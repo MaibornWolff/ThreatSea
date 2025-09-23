@@ -30,6 +30,7 @@ export class ListActions {
                 | "threats"
                 | "measures"
                 | "measureThreats"
+                | "threatMeasures"
                 | "addedMembers"
                 | "addableMembers",
             sortDirection: "asc" | "desc"
@@ -59,6 +60,7 @@ export class ListActions {
                 | "threats"
                 | "measures"
                 | "measureThreats"
+                | "threatMeasures"
                 | "addedMembers"
                 | "addableMembers",
             sortBy: string
@@ -88,6 +90,7 @@ export class ListActions {
                 | "threats"
                 | "measures"
                 | "measureThreats"
+                | "threatMeasures"
                 | "addedMembers"
                 | "addableMembers",
             searchValue: string
