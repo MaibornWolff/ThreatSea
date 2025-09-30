@@ -108,7 +108,7 @@ let csrfToken: string;
 
 beforeAll(async () => {
     // Get CSRF token
-    const csrfRes = await request(app).get("/csrf-token"); // Replace with your actual path
+    const csrfRes = await request(app).get("/api/csrf-token"); // Replace with your actual path
     csrfToken = csrfRes.body.token;
 
     const setCookieHeader = csrfRes.headers["set-cookie"];
@@ -130,7 +130,7 @@ beforeEach(async () => {
     ).at(0)!;
     const catalogId = catalog.id;
 
-    const authRes = await request(app).get("/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
+    const authRes = await request(app).get("/api/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
     const userId = authRes.body.data.userId;
 
     await db.insert(usersCatalogs).values({
@@ -140,7 +140,7 @@ beforeEach(async () => {
     });
 
     const threatRes = await request(app)
-        .post("/catalogs/" + catalogId + "/threats")
+        .post("/api/catalogs/" + catalogId + "/threats")
         .send(VALID_CATALOG_THREAT_1)
         .set("X-CSRF-TOKEN", csrfToken)
         .set("Cookie", cookies);
@@ -153,7 +153,7 @@ beforeEach(async () => {
     };
 
     const projectRes = await request(app)
-        .post("/projects")
+        .post("/api/projects")
         .send({ ...VALID_PROJECT, catalogId })
         .set("X-CSRF-TOKEN", csrfToken)
         .set("Cookie", cookies);
@@ -163,7 +163,7 @@ beforeEach(async () => {
 describe("get or create threats", () => {
     it("should list all threats", async () => {
         const res = await request(app)
-            .get(`/projects/${projectId}/system/threats`)
+            .get(`/api/projects/${projectId}/system/threats`)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(200);
@@ -172,7 +172,7 @@ describe("get or create threats", () => {
 
     it("should create a threat", async () => {
         const res = await request(app)
-            .post(`/projects/${projectId}/system/threats`)
+            .post(`/api/projects/${projectId}/system/threats`)
             .send({ ...VALID_THREAT_1, catalogThreatId })
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -185,7 +185,7 @@ describe("get or create threats", () => {
 
     it("should not create a threat (name missing)", async () => {
         const res = await request(app)
-            .post(`/projects/${projectId}/system/threats`)
+            .post(`/api/projects/${projectId}/system/threats`)
             .send({ ...INVALID_THREAT_NAME_MISSING, catalogThreatId })
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -195,7 +195,7 @@ describe("get or create threats", () => {
 
     it("should not create a threat (point of attack missing)", async () => {
         const res = await request(app)
-            .post(`/projects/${projectId}/system/threats`)
+            .post(`/api/projects/${projectId}/system/threats`)
             .send(INVALID_THREAT_POA_MISSING)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -205,7 +205,7 @@ describe("get or create threats", () => {
 
     it("should not create a threat (probability too high)", async () => {
         const res = await request(app)
-            .post(`/projects/${projectId}/system/threats`)
+            .post(`/api/projects/${projectId}/system/threats`)
             .send(INVALID_THREAT_PROB_TOO_HIGH)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -215,7 +215,7 @@ describe("get or create threats", () => {
 
     it("should not create a threat (probability too low)", async () => {
         const res = await request(app)
-            .post(`/projects/${projectId}/system/threats`)
+            .post(`/api/projects/${projectId}/system/threats`)
             .send(INVALID_THREAT_PROB_TOO_LOW)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -242,7 +242,7 @@ describe("get, delete or update a single threat", () => {
 
     it("should get a single threat", async () => {
         const res = await request(app)
-            .get(`/projects/${projectId}/system/threats/${threatId}`)
+            .get(`/api/projects/${projectId}/system/threats/${threatId}`)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(200);
@@ -251,7 +251,7 @@ describe("get, delete or update a single threat", () => {
 
     it("should update a threat", async () => {
         const res = await request(app)
-            .put("/projects/" + projectId + "/system/threats/" + threatId)
+            .put("/api/projects/" + projectId + "/system/threats/" + threatId)
             .send(VALID_UPDATE_THREAT)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -266,7 +266,7 @@ describe("get, delete or update a single threat", () => {
 
     it("should delete a threat", async () => {
         const res = await request(app)
-            .delete("/projects/" + projectId + "/system/threats/" + threatId)
+            .delete("/api/projects/" + projectId + "/system/threats/" + threatId)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(204);

@@ -29,7 +29,7 @@ let csrfToken: string;
 
 beforeAll(async () => {
     // Get CSRF token
-    const csrfRes = await request(app).get("/csrf-token"); // Replace with your actual path
+    const csrfRes = await request(app).get("/api/csrf-token"); // Replace with your actual path
     csrfToken = csrfRes.body.token;
 
     const setCookieHeader = csrfRes.headers["set-cookie"];
@@ -42,14 +42,14 @@ beforeAll(async () => {
 describe("catalog tests", () => {
     describe("get or create catalogs", () => {
         it("should list all catalogs", async () => {
-            const res = await request(app).get("/catalogs").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
+            const res = await request(app).get("/api/catalogs").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
             expect(res.statusCode).toEqual(200);
             expect(Array.isArray(res.body)).toBe(true);
         });
 
         it("should not get a specific catalog (invalid catalogId)", async () => {
             const res = await request(app)
-                .get("/catalogs/999999")
+                .get("/api/catalogs/999999")
                 .set("X-CSRF-TOKEN", csrfToken)
                 .set("Cookie", cookies);
             expect(res.statusCode).toEqual(404);
@@ -57,7 +57,7 @@ describe("catalog tests", () => {
 
         it("should create a new default catalog", async () => {
             const res = await request(app)
-                .post("/catalogs")
+                .post("/api/catalogs")
                 .send(VALID_CATALOG_DEFAULT)
                 .set("X-CSRF-TOKEN", csrfToken)
                 .set("Cookie", cookies);
@@ -68,7 +68,7 @@ describe("catalog tests", () => {
             const catalogId = res.body.id;
 
             const threatRes = await request(app)
-                .get(`/catalogs/${catalogId}/threats`)
+                .get(`/api/catalogs/${catalogId}/threats`)
                 .set("X-CSRF-TOKEN", csrfToken)
                 .set("Cookie", cookies);
             expect(threatRes.statusCode).toEqual(200);
@@ -76,7 +76,7 @@ describe("catalog tests", () => {
             expect(threatRes.body.length).toBeGreaterThan(0);
 
             const measureRes = await request(app)
-                .get(`/catalogs/${catalogId}/measures`)
+                .get(`/api/catalogs/${catalogId}/measures`)
                 .set("X-CSRF-TOKEN", csrfToken)
                 .set("Cookie", cookies);
             expect(measureRes.statusCode).toEqual(200);
@@ -86,7 +86,7 @@ describe("catalog tests", () => {
 
         it("should create a new empty catalog", async () => {
             const res = await request(app)
-                .post("/catalogs")
+                .post("/api/catalogs")
                 .send(VALID_CATALOG_EMPTY)
                 .set("X-CSRF-TOKEN", csrfToken)
                 .set("Cookie", cookies);
@@ -97,7 +97,7 @@ describe("catalog tests", () => {
             const catalogId = res.body.id;
 
             const threatRes = await request(app)
-                .get(`/catalogs/${catalogId}/threats`)
+                .get(`/api/catalogs/${catalogId}/threats`)
                 .set("X-CSRF-TOKEN", csrfToken)
                 .set("Cookie", cookies);
             expect(threatRes.statusCode).toEqual(200);
@@ -105,7 +105,7 @@ describe("catalog tests", () => {
             expect(threatRes.body.length).toEqual(0);
 
             const measureRes = await request(app)
-                .get(`/catalogs/${catalogId}/measures`)
+                .get(`/api/catalogs/${catalogId}/measures`)
                 .set("X-CSRF-TOKEN", csrfToken)
                 .set("Cookie", cookies);
             expect(measureRes.statusCode).toEqual(200);
@@ -115,7 +115,7 @@ describe("catalog tests", () => {
 
         it("should create a new empty catalog (defaultContent missing)", async () => {
             const res = await request(app)
-                .post("/catalogs")
+                .post("/api/catalogs")
                 .send(VALID_CATALOG)
                 .set("X-CSRF-TOKEN", csrfToken)
                 .set("Cookie", cookies);
@@ -126,7 +126,7 @@ describe("catalog tests", () => {
             const catalogId = res.body.id;
 
             const threatRes = await request(app)
-                .get(`/catalogs/${catalogId}/threats`)
+                .get(`/api/catalogs/${catalogId}/threats`)
                 .set("X-CSRF-TOKEN", csrfToken)
                 .set("Cookie", cookies);
             expect(threatRes.statusCode).toEqual(200);
@@ -134,7 +134,7 @@ describe("catalog tests", () => {
             expect(threatRes.body.length).toEqual(0);
 
             const measureRes = await request(app)
-                .get(`/catalogs/${catalogId}/measures`)
+                .get(`/api/catalogs/${catalogId}/measures`)
                 .set("X-CSRF-TOKEN", csrfToken)
                 .set("Cookie", cookies);
             expect(measureRes.statusCode).toEqual(200);
@@ -145,7 +145,7 @@ describe("catalog tests", () => {
         it("should not create a new catalog (name missing)", async () => {
             const invalidCatalog = { language: VALID_CATALOG_DEFAULT.language };
             const res = await request(app)
-                .post("/catalogs")
+                .post("/api/catalogs")
                 .send(invalidCatalog)
                 .set("X-CSRF-TOKEN", csrfToken)
                 .set("Cookie", cookies);
@@ -157,7 +157,7 @@ describe("catalog tests", () => {
         let catalogId: number;
         beforeEach(async () => {
             const res = await request(app)
-                .post("/catalogs")
+                .post("/api/catalogs")
                 .send(VALID_CATALOG_DEFAULT)
                 .set("X-CSRF-TOKEN", csrfToken)
                 .set("Cookie", cookies);
@@ -166,7 +166,7 @@ describe("catalog tests", () => {
 
         it("should get a single catalog", async () => {
             const res = await request(app)
-                .get("/catalogs/" + catalogId)
+                .get("/api/catalogs/" + catalogId)
                 .set("X-CSRF-TOKEN", csrfToken)
                 .set("Cookie", cookies);
             expect(res.statusCode).toEqual(200);
@@ -175,7 +175,7 @@ describe("catalog tests", () => {
 
         it("should update a catalog", async () => {
             const res = await request(app)
-                .put("/catalogs/" + catalogId)
+                .put("/api/catalogs/" + catalogId)
                 .send(VALID_CATALOG_EMPTY)
                 .set("X-CSRF-TOKEN", csrfToken)
                 .set("Cookie", cookies);
@@ -185,7 +185,7 @@ describe("catalog tests", () => {
 
         it("should delete a catalog", async () => {
             const res = await request(app)
-                .delete("/catalogs/" + catalogId)
+                .delete("/api/catalogs/" + catalogId)
                 .set("X-CSRF-TOKEN", csrfToken)
                 .set("Cookie", cookies);
             expect(res.statusCode).toEqual(204);

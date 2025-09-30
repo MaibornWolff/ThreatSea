@@ -16,7 +16,7 @@ let csrfToken: string;
 
 beforeAll(async () => {
     // Get CSRF token
-    const csrfRes = await request(app).get("/csrf-token"); // Replace with your actual path
+    const csrfRes = await request(app).get("/api/csrf-token"); // Replace with your actual path
     csrfToken = csrfRes.body.token;
 
     const setCookieHeader = csrfRes.headers["set-cookie"];
@@ -44,7 +44,7 @@ beforeEach(async () => {
     ).at(0);
     const catalogId = catalog!.id;
 
-    const authRes = await request(app).get("/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
+    const authRes = await request(app).get("/api/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
     const userId = authRes.body.data.userId;
 
     await db.insert(usersCatalogs).values({
@@ -54,7 +54,7 @@ beforeEach(async () => {
     });
 
     const res = await request(app)
-        .post("/projects")
+        .post("/api/projects")
         .send({ ...VALID_PROJECT, catalogId })
         .set("X-CSRF-TOKEN", csrfToken)
         .set("Cookie", cookies);
@@ -64,7 +64,7 @@ beforeEach(async () => {
 describe("export", () => {
     it("should generate an export", async () => {
         const res = await request(app)
-            .get("/export/" + projectId)
+            .get("/api/export/" + projectId)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(200);

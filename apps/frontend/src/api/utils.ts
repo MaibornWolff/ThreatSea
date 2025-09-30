@@ -4,7 +4,7 @@
  */
 import { CsrfApi } from "#api/csrf.api.js";
 
-export const API_URI = import.meta.env["VITE_API_URI"] as string;
+export const API_URI = `${import.meta.env["VITE_API_URI"] ?? ""}/api`;
 
 /**
  * Saves the csrf token as a string inside the local storage.

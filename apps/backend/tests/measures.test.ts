@@ -111,7 +111,7 @@ let csrfToken: string;
 
 beforeAll(async () => {
     // Get CSRF token
-    const csrfRes = await request(app).get("/csrf-token"); // Replace with your actual path
+    const csrfRes = await request(app).get("/api/csrf-token"); // Replace with your actual path
     csrfToken = csrfRes.body.token;
 
     const setCookieHeader = csrfRes.headers["set-cookie"];
@@ -133,7 +133,7 @@ beforeEach(async () => {
     ).at(0)!;
     const catalogId = catalog.id;
 
-    const authRes = await request(app).get("/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
+    const authRes = await request(app).get("/api/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
     const userId = authRes.body.data.userId;
 
     await db.insert(usersCatalogs).values({
@@ -143,28 +143,28 @@ beforeEach(async () => {
     });
 
     const catalogThreatRes = await request(app)
-        .post("/catalogs/" + catalogId + "/threats")
+        .post("/api/catalogs/" + catalogId + "/threats")
         .send(VALID_CATALOG_THREAT_1)
         .set("X-CSRF-TOKEN", csrfToken)
         .set("Cookie", cookies);
     catalogThreatId = catalogThreatRes.body.id;
 
     const projectRes = await request(app)
-        .post("/projects")
+        .post("/api/projects")
         .send({ ...VALID_PROJECT, catalogId })
         .set("X-CSRF-TOKEN", csrfToken)
         .set("Cookie", cookies);
     projectId = projectRes.body.id;
 
     const catalogMeasuresRes = await request(app)
-        .post("/catalogs/" + catalogId + "/measures")
+        .post("/api/catalogs/" + catalogId + "/measures")
         .send(VALID_CATALOG_MEASURE_1)
         .set("X-CSRF-TOKEN", csrfToken)
         .set("Cookie", cookies);
     catalogMeasureId = catalogMeasuresRes.body.id;
 
     await request(app)
-        .post(`/projects/${projectId}/system/measures`)
+        .post(`/api/projects/${projectId}/system/measures`)
         .send({ ...VALID_MEASURE_3, catalogMeasureId: null, threatId })
         .set("X-CSRF-TOKEN", csrfToken)
         .set("Cookie", cookies);
@@ -185,7 +185,7 @@ beforeEach(async () => {
 describe("get or create measures", () => {
     it("should list all measures", async () => {
         const res = await request(app)
-            .get(`/projects/${projectId}/system/measures`)
+            .get(`/api/projects/${projectId}/system/measures`)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(200);
@@ -194,7 +194,7 @@ describe("get or create measures", () => {
 
     it("should create a measure", async () => {
         const res = await request(app)
-            .post(`/projects/${projectId}/system/measures`)
+            .post(`/api/projects/${projectId}/system/measures`)
             .send({ ...VALID_MEASURE_1, catalogMeasureId: catalogMeasureId })
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -209,7 +209,7 @@ describe("get or create measures", () => {
 
     it("should create a measure without catalog measure", async () => {
         const res = await request(app)
-            .post(`/projects/${projectId}/system/measures`)
+            .post(`/api/projects/${projectId}/system/measures`)
             .send({ ...VALID_MEASURE_1, catalogMeasureId: null, threatId })
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -223,7 +223,7 @@ describe("get or create measures", () => {
 
     it("should not create a measure (name missing)", async () => {
         const res = await request(app)
-            .post(`/projects/${projectId}/system/measures`)
+            .post(`/api/projects/${projectId}/system/measures`)
             .send({ ...INVALID_MEASURE_NAME_MISSING, threatId })
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -233,7 +233,7 @@ describe("get or create measures", () => {
 
     it("should not create a measure (name not unique)", async () => {
         const res = await request(app)
-            .post(`/projects/${projectId}/system/measures`)
+            .post(`/api/projects/${projectId}/system/measures`)
             .send({ ...VALID_MEASURE_3, threatId })
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -242,7 +242,7 @@ describe("get or create measures", () => {
 
     it("should not create a measure (scheduled at missing)", async () => {
         const res = await request(app)
-            .post(`/projects/${projectId}/system/measures`)
+            .post(`/api/projects/${projectId}/system/measures`)
             .send({ ...INVALID_MEASURE_SCHEDULED_AT_MISSING, threatId })
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -270,7 +270,7 @@ describe("get, delete or update a single measure", () => {
 
     it("should update a measure", async () => {
         const res = await request(app)
-            .put("/projects/" + projectId + "/system/measures/" + measureId)
+            .put("/api/projects/" + projectId + "/system/measures/" + measureId)
             .send(VALID_MEASURE_2)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -282,7 +282,7 @@ describe("get, delete or update a single measure", () => {
 
     it("should delete a measure", async () => {
         const res = await request(app)
-            .delete("/projects/" + projectId + "/system/measures/" + measureId)
+            .delete("/api/projects/" + projectId + "/system/measures/" + measureId)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(204);
@@ -305,7 +305,10 @@ describe("measures impacts (invalid data)", () => {
         ).at(0);
         catalogId = catalog!.id;
 
-        const authRes = await request(app).get("/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
+        const authRes = await request(app)
+            .get("/api/auth/status")
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
         const userId = authRes.body.data.userId;
 
         await db.insert(usersCatalogs).values({
@@ -315,7 +318,7 @@ describe("measures impacts (invalid data)", () => {
         });
 
         const res = await request(app)
-            .post("/projects")
+            .post("/api/projects")
             .send({ ...VALID_PROJECT, catalogId })
             .set("Authorization", "Bearer fakeToken")
             .set("X-CSRF-TOKEN", csrfToken)
@@ -338,7 +341,7 @@ describe("measures impacts (invalid data)", () => {
 
     it("should not update a single measure impact (invalid projectId)", async () => {
         const res = await request(app)
-            .put("/projects/" + otherProjectId + "/system/measures/" + measureId)
+            .put("/api/projects/" + otherProjectId + "/system/measures/" + measureId)
             .send(VALID_MEASURE_1)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -347,7 +350,7 @@ describe("measures impacts (invalid data)", () => {
 
     it("should not delete a single measure impact(invalid projectId)", async () => {
         const res = await request(app)
-            .delete("/projects/" + otherProjectId + "/system/measures/" + measureId)
+            .delete("/api/projects/" + otherProjectId + "/system/measures/" + measureId)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(400);

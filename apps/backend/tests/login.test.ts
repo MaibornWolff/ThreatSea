@@ -10,7 +10,7 @@ let csrfToken: string;
 
 beforeAll(async () => {
     // Get CSRF token
-    const csrfRes = await request(app).get("/csrf-token"); // Replace with your actual path
+    const csrfRes = await request(app).get("/api/csrf-token"); // Replace with your actual path
     csrfToken = csrfRes.body.token;
 
     const setCookieHeader = csrfRes.headers["set-cookie"];
@@ -22,12 +22,12 @@ beforeAll(async () => {
 
 describe("login, logout and redirect", () => {
     it("should log in", async () => {
-        const res = await request(app).get("/auth/login").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
+        const res = await request(app).get("/api/auth/login").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
         expect(res.statusCode).toEqual(302);
     });
 
     it("should not log in", async () => {
-        const res = await request(app).get("/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", []);
+        const res = await request(app).get("/api/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", []);
 
         expect(res.statusCode).toEqual(200);
         expect(res.body.data.status.isLoggedIn).toBe(false);
@@ -35,19 +35,19 @@ describe("login, logout and redirect", () => {
 
     it("should get the authenticationMode", async () => {
         const res = await request(app)
-            .get("/auth/authenticationMode")
+            .get("/api/auth/authenticationMode")
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(200);
     });
 
     it("should log out", async () => {
-        const res = await request(app).post("/auth/logout").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
+        const res = await request(app).post("/api/auth/logout").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
         expect(res.statusCode).toEqual(204);
     });
 
     it("should redirect", async () => {
-        const res = await request(app).get("/auth/redirect");
+        const res = await request(app).get("/api/auth/redirect");
         expect(res.statusCode).toEqual(302);
     });
 });
