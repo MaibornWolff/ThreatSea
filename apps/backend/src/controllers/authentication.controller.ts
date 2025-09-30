@@ -12,8 +12,8 @@ import { JWTError, UnauthorizedError } from "#errors/unauthorized.error.js";
 const appOrigin = originConfig.app;
 
 async function loadStrategy() {
-    if (PASSPORT_STRATEGY === "azure") {
-        await import("#services/azureAuthentication.service.js");
+    if (PASSPORT_STRATEGY === "oidc") {
+        await import("#services/oidcAuthentication.service.js");
     } else if (PASSPORT_STRATEGY === "fixed") {
         await import("#services/fixedAuthentication.service.js");
     } else {
@@ -73,6 +73,7 @@ export async function getAuthStatus(request: Request, response: Response): Promi
             userId: decodedToken["userId"],
             firstname: decodedToken["firstname"],
             lastname: decodedToken["lastname"],
+            displayName: decodedToken["displayName"],
             email: decodedToken["email"],
             status: {
                 isLoggedIn: true,

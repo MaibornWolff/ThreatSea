@@ -110,6 +110,25 @@ const LoginPageBody = () => {
             </Button>,
         ];
 
+        let OIDCButtons = [
+            <Button
+                key="ms-login"
+                component="a"
+                href={`${API_URI}/auth/login`}
+                display={"none"}
+                data-testid="SaveButton"
+                sx={{ marginRight: 0, fontSize: 20 }}
+            >
+                <Box
+                    component="img"
+                    sx={{ width: 32, height: 32, mr: 1 }}
+                    src={msLogo}
+                    data-testid="login-page_login-button"
+                ></Box>
+                {t("login")} OIDC
+            </Button>,
+        ];
+
         /*
         Here the component directly calls the API component; normally this would be done via a middleware/redux actions,
         but since this is only a simple GET request for a single variable in a synchronous manner,
@@ -119,6 +138,8 @@ const LoginPageBody = () => {
         LoginAPI.getAuthenticationMode().then((authenticationMode) => {
             if (authenticationMode === "azure") {
                 setButtons(MSLoginButtons);
+            } else if (authenticationMode === "oidc") {
+                setButtons(OIDCButtons);
             } else {
                 setButtons(testUserLoginButtons);
             }
