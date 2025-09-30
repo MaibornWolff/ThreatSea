@@ -14,6 +14,7 @@ interface UserState {
     userId: number;
     firstname: string;
     lastname: string;
+    displayName: string;
     email: string;
     status: UserStatus;
     isPending: boolean;
@@ -31,6 +32,7 @@ export const userDefaultState: UserState = {
     userId: -1,
     firstname: "",
     lastname: "",
+    displayName: "",
     email: "",
     status: {
         isLoggedIn: false,

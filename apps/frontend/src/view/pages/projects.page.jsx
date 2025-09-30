@@ -39,7 +39,7 @@ export const ProjectsPage = CreatePage(HeaderNavigation, () => {
 
     const { openConfirm } = useConfirm();
 
-    const isPrivileged = useUser();
+    const { isPrivileged } = useUser();
 
     /**
      * Layout effect to change the header bar

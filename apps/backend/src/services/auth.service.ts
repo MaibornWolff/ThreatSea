@@ -7,6 +7,8 @@ import { azureConfig, JWT_SECRET } from "#config/config.js";
 import { db } from "#db/index.js";
 import { users } from "#db/schema.js";
 import { eq } from "drizzle-orm";
+import { GenericOidcUserProfile } from "#types/auth.types.js";
+import { mapGenericProfile } from "#utils/mapGenericProfile.js";
 
 export interface AzureProfile {
     _json: {
@@ -18,20 +20,16 @@ export interface AzureProfile {
     id: string;
 }
 
-const tenantId = azureConfig.tenantId;
+export async function buildThreatSeaAccessToken(
+    userObject: GenericOidcUserProfile,
+    isPrivileged: number,
+    tenantId = azureConfig.tenantId
+): Promise<string> {
+    // Extrahiere Felder!
+    const { email, firstname, lastname, displayName, providerId } = mapGenericProfile(userObject);
 
-export async function buildThreatSeaAccessToken(userObject: AzureProfile, isPrivileged: number): Promise<string> {
-    // UPN is mandatory in AD, whereas the other attributes are not
-    const email = userObject._json.userPrincipalName;
-    let firstName = "";
-    let lastname;
-    if (userObject._json.givenName && userObject._json.surname) {
-        firstName = userObject._json.givenName;
-        lastname = userObject._json.surname;
-    } else if (userObject._json.displayName) {
-        lastname = userObject._json.displayName;
-    } else {
-        lastname = email;
+    if (!email) {
+        throw new Error("No email found in user profile object.");
     }
 
     const user = await db.transaction(async (tx) => {
@@ -45,9 +43,9 @@ export async function buildThreatSeaAccessToken(userObject: AzureProfile, isPriv
             await tx
                 .insert(users)
                 .values({
-                    firstname: firstName,
-                    lastname: lastname,
-                    email: email,
+                    firstname,
+                    lastname,
+                    email,
                 })
                 .returning()
         ).at(0);
@@ -60,17 +58,16 @@ export async function buildThreatSeaAccessToken(userObject: AzureProfile, isPriv
     const threatseaAccessToken = jwt.sign(
         {
             userId: user.id,
-            azureId: userObject.id,
+            providerId, // kann oid, id, sub je nach Provider sein!
             tenantId,
-            email: email,
-            firstname: firstName,
-            lastname: lastname,
+            email,
+            firstname,
+            lastname,
+            displayName,
             isPrivileged,
         },
         JWT_SECRET,
-        {
-            expiresIn: "7d",
-        }
+        { expiresIn: "7d" }
     );
 
     return threatseaAccessToken;
