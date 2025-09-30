@@ -19,7 +19,7 @@ test("authenticate", async ({ page, browserName }) => {
             accountId = "4";
             break;
     }
-    await page.goto(`${process.env["API_URI"]}/auth/login?testUser=${accountId}`);
+    await page.goto(`${process.env["API_URI"]}/api/auth/login?testUser=${accountId}`);
 
     // Validate the session
     await page.goto("/login");

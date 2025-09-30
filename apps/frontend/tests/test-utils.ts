@@ -10,7 +10,7 @@ import type { CreateMeasureRequest, Measure } from "#api/types/measure.types.ts"
 
 type HttpMethode = "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "CONNECT" | "OPTIONS" | "TRACE" | "PATCH";
 
-const API_URI = process.env["API_URI"] as string;
+const API_URI = `${process.env["API_URI"] ?? ""}/api`;
 
 /**
  * Makes an API request using the specified HTTP method and endpoint.
