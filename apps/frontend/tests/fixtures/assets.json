@@ -1,0 +1,193 @@
+{
+  "assets": [
+    {
+      "name": "Sample Asset",
+      "description": "Some sample description text",
+      "confidentiality": 4,
+      "confidentialityJustification": "confidentiality justification sample",
+      "integrity": 1,
+      "integrityJustification": "integrity justification sample",
+      "availability": 5,
+      "availabilityJustification": "availability justification sample",
+      "createdAt": "2001-07-04T14:17:25.686Z"
+    },
+    {
+      "name": "Another Asset",
+      "description": "Another description text",
+      "confidentiality": 4,
+      "confidentialityJustification": "",
+      "integrity": 2,
+      "integrityJustification": "",
+      "availability": 4,
+      "availabilityJustification": "",
+      "createdAt": "2002-01-01T22:30:16.171Z"
+    },
+    {
+      "name": "Duplicated Name Asset",
+      "description": "Also a description",
+      "confidentiality": 4,
+      "confidentialityJustification": "confidentiality justification text",
+      "integrity": 4,
+      "integrityJustification": "",
+      "availability": 4,
+      "availabilityJustification": "",
+      "createdAt": "2003-08-05T18:14:56.134Z"
+    },
+    {
+      "name": "This is a very very very uncommon long asset name",
+      "description": "An even much much much more long and uncommon description text for an already very very very uncommon long asset name",
+      "confidentiality": 4,
+      "confidentialityJustification": "",
+      "integrity": 1,
+      "integrityJustification": "",
+      "availability": 5,
+      "availabilityJustification": "availability justification text",
+      "createdAt": "2004-02-02T16:28:58.622Z"
+    },
+    {
+      "name": "Fancy nam€ with speci@l charact$ers",
+      "description": "Also a descr!ption~ with sp€ci@l charact*rs",
+      "confidentiality": 3,
+      "confidentialityJustification": "Also a just!f!cation~ with sp€ci@l charact*rs",
+      "integrity": 5,
+      "integrityJustification": "",
+      "availability": 5,
+      "availabilityJustification": "",
+      "createdAt": "2020-10-06T15:16:20.786Z"
+    },
+    {
+      "name": "Asset name",
+      "description": "Bli bla blub",
+      "confidentiality": 1,
+      "confidentialityJustification": "",
+      "integrity": 5,
+      "integrityJustification": "",
+      "availability": 1,
+      "availabilityJustification": "",
+      "createdAt": "2001-05-13T14:45:17.370Z"
+    },
+    {
+      "name": "Just another asset name",
+      "description": "foo bar",
+      "confidentiality": 1,
+      "confidentialityJustification": "",
+      "integrity": 2,
+      "integrityJustification": "",
+      "availability": 3,
+      "availabilityJustification": "",
+      "createdAt": "2019-09-28T02:03:29.302Z"
+    },
+    {
+      "name": "Boring",
+      "description": "Even more boring",
+      "confidentiality": 2,
+      "confidentialityJustification": "",
+      "integrity": 4,
+      "integrityJustification": "",
+      "availability": 1,
+      "availabilityJustification": "",
+      "createdAt": "2019-02-07T02:59:57.272Z"
+    },
+    {
+      "name": "Nothing special here",
+      "description": "*snoring*",
+      "confidentiality": 5,
+      "confidentialityJustification": "",
+      "integrity": 5,
+      "integrityJustification": "",
+      "availability": 1,
+      "availabilityJustification": "",
+      "createdAt": "2026-11-07T02:08:18.532Z"
+    }
+  ],
+  "invalidAssets": [
+    {
+      "name": " ",
+      "description": "",
+      "confidentiality": 3,
+      "confidentialityJustification": "",
+      "integrity": 4,
+      "integrityJustification": "",
+      "availability": 4,
+      "availabilityJustification": "",
+      "createdAt": "2018-04-16T03:40:17.552Z"
+    },
+    {
+      "name": "Duplicated Name Asset",
+      "description": "Description of a asset with a duplicated name",
+      "confidentiality": 2,
+      "confidentialityJustification": "",
+      "integrity": 3,
+      "integrityJustification": "integrity justification text",
+      "availability": 4,
+      "availabilityJustification": "",
+      "createdAt": "2016-01-12T21:45:34.584Z"
+    },
+    {
+      "name": "Too high confidentiality",
+      "description": "",
+      "confidentiality": 6,
+      "confidentialityJustification": "",
+      "integrity": 4,
+      "integrityJustification": "",
+      "availability": 3,
+      "availabilityJustification": "",
+      "createdAt": "2027-04-18T03:22:31.874Z"
+    },
+    {
+      "name": "Too low confidentiality",
+      "description": "",
+      "confidentiality": 0,
+      "confidentialityJustification": "",
+      "integrity": 2,
+      "integrityJustification": "",
+      "availability": 2,
+      "availabilityJustification": "",
+      "createdAt": "2022-05-08T21:31:31.932Z"
+    },
+    {
+      "name": "Too high integrity",
+      "description": "",
+      "confidentiality": 3,
+      "confidentialityJustification": "",
+      "integrity": 6,
+      "integrityJustification": "",
+      "availability": 3,
+      "availabilityJustification": "",
+      "createdAt": "2027-04-18T03:22:31.874Z"
+    },
+    {
+      "name": "Too low integrity",
+      "description": "",
+      "confidentiality": 2,
+      "confidentialityJustification": "",
+      "integrity": 0,
+      "integrityJustification": "",
+      "availability": 5,
+      "availabilityJustification": "",
+      "createdAt": "2022-05-08T21:31:31.932Z"
+    },
+    {
+      "name": "Too high availability",
+      "description": "",
+      "confidentiality": 4,
+      "confidentialityJustification": "",
+      "integrity": 2,
+      "integrityJustification": "",
+      "availability": 6,
+      "availabilityJustification": "",
+      "createdAt": "2027-04-18T03:22:31.874Z"
+    },
+    {
+      "name": "Too low availability",
+      "description": "",
+      "confidentiality": 5,
+      "confidentialityJustification": "",
+      "integrity": 4,
+      "integrityJustification": "",
+      "availability": 0,
+      "availabilityJustification": "",
+      "createdAt": "2022-05-08T21:31:31.932Z"
+    }
+  ]
+}

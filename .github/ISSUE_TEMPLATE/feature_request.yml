@@ -1,0 +1,12 @@
+name: Feature Request
+description: Suggest a new feature or enhancement for ThreatSea
+title: "[Feature Request]: "
+labels: ["feature-request", "low-priority"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Describe the feature request. Include Sketches, diagrams, constraints, technical requirements if possible and as applicable
+    validations:
+      required: true

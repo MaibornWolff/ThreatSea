@@ -1,0 +1,37 @@
+{
+  "name": "threatsea",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "type-check": "turbo run type-check",
+    "dependency-check": "turbo run dependency-check",
+    "license-check": "turbo run license-check",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "cross-env": "10.1.0",
+    "husky": "9.1.7",
+    "lint-staged": "16.2.3",
+    "prettier": "3.6.2",
+    "turbo": "2.5.8",
+    "typescript": "5.9.2"
+  },
+  "packageManager": "pnpm@10.17.1",
+  "engines": {
+    "node": ">=22"
+  },
+  "lint-staged": {
+    "*.{cjs,js,jsx,mjs,ts,tsx}": [
+      "prettier --check"
+    ],
+    "*.{html,json,md,yaml,yml,xml}": [
+      "prettier --check"
+    ]
+  }
+}

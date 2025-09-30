@@ -1,0 +1,6 @@
+{
+  "unapplyMeasure": "Unapply Measure",
+  "measureImpactDeleteMessage": "Do you really want to no longer apply the measure '{{measureName}}' to the threat '{{threatName}}'?",
+  "delete": "Delete Measure",
+  "applyMeasure": "Apply Measure"
+}

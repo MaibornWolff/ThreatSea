@@ -1,0 +1,72 @@
+{
+  "catalogs": [
+    {
+      "name": "Sample Catalog",
+      "language": "EN",
+      "defaultContent": true,
+      "createdAt": "2029-08-20T17:53:26.739Z"
+    },
+    {
+      "name": "Another Catalog",
+      "language": "DE",
+      "defaultContent": false,
+      "createdAt": "2004-01-06T14:51:32.991Z"
+    },
+    {
+      "name": "Duplicated Name Catalog",
+      "language": "DE",
+      "defaultContent": false,
+      "createdAt": "2017-12-13T05:29:35.489Z"
+    },
+    {
+      "name": "Duplicated Name Catalog",
+      "language": "DE",
+      "defaultContent": true,
+      "createdAt": "2028-06-21T04:46:50.814Z"
+    },
+    {
+      "name": "This is a very very very uncommon long catalog name",
+      "language": "EN",
+      "defaultContent": false,
+      "createdAt": "2002-11-26T16:25:05.135Z"
+    },
+    {
+      "name": "Fancy nam€ with speci@l charact$ers",
+      "language": "DE",
+      "defaultContent": true,
+      "createdAt": "2028-05-13T02:56:24.667Z"
+    },
+    {
+      "name": "Catalog name",
+      "language": "DE",
+      "defaultContent": true,
+      "createdAt": "2030-11-12T04:33:35.113Z"
+    },
+    {
+      "name": "Just another catalog name",
+      "language": "EN",
+      "defaultContent": false,
+      "createdAt": "2008-10-03T04:17:10.906Z"
+    },
+    {
+      "name": "Boring",
+      "language": "DE",
+      "defaultContent": true,
+      "createdAt": "2003-08-31T23:58:20.067Z"
+    },
+    {
+      "name": "Nothing special here",
+      "language": "EN",
+      "defaultContent": false,
+      "createdAt": "2022-09-21T05:56:35.635Z"
+    }
+  ],
+  "invalidCatalogs": [
+    {
+      "name": " ",
+      "language": "DE",
+      "defaultContent": true,
+      "createdAt": "2002-05-12T09:34:32.132Z"
+    }
+  ]
+}

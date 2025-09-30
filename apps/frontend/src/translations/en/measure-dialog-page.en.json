@@ -1,0 +1,16 @@
+{
+  "addMeasureImpact": "Add Impact on a Threat",
+  "editMeasureImpact": "Edit Impact",
+  "deleteMeasureImpact": "Delete Impact",
+  "noImpact": "no Impact",
+  "component": "Component",
+  "netProbability": "Net Probability",
+  "netDamage": "Net Damage",
+  "measureThreatDeleteMessage": "Do you really want to no longer apply the measure '{{measureName}}' to the threat '{{threatName}}'?",
+  "noThreatsFound": "Not applied to any threat",
+  "setsOutOfScope": "Set out of Scope by measure",
+  "tab": {
+    "threats": "Threats",
+    "measure": "Measure"
+  }
+}

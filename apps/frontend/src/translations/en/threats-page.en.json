@@ -1,0 +1,18 @@
+{
+  "threatList.sortBy.nameToggleBtn": "Name",
+  "threatList.sortBy.createdAtToggleBtn": "Date",
+  "threatsFound": "Threats found",
+  "newProbability": "New Probability",
+  "newDamage": "New Damage",
+  "duplicateMessage": "Do you really want to duplicate the threat '{{ threatName }}'?",
+  "duplicate": "Duplicate",
+  "duplicateThreat": "Duplicate Threat",
+  "deleteThreat": "Delete Threat",
+  "edited": "Edited",
+  "threatsLoading": "Loading threats...",
+  "fullExport": "Export Assets, Threats and Measures",
+  "catalogMeasures": "Catalog Measures",
+  "deleteMessage": "Do you really want to delete the threat '{{ threatName }}'?",
+  "noThreatsFound": "No Threats found",
+  "heading": "Threats"
+}

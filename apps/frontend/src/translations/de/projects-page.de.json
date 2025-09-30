@@ -1,0 +1,11 @@
+{
+  "addProjectBtn": "Projekt hinzufügen",
+  "projectList.sortBy.nameToggleBtn": "Name",
+  "projectList.sortBy.createdAtToggleBtn": "Datum",
+  "deleteProject": "Projekt Löschen",
+  "members": "Mitglieder",
+  "importProject": "Projekt importieren",
+  "exportProject": "Projekt exportieren",
+  "deleteMessage": "Wollen sie das Projekt '{{ projectName }}' wirklich löschen?",
+  "heading": "Projekte"
+}

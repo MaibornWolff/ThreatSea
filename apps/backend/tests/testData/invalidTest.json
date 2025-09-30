@@ -1,0 +1,32 @@
+{
+  "success": true,
+  "datamodelVersion": 1,
+  "project": {
+    "id": 1,
+    "name": "test",
+    "description": "test",
+    "confidentialityLevel": "internal",
+    "lineOfToleranceGreen": 6,
+    "lineOfToleranceRed": 15,
+    "createdAt": "2025-03-19T17:00:17.000Z",
+    "updatedAt": "2025-03-19T17:00:17.000Z",
+    "catalogId": 1,
+    "role": 0
+  },
+  "assets": [],
+  "system": null,
+  "catalog": {
+    "id": 1,
+    "name": "test",
+    "language": "EN",
+    "createdAt": "2025-03-19T17:00:17.000Z",
+    "updatedAt": "2025-03-19T17:00:17.000Z",
+    "role": 0
+  },
+  "catalogThreats": [],
+  "catalogMeasures": [],
+  "componentTypes": [],
+  "measures": [],
+  "threats": [],
+  "measureImpacts": []
+}

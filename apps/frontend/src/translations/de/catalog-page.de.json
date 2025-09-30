@@ -1,0 +1,21 @@
+{
+  "attackersHeading": "Angreifer",
+  "pointsOfAttackHeading": "Angriffspunkte",
+  "threatsHeading": "Bedrohungen",
+  "measuresHeading": "Maßnahmen",
+  "addThreat": "Bedrohung hinzufügen",
+  "noThreatFound": "Bedrohung konnte nicht gefunden werden",
+  "noMeasureFound": "Maßnahme konnte nicht gefunden werden",
+  "exportData": "Exportieren",
+  "importData": "Importieren",
+  "exportThreats": "Bedrohungen exportieren",
+  "importThreats": "Bedrohungen importieren",
+  "exportMeasures": "Maßnahmen exportieren",
+  "importMeasures": "Maßnahmen importieren",
+  "catalogThreats": {
+    "deleteMessage": "Sind Sie sicher, dass Sie die Bedrohung '{{name}}' löschen möchten?"
+  },
+  "catalogMeasures": {
+    "deleteMessage": "Sind Sie sicher, dass Sie die Maßnahme '{{name}}' löschen möchten?"
+  }
+}

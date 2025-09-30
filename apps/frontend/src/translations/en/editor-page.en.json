@@ -1,0 +1,88 @@
+{
+  "header": {
+    "projectsBtn": "Projects",
+    "assetsBtn": "Assets",
+    "threatsBtn": "Threats",
+    "riskBtn": "Risk"
+  },
+  "canvas": {
+    "exportSystemImage": "Export System Image"
+  },
+  "connection": "Connection",
+  "autoSave": {
+    "failed": "Error: {{ error }}",
+    "upToDate": "Saved: {{ date }}",
+    "notUpToDate": "Last saved: {{ date }}"
+  },
+  "sidebar": {
+    "component": {
+      "title": "Component"
+    },
+    "pointsofattack": {
+      "title": "Points of Attack"
+    },
+    "assets": {
+      "title": "Assets"
+    },
+    "connection": {
+      "title": "Communication Infrastructure"
+    },
+    "connectionPoint": {
+      "title": "Communication Interface"
+    },
+    "description": {
+      "title": "Description"
+    },
+    "connected_components": {
+      "title": "Connected Components"
+    }
+  },
+  "contextMenu": {
+    "customComponents": "Custom",
+    "Database": "Database",
+    "Users": "Users",
+    "Communication Infrastructure": "Communication Infrastructure",
+    "Client": "Client",
+    "Server": "Server"
+  },
+  "setAllBtn": "Set All",
+  "unsetAllBtn": "Unset All",
+  "isProjectComponent": "only available in project",
+  "customComponent": {
+    "delete": "Delete",
+    "edit": "Edit",
+    "deleteCustomComponentText": "Do you really want to delete the Component '{{componentName}}' ?",
+    "fileUnusable": "The selected file is unusable. It is either too big (> 100kB) or not an image.",
+    "addComponent": "Add Component",
+    "editComponent": "Edit Component",
+    "selectSymbol": "Select Symbol",
+    "errorMessages": {
+      "nameRequired": "Name required"
+    }
+  },
+  "deleteDialog": {
+    "deleteCompMessage": "Do you really want to delete the component '{{ componentName }}'?",
+    "deleteConnMessage": "Do you really want to delete the connection '{{ connectionName }}'?",
+    "deleteAttPointMessage": "Do you really want to delete the attack point '{{ attPointName }}'?",
+    "deleteInterfaceMessage": "Do you really want to delete the communication interface '{{ interfaceName }}'?",
+    "delete": "Delete",
+    "cancel": "Cancel"
+  },
+  "communicationMenu": {
+    "title": "{{componentName}}: Communication Interface",
+    "wlan": "WLAN",
+    "bluetooth": "Bluetooth",
+    "internet": "Internet",
+    "createNew": "Create New"
+  },
+  "communicationInterface": {
+    "createNew": "Create New Communication Interface",
+    "editInterface": "Edit Communication Interface",
+    "name": "Name",
+    "selectIcon": "Select Icon",
+    "nameRequired": "Name is required",
+    "nameInvalid": "Name cannot be empty or contain only spaces",
+    "iconRequired": "Icon is required",
+    "poaRequired": "At least one point of attack must be selected"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "addCatalogBtn": "Add Catalog",
+  "deleteCatalogBtn": "Delete Catalog",
+  "editCatalogBtn": "Edit Catalog",
+  "editCatalog": "Edit Catalog",
+  "addCatalog": "Add Catalog",
+  "emptyCatalog": "Create empty catalog",
+  "emptyExplanation": "Creates an empty catalog without the default threats and measures of the 4x6 matrix.",
+  "catalogList": {
+    "sortBy": {
+      "nameToggleBtn": "Name",
+      "createdAtToggleBtn": "Date"
+    },
+    "alert.created.success": "New Catalog {{catalogName}} was created successfully.",
+    "alert.created.failure": "Failed to create Catalog {{catalogName}}."
+  },
+  "deleteMessage": "Do you really want to delete the catalog '{{ catalogName }}'?",
+  "heading": "Catalogs"
+}

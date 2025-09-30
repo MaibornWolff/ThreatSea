@@ -1,0 +1,90 @@
+{
+  "datamodelVersion": 3,
+  "project": {
+    "id": 1,
+    "name": "Test Project",
+    "description": "Sample Description",
+    "confidentialityLevel": "INTERNAL",
+    "lineOfToleranceGreen": 6,
+    "lineOfToleranceRed": 15,
+    "createdAt": "2025-08-13 12:58:23.3922+00",
+    "updatedAt": "2025-08-13 12:58:23.3922+00",
+    "catalogId": 2,
+    "role": 0,
+    "image": null
+  },
+  "assets": [
+    {
+      "id": 1,
+      "name": "A lonely asset",
+      "description": "But a funny description",
+      "confidentiality": 1,
+      "integrity": 2,
+      "availability": 3,
+      "confidentialityJustification": "",
+      "integrityJustification": "",
+      "availabilityJustification": "",
+      "createdAt": "2025-08-13 13:00:26.656036+00",
+      "updatedAt": "2025-08-13 13:00:26.656036+00",
+      "projectId": 1
+    }
+  ],
+  "system": {
+    "id": 1,
+    "data": {
+      "components": [],
+      "connections": [],
+      "pointsOfAttack": [],
+      "connectionPoints": [],
+      "lastAutoSaveDate": "8/13/2025, 3:00:37 PM"
+    },
+    "image": null,
+    "createdAt": "2025-08-13 12:58:23.409582+00",
+    "updatedAt": "2025-08-13 12:58:23.409582+00",
+    "projectId": 1
+  },
+  "catalog": {
+    "id": 2,
+    "name": "Test Catalog",
+    "language": "EN",
+    "createdAt": "2025-08-13 12:58:12.377029+00",
+    "updatedAt": "2025-08-13 12:58:12.377029+00",
+    "role": 0
+  },
+  "catalogThreats": [
+    {
+      "id": 1,
+      "name": "Physical data storage access",
+      "description": "Physical access means the possibility of direct access to hardware and data storage medium which means that the stored data can be accessed in their raw form without mediation and protection by the operating system or an application. Authorisation systems are ineffective. Data can not only be read but also manipulated, deleted/destroyed or the access blocked in some different way by physical means.",
+      "pointOfAttack": "DATA_STORAGE_INFRASTRUCTURE",
+      "attacker": "UNAUTHORISED_PARTIES",
+      "probability": 3,
+      "confidentiality": true,
+      "integrity": true,
+      "availability": true,
+      "createdAt": "2025-08-13 12:58:12.377029+00",
+      "updatedAt": "2025-08-13 12:58:12.377029+00",
+      "catalogId": 2
+    }
+  ],
+  "catalogMeasures": [
+    {
+      "id": 1,
+      "name": "Physical protection",
+      "description": "",
+      "pointOfAttack": "DATA_STORAGE_INFRASTRUCTURE",
+      "attacker": "UNAUTHORISED_PARTIES",
+      "probability": null,
+      "confidentiality": true,
+      "integrity": true,
+      "availability": true,
+      "createdAt": "2025-08-13 12:58:12.377029+00",
+      "updatedAt": "2025-08-13 12:58:12.377029+00",
+      "catalogId": 2
+    }
+  ],
+  "componentTypes": [],
+  "measures": [],
+  "threats": [],
+  "measureImpacts": []
+}

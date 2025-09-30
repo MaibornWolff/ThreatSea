@@ -1,0 +1,19 @@
+{
+  "extends": "@repo/typescript-config/node.json",
+  "compilerOptions": {
+    "rootDir": "./",
+    "baseUrl": "./",
+    "paths": {
+      "#*": ["./src/*"]
+    },
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    /* Type Checking */
+    "allowImportingTsExtensions": false,
+    "useUnknownInCatchVariables": true,
+    /* Completeness */
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  },
+  "include": ["src/**/*.ts", "tests/**/*.ts"]
+}

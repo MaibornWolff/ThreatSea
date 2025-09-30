@@ -1,0 +1,48 @@
+name: Bug Report
+description: Report a bug or issue with ThreatSea
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Please describe the behaviour you're experiencing. If possible, provide screenshots.
+      placeholder: |
+        - What behaviour would you actually expect?
+        - Is the issue you're reporting reproducible? If yes, describe how.
+        - Did you try to re-import your project
+
+        Please attach an export of an affected project (if no sensitive information is in the project) to the ticket.
+    validations:
+      required: true
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Workaround
+      description: Do you know a way how to come around the issue? If so, please describe it.
+
+  - type: textarea
+    id: technical
+    attributes:
+      label: Technical Notes
+      description: Any technical details or notes
+
+  - type: checkboxes
+    id: definition-of-ready
+    attributes:
+      label: Definition of Ready (to be filled by ThreatSea Team)
+      options:
+        - label: Issue confirmed
+        - label: Issue reproduced locally
+        - label: Issue has been prioritized
+
+  - type: checkboxes
+    id: definition-of-done
+    attributes:
+      label: Definition of Done
+      description: This issue is resolved, when
+      options:
+        - label: related PR(s) has/have been reviewed and merged
+        - label: ThreatSea has been analyzed for dependencies of the issue or similar issues

@@ -1,0 +1,85 @@
+{
+  "header": {
+    "projectsBtn": "Projekte",
+    "assetsBtn": "Assets",
+    "threatsBtn": "Bedrohungen",
+    "riskBtn": "Risikomatrix"
+  },
+  "canvas": {
+    "exportSystemImage": "Systembild exportieren"
+  },
+  "connection": "Verbindung",
+  "autoSave": {
+    "failed": "Fehler: {{ error }}",
+    "upToDate": "Stand: {{ date }}",
+    "notUpToDate": "Letzer Stand: {{ date }}"
+  },
+  "sidebar": {
+    "component": {
+      "title": "Komponente"
+    },
+    "pointsofattack": {
+      "title": "Angriffspunkte"
+    },
+    "assets": {
+      "title": "Assets"
+    },
+    "connection": {
+      "title": "Kommunikationsinfrastruktur"
+    },
+    "connectionPoint": {
+      "title": "Kommunikationsschnittstelle"
+    },
+    "description": {
+      "title": "Beschreibung"
+    },
+    "connected_components": {
+      "title": "Verbundene Komponenten"
+    }
+  },
+  "contextMenu": {
+    "customComponents": "Benutzerdefiniert",
+    "Database": "Datenbank",
+    "Communication Infrastructure": "Kommunikations-Infrastruktur",
+    "Users": "Benutzer",
+    "Client": "Client",
+    "Server": "Sever"
+  },
+  "setAllBtn": "Alle an",
+  "unsetAllBtn": "Alle aus",
+  "isProjectComponent": "nur im Projekt verfügbar",
+  "customComponent": {
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "deleteCustomComponentText": "Wollen sie die Komponent '{{componentName}}' wirklich löschen?",
+    "fileUnusable": "Die ausgewählte Datei kann nicht verwendet werden. Sie ist entweder zu groß (> 100kB) oder keine Bild-Datei.",
+    "addComponent": "Komponente hinzufügen",
+    "editComponent": "Komponente bearbeiten",
+    "selectSymbol": "Symbol auswählen"
+  },
+  "deleteDialog": {
+    "deleteCompMessage": "Wollen Sie die Komponente '{{ componentName }}' wirklich löschen?",
+    "deleteConnMessage": "Wollen Sie die Verbindung '{{ connectionName }}' wirklich löschen?",
+    "deleteAttPointMessage": "Wollen Sie den Angriffspunkt '{{ attPointName }}' wirklich löschen?",
+    "deleteInterfaceMessage": "Wollen Sie die Kommunikationsschnittstelle '{{ interfaceName }}' wirklich löschen?",
+    "delete": "Löschen",
+    "cancel": "Abbrechen"
+  },
+  "communicationMenu": {
+    "title": "{{componentName}}: Kommunikationsschnittstelle",
+    "wlan": "WLAN",
+    "bluetooth": "Bluetooth",
+    "internet": "Internet",
+    "createNew": "Neu erstellen"
+  },
+  "communicationInterface": {
+    "createNew": "Neue Kommunikationsschnittstelle erstellen",
+    "editInterface": "Kommunikationsschnittstelle bearbeiten",
+    "name": "Name",
+    "selectIcon": "Symbol auswählen",
+    "nameRequired": "Name ist erforderlich",
+    "nameInvalid": "Name darf nicht leer sein oder nur aus Leerzeichen bestehen",
+    "iconRequired": "Symbol ist erforderlich",
+    "poaRequired": "Es muss mindestens ein Angriffspunkt ausgewählt sein"
+  }
+}

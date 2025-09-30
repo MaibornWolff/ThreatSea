@@ -1,0 +1,12 @@
+{
+  "addProjectBtn": "Add Project",
+  "projectList.sortBy.nameToggleBtn": "Name",
+  "projectList.sortBy.createdAtToggleBtn": "Date",
+  "deleteProject": "Delete Project",
+  "members": "Members",
+  "importProject": "Import Project",
+  "exportProject": "Export Project",
+  "deleteMessage": "Do you really want to delete the project '{{ projectName }}'?",
+  "catalogs": "Catalog",
+  "heading": "Projects"
+}

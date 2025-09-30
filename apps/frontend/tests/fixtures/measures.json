@@ -1,0 +1,71 @@
+{
+  "measures": [
+    {
+      "name": "Sample Measure",
+      "description": "Some sample description text",
+      "scheduledAt": "2028-05-11T20:22:49.070Z",
+      "catalogMeasureId": null
+    },
+    {
+      "name": "Another Measure",
+      "description": "Another description text",
+      "scheduledAt": "2023-03-01T04:08:12.842Z",
+      "catalogMeasureId": null
+    },
+    {
+      "name": "Duplicated Name Measure",
+      "description": "Also a description",
+      "scheduledAt": "2001-08-22T23:07:34.179Z",
+      "catalogMeasureId": null
+    },
+    {
+      "name": "This is a very very very uncommon long measure name",
+      "description": "An even much much much more long and uncommon description text for an already very very very uncommon long measure name",
+      "scheduledAt": "2010-03-15T11:44:54.191Z",
+      "catalogMeasureId": null
+    },
+    {
+      "name": "Fancy nam€ with speci@l charact$ers",
+      "description": "Also a descr!ption~ with sp€ci@l charact*rs",
+      "scheduledAt": "2002-03-31T08:22:30.061Z",
+      "catalogMeasureId": null
+    },
+    {
+      "name": "Measure name",
+      "description": "Bli bla blub",
+      "scheduledAt": "2007-03-01T16:19:51.615Z",
+      "catalogMeasureId": null
+    },
+    {
+      "name": "Just another measure name",
+      "description": "foo bar",
+      "scheduledAt": "2004-09-30T05:29:01.547Z",
+      "catalogMeasureId": null
+    },
+    {
+      "name": "Boring",
+      "description": "Even more boring",
+      "scheduledAt": "2028-04-20T19:05:41.355Z",
+      "catalogMeasureId": null
+    },
+    {
+      "name": "Nothing special here",
+      "description": "*snoring*",
+      "scheduledAt": "2009-09-11T17:30:28.980Z",
+      "catalogMeasureId": null
+    }
+  ],
+  "invalidMeasures": [
+    {
+      "name": " ",
+      "description": "",
+      "scheduledAt": "2023-09-21T13:41:18.153Z"
+    },
+    {
+      "name": "Duplicated Name Measure",
+      "description": "Description of a measure with a duplicated name",
+      "scheduledAt": "2024-04-07T18:36:45.205Z",
+      "catalogMeasureId": null
+    }
+  ]
+}

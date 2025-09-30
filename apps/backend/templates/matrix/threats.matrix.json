@@ -1,0 +1,209 @@
+{
+  "DATA_STORAGE_INFRASTRUCTURE": {
+    "UNAUTHORISED_PARTIES": {
+      "text": {
+        "EN": {
+          "name": "Physical data storage access",
+          "description": "Physical access means the possibility of direct access to hardware and data storage medium which means that the stored data can be accessed in their raw form without mediation and protection by the operating system or an application. Authorisation systems are ineffective. Data can not only be read but also manipulated, deleted/destroyed or the access blocked in some different way by physical means."
+        },
+        "DE": {
+          "name": "Physischer Speichermedien-Zugriff",
+          "description": "Physikalischer Zugriff bedeutet unmittelbare Zugriffsmöglichkeiten auf Technik und Datenträger und damit auf die gespeicherten Daten in Rohform ohne Vermittlung und damit auch ohne Schutz durch das Betriebssystem oder eine Anwendung. Berechtigungssysteme sind damit wirkungslos. Physikalisch können Daten nicht nur ausgelesen, sondern auch manipuliert, gelöscht/zerstört oder der Zugriff auf andere Weise verhindert werden."
+        }
+      },
+      "probability": 3
+    },
+    "SYSTEM_USERS": {
+      "text": {
+        "EN": {
+          "name": "Internal breach on data storage",
+          "description": "System users are usually separated from the data to be protected only by the authorisation system of the operating system. In case of failure, misconfiguration or malfunction they can read, manipulate, delete or destroy data or disrupt access. One example for the latter is deliberately overloading resources."
+        },
+        "DE": {
+          "name": "Übergriff auf Speichermedien",
+          "description": "Systembenutzer werden von den zu schützenden Daten i.d.R. nur durch die Berechtigungssysteme von Betriebssystem oder Anwendung getrennt. Bei Versagen, Fehlkonfiguration oder Fehlfunktionen können sie Daten einsehen, manipulieren, zerstören/löschen oder den Zugriff stören. Beachtenswertes Szenario für letzteres ist gezielte Ressourcenüberlastung."
+        }
+      },
+      "probability": 5
+    },
+    "ADMINISTRATORS": {
+      "text": {
+        "EN": {
+          "name": "Privilege abuse on data storage",
+          "description": "Access to stored contents in their raw form."
+        },
+        "DE": {
+          "name": "Privilegienmissbrauch auf Speichermedien",
+          "description": "Zugriff auf gespeicherte Inhalte in Rohform"
+        }
+      },
+      "probability": 5
+    }
+  },
+  "PROCESSING_INFRASTRUCTURE": {
+    "UNAUTHORISED_PARTIES": {
+      "text": {
+        "EN": {
+          "name": "Physical attack on processing",
+          "description": "Physical access to computers where programs are executed makes it possible to gain information about the executed instructions and the processed data as well as to manipulate them or to block the execution."
+        },
+        "DE": {
+          "name": "Physischer Angriff auf die Ausführung",
+          "description": "Bei physikalischem Zugriff auf Computer, auf denen Programme ausgeführt werden, können Informationen über die ausgeführten Befehle und die verarbeiteten Daten erlangt werden, sowie diese manipuliert oder die Ausführung verhindert werden."
+        }
+      },
+      "probability": 2
+    },
+    "SYSTEM_USERS": {
+      "text": {
+        "EN": {
+          "name": "Internal breach during processing",
+          "description": "As they can execute programs on the same hardware, system users can interfere on the data or programs and even influence those, especially disruptive by resource overload. The technical possibilities depend on the functionality and configuration of the infrastructure and comprise simple attacks like access to parameters in process lists as well as technologically complex actions like side channel attacks."
+        },
+        "DE": {
+          "name": "Übergriff in der Ausführung",
+          "description": "Durch die Möglichkeit Programme auf der selben „Hardware\" auszuführen können Rückschlüsse auf Daten und Programme gezogen oder sogar Einfluss genommen bis hin zur Störung durch Ressourcenüberlast. Die technischen Möglichkeiten hängen von Fähigkeit und Konfiguration der Infrastruktur ab und beinhalten zwischen einfachen Angriffen wie das Auslesen von Parameter aus Prozesslisten auch technologisch komplexe Aktionen wie Seitenkanalangriffe."
+        }
+      },
+      "probability": 3
+    },
+    "ADMINISTRATORS": {
+      "text": {
+        "EN": {
+          "name": "Privilege abuse on processing",
+          "description": "Access at least to detailed meta-information like process environment, possibly complete memory contents and internal interfaces."
+        },
+        "DE": {
+          "name": "Privilegienmissbrauch in der Ausführung",
+          "description": "Zugriffe zumindest auf detaillierte Metainformationen wie Prozessumgebungen, ggf. auch auf volle Speicherinhalte und interne Schnittstellen."
+        }
+      },
+      "probability": 3
+    }
+  },
+  "COMMUNICATION_INFRASTRUCTURE": {
+    "UNAUTHORISED_PARTIES": {
+      "text": {
+        "EN": {
+          "name": "Physical attack on transmission",
+          "description": "Similar to the other physical access described above this facilitates the unobstructed access to the transferred data in its raw form with the possibility to eavesdrop, manipulate, disturb or disrupt. Wireless communication is especially vulnerable in this regard."
+        },
+        "DE": {
+          "name": "Physischer Angriff auf die Übertragung",
+          "description": "Ähnlich den anderen physikalischen Zugriffen besteht hier die Möglichkeit des ungehinderten Zugriffs auf die übertragenen Daten in Rohform mit der Möglichkeit des Abhörens, der Manipulation, Störung oder des Unterbindens. Besonders Funkstrecken sind hier von besonderer Bedeutung."
+        }
+      },
+      "probability": 3
+    },
+    "SYSTEM_USERS": {
+      "text": {
+        "EN": {
+          "name": "Internal breach on transmission",
+          "description": "System users have comparably direct influence on common means of communication and might be able by that to penetrate the communication relations of the system (e.g. by diverting communications to their own endpoints) and thereby read or manipulate data or block communication (e.g. again by resource overload)."
+        },
+        "DE": {
+          "name": "Übergriff in der Übertragung",
+          "description": "Systembenutzer haben relativ direkten Einfluss auf die gemeinsamen Kommunikationsmittel und können durch deren Beeinflussung ggf. in die Kommunikationsbeziehungen des Systems eindringen (z.B. auf eigene Endpunkte umleiten) und dadurch Daten lesen, manipulieren oder die Kommunikation (z.B. wiederum durch Ressourcenüberlastung) unterbinden."
+        }
+      },
+      "probability": 3
+    },
+    "ADMINISTRATORS": {
+      "text": {
+        "EN": {
+          "name": "Privilege abuse on transmission",
+          "description": "Access to transferred contents in their raw form."
+        },
+        "DE": {
+          "name": "Privilegienmissbrauch in der Übertragung",
+          "description": "Zugriff auf übertragene Inhalte in Rohform."
+        }
+      },
+      "probability": 3
+    }
+  },
+  "COMMUNICATION_INTERFACES": {
+    "UNAUTHORISED_PARTIES": {
+      "text": {
+        "EN": {
+          "name": "Physical interface attack",
+          "description": "Without additional measures systems process any data which is input to their communication interfaces. Unauthorised parties can use physically accessible interfaces (esp. wireless) to disclose or manipulate data or to case errors in the system by triggering some malfunction."
+        },
+        "DE": {
+          "name": "Physischer Angriff auf Schnittstellen",
+          "description": "Ohne zusätzliche Maßnahmen verarbeiten Systeme alle Daten, die sie an ihren Kommunikationsschnittstellen erreichen. Dritte können so über physisch zugängliche Schnittstellen (insbesondere Funk) Daten offengelegen oder manipulieren oder durch ausgelöste Fehlfunktionen Störungen im System verursachen."
+        }
+      },
+      "probability": 4
+    },
+    "SYSTEM_USERS": {
+      "text": {
+        "EN": {
+          "name": "Breach via interface access",
+          "description": "Without additional measures systems process any data which is input to their communication interfaces. Users of shared media can use this to effect disclosure or manipulation of data or errors in the system by triggering some malfunction."
+        },
+        "DE": {
+          "name": "Übergriff über Schnittstellenzugriff",
+          "description": "Ohne zusätzliche Maßnahmen verarbeiten Systeme alle Daten, die sie an ihren Kommunikationsschnittstellen erreichen. Durch Zugriffe von Benutzern gemeinsamer Kommunikationsmedien können darüber Daten offengelegt oder manipuliert werden oder durch ausgelöste Fehlfunktionen Störungen im System verursacht werden."
+        }
+      },
+      "probability": 4
+    },
+    "APPLICATION_USERS": {
+      "text": {
+        "EN": {
+          "name": "Detrimental interface usage",
+          "description": "Components of a system, esp. across trust boundaries, can abuse privileges or trigger malfunctions by sending detrimental messages across legitimate communication paths. Mostly, this is not due to a direct action of a human user but due to a system component acting on behalf of a user (often represented by a technical user)."
+        },
+        "DE": {
+          "name": "Schädliche Schnittstellennutzung",
+          "description": "Komponenten eines Systems, insbesondere jenseits von Vertrauensgrenzen, können durch schädliche Nachrichten im Rahmen vorgesehener Kommunikationswege Berechtigungen missbrauchen oder Fehlfunktionen auslösen. Dabei handelt es sich i.d.R. nicht um eine direkte Aktion eines menschlichen Benutzers, sondern um die eines für einen Benutzer agierenden Systembestandteils (häufig durch technische Benutzer abgebildet)."
+        }
+      },
+      "probability": 4
+    }
+  },
+  "USER_INTERFACE": {
+    "UNAUTHORISED_PARTIES": {
+      "text": {
+        "EN": {
+          "name": "Physical UI access",
+          "description": "Comparable to communication interfaces this allows interaction with the system with the same results of disclosure or manipulation of data and malfunction. Passive physical attacks like (acoustic) eavesdropping and shoulder surfing also belong here."
+        },
+        "DE": {
+          "name": "Physischer Oberflächenzugriff",
+          "description": "Ähnlich den Kommunikationsschnittstellen wird hier über die Benutzerschnittstelle mit dem System interagiert mit den gleichen Folgen der Offenlegung oder Manipulation von Daten, sowie Funktionsstörungen. Auch passive physische Angriffe wie (akustisches) Abhören oder Shoulder Surfing gehören hierher."
+        }
+      },
+      "probability": 4
+    },
+    "APPLICATION_USERS": {
+      "text": {
+        "EN": {
+          "name": "Detrimental UI usage",
+          "description": "As a matter of principle, application users are authorised to use the application and within the limits of their authorisation can do this abusively. By using existing malfunctions including wrong or missing checks they can also conduct unauthorised actions. Popular triggers for malfunctions are - similar to the case of communication interfaces - input outside the expected range."
+        },
+        "DE": {
+          "name": "Schädliche Oberflächennutzung",
+          "description": "Anwendungsbenutzer sind grundsätzlich berechtigt, die Anwendung zu benutzen, und können dies im Rahmen ihrer Berechtigungen auch missbräuchlich tun oder mithilfe vorhandener Fehlfunktionen einschließlich falscher oder fehlender Prüfungen auch dazu ausnutzen, nicht erlaubte Aktivitäten auszuführen. Beliebter Auslöser für Fehlfunktionen sind – wie bei den Kommunikationsschnittstellen – Eingaben außerhalb des erwarteten Wertebereichs."
+        }
+      },
+      "probability": 5
+    }
+  },
+  "USER_BEHAVIOUR": {
+    "UNAUTHORISED_PARTIES": {
+      "text": {
+        "EN": {
+          "name": "Deception",
+          "description": "Unauthorised parties trick users into triggering actions they actually don't want to have executed. To achieve this they interact directly or by technical means (e.g. by simultaneously executed rograms) with the user. Usually users are mislead about the action or are not aware of the fact that it is forbidden. Typical examples are Phising and other approaches of Social Engineering as well as technical attacks like malware, CSRF, Click-Jacking or drive-by-downloads. Please note that this kinds of attack can have impact not only on the attacked system but on its surroundings and infrastructure."
+        },
+        "DE": {
+          "name": "Täuschung",
+          "description": "Benutzer werden durch Dritte dazu gebracht, Aktionen anzustoßen, die sie eigentlich nicht ausführen wollen. Dazu interagieren sie technisch (z.B. durch gleichzeitig ausgeführte Programme) oder direkt mit den Benutzern. In der Regel werden Benutzer dabei über den Inhalt der Aktion getäuscht oder sind sich nicht darüber im Klaren, dass diese nicht erlaubt ist. Typische Beispiele sind Phishing und andere Ansätze des Social Engineerings, sowie auf technischer Seite Trojaner oder andere Malware, CSRF, Click-Jacking oder Drive-by-Downloads. Es ist zu beachten, dass derartige Angriffe möglicherweise über das attackierte System hinaus dessen Umgebung und Infrastruktur beeinträchtigen."
+        }
+      },
+      "probability": 4
+    }
+  }
+}

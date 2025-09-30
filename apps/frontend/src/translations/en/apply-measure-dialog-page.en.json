@@ -1,0 +1,19 @@
+{
+  "chooseMeasure": "Select a Measure",
+  "chooseThreat": "Select a Measure",
+  "suggestedMeasures": "Suggested Measures",
+  "otherMeasures": "Others",
+  "appliedMeasures": "Applied Measures",
+  "suggestedThreats": "Suggested Threats",
+  "otherThreats": "Others",
+  "impactedThreats": "Impacted Threats",
+  "impactsDamage": "Influences Damage",
+  "impactsProbability": "Influences Probability",
+  "placeholder-description": "How does the measure impact the Threat",
+  "noThreatSelected": "no threat selected",
+  "newMeasure": "Create Measure",
+  "gross": "gross",
+  "catalogMeasures": "Catalog Measures",
+  "setsOutOfScope": "Sets the threat out of scope",
+  "applyMeasure": "Apply Measure on:"
+}

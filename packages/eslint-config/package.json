@@ -1,0 +1,36 @@
+{
+  "name": "@repo/eslint-config",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./base": "./base.js",
+    "./node-js": "./node.js",
+    "./react-js": "./react.js"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.36.0",
+    "@typescript-eslint/eslint-plugin": "8.45.0",
+    "@typescript-eslint/parser": "8.45.0",
+    "@vitest/eslint-plugin": "1.3.13",
+    "eslint": "9.36.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-jsdoc": "60.5.0",
+    "eslint-plugin-react": "7.37.5",
+    "eslint-plugin-react-hooks": "5.2.0",
+    "eslint-plugin-react-refresh": "0.4.22",
+    "eslint-plugin-turbo": "2.5.8",
+    "globals": "16.4.0",
+    "typescript": "5.9.2",
+    "typescript-eslint": "8.45.0"
+  },
+  "lint-staged": {
+    "*.{cjs,js,jsx,mjs,ts,tsx}": [
+      "eslint",
+      "prettier --check"
+    ],
+    "*.{html,json,md,yaml,yml,xml}": [
+      "prettier --check"
+    ]
+  }
+}

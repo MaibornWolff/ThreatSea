@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:18.0-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U threatsea -d threatsea"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+    environment:
+      POSTGRES_DB: threatsea
+      POSTGRES_USER: threatsea
+      POSTGRES_PASSWORD: "threatseapassword"
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - postgresdb_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - threatsea
+
+  threatsea-backend:
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    build:
+      context: ../..
+      dockerfile: "./apps/backend/Dockerfile"
+    environment:
+      JWT_SECRET: somerandomstringtobeusedasJWTsecret
+      EXPRESS_SESSION_SECRET: someRandomExpressSessionSecret
+      PASSPORT_STRATEGY: fixed
+      ORIGIN_APP: http://localhost:3000
+      ORIGIN_BACKEND: http://localhost:8000
+      LOG_LEVEL: 0
+      DATABASE_HOST: postgres
+      DATABASE_USER: threatsea
+      DATABASE_PASSWORD: "threatseapassword"
+      DATABASE_NAME: threatsea
+      DATABASE_TLS: disabled
+      COOKIES_SECURE_OPTION: disabled
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "8000:8000"
+    networks:
+      - threatsea
+
+networks:
+  threatsea:
+
+volumes:
+  postgresdb_data:

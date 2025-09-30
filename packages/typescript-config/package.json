@@ -1,0 +1,17 @@
+{
+  "name": "@repo/typescript-config",
+  "version": "0.0.0",
+  "private": true,
+  "publishConfig": {
+    "access": "public"
+  },
+  "lint-staged": {
+    "*.{cjs,js,jsx,mjs,ts,tsx}": [
+      "eslint",
+      "prettier --check"
+    ],
+    "*.{html,json,md,yaml,yml,xml}": [
+      "prettier --check"
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "participants": "Participants",
+  "participant": "Participant",
+  "addMemberBtn": "Add Member",
+  "title": "Title",
+  "userRoles": {
+    "OWNER": "Owner",
+    "EDITOR": "Editor",
+    "VIEWER": "Viewer"
+  }
+}

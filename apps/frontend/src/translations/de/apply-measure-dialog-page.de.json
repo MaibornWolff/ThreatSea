@@ -1,0 +1,18 @@
+{
+  "chooseMeasure": "Maßnahme auswählen",
+  "chooseThreat": "Bedrohung auswählen",
+  "suggestedMeasures": "Passende Maßnahmen",
+  "otherMeasures": "Andere",
+  "appliedMeasures": "Angewendete Maßnahmen",
+  "suggestedThreats": "Passende Bedrohungen",
+  "otherThreats": "Andere",
+  "impactedThreats": "Schon angewendet auf",
+  "impactsDamage": "Reduziert Schaden",
+  "impactsProbability": "Reduziert Eintrittswahrscheinlichkeit",
+  "placeholder-description": "Wie wirkt sich die Maßnahme auf die Bedrohung aus?",
+  "noThreatSelected": "Bedrohung auswählen",
+  "newMeasure": "Maßnahme erstellen",
+  "gross": "brutto",
+  "catalogMeasures": "Katalog Maßnahmen",
+  "setsOutOfScope": "Setzt die Bedrohung out of Scope"
+}

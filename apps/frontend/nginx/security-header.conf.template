@@ -1,0 +1,10 @@
+add_header Strict-Transport-Security 'max-age=31536000; includeSubDomains; preload' always;
+add_header X-Frame-Options 'DENY' always;
+add_header X-Content-Type-Options 'nosniff' always;
+add_header Referrer-Policy 'strict-origin-when-cross-origin' always;
+add_header Cross-Origin-Embedder-Policy 'require-corp' always;
+add_header Cross-Origin-Opener-Policy 'same-origin' always;
+add_header Cross-Origin-Resource-Policy 'same-origin' always;
+
+#'wasm-unsafe-eval' is needed for react-pdf in chrome, 'unsafe-inline' for styling reasons
+add_header Content-Security-Policy "default-src 'self' ${API_URI} data:; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' https://fonts.googleapis.com/ 'unsafe-inline'; font-src 'self' https://fonts.googleapis.com/ fonts.gstatic.com" always;

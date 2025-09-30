@@ -1,0 +1,8 @@
+{
+  "errorNotice": "An error has occurred",
+  "backTo": "Go back to Project Page",
+  "moreInfo": "Stacktrace",
+  "messageDescription": "Error Message",
+  "copyBtn": "Copy Stacktrace to Clipboard",
+  "copied": "Copied"
+}

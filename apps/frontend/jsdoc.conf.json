@@ -1,0 +1,24 @@
+{
+  "tags": {
+    "allowUnknownTags": true,
+    "dictionaries": ["jsdoc", "closure"]
+  },
+  "source": {
+    "include": ["src"],
+    "includePattern": ".+\\.js(doc|x)?$",
+    "excludePattern": "(^|\\/|\\\\)_"
+  },
+  "plugins": ["plugins/markdown", "node_modules/better-docs/component", "node_modules/better-docs/category"],
+  "templates": {
+    "better-docs": {
+      "name": "ThreatSea"
+    },
+    "search": true
+  },
+  "opts": {
+    "destination": "docs",
+    "template": "node_modules/better-docs",
+    "recurse": true,
+    "readme": "README.md"
+  }
+}

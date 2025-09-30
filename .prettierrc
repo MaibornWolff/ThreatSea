@@ -1,0 +1,27 @@
+{
+  "useTabs": false,
+  "semi": true,
+  "singleQuote": false,
+  "endOfLine": "lf",
+  "overrides": [
+    {
+      "files": ["*.cjs", "*.js", "*.jsx", "*.mjs", "*.ts", "*.tsx"],
+      "options": {
+        "trailingComma": "es5",
+        "tabWidth": 4
+      }
+    },
+    {
+      "files": ["*.json"],
+      "options": {
+        "tabWidth": 2
+      }
+    },
+    {
+      "files": ["*.yaml", "*.yml"],
+      "options": {
+        "tabWidth": 2
+      }
+    }
+  ]
+}

@@ -1,0 +1,184 @@
+{
+  "justification": "Justification",
+  "confidentialityJustification": "Justification for Confidentiality",
+  "integrityJustification": "Justification for Integrity",
+  "availabilityJustification": "Justification for Availability",
+  "activeTooltip": "Active Measure",
+  "addMeasure": "Add Measure",
+  "addMeasureBtn": "Add Measure",
+  "copy": "Duplicate Measure",
+  "deleteMeasureText": "Do you really want to delete the measure '{{ measureName }}'?",
+  "editMeasure": "Edit Measure",
+  "measure": "Measure",
+  "measures": "Measures",
+  "reset": "Reset Measure",
+  "resetMeasureText": "Do you really want to reset the measure '{{ measureName }}'?",
+  "scheduledTooltip": "Scheduled Measure",
+
+  "addAsset": "Add Asset",
+  "assets": "Assets",
+  "editAsset": "Edit Asset",
+
+  "addThreatBtn": "Add Threat",
+  "editThreat": "Edit Threat",
+  "threat": "Threat",
+  "threats": "Threats",
+
+  "A": "Availability",
+  "availability": "Availability",
+  "C": "Confidentiality",
+  "confidentiality": "Confidentiality",
+  "I": "Integrity",
+  "integrity": "Integrity",
+
+  "unknown": "Unknown",
+
+  "attacker": "Attacker",
+  "catalog": "Catalog",
+  "componentName": "Component",
+  "creationDate": "Date",
+  "damage": "Damage",
+  "damageAxis": "Damage",
+  "description": "Description",
+  "done": "Done",
+  "email": "Email Address",
+  "heading": "Risk Timeline",
+  "language": "Language",
+  "lineOfTolerance.title": "Line of Tolerance",
+  "name": "Name",
+  "notScheduledYet": "Not scheduled yet",
+  "open": "Open",
+  "pointOfAttack": "Point of Attack",
+  "probability": "Probability",
+  "probabilityAxis": "Probability",
+  "report": "Report",
+  "risk": "Risk",
+  "role": "Role",
+  "scheduledAt": "Scheduled at",
+  "system": "System",
+
+  "addBtn": "Add",
+  "cancel": "Cancel",
+  "cancelBtn": "Cancel",
+  "cancelText": "Cancel",
+  "delete": "Delete",
+  "deleteBtn": "Delete",
+  "deleteMember": "Remove Member",
+  "deleteText": "Delete",
+  "duplicateName": "Copy of {{ name }}",
+  "edit": "Edit",
+  "editProject": "Edit Project",
+  "resetText": "Reset",
+  "saveBtn": "Save",
+
+  "attackerList": {
+    "ADMINISTRATORS": "Administrators",
+    "APPLICATION_USERS": "Application Users",
+    "SYSTEM_USERS": "System Users",
+    "UNAUTHORISED_PARTIES": "Unauthorised Parties"
+  },
+
+  "confidentialityLevels": {
+    "PUBLIC": "public",
+    "INTERNAL": "internal",
+    "CONFIDENTIAL": "confidential",
+    "HIGHLY_CONFIDENTIAL": "highly confidential"
+  },
+
+  "errorMessages": {
+    "availabilityMin": "Availability must be 1 or greater",
+    "availabilityMax": "Availability must be 5 or smaller",
+    "confidentialityMin": "Confidentiality must be 1 or greater",
+    "confidentialityMax": "Confidentiality must be 5 or smaller",
+    "damageMin": "Damage must be 1 or greater",
+    "damageMax": "Damge must be 5 or smaller",
+    "integrityMin": "Integrity must be 1 or greater",
+    "integrityMax": "Integrity must be 5 or smaller",
+    "probabilityMin": "Probability must be 1 or greater",
+    "probabilityMax": "Probability must be 5 or smaller",
+
+    "attakerRequired": "Attacker required",
+    "availabilityValue": "Availability required",
+    "catalogRequired": "Catalog required",
+    "confidentialityValue": "Confidentiality required",
+    "damageRequired": "Damage required",
+    "dateRequired": "Date required",
+    "emailRequired": "Email required",
+    "integrityValue": "Integrity required",
+    "measureRequired": "Measure required",
+    "memberRequired": "Member required",
+    "nameRequired": "Name required",
+    "nameTooLong": "Name must be at most 256 characters long",
+    "textTooLong": "Text must be at most 65535 characters long",
+    "pointOfAttackRequired": "Point of Attack required",
+    "probabilityRequired": "Probability required",
+    "roleRequired": "Role required",
+    "threatRequired": "Threat required",
+    "nameNotUnique": "Name is already taken",
+
+    "noConnectionFound": "No connection found for this component.",
+    "noCommunicationInterfaceFound": "The selected communication interface was not found for this component.",
+    "userConnectionInvalid": "Users can only connect to clients, servers, or databases",
+    "componentToUserInvalid": "Only clients, servers, or databases can connect to users",
+    "componentToCommunicationInfraInvalid": "Clients, servers, and databases can only connect to communication infrastructure via communication interfaces",
+    "communicationInfraToComponentInvalid": "Communication infrastructure can only connect to clients, servers, or databases via communication interfaces",
+    "invalidConnection": "Invalid connection"
+  },
+
+  "pointsOfAttackList": {
+    "COMMUNICATION_INFRASTRUCTURE": "Communication Infrastructure",
+    "DATA_STORAGE_INFRASTRUCTURE": "Data Storage Infrastructure",
+    "PROCESSING_INFRASTRUCTURE": "Processing Infrastructure",
+
+    "COMMUNICATION_INTERFACE": "Communication Interface",
+    "COMMUNICATION_INTERFACES": "Communication Interfaces",
+    "USER_INTERFACE": "User Interface",
+    "USER_BEHAVIOUR": "User Behaviour"
+  },
+
+  "probabilities": {
+    "1": {
+      "name": "extremely unlikely",
+      "description": "Only attackers on the level of state secret services can realise the attack or several highly unlikely events not under control of the attacker have to occur together."
+    },
+    "2": {
+      "name": "rather unlikely",
+      "description": "Only attackers with much time and/or money can realise the threat or unlikely events not under control of the attacker need to occur."
+    },
+    "3": {
+      "name": "possible",
+      "description": "The threat can only be realised by serious attackers with considerable criminal energy and in-depth knowledge."
+    },
+    "4": {
+      "name": "probable",
+      "description": "An attacker needs only intent, but no more knowledge than what can be derived from internet research (alike \"script kiddies\")."
+    },
+    "5": {
+      "name": "almost certain",
+      "description": "The threat can occur unintentionally, e.g. during regular usage by a non-malicious user."
+    }
+  },
+
+  "damages": {
+    "1": {
+      "name": "very neglectable",
+      "description": ""
+    },
+    "2": {
+      "name": "noticeable",
+      "description": "Can easily be compensated (e.g. within the organisation not using a dedicated project, without noteworthy cutback in other activities, with limited financial effort, ...)."
+    },
+    "3": {
+      "name": "quite noticeable",
+      "description": "Can only be compensated with effort (e.g. by postponing other projects, with considerable financial resources or expenditure of time, ...)"
+    },
+    "4": {
+      "name": "threatening",
+      "description": "For the market position of the company"
+    },
+    "5": {
+      "name": "very threatening",
+      "description": "For the existence of the company"
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "projects": [
+    {
+      "name": "Sample Project",
+      "description": "Some sample description text",
+      "createdAt": "2017-04-30T01:13:25.782Z",
+      "confidentialityLevel": "INTERNAL"
+    },
+    {
+      "name": "Another Project",
+      "description": "Another description text",
+      "createdAt": "2000-11-08T00:42:06.950Z",
+      "confidentialityLevel": "PUBLIC"
+    },
+    {
+      "name": "Duplicated Name Project",
+      "description": "Also a description",
+      "createdAt": "2007-02-19T19:13:28.552Z",
+      "confidentialityLevel": "CONFIDENTIAL"
+    },
+    {
+      "name": "Duplicated Name Project",
+      "description": "Description of a project with a duplicated name",
+      "createdAt": "2020-09-28T09:13:21.302Z",
+      "confidentialityLevel": "HIGHLY_CONFIDENTIAL"
+    },
+    {
+      "name": "This is a very very very uncommon long project name",
+      "description": "An even much much much more long and uncommon description text for an already very very very uncommon long project name",
+      "createdAt": "2023-06-30T03:31:14.035Z",
+      "confidentialityLevel": "INTERNAL"
+    },
+    {
+      "name": "Fancy nam€ with speci@l charact$ers",
+      "description": "Also a descr!ption~ with sp€ci@l charact*rs",
+      "createdAt": "2020-08-16T13:48:10.196Z",
+      "confidentialityLevel": "INTERNAL"
+    },
+    {
+      "name": "Project name",
+      "description": "Bli bla blub",
+      "createdAt": "2012-03-15T19:07:21.980Z",
+      "confidentialityLevel": "CONFIDENTIAL"
+    },
+    {
+      "name": "Just another project name",
+      "description": "foo bar",
+      "createdAt": "2030-11-27T07:02:09.379Z",
+      "confidentialityLevel": "PUBLIC"
+    },
+    {
+      "name": "Boring",
+      "description": "Even more boring",
+      "createdAt": "2000-02-24T12:52:15.658Z",
+      "confidentialityLevel": "HIGHLY_CONFIDENTIAL"
+    },
+    {
+      "name": "Nothing special here",
+      "description": "*snoring*",
+      "createdAt": "2022-01-19T15:06:25.027Z",
+      "confidentialityLevel": "INTERNAL"
+    }
+  ],
+  "invalidProjects": [
+    {
+      "name": " ",
+      "description": "",
+      "createdAt": "2019-12-21T16:45:32.351Z",
+      "confidentialityLevel": "INTERNAL"
+    }
+  ]
+}

@@ -1,0 +1,366 @@
+{
+  "threats": [
+    {
+      "name": "Sample Threat",
+      "description": "Some sample description text",
+      "attackers": ["SYSTEM_USERS", "APPLICATION_USERS"],
+      "pointsOfAttack": ["DATA_STORAGE_INFRASTRUCTURE"],
+      "probability": 2,
+      "confidentiality": false,
+      "integrity": false,
+      "availability": false,
+      "createdAt": "2006-09-12T11:48:57.430Z"
+    },
+    {
+      "name": "Another Threat",
+      "description": "Another description text",
+      "attackers": ["APPLICATION_USERS", "SYSTEM_USERS"],
+      "pointsOfAttack": ["COMMUNICATION_INTERFACES", "USER_BEHAVIOUR"],
+      "probability": 5,
+      "confidentiality": false,
+      "integrity": false,
+      "availability": true,
+      "createdAt": "2014-01-29T04:42:03.866Z"
+    },
+    {
+      "name": "Duplicated Name Threat",
+      "description": "Also a description",
+      "attackers": ["SYSTEM_USERS", "APPLICATION_USERS"],
+      "pointsOfAttack": ["USER_INTERFACE", "COMMUNICATION_INTERFACES", "USER_BEHAVIOUR"],
+      "probability": 2,
+      "confidentiality": false,
+      "integrity": false,
+      "availability": false,
+      "createdAt": "2026-11-02T09:39:53.882Z"
+    },
+    {
+      "name": "Duplicated Name Threat",
+      "description": "Description of a threat with a duplicated name",
+      "attackers": ["ADMINISTRATORS"],
+      "pointsOfAttack": [
+        "USER_INTERFACE",
+        "DATA_STORAGE_INFRASTRUCTURE",
+        "PROCESSING_INFRASTRUCTURE",
+        "COMMUNICATION_INFRASTRUCTURE",
+        "COMMUNICATION_INTERFACES"
+      ],
+      "probability": 5,
+      "confidentiality": false,
+      "integrity": true,
+      "availability": true,
+      "createdAt": "2002-01-29T13:57:20.003Z"
+    },
+    {
+      "name": "This is a very very very uncommon long threat name",
+      "description": "An even much much much more long and uncommon description text for an already very very very uncommon long threat name",
+      "attackers": ["UNAUTHORISED_PARTIES", "SYSTEM_USERS", "APPLICATION_USERS"],
+      "pointsOfAttack": ["USER_INTERFACE", "COMMUNICATION_INFRASTRUCTURE", "PROCESSING_INFRASTRUCTURE"],
+      "probability": 5,
+      "confidentiality": true,
+      "integrity": true,
+      "availability": false,
+      "createdAt": "2030-12-20T17:49:46.164Z"
+    },
+    {
+      "name": "Fancy nam€ with speci@l charact$ers",
+      "description": "Also a descr!ption~ with sp€ci@l charact*rs",
+      "attackers": ["UNAUTHORISED_PARTIES", "APPLICATION_USERS", "SYSTEM_USERS", "ADMINISTRATORS"],
+      "pointsOfAttack": ["PROCESSING_INFRASTRUCTURE", "COMMUNICATION_INTERFACES"],
+      "probability": 2,
+      "confidentiality": false,
+      "integrity": true,
+      "availability": true,
+      "createdAt": "2001-08-14T01:31:24.059Z"
+    },
+    {
+      "name": "Threat name",
+      "description": "Bli bla blub",
+      "attackers": ["APPLICATION_USERS", "UNAUTHORISED_PARTIES", "ADMINISTRATORS", "SYSTEM_USERS"],
+      "pointsOfAttack": ["DATA_STORAGE_INFRASTRUCTURE", "COMMUNICATION_INTERFACES"],
+      "probability": 4,
+      "confidentiality": false,
+      "integrity": true,
+      "availability": true,
+      "createdAt": "2005-11-13T14:04:29.906Z"
+    },
+    {
+      "name": "Just another threat name",
+      "description": "foo bar",
+      "attackers": ["SYSTEM_USERS"],
+      "pointsOfAttack": ["PROCESSING_INFRASTRUCTURE", "COMMUNICATION_INTERFACES"],
+      "probability": 1,
+      "confidentiality": true,
+      "integrity": true,
+      "availability": false,
+      "createdAt": "2024-01-25T20:04:31.772Z"
+    },
+    {
+      "name": "Boring",
+      "description": "Even more boring",
+      "attackers": ["SYSTEM_USERS", "UNAUTHORISED_PARTIES", "APPLICATION_USERS", "ADMINISTRATORS"],
+      "pointsOfAttack": ["DATA_STORAGE_INFRASTRUCTURE", "PROCESSING_INFRASTRUCTURE"],
+      "probability": 3,
+      "confidentiality": true,
+      "integrity": true,
+      "availability": false,
+      "createdAt": "2024-06-28T18:22:42.013Z"
+    },
+    {
+      "name": "Nothing special here",
+      "description": "*snoring*",
+      "attackers": ["SYSTEM_USERS", "ADMINISTRATORS"],
+      "pointsOfAttack": ["COMMUNICATION_INFRASTRUCTURE", "USER_INTERFACE", "COMMUNICATION_INTERFACES"],
+      "probability": 1,
+      "confidentiality": true,
+      "integrity": true,
+      "availability": false,
+      "createdAt": "2028-02-09T10:09:37.029Z"
+    }
+  ],
+  "measures": [
+    {
+      "name": "Sample Measure",
+      "description": "Some sample description text",
+      "attackers": ["APPLICATION_USERS"],
+      "pointsOfAttack": ["PROCESSING_INFRASTRUCTURE", "COMMUNICATION_INTERFACES"],
+      "probability": 4,
+      "confidentiality": true,
+      "integrity": true,
+      "availability": true,
+      "createdAt": "2011-08-02T03:09:56.242Z"
+    },
+    {
+      "name": "Another Measure",
+      "description": "Another description text",
+      "attackers": ["SYSTEM_USERS", "UNAUTHORISED_PARTIES"],
+      "pointsOfAttack": ["USER_BEHAVIOUR", "COMMUNICATION_INFRASTRUCTURE"],
+      "probability": 2,
+      "confidentiality": true,
+      "integrity": false,
+      "availability": false,
+      "createdAt": "2004-12-17T21:00:10.497Z"
+    },
+    {
+      "name": "Duplicated Name Measure",
+      "description": "Also a description",
+      "attackers": ["ADMINISTRATORS", "SYSTEM_USERS", "APPLICATION_USERS"],
+      "pointsOfAttack": ["USER_BEHAVIOUR", "PROCESSING_INFRASTRUCTURE", "USER_INTERFACE"],
+      "probability": 3,
+      "confidentiality": false,
+      "integrity": false,
+      "availability": true,
+      "createdAt": "2022-07-25T02:48:27.720Z"
+    },
+    {
+      "name": "Duplicated Name Measure",
+      "description": "Description of a measure with a duplicated name",
+      "attackers": ["ADMINISTRATORS"],
+      "pointsOfAttack": [
+        "USER_BEHAVIOUR",
+        "COMMUNICATION_INFRASTRUCTURE",
+        "USER_INTERFACE",
+        "COMMUNICATION_INTERFACES",
+        "DATA_STORAGE_INFRASTRUCTURE",
+        "PROCESSING_INFRASTRUCTURE"
+      ],
+      "probability": 3,
+      "confidentiality": true,
+      "integrity": false,
+      "availability": true,
+      "createdAt": "2016-03-21T05:15:03.946Z"
+    },
+    {
+      "name": "This is a very very very uncommon long measure name",
+      "description": "An even much much much more long and uncommon description text for an already very very very uncommon long measure name",
+      "attackers": ["APPLICATION_USERS"],
+      "pointsOfAttack": ["USER_BEHAVIOUR"],
+      "probability": 2,
+      "confidentiality": true,
+      "integrity": false,
+      "availability": true,
+      "createdAt": "2009-04-26T22:49:08.713Z"
+    },
+    {
+      "name": "Fancy nam€ with speci@l charact$ers",
+      "description": "Also a descr!ption~ with sp€ci@l charact*rs",
+      "attackers": ["SYSTEM_USERS", "ADMINISTRATORS"],
+      "pointsOfAttack": ["USER_BEHAVIOUR"],
+      "probability": 2,
+      "confidentiality": false,
+      "integrity": false,
+      "availability": true,
+      "createdAt": "2003-09-25T20:52:22.552Z"
+    },
+    {
+      "name": "Measure name",
+      "description": "Bli bla blub",
+      "attackers": ["SYSTEM_USERS", "UNAUTHORISED_PARTIES", "APPLICATION_USERS"],
+      "pointsOfAttack": ["COMMUNICATION_INFRASTRUCTURE", "USER_BEHAVIOUR"],
+      "probability": 1,
+      "confidentiality": false,
+      "integrity": false,
+      "availability": false,
+      "createdAt": "2020-01-09T19:02:34.890Z"
+    },
+    {
+      "name": "Just another measure name",
+      "description": "foo bar",
+      "attackers": ["APPLICATION_USERS", "ADMINISTRATORS"],
+      "pointsOfAttack": ["COMMUNICATION_INTERFACES", "USER_BEHAVIOUR", "USER_INTERFACE"],
+      "probability": 5,
+      "confidentiality": false,
+      "integrity": true,
+      "availability": false,
+      "createdAt": "2021-03-16T01:18:20.813Z"
+    },
+    {
+      "name": "Boring",
+      "description": "Even more boring",
+      "attackers": ["SYSTEM_USERS"],
+      "pointsOfAttack": [
+        "DATA_STORAGE_INFRASTRUCTURE",
+        "COMMUNICATION_INFRASTRUCTURE",
+        "USER_BEHAVIOUR",
+        "USER_INTERFACE",
+        "COMMUNICATION_INTERFACES",
+        "PROCESSING_INFRASTRUCTURE"
+      ],
+      "probability": 3,
+      "confidentiality": true,
+      "integrity": false,
+      "availability": true,
+      "createdAt": "2013-05-07T22:51:43.836Z"
+    },
+    {
+      "name": "Nothing special here",
+      "description": "*snoring*",
+      "attackers": ["SYSTEM_USERS"],
+      "pointsOfAttack": [
+        "DATA_STORAGE_INFRASTRUCTURE",
+        "USER_INTERFACE",
+        "USER_BEHAVIOUR",
+        "PROCESSING_INFRASTRUCTURE",
+        "COMMUNICATION_INFRASTRUCTURE"
+      ],
+      "probability": 5,
+      "confidentiality": true,
+      "integrity": true,
+      "availability": true,
+      "createdAt": "2000-04-29T08:13:06.110Z"
+    }
+  ],
+  "invalidThreats": [
+    {
+      "name": " ",
+      "description": "",
+      "attackers": ["SYSTEM_USERS"],
+      "pointsOfAttack": ["DATA_STORAGE_INFRASTRUCTURE"],
+      "probability": 2,
+      "confidentiality": false,
+      "integrity": false,
+      "availability": false,
+      "createdAt": "2006-09-12T11:48:57.430Z"
+    },
+    {
+      "name": "Too high probability",
+      "description": "",
+      "attackers": ["SYSTEM_USERS"],
+      "pointsOfAttack": ["DATA_STORAGE_INFRASTRUCTURE"],
+      "probability": 6,
+      "confidentiality": false,
+      "integrity": false,
+      "availability": false,
+      "createdAt": "2006-09-12T11:48:57.430Z"
+    },
+    {
+      "name": "Too low probability",
+      "description": "",
+      "attackers": ["SYSTEM_USERS"],
+      "pointsOfAttack": ["DATA_STORAGE_INFRASTRUCTURE"],
+      "probability": 0,
+      "confidentiality": false,
+      "integrity": false,
+      "availability": false,
+      "createdAt": "2006-09-12T11:48:57.430Z"
+    },
+    {
+      "name": "No attacker",
+      "description": "",
+      "attackers": [],
+      "pointsOfAttack": ["DATA_STORAGE_INFRASTRUCTURE"],
+      "probability": 2,
+      "confidentiality": false,
+      "integrity": false,
+      "availability": false,
+      "createdAt": "2006-09-12T11:48:57.430Z"
+    },
+    {
+      "name": "No point of attack",
+      "description": "",
+      "attackers": ["SYSTEM_USERS"],
+      "pointsOfAttack": [],
+      "probability": 2,
+      "confidentiality": false,
+      "integrity": false,
+      "availability": false,
+      "createdAt": "2006-09-12T11:48:57.430Z"
+    }
+  ],
+  "invalidMeasures": [
+    {
+      "name": " ",
+      "description": "",
+      "attackers": ["APPLICATION_USERS"],
+      "pointsOfAttack": ["COMMUNICATION_INTERFACES"],
+      "probability": 4,
+      "confidentiality": true,
+      "integrity": true,
+      "availability": true,
+      "createdAt": "2011-08-02T03:09:56.242Z"
+    },
+    {
+      "name": "Too high probability",
+      "description": "",
+      "attackers": ["APPLICATION_USERS"],
+      "pointsOfAttack": ["COMMUNICATION_INTERFACES"],
+      "probability": 6,
+      "confidentiality": true,
+      "integrity": true,
+      "availability": true,
+      "createdAt": "2011-08-02T03:09:56.242Z"
+    },
+    {
+      "name": "Too low probability",
+      "description": "",
+      "attackers": ["APPLICATION_USERS"],
+      "pointsOfAttack": ["COMMUNICATION_INTERFACES"],
+      "probability": 0,
+      "confidentiality": true,
+      "integrity": true,
+      "availability": true,
+      "createdAt": "2011-08-02T03:09:56.242Z"
+    },
+    {
+      "name": "No attacker",
+      "description": "",
+      "attackers": [],
+      "pointsOfAttack": ["COMMUNICATION_INTERFACES"],
+      "probability": 4,
+      "confidentiality": true,
+      "integrity": true,
+      "availability": true,
+      "createdAt": "2011-08-02T03:09:56.242Z"
+    },
+    {
+      "name": "No point of attack",
+      "description": "",
+      "attackers": ["APPLICATION_USERS"],
+      "pointsOfAttack": [],
+      "probability": 4,
+      "confidentiality": true,
+      "integrity": true,
+      "availability": true,
+      "createdAt": "2011-08-02T03:09:56.242Z"
+    }
+  ]
+}

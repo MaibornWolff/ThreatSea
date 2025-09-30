@@ -1,0 +1,64 @@
+body {
+  margin: 0;
+  font-family:
+    "Poppins",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Roboto",
+    "Oxygen",
+    "Ubuntu",
+    "Cantarell",
+    "Fira Sans",
+    "Droid Sans",
+    "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: rgb(35, 60, 87);
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+#logo {
+  filter: brightness(0) invert(1);
+}
+
+html,
+body,
+#root {
+  height: 100vh;
+}
+
+::-webkit-scrollbar {
+  width: 15px;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(35, 60, 87, 0.75) rgba(236, 238, 242, 1);
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: rgba(236, 238, 242, 1);
+  border-radius: 7.5px;
+  margin-left: 2px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 7.5px;
+  background: rgba(35, 60, 87, 0.75);
+  cursor: pointer;
+}
+
+@keyframes autoSaveSavingAnimation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

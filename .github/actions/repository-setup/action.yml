@@ -1,0 +1,17 @@
+name: "Repository Setup"
+description: "setup for pnpm and dependency installation"
+runs:
+  using: "composite"
+  steps:
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        run_install: false
+    - name: Setup Node.js
+      uses: actions/setup-node@v5
+      with:
+        node-version-file: .node-version
+        cache: "pnpm"
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile

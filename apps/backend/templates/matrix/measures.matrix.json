@@ -1,0 +1,544 @@
+{
+  "DATA_STORAGE_INFRASTRUCTURE": {
+    "UNAUTHORISED_PARTIES": [
+      {
+        "text": {
+          "EN": {
+            "name": "Physical protection"
+          },
+          "DE": {
+            "name": "physikalischer Schutz"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Backups"
+          },
+          "DE": {
+            "name": "Backups"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Encryption at rest (ineffective against interference and destruction)"
+          },
+          "DE": {
+            "name": "Verschlüsselung in Ruhe (nicht gegen Störung und Zerstörung)"
+          }
+        }
+      }
+    ],
+    "SYSTEM_USERS": [
+      {
+        "text": {
+          "EN": {
+            "name": "Authentication and authorisation"
+          },
+          "DE": {
+            "name": "Authentifizierung und Autorisierung"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Backups"
+          },
+          "DE": {
+            "name": "Backups"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Encryption at rest (granularity of accessed objects; ineffective against interference/destruction)"
+          },
+          "DE": {
+            "name": "Verschlüsselung in Ruhe (Granularität Zugriffsobjekte; nicht gegen Störung/Zerstörung)"
+          }
+        }
+      }
+    ],
+    "ADMINISTRATORS": [
+      {
+        "text": {
+          "EN": {
+            "name": "Monitoring and logging including auditing (not to be manipulated by the administrator)"
+          },
+          "DE": {
+            "name": "Überwachung und Protokollierung samt Auswertung (für den Administrator nicht manipuliertbar)"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Least privileges and separation of duties up to enforced four-eyes principle"
+          },
+          "DE": {
+            "name": "Privilegienminimierung und -teilung bis hin zu technisch erzwungenem vier-Augen-Prinzip"
+          }
+        }
+      }
+    ]
+  },
+  "PROCESSING_INFRASTRUCTURE": {
+    "UNAUTHORISED_PARTIES": [
+      {
+        "text": {
+          "EN": {
+            "name": "Physical protection"
+          },
+          "DE": {
+            "name": "physischer Schutz"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Obfuscation of processing, encrypted processing (ineffective against interference and destruction)"
+          },
+          "DE": {
+            "name": "Verschleierung der Verarbeitung, verschlüsselte Verarbeitung (nicht gegen Störung und Zerstörung)"
+          }
+        }
+      }
+    ],
+    "SYSTEM_USERS": [
+      {
+        "text": {
+          "EN": {
+            "name": "Isolation between users"
+          },
+          "DE": {
+            "name": "Isolation zwischen Benutzern"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Resource limits for shared resources"
+          },
+          "DE": {
+            "name": "Resourcenlimits bei gemeinsamer Nutzung"
+          }
+        }
+      }
+    ],
+    "ADMINISTRATORS": [
+      {
+        "text": {
+          "EN": {
+            "name": "Monitoring and logging including auditing (not to be manipulated by the administrator)"
+          },
+          "DE": {
+            "name": "Überwachung und Protokollierung samt Auswertung (für den Administrator nicht manipuliertbar)"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Least privileges and separation of duties up to enforced four-eyes principle"
+          },
+          "DE": {
+            "name": "Privilegienminimierung und -teilung bis hin zu technisch erzwungenem vier-Augen-Prinzip"
+          }
+        }
+      }
+    ]
+  },
+  "COMMUNICATION_INFRASTRUCTURE": {
+    "UNAUTHORISED_PARTIES": [
+      {
+        "text": {
+          "EN": {
+            "name": "Physical protection (unavailable for wireless)"
+          },
+          "DE": {
+            "name": "physikalischer Schutz (geht nicht bei Funk)"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Obfuscation of communications (ineffective against interference)"
+          },
+          "DE": {
+            "name": "Verschleierung der Kommunikation (nicht gegen Störung)"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Encryption in transit (ineffective against interference), cryptographic protection of integrity"
+          },
+          "DE": {
+            "name": "Verschlüsselung (nicht gegen Störung), kryptographischer Integritätsschutz"
+          }
+        }
+      }
+    ],
+    "SYSTEM_USERS": [
+      {
+        "text": {
+          "EN": {
+            "name": "Isolation on appropriate level of granularity"
+          },
+          "DE": {
+            "name": "Isolation auf geeigneter Granularitätsebene"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Encryption in transit (ineffective against interference), cryptographic protection of integrity on appropriate level of granularity"
+          },
+          "DE": {
+            "name": "Verschlüsselung in der Übertragung (nicht gegen Störung), kryptographischer Integritätsschutz auf jeweils geeigneter Granularitätsebene"
+          }
+        }
+      }
+    ],
+    "ADMINISTRATORS": [
+      {
+        "text": {
+          "EN": {
+            "name": "Monitoring and logging including auditing (not to be manipulated by the administrator)"
+          },
+          "DE": {
+            "name": "Überwachung und Protokollierung samt Auswertung (für den Administrator nicht manipuliertbar)"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Least privileges and separation of duties up to enforced four-eyes principle"
+          },
+          "DE": {
+            "name": "Privilegienminimierung und -teilung bis hin zu technisch erzwungenem vier-Augen-Prinzip"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Encryption in transit (ineffective against interference), cryptographic protection of integrity"
+          },
+          "DE": {
+            "name": "Verschlüsselung in der Übertragung (nicht gegen Störung), kryptographischer Integritätsschutz"
+          }
+        }
+      }
+    ]
+  },
+  "COMMUNICATION_INTERFACES": {
+    "UNAUTHORISED_PARTIES": [
+      {
+        "text": {
+          "EN": {
+            "name": "Isolation of interfaces against access by unauthorised parties"
+          },
+          "DE": {
+            "name": "Abschottung der Schnittstellen gegen Zugriffe Dritter"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Upstream identification and authentication (limited against interference)"
+          },
+          "DE": {
+            "name": "Vorschaltung von Identifikation und Authentifikation (eingeschränkt gegen Störung)"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Hardening and QA of the system in use, contractually guaranteed by providers if appropriate"
+          },
+          "DE": {
+            "name": "Härtung und QS der eingesetzten Systeme, ggf. vertraglich gegenüber Lieferanten abgesichert"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Checks, validation and sanitisation of in- and outputs"
+          },
+          "DE": {
+            "name": "Überwachung, Prüfung und Bereinigung von Ein- und Ausgaben"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Plausibility and compliance checks of input"
+          },
+          "DE": {
+            "name": "Überwachung der Eingaben auf Plausibilität und Ordnungsmäßigkeit"
+          }
+        }
+      }
+    ],
+    "SYSTEM_USERS": [
+      {
+        "text": {
+          "EN": {
+            "name": "Isolation of interfaces against foreign access"
+          },
+          "DE": {
+            "name": "Abschottung der Schnittstellen gegen fremde Zugriffe"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Upstream identification and authentication (limited against interference)"
+          },
+          "DE": {
+            "name": "Vorschaltung von Identifikation und Authentifikation (eingeschränkt gegen Störung)"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Hardening and QA of the system in use, contractually guaranteed by providers if appropriate"
+          },
+          "DE": {
+            "name": "Härtung und QS der eingesetzten Systeme, ggf. vertraglich gegenüber Lieferanten abgesichert"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Checks, validation and sanitisation of in- and outputs"
+          },
+          "DE": {
+            "name": "Überwachung, Prüfung und Bereinigung von Ein- und Ausgaben"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Plausibility and compliance checks of input"
+          },
+          "DE": {
+            "name": "Überwachung der Eingaben auf Plausibilität und Ordnungsmäßigkeit"
+          }
+        }
+      }
+    ],
+    "APPLICATION_USERS": [
+      {
+        "text": {
+          "EN": {
+            "name": "Authentication und authorisation of technical communication"
+          },
+          "DE": {
+            "name": "Authentifikation und Autorisierung auch bei technischen Kommunikationsbeziehungen"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Hardening and QA of the system in use, contractually guaranteed by providers if appropriate"
+          },
+          "DE": {
+            "name": "Härtung und QS der eingesetzten Systeme, ggf. vertraglich gegenüber Lieferanten abgesichert"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Checks, validation and sanitisation of in- and outputs, also for return values of other system components"
+          },
+          "DE": {
+            "name": "Überwachung, Prüfung und Bereinigung von Ein- und Ausgaben, auch bei Rückgabewerten anderenr Systemkomponenten"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Plausibility and compliance checks of communications from other system components"
+          },
+          "DE": {
+            "name": "Überwachung der Kommunikation anderer Systemkomponenten auf Plausibilität und Ordnungsmäßigkeit"
+          }
+        }
+      }
+    ]
+  },
+  "USER_INTERFACE": {
+    "UNAUTHORISED_PARTIES": [
+      {
+        "text": {
+          "EN": {
+            "name": "(physical) access control of the UI"
+          },
+          "DE": {
+            "name": "(physikalische) Zugangssicherung zum UI"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Upstream identification and authentication (limited against interference)"
+          },
+          "DE": {
+            "name": "Vorschaltung von Identifikation und Authentifikation (eingeschränkt gegen Störung)"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Hardening and QA of the system in use, contractually guaranteed by providers if appropriate"
+          },
+          "DE": {
+            "name": "Härtung und QS der eingesetzten Systeme, ggf. vertraglich gegenüber Lieferanten abgesichert"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Checks, validation and sanitisation of in- and outputs"
+          },
+          "DE": {
+            "name": "Überwachung, Prüfung und Bereinigung von Ein- und Ausgaben"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Plausibility and compliance checks of input"
+          },
+          "DE": {
+            "name": "Überwachung der Eingaben auf Plausibilität und Ordnungsmäßigkeit"
+          }
+        }
+      }
+    ],
+    "APPLICATION_USERS": [
+      {
+        "text": {
+          "EN": {
+            "name": "Authentication and authorisation"
+          },
+          "DE": {
+            "name": "Authentifikation und Autorisierung"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Monitoring of user interaction for plausibility and compliance (technically and functionally)"
+          },
+          "DE": {
+            "name": "Überwachung der Benutzeraktionen auf Plausibilität und Ordnungsmäßigkeit (fachlich und technisch)"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Hardening and QA of systems and applications"
+          },
+          "DE": {
+            "name": "Härtung und Qualitätssicherung von Systemen und Anwendungen"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Dedicated appliance for in- and output validation and sanitisation"
+          },
+          "DE": {
+            "name": "dedizierte Zusatzsysteme zur Überwachung, Prüfung und Bereinigung von Ein- und Ausgaben"
+          }
+        }
+      }
+    ]
+  },
+  "USER_BEHAVIOUR": {
+    "UNAUTHORISED_PARTIES": [
+      {
+        "text": {
+          "EN": {
+            "name": "Awareness training"
+          },
+          "DE": {
+            "name": "Awareness, Schulungen"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Technical isolation between attack vectors and target applications"
+          },
+          "DE": {
+            "name": "technische Trennung von Angriffsvektoren und Zielprogrammen"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Detection and blocking of technical attempts of attack"
+          },
+          "DE": {
+            "name": "Erkennung und Blockade der technischen Angriffsversuche"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Hardening and QA of the system in use, contractually guaranteed by providers if appropriate"
+          },
+          "DE": {
+            "name": "Härtung und QS der angegriffenen Systeme, ggf. vertraglich gegenüber Lieferanten abgesichert"
+          }
+        }
+      },
+      {
+        "text": {
+          "EN": {
+            "name": "Monitoring of technical and user behaviour for attack attempts or their effects and blocking thereof if possible"
+          },
+          "DE": {
+            "name": "Überwachung von technischem und Benutzerverhalten zur Erkennung von Angriffen und deren Auswirkungen und möglichst Unterbindung"
+          }
+        }
+      }
+    ]
+  }
+}

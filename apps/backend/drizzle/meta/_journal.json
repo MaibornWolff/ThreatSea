@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1753879046176,
+      "tag": "0000_initial_schema",
+      "breakpoints": false
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1755006322189,
+      "tag": "0001_cleanup",
+      "breakpoints": false
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1755519963293,
+      "tag": "0002_update_user_role_type",
+      "breakpoints": false
+    }
+  ]
+}

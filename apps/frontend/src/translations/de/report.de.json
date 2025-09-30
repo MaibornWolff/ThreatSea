@@ -1,0 +1,143 @@
+{
+  "attackersHeader": "Angreifer",
+  "pointsOfAttackHeader": "Angriffspunkte",
+  "component": "Komponente",
+  "systemImage": "Systembild",
+  "protectionNeeds": "Schutzbedarf",
+  "riskList": "Auflistung der Bedrohungen",
+  "tableOfContents": "Inhaltsverzeichnis",
+  "chapter": "Kapitel",
+  "pagenumber": "Seite",
+  "riskMatrices": "Risiko Matrizen",
+  "coverPage": "Deckblatt",
+  "before": "Davor",
+  "after": "Danach",
+  "probability": "Wahrscheinlichkeit",
+  "method": "Die 4x6 Methodik",
+  "gross": "brutto",
+  "net": "netto",
+
+  "explanationIdea": "Die 4x6 Methodik basiert auf einer Matrix, die für jedes IT-System, das auf sechs Klassen von Angriffspunkten abstrahiert wird, für die vier Klassen von Angreifern jede erdenkliche Bedrohung wiedergibt.",
+  "explanationApplication": "Die Matrix ist zunächst unabhängig von konkreten Angriffstechniken oder Angriffszielen. Im Laufe einer Bedrohungsanalyse wird diese abstrahierte Matrix auf eine konkrete Systemarchitektur, die gemäß der obigen Vorgabe abstrahiert wurde, angewendet. Daraus werden unmittelbar konkrete Angriffsszenarien in einer überschaubaren, aber dennoch vollständigen Sicht entwickelt.",
+
+  "explanationScale": "Erklärung der Wahrscheinlichkeits- und Schadensskala",
+
+  "attackers": {
+    "UNAUTHORISED_PARTIES": {
+      "name": "Dritte",
+      "description": "Einheiten, die keinerlei Bezug zu und insbesondere keine Rechte auf dem betrachteten System haben"
+    },
+    "SYSTEM_USERS": {
+      "name": "Systembenutzer",
+      "description": "Benutzer, die von der betrachteten Anwendung genutzte Ressourcen berechtigterweise mitbenutzen, ohne auf der Anwendung selbst Rechte zu haben"
+    },
+    "APPLICATION_USERS": {
+      "name": "Anwendungsbenutzer",
+      "description": "Benutzer, die berechtigt mit der betrachteten Anwendung arbeiten"
+    },
+    "ADMINISTRATORS": {
+      "name": "(Technische) Administratoren",
+      "description": "Benutzer, die der Anwendung zugrundeliegende Infrastrukturen mit entsprechenden erweiterten Berechtigungen verwalten"
+    }
+  },
+
+  "pointsOfAttacks": {
+    "USER_INTERFACE": {
+      "name": "Benutzerschnittstelle",
+      "description": "Orte und Programme, an und mit denen Benutzer mit dem System interagieren, meist per Bildschirm und Eingabegerät, z.B. Browser am PC"
+    },
+    "PROCESSING_INFRASTRUCTURE": {
+      "name": "Ausführungsinfrastruktur",
+      "description": "Orte der Programmausführung - im Prinzip alles, was einen Prozessor und keine absolut unveränderliche Programmierung hat, z.B. auch Datenbankserver, wo die Abfragen verarbeitet werden"
+    },
+    "DATA_STORAGE_INFRASTRUCTURE": {
+      "name": "Datenablagestruktur",
+      "description": "Orte, wo Daten physisch dauerhaft abgelegt werden - Festplatten, persistente Halbleiterspeicher, etc."
+    },
+    "COMMUNICATION_INFRASTRUCTURE": {
+      "name": "Kommunikationsinfrastruktur",
+      "description": "Orte der Programmausführung - im Prinzip alles, was einen Prozessor und keine absolut unveränderliche Programmierung hat, z.B. auch Datenbankserver, wo die Abfragen verarbeitet werden"
+    },
+    "COMMUNICATION_INTERFACES": {
+      "name": "Kommunikationsschnittstelle",
+      "description": "Anschlüsse an die Kommunikationsverbindungen auf allen OSI-Schichten: Netzschnittstellen, Funkantennen, TCP-Ports, APIs ..."
+    },
+    "USER_BEHAVIOUR": {
+      "name": "Benutzerverhalten",
+      "description": "Das Verhalten eines Benutzers (Menschen)"
+    }
+  },
+
+  "DATA_STORAGE_INFRASTRUCTURE": {
+    "UNAUTHORISED_PARTIES": {
+      "name": "Physischer Speichermedien-Zugriff",
+      "description": "Physikalischer Zugriff bedeutet unmittelbare Zugriffsmöglichkeiten auf Technik und Datenträger und damit auf die gespeicherten Daten in Rohform ohne Vermittlung und damit auch ohne Schutz durch das Betriebssystem oder eine Anwendung. Berechtigungssysteme sind damit wirkungslos. Physikalisch können Daten nicht nur ausgelesen, sondern auch manipuliert, gelöscht/zerstört oder der Zugriff auf andere Weise verhindert werden."
+    },
+    "SYSTEM_USERS": {
+      "name": "Übergriff auf Speichermedien",
+      "description": "Systembenutzer werden von den zu schützenden Daten i.d.R. nur durch die Berechtigungssysteme von Betriebssystem oder Anwendung getrennt. Bei Versagen, Fehlkonfiguration oder Fehlfunktionen können sie Daten einsehen, manipulieren, zerstören/löschen oder den Zugriff stören. Beachtenswertes Szenario für letzteres ist gezielte Ressourcenüberlastung."
+    },
+    "ADMINISTRATORS": {
+      "name": "Privilegienmissbrauch auf Speichermedien",
+      "description": "Zugriff auf gespeicherte Inhalte in Rohform"
+    }
+  },
+  "PROCESSING_INFRASTRUCTURE": {
+    "UNAUTHORISED_PARTIES": {
+      "name": "Physischer Angriff auf die Ausführung",
+      "description": "Bei physikalischem Zugriff auf Computer, auf denen Programme ausgeführt werden, können Informationen über die ausgeführten Befehle und die verarbeiteten Daten erlangt werden, sowie diese manipuliert oder die Ausführung verhindert werden."
+    },
+    "SYSTEM_USERS": {
+      "name": "Übergriff in der Ausführung",
+      "description": "Durch die Möglichkeit Programme auf der selben „Hardware\" auszuführen können Rückschlüsse auf Daten und Programme gezogen oder sogar Einfluss genommen bis hin zur Störung durch Ressourcenüberlast. Die technischen Möglichkeiten hängen von Fähigkeit und Konfiguration der Infrastruktur ab und beinhalten zwischen einfachen Angriffen wie das Auslesen von Parameter aus Prozesslisten auch technologisch komplexe Aktionen wie Seitenkanalangriffe."
+    },
+    "ADMINISTRATORS": {
+      "name": "Privilegienmissbrauch in der Ausführung",
+      "description": "Zugriffe zumindest auf detaillierte Metainformationen wie Prozessumgebungen, ggf. auch auf volle Speicherinhalte und interne Schnittstellen."
+    }
+  },
+  "COMMUNICATION_INFRASTRUCTURE": {
+    "UNAUTHORISED_PARTIES": {
+      "name": "Physischer Angriff auf die Übertragung",
+      "description": "Ähnlich den anderen physikalischen Zugriffen besteht hier die Möglichkeit des ungehinderten Zugriffs auf die übertragenen Daten in Rohform mit der Möglichkeit des Abhörens, der Manipulation, Störung oder des Unterbindens. Besonders Funkstrecken sind hier von besonderer Bedeutung."
+    },
+    "SYSTEM_USERS": {
+      "name": "Übergriff in der Übertragung",
+      "description": "Systembenutzer haben relativ direkten Einfluss auf die gemeinsamen Kommunikationsmittel und können durch deren Beeinflussung ggf. in die Kommunikationsbeziehungen des Systems eindringen (z.B. auf eigene Endpunkte umleiten) und dadurch Daten lesen, manipulieren oder die Kommunikation (z.B. wiederum durch Ressourcenüberlastung) unterbinden."
+    },
+    "ADMINISTRATORS": {
+      "name": "Privilegienmissbrauch in der Übertragung",
+      "description": "Zugriff auf übertragene Inhalte in Rohform."
+    }
+  },
+  "COMMUNICATION_INTERFACES": {
+    "UNAUTHORISED_PARTIES": {
+      "name": "Physischer Angriff auf Schnittstellen",
+      "description": "Ohne zusätzliche Maßnahmen verarbeiten Systeme alle Daten, die sie an ihren Kommunikationsschnittstellen erreichen. Dritte können so über physisch zugängliche Schnittstellen (insbesondere Funk) Daten offengelegen oder manipulieren oder durch ausgelöste Fehlfunktionen Störungen im System verursachen."
+    },
+    "SYSTEM_USERS": {
+      "name": "Übergriff über Schnittstellenzugriff",
+      "description": "Ohne zusätzliche Maßnahmen verarbeiten Systeme alle Daten, die sie an ihren Kommunikationsschnittstellen erreichen. Durch Zugriffe von Benutzern gemeinsamer Kommunikationsmedien können darüber Daten offengelegt oder manipuliert werden oder durch ausgelöste Fehlfunktionen Störungen im System verursacht werden."
+    },
+    "APPLICATION_USERS": {
+      "name": "Schädliche Schnittstellennutzung",
+      "description": "Komponenten eines Systems, insbesondere jenseits von Vertrauensgrenzen, können durch schädliche Nachrichten im Rahmen vorgesehener Kommunikationswege Berechtigungen missbrauchen oder Fehlfunktionen auslösen. Dabei handelt es sich i.d.R. nicht um eine direkte Aktion eines menschlichen Benutzers, sondern um die eines für einen Benutzer agierenden Systembestandteils (häufig durch technische Benutzer abgebildet)."
+    }
+  },
+  "USER_INTERFACE": {
+    "UNAUTHORISED_PARTIES": {
+      "name": "Physischer Oberflächenzugriff",
+      "description": "Ähnlich den Kommunikationsschnittstellen wird hier über die Benutzerschnittstelle mit dem System interagiert mit den gleichen Folgen der Offenlegung oder Manipulation von Daten, sowie Funktionsstörungen. Auch passive physische Angriffe wie (akustisches) Abhören oder Shoulder Surfing gehören hierher."
+    },
+    "APPLICATION_USERS": {
+      "name": "Schädliche Oberflächennutzung",
+      "description": "Anwendungsbenutzer sind grundsätzlich berechtigt, die Anwendung zu benutzen, und können dies im Rahmen ihrer Berechtigungen auch missbräuchlich tun oder mithilfe vorhandener Fehlfunktionen einschließlich falscher oder fehlender Prüfungen auch dazu ausnutzen, nicht erlaubte Aktivitäten auszuführen. Beliebter Auslöser für Fehlfunktionen sind – wie bei den Kommunikationsschnittstellen – Eingaben außerhalb des erwarteten Wertebereichs."
+    }
+  },
+  "USER_BEHAVIOUR": {
+    "UNAUTHORISED_PARTIES": {
+      "name": "Täuschung",
+      "description": "Benutzer werden durch Dritte dazu gebracht, Aktionen anzustoßen, die sie eigentlich nicht ausführen wollen. Dazu interagieren sie technisch (z.B. durch gleichzeitig ausgeführte Programme) oder direkt mit den Benutzern. In der Regel werden Benutzer dabei über den Inhalt der Aktion getäuscht oder sind sich nicht darüber im Klaren, dass diese nicht erlaubt ist. Typische Beispiele sind Phishing und andere Ansätze des Social Engineerings, sowie auf technischer Seite Trojaner oder andere Malware, CSRF, Click-Jacking oder Drive-by-Downloads. Es ist zu beachten, dass derartige Angriffe möglicherweise über das attackierte System hinaus dessen Umgebung und Infrastruktur beeinträchtigen."
+    }
+  }
+}

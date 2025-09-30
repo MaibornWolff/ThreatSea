@@ -1,0 +1,19 @@
+{
+  "addCatalogBtn": "Katalog hinzufügen",
+  "deleteCatalogBtn": "Katalog Löschen",
+  "editCatalogBtn": "Katalog Bearbeiten",
+  "editCatalog": "Katalog bearbeiten",
+  "addCatalog": "Katalog hinzufügen",
+  "emptyCatalog": "Leeren Katalog erstellen",
+  "emptyExplanation": "Erstellt einen leeren Katalog, ohne die standardmäßigen Bedrohungen und Maßnahmen der 4x6 Matrix.",
+  "catalogList": {
+    "sortBy": {
+      "nameToggleBtn": "Name",
+      "createdAtToggleBtn": "Datum"
+    },
+    "alert.created.success": "Der Katalog {{catalogName}} wurde erfolgreich erstellt.",
+    "alert.created.failure": "Der Katalog {{catalogName}} konnte nicht erstellt werden."
+  },
+  "deleteMessage": "Wollen Sie den Katalog '{{ catalogName }}' wirklich löschen?",
+  "heading": "Kataloge"
+}

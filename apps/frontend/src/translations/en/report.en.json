@@ -1,0 +1,142 @@
+{
+  "attackersHeader": "Attackers",
+  "pointsOfAttackHeader": "Points Of Attack",
+  "component": "Component",
+  "systemImage": "System Image",
+  "protectionNeeds": "Protection Needs",
+  "riskList": "List of Threats",
+  "tableOfContents": "Table of Contents",
+  "chapter": "Chapter",
+  "pagenumber": "Page",
+  "riskMatrices": "Risk Matrices",
+  "coverPage": "Cover Page",
+  "method": "The 4x6 Methodology",
+  "before": "Before",
+  "after": "After",
+  "gross": "gross",
+  "net": "net",
+
+  "explanationIdea": "The 4x6 methodology is based on a matrix that specifies every conceivable threat from the four classes of attackers for any IT system abstracted to six classes of attack points.",
+  "explanationApplication": "The matrix is initially independent of specific attack techniques or attack targets. In the course of a threat analysis, this abstracted matrix is applied to a specific system architecture that was abstracted according to the above specification. From this, concrete attack scenarios are immediately developed in a manageable but nevertheless complete view.",
+
+  "explanationScale": "Explanation of Probability and Damage Scale",
+
+  "attackers": {
+    "UNAUTHORISED_PARTIES": {
+      "name": "Unauthorised Parties",
+      "description": "Entities with no tie to and especially no authorisation on the system under consideration"
+    },
+    "SYSTEM_USERS": {
+      "name": "System Users",
+      "description": "Users being authorised to share use of resources with the application under consideration but not having authorisation on the application itself"
+    },
+    "APPLICATION_USERS": {
+      "name": "Application Users",
+      "description": "Users being authorised to work with the application under consideration"
+    },
+    "ADMINISTRATORS": {
+      "name": "(Technical) Administrators",
+      "description": "Users with elevated privileges who manage the infrastructure used by the application"
+    }
+  },
+
+  "pointsOfAttacks": {
+    "USER_INTERFACE": {
+      "name": "User Interface",
+      "description": "the places and programms, where and by which users interact with the system, usually via screen and input device, e.g. a browser on a PC"
+    },
+    "PROCESSING_INFRASTRUCTURE": {
+      "name": "Processing Infrastructure",
+      "description": "places of program execution - in principle everything which has a processor and its programming is not absolutely fixed, e.g. including database servers, where queries are processed"
+    },
+    "DATA_STORAGE_INFRASTRUCTURE": {
+      "name": "Data Storage Infrastructure",
+      "description": "places where data is stored durably - hard disks, non-volatile semiconductor memory, ..."
+    },
+    "COMMUNICATION_INFRASTRUCTURE": {
+      "name": "Communication Infrastructure",
+      "description": "physical transport of data via cable or wireless"
+    },
+    "COMMUNICATION_INTERFACES": {
+      "name": "Communication Interfaces",
+      "description": "the connection to the means of communication on all OSI layers: network interfaces, wireless antenna, TCP Ports, APIs, ..."
+    },
+    "USER_BEHAVIOUR": {
+      "name": "User Behaviour",
+      "description": "The behaviour of an user (human)"
+    }
+  },
+
+  "DATA_STORAGE_INFRASTRUCTURE": {
+    "UNAUTHORISED_PARTIES": {
+      "name": "Physical data storage access",
+      "description": "Physical access means the possibility of direct access to hardware and data storage medium which means that the stored data can be accessed in their raw form without mediation and protection by the operating system or an application. Authorisation systems are ineffective. Data can not only be read but also manipulated, deleted/destroyed or the access blocked in some different way by physical means."
+    },
+    "SYSTEM_USERS": {
+      "name": "Internal breach on data storage",
+      "description": "System users are usually separated from the data to be protected only by the authorisation system of the operating system. In case of failure, misconfiguration or malfunction they can read, manipulate, delete or destroy data or disrupt access. One example for the latter is deliberately overloading resources."
+    },
+    "ADMINISTRATORS": {
+      "name": "Privilege abuse on data storage",
+      "description": "Access to stored contents in their raw form."
+    }
+  },
+  "PROCESSING_INFRASTRUCTURE": {
+    "UNAUTHORISED_PARTIES": {
+      "name": "Physical attack on processing",
+      "description": "Physical access to computers where programs are executed makes it possible to gain information about the executed instructions and the processed data as well as to manipulate them or to block the execution."
+    },
+    "SYSTEM_USERS": {
+      "name": "Internal breach during processing",
+      "description": "As they can execute programs on the same hardware, system users can interfere on the data or programs and even influence those, especially disruptive by resource overload. The technical possibilities depend on the functionality and configuration of the infrastructure and comprise simple attacks like access to parameters in process lists as well as technologically complex actions like side channel attacks."
+    },
+    "ADMINISTRATORS": {
+      "name": "Privilege abuse on processing",
+      "description": "Access at least to detailed meta-information like process environment, possibly complete memory contents and internal interfaces."
+    }
+  },
+  "COMMUNICATION_INFRASTRUCTURE": {
+    "UNAUTHORISED_PARTIES": {
+      "name": "Physical attack on transmission",
+      "description": "Similar to the other physical access described above this facilitates the unobstructed access to the transferred data in its raw form with the possibility to eavesdrop, manipulate, disturb or disrupt. Wireless communication is especially vulnerable in this regard."
+    },
+    "SYSTEM_USERS": {
+      "name": "Internal breach on transmission",
+      "description": "System users have comparably direct influence on common means of communication and might be able by that to penetrate the communication relations of the system (e.g. by diverting communications to their own endpoints) and thereby read or manipulate data or block communication (e.g. again by resource overload)."
+    },
+    "ADMINISTRATORS": {
+      "name": "Privilege abuse on transmission",
+      "description": "Access to transferred contents in their raw form."
+    }
+  },
+  "COMMUNICATION_INTERFACES": {
+    "UNAUTHORISED_PARTIES": {
+      "name": "Physical interface attack",
+      "description": "Without additional measures systems process any data which is input to their communication interfaces. Unauthorised parties can use physically accessible interfaces (esp. wireless) to disclose or manipulate data or to case errors in the system by triggering some malfunction."
+    },
+    "SYSTEM_USERS": {
+      "name": "Breach via interface access",
+      "description": "Without additional measures systems process any data which is input to their communication interfaces. Users of shared media can use this to effect disclosure or manipulation of data or errors in the system by triggering some malfunction."
+    },
+    "APPLICATION_USERS": {
+      "name": "Detrimental interface usage",
+      "description": "Components of a system, esp. across trust boundaries, can abuse privileges or trigger malfunctions by sending detrimental messages across legitimate communication paths. Mostly, this is not due to a direct action of a human user but due to a system component acting on behalf of a user (often represented by a technical user)."
+    }
+  },
+  "USER_INTERFACE": {
+    "UNAUTHORISED_PARTIES": {
+      "name": "Physical UI access",
+      "description": "Comparable to communication interfaces this allows interaction with the system with the same results of disclosure or manipulation of data and malfunction. Passive physical attacks like (acoustic) eavesdropping and shoulder surfing also belong here."
+    },
+    "APPLICATION_USERS": {
+      "name": "Detrimental UI usage",
+      "description": "As a matter of principle, application users are authorised to use the application and within the limits of their authorisation can do this abusively. By using existing malfunctions including wrong or missing checks they can also conduct unauthorised actions. Popular triggers for malfunctions are - similar to the case of communication interfaces - input outside the expected range."
+    }
+  },
+  "USER_BEHAVIOUR": {
+    "UNAUTHORISED_PARTIES": {
+      "name": "Deception",
+      "description": "Unauthorised parties trick users into triggering actions they actually don't want to have executed. To achieve this they interact directly or by technical means (e.g. by simultaneously executed rograms) with the user. Usually users are mislead about the action or are not aware of the fact that it is forbidden. Typical examples are Phising and other approaches of Social Engineering as well as technical attacks like malware, CSRF, Click-Jacking or drive-by-downloads. Please note that this kinds of attack can have impact not only on the attacked system but on its surroundings and infrastructure."
+    }
+  }
+}

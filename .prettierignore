@@ -1,0 +1,20 @@
+# Ignore artifacts:
+# Dependencies
+.pnpm-store
+node_modules
+pnpm-lock.yaml
+
+# Testing
+.tmp
+tmp
+coverage
+playwright-report
+test-results
+
+# Turbo
+.turbo
+
+# Build Outputs
+.vite
+build
+dist

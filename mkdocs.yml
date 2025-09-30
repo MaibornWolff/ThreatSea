@@ -1,0 +1,12 @@
+site_name: ThreatSea
+docs_dir: gh-pages
+nav:
+  - Home: README.md
+  - User Manual: User Manual.md
+  - Technical Documentation:
+      - Architectural Decision Record: Technical Documentation\Architectural Decision Record.md
+  - Developer Setup: Developer Setup.md
+theme:
+  name: material
+  palette:
+    - scheme: slate

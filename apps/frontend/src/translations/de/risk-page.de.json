@@ -1,0 +1,6 @@
+{
+  "unapplyMeasure": "Auswirkung entfernen",
+  "measureImpactDeleteMessage": "Sind Sie sicher, dass Sie die Maßnahme '{{measureName}}' nicht länger auf die Bedrohung '{{threatName}}' anwenden möchten?",
+  "delete": "Maßnahme löschen",
+  "probability": "EW"
+}

@@ -1,0 +1,12 @@
+{
+  "editMember": "Edit Member",
+  "addMember": "Add Member",
+  "addProject": "Add Member",
+  "editProject": "Edit Member",
+  "title": "Add Member",
+  "userRoles": {
+    "OWNER": "Owner",
+    "EDITOR": "Editor",
+    "VIEWER": "Viewer"
+  }
+}

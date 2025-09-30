@@ -1,0 +1,16 @@
+{
+  "addMeasureImpact": "Auswirkung hinzufügen",
+  "editMeasureImpact": "Auswirkung bearbeiten",
+  "deleteMeasureImpact": "Auswirkung Löschen",
+  "noImpact": "keine Auswirkung",
+  "component": "Komponente",
+  "netProbability": "Netto EW",
+  "netDamage": "Netto Schaden",
+  "measureThreatDeleteMessage": "Sind Sie sicher, dass Sie die Maßnahme '{{measureName}}' nicht länger auf die Bedrohung '{{threatName}}' anwenden möchten?",
+  "noThreatsFound": "Noch auf keine Bedrohung angewendet",
+  "setsOutOfScope": "Out of Scope gesetzt",
+  "tab": {
+    "threats": "Bedrohungen",
+    "measure": "Maßnahme"
+  }
+}

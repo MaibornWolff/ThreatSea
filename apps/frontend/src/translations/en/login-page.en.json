@@ -1,0 +1,9 @@
+{
+  "signin": "Sign in",
+  "pw": "Password",
+  "remember": "Remember me",
+  "login": "with Microsoft",
+  "testUserPrivileged": "with Privileged Test User",
+  "testUserUnprivileged": "with Non-Privileged Test User",
+  "invalidtoken": "Token is not valid"
+}

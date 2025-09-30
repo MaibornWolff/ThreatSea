@@ -1,0 +1,21 @@
+{
+  "attackersHeading": "Attacker",
+  "pointsOfAttackHeading": "Points of Attack",
+  "threatsHeading": "Threats",
+  "measuresHeading": "Measures",
+  "addThreat": "Add Threat",
+  "noThreatFound": "Threat not found",
+  "noMeasureFound": "Measure not found",
+  "catalogThreats": {
+    "deleteMessage": "Do you really want to delete the catalog threat '{{name}}'?"
+  },
+  "catalogMeasures": {
+    "deleteMessage": "Do you really want to delete the catalog measure '{{name}}'?"
+  },
+  "exportData": "Export",
+  "importData": "Import",
+  "exportThreats": "Export Threats",
+  "importThreats": "Import Threats",
+  "exportMeasures": "Export Measures",
+  "importMeasures": "Import Measures"
+}

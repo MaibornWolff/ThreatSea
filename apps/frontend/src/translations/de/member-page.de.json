@@ -1,0 +1,10 @@
+{
+  "participant": "Teilnehmer",
+  "addMemberBtn": "Teilnehmer hinzufügen",
+  "deleteMember": "Teilnehmer entfernen",
+  "userRoles": {
+    "OWNER": "Besitz",
+    "EDITOR": "Bearbeiten",
+    "VIEWER": "Beobachten"
+  }
+}

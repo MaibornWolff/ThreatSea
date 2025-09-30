@@ -1,0 +1,187 @@
+{
+  "justification": "Begründung",
+  "confidentialityJustification": "Begründung für Vertraulichkeit",
+  "integrityJustification": "Begründung für Integrität",
+  "availabilityJustification": "Begründung für Verfügbarkeit",
+  "activeTooltip": "Aktive Maßnahme",
+  "addMeasure": "Maßnahme hinzufügen",
+  "addMeasureBtn": "Maßnahme hinzufügen",
+  "applyMeasure": "Maßnahme anwenden für:",
+  "copy": "Maßnahme duplizieren",
+  "deleteMeasureText": "Wollen Sie wirklich die Maßnahme '{{ measureName }}' löschen?",
+  "editMeasure": "Maßnahme bearbeiten",
+  "measure": "Maßnahme",
+  "measures": "Maßnahmen",
+  "scheduledTooltip": "Geplante Maßnahme",
+  "reset": "Maßnahme zurücksetzen",
+  "resetMeasureText": "Wollen Sie wirklich die Maßnahme '{{ measureName }}' zurücksetzen?",
+
+  "addAsset": "Asset hinzufügen",
+  "assets": "Assets",
+  "editAsset": "Asset bearbeiten",
+
+  "addThreatBtn": "Bedrohung hinzufügen",
+  "editThreat": "Bedrohung bearbeiten",
+  "threat": "Bedrohung",
+  "threats": "Bedrohungen",
+
+  "A": "Verfügbarkeit",
+  "availability": "Verfügbarkeit",
+  "C": "Vertraulichkeit",
+  "confidentiality": "Vertraulichkeit",
+  "I": "Integrität",
+  "integrity": "Integrität",
+
+  "unknown": "Unbekannt",
+
+  "attacker": "Angreifer",
+  "catalogs": "Kataloge",
+  "componentName": "Komponente",
+  "creationDate": "Datum",
+  "damage": "Schaden",
+  "damageAxis": "Schaden",
+  "description": "Beschreibung",
+  "done": "Erledigt",
+  "email": "Email Adresse",
+  "fullExport": "Export der Assets, Bedrohungen und Maßnahmen",
+  "heading": "Risiko Zeitstrahl",
+  "language": "Sprache",
+  "lineOfTolerance.title": "Toleranzgrenze",
+  "name": "Name",
+  "notScheduledYet": "Noch nicht terminiert",
+  "open": "Offen",
+  "participants": "Teilnehmer",
+  "pointOfAttack": "Angriffspunkt",
+  "probability": "Eintrittswahrscheinlichkeit",
+  "probabilityAxis": "Eintrittswahrscheinlichkeit",
+  "report": "Report",
+  "risk": "Risiko",
+  "role": "Rolle",
+  "scheduledAt": "Geplant für",
+  "system": "System",
+  "title": "Titel",
+
+  "addBtn": "Hinzufügen",
+  "cancel": "Abbrechen",
+  "cancelBtn": "Abbrechen",
+  "cancelText": "Abbrechen",
+  "delete": "Löschen",
+  "deleteBtn": "Löschen",
+  "deleteText": "Löschen",
+  "duplicateName": "Kopie von {{ name }}",
+  "editProject": "Projekt bearbeiten",
+  "edit": "Bearbeiten",
+  "resetText": "Zurücksetzen",
+  "saveBtn": "Speichern",
+
+  "attackerList": {
+    "ADMINISTRATORS": "Administratoren",
+    "APPLICATION_USERS": "Anwendungsbenutzer",
+    "SYSTEM_USERS": "Systembenutzer",
+    "UNAUTHORISED_PARTIES": "Dritte"
+  },
+
+  "confidentialityLevels": {
+    "PUBLIC": "öffentlich",
+    "INTERNAL": "intern",
+    "CONFIDENTIAL": "vertraulich",
+    "HIGHLY_CONFIDENTIAL": "streng vertraulich"
+  },
+
+  "errorMessages": {
+    "availabilityMin": "Verfügbarkeitswert muss 1 oder größer sein",
+    "availabilityMax": "Verfügbarkeitswert muss 5 oder kleiner sein",
+    "confidentialityMin": "Vertraulichkeitswert muss 1 oder größer sein",
+    "confidentialityMax": "Vertraulichkeitswert muss 5 oder kleiner sein",
+    "damageMin": "Schaden muss 1 oder größer sein",
+    "damageMax": "Schaden muss 5 oder kleiner sein",
+    "integrityMin": "Integritätswert muss 1 oder größer sein",
+    "integrityMax": "Integritätswert muss 5 oder kleiner sein",
+    "probabilityMin": "Eintrittswahrscheinlichkeit muss 1 oder größer sein",
+    "probabilityMax": "Eintrittswahrscheinlichkeit muss 5 oder kleiner sein",
+
+    "attakerRequired": "Angreifer erforderlich",
+    "availabilityValue": "Verfügbarkeitswert erforderlich",
+    "catalogRequired": "Katalog erforderlich",
+    "confidentialityValue": "Vertraulichkeitswert erforderlich",
+    "damageRequired": "Schaden erforderlich",
+    "dateRequired": "Datum erforderlich",
+    "emailRequired": "Email erforderlich",
+    "integrityValue": "Integritätswert erforderlich",
+    "measureRequired": "Maßnahme erforderlich",
+    "memberRequired": "Mitglied erforderlich",
+    "nameRequired": "Name erforderlich",
+    "nameTooLong": "Name darf max. 256 Zeichen lang sein",
+    "textTooLong": "Text darf max. 65535 Zeichen lang sein",
+    "pointOfAttackRequired": "Angriffspunkt erforderlich",
+    "probabilityRequired": "Eintrittswahrscheinlichkeit erforderlich",
+    "roleRequired": "Rolle erforderlich",
+    "threatRequired": "Bedrohung erforderlich",
+    "nameNotUnique": "Name ist schon vergeben",
+
+    "noConnectionFound": "Keine Verbindung für diese Komponente gefunden.",
+    "noCommunicationInterfaceFound": "Die ausgewählte Kommunikationsschnittstelle konnte nicht gefunden werden.",
+    "userConnectionInvalid": "Benutzer können sich nur mit Clients, Servern oder Datenbanken verbinden",
+    "componentToUserInvalid": "Nur Clients, Server oder Datenbanken können sich mit Benutzern verbinden",
+    "componentToCommunicationInfraInvalid": "Clients, Server und Datenbanken können sich nur über Kommunikationsschnittstellen mit der Kommunikationsinfrastruktur verbinden",
+    "communicationInfraToComponentInvalid": "Kommunikationsinfrastruktur kann sich nur über Kommunikationsschnittstellen mit Clients, Servern oder Datenbanken verbinden",
+    "invalidConnection": "Ungültige Verbindung"
+  },
+
+  "pointsOfAttackList": {
+    "COMMUNICATION_INFRASTRUCTURE": "Kommunikationsinfrastruktur",
+    "DATA_STORAGE_INFRASTRUCTURE": "Datenablagestruktur",
+    "PROCESSING_INFRASTRUCTURE": "Ausführungsinfrastruktur",
+
+    "COMMUNICATION_INTERFACE": "Kommunikationsschnittstelle",
+    "COMMUNICATION_INTERFACES": "Kommunikationsschnittstelle",
+    "USER_INTERFACE": "Benutzerschnittstelle",
+    "USER_BEHAVIOUR": "Benutzerverhalten"
+  },
+
+  "probabilities": {
+    "1": {
+      "name": "extrem unwahrscheinlich",
+      "description": "Die Bedrohung ist nur Angreifern auf dem Niveau eines Geheimdienstes zugänglich oder es müssen zahlreiche oder extrem unwahrscheinliche Ereignisse, die nicht vom Angreifer kontrolliert werden können, zusammentreffen."
+    },
+    "2": {
+      "name": "eher unwahrscheinlich",
+      "description": "Nur Angreifern mit viel Zeit und/oder Geld können die Bedrohung realisieren oder es müssen nicht vom Angreifer kontrollierbare, unwahrscheinliche Ereignisse eintreten."
+    },
+    "3": {
+      "name": "möglich",
+      "description": "Die Bedrohung kann nur von ernsthaften Angreifern mit erheblicher krimineller Energie und fundierten Kenntnissen realisiert werden."
+    },
+    "4": {
+      "name": "wahrscheinlich",
+      "description": "Außer Absicht benötigt ein Angreifer höchsten Kenntnisse, die er sich über eine Internet-Recherche leicht aneignen kann (Niveau \"Script Kiddies\")."
+    },
+    "5": {
+      "name": "nahezu sicher",
+      "description": "Die Bedrohung kann bereits unbeabsichtigt (z.B. bei der regulären Tätigkeit eines gutwilligen Benutzers) eintreten."
+    }
+  },
+
+  "damages": {
+    "1": {
+      "name": "sehr geringfügig",
+      "description": ""
+    },
+    "2": {
+      "name": "bemerkbar",
+      "description": "Kann leicht kompensiert werden (z.B. innerhalb der Organisation ohne ein dediziertes Projekt, ohne nennenswerte Einschränkungen bei anderen Aktivitäten, mit begrenztem finanziellen Aufwand, ...)"
+    },
+    "3": {
+      "name": "deutlich spürbar",
+      "description": "Kann nur mit Aufwand kompensiert werden (z.B. durch Verschiebung anderer Projekte, mit erheblichen finanziellen Mitteln oder Zeitaufwand, ...)"
+    },
+    "4": {
+      "name": "bedrohlich",
+      "description": "Für die Marktposition des Unternehmens"
+    },
+    "5": {
+      "name": "existenzbedrohend",
+      "description": "Für die Existenz des Unternehmens"
+    }
+  }
+}

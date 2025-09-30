@@ -1,0 +1,9 @@
+{
+  "editMember": "Teilnehmer editieren",
+  "addMember": "Teilnehmer hinzufügen",
+  "userRoles": {
+    "OWNER": "Besitz",
+    "EDITOR": "Bearbeiten",
+    "VIEWER": "Beobachten"
+  }
+}

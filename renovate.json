@@ -1,0 +1,13 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "baseBranches": ["next"],
+  "binarySource": "install",
+  "dependencyDashboard": false,
+  "dependencyDashboardApproval": false,
+  "labels": ["dependencies"],
+  "lockFileMaintenance": {
+    "enabled": true
+  },
+  "rebaseWhen": "behind-base-branch"
+}

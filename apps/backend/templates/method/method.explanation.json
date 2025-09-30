@@ -1,0 +1,118 @@
+{
+  "EXPLANATION_IDEA": {
+    "EN": "",
+    "DE": "Die 4x6 Methodik basiert darauf, jede erdenkliche Bedrohung für ein IT-System abstrahiert in eine Matrix aus vier Klassen von Angreifern und sechs Klassen von Angriffspunkten einordnen zu können."
+  },
+  "EXPLANATION_APPLICATION": {
+    "EN": "",
+    "DE": "Die Matrix ist zunächst unabhängig von konkreten Angriffstechniken oder Angriffszielen.Im Laufe einer Bedrohungsanalyse wird diese abstrahierte Matrix auf eine konkrete Systemarchitektur, die gemäß der obigen Vorgabe abstrahiert wurde, angewendet. Daraus werden unmittelbar konkrete Angriffsszenarien in einer überschaubaren, aber dennoch vollständigen Sicht entwickelt."
+  },
+  "ATTACKERS": {
+    "UNAUTHORISED_PARTIES": {
+      "EN": {
+        "name": "Unauthorised Parties",
+        "description": "Entities with no tie to and especially no authorisation on the system under consideration"
+      },
+      "DE": {
+        "name": "Dritte",
+        "description": "Einheiten, die keinerlei Bezug zu und insbesondere keine Rechte auf dem betrachteten System haben"
+      }
+    },
+    "SYSTEM_USERS": {
+      "EN": {
+        "name": "System Users",
+        "description": "Users being authorised to share use of resources with the application under consideration but not having authorisation on the application itself"
+      },
+      "DE": {
+        "name": "Systembenutzer",
+        "description": "Benutzer, die von der betrachteten Anwendung genutzte Ressourcen berechtigterweise mitbenutzen, ohne auf der Anwendung selbst Rechte zu haben"
+      }
+    },
+    "APPLICATION_USERS": {
+      "EN": {
+        "name": "Application Users",
+        "description": "Users being authorised to work with the application under consideration"
+      },
+      "DE": {
+        "name": "Anwendungsbenutzer",
+        "description": "Benutzer, die berechtigt mit der betrachteten Anwendung arbeiten"
+      }
+    },
+    "ADMINISTRATORS": {
+      "EN": {
+        "name": "Administrators",
+        "description": "Users with elevated privileges who manage the application (and possibly the infrastructure)"
+      },
+      "DE": {
+        "name": "Administratoren",
+        "description": "Benutzer, die der Anwendung zugrundeliegende Infrastrukturen mit entsprechenden erweiterten Berechtigungen verwalten"
+      }
+    }
+  },
+  "POINTS_OF_ATTACKS": {
+    "USER_INTERFACE": {
+      "EN": {
+        "name": "User Interface",
+        "description": ""
+      },
+      "DE": {
+        "name": "Benutzerschnittstelle",
+        "description": ""
+      }
+    },
+    "PROCESSING_INFRASTRUCTURE": {
+      "EN": {
+        "name": "Processing Infrastructure",
+        "description": ""
+      },
+      "DE": {
+        "name": "Ausführungsinfrastruktur",
+        "description": ""
+      }
+    },
+    "DATA_STORAGE_INFRASTRUCTURE": {
+      "EN": {
+        "name": "Data Storage Infrastructure",
+        "description": ""
+      },
+      "DE": {
+        "name": "Datenablagestruktur",
+        "description": "Orte, wo Daten physisch dauerhaft abgelegt werden - Festplatten, persistente Halbleiterspeicher, etc."
+      }
+    },
+    "COMMUNICATION_INFRASTRUCTURE": {
+      "EN": {
+        "name": "Communication Infrastructure",
+        "description": ""
+      },
+      "DE": {
+        "name": "Kommunikationsinfrastruktur",
+        "description": "Orte der Programmausführung - im Prinzip alles, was einen Prozessor und keine absolut unveränderliche Programmierung hat, z.B. auch Datenbankserver, wo die Abfragen verarbeitet werden"
+      }
+    },
+    "COMMUNICATION_INTERFACES": {
+      "EN": {
+        "name": "Communication Interfaces",
+        "description": ""
+      },
+      "DE": {
+        "name": "Kommunikationsschnittstelle",
+        "description": ""
+      }
+    },
+    "USER_BEHAVIOUR": {
+      "EN": {
+        "name": "User Behaviour",
+        "description": ""
+      },
+      "DE": {
+        "name": "Benutzerverhalten",
+        "description": ""
+      }
+    }
+  },
+  "SCALES": {
+    "PROBABILITY": {},
+    "DAMAGE": {}
+  }
+}

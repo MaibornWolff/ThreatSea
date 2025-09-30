@@ -1,0 +1,17 @@
+{
+  "threatList.sortBy.nameToggleBtn": "Name",
+  "threatList.sortBy.createdAtToggleBtn": "Datum",
+  "threatsFound": "Bedrohungen gefunden",
+  "newProbability": "Neue Eintrittswahrscheinlichkeit",
+  "newDamage": "Neuer Schaden",
+  "duplicateMessage": "Wollen Sie die Bedrohung '{{ threatName }}' wirklich duplizieren?",
+  "duplicate": "Duplizieren",
+  "duplicateThreat": "Bedrohung duplizieren",
+  "deleteThreat": "Bedrohung löschen",
+  "edited": "Bearbeitet",
+  "threatsLoading": "Bedrohungen werden geladen...",
+  "deleteMessage": "Wollen Sie die Bedrohung '{{ threatName }}' wirklich löschen?",
+  "probability": "EW",
+  "heading": "Bedrohungen",
+  "noThreatsFound": "Keine Bedrohungen gefunden"
+}

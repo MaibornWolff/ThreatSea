@@ -1,0 +1,10 @@
+{
+  "addAssetsBtn": "Asset hinzufügen",
+  "deleteAsset": "Asset löschen",
+  "assetsFound": "Assets",
+  "assetFound": "Asset",
+  "noAssetsFound": "Keine Assets vorhanden",
+  "assetsLoading": "Assets werden geladen...",
+  "assetDeleteMessage": "Sind Sie sicher, dass Sie das Asset '{{name}}' löschen möchten?",
+  "heading": "Assets"
+}
