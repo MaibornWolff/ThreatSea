@@ -25,6 +25,17 @@ export const azureConfig = {
     privilegedGroupId: process.env["THREATSEA_PRIVILEGED_GROUP_ID"],
 };
 
+export const oidcConfig = {
+    clientId: getEnvironmentVariable("APP_REGISTRATION_CLIENT_ID"),
+    clientSecret: getEnvironmentVariable("APP_REGISTRATION_CLIENT_SECRET"),
+    issuer: `https://login.microsoftonline.com/${process.env["AZURE_TENANT_ID"]}/v2.0`,
+    authorizationURL: `https://login.microsoftonline.com/${process.env["AZURE_TENANT_ID"]}/oauth2/v2.0/authorize`,
+    tokenURL: `https://login.microsoftonline.com/${process.env["AZURE_TENANT_ID"]}/oauth2/v2.0/token`,
+    userInfoURL: `https://graph.microsoft.com/oidc/userinfo`,
+    callbackURL: `${getEnvironmentVariable("ORIGIN_BACKEND")}/auth/redirect`,
+    scope: "openid profile email User.Read",
+};
+
 export const originConfig = {
     app: getEnvironmentVariable("ORIGIN_APP"),
     backend: `${getEnvironmentVariable("ORIGIN_BACKEND")}/api`,
@@ -77,7 +88,7 @@ export const sessionConfig: SessionOptions = {
         secure: true,
         path: "/",
         httpOnly: true,
-        sameSite: "strict",
+        sameSite: "lax",
         maxAge: 43200000,
     },
     secret: getEnvironmentVariable("EXPRESS_SESSION_SECRET"),
