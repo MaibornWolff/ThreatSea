@@ -30,7 +30,7 @@ RUN pnpm -r --filter "..../${FRONTEND_DIR}" run build
 
 
 # production environment with nginx webserver
-FROM nginxinc/nginx-unprivileged:stable-alpine@sha256:9a27cf44fdb3558922835695fdf4764628705b6caa3a2cdcd5953866a1678713
+FROM nginxinc/nginx-unprivileged:stable-alpine@sha256:6164b8701fa0acba010bb009a9c9b8317aeadb2ad50b212695a45a3746550cb6
 
 ARG FRONTEND_DIR=apps/frontend
 ARG API_URI
