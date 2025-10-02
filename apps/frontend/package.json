@@ -63,7 +63,7 @@
     "dotenv": "17.2.3",
     "eslint": "9.36.0",
     "jsdoc": "4.0.4",
-    "typescript": "5.9.2",
+    "typescript": "5.9.3",
     "vite": "7.1.7",
     "vite-plugin-svgr": "4.5.0",
     "vite-tsconfig-paths": "5.1.4"
