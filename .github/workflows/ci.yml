@@ -53,7 +53,7 @@ jobs:
     needs: build-backend
     services:
       postgres:
-        image: postgres:17.6-alpine
+        image: postgres:18.0-alpine
         env:
           POSTGRES_DB: threatsea
           POSTGRES_USER: user
