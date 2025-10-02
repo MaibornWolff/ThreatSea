@@ -28,7 +28,7 @@
     "cors": "2.8.5",
     "csrf-sync": "4.2.1",
     "dotenv": "17.2.3",
-    "drizzle-orm": "0.44.5",
+    "drizzle-orm": "0.44.6",
     "express": "5.1.0",
     "express-session": "1.18.2",
     "express-ws": "5.0.2",
