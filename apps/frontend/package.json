@@ -36,7 +36,7 @@
     "markdown-to-jsx": "7.7.13",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-hook-form": "7.63.0",
+    "react-hook-form": "7.64.0",
     "react-i18next": "16.0.0",
     "react-konva": "18.2.14",
     "react-reconciler": "0.32.0",
