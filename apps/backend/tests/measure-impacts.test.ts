@@ -130,7 +130,7 @@ const INVALID_MEASURE_IMPACT_DAMAGE_NULL: Omit<
 
 beforeAll(async () => {
     // Get CSRF token
-    const csrfRes = await request(app).get("/csrf-token"); // Replace with your actual path
+    const csrfRes = await request(app).get("/api/csrf-token"); // Replace with your actual path
     csrfToken = csrfRes.body.token;
 
     const setCookieHeader = csrfRes.headers["set-cookie"];
@@ -152,7 +152,7 @@ beforeEach(async () => {
     ).at(0);
     catalogId = catalog!.id;
 
-    const authRes = await request(app).get("/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
+    const authRes = await request(app).get("/api/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
     const userId = authRes.body.data.userId;
 
     await db.insert(usersCatalogs).values({
@@ -162,7 +162,7 @@ beforeEach(async () => {
     });
 
     const res = await request(app)
-        .post("/projects")
+        .post("/api/projects")
         .send({ ...VALID_PROJECT, catalogId })
         .set("Authorization", "Bearer fakeToken")
         .set("X-CSRF-TOKEN", csrfToken)
@@ -221,7 +221,7 @@ beforeEach(async () => {
 describe("get or create measure impacts", () => {
     it("should list all measure impacts", async () => {
         const res = await request(app)
-            .get(`/projects/${projectId}/system/measureImpacts`)
+            .get(`/api/projects/${projectId}/system/measureImpacts`)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(200);
@@ -229,7 +229,7 @@ describe("get or create measure impacts", () => {
 
     it("should create a measure impacts", async () => {
         const res = await request(app)
-            .post(`/projects/${projectId}/system/measureImpacts`)
+            .post(`/api/projects/${projectId}/system/measureImpacts`)
             .send({
                 ...VALID_MEASURE_IMPACT_1,
                 threatId,
@@ -250,7 +250,7 @@ describe("get or create measure impacts", () => {
 
     it("should not create a measure impacts (probability null)", async () => {
         const res = await request(app)
-            .post(`/projects/${projectId}/system/measureImpacts`)
+            .post(`/api/projects/${projectId}/system/measureImpacts`)
             .send({
                 ...INVALID_MEASURE_IMPACT_PROBABILITY_NULL,
                 threatId,
@@ -264,7 +264,7 @@ describe("get or create measure impacts", () => {
 
     it("should not create a measure impacts (damage null)", async () => {
         const res = await request(app)
-            .post(`/projects/${projectId}/system/measureImpacts`)
+            .post(`/api/projects/${projectId}/system/measureImpacts`)
             .send({
                 ...INVALID_MEASURE_IMPACT_DAMAGE_NULL,
                 threatId,
@@ -296,7 +296,7 @@ describe("get, delete or update a single measure Impact", () => {
 
     it("should get a single measure impact", async () => {
         const res = await request(app)
-            .get(`/projects/${projectId}/system/measureImpacts/${measureImpactId}`)
+            .get(`/api/projects/${projectId}/system/measureImpacts/${measureImpactId}`)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(200);
@@ -313,7 +313,7 @@ describe("get, delete or update a single measure Impact", () => {
     it("should not get a single measure impact (non exist)", async () => {
         const nonExistentMeasureImpactId = 999999;
         const res = await request(app)
-            .get(`/projects/${projectId}/system/measureImpacts/${nonExistentMeasureImpactId}`)
+            .get(`/api/projects/${projectId}/system/measureImpacts/${nonExistentMeasureImpactId}`)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(404);
@@ -321,7 +321,7 @@ describe("get, delete or update a single measure Impact", () => {
 
     it("should update a measure", async () => {
         const res = await request(app)
-            .put(`/projects/${projectId}/system/measureImpacts/${measureImpactId}`)
+            .put(`/api/projects/${projectId}/system/measureImpacts/${measureImpactId}`)
             .send({
                 ...VALID_MEASURE_IMPACT_2,
                 threatId,
@@ -342,7 +342,7 @@ describe("get, delete or update a single measure Impact", () => {
 
     it("should delete a measure", async () => {
         const res = await request(app)
-            .delete("/projects/" + projectId + "/system/measureImpacts/" + measureImpactId)
+            .delete("/api/projects/" + projectId + "/system/measureImpacts/" + measureImpactId)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(204);
@@ -354,7 +354,7 @@ describe("get, delete or update a single measure Impact", () => {
             .where(and(eq(measureImpacts.threatId, threatId), eq(measureImpacts.measureId, measureId)));
 
         const res = await request(app)
-            .delete("/projects/" + projectId + "/system/measureImpacts/" + measureImpactId)
+            .delete("/api/projects/" + projectId + "/system/measureImpacts/" + measureImpactId)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(404);
@@ -366,7 +366,7 @@ describe("measures impacts (invalid data)", () => {
     let measureImpactId: number;
     beforeEach(async () => {
         const res = await request(app)
-            .post("/projects")
+            .post("/api/projects")
             .send({ ...VALID_PROJECT, catalogId })
             .set("Authorization", "Bearer fakeToken")
             .set("X-CSRF-TOKEN", csrfToken)
@@ -388,7 +388,7 @@ describe("measures impacts (invalid data)", () => {
 
     it("should not get a single measure impact (invalid projectId)", async () => {
         const res = await request(app)
-            .get(`/projects/${otherProjectId}/system/measureImpacts/${measureImpactId}`)
+            .get(`/api/projects/${otherProjectId}/system/measureImpacts/${measureImpactId}`)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(400);
@@ -396,7 +396,7 @@ describe("measures impacts (invalid data)", () => {
 
     it("should not create a single measure impact(invalid projectId)", async () => {
         const res = await request(app)
-            .post(`/projects/${otherProjectId}/system/measureImpacts`)
+            .post(`/api/projects/${otherProjectId}/system/measureImpacts`)
             .send({
                 ...VALID_MEASURE_IMPACT_1,
                 threatId,
@@ -409,7 +409,7 @@ describe("measures impacts (invalid data)", () => {
 
     it("should not update a single measure impact (invalid projectId)", async () => {
         const res = await request(app)
-            .put(`/projects/${otherProjectId}/system/measureImpacts/${measureImpactId}`)
+            .put(`/api/projects/${otherProjectId}/system/measureImpacts/${measureImpactId}`)
             .send({
                 ...VALID_MEASURE_IMPACT_1,
                 threatId,
@@ -422,7 +422,7 @@ describe("measures impacts (invalid data)", () => {
 
     it("should not delete a single measure impact (invalid projectId)", async () => {
         const res = await request(app)
-            .delete("/projects/" + otherProjectId + "/system/measureImpacts/" + measureImpactId)
+            .delete("/api/projects/" + otherProjectId + "/system/measureImpacts/" + measureImpactId)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(400);

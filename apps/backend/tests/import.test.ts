@@ -18,7 +18,7 @@ let csrfToken: string;
 
 beforeAll(async () => {
     // Get CSRF token
-    const csrfRes = await request(app).get("/csrf-token"); // Replace with your actual path
+    const csrfRes = await request(app).get("/api/csrf-token"); // Replace with your actual path
     csrfToken = csrfRes.body.token;
 
     const setCookieHeader = csrfRes.headers["set-cookie"];
@@ -31,7 +31,7 @@ beforeAll(async () => {
 describe("import a project", () => {
     it("should import a simple project", async () => {
         const res = await request(app)
-            .post("/import")
+            .post("/api/import")
             .send({ ...VALID_TEST_PROJECT_SMALL })
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -40,7 +40,7 @@ describe("import a project", () => {
 
     it("should not import a simple project(wrong datamodelType)", async () => {
         const res = await request(app)
-            .post("/import")
+            .post("/api/import")
             .send({
                 ...INVALID_TEST_PROJECT_1,
             })
@@ -51,7 +51,7 @@ describe("import a project", () => {
 
     it("should import a bigger project", async () => {
         const res = await request(app)
-            .post("/import")
+            .post("/api/import")
             .send({ ...VALID_TEST_PROJECT })
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -60,7 +60,7 @@ describe("import a project", () => {
 
     it("should import a bigger project with a connection", async () => {
         const res = await request(app)
-            .post("/import")
+            .post("/api/import")
             .send({ ...VALID_TEST_PROJECT_1 })
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -74,7 +74,7 @@ describe("import a project", () => {
         });
 
         const res = await request(app)
-            .post("/import")
+            .post("/api/import")
             .send({ ...VALID_TEST_PROJECT })
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -86,7 +86,7 @@ describe("get report from imported project", () => {
     let projectId: number;
     beforeEach(async () => {
         const res = await request(app)
-            .post("/import")
+            .post("/api/import")
             .send({ ...VALID_TEST_PROJECT })
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -100,7 +100,7 @@ describe("get report from imported project", () => {
 
     it("should get a report from an imported project", async () => {
         const res = await request(app)
-            .get("/projects/" + projectId + "/report")
+            .get("/api/projects/" + projectId + "/report")
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(200);
@@ -108,7 +108,7 @@ describe("get report from imported project", () => {
 
     it("should get a export from an imported project", async () => {
         const res = await request(app)
-            .get("/export/" + projectId)
+            .get("/api/export/" + projectId)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(200);

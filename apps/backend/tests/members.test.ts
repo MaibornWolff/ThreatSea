@@ -25,7 +25,7 @@ let csrfToken: string;
 
 beforeAll(async () => {
     // Get CSRF token
-    const csrfRes = await request(app).get("/csrf-token"); // Replace with your actual path
+    const csrfRes = await request(app).get("/api/csrf-token"); // Replace with your actual path
     csrfToken = csrfRes.body.token;
 
     const setCookieHeader = csrfRes.headers["set-cookie"];
@@ -59,7 +59,7 @@ beforeEach(async () => {
     ).at(0);
     catalogId = catalog!.id;
 
-    const authRes = await request(app).get("/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
+    const authRes = await request(app).get("/api/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
     const userId = authRes.body.data.userId;
 
     await db.insert(usersCatalogs).values({
@@ -69,7 +69,7 @@ beforeEach(async () => {
     });
 
     const res = await request(app)
-        .post("/projects")
+        .post("/api/projects")
         .send({ ...VALID_PROJECT, catalogId })
         .set("Authorization", "Bearer fakeToken")
         .set("X-CSRF-TOKEN", csrfToken)
@@ -80,7 +80,7 @@ beforeEach(async () => {
 describe("get or add members", () => {
     it("should list all members of the project", async () => {
         const res = await request(app)
-            .get("/projects/" + projectId + "/members")
+            .get("/api/projects/" + projectId + "/members")
             .set("Authorization", "Bearer fakeToken")
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -90,7 +90,7 @@ describe("get or add members", () => {
 
     it("should list all addable members", async () => {
         const res = await request(app)
-            .get("/projects/" + projectId + "/members/addable")
+            .get("/api/projects/" + projectId + "/members/addable")
             .set("Authorization", "Bearer fakeToken")
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -100,7 +100,7 @@ describe("get or add members", () => {
 
     it("should add an addable member", async () => {
         const res = await request(app)
-            .post("/projects/" + projectId + `/members/${memberId}`)
+            .post("/api/projects/" + projectId + `/members/${memberId}`)
             .send({ role: "EDITOR" })
             .set("Authorization", "Bearer fakeToken")
             .set("X-CSRF-TOKEN", csrfToken)
@@ -120,7 +120,7 @@ describe("update and deletes members", () => {
 
     it("should update the role of a member", async () => {
         const res = await request(app)
-            .put("/projects/" + projectId + `/members/${memberId}`)
+            .put("/api/projects/" + projectId + `/members/${memberId}`)
             .send({ role: "VIEWER" })
             .set("Authorization", "Bearer fakeToken")
             .set("X-CSRF-TOKEN", csrfToken)
@@ -130,7 +130,7 @@ describe("update and deletes members", () => {
 
     it("should delete a member from the project", async () => {
         const res = await request(app)
-            .delete("/projects/" + projectId + `/members/${memberId}`)
+            .delete("/api/projects/" + projectId + `/members/${memberId}`)
             .set("Authorization", "Bearer fakeToken")
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -139,7 +139,7 @@ describe("update and deletes members", () => {
 
     it("should not add an addable member (user is already a member)", async () => {
         const res = await request(app)
-            .post("/projects/" + projectId + `/members/${memberId}`)
+            .post("/api/projects/" + projectId + `/members/${memberId}`)
             .send({ role: "OWNER" })
             .set("Authorization", "Bearer fakeToken")
             .set("X-CSRF-TOKEN", csrfToken)

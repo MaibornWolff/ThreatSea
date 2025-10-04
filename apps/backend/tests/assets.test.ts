@@ -92,7 +92,7 @@ let csrfToken: string;
 
 beforeAll(async () => {
     // Get CSRF token
-    const csrfRes = await request(app).get("/csrf-token"); // Replace with your actual path
+    const csrfRes = await request(app).get("/api/csrf-token"); // Replace with your actual path
     csrfToken = csrfRes.body.token;
 
     const setCookieHeader = csrfRes.headers["set-cookie"];
@@ -114,7 +114,7 @@ beforeEach(async () => {
     ).at(0);
     catalogId = catalog!.id;
 
-    const authRes = await request(app).get("/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
+    const authRes = await request(app).get("/api/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
     const userId = authRes.body.data.userId;
 
     await db.insert(usersCatalogs).values({
@@ -124,7 +124,7 @@ beforeEach(async () => {
     });
 
     const res = await request(app)
-        .post("/projects")
+        .post("/api/projects")
         .send({ ...VALID_PROJECT, catalogId })
         .set("Authorization", "Bearer fakeToken")
         .set("X-CSRF-TOKEN", csrfToken)
@@ -132,7 +132,7 @@ beforeEach(async () => {
     projectId = res.body.id;
 
     await request(app)
-        .post("/projects/" + projectId + "/assets")
+        .post("/api/projects/" + projectId + "/assets")
         .send({
             ...VALID_ASSET_3,
             projectId,
@@ -144,7 +144,7 @@ beforeEach(async () => {
 describe("get or create assets", () => {
     it("should list all assets", async () => {
         const res = await request(app)
-            .get("/projects/" + projectId + "/assets")
+            .get("/api/projects/" + projectId + "/assets")
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(200);
@@ -153,7 +153,7 @@ describe("get or create assets", () => {
 
     it("should create a new asset", async () => {
         const res = await request(app)
-            .post("/projects/" + projectId + "/assets")
+            .post("/api/projects/" + projectId + "/assets")
             .send({
                 ...VALID_ASSET_1,
                 projectId,
@@ -171,7 +171,7 @@ describe("get or create assets", () => {
             integrity: VALID_ASSET_1.integrity,
         };
         const res = await request(app)
-            .post("/projects/" + projectId + "/assets")
+            .post("/api/projects/" + projectId + "/assets")
             .send(invalidAsset)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -181,7 +181,7 @@ describe("get or create assets", () => {
 
     it("should not create a new asset (name not unique)", async () => {
         const res = await request(app)
-            .post("/projects/" + projectId + "/assets")
+            .post("/api/projects/" + projectId + "/assets")
             .send(VALID_ASSET_3)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -190,7 +190,7 @@ describe("get or create assets", () => {
 
     it("should not create a new asset (confidentiality > 5)", async () => {
         const res = await request(app)
-            .post("/projects/" + projectId + "/assets")
+            .post("/api/projects/" + projectId + "/assets")
             .send(CONFIDENTIALITY_TOO_BIG_ASSET)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -200,7 +200,7 @@ describe("get or create assets", () => {
 
     it("should not create a new asset (integrity < 1)", async () => {
         const res = await request(app)
-            .post("/projects/" + projectId + "/assets")
+            .post("/api/projects/" + projectId + "/assets")
             .send(INTEGRITY_TOO_LOW_ASSET)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -210,7 +210,7 @@ describe("get or create assets", () => {
 
     it("should not create a new asset (name too long)", async () => {
         const res = await request(app)
-            .post("/projects/" + projectId + "/assets")
+            .post("/api/projects/" + projectId + "/assets")
             .send(NAME_TOO_LONG_ASSET)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -236,7 +236,7 @@ describe("delete or update assets", () => {
 
     it("should update an asset", async () => {
         const res = await request(app)
-            .put("/projects/" + projectId + "/assets/" + assetId)
+            .put("/api/projects/" + projectId + "/assets/" + assetId)
             .send(VALID_ASSET_2)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -253,7 +253,7 @@ describe("delete or update assets", () => {
 
     it("should delete an asset", async () => {
         const res = await request(app)
-            .delete("/projects/" + projectId + "/assets/" + assetId)
+            .delete("/api/projects/" + projectId + "/assets/" + assetId)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(204);
@@ -265,7 +265,7 @@ describe("delete or update assets(invalid data)", () => {
     let assetId: number;
     beforeEach(async () => {
         const res = await request(app)
-            .post("/projects")
+            .post("/api/projects")
             .send({ ...VALID_PROJECT, catalogId })
             .set("Authorization", "Bearer fakeToken")
             .set("X-CSRF-TOKEN", csrfToken)
@@ -286,7 +286,7 @@ describe("delete or update assets(invalid data)", () => {
 
     it("should not update an asset (invalid projectId)", async () => {
         const res = await request(app)
-            .put("/projects/" + otherProjectId + "/assets/" + assetId)
+            .put("/api/projects/" + otherProjectId + "/assets/" + assetId)
             .send({
                 name: "Asset 2",
                 description: "Description 2",
@@ -298,7 +298,7 @@ describe("delete or update assets(invalid data)", () => {
 
     it("should delete an asset (invalid projectId)", async () => {
         const res = await request(app)
-            .delete("/projects/" + otherProjectId + "/assets/" + assetId)
+            .delete("/api/projects/" + otherProjectId + "/assets/" + assetId)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(400);

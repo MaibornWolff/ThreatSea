@@ -14,26 +14,26 @@ services:
     security_opt:
       - no-new-privileges:true
     volumes:
-      - postgresdb_data:/var/lib/postgresql/data
+      - threatsea_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     networks:
       - threatsea
 
-  threatsea-backend:
+  threatsea:
     restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
     build:
-      context: ../..
-      dockerfile: "./apps/backend/Dockerfile"
+      context: .
+      dockerfile: "./Dockerfile"
     environment:
       JWT_SECRET: somerandomstringtobeusedasJWTsecret
       EXPRESS_SESSION_SECRET: someRandomExpressSessionSecret
       PASSPORT_STRATEGY: fixed
-      ORIGIN_APP: http://localhost:3000
-      ORIGIN_BACKEND: http://localhost:8000
+      ORIGIN_APP: http://127.0.0.1:8000
+      ORIGIN_BACKEND: http://127.0.0.1:8000
       LOG_LEVEL: 0
       DATABASE_HOST: postgres
       DATABASE_USER: threatsea
@@ -52,4 +52,4 @@ networks:
   threatsea:
 
 volumes:
-  postgresdb_data:
+  threatsea_data:

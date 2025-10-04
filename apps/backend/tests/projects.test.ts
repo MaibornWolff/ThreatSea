@@ -50,7 +50,7 @@ let csrfToken: string;
 
 beforeAll(async () => {
     // Get CSRF token
-    const csrfRes = await request(app).get("/csrf-token"); // Replace with your actual path
+    const csrfRes = await request(app).get("/api/csrf-token"); // Replace with your actual path
     csrfToken = csrfRes.body.token;
 
     const setCookieHeader = csrfRes.headers["set-cookie"];
@@ -75,7 +75,10 @@ describe("project tests", () => {
         ).at(0);
         catalogId = catalog!.id;
 
-        const authRes = await request(app).get("/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
+        const authRes = await request(app)
+            .get("/api/auth/status")
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
         const userId = authRes.body.data.userId;
 
         await db.insert(usersCatalogs).values({
@@ -87,14 +90,14 @@ describe("project tests", () => {
 
     describe("get or create projects", () => {
         it("should list all projects", async () => {
-            const res = await request(app).get("/projects").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
+            const res = await request(app).get("/api/projects").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
             expect(res.statusCode).toEqual(200);
             expect(Array.isArray(res.body)).toBe(true);
         });
 
         it("should not get a specific project (invalid projectId)", async () => {
             const res = await request(app)
-                .get("/projects/999999")
+                .get("/api/projects/999999")
                 .set("X-CSRF-TOKEN", csrfToken)
                 .set("Cookie", cookies);
             expect(res.statusCode).toEqual(404);
@@ -102,7 +105,7 @@ describe("project tests", () => {
 
         it("should create a new project", async () => {
             const res = await request(app)
-                .post("/projects")
+                .post("/api/projects")
                 .send({ ...VALID_PROJECT, catalogId })
                 .set("X-CSRF-TOKEN", csrfToken)
                 .set("Cookie", cookies);
@@ -112,7 +115,7 @@ describe("project tests", () => {
 
         it("should not create a new project (name missing)", async () => {
             const res = await request(app)
-                .post("/projects")
+                .post("/api/projects")
                 .send({ ...INVALID_PROJECT_NAME_MISSING, catalogId })
                 .set("X-CSRF-TOKEN", csrfToken)
                 .set("Cookie", cookies);
@@ -122,7 +125,7 @@ describe("project tests", () => {
 
         it("should not create a new project (name too long)", async () => {
             const res = await request(app)
-                .post("/projects")
+                .post("/api/projects")
                 .send({
                     ...INVALID_PROJECT_NAME_TOO_LONG,
                     catalogId,
@@ -137,7 +140,7 @@ describe("project tests", () => {
     describe("delete or update projects", () => {
         it("should list specific project", async () => {
             const res = await request(app)
-                .get("/projects/" + projectId)
+                .get("/api/projects/" + projectId)
                 .set("X-CSRF-TOKEN", csrfToken)
                 .set("Cookie", cookies);
             expect(res.statusCode).toEqual(200);
@@ -145,7 +148,7 @@ describe("project tests", () => {
 
         it("should generate a report of a specific project", async () => {
             const res = await request(app)
-                .get("/projects/" + projectId + "/report")
+                .get("/api/projects/" + projectId + "/report")
                 .set("X-CSRF-TOKEN", csrfToken)
                 .set("Cookie", cookies);
             expect(res.statusCode).toEqual(200);
@@ -153,7 +156,7 @@ describe("project tests", () => {
 
         it("should update a project", async () => {
             const res = await request(app)
-                .put("/projects/" + projectId)
+                .put("/api/projects/" + projectId)
                 .send(VALID_PROJECT_UPDATE)
                 .set("X-CSRF-TOKEN", csrfToken)
                 .set("Cookie", cookies);
@@ -167,7 +170,7 @@ describe("project tests", () => {
 
         it("should not update a project (invalid lines of tolerance ratio)", async () => {
             const res = await request(app)
-                .put("/projects/" + projectId)
+                .put("/api/projects/" + projectId)
                 .send(INVALID_PROJECT_UPDATE_LOT_RATIO)
                 .set("X-CSRF-TOKEN", csrfToken)
                 .set("Cookie", cookies);
@@ -177,7 +180,7 @@ describe("project tests", () => {
 
         it("should delete a project", async () => {
             const res = await request(app)
-                .delete("/projects/" + projectId)
+                .delete("/api/projects/" + projectId)
                 .set("X-CSRF-TOKEN", csrfToken)
                 .set("Cookie", cookies);
             expect(res.statusCode).toEqual(204);

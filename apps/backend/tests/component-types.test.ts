@@ -51,7 +51,7 @@ let csrfToken: string;
 
 beforeAll(async () => {
     // Get CSRF token
-    const csrfRes = await request(app).get("/csrf-token"); // Replace with your actual path
+    const csrfRes = await request(app).get("/api/csrf-token"); // Replace with your actual path
     csrfToken = csrfRes.body.token;
 
     const setCookieHeader = csrfRes.headers["set-cookie"];
@@ -73,7 +73,7 @@ beforeEach(async () => {
     ).at(0);
     catalogId = catalog!.id;
 
-    const authRes = await request(app).get("/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
+    const authRes = await request(app).get("/api/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
     const userId = authRes.body.data.userId;
 
     await db.insert(usersCatalogs).values({
@@ -83,7 +83,7 @@ beforeEach(async () => {
     });
 
     const res = await request(app)
-        .post("/projects")
+        .post("/api/projects")
         .send({ ...VALID_PROJECT, catalogId })
         .set("Authorization", "Bearer fakeToken")
         .set("X-CSRF-TOKEN", csrfToken)
@@ -91,7 +91,7 @@ beforeEach(async () => {
     projectId = res.body.id;
 
     await request(app)
-        .post("/projects/" + projectId + "/componentTypes")
+        .post("/api/projects/" + projectId + "/componentTypes")
         .send(VALID_COMPONENT_TYPE_3)
         .set("Authorization", "Bearer fakeToken")
         .set("X-CSRF-TOKEN", csrfToken)
@@ -101,7 +101,7 @@ beforeEach(async () => {
 describe("get or create component-types", () => {
     it("should list all component-types", async () => {
         const res = await request(app)
-            .get("/projects/" + projectId + "/componentTypes")
+            .get("/api/projects/" + projectId + "/componentTypes")
             .set("Authorization", "Bearer fakeToken")
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -111,7 +111,7 @@ describe("get or create component-types", () => {
 
     it("should create a component-types", async () => {
         const res = await request(app)
-            .post("/projects/" + projectId + "/componentTypes")
+            .post("/api/projects/" + projectId + "/componentTypes")
             .send(VALID_COMPONENT_TYPE)
             .set("Authorization", "Bearer fakeToken")
             .set("X-CSRF-TOKEN", csrfToken)
@@ -121,7 +121,7 @@ describe("get or create component-types", () => {
 
     it("should still create a component-types(no symbol)", async () => {
         const res = await request(app)
-            .post("/projects/" + projectId + "/componentTypes")
+            .post("/api/projects/" + projectId + "/componentTypes")
             .send(VALID_COMPONENT_TYPE_NO_SYMBOL)
             .set("Authorization", "Bearer fakeToken")
             .set("X-CSRF-TOKEN", csrfToken)
@@ -131,7 +131,7 @@ describe("get or create component-types", () => {
 
     it("should not create a component-types (name not unique)", async () => {
         const res = await request(app)
-            .post("/projects/" + projectId + "/componentTypes")
+            .post("/api/projects/" + projectId + "/componentTypes")
             .send(VALID_COMPONENT_TYPE_3)
             .set("Authorization", "Bearer fakeToken")
             .set("X-CSRF-TOKEN", csrfToken)
@@ -157,7 +157,7 @@ describe("updates or deletes component-Type", () => {
 
     it("should update the component-type", async () => {
         const res = await request(app)
-            .put("/projects/" + projectId + "/componentTypes/" + componentTypeId)
+            .put("/api/projects/" + projectId + "/componentTypes/" + componentTypeId)
             .send(VALID_COMPONENT_TYPE_2)
             .set("Authorization", "Bearer fakeToken")
             .set("X-CSRF-TOKEN", csrfToken)
@@ -171,7 +171,7 @@ describe("updates or deletes component-Type", () => {
 
     it("should delete the component-type", async () => {
         const res = await request(app)
-            .delete("/projects/" + projectId + "/componentTypes/" + componentTypeId)
+            .delete("/api/projects/" + projectId + "/componentTypes/" + componentTypeId)
             .set("Authorization", "Bearer fakeToken")
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);

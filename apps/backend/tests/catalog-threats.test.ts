@@ -87,7 +87,7 @@ let csrfToken: string;
 
 beforeAll(async () => {
     // Get CSRF token
-    const csrfRes = await request(app).get("/csrf-token"); // Replace with your actual path
+    const csrfRes = await request(app).get("/api/csrf-token"); // Replace with your actual path
     csrfToken = csrfRes.body.token;
 
     const setCookieHeader = csrfRes.headers["set-cookie"];
@@ -109,7 +109,7 @@ beforeEach(async () => {
     ).at(0)!;
     catalogId = catalog.id;
 
-    const authRes = await request(app).get("/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
+    const authRes = await request(app).get("/api/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
     const userId = authRes.body.data.userId;
 
     await db.insert(usersCatalogs).values({
@@ -122,7 +122,7 @@ beforeEach(async () => {
 describe("get or create catalog threats", () => {
     it("should list all catalog threats", async () => {
         const res = await request(app)
-            .get("/catalogs/" + catalogId + "/threats")
+            .get("/api/catalogs/" + catalogId + "/threats")
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(200);
@@ -131,7 +131,7 @@ describe("get or create catalog threats", () => {
 
     it("should create a new catalog threat", async () => {
         const res = await request(app)
-            .post("/catalogs/" + catalogId + "/threats")
+            .post("/api/catalogs/" + catalogId + "/threats")
             .send(VALID_CATALOG_THREAT_1)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -147,7 +147,7 @@ describe("get or create catalog threats", () => {
 
     it("should not create a new catalog threat (name missing)", async () => {
         const res = await request(app)
-            .post("/catalogs/" + catalogId + "/threats")
+            .post("/api/catalogs/" + catalogId + "/threats")
             .send(CATALOG_THREAT_NAME_MISSING)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -157,7 +157,7 @@ describe("get or create catalog threats", () => {
 
     it("should not create a new catalog threat (attacker missing)", async () => {
         const res = await request(app)
-            .post("/catalogs/" + catalogId + "/threats")
+            .post("/api/catalogs/" + catalogId + "/threats")
             .send(CATALOG_THREAT_ATTACKER_MISSING)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -167,7 +167,7 @@ describe("get or create catalog threats", () => {
 
     it("should not create a new catalog threat (point of attack missing)", async () => {
         const res = await request(app)
-            .post("/catalogs/" + catalogId + "/threats")
+            .post("/api/catalogs/" + catalogId + "/threats")
             .send(CATALOG_THREAT_POA_MISSING)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -177,7 +177,7 @@ describe("get or create catalog threats", () => {
 
     it("should not create a new catalog threat (probability missing)", async () => {
         const res = await request(app)
-            .post("/catalogs/" + catalogId + "/threats")
+            .post("/api/catalogs/" + catalogId + "/threats")
             .send(CATALOG_THREAT_PROBABILITY_MISSING)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -203,7 +203,7 @@ describe("delete or update catalog threats", () => {
 
     it("should update a catalog threat", async () => {
         const res = await request(app)
-            .put("/catalogs/" + catalogId + "/threats/" + catalogThreatId)
+            .put("/api/catalogs/" + catalogId + "/threats/" + catalogThreatId)
             .send(VALID_CATALOG_THREAT_2)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -219,7 +219,7 @@ describe("delete or update catalog threats", () => {
 
     it("should delete a catalog threat", async () => {
         const res = await request(app)
-            .delete("/catalogs/" + catalogId + "/threats/" + catalogThreatId)
+            .delete("/api/catalogs/" + catalogId + "/threats/" + catalogThreatId)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(204);
@@ -231,7 +231,7 @@ describe("delete or update catalog threats (invalid data)", () => {
     let catalogThreatId: number;
     beforeEach(async () => {
         const res = await request(app)
-            .post("/catalogs")
+            .post("/api/catalogs")
             .send(VALID_CATALOG_1)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -251,7 +251,7 @@ describe("delete or update catalog threats (invalid data)", () => {
 
     it("should not update a catalog threat(invalid catalogId)", async () => {
         const res = await request(app)
-            .put("/catalogs/" + otherCatalogId + "/threats/" + catalogThreatId)
+            .put("/api/catalogs/" + otherCatalogId + "/threats/" + catalogThreatId)
             .send(CATALOG_THREAT_NAME_MISSING)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -260,7 +260,7 @@ describe("delete or update catalog threats (invalid data)", () => {
 
     it("should not delete a catalog threat(invalid catalogId)", async () => {
         const res = await request(app)
-            .delete("/catalogs/" + otherCatalogId + "/threats/" + catalogThreatId)
+            .delete("/api/catalogs/" + otherCatalogId + "/threats/" + catalogThreatId)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(400);
