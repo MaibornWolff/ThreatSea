@@ -1,6 +1,7 @@
 import { db, runMigrations } from "#db/index.js";
 import { CreateCatalog, users } from "#db/schema.js";
 import { createDefaultCatalog } from "#services/catalogs.service.js";
+import { LANGUAGES } from "#types/languages.type.ts";
 import * as fs from "node:fs/promises";
 
 export async function setup() {
@@ -21,7 +22,7 @@ export async function setup() {
 
     const catalogData: CreateCatalog = {
         name: "testCatalog",
-        language: "EN",
+        language: LANGUAGES.EN,
     };
 
     await createDefaultCatalog(catalogData, testUser.id);

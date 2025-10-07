@@ -558,7 +558,7 @@ let csrfToken: string;
 
 beforeAll(async () => {
     // Get CSRF token
-    const csrfRes = await request(app).get("/csrf-token"); // Replace with your actual path
+    const csrfRes = await request(app).get("/api/csrf-token"); // Replace with your actual path
     csrfToken = csrfRes.body.token;
 
     const setCookieHeader = csrfRes.headers["set-cookie"];
@@ -580,7 +580,7 @@ beforeEach(async () => {
     ).at(0);
     catalogId = catalog!.id;
 
-    const authRes = await request(app).get("/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
+    const authRes = await request(app).get("/api/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
     const userId = authRes.body.data.userId;
 
     await db.insert(usersCatalogs).values({
@@ -590,7 +590,7 @@ beforeEach(async () => {
     });
 
     const res = await request(app)
-        .post("/projects")
+        .post("/api/projects")
         .send({ ...VALID_PROJECT, catalogId })
         .set("X-CSRF-TOKEN", csrfToken)
         .set("Cookie", cookies);
@@ -599,7 +599,7 @@ beforeEach(async () => {
 
 it("should be a empty system", async () => {
     const res = await request(app)
-        .get(`/projects/${projectId}/system`)
+        .get(`/api/projects/${projectId}/system`)
         .set("X-CSRF-TOKEN", csrfToken)
         .set("Cookie", cookies);
     expect(res.statusCode).toEqual(200);
@@ -609,7 +609,7 @@ it("should be a empty system", async () => {
 
 it("should save a valid system", async () => {
     const res = await request(app)
-        .put(`/projects/${projectId}/system`)
+        .put(`/api/projects/${projectId}/system`)
         .send(VALID_SYSTEM)
         .set("X-CSRF-TOKEN", csrfToken)
         .set("Cookie", cookies);
@@ -623,7 +623,7 @@ it("should save a valid system", async () => {
 
 it("should update a system", async () => {
     const res = await request(app)
-        .put(`/projects/${projectId}/system`)
+        .put(`/api/projects/${projectId}/system`)
         .send(VALID_UPDATE_SYSTEM)
         .set("X-CSRF-TOKEN", csrfToken)
         .set("Cookie", cookies);

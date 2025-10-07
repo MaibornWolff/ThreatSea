@@ -27,7 +27,7 @@ export const azureConfig = {
 
 export const originConfig = {
     app: getEnvironmentVariable("ORIGIN_APP"),
-    backend: getEnvironmentVariable("ORIGIN_BACKEND"),
+    backend: `${getEnvironmentVariable("ORIGIN_BACKEND")}/api`,
 };
 
 export const databaseConfig: PoolConfig = {
@@ -52,6 +52,15 @@ export const helmetConfig: HelmetOptions = {
     },
     crossOriginResourcePolicy: {
         policy: "same-origin",
+    },
+    contentSecurityPolicy: {
+        directives: {
+            "default-src": ["'self'"],
+            "img-src": ["'self'", "data:"],
+            "script-src": ["'self'", "'wasm-unsafe-eval'"],
+            "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com/"],
+            "font-src": ["'self'", "https://fonts.gstatic.com/"],
+        },
     },
     strictTransportSecurity: {
         maxAge: 31536000,

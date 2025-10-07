@@ -97,7 +97,7 @@ let csrfToken: string;
 
 beforeAll(async () => {
     // Get CSRF token
-    const csrfRes = await request(app).get("/csrf-token"); // Replace with your actual path
+    const csrfRes = await request(app).get("/api/csrf-token"); // Replace with your actual path
     csrfToken = csrfRes.body.token;
 
     const setCookieHeader = csrfRes.headers["set-cookie"];
@@ -119,7 +119,7 @@ beforeEach(async () => {
     ).at(0)!;
     catalogId = catalog.id;
 
-    const authRes = await request(app).get("/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
+    const authRes = await request(app).get("/api/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
     const userId = authRes.body.data.userId;
 
     await db.insert(usersCatalogs).values({
@@ -129,7 +129,7 @@ beforeEach(async () => {
     });
 
     await request(app)
-        .post("/catalogs/" + catalogId + "/measures")
+        .post("/api/catalogs/" + catalogId + "/measures")
         .send(VALID_CATALOG_MEASURE_3)
         .set("X-CSRF-TOKEN", csrfToken)
         .set("Cookie", cookies);
@@ -138,7 +138,7 @@ beforeEach(async () => {
 describe("get or create catalog measures", () => {
     it("should get all catalog measure", async () => {
         const res = await request(app)
-            .get("/catalogs/" + catalogId + "/measures")
+            .get("/api/catalogs/" + catalogId + "/measures")
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(200);
@@ -146,7 +146,7 @@ describe("get or create catalog measures", () => {
 
     it("should create a new catalog measure", async () => {
         const res = await request(app)
-            .post("/catalogs/" + catalogId + "/measures")
+            .post("/api/catalogs/" + catalogId + "/measures")
             .send(VALID_CATALOG_MEASURE_1)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -163,7 +163,7 @@ describe("get or create catalog measures", () => {
 
     it("should not create a new catalog measure (name missing)", async () => {
         const res = await request(app)
-            .post("/catalogs/" + catalogId + "/measures")
+            .post("/api/catalogs/" + catalogId + "/measures")
             .send(CATALOG_MEASURE_NAME_MISSING)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -173,7 +173,7 @@ describe("get or create catalog measures", () => {
 
     it("should not create a new catalog measure (attacker missing)", async () => {
         const res = await request(app)
-            .post("/catalogs/" + catalogId + "/measures")
+            .post("/api/catalogs/" + catalogId + "/measures")
             .send(CATALOG_MEASURE_ATTACKER_MISSING)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -183,7 +183,7 @@ describe("get or create catalog measures", () => {
 
     it("should not create a new catalog measure (attacker missing)", async () => {
         const res = await request(app)
-            .post("/catalogs/" + catalogId + "/measures")
+            .post("/api/catalogs/" + catalogId + "/measures")
             .send(CATALOG_MEASURE_POA_MISSING)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -193,7 +193,7 @@ describe("get or create catalog measures", () => {
 
     it("should not create a new catalog measure (probability missing)", async () => {
         const res = await request(app)
-            .post("/catalogs/" + catalogId + "/measures")
+            .post("/api/catalogs/" + catalogId + "/measures")
             .send(CATALOG_MEASURE_PROBABILITY_MISSING)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -203,7 +203,7 @@ describe("get or create catalog measures", () => {
 
     it("should import a new catalog measure", async () => {
         const res = await request(app)
-            .post("/catalogs/" + catalogId + "/measures/import")
+            .post("/api/catalogs/" + catalogId + "/measures/import")
             .send([VALID_CATALOG_MEASURE_1])
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -228,7 +228,7 @@ describe("delete or update catalog measures", () => {
 
     it("should update a catalog measure", async () => {
         const res = await request(app)
-            .put("/catalogs/" + catalogId + "/measures/" + catalogThreatId)
+            .put("/api/catalogs/" + catalogId + "/measures/" + catalogThreatId)
             .send(VALID_CATALOG_MEASURE_2)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -244,7 +244,7 @@ describe("delete or update catalog measures", () => {
 
     it("should delete a catalog measure", async () => {
         const res = await request(app)
-            .delete("/catalogs/" + catalogId + "/measures/" + catalogThreatId)
+            .delete("/api/catalogs/" + catalogId + "/measures/" + catalogThreatId)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(204);
@@ -265,7 +265,10 @@ describe("delete or update catalog measures (invalid data)", () => {
         ).at(0);
         otherCatalogId = catalog!.id;
 
-        const authRes = await request(app).get("/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
+        const authRes = await request(app)
+            .get("/api/auth/status")
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
         const userId = authRes.body.data.userId;
 
         await db.insert(usersCatalogs).values({
@@ -288,7 +291,7 @@ describe("delete or update catalog measures (invalid data)", () => {
 
     it("should not update a catalog measure (invalid catalogId)", async () => {
         const res = await request(app)
-            .put("/catalogs/" + otherCatalogId + "/measures/" + catalogMeasureId)
+            .put("/api/catalogs/" + otherCatalogId + "/measures/" + catalogMeasureId)
             .send({ ...VALID_CATALOG_MEASURE_2 })
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
