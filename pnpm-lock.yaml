@@ -287,8 +287,8 @@ importers:
         specifier: 9.37.0
         version: 9.37.0
       jsdoc:
-        specifier: 4.0.4
-        version: 4.0.4
+        specifier: 4.0.5
+        version: 4.0.5
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -3039,8 +3039,8 @@ packages:
     resolution: {integrity: sha512-3hSD14nXx66Rspx1RMnz1Pj4JacrMBAsC0CrF9lZYO/Qsp5/oIr6KqujVUNhQu94B6mMip2ukki8MpEWZwyhKA==}
     engines: {node: '>=20.0.0'}
 
-  jsdoc@4.0.4:
-    resolution: {integrity: sha512-zeFezwyXeG4syyYHbvh1A967IAqq/67yXtXvuL5wnqCkFZe8I0vKfm+EO+YEvLguo6w9CDUbrAXVtJSHh2E8rw==}
+  jsdoc@4.0.5:
+    resolution: {integrity: sha512-P4C6MWP9yIlMiK8nwoZvxN84vb6MsnXcHuy7XzVOvQoCizWX5JFCBsWIIWKXBltpoRZXddUOVQmCTOZt9yDj9g==}
     engines: {node: '>=12.0.0'}
     hasBin: true
 
@@ -7483,7 +7483,7 @@ snapshots:
 
   jsdoc-type-pratt-parser@6.6.0: {}
 
-  jsdoc@4.0.4:
+  jsdoc@4.0.5:
     dependencies:
       '@babel/parser': 7.28.4
       '@jsdoc/salty': 0.2.9
