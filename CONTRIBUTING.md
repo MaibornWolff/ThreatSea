@@ -206,9 +206,14 @@ Guidelines:
 ## Documentation
 
 - Update or create documentation for new features or changes.
+- Document **every** decision in Github issues that you take during their realization. 
 - Ensure examples are accurate and minimal but representative.
+- Keep sentence structure short and simple.
+- Include illustrations like screenshots or add additional information like code snippets whenever helpful.
 - Update API references, if applicable.
 - Document any breaking changes and migration notes.
+- Whenever a feature adds/removes UI elements or changes a UI flow, update the [user manual](https://maibornwolff.github.io/ThreatSea/User%20Manual/).
+- Decisions that have an impact on several features or the whole architecture can be taken over into the [ADR](https://maibornwolff.github.io/ThreatSea/Technical%20Documentation/Architectural%20Decision%20Record.md). 
 
 ---
 
