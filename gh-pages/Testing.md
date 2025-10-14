@@ -6,7 +6,7 @@ The labels indicate on which environment or in which build stage the test method
 
 ## Linting
 <container style="background-color:rgba(35,60,87,.75);color:white;">
-  <strong>LOCAL BUILD</strong>
+  <strong>LOCAL_BUILD</strong>
 </container>  
 
 - We use linting to achieve a good and consistent code style.
@@ -15,7 +15,7 @@ The labels indicate on which environment or in which build stage the test method
 
 ## Unit Tests
 <container style="background-color:rgba(35,60,87,.75);color:white;">
-  <strong>LOCAL BUILD</strong>
+  <strong>LOCAL_BUILD</strong>
 </container>
 <container style="background-color:rgba(35,60,87,.75);color:white;">
   <strong>DEV</strong>
@@ -48,7 +48,7 @@ The labels indicate on which environment or in which build stage the test method
 
 ## E2E Tests
 <container style="background-color:rgba(35,60,87,.75);color:white;">
-  <strong>LOCAL BUILD</strong>
+  <strong>LOCAL_BUILD</strong>
 </container>
 <container style="background-color:rgba(35,60,87,.75);color:white;">
   <strong>STAGING</strong>
