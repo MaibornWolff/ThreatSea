@@ -2,7 +2,7 @@
 # Testing Strategy
 This page aims at providing a common understanding which test methods we are doing for which purpose and in which manner for ThreatSea.
 It also defines some relevant target KPIs in regards to testing. 
-The labels indicate on which environment or in which build stage the test method shall be applied. 
+MaibornWolff internally uses a three stage environment approach (dev, staging, prod) for which different kinds of tests are applied, indicated by the respective labels.
 
 ## Linting
 <container style="background-color:rgba(35,60,87,.75);color:white;">
