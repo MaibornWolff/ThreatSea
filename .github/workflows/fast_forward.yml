@@ -4,14 +4,11 @@ on:
   issue_comment:
     types: [created]
 
-permissions:
-  contents: write
-  pull-requests: write
-
 jobs:
   fast_forward_job:
     name: Fast Forward
     if: github.event.issue.pull_request != '' && contains(github.event.comment.body, '/fast-forward')
+    permissions: write-all
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

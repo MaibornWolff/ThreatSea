@@ -22,7 +22,7 @@ jobs:
         uses: octokit/graphql-action@8ad880e4d437783ea2ab17010324de1075228110 # v2.3.2
         with:
           query: |
-            query($cursor: String) {
+            query($projectId: String!, $cursor: String) {
               organization(login: "MaibornWolff") {
                 projectV2(number: $projectId) {
                   items(first: 100, after: $cursor) {
