@@ -1,0 +1,77 @@
+name: Label issues with 'will_do' based on Project status
+
+on:
+  schedule:
+    - cron: "0 2 * * *" # Läuft täglich um 02:00 UTC
+  workflow_dispatch: # Manuell startbar
+
+jobs:
+  label_will_do_issues:
+    runs-on: ubuntu-latest
+
+    permissions:
+      issues: write
+      contents: read
+
+    steps:
+      - name: Query project items from GitHub GraphQL API
+        id: query
+        uses: octokit/graphql-action@v2.x
+        with:
+          query: |
+            {
+              organization(login: "MaibornWolff") {
+                projectV2(number: 25) {
+                  items(first: 50) {
+                    nodes {
+                      id
+                      content {
+                        ... on Issue {
+                          id
+                          number
+                          title
+                          labels(first: 20) {
+                            nodes {
+                              name
+                            }
+                          }
+                        }
+                      }
+                      fieldValueByName(name: "Status") {
+                        ... on ProjectV2ItemFieldSingleSelectValue {
+                          name
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add label 'will_do' where missing
+        run: |
+          echo "🔍 Checking issues with 'Will do' status..."
+
+          issues=$(echo '${{ steps.query.outputs.data }}' | jq -c '.organization.projectV2.items.nodes[] | select(.fieldValueByName.name=="Will do") | .content')
+
+          if [ -z "$issues" ]; then
+            echo "No issues with 'Will do' status found."
+            exit 0
+          fi
+
+          echo "$issues" | while read -r issue; do
+            number=$(echo "$issue" | jq -r '.number')
+            title=$(echo "$issue" | jq -r '.title')
+            has_label=$(echo "$issue" | jq -r '.labels.nodes[]?.name' | grep -i '^will_do$' || true)
+
+            if [ -z "$has_label" ]; then
+              echo "🏷️  Adding label 'will_do' to issue #$number ($title)"
+              gh issue edit "$number" --add-label "will_do" --repo "MaibornWolff/ThreatSea"
+            else
+              echo "✅ Issue #$number already labeled 'will_do'"
+            fi
+          done
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
