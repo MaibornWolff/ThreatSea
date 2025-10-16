@@ -19,7 +19,7 @@ jobs:
 
       - name: Query all project items from GitHub GraphQL API
         id: query
-        uses: octokit/graphql-action@v2
+        uses: octokit/graphql-action@8ad880e4d437783ea2ab17010324de1075228110 # v2.3.2
         with:
           query: |
             query($cursor: String) {
@@ -57,7 +57,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.ORG_ACCESS_TOKEN }}
 
-      - name: Debug: Show project items and status values
+      - name: "Debug: Show project items and status values"
         run: |
           echo "Listing all issues with their current status:"
           echo "${{ steps.query.outputs.data }}" | jq -r '
