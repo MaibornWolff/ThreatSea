@@ -64,7 +64,7 @@ jobs:
           echo "Checking issues with 'Will do' status..."
 
           # Loop through all items and select only issues with status "Will do"
-          echo "${{ steps.query.outputs.data }}" | jq -c '
+          printf '%s' "${{ steps.query.outputs.data }}" | jq -c '
             .organization.projectV2.items.nodes[]
             | select(.content != null)
             | select(.fieldValueByName.name? | test("^Will do$"))
