@@ -48,7 +48,7 @@ jobs:
               }
             }
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ORG_ACCESS_TOKEN }}
 
       - name: Add label 'will_do' where missing
         run: |
@@ -74,4 +74,4 @@ jobs:
             fi
           done
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ORG_ACCESS_TOKEN }}
