@@ -2,8 +2,8 @@ name: Label issues with 'will_do' based on Project status
 
 on:
   schedule:
-    - cron: "0 2 * * *" # Läuft täglich um 02:00 UTC
-  workflow_dispatch: # Manuell startbar
+    - cron: "0 2 * * *" # Runs daily at 02:00 UTC
+  workflow_dispatch: # Can be started manually
 
 jobs:
   label_will_do_issues:
@@ -16,13 +16,13 @@ jobs:
     steps:
       - name: Query project items from GitHub GraphQL API
         id: query
-        uses: octokit/graphql-action@v2.x
+        uses: octokit/graphql-action@8ad880e4d437783ea2ab17010324de1075228110 # v2.3.2
         with:
           query: |
             {
               organization(login: "MaibornWolff") {
                 projectV2(number: 25) {
-                  items(first: 50) {
+                  items(first: 50) { # Number can be increased if required
                     nodes {
                       id
                       content {
@@ -52,7 +52,7 @@ jobs:
 
       - name: Add label 'will_do' where missing
         run: |
-          echo "🔍 Checking issues with 'Will do' status..."
+          echo "Checking issues with 'Will do' status..."
 
           issues=$(echo '${{ steps.query.outputs.data }}' | jq -c '.organization.projectV2.items.nodes[] | select(.fieldValueByName.name=="Will do") | .content')
 
@@ -67,10 +67,10 @@ jobs:
             has_label=$(echo "$issue" | jq -r '.labels.nodes[]?.name' | grep -i '^will_do$' || true)
 
             if [ -z "$has_label" ]; then
-              echo "🏷️  Adding label 'will_do' to issue #$number ($title)"
+              echo "Adding label 'will_do' to issue #$number ($title)"
               gh issue edit "$number" --add-label "will_do" --repo "MaibornWolff/ThreatSea"
             else
-              echo "✅ Issue #$number already labeled 'will_do'"
+              echo "Issue #$number already labeled 'will_do'"
             fi
           done
         env:
