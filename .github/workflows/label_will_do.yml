@@ -24,7 +24,7 @@ jobs:
           query: |
             query($cursor: String) {
               organization(login: "MaibornWolff") {
-                projectV2(number: 25) {
+                projectV2(number: $projectId) {
                   items(first: 100, after: $cursor) {
                     pageInfo {
                       hasNextPage
@@ -54,6 +54,8 @@ jobs:
                 }
               }
             }
+          variables: |
+            projectId: ${{ vars.COMMUNITY_REPORTS_ID }}
         env:
           GITHUB_TOKEN: ${{ secrets.ORG_ACCESS_TOKEN }}
 
