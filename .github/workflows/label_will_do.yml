@@ -59,15 +59,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.ORG_ACCESS_TOKEN }}
 
-      - name: "Debug: Show project items and status values"
-        run: |
-          echo "Listing all issues with their current status:"
-          echo "${{ steps.query.outputs.data }}" | jq -r '
-            .organization.projectV2.items.nodes[]
-            | select(.content != null)
-            | select(.content.__typename == "Issue")
-            | "Issue #" + (.content.number|tostring) + " | Title: " + .content.title + " | Status: " + (.fieldValueByName.name // "null")'
-
       - name: Add label 'will_do' where missing
         run: |
           echo "Checking issues with 'Will do' status..."
@@ -76,7 +67,6 @@ jobs:
           echo "${{ steps.query.outputs.data }}" | jq -c '
             .organization.projectV2.items.nodes[]
             | select(.content != null)
-            | select(.content.__typename == "Issue")
             | select(.fieldValueByName.name? | test("^Will do$"))
             | .content
           ' | while read -r issue; do
