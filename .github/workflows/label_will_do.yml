@@ -65,7 +65,7 @@ jobs:
             | select(.content != null)
             | select(.content.__typename == "Issue")
             | "Issue #" + (.content.number|tostring) + " | Title: " + .content.title + " | Status: " + (.fieldValueByName.name // "null")'
-          
+
       - name: Add label 'will_do' where missing
         run: |
           echo "Checking issues with 'Will do' status..."
