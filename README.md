@@ -5,6 +5,10 @@ It provides a comprehensive framework for identifying and analyzing potential th
 
 ## Getting started
 
+### Cloning
+
+This repository uses [Git LFS](https://git-lfs.com/). Please make sure that it is available on your machine before cloning the repository.
+
 ### Requirements
 
 - [node.js](https://nodejs.org/) installation (you can find the currently used version of node.js in the [.node-version](.node-version) file)
