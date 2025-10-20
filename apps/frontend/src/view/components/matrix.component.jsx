@@ -9,7 +9,14 @@ const probabilityAxis = [5, 4, 3, 2, 1];
 export const Matrix = ({ matrix, size = 120, onSelectCell }) => {
     const { t } = useTranslation("riskPage");
     return (
-        <Box display="flex" flexDirection="row" alignItems="stretch" sx={{ width: "auto" }}>
+        <Box
+            sx={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "stretch",
+                width: "auto",
+            }}
+        >
             <Typography
                 sx={{
                     display: "inline-block",
@@ -25,7 +32,13 @@ export const Matrix = ({ matrix, size = 120, onSelectCell }) => {
             >
                 {t("probabilityAxis")}
             </Typography>
-            <Box display="flex" flexDirection="column" alignItems="flex-start">
+            <Box
+                sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                }}
+            >
                 {matrix.map((row, i) => (
                     <Box
                         key={i}
@@ -157,11 +170,11 @@ const MatrixCell = ({ size, amount, color, selected, probability, damage, onClic
         >
             {amount && (
                 <Typography
-                    margin="0 auto"
-                    fontSize={fontSize}
-                    color={foregroundColor}
                     sx={{
                         fontWeight: "bold",
+                        margin: "0 auto",
+                        fontSize,
+                        color: foregroundColor,
                     }}
                 >
                     {amount}

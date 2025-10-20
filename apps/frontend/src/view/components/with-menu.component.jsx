@@ -146,14 +146,16 @@ export const CreatePage = (HeaderNavigation, PageBody, showAutoSave = false) => 
                 >
                     <Box
                         component="header"
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="space-between"
-                        paddingTop={1.5}
-                        paddingBottom={1.5}
-                        paddingLeft={6}
-                        paddingRight={6}
-                        sx={{ backgroundColor: "page.headerBackground" }}
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            paddingTop: 1.5,
+                            paddingBottom: 1.5,
+                            paddingLeft: 6,
+                            paddingRight: 6,
+                            backgroundColor: "page.headerBackground",
+                        }}
                     >
                         <Box
                             sx={{

@@ -298,7 +298,15 @@ const MemberPageBody = () => {
                     overflow: "hidden",
                 }}
             >
-                <Box display="flex" alignItems="center" justifyContent="space-between" paddingTop={1} paddingBottom={2}>
+                <Box
+                    sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        paddingTop: 1,
+                        paddingBottom: 2,
+                    }}
+                >
                     <Box sx={{ display: "flex", alignItems: "center" }}>
                         <SearchField data-testid="MemberSearch" onChange={onChangeSearchValue} />
                         {checkUserRole(userRole, USER_ROLES.OWNER) && (

@@ -202,11 +202,13 @@ const ThreatsPageBody = () => {
                     }}
                 >
                     <Box
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="space-between"
-                        paddingTop={1}
-                        paddingBottom={2}
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            paddingTop: 1,
+                            paddingBottom: 2,
+                        }}
                     >
                         <Box sx={{ display: "flex", alignItems: "center" }}>
                             <SearchField onChange={onChangeSearchValue} data-testid="ThreatSearch" />
@@ -454,7 +456,13 @@ const ThreatsPageBody = () => {
                                                             {threat.doneEditing ? <Check /> : <Clear />}
                                                         </CustomTableCell>
                                                         <CustomTableCell padding="none" align="right">
-                                                            <Box display="flex" paddingRight={2} paddingLeft={2}>
+                                                            <Box
+                                                                sx={{
+                                                                    display: "flex",
+                                                                    paddingRight: 2,
+                                                                    paddingLeft: 2,
+                                                                }}
+                                                            >
                                                                 {checkUserRole(userRole, USER_ROLES.EDITOR) && [
                                                                     <IconButton
                                                                         key={threat.id}
@@ -492,11 +500,13 @@ const ThreatsPageBody = () => {
                                 </Table>
                                 {threats.length === 0 && searchValue.length > 0 && (
                                     <Box
-                                        height="calc(100% - 59px)"
-                                        display="flex"
-                                        flexDirection="column"
-                                        alignItems="center"
-                                        justifyContent="center"
+                                        sx={{
+                                            height: "calc(100% - 59px)",
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                        }}
                                     >
                                         <Typography align="center" sx={{ p: 1 }}>
                                             {t("noThreatsFound")}

@@ -88,7 +88,12 @@ const CatalogPageBody = () => {
 
     return (
         <Page>
-            <Box display="flex" justifyContent="space-between">
+            <Box
+                sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                }}
+            >
                 <Box
                     sx={{
                         display: "flex",

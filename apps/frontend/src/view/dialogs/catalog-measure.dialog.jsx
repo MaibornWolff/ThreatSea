@@ -363,7 +363,12 @@ const CatalogMeasureDialog = ({ catalogMeasure, isNew, catalogId, ...props }) =>
                     helperText={errors?.probability?.message}
                     data-testid="catalog-measure-creation-modal_probability-input"
                 />
-                <Box display="flex" alignItems="center">
+                <Box
+                    sx={{
+                        display: "flex",
+                        alignItems: "center",
+                    }}
+                >
                     <FormGroup>
                         <FormControlLabel
                             control={

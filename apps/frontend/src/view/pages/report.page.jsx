@@ -198,7 +198,13 @@ const ReportPageBody = ({ project }) => {
     return (
         <Box>
             {<LinearProgress sx={{ visibility: data ? "hidden" : "visible" }} />}
-            <Page padding={0} paddingLeft={6} paddingRight={6}>
+            <Page
+                sx={{
+                    padding: 0,
+                    paddingLeft: 6,
+                    paddingRight: 6,
+                }}
+            >
                 {data && (
                     <Box
                         sx={{
@@ -544,7 +550,12 @@ const ReportPageBody = ({ project }) => {
                                         {t("sortThreats")}
                                     </Typography>
                                     <FormControl sx={{ margin: 0, marginTop: 1 }}>
-                                        <Box display="flex" alignItems="center">
+                                        <Box
+                                            sx={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                            }}
+                                        >
                                             <ToggleButtons
                                                 sx={{ mr: 1 }}
                                                 onChange={onChangeSortBy}
@@ -596,7 +607,12 @@ const ReportPageBody = ({ project }) => {
                                     >
                                         {t("export")}
                                     </Typography>
-                                    <Box display="flex" alignItems="center">
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                        }}
+                                    >
                                         <Typography sx={{ fontSize: "0.875rem" }}>{t("fullExport")}</Typography>
                                         <ExportIconButton
                                             title={t("fullExportBtn")}

@@ -66,7 +66,7 @@ const TimeSlider = styled(Slider)(({ theme }) => ({
     },
 }));
 
-export const MeasureTimeline = ({ timeline, onChange, ...props }) => {
+export const MeasureTimeline = ({ timeline, onChange, sx = {}, ...props }) => {
     const { marks = [], minValue = 0, maxValue = 0 } = timeline;
 
     function valueLabelFormat(value) {
@@ -82,7 +82,16 @@ export const MeasureTimeline = ({ timeline, onChange, ...props }) => {
     };
 
     return (
-        <Box display="flex" alignItems="center" paddingLeft={"2px"} paddingRight={1} {...props}>
+        <Box
+            sx={{
+                display: "flex",
+                alignItems: "center",
+                paddingLeft: "2px",
+                paddingRight: 1,
+                ...sx,
+            }}
+            {...props}
+        >
             <TimeSlider
                 defaultValue={-1}
                 valueLabelFormat={valueLabelFormat}
