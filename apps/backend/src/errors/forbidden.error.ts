@@ -12,7 +12,7 @@ export class ForbiddenError extends ServerError {
 
 export class CSRFTokenError extends ForbiddenError {
     constructor() {
-        super("Invalid CSRF-Token", "EINVALIDCSRFTOKEN");
+        super("Invalid CSRF-Token", "INVALIDCSRFTOKEN");
     }
 
     override getErrorResponse(): ErrorResponse {

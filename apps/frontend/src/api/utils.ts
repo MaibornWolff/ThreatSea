@@ -92,7 +92,7 @@ export async function fetchAPI<T>(
     if (!response.ok) {
         const data = await response.json();
 
-        if (retry && data.code === "EINVALIDCSRFTOKEN") {
+        if (retry && data.code === "INVALIDCSRFTOKEN") {
             await startTokenRefresh();
             return fetchAPI(endpoint, config, fetchDataFunc, false);
         }
