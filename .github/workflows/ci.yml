@@ -37,6 +37,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
+        with:
+          lfs: true
       - name: Setup Repository
         uses: ./.github/actions/repository-setup
       - name: Build backend
@@ -81,6 +83,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
+        with:
+          lfs: true
       - name: Setup Repository
         uses: ./.github/actions/repository-setup
       - name: Test backend
@@ -101,6 +105,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
+        with:
+          lfs: true
       - name: Setup Repository
         uses: ./.github/actions/repository-setup
       - name: Build Frontend
@@ -120,6 +126,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
+        with:
+          lfs: true
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - uses: rlespinasse/github-slug-action@v5
