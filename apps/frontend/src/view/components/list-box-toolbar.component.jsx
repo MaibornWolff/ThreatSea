@@ -42,8 +42,21 @@ export const ListBoxToolbar = ({
     };
 
     return (
-        <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom={1} marginRight={4}>
-            <Box display="flex" flexDirection={"row"}>
+        <Box
+            sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 1,
+                marginRight: 4,
+            }}
+        >
+            <Box
+                sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                }}
+            >
                 <SearchField
                     iconButtonProps={{ p: 0.5 }}
                     onChange={onChangeSearchValue}
@@ -71,7 +84,13 @@ export const ListBoxToolbar = ({
                     <ImportIconButton tooltipTitle={importText} onChange={onImport} {...importIconButtonProps} />
                 )}
             </Box>
-            <Box color="primary" display="flex" alignItems="center">
+            <Box
+                sx={{
+                    color: "primary.main",
+                    display: "flex",
+                    alignItems: "center",
+                }}
+            >
                 <ToggleButtons
                     value={sortDirection}
                     onChange={onChangeSortDirection}

@@ -40,7 +40,7 @@ const ProjectDialogPage = lazy(() => import("./view/pages/project-dialog.page"))
 
 // Loading component
 const PageLoader = () => (
-    <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+    <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "200px" }}>
         <CircularProgress />
     </Box>
 );

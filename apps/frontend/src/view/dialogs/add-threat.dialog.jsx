@@ -355,8 +355,12 @@ const AddThreatDialog = ({ threat, project, userRole, ...props }) => {
                             ),
                         }}
                     />
-
-                    <Box display="flex" alignItems="center">
+                    <Box
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                        }}
+                    >
                         <FormGroup>
                             <FormControlLabel
                                 control={

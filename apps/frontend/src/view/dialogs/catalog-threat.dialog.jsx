@@ -356,7 +356,12 @@ const CatalogThreatDialog = ({ catalogThreat, isNew, ...props }) => {
                     helperText={errors?.probability?.message}
                     data-testid="catalog-threat-creation-modal_probability-input"
                 />
-                <Box display="flex" alignItems="center">
+                <Box
+                    sx={{
+                        display: "flex",
+                        alignItems: "center",
+                    }}
+                >
                     <FormGroup>
                         <FormControlLabel
                             control={

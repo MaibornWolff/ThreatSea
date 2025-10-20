@@ -127,7 +127,15 @@ export const ProjectsPage = CreatePage(HeaderNavigation, () => {
                     boxSizing: "border-box",
                 }}
             >
-                <Box display="flex" alignItems="center" justifyContent="space-between" paddingTop={1} paddingBottom={2}>
+                <Box
+                    sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        paddingTop: 1,
+                        paddingBottom: 2,
+                    }}
+                >
                     <Box sx={{ display: "flex", alignItems: "center" }}>
                         <SearchField data-testid="projects-page_search-field" onChange={onChangeSearchValue} />
                         {isPrivileged && (
@@ -159,7 +167,13 @@ export const ProjectsPage = CreatePage(HeaderNavigation, () => {
                             />
                         )}
                     </Box>
-                    <Box display="flex" alignItems="center" marginRight={4}>
+                    <Box
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            marginRight: 4,
+                        }}
+                    >
                         <ToggleButtons
                             onChange={onChangeSortDirection}
                             value={sortDirection}

@@ -164,7 +164,15 @@ const CatalogsPageBody = () => {
             {<LinearProgress sx={{ visibility: isPending ? "visible" : "hidden" }} />}
             <Page sx={{ overflowX: "visible" }}>
                 <PageHeading></PageHeading>
-                <Box display="flex" alignItems="center" justifyContent="space-between" paddingTop={1} paddingBottom={2}>
+                <Box
+                    sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        paddingTop: 1,
+                        paddingBottom: 2,
+                    }}
+                >
                     <Box sx={{ display: "flex", alignItems: "center" }}>
                         <SearchField onChange={onChangeSearchValue} />
                         {isPrivileged && (
@@ -185,7 +193,13 @@ const CatalogsPageBody = () => {
                             </IconButton>
                         )}
                     </Box>
-                    <Box display="flex" alignItems="center" marginRight={4}>
+                    <Box
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            marginRight: 4,
+                        }}
+                    >
                         <ToggleButtons
                             onChange={onChangeSortDirection}
                             value={sortDirection}

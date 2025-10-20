@@ -184,11 +184,13 @@ const AssetsPageBody = ({ project }) => {
                     }}
                 >
                     <Box
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="space-between"
-                        paddingTop={1}
-                        paddingBottom={2}
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            paddingTop: 1,
+                            paddingBottom: 2,
+                        }}
                     >
                         <Box sx={{ display: "flex", alignItems: "center" }}>
                             <SearchField onChange={onChangeSearchValue} data-testid="SearchAsset" />
@@ -206,7 +208,12 @@ const AssetsPageBody = ({ project }) => {
                                 </IconButton>
                             )}
                         </Box>
-                        <Box display="flex" alignItems="center">
+                        <Box
+                            sx={{
+                                display: "flex",
+                                alignItems: "center",
+                            }}
+                        >
                             {assets.length > 0 && (
                                 <Box
                                     sx={{

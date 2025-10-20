@@ -2,7 +2,13 @@ import { Typography, Box } from "@mui/material";
 
 export const ListBoxHeader = ({ title }) => {
     return (
-        <Box display="flex" justifyContent="space-between" marginBottom={2}>
+        <Box
+            sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginBottom: 2,
+            }}
+        >
             <Typography
                 sx={{
                     fontWeight: "bold",

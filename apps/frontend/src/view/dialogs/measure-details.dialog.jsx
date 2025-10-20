@@ -285,11 +285,13 @@ const MeasureDetailsDialog = ({ project, measure, ...props }) => {
                         }}
                     >
                         <Box
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="space-between"
-                            paddingTop={1}
-                            paddingBottom={2}
+                            sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                paddingTop: 1,
+                                paddingBottom: 2,
+                            }}
                         >
                             <Box sx={{ display: "flex", alignItems: "center" }}>
                                 <SearchField onChange={onChangeSearchValue} data-testid="SearchAsset" />

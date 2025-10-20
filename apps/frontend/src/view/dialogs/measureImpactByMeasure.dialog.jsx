@@ -295,8 +295,12 @@ const MeasureImpactByMeasureDialog = ({ project, threat, measureImpact, ...props
                     placeholder={t("placeholder-description")}
                     rows={2}
                 />
-
-                <Box display="flex" alignItems="flex-start">
+                <Box
+                    sx={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                    }}
+                >
                     <FormControlLabel
                         control={
                             <Controller
