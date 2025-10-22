@@ -135,7 +135,7 @@ export class MemberActions {
      * @param {string} type - Action type.
      * @returns Action function for resetting the isSelfRemoved flag.
      */
-    static resetIsSelfRemoved = createAction("[member] reset isSelfRemoved flag");
+    static resetIsSelfRemoved = createAction<void>("[member] reset isSelfRemoved flag");
 
     /**
      * Action that checks and changes the role of the user
@@ -145,7 +145,7 @@ export class MemberActions {
      * @param {string} type - Action type.
      * @returns Action for changing the own user role.
      */
-    static errorChangeSelfRole = createAction("[member] error change own role");
+    static errorChangeSelfRole = createAction<unknown>("[member] error change own role");
 
     /**
      * Refreshes the user access role to hide ui elements that
@@ -155,5 +155,5 @@ export class MemberActions {
      * @param {string} type - Action type.
      * @returns Action for refreshing the role of the own user.
      */
-    static refreshSelfRole = createAction("[member] changing members role");
+    static refreshSelfRole = createAction<unknown>("[member] changing members role");
 }

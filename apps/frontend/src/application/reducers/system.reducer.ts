@@ -1,8 +1,3 @@
-/**
- * @module system.reducer - Defines the reducer for
- *     the projects.
- */
-
 import { createReducer } from "@reduxjs/toolkit";
 import { PointsOfAttackActions } from "../actions/points-of-attack.actions";
 import { SystemActions } from "../actions/system.actions";
@@ -11,72 +6,25 @@ import { systemComponentsAdapter } from "../adapters/system-components.adapter";
 import { systemConnectionPointsAdapter } from "../adapters/system-connection-point.adapter";
 import { systemConnectionsAdapter } from "../adapters/system-connections.adapter";
 
-/**
- * Initial state of a system.
- *
- * @type {array of number} ids - The id of the saved system.
- * @type {object} components - Wrapper object for the underlying adapter.
- *     @type {array of string} ids - ids of the components.
- *     @type {object of objects} entities - Maps the ids to the data of the components.
- *        Entity: @type {string} Key - id of the entity.
- *        Values:
- *             => @type {string} id - id of the system.
- *             => @type {string} name - The name of the component.
- *             => @type {string} type - The type of the component.
- *             => @type {number} x - X coordinate of the component.
- *             => @type {number} y - Y coordinate of the component.
- *             => @type {number} gridX - GridX coordinate of the component.
- *             => @type {number} gridY - GridY coordinate of the component.
- *             => @type {number} width - Width of the component.
- *             => @type {number} height - Height of the component.
- *             => @type {boolean} selected - Indicator if the component is selected.
- *             => @type {number} projectId - id of the project the component belongs to.
- *             => @type {string} symbol - Path of the image used as an icon.
- *             => @type {number} alwaysShowAnchors - Indicator to always show the anchoring.
- *
- * @type {object} connections - Wrapper object for the underlying adapter.
- *     @type {array of string} ids - ids of the connections.
- *     @type {object of objects} entities - Maps the ids to the data of the connections.
- *        Entity: @type {string} Key - id of the entity.
- *        Values:
- *             => @type {string} id - id of the connection.
- *             => @type {string} name - The name of the connection.
- *             => @type {object} from - Marks the start of a connection.
- *             => @type {object} to - Marks the end of a connection.
- *             => @type {object} connectionPoints - Marks the points that are connected with another.
- *             => @type {object} connectionPointsMeta - Contains extra information about the connected points.
- *             => @type {array of number} waypoints - Waypoint data to form clean lines.
- *             => @type {boolean} recalculate - Indicator that this connection will be recalculated.
- *             => @type {number} projectId - id of the project the connection belongs to.
- *             => @type {boolean} visible - Indicator that this component is visible.
- *
- * @type {object} connectionPoints - Wrapper object for the underlying adapter.
- *     @type {array of string} ids - ids of the connection points.
- *     @type {object of objects} entities - Maps the ids to the data of the connection points.
- *        Entity: @type {string} Key - id of the entity.
- *        Values:
- *             => @type {string} id - id of the connection point.
- *             => @type {string} name - The name of the connection point.
- *             => @type {string} connectionId - id of the involved connection.
- *             => @type {number} projectId - id of the underlying project.
- *
- * @type {object} pointsOfAttack - Wrapper object for the underlying adapter.
- *     @type {array of string} ids - ids of the attack points.
- *     @type {object of objects} entities - Maps the ids to the data of the attack points.
- *        Entity: @type {string} Key - id of the entity.
- *        Values:
- *             => @type {string} id - id of the attack point.
- *             => @type {string} type - The type of the attack point.
- *             => @type {string} componentId - id of the involved component.
- *             => @type {number} projectId - id of the underlying project.
- *
- * @type {boolean} isPending - Indicator if a request to the backend is still pending.
- * @type {boolean} initialized - Indicator if the component has been initialised.
- * @type {boolean} hasChanged - Indicator that the component has changed.
- * @type {boolean} blockAutoSave - Indicator that autosave is blocked.
- * @type {number} refreshCounter - Count of refreshes of the page.
- */
-const defaultState = {
+type ComponentsState = ReturnType<typeof systemComponentsAdapter.getInitialState>;
+type ConnectionsState = ReturnType<typeof systemConnectionsAdapter.getInitialState>;
+type ConnectionPointsState = ReturnType<typeof systemConnectionPointsAdapter.getInitialState>;
+type PointsOfAttackState = ReturnType<typeof pointsOfAttackAdapter.getInitialState>;
+
+export interface SystemState {
+    id: number | null;
+    components: ComponentsState;
+    connections: ConnectionsState;
+    connectionPoints: ConnectionPointsState;
+    pointsOfAttack: PointsOfAttackState;
+    isPending: boolean;
+    initialized: boolean;
+    hasChanged: boolean;
+    blockAutoSave: boolean;
+    refreshCounter: number;
+}
+
+const defaultState: SystemState = {
     id: null,
     components: systemComponentsAdapter.getInitialState(),
     connections: systemConnectionsAdapter.getInitialState(),
@@ -89,10 +37,6 @@ const defaultState = {
     refreshCounter: 0,
 };
 
-/**
- * Reducer for the incoming system actions.
- * @function systemReducer
- */
 const systemReducer = createReducer(defaultState, (builder) => {
     builder.addCase(SystemActions.getSystem.pending, (state) => {
         state.isPending = true;

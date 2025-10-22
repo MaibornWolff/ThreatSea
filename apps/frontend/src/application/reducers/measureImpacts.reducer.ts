@@ -1,22 +1,18 @@
-/**
- * @module measureImpacts.reducer - Defines the reducer for
- *     the measures.
- */
-
+import { createReducer } from "@reduxjs/toolkit";
 import { MeasureImpactsActions } from "../actions/measureImpacts.actions";
 import { measureImpactsAdapter } from "../adapters/measureImpactsAdapter";
-import { createReducer } from "@reduxjs/toolkit";
 
-const defaultState = {
+type MeasureImpactsAdapterState = ReturnType<typeof measureImpactsAdapter.getInitialState>;
+
+export type MeasureImpactsState = MeasureImpactsAdapterState & {
+    isPending: boolean;
+};
+
+const defaultState: MeasureImpactsState = {
     ...measureImpactsAdapter.getInitialState(),
     isPending: false,
 };
 
-/**
- * Reducer to mutate the state based on the incoming
- * measureImpacts actions.
- * @function measureImpactsReducer
- */
 const measureImpactsReducer = createReducer(defaultState, (builder) => {
     builder.addCase(MeasureImpactsActions.getMeasureImpacts.pending, (state) => {
         state.isPending = true;

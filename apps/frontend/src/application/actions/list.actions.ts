@@ -4,6 +4,19 @@
  */
 import { createAction } from "@reduxjs/toolkit";
 
+export type ListNamespace =
+    | "projects"
+    | "assets"
+    | "catalogs"
+    | "catalogThreats"
+    | "catalogMeasures"
+    | "threats"
+    | "measures"
+    | "measureThreats"
+    | "threatMeasures"
+    | "addedMembers"
+    | "addableMembers";
+
 /**
  * Wrapper class for defining functions
  * to expose the list actions.
@@ -20,21 +33,7 @@ export class ListActions {
      */
     static setSortDirection = createAction(
         "[list] set Sort Direction",
-        (
-            nameSpace:
-                | "projects"
-                | "assets"
-                | "catalogs"
-                | "catalogThreats"
-                | "catalogMeasures"
-                | "threats"
-                | "measures"
-                | "measureThreats"
-                | "threatMeasures"
-                | "addedMembers"
-                | "addableMembers",
-            sortDirection: "asc" | "desc"
-        ) => ({
+        (nameSpace: ListNamespace, sortDirection: "asc" | "desc") => ({
             payload: { nameSpace, sortDirection },
         })
     );
@@ -48,26 +47,9 @@ export class ListActions {
      *     and nameSpace a string defining the list type.
      * @returns Action function for setting the type thats sorted by.
      */
-    static setSortBy = createAction(
-        "[list] set Sort By",
-        (
-            nameSpace:
-                | "projects"
-                | "assets"
-                | "catalogs"
-                | "catalogThreats"
-                | "catalogMeasures"
-                | "threats"
-                | "measures"
-                | "measureThreats"
-                | "threatMeasures"
-                | "addedMembers"
-                | "addableMembers",
-            sortBy: string
-        ) => ({
-            payload: { nameSpace, sortBy },
-        })
-    );
+    static setSortBy = createAction("[list] set Sort By", (nameSpace: ListNamespace, sortBy: string) => ({
+        payload: { nameSpace, sortBy },
+    }));
 
     /**
      * Action that sets the search value for filtering.
@@ -80,21 +62,7 @@ export class ListActions {
      */
     static setSearchValue = createAction(
         "[list] set Search Value",
-        (
-            nameSpace:
-                | "projects"
-                | "assets"
-                | "catalogs"
-                | "catalogThreats"
-                | "catalogMeasures"
-                | "threats"
-                | "measures"
-                | "measureThreats"
-                | "threatMeasures"
-                | "addedMembers"
-                | "addableMembers",
-            searchValue: string
-        ) => ({
+        (nameSpace: ListNamespace, searchValue: string) => ({
             payload: {
                 nameSpace,
                 searchValue,

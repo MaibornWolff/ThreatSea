@@ -23,6 +23,13 @@ function prepareOpenAlert({ text, duration = 3000 }: { text: string; duration: n
     };
 }
 
+interface AlertPayload {
+    text: string;
+    type: string;
+    visible: boolean;
+    duration?: number;
+}
+
 /**
  * Class for combining the alert action functions.
  */
@@ -53,7 +60,7 @@ export class AlertActions {
      * @param {string} type - Action type.
      * @returns Action for setting an alert.
      */
-    static setAlert = createAction("[alert] set alert");
+    static setAlert = createAction<AlertPayload>("[alert] set alert");
 
     /**
      * Action for closing an alert.
@@ -61,5 +68,5 @@ export class AlertActions {
      * @param {string} type - Action type.
      * @returns Action for closing an alert.
      */
-    static closeAlert = createAction("[alert] close alert");
+    static closeAlert = createAction<void>("[alert] close alert");
 }

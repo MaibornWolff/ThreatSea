@@ -6,6 +6,7 @@ import type { Measure } from "#api/types/measure.types.ts";
 import type { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import type { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
 import type { Threat } from "#api/types/threat.types.ts";
+import type { USER_ROLES } from "./user-roles.types";
 
 export interface CreateProjectRequest {
     catalogId: number;
@@ -31,7 +32,7 @@ export interface Project {
 }
 
 export interface ExtendedProject extends Project {
-    role: number;
+    role: USER_ROLES;
     image: string | null;
 }
 

@@ -1,38 +1,22 @@
-/**
- * @module catalogs.reducer - Reducer
- *     for the catalogues.
- */
-
 import { createReducer } from "@reduxjs/toolkit";
-import { USER_ROLES } from "../../api/types/user-roles.types";
+import type { CatalogWithRole } from "#api/types/catalogs.types.ts";
+import { USER_ROLES } from "#api/types/user-roles.types.ts";
 import { CatalogsActions } from "../actions/catalogs.actions";
 import { catalogsAdapter } from "../adapters/catalogs.adapter";
 
-/**
- * Initial state of the catalogues.
- *
- * @type {array of number} ids - ids of the catalogues.
- * @type {object of objects} entities - Holds the catalogues mapped to their id.
- *    Entity: @type {number} Key - id of the entity.
- *    Values:
- *         => @type {number} id - id of the catalogue.
- *         => @type {string} name - The name of the catalogue.
- *         => @type {string} language - The chosen language.
- *         => @type {string} updatedAt - Timestamp when this catalogue got updated last.
- *         => @type {string} createdAt - Timestamp when this catalogue was created.
- * @type {boolean} isPending - Indicator if a request to the backend is still pending.
- */
-const defaultState = {
-    ...catalogsAdapter.getInitialState(),
-    isPending: false,
-    current: {},
+type CatalogsAdapterState = ReturnType<typeof catalogsAdapter.getInitialState>;
+
+export type CatalogsState = CatalogsAdapterState & {
+    isPending: boolean;
+    current: CatalogWithRole | undefined;
 };
 
-/**
- * Reducer for the actions of the catalogues.
- *
- * @function catalogsReducer
- */
+const defaultState: CatalogsState = {
+    ...catalogsAdapter.getInitialState(),
+    isPending: false,
+    current: undefined,
+};
+
 const catalogsReducer = createReducer(defaultState, (builder) => {
     builder.addCase(CatalogsActions.getCatalogs.pending, (state) => {
         state.isPending = true;
@@ -85,11 +69,12 @@ const catalogsReducer = createReducer(defaultState, (builder) => {
     });
 
     builder.addCase(CatalogsActions.changeOwnCatalogRole, (state, action) => {
-        const { role } = action.payload;
-        const { id } = state.current;
+        const role = action.payload;
+        const id = state.current?.id;
 
-        if (state.entities[id]) state.entities[id].role = role;
-        state.current.role = role;
+        if (id && state.entities[id]) state.entities[id].role = role;
+
+        if (state.current) state.current.role = role;
     });
 });
 

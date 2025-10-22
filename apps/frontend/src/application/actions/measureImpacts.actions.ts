@@ -86,7 +86,7 @@ export class MeasureImpactsActions {
      * @param {string} type - Action type.
      * @returns Action function for changing a measure.
      */
-    static setMeasureImpact = createAction("[measureImpacts] set measureImpact");
+    static setMeasureImpact = createAction<MeasureImpact>("[measureImpacts] set measureImpact");
 
     /**
      * Action that removes a measure.
@@ -94,7 +94,7 @@ export class MeasureImpactsActions {
      * @param {string} type - Action type.
      * @returns Action function for removing a measure.
      */
-    static removeMeasureImpact = createAction("[measureImpacts] remove measureImpact");
+    static removeMeasureImpact = createAction<MeasureImpact>("[measureImpacts] remove measureImpact");
 
     /**
      * Action that resets a measure.
@@ -102,5 +102,5 @@ export class MeasureImpactsActions {
      * @param {string} type - Action type.
      * @returns Action function for resetting a measure.
      */
-    static resetMeasureImpact = createAction("[measureImpacts] reset measureImpacts");
+    static resetMeasureImpact = createAction<void>("[measureImpacts] reset measureImpacts");
 }

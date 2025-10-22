@@ -34,8 +34,8 @@ const MemberPageBody = () => {
 
     const user = useSelector((state) => state.user);
     const isSelfRemoved = useSelector((state) => state.members.isSelfRemoved);
-    const userProjectRole = useSelector((state) => state.projects.current.role);
-    const userCatalogRole = useSelector((state) => state.catalogs.current.role);
+    const userProjectRole = useSelector((state) => state.projects.current?.role);
+    const userCatalogRole = useSelector((state) => state.catalogs.current?.role);
 
     let projectCatalogId;
     let memberPath;

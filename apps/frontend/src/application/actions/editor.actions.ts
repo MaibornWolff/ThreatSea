@@ -2,13 +2,17 @@
  * @module editor.actions - Defines the actions for
  *     the system view editing.
  */
-import { createAction, createAsyncThunk } from "@reduxjs/toolkit";
+import { createAction, createAsyncThunk, type EntityId, type Update } from "@reduxjs/toolkit";
 import { ComponentTypeAPI } from "#api/component-type.api.ts";
 import type {
     ComponentType,
     CreateComponentTypeRequest,
     UpdateComponentTypeRequest,
 } from "#api/types/component-types.types.ts";
+import type { EditorConnection, EditorEntityId, EditorPosition } from "#application/reducers/editor.reducer.ts";
+import type { EditorMousePointer } from "#application/adapters/editor-mouse-pointers.adapter.ts";
+import type { EditorComponentType } from "#application/adapters/editor-component-type.adapter.ts";
+import type { EditorComponentConnectionLine } from "#application/adapters/editor-component-connection-lines.adapter.ts";
 
 /**
  * Wrapper class the defines the functions
@@ -21,7 +25,7 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for selecting a component.
      */
-    static selectComponent = createAction("[editor] select component");
+    static selectComponent = createAction<EditorEntityId>("[editor] select component");
 
     /**
      * Action that deselects a component.
@@ -29,7 +33,7 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for deselecting a component.
      */
-    static deselectComponent = createAction("[editor] deselect component");
+    static deselectComponent = createAction<void>("[editor] deselect component");
 
     /**
      * Action that creates a dotted connection line.
@@ -37,7 +41,7 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for creating a dotted connection line.
      */
-    static setConnection = createAction("[editor] set connection");
+    static setConnection = createAction<EditorConnection>("[editor] set connection");
 
     /**
      * Action that resets a dotted connection line.
@@ -45,9 +49,9 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for resetting a dotted connection line.
      */
-    static resetConnection = createAction("[editor] reset connection");
+    static resetConnection = createAction<void>("[editor] reset connection");
 
-    static selectConnector = createAction("[editor] select connector");
+    static selectConnector = createAction<EditorEntityId>("[editor] select connector");
 
     /**
      * Action that deselects a connector.
@@ -55,7 +59,7 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for deselecting a connector.
      */
-    static deselectConnector = createAction("[editor] deselect connector");
+    static deselectConnector = createAction<void>("[editor] deselect connector");
 
     /**
      * Action that selects a connection line.
@@ -63,7 +67,7 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for selecting a connection line.
      */
-    static selectConnection = createAction("[editor] select connection");
+    static selectConnection = createAction<EditorEntityId>("[editor] select connection");
 
     /**
      * Action that deselects a connection line.
@@ -71,7 +75,7 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for deselecting a connection line.
      */
-    static deselectConnection = createAction("[editor] deselect connection");
+    static deselectConnection = createAction<void>("[editor] deselect connection");
 
     /**
      * Action that centers the system view.
@@ -79,7 +83,7 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for centering the system view.
      */
-    static setLayerPosition = createAction("[editor] set layer position");
+    static setLayerPosition = createAction<EditorPosition>("[editor] set layer position");
 
     /**
      * Action that zooms the system view in and out.
@@ -87,7 +91,7 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for zooming the system view in and out.
      */
-    static setStageScale = createAction("[editor] set stage scale");
+    static setStageScale = createAction<{ scale: number; position: EditorPosition }>("[editor] set stage scale");
 
     /**
      * Action that creates help lines when moving a component.
@@ -95,7 +99,7 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for creating help lines when moving a component.
      */
-    static setShowHelpLines = createAction("[editor] show help lines");
+    static setShowHelpLines = createAction<boolean>("[editor] show help lines");
 
     /**
      * Action for selecting a point of attack.
@@ -103,7 +107,7 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for selecting a point of attack.
      */
-    static selectPointOfAttack = createAction("[editor] select point of attack");
+    static selectPointOfAttack = createAction<string>("[editor] select point of attack");
 
     /**
      * Action for deselecting a point of attack.
@@ -111,7 +115,7 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for deselecting a point of attack.
      */
-    static deselectPointOfAttack = createAction("[editor] deselect point of attack");
+    static deselectPointOfAttack = createAction<void>("[editor] deselect point of attack");
 
     /**
      * Action for selecting a connection interface.
@@ -119,7 +123,7 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for selecting a connection interface.
      */
-    static selectConnectionPoint = createAction("[editor] select connection point");
+    static selectConnectionPoint = createAction<string>("[editor] select connection point");
 
     /**
      * Action for deselecting a connection interface.
@@ -127,9 +131,9 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for deselecting a connection interface.
      */
-    static deselectConnectionPoint = createAction("[editor] deselect connection point");
+    static deselectConnectionPoint = createAction<void>("[editor] deselect connection point");
 
-    static setMousePointer = createAction("[editor] set mouse pointer");
+    static setMousePointer = createAction<EditorMousePointer>("[editor] set mouse pointer");
 
     /**
      * Action for searching for an asset at a component.
@@ -137,7 +141,7 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for searching an asset inside of a component.
      */
-    static setAssetSearchValue = createAction("[editor] set asset search value");
+    static setAssetSearchValue = createAction<string>("[editor] set asset search value");
 
     /**
      * Action when a user joins.
@@ -145,7 +149,7 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for letting a user join.
      */
-    static userJoined = createAction("[editor] user joined");
+    static userJoined = createAction<EditorMousePointer>("[editor] user joined");
 
     /**
      * Action when a user leaves.
@@ -153,7 +157,7 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for letting a user leave.
      */
-    static userLeft = createAction("[editor] user left");
+    static userLeft = createAction<Pick<EditorMousePointer, "id">>("[editor] user left");
 
     /**
      * Action when a user opens the context menu of a component.
@@ -161,7 +165,7 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for opening the context menu of a component.
      */
-    static setOpenContextMenu = createAction("[editor] set open context menu");
+    static setOpenContextMenu = createAction<boolean>("[editor] set open context menu");
 
     /**
      * Action for adding a component to the system view.
@@ -169,9 +173,9 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for adding a component to the system view.
      */
-    static addComponentType = createAction("[editor] add component type");
+    static addComponentType = createAction<EditorComponentType>("[editor] add component type");
 
-    static setComponentType = createAction("[editor] set component type");
+    static setComponentType = createAction<Update<EditorComponentType, EntityId>>("[editor] set component type");
 
     /**
      * Action for removing a component from the system view.
@@ -179,7 +183,7 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for removing a component from the system view.
      */
-    static removeComponentType = createAction("[editor] remove component type");
+    static removeComponentType = createAction<EditorComponentType>("[editor] remove component type");
 
     /**
      * Action that gets the components using the backend api.
@@ -236,9 +240,13 @@ export class EditorActions {
         return data;
     });
 
-    static addComponentConnectionLine = createAction("[editor] create component connection line");
-    static removeComponentConnectionLine = createAction("[editor] remove component connection line");
-    static clearComponentConnectionLines = createAction("[editor] clear component connection lines");
+    static addComponentConnectionLine = createAction<EditorComponentConnectionLine>(
+        "[editor] create component connection line"
+    );
+    static removeComponentConnectionLine = createAction<Pick<EditorComponentConnectionLine, "id">>(
+        "[editor] remove component connection line"
+    );
+    static clearComponentConnectionLines = createAction<void>("[editor] clear component connection lines");
 
     /**
      * Action for adding an already in use component in the editor e.g when dragging it.
@@ -246,9 +254,9 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for adding a used component.
      */
-    static addInUseComponent = createAction("[editor] add in-use-component");
+    static addInUseComponent = createAction<EditorEntityId>("[editor] add in-use-component");
 
-    static removeInUseComponent = createAction("[editor] remove in-use-component");
+    static removeInUseComponent = createAction<EditorEntityId>("[editor] remove in-use-component");
 
     /**
      * Action for setting the auto save status.
@@ -256,7 +264,7 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for setting the auto save status.
      */
-    static setAutoSaveStatus = createAction("[editor] set auto save status");
+    static setAutoSaveStatus = createAction<string>("[editor] set auto save status");
 
     /**
      * Action for setting the auto save text.
@@ -264,7 +272,7 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for setting the auto save text.
      */
-    static setAutoSaveText = createAction("[editor] set auto save text");
+    static setAutoSaveText = createAction<string>("[editor] set auto save text");
 
     /**
      * Action for setting the last auto save date.
@@ -272,7 +280,7 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for setting the last auto save date.
      */
-    static setLastAutoSaveDate = createAction("[editor] set last auto save date");
+    static setLastAutoSaveDate = createAction<string>("[editor] set last auto save date");
 
     /**
      * Action for making a screenshot of the system view.
@@ -280,5 +288,5 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for making a screenshot of the system view.
      */
-    static makeAScreenshot = createAction("[editor] make a screenshot");
+    static makeAScreenshot = createAction<void>("[editor] make a screenshot");
 }

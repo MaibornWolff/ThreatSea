@@ -39,7 +39,7 @@ const MeasuresPageBody = ({ project }) => {
     const { setSortDirection, setSearchValue, setSortBy, deleteMeasure, sortDirection, sortBy, isPending, measures } =
         useMeasuresList({ projectId });
 
-    const userRole = useSelector((state) => state.projects.current.role);
+    const userRole = useSelector((state) => state.projects.current?.role);
 
     /**
      * Layout effect to change the header bar
