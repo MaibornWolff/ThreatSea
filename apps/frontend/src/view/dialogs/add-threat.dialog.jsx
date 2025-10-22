@@ -38,6 +38,11 @@ import { DialogTextField } from "../components/dialog.textfield.component";
 import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
 import { BoxNameTextField } from "#view/components/name-textfield.component.jsx";
 import { DescriptionTextField } from "#view/components/description-textfield.component.jsx";
+import { ThreatMeasuresTable } from "#view/components/threatMeasuresTable.component.jsx";
+import { SearchField } from "../components/search-field.component";
+import { IconButton } from "../components/icon-button.component";
+import { useThreatMeasuresList } from "#application/hooks/use-threat-measures-list.hook.js";
+import { useConfirm } from "../../application/hooks/use-confirm.hook";
 
 /**
  * Creates a dialog to edit threats.
@@ -47,12 +52,14 @@ import { DescriptionTextField } from "#view/components/description-textfield.com
  * @param {object} props - Dialog properties.
  * @returns React component for changing a threat.
  */
-const AddThreatDialog = ({ threat, userRole, ...props }) => {
+const AddThreatDialog = ({ threat, project, userRole, ...props }) => {
     const { confirmDialog, cancelDialog } = useDialog("threats");
     const navigate = useNavigate();
     const { t } = useTranslation("threatDialogPage");
     const [tab, setTab] = useState("MAIN");
     const formRef = useRef();
+    const projectId = project.id;
+    const threatId = threat.id;
     const {
         control,
         register,
@@ -69,6 +76,7 @@ const AddThreatDialog = ({ threat, userRole, ...props }) => {
             integrity: threat?.integrity ?? false,
             availability: threat?.availability ?? false,
             doneEditing: threat?.doneEditing ?? false,
+            measures: threat?.measures ?? [],
         },
     });
 
@@ -99,6 +107,71 @@ const AddThreatDialog = ({ threat, userRole, ...props }) => {
     const handleOnSaveButtonClicked = (event) => {
         setTab("MAIN");
         event.target.click();
+    };
+
+    const { openConfirm } = useConfirm();
+
+    const onChangeSearchValue = (e) => {
+        setSearchValue(e.target.value);
+    };
+
+    const { setSortDirection, setSearchValue, setSortBy, deleteMeasureImpact, sortDirection, sortBy, threatMeasures } =
+        useThreatMeasuresList({ projectId, threatId });
+
+    const onChangeSortBy = (e, newSortBy) => {
+        // If the attribute is clicked again, the order is changed.
+        if (sortBy === newSortBy) {
+            const newSortDirection = sortDirection === "asc" ? "desc" : sortDirection === "desc" ? "asc" : null;
+            if (newSortDirection) {
+                setSortDirection(newSortDirection);
+            }
+        } else if (newSortBy) {
+            setSortBy(newSortBy);
+        }
+    };
+    const onClickEditMeasure = (e, project, measure) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
+            navigate(`/projects/${projectId}/measures/edit`, {
+                state: { project, measure },
+            });
+        }
+    };
+
+    const onClickEditMeasureImpact = (e, measureImpact, measure) => {
+        e.preventDefault();
+        e.stopPropagation();
+        navigate(`/projects/${projectId}/measures/${measure.id}/measureImpacts/edit`, {
+            state: {
+                measure,
+                measureImpact,
+                project,
+            },
+        });
+    };
+
+    const onClickDeleteMeasureThreat = (e, measureThreat, measure) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openConfirm({
+            state: measureThreat,
+            message: t("measureThreatDeleteMessage", {
+                measureName: measure.name,
+                threatName: measureThreat.threatName,
+            }),
+            cancelText: t("cancelBtn"),
+            acceptText: t("deleteBtn"),
+            onAccept: (measureThreat) => {
+                handleDeleteMeasureThreat(measureThreat);
+            },
+        });
+    };
+
+    const handleDeleteMeasureThreat = (measureThreat) => {
+        const { measureImpact } = measureThreat;
+        const data = { ...measureImpact, projectId };
+        deleteMeasureImpact(data);
     };
 
     /**
@@ -177,6 +250,15 @@ const AddThreatDialog = ({ threat, userRole, ...props }) => {
                             "&.Mui-selected": { color: "text.primary" },
                         }}
                         data-testid="ThreatToAsset"
+                    />
+                    <Tab
+                        label={<Typography sx={{ fontSize: "0.75rem" }}>{t("tab.measures")}</Typography>}
+                        value="MEASURES"
+                        sx={{
+                            color: "text.primary",
+                            "&.Mui-selected": { color: "text.primary" },
+                        }}
+                        data-testid="ThreatToMeasure"
                     />
                 </Tabs>
                 <Box
@@ -450,6 +532,49 @@ const AddThreatDialog = ({ threat, userRole, ...props }) => {
                             </TableBody>
                         </Table>
                     </TableContainer>
+                </Box>
+                <Box
+                    sx={{
+                        display: tab === "MEASURES" ? "flex" : "none",
+                        flexDirection: "column",
+                    }}
+                >
+                    <Box
+                        sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            backgroundColor: "background.paperIntransparent",
+                            boxShadow: 1,
+                            padding: 2,
+                            boxSizing: "border-box",
+                            borderRadius: 5,
+                            height: "100%",
+                            overflow: "hidden",
+                        }}
+                    >
+                        <Box
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="space-between"
+                            paddingTop={1}
+                            paddingBottom={2}
+                        >
+                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                                <SearchField onChange={onChangeSearchValue} data-testid="SearchAsset" />
+                            </Box>
+                        </Box>
+                        <ThreatMeasuresTable
+                            threatMeasures={threatMeasures}
+                            sortBy={sortBy}
+                            onChangeSortBy={onChangeSortBy}
+                            sortDirection={sortDirection}
+                            project={project}
+                            userRole={userRole}
+                            onClickEditMeasure={onClickEditMeasure}
+                            onClickDeleteMeasureThreat={onClickDeleteMeasureThreat}
+                            onClickEditMeasureImpact={onClickEditMeasureImpact}
+                        />
+                    </Box>
                 </Box>
                 <DialogActions
                     sx={{

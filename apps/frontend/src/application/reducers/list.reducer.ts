@@ -47,6 +47,11 @@ interface ListState {
         sortDirection: "asc" | "desc";
         sortBy: "threatName";
     };
+    threatMeasures: {
+        searchValue: string;
+        sortDirection: "asc" | "desc";
+        sortBy: "measureName";
+    };
     addedMembers: {
         searchValue: string;
         sortDirection: "asc" | "desc";
@@ -108,6 +113,11 @@ const defaultState: ListState = {
         searchValue: "",
         sortDirection: "asc",
         sortBy: "threatName",
+    },
+    threatMeasures: {
+        searchValue: "",
+        sortDirection: "asc",
+        sortBy: "measureName",
     },
     addedMembers: {
         searchValue: "",

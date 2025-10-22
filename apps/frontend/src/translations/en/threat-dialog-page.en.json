@@ -1,6 +1,15 @@
 {
+  "measureThreatDeleteMessage": "Do you really want to no longer apply the measure '{{measureName}}' to the threat '{{threatName}}'?",
+  "noThreatsFound": "Not applied to any threat",
+  "setsOutOfScope": "Set out of Scope by measure",
+  "editMeasureImpact": "Edit Impact",
+  "deleteMeasureImpact": "Delete Impact",
+  "noImpact": "no Impact",
+  "netProbability": "Net Probability",
+  "netDamage": "Net Damage",
   "pointOfAttack": "Point of Attack",
   "doneEditing": "Done editing",
+  "scheduledAt": "Scheduled at",
   "tab": {
     "threat": "Threat",
     "assets": "Assets",

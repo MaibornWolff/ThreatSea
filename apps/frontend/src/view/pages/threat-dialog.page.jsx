@@ -14,9 +14,10 @@ const ThreatDialogPage = () => {
     const { projectId } = useParams();
     const userRole = useSelector((state) => state.projects.current.role);
     const threat = useLocation().state.threat;
+    const project = useSelector((state) => state.projects.current);
 
-    if (threat) {
-        return <AddThreatDialog threat={threat} userRole={userRole} />;
+    if (threat && project) {
+        return <AddThreatDialog threat={threat} project={project} userRole={userRole} />;
     } else {
         navigate(`/projects/${projectId}/threats`, { replace: true });
         return null;
