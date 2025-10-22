@@ -3,5 +3,6 @@
  *     for the measures.
  */
 import { createEntityAdapter } from "@reduxjs/toolkit";
+import type { Measure } from "#api/types/measure.types.ts";
 
-export const measuresAdapter = createEntityAdapter();
+export const measuresAdapter = createEntityAdapter<Measure>();

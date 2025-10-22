@@ -16,7 +16,7 @@ import { useSelector } from "react-redux";
 const AssetDialogPage = () => {
     const navigate = useNavigate();
     const { projectId } = useParams();
-    const userRole = useSelector((state) => state.projects.current.role);
+    const userRole = useSelector((state) => state.projects.current?.role);
     const state = useLocation().state;
 
     if (state) {

@@ -1,20 +1,16 @@
-/**
- * @module dialogs.reducer - Defines the reducer for
- *     the fillable dialogs.
- */
-
 import { createReducer } from "@reduxjs/toolkit";
 import { DialogsActions } from "../actions/dialogs.actions";
 
-/**
- * The initial state for the fillable dialogs.
- */
-const defaultState = {};
+type DialogError = Record<string, unknown>;
 
-/**
- * Reducer for the fillable dialogs to change state upon receiving actions.
- * @function dialogsReducer
- */
+export type DialogValue = Record<string, unknown> & {
+    error?: DialogError | null;
+};
+
+export type DialogsState = Record<string, DialogValue | null | undefined>;
+
+const defaultState: DialogsState = {};
+
 const dialogsReducer = createReducer(defaultState, (builder) => {
     builder.addCase(DialogsActions.setValue, (state, action) => {
         const {
@@ -43,7 +39,7 @@ const dialogsReducer = createReducer(defaultState, (builder) => {
             [nameSpace]: {
                 ...state[nameSpace],
                 error: {
-                    ...state[nameSpace].error,
+                    ...state[nameSpace]?.error,
                     ...error,
                 },
             },

@@ -18,7 +18,7 @@ export class DialogsActions {
      *     defining the dialog type.
      * @returns Action function for opening/setting a fillable dialog.
      */
-    static setValue = createAction("[dialogs] set value", (nameSpace: string, data) => {
+    static setValue = createAction("[dialogs] set value", (nameSpace: string, data: object) => {
         return {
             payload: {
                 nameSpace,
@@ -27,7 +27,7 @@ export class DialogsActions {
         };
     });
 
-    static setError = createAction("[dialogs] set error", (nameSpace: string, error) => {
+    static setError = createAction("[dialogs] set error", (nameSpace: string, error: object) => {
         return {
             payload: {
                 nameSpace,
@@ -45,7 +45,7 @@ export class DialogsActions {
      *     defining the dialog type.
      * @returns Action function for confirming a fillable dialog.
      */
-    static confirmDialog = createAction("[dialogs] confirm dialog", (nameSpace: string, data) => {
+    static confirmDialog = createAction("[dialogs] confirm dialog", (nameSpace: string, data: object) => {
         return {
             payload: {
                 nameSpace,

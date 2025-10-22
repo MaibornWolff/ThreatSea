@@ -3,6 +3,7 @@
  *     for page navigation specific events and how the ui looks
  *     for certain pages.
  */
+import type { NavigationState } from "#application/reducers/navigation.reducer.ts";
 import { createAction } from "@reduxjs/toolkit";
 
 /**
@@ -16,11 +17,5 @@ export class NavigationActions {
      * @param {string} type - Action type.
      * @returns Action function for setting the page header.
      */
-    static setPageHeader = createAction<{
-        showProjectCatalogueInnerNavigation: boolean;
-        showLanguagePicker: boolean;
-        showUniversalHeaderNavigation: boolean;
-        showProjectInfo: boolean;
-        getCatalogInfo: boolean;
-    }>("[navigation] setting the page header");
+    static setPageHeader = createAction<Required<NavigationState>>("[navigation] setting the page header");
 }

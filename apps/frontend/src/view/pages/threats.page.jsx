@@ -50,7 +50,7 @@ const ThreatsPageBody = () => {
 
     const { autoSaveStatus } = useEditor({ projectId: projectId });
 
-    const userRole = useSelector((state) => state.projects.current.role);
+    const userRole = useSelector((state) => state.projects.current?.role);
 
     const onChangeSearchValue = (e) => {
         setSearchValue(e.target.value);

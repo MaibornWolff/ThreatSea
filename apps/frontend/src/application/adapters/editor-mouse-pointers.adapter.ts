@@ -4,4 +4,9 @@
  */
 import { createEntityAdapter } from "@reduxjs/toolkit";
 
-export const editorMousePointersAdapter = createEntityAdapter();
+export interface EditorMousePointer {
+    id: string;
+    name: string;
+}
+
+export const editorMousePointersAdapter = createEntityAdapter<EditorMousePointer>();

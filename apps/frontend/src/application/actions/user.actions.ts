@@ -4,6 +4,7 @@
  */
 import { createAction, createAsyncThunk } from "@reduxjs/toolkit";
 import { LoginAPI } from "#api/login.api.ts";
+import type { UserState } from "#application/reducers/user.reducer.ts";
 
 /**
  * Wrapper class to expose action functions
@@ -16,7 +17,7 @@ export class UserActions {
      * @param {string} type - Action type.
      * @returns Action function for logging the user in.
      */
-    static setUserLoggedIn = createAction("[user] user logged in");
+    static setUserLoggedIn = createAction<Omit<UserState, "isPending">>("[user] user logged in");
 
     /**
      * Action that sets the user as logged out.
@@ -24,7 +25,7 @@ export class UserActions {
      * @param {string} type - Action type.
      * @returns Action function for logging the user out.
      */
-    static setUserLoggedOut = createAction("[user] user logged out");
+    static setUserLoggedOut = createAction<void>("[user] user logged out");
 
     static getAuthStatus = createAsyncThunk("[user] get auth status", async () => {
         return await LoginAPI.getAuthenticationStatus();

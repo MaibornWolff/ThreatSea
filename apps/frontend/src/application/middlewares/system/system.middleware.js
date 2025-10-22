@@ -23,7 +23,7 @@ const handleSaveSystem =
         next(action);
 
         if (
-            checkUserRole(getState().projects.current.role, USER_ROLES.EDITOR) &&
+            checkUserRole(getState().projects.current?.role, USER_ROLES.EDITOR) &&
             SystemActions.saveSystem.match(action)
         ) {
             const { projectId, image } = action.payload;

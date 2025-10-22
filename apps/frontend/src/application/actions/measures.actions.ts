@@ -70,7 +70,7 @@ export class MeasuresActions {
      * @param {string} type - Action type.
      * @returns Action function for changing a measure.
      */
-    static setMeasure = createAction("[measures] set measures");
+    static setMeasure = createAction<Measure>("[measures] set measures");
 
     /**
      * Action that removes a measure.
@@ -78,7 +78,7 @@ export class MeasuresActions {
      * @param {string} type - Action type.
      * @returns Action function for removing a measure.
      */
-    static removeMeasure = createAction("[measures] remove measures");
+    static removeMeasure = createAction<Measure>("[measures] remove measures");
 
     /**
      * Action that resets a measure.
@@ -86,5 +86,5 @@ export class MeasuresActions {
      * @param {string} type - Action type.
      * @returns Action function for resetting a measure.
      */
-    static resetMeasure = createAction("[measure] reset measures");
+    static resetMeasure = createAction<void>("[measure] reset measures");
 }

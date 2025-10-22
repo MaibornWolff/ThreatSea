@@ -54,8 +54,6 @@ export const CreatePage = (HeaderNavigation, PageBody, showAutoSave = false) => 
             setAutoSaveOnClick(() => onClick);
         };
 
-        const projectDate = new Date(project?.createdAt);
-
         let autoSaveIconColor = "#546581";
         switch (autoSaveStatus) {
             case "uninitialized":
@@ -109,7 +107,7 @@ export const CreatePage = (HeaderNavigation, PageBody, showAutoSave = false) => 
             } else if (getCatalogInfo && catalogId) {
                 const cid = parseInt(catalogId);
 
-                if (catalog.id !== cid) {
+                if (catalog?.id !== cid) {
                     if (catalogsSelector.selectById(store.getState(), cid)) {
                         dispatch(CatalogsActions.getCatalogFromRedux(cid));
                     } else {
@@ -117,7 +115,7 @@ export const CreatePage = (HeaderNavigation, PageBody, showAutoSave = false) => 
                     }
                 }
             }
-        }, [showProjectInfo, projectId, dispatch, getCatalogInfo, catalogId, catalog.id, currentProjectJSON]);
+        }, [showProjectInfo, projectId, dispatch, getCatalogInfo, catalogId, catalog?.id, currentProjectJSON]);
 
         const { t } = useTranslation("mainMenu");
         const footerLinks = [
@@ -323,7 +321,9 @@ export const CreatePage = (HeaderNavigation, PageBody, showAutoSave = false) => 
                                                 ml: 2,
                                             }}
                                         >
-                                            {project.createdAt ? projectDate.toISOString().split("T")[0] : ""}
+                                            {project?.createdAt
+                                                ? new Date(project.createdAt).toISOString().split("T")[0]
+                                                : ""}
                                         </Typography>
                                         <IconButton
                                             onClick={(e) => handleProjectInfoClick(e)}
@@ -476,8 +476,8 @@ export const HeaderNavigation = () => {
     ];
 
     // viewer should not have access to the members page
-    const userProjectRole = useSelector((state) => state.projects.current.role);
-    const userCatalogRole = useSelector((state) => state.catalogs.current.role);
+    const userProjectRole = useSelector((state) => state.projects.current?.role);
+    const userCatalogRole = useSelector((state) => state.catalogs.current?.role);
     const userRole = userProjectRole ?? userCatalogRole;
 
     if (!checkUserRole(userRole, USER_ROLES.EDITOR)) {

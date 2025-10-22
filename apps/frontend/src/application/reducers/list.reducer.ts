@@ -1,8 +1,3 @@
-/**
- * @module list.reducer - Defines the reducer for
- *     the listings.
- */
-
 import { createReducer } from "@reduxjs/toolkit";
 import { ListActions } from "../actions/list.actions";
 
@@ -64,15 +59,6 @@ interface ListState {
     };
 }
 
-/**
- * Initial state of the listings filter/sorting.
- *
- * Defines for each categorie the same search criteria.
- * @type {object} nameSpace - Holds the search criteria for the given list.
- *     @type {string} searchValue - The value to search/filter with.
- *     @type {string} sortDirection - The direction the list shall be sorted => asc/desc.
- *     @type {string} sortBy - The attribute we sort by.
- */
 const defaultState: ListState = {
     projects: {
         searchValue: "",
@@ -131,10 +117,6 @@ const defaultState: ListState = {
     },
 };
 
-/**
- * The ListReducer updates the current state based on incoming actions.
- * @function listReducer
- */
 export const listReducer = createReducer(defaultState, (builder) => {
     builder.addCase(ListActions.setSearchValue, (state, action) => {
         const {

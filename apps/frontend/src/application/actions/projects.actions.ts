@@ -6,7 +6,8 @@ import { createAsyncThunk, createAction } from "@reduxjs/toolkit";
 import { ImportsApi } from "#api/import.api.ts";
 import { ProjectsAPI } from "#api/projects.api.ts";
 import { ExportsApi } from "#api/export.api.ts";
-import type { CreateProjectRequest, Project, UpdateProjectRequest } from "#api/types/project.types.ts";
+import type { CreateProjectRequest, ExtendedProject, Project, UpdateProjectRequest } from "#api/types/project.types.ts";
+import type { USER_ROLES } from "#api/types/user-roles.types.ts";
 
 /**
  * Wrapper class that exposes functions for
@@ -83,7 +84,7 @@ export class ProjectsActions {
      * @param {string} type - Action type.
      * @returns Action function for getting a project from the redux store.
      */
-    static getProjectFromRedux = createAction("[project] get single project from redux store");
+    static getProjectFromRedux = createAction<number>("[project] get single project from redux store");
 
     /**
      * Action that setting a project.
@@ -91,7 +92,7 @@ export class ProjectsActions {
      * @param {string} type - Action type.
      * @returns Action function for setting a project.
      */
-    static setProject = createAction("[projects] set project");
+    static setProject = createAction<ExtendedProject>("[projects] set project");
 
     /**
      * Action that removes a project.
@@ -99,7 +100,7 @@ export class ProjectsActions {
      * @param {string} type - Action type.
      * @returns Action function for removing a project.
      */
-    static removeProject = createAction("[projects] remove project");
+    static removeProject = createAction<Project>("[projects] remove project");
 
     /**
      * Action that changes the role of the user for the current project.
@@ -107,7 +108,7 @@ export class ProjectsActions {
      * @param {string} type - Action type.
      * @returns Action function for changing the users role.
      */
-    static changeOwnProjectRole = createAction("[projects] change current role");
+    static changeOwnProjectRole = createAction<USER_ROLES>("[projects] change current role");
 
     /**
      * Action that imports a new project from a json file.

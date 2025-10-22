@@ -92,7 +92,7 @@ export const LineOfToleranceSelector = ({ title, greenValue, redValue, onLoTChan
         [marksvals]
     );
 
-    const userRole = useSelector((state) => state.projects.current.role);
+    const userRole = useSelector((state) => state.projects.current?.role);
 
     const sliderRef = useRef();
 

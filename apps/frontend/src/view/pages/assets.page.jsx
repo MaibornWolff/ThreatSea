@@ -49,7 +49,7 @@ const AssetsPageBody = ({ project }) => {
             projectId,
         });
 
-    const userRole = useSelector((state) => state.projects.current.role);
+    const userRole = useSelector((state) => state.projects.current?.role);
     const { openConfirm } = useConfirm();
 
     const navigate = useNavigate();

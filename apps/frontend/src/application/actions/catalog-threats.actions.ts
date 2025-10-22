@@ -97,7 +97,7 @@ export class CatalogThreatsActions {
      * @param {string} type - Action type.
      * @returns Action function for changing catalogue threats.
      */
-    static setCatalogThreat = createAction("[catalog threats] set catalog threat");
+    static setCatalogThreat = createAction<CatalogThreat>("[catalog threats] set catalog threat");
 
     /**
      * Action that removes catalogue.
@@ -105,5 +105,5 @@ export class CatalogThreatsActions {
      * @param {string} type - Action type.
      * @returns Action function for removing catalogue threats.
      */
-    static removeCatalogThreat = createAction("[catalog threats] remove catalog threat");
+    static removeCatalogThreat = createAction<CatalogThreat>("[catalog threats] remove catalog threat");
 }

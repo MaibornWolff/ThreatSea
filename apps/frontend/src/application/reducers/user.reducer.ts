@@ -1,7 +1,3 @@
-/**
- * @module user.reducer - Defines the reducer for
- *     the user login.
- */
 import { createReducer } from "@reduxjs/toolkit";
 import { UserActions } from "#application/actions/user.actions.ts";
 
@@ -10,7 +6,7 @@ interface UserStatus {
     isPrivileged: boolean;
 }
 
-interface UserState {
+export interface UserState {
     userId: number;
     firstname: string;
     lastname: string;
@@ -19,14 +15,6 @@ interface UserState {
     isPending: boolean;
 }
 
-/**
- * Initial state of the user.
- *
- * @type {number} userId - id of the current user.
- * @type {string} firstname - The firstname of the user.
- * @type {string} lastname - The lastname of the user.
- * @type {string} email - The email of the user.
- */
 export const userDefaultState: UserState = {
     userId: -1,
     firstname: "",
@@ -39,13 +27,12 @@ export const userDefaultState: UserState = {
     isPending: true,
 };
 
-/**
- * Defines the reducer for incoming user actions.
- * @function userReducer
- */
 export const userReducer = createReducer(userDefaultState, (builder) => {
     builder.addCase(UserActions.setUserLoggedIn, (_state, action) => {
-        return action.payload;
+        return {
+            ...action.payload,
+            isPending: false,
+        };
     });
 
     builder.addCase(UserActions.setUserLoggedOut, () => {

@@ -81,7 +81,7 @@ const RiskPageBody = ({ project }) => {
     const [measureSortBy, setMeasureSortBy] = useState("name");
     const [measureSortDirection, setMeasureSortDirection] = useState("asc");
 
-    const userRole = useSelector((state) => state.projects.current.role);
+    const userRole = useSelector((state) => state.projects.current?.role);
 
     const projectId = parseInt(useParams().projectId);
 

@@ -81,12 +81,12 @@ export class CatalogMeasuresActions {
      * @function setCatalogMeasure
      * @returns Action to change a measure from the catalogue.
      */
-    static setCatalogMeasure = createAction("[catalog measures] set catalog measure");
+    static setCatalogMeasure = createAction<CatalogMeasure>("[catalog measures] set catalog measure");
 
     /**
      * Removes measures from the catalogue.
      * @function removeCatalogMeasure
      * @returns Action to remove a measure from the catalogue.
      */
-    static removeCatalogMeasure = createAction("[catalog measures] remove catalog measure");
+    static removeCatalogMeasure = createAction<CatalogMeasure>("[catalog measures] remove catalog measure");
 }

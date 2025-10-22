@@ -35,7 +35,7 @@ const CatalogPageBody = () => {
 
     const dispatch = useDispatch();
 
-    const userRole = useSelector((state) => state.catalogs.current.role);
+    const userRole = useSelector((state) => state.catalogs.current?.role);
 
     const catalogId = parseInt(useParams().catalogId);
     const catalog = useSelector((state) => state.catalogs.current);

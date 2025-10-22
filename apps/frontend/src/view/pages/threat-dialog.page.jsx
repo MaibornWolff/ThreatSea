@@ -12,7 +12,7 @@ import { useSelector } from "react-redux";
 const ThreatDialogPage = () => {
     const navigate = useNavigate();
     const { projectId } = useParams();
-    const userRole = useSelector((state) => state.projects.current.role);
+    const userRole = useSelector((state) => state.projects.current?.role);
     const threat = useLocation().state.threat;
     const project = useSelector((state) => state.projects.current);
 

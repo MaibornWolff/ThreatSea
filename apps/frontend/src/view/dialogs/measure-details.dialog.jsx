@@ -34,7 +34,7 @@ import { DescriptionTextField } from "#view/components/description-textfield.com
 const MeasureDetailsDialog = ({ project, measure, ...props }) => {
     const navigate = useNavigate();
     const { confirmDialog, cancelDialog } = useDialog("measures");
-    const userRole = useSelector((state) => state.projects.current.role);
+    const userRole = useSelector((state) => state.projects.current?.role);
 
     const projectId = project.id;
     const measureId = measure.id;

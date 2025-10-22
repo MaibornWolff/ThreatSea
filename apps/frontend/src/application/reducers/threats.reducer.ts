@@ -1,0 +1,49 @@
+import { createReducer } from "@reduxjs/toolkit";
+import { ThreatsActions } from "../actions/threats.actions";
+import { threatAdapter } from "../adapters/threats.adapter";
+
+type ThreatsAdapterState = ReturnType<typeof threatAdapter.getInitialState>;
+
+export type ThreatsState = ThreatsAdapterState & {
+    isPending: boolean;
+};
+
+const defaultState: ThreatsState = {
+    ...threatAdapter.getInitialState(),
+    isPending: false,
+};
+
+const threatsReducer = createReducer(defaultState, (builder) => {
+    builder.addCase(ThreatsActions.getThreats.pending, (state) => {
+        state.isPending = true;
+    });
+
+    builder.addCase(ThreatsActions.getThreats.fulfilled, (state, action) => {
+        threatAdapter.setAll(state, action);
+        state.isPending = false;
+    });
+
+    builder.addCase(ThreatsActions.getThreats.rejected, (state) => {
+        state.isPending = false;
+    });
+
+    builder.addCase(ThreatsActions.createThreat.pending, (state) => {
+        state.isPending = true;
+    });
+
+    builder.addCase(ThreatsActions.setThreat, (state, action) => {
+        threatAdapter.upsertOne(state, action.payload);
+        state.isPending = false;
+    });
+
+    builder.addCase(ThreatsActions.removeThreat, (state, action) => {
+        threatAdapter.removeOne(state, action.payload.id);
+        state.isPending = false;
+    });
+
+    builder.addCase(ThreatsActions.createThreat.rejected, (state) => {
+        state.isPending = false;
+    });
+});
+
+export default threatsReducer;

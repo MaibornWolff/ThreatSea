@@ -66,7 +66,7 @@ export class AssetsActions {
      * @param {string} type - Action type.
      * @returns Action function for changing assets.
      */
-    static setAsset = createAction("[assets] set asset");
+    static setAsset = createAction<Asset>("[assets] set asset");
 
     /**
      * Action that removes assets from the redux state.
@@ -74,5 +74,5 @@ export class AssetsActions {
      * @param {string} type - Action type.
      * @returns Action function for removing assets.
      */
-    static removeAsset = createAction("[assets] remove asset");
+    static removeAsset = createAction<Asset>("[assets] remove asset");
 }

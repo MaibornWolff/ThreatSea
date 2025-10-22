@@ -4,7 +4,13 @@
  */
 import { createAsyncThunk, createAction } from "@reduxjs/toolkit";
 import { CatalogsAPI } from "#api/catalogs.api.ts";
-import type { Catalog, CreateCatalogRequest, UpdateCatalogRequest } from "#api/types/catalogs.types.ts";
+import type {
+    Catalog,
+    CatalogWithRole,
+    CreateCatalogRequest,
+    UpdateCatalogRequest,
+} from "#api/types/catalogs.types.ts";
+import type { USER_ROLES } from "#api/types/user-roles.types.ts";
 
 /**
  * Wrapper class that defines functions
@@ -81,7 +87,7 @@ export class CatalogsActions {
      * @param {string} type - Action type.
      * @returns Action function for getting a catalogue from the redux store.
      */
-    static getCatalogFromRedux = createAction("[catalog] get single catalog from redux store");
+    static getCatalogFromRedux = createAction<number>("[catalog] get single catalog from redux store");
 
     /**
      * Action that changes a catalogue.
@@ -89,7 +95,7 @@ export class CatalogsActions {
      * @param {string} type - Action type.
      * @returns Action function for changing a catalogue.
      */
-    static setCatalog = createAction("[catalogs] set catalog");
+    static setCatalog = createAction<CatalogWithRole>("[catalogs] set catalog");
 
     /**
      * Action that removes a catalogue.
@@ -97,7 +103,7 @@ export class CatalogsActions {
      * @param {string} type - Action type.
      * @returns Action function for removing a catalogue.
      */
-    static removeCatalog = createAction("[catalogs] remove catalog");
+    static removeCatalog = createAction<Catalog>("[catalogs] remove catalog");
 
     /**
      * Action that changes the role of the user for the current catalog.
@@ -105,5 +111,5 @@ export class CatalogsActions {
      * @param {string} type - Action type.
      * @returns Action function for changing the users role.
      */
-    static changeOwnCatalogRole = createAction("[catalog] change current role");
+    static changeOwnCatalogRole = createAction<USER_ROLES>("[catalog] change current role");
 }

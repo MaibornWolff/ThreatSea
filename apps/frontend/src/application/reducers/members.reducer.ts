@@ -1,31 +1,31 @@
-/**
- * @module member.reducer - Defines the reducer for the member
- *     actions.
- */
-
 import { createReducer } from "@reduxjs/toolkit";
+import type { USER_ROLES } from "#api/types/user-roles.types.ts";
 import { MemberActions } from "../actions/members.actions";
 import { addableMembersAdapter, addedMembersAdapter } from "../adapters/members.adapter";
 
-/**
- * Initial state of the assets.
- *
- * @type {array of number} ids - ids of the assets.
- * @type {object of objects} entities - Holds the assets mapped to their id.
- *    Entity: @type {number} Key - id of the entity.
- *    Values:
- *         => @type {number} id - id of the asset.
- *         => @type {string} name - The name of the asset.
- *         => @type {string} description - The description of the asset.
- *         => @type {string} integrity - The integrity value of the asset.
- *         => @type {string} confidentiality - The confidentiality value of the asset.
- *         => @type {string} availability - The availability value of the asset.
- *         => @type {string} projectId - The id of the project.
- *         => @type {string} updatedAt - Timestamp when this asset got updated last.
- *         => @type {string} createdAt - Timestamp when this asset got created.
- * @type {boolean} isPending - Indicator if a request to the backend is still pending.
- */
-const defaultState = {
+type AddedMembersState = ReturnType<typeof addedMembersAdapter.getInitialState>;
+type AddableMembersState = ReturnType<typeof addableMembersAdapter.getInitialState>;
+
+interface MembersPendingState {
+    isAddedPending: boolean;
+    isAddablePending: boolean;
+}
+
+interface MembersAccessState {
+    userRole: USER_ROLES | undefined;
+    projectId: number | undefined;
+    catalogId: number | undefined;
+}
+
+export interface MembersState {
+    added: AddedMembersState;
+    addable: AddableMembersState;
+    pending: MembersPendingState;
+    isSelfRemoved: boolean;
+    currentUserAccess: MembersAccessState;
+}
+
+const defaultState: MembersState = {
     added: addedMembersAdapter.getInitialState(),
     addable: addableMembersAdapter.getInitialState(),
     pending: {
@@ -34,22 +34,23 @@ const defaultState = {
     },
     isSelfRemoved: false,
     currentUserAccess: {
-        userRole: -1,
-        projectId: -1,
-        catalogId: -1,
+        userRole: undefined,
+        projectId: undefined,
+        catalogId: undefined,
     },
 };
 
-const roleHandlingHelper = {
+interface RoleHandlingHelper {
+    userRole: USER_ROLES | undefined;
+    isProject: boolean;
+}
+
+export const roleHandlingHelper: RoleHandlingHelper = {
     userRole: undefined,
     isProject: false,
 };
 
-/**
- * Reducer for the assets actions.
- * @function memberReducers
- */
-const membersReducer = createReducer(defaultState, (builder) => {
+export const membersReducer = createReducer(defaultState, (builder) => {
     builder.addCase(MemberActions.getAddedMembers.pending, (state) => {
         state.pending.isAddedPending = true;
     });
@@ -97,9 +98,9 @@ const membersReducer = createReducer(defaultState, (builder) => {
         const { id, role } = action.payload;
 
         addedMembersAdapter.updateOne(state.added, {
-            id: id,
+            id,
             changes: {
-                role: role,
+                role,
             },
         });
 
@@ -130,5 +131,3 @@ const membersReducer = createReducer(defaultState, (builder) => {
         state.isSelfRemoved = false;
     });
 });
-
-export { membersReducer, roleHandlingHelper };

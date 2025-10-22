@@ -137,7 +137,7 @@ const EditorPageBody = ({ updateAutoSaveOnCLick }) => {
 
     const dispatch = useDispatch();
 
-    const userRole = useSelector((state) => state.projects.current.role);
+    const userRole = useSelector((state) => state.projects.current?.role);
     const stageScale = useSelector((state) => state.editor.stageScale);
     const stagePosition = useSelector((state) => state.editor.stagePosition);
 

@@ -2,6 +2,7 @@
  * @module confirm.actions - Defines the actions for the
  *     confirmation dialog.
  */
+import type { ConfirmState } from "#application/reducers/confirm.reducer.ts";
 import { createAction } from "@reduxjs/toolkit";
 
 export class ConfirmActions {
@@ -11,9 +12,8 @@ export class ConfirmActions {
      * @param {string} type - Action type.
      * @returns Action function for opening a confirm dialog.
      */
-    static openConfirm = createAction<{ message: string; cancelText: string | null; acceptText: string | null }>(
-        "[confirm] open confirm"
-    );
+    static openConfirm =
+        createAction<Pick<ConfirmState, "message" | "cancelText" | "acceptText">>("[confirm] open confirm");
 
     /**
      * Action that cancels a confirm dialog.
@@ -21,7 +21,7 @@ export class ConfirmActions {
      * @param {string} type - Action type.
      * @returns Action function for canceling a confirm dialog.
      */
-    static cancelConfirm = createAction("[confirm] cancel confirm");
+    static cancelConfirm = createAction<void>("[confirm] cancel confirm");
 
     /**
      * Action that accepts a confirm dialog.
@@ -29,5 +29,5 @@ export class ConfirmActions {
      * @param {string} type - Action type.
      * @returns Action function for accepting a confirm dialog.
      */
-    static acceptConfirm = createAction("[confirm] accept confirm");
+    static acceptConfirm = createAction<void>("[confirm] accept confirm");
 }

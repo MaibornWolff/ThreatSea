@@ -19,8 +19,8 @@ const MemberDialogPage = () => {
         projectCatalogId = params.catalogId;
     }
     const memberPath = useLocation().pathname.split("/")[1];
-    const userProjectRole = useSelector((state) => state.projects.current.role);
-    const userCatalogRole = useSelector((state) => state.catalogs.current.role);
+    const userProjectRole = useSelector((state) => state.projects.current?.role);
+    const userCatalogRole = useSelector((state) => state.catalogs.current?.role);
 
     const state = useLocation().state;
 
