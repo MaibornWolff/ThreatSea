@@ -127,8 +127,8 @@ importers:
         specifier: 1.0.17
         version: 1.0.17
       '@types/passport-microsoft':
-        specifier: 2.1.0
-        version: 2.1.0
+        specifier: 2.1.1
+        version: 2.1.1
       '@types/pg':
         specifier: 8.15.5
         version: 8.15.5
@@ -1438,8 +1438,8 @@ packages:
   '@types/parse-json@4.0.2':
     resolution: {integrity: sha512-dISoDXWWQwUquiKsyZ4Ng+HX2KsPL7LyHKHQwgGFEA3IaKac4Obd+h2a/a6waisAoepJlBcx9paWqjA8/HVjCw==}
 
-  '@types/passport-microsoft@2.1.0':
-    resolution: {integrity: sha512-wAhVpA7MosymqLkT9SeX9qKS1LNJjxRm20Z4/fE9NCRcnznzoqPnPEwNwM6UIa+UhngNCRsCRZyz4HjPgsRpBA==}
+  '@types/passport-microsoft@2.1.1':
+    resolution: {integrity: sha512-mtxO0nUt8PSAQd1MPD4JZXacYRx9MXYCTFjKyBEarmCJYyJlKHMwBRYltBEi/zpvC6xYX0LgK1AFXp+hQI+DEw==}
 
   '@types/passport-oauth2@1.8.0':
     resolution: {integrity: sha512-6//z+4orIOy/g3zx17HyQ71GSRK4bs7Sb+zFasRoc2xzlv7ZCJ+vkDBYFci8U6HY+or6Zy7ajf4mz4rK7nsWJQ==}
@@ -5517,7 +5517,7 @@ snapshots:
 
   '@types/parse-json@4.0.2': {}
 
-  '@types/passport-microsoft@2.1.0':
+  '@types/passport-microsoft@2.1.1':
     dependencies:
       '@types/passport-oauth2': 1.8.0
 

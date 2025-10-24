@@ -56,7 +56,7 @@
     "@types/jsonwebtoken": "9.0.10",
     "@types/node": "22.18.12",
     "@types/passport": "1.0.17",
-    "@types/passport-microsoft": "2.1.0",
+    "@types/passport-microsoft": "2.1.1",
     "@types/pg": "8.15.5",
     "@types/supertest": "6.0.3",
     "@vitest/coverage-v8": "4.0.2",
