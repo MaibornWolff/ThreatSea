@@ -6,7 +6,7 @@
 import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { CatalogThreatsActions } from "../actions/catalog-threats.actions";
-import catalogThreatsSelectors from "../selectors/catalog-threats.selectors";
+import { catalogThreatsSelectors } from "../selectors/catalog-threats.selectors";
 
 /**
  * Creates an custom catalogue threat hook.

@@ -6,7 +6,7 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ListActions } from "../actions/list.actions";
-import listSelectors from "../selectors/list.selectors";
+import { listSelectors } from "../selectors/list.selectors";
 
 /**
  * Creates a hook to filter and sort listings.

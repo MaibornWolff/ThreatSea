@@ -5,7 +5,7 @@
 
 import { useDispatch, useSelector } from "react-redux";
 import { ConfirmActions } from "../actions/confirm.actions";
-import confirmSelectors from "../selectors/confirm.selectors";
+import { confirmSelectors } from "../selectors/confirm.selectors";
 
 /**
  * Custom hook for the confirmation dialog.

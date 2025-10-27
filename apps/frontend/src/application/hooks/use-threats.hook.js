@@ -2,11 +2,11 @@ import { useCallback, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { socket } from "../../api/system-socket.api";
 import { ThreatsActions } from "../actions/threats.actions";
-import threatsSelector from "../selectors/threats.selectors";
+import { threatsSelectors } from "../selectors/threats.selectors";
 
 export const useThreats = ({ projectId }) => {
     const dispatch = useDispatch();
-    const items = useSelector((state) => threatsSelector.selectByProjectId(state, projectId));
+    const items = useSelector((state) => threatsSelectors.selectByProjectId(state, projectId));
     const isPending = useSelector((state) => state.threats.isPending);
 
     useEffect(() => {

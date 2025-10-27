@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ProjectsActions } from "../actions/projects.actions";
-import projectsSelectors from "../selectors/projects.selectors";
+import { projectsSelectors } from "../selectors/projects.selectors";
 
 /**
  * the useProjects hook can be used to load, create, delete or modify projects.

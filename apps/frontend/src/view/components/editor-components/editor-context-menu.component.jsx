@@ -21,7 +21,7 @@ import { useParams } from "react-router-dom";
 import { EditorActions } from "../../../application/actions/editor.actions";
 import { useConfirm } from "../../../application/hooks/use-confirm.hook";
 import { useEditor } from "../../../application/hooks/use-editor.hook";
-import editorSelectors from "../../../application/selectors/editor.selectors";
+import { editorSelectors } from "../../../application/selectors/editor.selectors";
 
 let opened = {
     x: 0,

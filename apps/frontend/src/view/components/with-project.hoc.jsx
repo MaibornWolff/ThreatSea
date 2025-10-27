@@ -2,7 +2,7 @@ import { LinearProgress } from "@mui/material";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ProjectsActions } from "../../application/actions/projects.actions";
-import projectsSelectors from "../../application/selectors/projects.selectors";
+import { projectsSelectors } from "../../application/selectors/projects.selectors";
 import { useParams } from "react-router-dom";
 
 export const withProject = (Component) => {

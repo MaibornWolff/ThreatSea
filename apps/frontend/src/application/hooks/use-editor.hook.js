@@ -12,8 +12,8 @@ import { AssetsActions } from "../actions/assets.actions";
 import { EditorActions } from "../actions/editor.actions";
 import { PointsOfAttackActions } from "../actions/points-of-attack.actions";
 import { SystemActions } from "../actions/system.actions";
-import editorSelectors from "../selectors/editor.selectors";
-import systemSelectors from "../selectors/system.selectors";
+import { editorSelectors } from "../selectors/editor.selectors";
+import { systemSelectors } from "../selectors/system.selectors";
 import { useSystem } from "./use-system.hook";
 
 let lastMousePointerUpdate = 0;

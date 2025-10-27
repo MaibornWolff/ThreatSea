@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { MeasuresActions } from "../actions/measures.actions";
-import measuresSelectors from "../selectors/measures.selectors";
+import { measuresSelectors } from "../selectors/measures.selectors";
 
 /**
  * the useMeasures hook can be used to load, create, delete or modify measures.

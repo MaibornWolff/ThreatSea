@@ -6,7 +6,7 @@
 import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AssetsActions } from "../actions/assets.actions";
-import assetsSelectors from "../selectors/assets.selectors";
+import { assetsSelectors } from "../selectors/assets.selectors";
 
 /**
  * Creates a custom overall hook for the assets.

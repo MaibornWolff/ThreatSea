@@ -3,7 +3,7 @@ import { useCatalogMeasures } from "./use-catalog-measures.hook";
 import { useThreats } from "./use-threats.hook";
 import { useMeasures } from "./use-measures.hook";
 import { useSelector } from "react-redux";
-import projectsSelectors from "../selectors/projects.selectors";
+import { projectsSelectors } from "../selectors/projects.selectors";
 import { useMeasureImpacts } from "./use-measureImpacts.hook";
 import { calcRiskColour } from "../../utils/calcRisk";
 

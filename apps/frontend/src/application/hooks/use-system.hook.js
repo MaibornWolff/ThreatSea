@@ -1,16 +1,16 @@
 import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { SystemActions } from "../actions/system.actions";
-import SystemSelectors from "../selectors/system.selectors";
+import { systemSelectors } from "../selectors/system.selectors";
 
 export const useSystem = ({ projectId }) => {
     const dispatch = useDispatch();
     const isPending = useSelector((state) => state.system.pending);
-    const components = useSelector((state) => SystemSelectors.selectComponents(state, projectId));
-    const connections = useSelector((state) => SystemSelectors.selectConnections(state, projectId));
-    const connectionPoints = useSelector((state) => SystemSelectors.selectConnectionPoints(state, projectId));
-    const pointsOfAttack = useSelector((state) => SystemSelectors.selectPointsOfAttack(state, projectId));
-    const hasSystemChanged = useSelector(SystemSelectors.selectHasChanged);
+    const components = useSelector((state) => systemSelectors.selectComponents(state, projectId));
+    const connections = useSelector((state) => systemSelectors.selectConnections(state, projectId));
+    const connectionPoints = useSelector((state) => systemSelectors.selectConnectionPoints(state, projectId));
+    const pointsOfAttack = useSelector((state) => systemSelectors.selectPointsOfAttack(state, projectId));
+    const hasSystemChanged = useSelector(systemSelectors.selectHasChanged);
     const initialized = useSelector((state) => state.system.initialized);
 
     const loadSystem = useCallback(() => {
