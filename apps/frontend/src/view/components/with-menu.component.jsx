@@ -10,9 +10,9 @@ import { Link, Route, Routes, useLocation, useNavigate, useParams } from "react-
 import { store } from "#main.jsx";
 import { CatalogsActions } from "../../application/actions/catalogs.actions";
 import { ProjectsActions } from "../../application/actions/projects.actions";
-import catalogsSelector from "../../application/selectors/catalogs.selector";
-import editorSelectors from "../../application/selectors/editor.selectors";
-import projectsSelectors from "../../application/selectors/projects.selectors";
+import { catalogsSelector } from "../../application/selectors/catalogs.selector";
+import { editorSelectors } from "../../application/selectors/editor.selectors";
+import { projectsSelectors } from "../../application/selectors/projects.selectors";
 import logo from "../../images/threatsealogo-dez.png";
 import ErrorBoundary from "../wrappers/error.wrapper";
 import { LanguagePicker } from "./language-picker.component";

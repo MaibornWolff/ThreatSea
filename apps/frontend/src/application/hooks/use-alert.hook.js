@@ -5,7 +5,7 @@
 
 import { useDispatch, useSelector } from "react-redux";
 import { AlertActions } from "../actions/alert.actions";
-import alertSelectors from "../selectors/alert.selectors";
+import { alertSelectors } from "../selectors/alert.selectors";
 
 /**
  * Defines a hook function for the state of the alert.

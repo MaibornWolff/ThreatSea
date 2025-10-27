@@ -6,7 +6,7 @@
 import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { CatalogsActions } from "../actions/catalogs.actions";
-import catalogsSelector from "../selectors/catalogs.selector";
+import { catalogsSelector } from "../selectors/catalogs.selector";
 
 /**
  * Creates a custom hook for the catalogues.

@@ -7,7 +7,7 @@ import { useCatalogMeasures } from "../../application/hooks/use-catalog-measures
 import { useMeasures } from "../../application/hooks/use-measures.hook.js";
 import { useAssets } from "../../application/hooks/use-assets.hook.js";
 import { useEditor } from "../../application/hooks/use-editor.hook";
-import editorSelectors from "../../application/selectors/editor.selectors";
+import { editorSelectors } from "../../application/selectors/editor.selectors";
 
 const BaseNameTextField = (
     { placeholder, error, defaultSx, sx, fieldName, register, ownId, type, catalogId, projectId, ...props },

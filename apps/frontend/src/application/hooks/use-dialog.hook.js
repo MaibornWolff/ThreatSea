@@ -5,7 +5,7 @@
 
 import { useDispatch, useSelector } from "react-redux";
 import { DialogsActions } from "../actions/dialogs.actions";
-import dialogsSelectors from "../selectors/dialogs.selectors";
+import { dialogsSelectors } from "../selectors/dialogs.selectors";
 
 /**
  * Creates a custom hook for the fillable dialogs.

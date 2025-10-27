@@ -6,7 +6,7 @@
 import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { CatalogMeasuresActions } from "../actions/catalog-measures.actions";
-import catalogMeasuresSelectors from "../selectors/catalog-measures.selectors";
+import { catalogMeasuresSelectors } from "../selectors/catalog-measures.selectors";
 
 /**
  * Creates a hook to the specified catalogue data.

@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { MeasureImpactsActions } from "../actions/measureImpacts.actions";
-import measureImpactsSelectors from "../selectors/measureImpacts.selectors";
+import { measureImpactsSelectors } from "../selectors/measureImpacts.selectors";
 
 /**
  * the useMeasureImpacts hook can be used to load, create, delete or modify measures.
