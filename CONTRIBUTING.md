@@ -23,8 +23,6 @@ If you’re unsure where to start, look for issues labeled:
 
 ## Getting Started
 
-Install [Git LFS](https://git-lfs.com/) if it is not yet available on your machine before you clone the repository.
-
 1. Fork the repository on GitHub.
 2. Create a feature/bugfix branch locally:
    - Git: git checkout -b feature/your-name-description
