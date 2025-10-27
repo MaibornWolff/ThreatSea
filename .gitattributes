@@ -1,5 +1,6 @@
 # Default behavior, in case someone does not have core.autocrlf set.
 * text eol=lf
+
 # Files that should be normalized and converted.
 *.md text
 *.json text
@@ -9,7 +10,8 @@
 *.yaml
 *.sql
 *.txt
+
 # Denote all files that are truly binary and should not be modified.
-*.png filter=lfs diff=lfs merge=lfs -text
-*.ico filter=lfs diff=lfs merge=lfs -text
-*.ttf filter=lfs diff=lfs merge=lfs -text
+*.png binary
+*.ico binary
+*.ttf binary
