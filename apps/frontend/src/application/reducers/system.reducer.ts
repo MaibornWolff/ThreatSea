@@ -1,7 +1,7 @@
 import { createReducer } from "@reduxjs/toolkit";
 import { PointsOfAttackActions } from "../actions/points-of-attack.actions";
 import { SystemActions } from "../actions/system.actions";
-import { pointsOfAttackAdapter } from "../adapters/points-of-attack.adapter";
+import { pointsOfAttackAdapter, type SystemPointOfAttack } from "../adapters/points-of-attack.adapter";
 import { systemComponentsAdapter } from "../adapters/system-components.adapter";
 import { systemConnectionPointsAdapter, type SystemConnectionPoint } from "../adapters/system-connection-point.adapter";
 import { systemConnectionsAdapter } from "../adapters/system-connections.adapter";
