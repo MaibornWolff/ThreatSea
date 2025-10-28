@@ -4,7 +4,7 @@
  */
 import { createAsyncThunk, createAction, type Update } from "@reduxjs/toolkit";
 import { SystemAPI } from "#api/system.api.ts";
-import type { Component, System, UpdateSystemRequest } from "#api/types/system.types.ts";
+import type { Component, Connection, ConnectionPoint, System, UpdateSystemRequest } from "#api/types/system.types.ts";
 import type { SystemComponent } from "#application/adapters/system-components.adapter.ts";
 import type { SystemConnection } from "#application/adapters/system-connections.adapter.ts";
 import type { SystemConnectionPoint } from "#application/adapters/system-connection-point.adapter.ts";
@@ -62,7 +62,7 @@ export class SystemActions {
      * @param {string} type - Action type.
      * @returns Action function for setting a connection line in the system view.
      */
-    static setConnections = createAction<SystemConnection[]>("[system] set connections");
+    static setConnections = createAction<Connection[]>("[system] set connections");
 
     /**
      * Action that sets the pending state of a request.
@@ -208,5 +208,5 @@ export class SystemActions {
      * @param {string} type - Action type.
      * @returns Action function for changing the connection points.
      */
-    static setConnectionPoints = createAction<SystemConnectionPoint[]>("[sysetm] set connection points");
+    static setConnectionPoints = createAction<ConnectionPoint[]>("[system] set connection points");
 }

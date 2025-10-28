@@ -6,7 +6,7 @@ import { createAsyncThunk, createAction } from "@reduxjs/toolkit";
 import { ImportsApi } from "#api/import.api.ts";
 import { ProjectsAPI } from "#api/projects.api.ts";
 import { ExportsApi } from "#api/export.api.ts";
-import type { CreateProjectRequest, ExtendedProject, Project, UpdateProjectRequest } from "#api/types/project.types.ts";
+import type { CreateProjectRequest, Project, UpdateProjectRequest } from "#api/types/project.types.ts";
 import type { USER_ROLES } from "#api/types/user-roles.types.ts";
 
 /**
@@ -92,7 +92,7 @@ export class ProjectsActions {
      * @param {string} type - Action type.
      * @returns Action function for setting a project.
      */
-    static setProject = createAction<ExtendedProject>("[projects] set project");
+    static setProject = createAction<Project>("[projects] set project");
 
     /**
      * Action that removes a project.

@@ -2,12 +2,7 @@
  * @module error.actions - Defines the actions for
  *     the non fatal error handling.
  */
-import { createAction } from "@reduxjs/toolkit";
-
-interface ErrorPayload {
-    name: string;
-    message: string;
-}
+import { createAction, type SerializedError } from "@reduxjs/toolkit";
 
 /**
  * Wrapper class to expose functions for
@@ -20,5 +15,5 @@ export class ErrorActions {
      * @param {string} type - Action type.
      * @returns Action function for setting an api error.
      */
-    static setAPIError = createAction<ErrorPayload>("[error] api request failure");
+    static setAPIError = createAction<SerializedError>("[error] api request failure");
 }

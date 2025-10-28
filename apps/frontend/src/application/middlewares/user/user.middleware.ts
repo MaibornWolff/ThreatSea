@@ -1,20 +1,20 @@
+import { isFulfilled, isRejected } from "@reduxjs/toolkit";
+import type { AppMiddleware } from "../types";
 import { UserActions } from "../../actions/user.actions";
 import { AlertActions } from "../../actions/alert.actions";
-import { isFulfilled, isRejected } from "@reduxjs/toolkit";
 
-const asyncThunks = [UserActions.logOut, UserActions.getAuthStatus];
+const asyncThunks = [UserActions.logOut, UserActions.getAuthStatus] as const;
 
 const isFullfiledAction = isFulfilled(...asyncThunks);
 
 const isRejectedAction = isRejected(...asyncThunks);
 
-const handleSuccessfulRequest =
+const handleSuccessfulRequest: AppMiddleware =
     ({ dispatch }) =>
     (next) =>
     (action) => {
         next(action);
         if (isFullfiledAction(action)) {
-            const { payload: meta } = action;
             if (UserActions.logOut.fulfilled.match(action)) {
                 dispatch(UserActions.setUserLoggedOut());
 
@@ -27,13 +27,12 @@ const handleSuccessfulRequest =
         }
     };
 
-const handleFailedRequest =
+const handleFailedRequest: AppMiddleware =
     ({ dispatch }) =>
     (next) =>
     (action) => {
         next(action);
         if (isRejectedAction(action)) {
-            const { payload: meta } = action;
             if (UserActions.logOut.rejected.match(action)) {
                 dispatch(
                     AlertActions.openErrorAlert({
@@ -46,4 +45,6 @@ const handleFailedRequest =
         }
     };
 
-export default [handleSuccessfulRequest, handleFailedRequest];
+const userMiddlewares: AppMiddleware[] = [handleSuccessfulRequest, handleFailedRequest];
+
+export default userMiddlewares;

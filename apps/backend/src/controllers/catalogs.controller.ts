@@ -94,7 +94,7 @@ export async function updateCatalog(
 
     const data = request.body;
     try {
-        const catalog = await CatalogsService.updateCatalog(catalogId, data);
+        const catalog: CatalogResponse = await CatalogsService.updateCatalog(catalogId, data);
 
         response.json(catalog);
     } catch (error) {

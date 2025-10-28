@@ -1,5 +1,6 @@
-import { EditorActions } from "../../actions/editor.actions";
 import { isFulfilled, isRejected } from "@reduxjs/toolkit";
+import type { AppMiddleware } from "../types";
+import { EditorActions } from "../../actions/editor.actions";
 import { AlertActions } from "../../actions/alert.actions";
 import { socket } from "../../../api/system-socket.api";
 
@@ -7,20 +8,20 @@ const asyncThunks = [
     EditorActions.createComponentType,
     EditorActions.updateComponentType,
     EditorActions.deleteComponentType,
-];
+] as const;
 
 const isFullfiledAction = isFulfilled(...asyncThunks);
 
 const isRejectedAction = isRejected(...asyncThunks);
 
-const handleSuccessfulRequest =
+const handleSuccessfulRequest: AppMiddleware =
     ({ dispatch }) =>
     (next) =>
     (action) => {
         next(action);
         if (isFullfiledAction(action)) {
-            const { payload: componentType } = action;
             if (EditorActions.deleteComponentType.fulfilled.match(action)) {
+                const { payload: componentType } = action;
                 dispatch(EditorActions.removeComponentType(componentType));
                 socket.emit("delete_component_type", JSON.stringify(componentType));
                 dispatch(
@@ -29,6 +30,7 @@ const handleSuccessfulRequest =
                     })
                 );
             } else if (EditorActions.createComponentType.fulfilled.match(action)) {
+                const { payload: componentType } = action;
                 dispatch(EditorActions.addComponentType(componentType));
                 socket.emit("create_component_type", JSON.stringify(componentType));
                 dispatch(
@@ -37,6 +39,7 @@ const handleSuccessfulRequest =
                     })
                 );
             } else if (EditorActions.updateComponentType.fulfilled.match(action)) {
+                const { payload: componentType } = action;
                 dispatch(
                     EditorActions.setComponentType({
                         id: componentType.id,
@@ -53,7 +56,7 @@ const handleSuccessfulRequest =
         }
     };
 
-const handleFailedRequest =
+const handleFailedRequest: AppMiddleware =
     ({ dispatch }) =>
     (next) =>
     (action) => {
@@ -76,10 +79,10 @@ const handleFailedRequest =
         }
     };
 
-const handleSelectAnchor = () => (next) => (action) => {
+const handleSelectAnchor: AppMiddleware = () => (next) => (action) => {
     next(action);
 };
 
-const editorMiddlewares = [handleSelectAnchor, handleFailedRequest, handleSuccessfulRequest];
+const editorMiddlewares: AppMiddleware[] = [handleSelectAnchor, handleFailedRequest, handleSuccessfulRequest];
 
 export default editorMiddlewares;

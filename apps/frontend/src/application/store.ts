@@ -6,6 +6,8 @@ import { middleware } from "./middlewares";
 import { rootReducer } from "./reducers";
 import { errorDefaultState } from "#application/reducers/error.reducer.ts";
 import { userDefaultState } from "#application/reducers/user.reducer.ts";
+import type { NavigationState } from "#application/reducers/navigation.reducer.ts";
+import type { RootState } from "./store.types";
 
 /**
  * Wrapper function to create the global redux store
@@ -13,18 +15,14 @@ import { userDefaultState } from "#application/reducers/user.reducer.ts";
  *
  * @returns The redux store.
  */
-export function createStore() {
+export function createStore(preloadedState?: Partial<RootState>) {
     const errorPreload = errorDefaultState;
     const userPreload = userDefaultState;
-    const navigationPreload: {
-        showLanguagePicker?: boolean;
-        showUniversalHeaderNavigation?: boolean;
-        showProjectCatalogueInnerNavigation?: boolean;
-    } = {};
+    const navigationPreload: NavigationState = {
+        showLanguagePicker: true,
+    };
 
-    navigationPreload.showLanguagePicker = true;
-
-    if (!window.location.pathname.includes("/login")) {
+    if (typeof window !== "undefined" && !window.location.pathname.includes("/login")) {
         navigationPreload.showUniversalHeaderNavigation = true;
         navigationPreload.showProjectCatalogueInnerNavigation = true;
     } else {
@@ -40,12 +38,10 @@ export function createStore() {
             user: userPreload,
             error: errorPreload,
             navigation: navigationPreload,
+            ...preloadedState,
         },
     });
 }
 
-// Infer the type of makeStore
 export type AppStore = ReturnType<typeof createStore>;
-// Infer the `RootState` and `AppDispatch` types from the store itself
-export type RootState = ReturnType<AppStore["getState"]>;
-export type AppDispatch = AppStore["dispatch"];
+export type { RootState, AppDispatch } from "./store.types";

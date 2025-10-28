@@ -1,4 +1,5 @@
 import { isFulfilled, isRejected } from "@reduxjs/toolkit";
+import type { AppMiddleware } from "../types";
 import { AlertActions } from "../../actions/alert.actions";
 import { CatalogMeasuresActions } from "../../actions/catalog-measures.actions";
 import { batch } from "react-redux";
@@ -9,20 +10,20 @@ const asyncThunks = [
     CatalogMeasuresActions.importCatalogMeasures,
     CatalogMeasuresActions.updateCatalogMeasure,
     CatalogMeasuresActions.deleteCatalogMeasure,
-];
+] as const;
 
 const isFullfiledAction = isFulfilled(...asyncThunks);
 
 const isRejectedAction = isRejected(...asyncThunks);
 
-const handleSuccessfulRequest =
+const handleSuccessfulRequest: AppMiddleware =
     ({ dispatch }) =>
     (next) =>
     (action) => {
         next(action);
         if (isFullfiledAction(action)) {
-            const { payload } = action;
             if (CatalogMeasuresActions.deleteCatalogMeasure.fulfilled.match(action)) {
+                const { payload } = action;
                 dispatch(CatalogMeasuresActions.removeCatalogMeasure(payload));
                 socket.emit("remove_catalog_measure", JSON.stringify(payload));
                 dispatch(
@@ -31,6 +32,7 @@ const handleSuccessfulRequest =
                     })
                 );
             } else if (CatalogMeasuresActions.importCatalogMeasures.fulfilled.match(action)) {
+                const { payload } = action;
                 batch(() => {
                     payload.forEach((item) => {
                         dispatch(CatalogMeasuresActions.setCatalogMeasure(item));
@@ -43,6 +45,7 @@ const handleSuccessfulRequest =
                     );
                 });
             } else {
+                const { payload } = action;
                 dispatch(CatalogMeasuresActions.setCatalogMeasure(payload));
                 socket.emit("set_catalog_measure", JSON.stringify(payload));
                 dispatch(
@@ -54,14 +57,14 @@ const handleSuccessfulRequest =
         }
     };
 
-const handleFailedRequest =
+const handleFailedRequest: AppMiddleware =
     ({ dispatch }) =>
     (next) =>
     (action) => {
         next(action);
         if (isRejectedAction(action)) {
-            const { arg: catalogMeasure } = action.meta;
             if (CatalogMeasuresActions.deleteCatalogMeasure.rejected.match(action)) {
+                const { arg: catalogMeasure } = action.meta;
                 dispatch(
                     AlertActions.openErrorAlert({
                         text: `Failed to delete Catalog Measure '${catalogMeasure.name}'`,
@@ -74,6 +77,7 @@ const handleFailedRequest =
                     })
                 );
             } else {
+                const { arg: catalogMeasure } = action.meta;
                 dispatch(
                     AlertActions.openErrorAlert({
                         text: `Failed to save Catalog Measure '${catalogMeasure.name}'`,
@@ -83,6 +87,6 @@ const handleFailedRequest =
         }
     };
 
-const catalogThreatsMiddlewares = [handleSuccessfulRequest, handleFailedRequest];
+const catalogThreatsMiddlewares: AppMiddleware[] = [handleSuccessfulRequest, handleFailedRequest];
 
 export default catalogThreatsMiddlewares;

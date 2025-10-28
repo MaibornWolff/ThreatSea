@@ -4,7 +4,7 @@
  */
 import { createAsyncThunk, createAction } from "@reduxjs/toolkit";
 import { ThreatsAPI } from "#api/threats.api.ts";
-import type { CreateThreatRequest, ExtendedThreat, Threat, UpdateThreatRequest } from "#api/types/threat.types.ts";
+import type { CreateThreatRequest, Threat, UpdateThreatRequest } from "#api/types/threat.types.ts";
 
 /**
  * Wrapper class for the threat view actions.
@@ -65,7 +65,7 @@ export class ThreatsActions {
      * @param {string} type - Action type.
      * @returns Action function for setting/changing a threat.
      */
-    static setThreat = createAction<ExtendedThreat>("[threats] set threat");
+    static setThreat = createAction<Threat>("[threats] set threat");
 
     /**
      * Action that removes a threat.
@@ -73,5 +73,5 @@ export class ThreatsActions {
      * @param {string} type - Action type.
      * @returns Action function for removing a threat.
      */
-    static removeThreat = createAction<ExtendedThreat>("[threats] remove threat");
+    static removeThreat = createAction<Threat>("[threats] remove threat");
 }

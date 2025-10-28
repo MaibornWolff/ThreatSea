@@ -12,7 +12,7 @@ import { createAction } from "@reduxjs/toolkit";
  *     alert will be gone.
  * @returns Payload for the alert action.
  */
-function prepareOpenAlert({ text, duration = 3000 }: { text: string; duration: number }): {
+function prepareOpenAlert({ text, duration = 3000 }: { text: string; duration?: number }): {
     payload: { text: string; duration: number };
 } {
     return {

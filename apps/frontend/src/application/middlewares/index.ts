@@ -1,3 +1,4 @@
+import type { AppMiddleware } from "./types";
 import assets from "./assets/assets.middleware";
 import projects from "./projects/projects.middleware";
 import alert from "./alert/alert.middleware";
@@ -10,11 +11,11 @@ import measures from "./measures/measures.middleware";
 import measureImpacts from "./measureImpacts/measureImpacts.middleware";
 import catalogThreats from "./catalogThreats/catalog-threats.middleware";
 import catalogMeasures from "./catalogMeasures/catalog-threats.middleware";
-import { errorMiddlewares as errors } from "./error.middleware";
+import errors from "./error.middleware";
 import members from "./members.middleware";
 import user from "./user/user.middleware";
 
-export const middleware = [
+export const middleware: AppMiddleware[] = [
     ...errors,
     ...assets,
     ...projects,

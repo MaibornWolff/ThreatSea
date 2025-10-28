@@ -1,4 +1,5 @@
 import { isFulfilled, isRejected } from "@reduxjs/toolkit";
+import type { AppMiddleware } from "../types";
 import { AlertActions } from "../../actions/alert.actions";
 import { CatalogThreatsActions } from "../../actions/catalog-threats.actions";
 import { batch } from "react-redux";
@@ -9,20 +10,20 @@ const asyncThunks = [
     CatalogThreatsActions.importCatalogThreats,
     CatalogThreatsActions.updateCatalogThreat,
     CatalogThreatsActions.deleteCatalogThreat,
-];
+] as const;
 
 const isFullfiledAction = isFulfilled(...asyncThunks);
 
 const isRejectedAction = isRejected(...asyncThunks);
 
-const handleSuccessfulRequest =
+const handleSuccessfulRequest: AppMiddleware =
     ({ dispatch }) =>
     (next) =>
     (action) => {
         next(action);
         if (isFullfiledAction(action)) {
-            const { payload } = action;
             if (CatalogThreatsActions.deleteCatalogThreat.fulfilled.match(action)) {
+                const { payload } = action;
                 dispatch(CatalogThreatsActions.removeCatalogThreat(payload));
                 socket.emit("remove_catalog_threat", JSON.stringify(payload));
                 dispatch(
@@ -31,6 +32,7 @@ const handleSuccessfulRequest =
                     })
                 );
             } else if (CatalogThreatsActions.importCatalogThreats.fulfilled.match(action)) {
+                const { payload } = action;
                 batch(() => {
                     payload.forEach((item) => {
                         dispatch(CatalogThreatsActions.setCatalogThreat(item));
@@ -43,6 +45,7 @@ const handleSuccessfulRequest =
                     );
                 });
             } else {
+                const { payload } = action;
                 dispatch(CatalogThreatsActions.setCatalogThreat(payload));
                 socket.emit("set_catalog_threat", JSON.stringify(payload));
                 dispatch(
@@ -54,14 +57,14 @@ const handleSuccessfulRequest =
         }
     };
 
-const handleFailedRequest =
+const handleFailedRequest: AppMiddleware =
     ({ dispatch }) =>
     (next) =>
     (action) => {
         next(action);
         if (isRejectedAction(action)) {
-            const { arg: asset } = action.meta;
             if (CatalogThreatsActions.deleteCatalogThreat.rejected.match(action)) {
+                const { arg: asset } = action.meta;
                 dispatch(
                     AlertActions.openErrorAlert({
                         text: `Failed to delete Catalog Threat '${asset.name}'`,
@@ -74,6 +77,7 @@ const handleFailedRequest =
                     })
                 );
             } else {
+                const { arg: asset } = action.meta;
                 dispatch(
                     AlertActions.openErrorAlert({
                         text: `Failed to save Catalog Threat '${asset.name}'`,
@@ -83,6 +87,6 @@ const handleFailedRequest =
         }
     };
 
-const catalogThreatsMiddlewares = [handleSuccessfulRequest, handleFailedRequest];
+const catalogThreatsMiddlewares: AppMiddleware[] = [handleSuccessfulRequest, handleFailedRequest];
 
 export default catalogThreatsMiddlewares;

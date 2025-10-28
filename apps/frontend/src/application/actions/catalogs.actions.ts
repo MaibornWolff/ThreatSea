@@ -4,12 +4,7 @@
  */
 import { createAsyncThunk, createAction } from "@reduxjs/toolkit";
 import { CatalogsAPI } from "#api/catalogs.api.ts";
-import type {
-    Catalog,
-    CatalogWithRole,
-    CreateCatalogRequest,
-    UpdateCatalogRequest,
-} from "#api/types/catalogs.types.ts";
+import type { Catalog, CreateCatalogRequest, UpdateCatalogRequest } from "#api/types/catalogs.types.ts";
 import type { USER_ROLES } from "#api/types/user-roles.types.ts";
 
 /**
@@ -95,7 +90,7 @@ export class CatalogsActions {
      * @param {string} type - Action type.
      * @returns Action function for changing a catalogue.
      */
-    static setCatalog = createAction<CatalogWithRole>("[catalogs] set catalog");
+    static setCatalog = createAction<Catalog>("[catalogs] set catalog");
 
     /**
      * Action that removes a catalogue.

@@ -1,7 +1,4 @@
-/**
- * @module index - Combines all reducers defined
- *     in other files into one root reducer.
- */
+import { combineReducers } from "@reduxjs/toolkit";
 import projects from "./projects.reducer";
 import { listReducer as list } from "./list.reducer";
 import dialogs from "./dialogs.reducer";
@@ -21,9 +18,7 @@ import { errorReducer as error } from "./error.reducer";
 import { navigationReducer as navigation } from "./navigation.reducer";
 import { membersReducer as members } from "./members.reducer";
 
-// The names of the reducers, define the state
-// object inside the global redux state.
-export const rootReducer = {
+const reducers = {
     assets,
     projects,
     catalogs,
@@ -43,3 +38,6 @@ export const rootReducer = {
     navigation,
     members,
 };
+
+export type ReducersMap = typeof reducers;
+export const rootReducer = combineReducers(reducers);

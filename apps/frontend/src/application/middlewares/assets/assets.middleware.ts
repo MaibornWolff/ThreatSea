@@ -1,23 +1,24 @@
 import { isFulfilled, isRejected } from "@reduxjs/toolkit";
+import type { AppMiddleware } from "../types";
 import { socket } from "../../../api/system-socket.api";
 import { AlertActions } from "../../actions/alert.actions";
 import { AssetsActions } from "../../actions/assets.actions";
 import { EditorActions } from "../../actions/editor.actions";
 
-const asyncThunks = [AssetsActions.updateAsset, AssetsActions.createAsset, AssetsActions.deleteAsset];
+const asyncThunks = [AssetsActions.updateAsset, AssetsActions.createAsset, AssetsActions.deleteAsset] as const;
 
 const isFullfiledAction = isFulfilled(...asyncThunks);
 
 const isRejectedAction = isRejected(...asyncThunks);
 
-const handleSuccessfulRequest =
+const handleSuccessfulRequest: AppMiddleware =
     ({ dispatch }) =>
     (next) =>
     (action) => {
         next(action);
         if (isFullfiledAction(action)) {
-            const { payload } = action;
             if (AssetsActions.deleteAsset.fulfilled.match(action)) {
+                const { payload } = action;
                 socket.emit("remove_asset", JSON.stringify(payload));
 
                 dispatch(AssetsActions.removeAsset(payload));
@@ -28,6 +29,7 @@ const handleSuccessfulRequest =
                     })
                 );
             } else {
+                const { payload } = action;
                 socket.emit("set_asset", JSON.stringify(payload));
                 dispatch(AssetsActions.setAsset(payload));
                 dispatch(EditorActions.setAutoSaveStatus("upToDate"));
@@ -40,7 +42,7 @@ const handleSuccessfulRequest =
         }
     };
 
-const handleFailedRequest =
+const handleFailedRequest: AppMiddleware =
     ({ dispatch }) =>
     (next) =>
     (action) => {
@@ -65,6 +67,6 @@ const handleFailedRequest =
         }
     };
 
-const assetsMiddlewares = [handleSuccessfulRequest, handleFailedRequest];
+const assetsMiddlewares: AppMiddleware[] = [handleSuccessfulRequest, handleFailedRequest];
 
 export default assetsMiddlewares;

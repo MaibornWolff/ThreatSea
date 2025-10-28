@@ -57,9 +57,9 @@ const catalogsReducer = createReducer(defaultState, (builder) => {
     });
 
     builder.addCase(CatalogsActions.setCatalog, (state, action) => {
-        action.payload.role = USER_ROLES.OWNER;
+        const catalogWithRole: CatalogWithRole = { ...action.payload, role: USER_ROLES.OWNER };
 
-        catalogsAdapter.upsertOne(state, action.payload);
+        catalogsAdapter.upsertOne(state, catalogWithRole);
         state.isPending = false;
     });
 
