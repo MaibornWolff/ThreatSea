@@ -51,7 +51,7 @@
     "@types/compression": "1.8.1",
     "@types/cookie-parser": "1.4.10",
     "@types/cors": "2.8.19",
-    "@types/express": "5.0.4",
+    "@types/express": "5.0.5",
     "@types/express-session": "1.18.2",
     "@types/jsonwebtoken": "9.0.10",
     "@types/node": "22.18.12",

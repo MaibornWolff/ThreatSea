@@ -107,13 +107,13 @@ importers:
         version: 1.8.1
       '@types/cookie-parser':
         specifier: 1.4.10
-        version: 1.4.10(@types/express@5.0.4)
+        version: 1.4.10(@types/express@5.0.5)
       '@types/cors':
         specifier: 2.8.19
         version: 2.8.19
       '@types/express':
-        specifier: 5.0.4
-        version: 5.0.4
+        specifier: 5.0.5
+        version: 5.0.5
       '@types/express-session':
         specifier: 1.18.2
         version: 1.18.2
@@ -1396,8 +1396,8 @@ packages:
   '@types/express-session@1.18.2':
     resolution: {integrity: sha512-k+I0BxwVXsnEU2hV77cCobC08kIsn4y44C3gC0b46uxZVMaXA04lSPgRLR/bSL2w0t0ShJiG8o4jPzRG/nscFg==}
 
-  '@types/express@5.0.4':
-    resolution: {integrity: sha512-g64dbryHk7loCIrsa0R3shBnEu5p6LPJ09bu9NG58+jz+cRUjFrc3Bz0kNQ7j9bXeCsrRDvNET1G54P/GJkAyA==}
+  '@types/express@5.0.5':
+    resolution: {integrity: sha512-LuIQOcb6UmnF7C1PCFmEU1u2hmiHL43fgFQX67sN3H4Z+0Yk0Neo++mFsBjhOAuLzvlQeqAAkeDOZrJs9rzumQ==}
 
   '@types/http-errors@2.0.5':
     resolution: {integrity: sha512-r8Tayk8HJnX0FztbZN7oVqGccWgw98T/0neJphO91KkmOzug1KkofZURD4UaD5uH8AqcFLfdPErnBod0u71/qg==}
@@ -5411,16 +5411,16 @@ snapshots:
 
   '@types/compression@1.8.1':
     dependencies:
-      '@types/express': 5.0.4
+      '@types/express': 5.0.5
       '@types/node': 22.18.12
 
   '@types/connect@3.4.38':
     dependencies:
       '@types/node': 22.18.12
 
-  '@types/cookie-parser@1.4.10(@types/express@5.0.4)':
+  '@types/cookie-parser@1.4.10(@types/express@5.0.5)':
     dependencies:
-      '@types/express': 5.0.4
+      '@types/express': 5.0.5
 
   '@types/cookiejar@2.1.5': {}
 
@@ -5441,9 +5441,9 @@ snapshots:
 
   '@types/express-session@1.18.2':
     dependencies:
-      '@types/express': 5.0.4
+      '@types/express': 5.0.5
 
-  '@types/express@5.0.4':
+  '@types/express@5.0.5':
     dependencies:
       '@types/body-parser': 1.19.6
       '@types/express-serve-static-core': 5.1.0
@@ -5491,13 +5491,13 @@ snapshots:
 
   '@types/passport-oauth2@1.8.0':
     dependencies:
-      '@types/express': 5.0.4
+      '@types/express': 5.0.5
       '@types/oauth': 0.9.6
       '@types/passport': 1.0.17
 
   '@types/passport@1.0.17':
     dependencies:
-      '@types/express': 5.0.4
+      '@types/express': 5.0.5
 
   '@types/pg@8.15.5':
     dependencies:
