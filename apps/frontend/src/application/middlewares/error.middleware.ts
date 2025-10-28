@@ -1,4 +1,5 @@
 import { isRejected } from "@reduxjs/toolkit";
+import type { AppMiddleware } from "./types";
 import { AssetsActions } from "../actions/assets.actions";
 import { CatalogMeasuresActions } from "../actions/catalog-measures.actions";
 import { CatalogThreatsActions } from "../actions/catalog-threats.actions";
@@ -66,11 +67,11 @@ const asyncThunks = [
     ThreatsActions.deleteThreat,
     UserActions.getAuthStatus,
     UserActions.logOut,
-];
+] as const;
 
 const isRejectedAction = isRejected(...asyncThunks);
 
-const handleErrors =
+const handleErrors: AppMiddleware =
     ({ dispatch }) =>
     (next) =>
     (action) => {
@@ -93,6 +94,6 @@ const handleErrors =
         }
     };
 
-const errorMiddlewares = [handleErrors];
+const errorMiddlewares: AppMiddleware[] = [handleErrors];
 
-export { errorMiddlewares };
+export default errorMiddlewares;

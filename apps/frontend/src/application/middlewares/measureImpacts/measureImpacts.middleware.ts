@@ -1,25 +1,26 @@
+import { isFulfilled, isRejected } from "@reduxjs/toolkit";
+import type { AppMiddleware } from "../types";
 import { AlertActions } from "../../actions/alert.actions";
 import { MeasureImpactsActions } from "../../actions/measureImpacts.actions";
-import { isFulfilled, isRejected } from "@reduxjs/toolkit";
 
 const asyncThunks = [
     MeasureImpactsActions.createMeasureImpact,
     MeasureImpactsActions.updateMeasureImpact,
     MeasureImpactsActions.deleteMeasureImpact,
-];
+] as const;
 
 const isFullfiledAction = isFulfilled(...asyncThunks);
 
 const isRejectedAction = isRejected(...asyncThunks);
 
-const handleSuccessfulRequest =
+const handleSuccessfulRequest: AppMiddleware =
     ({ dispatch }) =>
     (next) =>
     (action) => {
         next(action);
         if (isFullfiledAction(action)) {
-            const { payload } = action;
             if (MeasureImpactsActions.deleteMeasureImpact.fulfilled.match(action)) {
+                const { payload } = action;
                 dispatch(MeasureImpactsActions.removeMeasureImpact(payload));
                 dispatch(
                     AlertActions.openSuccessAlert({
@@ -27,6 +28,7 @@ const handleSuccessfulRequest =
                     })
                 );
             } else {
+                const { payload } = action;
                 dispatch(MeasureImpactsActions.setMeasureImpact(payload));
                 dispatch(
                     AlertActions.openSuccessAlert({
@@ -37,7 +39,7 @@ const handleSuccessfulRequest =
         }
     };
 
-const handleFailedRequest =
+const handleFailedRequest: AppMiddleware =
     ({ dispatch }) =>
     (next) =>
     (action) => {
@@ -59,4 +61,6 @@ const handleFailedRequest =
         }
     };
 
-export default [handleSuccessfulRequest, handleFailedRequest];
+const measureImpactsMiddlewares: AppMiddleware[] = [handleSuccessfulRequest, handleFailedRequest];
+
+export default measureImpactsMiddlewares;

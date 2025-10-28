@@ -1,22 +1,27 @@
+import { isFulfilled, isRejected } from "@reduxjs/toolkit";
+import type { AppMiddleware } from "../types";
 import { AlertActions } from "../../actions/alert.actions";
 import { MeasuresActions } from "../../actions/measures.actions";
-import { isFulfilled, isRejected } from "@reduxjs/toolkit";
 import { DialogsActions } from "../../actions/dialogs.actions";
 
-const asyncThunks = [MeasuresActions.updateMeasure, MeasuresActions.createMeasure, MeasuresActions.deleteMeasure];
+const asyncThunks = [
+    MeasuresActions.updateMeasure,
+    MeasuresActions.createMeasure,
+    MeasuresActions.deleteMeasure,
+] as const;
 
 const isFullfiledAction = isFulfilled(...asyncThunks);
 
 const isRejectedAction = isRejected(...asyncThunks);
 
-const handleSuccessfulRequest =
+const handleSuccessfulRequest: AppMiddleware =
     ({ dispatch }) =>
     (next) =>
     (action) => {
         next(action);
         if (isFullfiledAction(action)) {
-            const { payload: measure, meta } = action;
             if (MeasuresActions.deleteMeasure.fulfilled.match(action)) {
+                const { payload: measure } = action;
                 dispatch(MeasuresActions.removeMeasure(measure));
                 dispatch(
                     AlertActions.openSuccessAlert({
@@ -24,8 +29,10 @@ const handleSuccessfulRequest =
                     })
                 );
             } else {
+                const { payload: measure, meta } = action;
                 dispatch(MeasuresActions.setMeasure(measure));
-                if (meta.arg.preSelectMeasureImpactDialog) {
+                // TODO: Is preSelectMeasureImpactDialog legacy? Should this check be removed/altered?
+                if ((meta.arg as unknown as { preSelectMeasureImpactDialog: unknown }).preSelectMeasureImpactDialog) {
                     dispatch(
                         DialogsActions.setValue("measureImpacts", {
                             measureId: measure.id,
@@ -41,7 +48,7 @@ const handleSuccessfulRequest =
         }
     };
 
-const handleFailedRequest =
+const handleFailedRequest: AppMiddleware =
     ({ dispatch }) =>
     (next) =>
     (action) => {
@@ -64,4 +71,6 @@ const handleFailedRequest =
         }
     };
 
-export default [handleSuccessfulRequest, handleFailedRequest];
+const measuresMiddlewares: AppMiddleware[] = [handleSuccessfulRequest, handleFailedRequest];
+
+export default measuresMiddlewares;

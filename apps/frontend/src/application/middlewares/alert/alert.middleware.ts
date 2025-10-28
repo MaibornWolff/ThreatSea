@@ -3,6 +3,7 @@
  *     for the alert.
  */
 
+import type { AppMiddleware } from "../types";
 import { AlertActions } from "../../actions/alert.actions";
 
 /**
@@ -11,7 +12,7 @@ import { AlertActions } from "../../actions/alert.actions";
  * @param {Object} dispatch - Dispatch function of the alert component.
  * @returns Function which is called before the actual action.
  */
-const handleOpenSuccessAlert =
+const handleOpenSuccessAlert: AppMiddleware =
     ({ dispatch }) =>
     (next) =>
     (action) => {
@@ -39,7 +40,7 @@ const handleOpenSuccessAlert =
  * @param {Object} dispatch - Dispatch function of the alert component.
  * @returns Function which is called before the actual action.
  */
-const handleOpenErrorAlert =
+const handleOpenErrorAlert: AppMiddleware =
     ({ dispatch }) =>
     (next) =>
     (action) => {
@@ -66,7 +67,7 @@ const handleOpenErrorAlert =
  * @param {Object} dispatch - Dispatch function of the alert component.
  * @returns Function which is called before the actual action.
  */
-const handleCloseOnTimeout =
+const handleCloseOnTimeout: AppMiddleware =
     ({ dispatch }) =>
     (next) =>
     (action) => {
@@ -84,6 +85,6 @@ const handleCloseOnTimeout =
     };
 
 // Combines as an array for the export.
-const alertMiddlewares = [handleCloseOnTimeout, handleOpenErrorAlert, handleOpenSuccessAlert];
+const alertMiddlewares: AppMiddleware[] = [handleCloseOnTimeout, handleOpenErrorAlert, handleOpenSuccessAlert];
 
 export default alertMiddlewares;

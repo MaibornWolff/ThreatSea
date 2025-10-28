@@ -1,6 +1,7 @@
+import { isFulfilled, isRejected } from "@reduxjs/toolkit";
+import type { AppMiddleware } from "../types";
 import { AlertActions } from "../../actions/alert.actions";
 import { ThreatsActions } from "../../actions/threats.actions";
-import { isFulfilled, isRejected } from "@reduxjs/toolkit";
 import { socket } from "../../../api/system-socket.api";
 
 const asyncThunks = [
@@ -8,21 +9,20 @@ const asyncThunks = [
     ThreatsActions.createThreat,
     ThreatsActions.deleteThreat,
     ThreatsActions.deleteThreat,
-];
+] as const;
 
 const isFullfiledAction = isFulfilled(...asyncThunks);
 
 const isRejectedAction = isRejected(...asyncThunks);
 
-const handleSuccessfulRequest =
+const handleSuccessfulRequest: AppMiddleware =
     ({ dispatch }) =>
     (next) =>
     (action) => {
         next(action);
         if (isFullfiledAction(action)) {
-            const { payload: threat } = action;
-
             if (ThreatsActions.deleteThreat.fulfilled.match(action)) {
+                const { payload: threat } = action;
                 dispatch(ThreatsActions.removeThreat(threat));
                 socket.emit("remove_threat", JSON.stringify(threat));
                 dispatch(
@@ -31,6 +31,7 @@ const handleSuccessfulRequest =
                     })
                 );
             } else {
+                const { payload: threat } = action;
                 dispatch(ThreatsActions.setThreat(threat));
 
                 socket.emit("set_threat", JSON.stringify(threat));
@@ -43,7 +44,7 @@ const handleSuccessfulRequest =
         }
     };
 
-const handleFailedRequest =
+const handleFailedRequest: AppMiddleware =
     ({ dispatch }) =>
     (next) =>
     (action) => {
@@ -66,4 +67,6 @@ const handleFailedRequest =
         }
     };
 
-export default [handleSuccessfulRequest, handleFailedRequest];
+const threatsMiddlewares: AppMiddleware[] = [handleSuccessfulRequest, handleFailedRequest];
+
+export default threatsMiddlewares;

@@ -1,6 +1,7 @@
 import { createReducer } from "@reduxjs/toolkit";
 import { ThreatsActions } from "../actions/threats.actions";
 import { threatAdapter } from "../adapters/threats.adapter";
+import type { ExtendedThreat } from "#api/types/threat.types.ts";
 
 type ThreatsAdapterState = ReturnType<typeof threatAdapter.getInitialState>;
 
@@ -32,7 +33,15 @@ const threatsReducer = createReducer(defaultState, (builder) => {
     });
 
     builder.addCase(ThreatsActions.setThreat, (state, action) => {
-        threatAdapter.upsertOne(state, action.payload);
+        const extendedThreat: ExtendedThreat = {
+            componentName: null,
+            componentType: null,
+            interfaceName: null,
+            assets: [],
+            ...action.payload,
+        };
+
+        threatAdapter.upsertOne(state, extendedThreat);
         state.isPending = false;
     });
 

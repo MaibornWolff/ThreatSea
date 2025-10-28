@@ -1,4 +1,5 @@
 import { isFulfilled } from "@reduxjs/toolkit";
+import type { AppMiddleware } from "./types";
 import { AlertActions } from "../actions/alert.actions";
 import { CatalogsActions } from "../actions/catalogs.actions";
 import { MemberActions } from "../actions/members.actions";
@@ -8,11 +9,11 @@ const successAlertThunks = [
     MemberActions.addAddableMember,
     MemberActions.updateAddedMember,
     MemberActions.deleteAddedMember,
-];
+] as const;
 
 const isMemberActionFulfilled = isFulfilled(...successAlertThunks);
 
-const handleMemberSuccessAlert =
+const handleMemberSuccessAlert: AppMiddleware =
     ({ dispatch }) =>
     (next) =>
     (action) => {
@@ -57,4 +58,6 @@ const handleMemberSuccessAlert =
         }
     };
 
-export default [handleMemberSuccessAlert];
+const membersMiddlewares: AppMiddleware[] = [handleMemberSuccessAlert];
+
+export default membersMiddlewares;

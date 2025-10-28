@@ -1,4 +1,5 @@
 import { batch } from "react-redux";
+import type { AppMiddleware } from "../types";
 import { checkUserRole, USER_ROLES } from "../../../api/types/user-roles.types";
 import { translationUtil } from "../../../utils/translations";
 import { AlertActions } from "../../actions/alert.actions";
@@ -6,17 +7,12 @@ import { EditorActions } from "../../actions/editor.actions";
 import { PointsOfAttackActions } from "../../actions/points-of-attack.actions";
 import { SystemActions } from "../../actions/system.actions";
 import { ProjectsActions } from "../../actions/projects.actions";
+import type { SystemComponent } from "../../adapters/system-components.adapter";
+import type { SystemConnection } from "../../adapters/system-connections.adapter";
+import type { Connection, UpdateSystemRequest } from "#api/types/system.types.ts";
+import type { EditorState } from "#application/reducers/editor.reducer.ts";
 
-const filterProps = (item, filterProps = []) => {
-    return Object.keys(item)
-        .filter((key) => !filterProps.includes(key))
-        .reduce((obj, key) => {
-            obj[key] = item[key];
-            return obj;
-        }, {});
-};
-
-const handleSaveSystem =
+const handleSaveSystem: AppMiddleware =
     ({ dispatch, getState }) =>
     (next) =>
     (action) => {
@@ -30,39 +26,32 @@ const handleSaveSystem =
             const { system, editor } = getState();
             const { id, connections, components, pointsOfAttack, connectionPoints } = system;
             const { lastAutoSaveDate } = editor;
-            const data = {
+            const data: UpdateSystemRequest = {
+                projectId,
                 image,
                 data: {
                     connections: Object.values(connections.entities)
                         .filter((item) => item.projectId === projectId)
-                        .map((item) => {
-                            return filterProps(item, ["visible"]);
-                        }),
+                        .map((connection) => ({ ...connection, visible: undefined })),
                     components: Object.values(components.entities)
                         .filter((item) => item.projectId === projectId)
-                        .map((item) => {
-                            return filterProps(item, ["alwaysShowAnchors"]);
-                        }),
+                        .map((component) => ({ ...component, alwaysShowAnchors: undefined })),
                     pointsOfAttack: Object.values(pointsOfAttack.entities).filter(
                         (item) => item.projectId === projectId
                     ),
                     connectionPoints: Object.values(connectionPoints.entities).filter(
                         (item) => item.projectId === projectId
                     ),
-                    lastAutoSaveDate: lastAutoSaveDate,
+                    lastAutoSaveDate,
                 },
             };
+            // TODO: Is id legacy? Should this check be removed/altered? As far as I can see it is not needed.
             if (id) {
-                data.id = id;
+                (data as UpdateSystemRequest & { id: number | null }).id = id;
             }
             dispatch(EditorActions.setAutoSaveStatus("saving"));
             dispatch(EditorActions.setAutoSaveText(""));
-            dispatch(
-                SystemActions.updateSystem({
-                    projectId,
-                    ...data,
-                })
-            )
+            dispatch(SystemActions.updateSystem(data))
                 .unwrap()
                 .then((result) => {
                     if (!result) {
@@ -71,13 +60,13 @@ const handleSaveSystem =
                         dispatch(
                             EditorActions.setAutoSaveText(
                                 translationUtil.t("editorPage:autoSave.failed", {
-                                    error: result.message,
+                                    error: (result as { message?: string } | undefined)?.message ?? "",
                                 })
                             )
                         );
                     }
                 })
-                .catch((error) => {
+                .catch((error: Error) => {
                     dispatch(EditorActions.setAutoSaveStatus("failed"));
                     dispatch(
                         EditorActions.setAutoSaveText(
@@ -90,7 +79,7 @@ const handleSaveSystem =
         }
     };
 
-const handleUpdateSystemSuccesful =
+const handleUpdateSystemSuccesful: AppMiddleware =
     ({ dispatch }) =>
     (next) =>
     (action) => {
@@ -101,7 +90,7 @@ const handleUpdateSystemSuccesful =
         }
     };
 
-const handleUpdateSystemFailed =
+const handleUpdateSystemFailed: AppMiddleware =
     ({ dispatch }) =>
     (next) =>
     (action) => {
@@ -115,7 +104,7 @@ const handleUpdateSystemFailed =
         }
     };
 
-const handleGetSystemFailed =
+const handleGetSystemFailed: AppMiddleware =
     ({ dispatch }) =>
     (next) =>
     (action) => {
@@ -130,7 +119,10 @@ const handleGetSystemFailed =
         }
     };
 
-const compareComponents = (component1, component2) => {
+const compareComponents = (component1: SystemComponent, component2: SystemComponent | undefined): boolean => {
+    if (!component2) {
+        return false;
+    }
     return (
         component1.id === component2.id &&
         component1.name === component2.name &&
@@ -141,7 +133,10 @@ const compareComponents = (component1, component2) => {
     );
 };
 
-const compareConnections = (connection1, connection2) => {
+const compareConnections = (connection1: Connection, connection2: SystemConnection | undefined): boolean => {
+    if (!connection2) {
+        return false;
+    }
     return (
         connection1.id === connection2.id &&
         connection1.recalculate === connection2.recalculate &&
@@ -149,7 +144,7 @@ const compareConnections = (connection1, connection2) => {
     );
 };
 
-const handleUserDidSomething =
+const handleUserDidSomething: AppMiddleware =
     ({ dispatch, getState }) =>
     (next) =>
     (action) => {
@@ -188,7 +183,7 @@ const handleUserDidSomething =
         }
     };
 
-const handleSuccessfulRequest =
+const handleSuccessfulRequest: AppMiddleware =
     ({ dispatch, getState }) =>
     (next) =>
     (action) => {
@@ -241,23 +236,25 @@ const handleSuccessfulRequest =
             });
         } else if (SystemActions.updateSystem.fulfilled.match(action)) {
             const { system, editor } = getState();
-            const { blockAutoSave, lastAutoSaveDate } = editor;
+            // TODO: Bug? Should blockAutoSave come from SystemState instead?
+            const { blockAutoSave, lastAutoSaveDate } = editor as EditorState & { blockAutoSave?: boolean };
 
             const components = Object.values(system.components.entities).filter(
                 (component) => component.projectId === action.payload.projectId
             );
-            const actionComponents = action.payload.data.components;
+            const actionComponents = action.payload.data?.components ?? [];
 
             const connections = Object.values(system.connections.entities).filter(
                 (connection) => connection.projectId === action.payload.projectId
             );
-            const actionConnections = action.payload.data.connections;
+            const actionConnections = action.payload.data?.connections ?? [];
 
             // Check Components
-            let equal = components.length == actionComponents.length;
+            let equal = components.length === actionComponents.length;
             for (let i = 0; i < components.length && equal; i++) {
-                const actionComponent = actionComponents.filter((component) => component.id === components[i].id)[0];
-                if (!actionComponent || !compareComponents(actionComponent, components[i])) {
+                const component = components[i];
+                const actionComponent = actionComponents.find((item) => item.id === component?.id);
+                if (!actionComponent || !compareComponents(actionComponent, component)) {
                     equal = false;
                 }
             }
@@ -265,10 +262,9 @@ const handleSuccessfulRequest =
             // Check Connections
             equal = equal && connections.length === actionConnections.length;
             for (let i = 0; i < connections.length && equal; i++) {
-                const actionConnection = actionConnections.filter(
-                    (connection) => connection.id === connections[i].id
-                )[0];
-                if (!actionConnection || !compareConnections(actionConnection, connections[i])) {
+                const connection = connections[i];
+                const actionConnection = actionConnections.find((item) => item.id === connection?.id);
+                if (!actionConnection || !compareConnections(actionConnection, connection)) {
                     equal = false;
                 }
             }
@@ -300,7 +296,7 @@ const handleSuccessfulRequest =
         }
     };
 
-const systemMiddlewares = [
+const systemMiddlewares: AppMiddleware[] = [
     handleSuccessfulRequest,
     handleGetSystemFailed,
     handleSaveSystem,

@@ -57,9 +57,13 @@ const projectsReducer = createReducer(defaultState, (builder) => {
     });
 
     builder.addCase(ProjectsActions.setProject, (state, action) => {
-        action.payload.role = USER_ROLES.OWNER;
+        const extendedProject: ExtendedProject = {
+            image: null,
+            ...action.payload,
+            role: USER_ROLES.OWNER,
+        };
 
-        projectsAdapter.upsertOne(state, action.payload);
+        projectsAdapter.upsertOne(state, extendedProject);
         state.isPending = false;
     });
 

@@ -1,21 +1,26 @@
 import { isFulfilled, isRejected } from "@reduxjs/toolkit";
+import type { AppMiddleware } from "../types";
 import { socket } from "../../../api/system-socket.api";
 import { AlertActions } from "../../actions/alert.actions";
 import { CatalogsActions } from "../../actions/catalogs.actions";
 
-const asyncThunks = [CatalogsActions.createCatalog, CatalogsActions.updateCatalog, CatalogsActions.deleteCatalog];
+const asyncThunks = [
+    CatalogsActions.createCatalog,
+    CatalogsActions.updateCatalog,
+    CatalogsActions.deleteCatalog,
+] as const;
 
 const isFulfilledAction = isFulfilled(...asyncThunks);
 const isRejectedAction = isRejected(...asyncThunks);
 
-const handleSuccessfulRequest =
+const handleSuccessfulRequest: AppMiddleware =
     ({ dispatch }) =>
     (next) =>
     (action) => {
         next(action);
         if (isFulfilledAction(action)) {
-            const { payload: catalog } = action;
             if (CatalogsActions.deleteCatalog.fulfilled.match(action)) {
+                const { payload: catalog } = action;
                 socket.emit("remove_catalog", JSON.stringify(catalog));
                 dispatch(CatalogsActions.removeCatalog(catalog));
                 dispatch(
@@ -24,6 +29,7 @@ const handleSuccessfulRequest =
                     })
                 );
             } else {
+                const { payload: catalog } = action;
                 socket.emit("set_catalog", JSON.stringify(catalog));
                 dispatch(CatalogsActions.setCatalog(catalog));
                 dispatch(
@@ -35,7 +41,7 @@ const handleSuccessfulRequest =
         }
     };
 
-const handleFailedRequest =
+const handleFailedRequest: AppMiddleware =
     ({ dispatch }) =>
     (next) =>
     (action) => {
@@ -50,6 +56,6 @@ const handleFailedRequest =
         }
     };
 
-const catalogsMiddlewares = [handleFailedRequest, handleSuccessfulRequest];
+const catalogsMiddlewares: AppMiddleware[] = [handleFailedRequest, handleSuccessfulRequest];
 
 export default catalogsMiddlewares;

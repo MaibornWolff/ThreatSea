@@ -2,6 +2,7 @@
  * @module points-of-attack.actions - Defines the actions
  *     for the points of attack.
  */
+import type { PointOfAttack } from "#api/types/system.types.ts";
 import type { SystemPointOfAttack } from "#application/adapters/points-of-attack.adapter.ts";
 import { createAction, type Update } from "@reduxjs/toolkit";
 
@@ -35,7 +36,7 @@ export class PointsOfAttackActions {
      * @returns Action function for changing multiple points of attack
      *     under the risk page.
      */
-    static setPointsOfAttack = createAction<SystemPointOfAttack[]>("[points of attack] set points of attack");
+    static setPointsOfAttack = createAction<PointOfAttack[]>("[points of attack] set points of attack");
 
     /**
      * Action that removes multiple points of attack

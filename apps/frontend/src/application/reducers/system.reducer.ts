@@ -1,10 +1,10 @@
 import { createReducer } from "@reduxjs/toolkit";
 import { PointsOfAttackActions } from "../actions/points-of-attack.actions";
 import { SystemActions } from "../actions/system.actions";
-import { pointsOfAttackAdapter } from "../adapters/points-of-attack.adapter";
+import { pointsOfAttackAdapter, type SystemPointOfAttack } from "../adapters/points-of-attack.adapter";
 import { systemComponentsAdapter } from "../adapters/system-components.adapter";
-import { systemConnectionPointsAdapter } from "../adapters/system-connection-point.adapter";
-import { systemConnectionsAdapter } from "../adapters/system-connections.adapter";
+import { systemConnectionPointsAdapter, type SystemConnectionPoint } from "../adapters/system-connection-point.adapter";
+import { systemConnectionsAdapter, type SystemConnection } from "../adapters/system-connections.adapter";
 
 type ComponentsState = ReturnType<typeof systemComponentsAdapter.getInitialState>;
 type ConnectionsState = ReturnType<typeof systemConnectionsAdapter.getInitialState>;
@@ -98,7 +98,12 @@ const systemReducer = createReducer(defaultState, (builder) => {
     });
 
     builder.addCase(SystemActions.setConnections, (state, action) => {
-        systemConnectionsAdapter.upsertMany(state.connections, action);
+        const systemConnections: SystemConnection[] = action.payload.map((connection) => ({
+            communicationInterface: null,
+            ...connection,
+        }));
+
+        systemConnectionsAdapter.upsertMany(state.connections, { payload: systemConnections, type: action.type });
         state.hasChanged = true;
     });
 
@@ -151,7 +156,12 @@ const systemReducer = createReducer(defaultState, (builder) => {
     });
 
     builder.addCase(PointsOfAttackActions.setPointsOfAttack, (state, action) => {
-        pointsOfAttackAdapter.upsertMany(state.pointsOfAttack, action);
+        const pointsOfAttack: SystemPointOfAttack[] = action.payload.map((pointOfAttack) => ({
+            componentName: null,
+            ...pointOfAttack,
+        }));
+
+        pointsOfAttackAdapter.upsertMany(state.pointsOfAttack, { payload: pointsOfAttack, type: action.type });
         state.hasChanged = true;
     });
 
@@ -189,7 +199,16 @@ const systemReducer = createReducer(defaultState, (builder) => {
     });
 
     builder.addCase(SystemActions.setConnectionPoints, (state, action) => {
-        systemConnectionPointsAdapter.upsertMany(state.connectionPoints, action);
+        const systemConnectionPoints: SystemConnectionPoint[] = action.payload.map((connectionPoint) => ({
+            componentId: null,
+            componentName: null,
+            ...connectionPoint,
+        }));
+
+        systemConnectionPointsAdapter.upsertMany(state.connectionPoints, {
+            payload: systemConnectionPoints,
+            type: action.type,
+        });
     });
 
     builder.addCase(SystemActions.setConnectionPoint, (state, action) => {

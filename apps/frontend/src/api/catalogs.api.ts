@@ -51,7 +51,7 @@ export class CatalogsAPI {
      * @param {UpdateCatalogRequest} data - Data of the catalogue.
      * @returns The updated catalogue.
      */
-    static async updateCatalog(data: UpdateCatalogRequest) {
+    static async updateCatalog(data: UpdateCatalogRequest): Promise<Catalog> {
         const { id, ...body } = data;
         return await fetchAPI(`/catalogs/${id}`, {
             method: "PUT",
