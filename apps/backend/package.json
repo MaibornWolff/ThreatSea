@@ -60,7 +60,7 @@
     "@types/pg": "8.15.6",
     "@types/supertest": "6.0.3",
     "@vitest/coverage-v8": "4.0.4",
-    "drizzle-kit": "0.31.5",
+    "drizzle-kit": "0.31.6",
     "eslint": "9.38.0",
     "nanoid": "5.1.6",
     "supertest": "7.1.4",
