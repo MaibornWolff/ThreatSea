@@ -78,7 +78,8 @@ export class SystemActions {
      * @param {string} type - Action type.
      * @returns Action function for creating a component in the system view.
      */
-    static createComponent = createAction<Component>("[system] create component");
+    static createComponent =
+        createAction<Omit<Component, "width" | "height" | "selected">>("[system] create component");
 
     /**
      * Action that creates a connection line in the system view.

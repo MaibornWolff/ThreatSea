@@ -40,6 +40,8 @@ export interface ConnectionAnchor {
     id: string;
     anchor: AnchorOrientation;
     type: STANDARD_COMPONENT_TYPES | number;
+    name?: string | null;
+    communicationInterfaceId?: string | null;
 }
 
 export enum AnchorOrientation {
@@ -76,6 +78,7 @@ export interface PointOfAttack {
 export interface Component {
     id: string;
     name: string;
+    description?: string;
     type: STANDARD_COMPONENT_TYPES | number;
     x: number;
     y: number;
@@ -85,7 +88,7 @@ export interface Component {
     height: number;
     selected: boolean;
     projectId: number;
-    symbol: string;
+    symbol: string | null;
 }
 
 export interface ConnectionPoint {

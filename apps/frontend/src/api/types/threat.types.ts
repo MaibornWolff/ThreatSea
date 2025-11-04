@@ -1,6 +1,7 @@
 import type { ATTACKERS } from "#api/types/attackers.types.ts";
 import type { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import type { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
+import type { Asset } from "./asset.types";
 
 export interface CreateThreatRequest {
     pointOfAttackId: string;
@@ -43,5 +44,5 @@ export interface ExtendedThreat extends Threat {
     componentName: string | null;
     componentType: number | STANDARD_COMPONENT_TYPES | null;
     interfaceName: string | null;
-    assets: { id: number; name: string }[];
+    assets: Asset[];
 }

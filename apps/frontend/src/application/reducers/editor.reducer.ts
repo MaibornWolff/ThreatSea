@@ -32,8 +32,8 @@ type EditorComponentSelection = Record<string, unknown>;
 
 export interface EditorState {
     selectedComponents: EditorComponentSelection[] | null;
-    selectedComponent: EditorEntityId | null;
-    selectedConnection: EditorEntityId | null;
+    selectedComponent: string | null;
+    selectedConnection: string | null;
     connection: EditorConnection | null;
     layerPosition: EditorPosition;
     stageScale: number;

@@ -88,6 +88,7 @@ export interface PointOfAttack {
 export interface Component {
     id: string;
     name: string;
+    description?: string;
     type: ComponentType | number;
     x: number;
     y: number;

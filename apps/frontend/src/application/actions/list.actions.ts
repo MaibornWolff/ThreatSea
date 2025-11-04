@@ -17,6 +17,8 @@ export type ListNamespace =
     | "addedMembers"
     | "addableMembers";
 
+export type SortDirection = "asc" | "desc";
+
 /**
  * Wrapper class for defining functions
  * to expose the list actions.
@@ -33,7 +35,7 @@ export class ListActions {
      */
     static setSortDirection = createAction(
         "[list] set Sort Direction",
-        (nameSpace: ListNamespace, sortDirection: "asc" | "desc") => ({
+        (nameSpace: ListNamespace, sortDirection: SortDirection) => ({
             payload: { nameSpace, sortDirection },
         })
     );
