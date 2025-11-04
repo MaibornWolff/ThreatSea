@@ -1,45 +1,45 @@
 import { createReducer } from "@reduxjs/toolkit";
-import { ListActions } from "../actions/list.actions";
+import { ListActions, type SortDirection } from "../actions/list.actions";
 
 interface ListState {
     projects: {
         searchValue: string;
-        sortDirection: "asc" | "desc";
+        sortDirection: SortDirection;
         sortBy: string;
     };
     assets: {
         searchValue: string;
-        sortDirection: "asc" | "desc";
+        sortDirection: SortDirection;
         sortBy: string;
     };
     catalogs: {
         searchValue: string;
-        sortDirection: "asc" | "desc";
+        sortDirection: SortDirection;
         sortBy: string;
     };
     catalogThreats: {
         searchValue: string;
-        sortDirection: "asc" | "desc";
+        sortDirection: SortDirection;
         sortBy: string;
     };
     catalogMeasures: {
         searchValue: string;
-        sortDirection: "asc" | "desc";
+        sortDirection: SortDirection;
         sortBy: string;
     };
     threats: {
         searchValue: string;
-        sortDirection: "asc" | "desc";
+        sortDirection: SortDirection;
         sortBy: string;
     };
     measures: {
         searchValue: string;
-        sortDirection: "asc" | "desc";
+        sortDirection: SortDirection;
         sortBy: string;
     };
     measureThreats: {
         searchValue: string;
-        sortDirection: "asc" | "desc";
+        sortDirection: SortDirection;
         sortBy: "threatName";
     };
     threatMeasures: {
@@ -49,12 +49,12 @@ interface ListState {
     };
     addedMembers: {
         searchValue: string;
-        sortDirection: "asc" | "desc";
+        sortDirection: SortDirection;
         sortBy: string;
     };
     addableMembers: {
         searchValue: string;
-        sortDirection: "asc" | "desc";
+        sortDirection: SortDirection;
         sortBy: string;
     };
 }

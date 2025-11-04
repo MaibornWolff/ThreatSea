@@ -378,7 +378,7 @@ const EditorPageBody = ({ updateAutoSaveOnCLick }) => {
 
             setShowHelpLines(true);
             moveComponent({
-                componentId,
+                id: componentId,
                 x: newx,
                 y: newy,
                 gridX: gridPositionX,

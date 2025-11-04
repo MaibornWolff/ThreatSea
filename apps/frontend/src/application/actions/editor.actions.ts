@@ -25,7 +25,7 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for selecting a component.
      */
-    static selectComponent = createAction<EditorEntityId>("[editor] select component");
+    static selectComponent = createAction<string>("[editor] select component");
 
     /**
      * Action that deselects a component.
@@ -67,7 +67,7 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for selecting a connection line.
      */
-    static selectConnection = createAction<EditorEntityId>("[editor] select connection");
+    static selectConnection = createAction<string>("[editor] select connection");
 
     /**
      * Action that deselects a connection line.

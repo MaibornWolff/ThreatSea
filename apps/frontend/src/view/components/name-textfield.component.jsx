@@ -3,9 +3,9 @@ import { TextField } from "@mui/material";
 import { forwardRef, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
-import { useCatalogMeasures } from "../../application/hooks/use-catalog-measures.hook.js";
-import { useMeasures } from "../../application/hooks/use-measures.hook.js";
-import { useAssets } from "../../application/hooks/use-assets.hook.js";
+import { useCatalogMeasures } from "../../application/hooks/use-catalog-measures.hook";
+import { useMeasures } from "../../application/hooks/use-measures.hook";
+import { useAssets } from "../../application/hooks/use-assets.hook";
 import { useEditor } from "../../application/hooks/use-editor.hook";
 import { editorSelectors } from "../../application/selectors/editor.selectors";
 
