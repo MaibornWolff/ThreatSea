@@ -59,7 +59,7 @@
     "@types/passport-microsoft": "2.1.1",
     "@types/pg": "8.15.6",
     "@types/supertest": "6.0.3",
-    "@vitest/coverage-v8": "4.0.7",
+    "@vitest/coverage-v8": "4.0.8",
     "drizzle-kit": "0.31.6",
     "eslint": "9.39.1",
     "nanoid": "5.1.6",
@@ -67,7 +67,7 @@
     "tsc-alias": "1.8.16",
     "tsx": "4.20.6",
     "typescript": "5.9.3",
-    "vitest": "4.0.7"
+    "vitest": "4.0.8"
   },
   "imports": {
     "#*": "./src/*"
