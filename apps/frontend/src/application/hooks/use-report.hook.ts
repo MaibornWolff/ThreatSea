@@ -67,7 +67,7 @@ const calcNetRiskMatrix = (
             }, threat.damage);
             const y = 5 - probability;
             const x = damage - 1;
-            if (x >= 0 && y >= 0 && arr[y]?.[x]?.amount !== undefined) {
+            if (x >= 0 && y >= 0 && arr[y]?.[x]) {
                 // if no protection goal is affected risk is not in the matrix
                 if (typeof arr[y][x].amount !== "number") {
                     arr[y][x].amount = 0;
@@ -237,7 +237,7 @@ export const useReport = ({ projectId }: { projectId: number }) => {
             (arr, threat) => {
                 const y = 5 - threat.probability;
                 const x = threat.damage - 1;
-                if (x >= 0 && y >= 0 && arr[y]?.[x]?.amount !== undefined) {
+                if (x >= 0 && y >= 0 && arr[y]?.[x]) {
                     // if no protection goal is affected risk is not in the matrix
                     if (typeof arr[y][x]?.amount !== "number") {
                         arr[y][x].amount = 0;
@@ -258,7 +258,7 @@ export const useReport = ({ projectId }: { projectId: number }) => {
                 const { netProbability, netDamage } = threat;
                 const y = 5 - netProbability;
                 const x = netDamage - 1;
-                if (x >= 0 && y >= 0 && arr[y]?.[x]?.amount !== undefined) {
+                if (x >= 0 && y >= 0 && arr[y]?.[x]) {
                     // if no protection goal is affected risk is not in the matrix
                     if (typeof arr[y][x].amount !== "number") {
                         arr[y][x].amount = 0;

@@ -99,7 +99,7 @@ const systemReducer = createReducer(defaultState, (builder) => {
 
     builder.addCase(SystemActions.setConnections, (state, action) => {
         const systemConnections: SystemConnection[] = action.payload.map((connection) => ({
-            communicationInterface: null,
+            communicationInterface: state.connections.entities[connection.id]?.communicationInterface ?? null,
             ...connection,
         }));
 
@@ -157,7 +157,7 @@ const systemReducer = createReducer(defaultState, (builder) => {
 
     builder.addCase(PointsOfAttackActions.setPointsOfAttack, (state, action) => {
         const pointsOfAttack: SystemPointOfAttack[] = action.payload.map((pointOfAttack) => ({
-            componentName: null,
+            componentName: state.pointsOfAttack.entities[pointOfAttack.id]?.componentName ?? null,
             ...pointOfAttack,
         }));
 
@@ -200,8 +200,8 @@ const systemReducer = createReducer(defaultState, (builder) => {
 
     builder.addCase(SystemActions.setConnectionPoints, (state, action) => {
         const systemConnectionPoints: SystemConnectionPoint[] = action.payload.map((connectionPoint) => ({
-            componentId: null,
-            componentName: null,
+            componentId: state.connectionPoints.entities[connectionPoint.id]?.componentId ?? null,
+            componentName: state.connectionPoints.entities[connectionPoint.id]?.componentName ?? null,
             ...connectionPoint,
         }));
 

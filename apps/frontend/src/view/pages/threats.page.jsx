@@ -18,7 +18,7 @@ import { useThreatsList } from "../../application/hooks/use-threats-list.hook";
 import { IconButton } from "../components/icon-button.component";
 import { Page } from "../components/page.component";
 import { SearchField } from "../components/search-field.component";
-import CustomTableHeaderCell from "../components/table-header.component";
+import { CustomTableHeaderCell } from "../components/table-header.component";
 import { CreatePage, HeaderNavigation } from "../components/with-menu.component";
 import ThreatDialogPage from "./threat-dialog.page";
 import { withProject } from "../components/with-project.hoc";

@@ -10,11 +10,7 @@ import databaseImg from "../../images/database.png";
 import desktopImg from "../../images/desktop.png";
 import userImg from "../../images/user.png";
 import communicationInfrastructureImg from "../../images/communication-infrastructure.png";
-
-export interface EditorPosition {
-    x: number;
-    y: number;
-}
+import type { Coordinate } from "#api/types/system.types.ts";
 
 export type EditorEntityId = string | number;
 
@@ -35,9 +31,9 @@ export interface EditorState {
     selectedComponent: string | null;
     selectedConnection: string | null;
     connection: EditorConnection | null;
-    layerPosition: EditorPosition;
+    layerPosition: Coordinate;
     stageScale: number;
-    stagePosition: EditorPosition;
+    stagePosition: Coordinate;
     mousePointers: MousePointersState;
     showHelpLines: boolean;
     selectedPointOfAttack: string | null;

@@ -4,7 +4,7 @@ import { Page } from "../components/page.report.component";
 import { Text } from "../components/text.report.component";
 import { useTranslation } from "react-i18next";
 import { s1, backgroundColor, s5 } from "../report.style";
-import MATRIX_COLOR from "../../colors/matrix";
+import { MATRIX_COLOR } from "../../colors/matrix";
 
 export const ThreatsListPage = ({ indexCallback, threats, project, logo, language, date }) => {
     const linkId = "riskList";

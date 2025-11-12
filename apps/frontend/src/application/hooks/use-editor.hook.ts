@@ -4,24 +4,28 @@ import { useTranslation } from "react-i18next";
 import { batch } from "react-redux";
 import type { Asset } from "#api/types/asset.types.ts";
 import type { ComponentType } from "#api/types/component-types.types.ts";
-import type { AnchorOrientation, Component, ConnectionAnchor, ConnectionPointMeta } from "#api/types/system.types.ts";
+import type {
+    AnchorOrientation,
+    Component,
+    ConnectionAnchor,
+    ConnectionPointMeta,
+    Coordinate,
+} from "#api/types/system.types.ts";
 import type { SystemCommunicationInterface, SystemComponent } from "#application/adapters/system-components.adapter.ts";
 import type { SystemConnection } from "#application/adapters/system-connections.adapter.ts";
 import type { SystemPointOfAttack } from "#application/adapters/points-of-attack.adapter.ts";
-import type { EditorConnection, EditorEntityId, EditorPosition } from "#application/reducers/editor.reducer.ts";
+import type { EditorConnection, EditorEntityId } from "#application/reducers/editor.reducer.ts";
 import { POINTS_OF_ATTACK } from "../../api/types/points-of-attack.types";
 import { EditorActions } from "../actions/editor.actions";
 import { PointsOfAttackActions } from "../actions/points-of-attack.actions";
 import { SystemActions } from "../actions/system.actions";
 import { editorSelectors } from "../selectors/editor.selectors";
-import { systemSelectors } from "../selectors/system.selectors";
+import { systemSelectors, type AugmentedSystemComponent } from "../selectors/system.selectors";
 import { useAppDispatch, useAppSelector } from "./use-app-redux.hook";
 import { useSystem } from "./use-system.hook";
 import type { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
 
 let lastMousePointerUpdate = 0;
-
-type AugmentedSystemComponent = ReturnType<typeof systemSelectors.selectComponents>[number];
 
 type EditorConnectionPreview = EditorConnection & {
     from: EditorConnectionAnchor;
@@ -644,7 +648,7 @@ export const useEditor = ({
         dispatch(EditorActions.setLayerPosition({ x, y }));
     };
 
-    const setStageScale = (newScale: number, newPos: EditorPosition): void => {
+    const setStageScale = (newScale: number, newPos: Coordinate): void => {
         dispatch(
             EditorActions.setStageScale({
                 scale: newScale,
@@ -777,7 +781,7 @@ export const useEditor = ({
         dispatch(EditorActions.deselectConnectionPoint());
     };
 
-    const setMousePointers = (_position: EditorPosition): void => {
+    const setMousePointers = (_position: Coordinate): void => {
         const now = performance.now();
         const diff = now - lastMousePointerUpdate;
         if (diff > 0) {

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useSelector } from "react-redux";
 import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
 import { calcRiskColourFromRisk } from "../../utils/calcRisk";
-import MATRIX_COLOR from "../colors/matrix";
+import { MATRIX_COLOR } from "../colors/matrix";
 
 const LineOfToleranceSlider = styled(Slider)(() => ({
     height: 2,

@@ -9,10 +9,11 @@ import type {
     CreateComponentTypeRequest,
     UpdateComponentTypeRequest,
 } from "#api/types/component-types.types.ts";
-import type { EditorConnection, EditorEntityId, EditorPosition } from "#application/reducers/editor.reducer.ts";
+import type { EditorConnection, EditorEntityId } from "#application/reducers/editor.reducer.ts";
 import type { EditorMousePointer } from "#application/adapters/editor-mouse-pointers.adapter.ts";
 import type { EditorComponentType } from "#application/adapters/editor-component-type.adapter.ts";
 import type { EditorComponentConnectionLine } from "#application/adapters/editor-component-connection-lines.adapter.ts";
+import type { Coordinate } from "#api/types/system.types.ts";
 
 /**
  * Wrapper class the defines the functions
@@ -83,7 +84,7 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for centering the system view.
      */
-    static setLayerPosition = createAction<EditorPosition>("[editor] set layer position");
+    static setLayerPosition = createAction<Coordinate>("[editor] set layer position");
 
     /**
      * Action that zooms the system view in and out.
@@ -91,7 +92,7 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for zooming the system view in and out.
      */
-    static setStageScale = createAction<{ scale: number; position: EditorPosition }>("[editor] set stage scale");
+    static setStageScale = createAction<{ scale: number; position: Coordinate }>("[editor] set stage scale");
 
     /**
      * Action that creates help lines when moving a component.

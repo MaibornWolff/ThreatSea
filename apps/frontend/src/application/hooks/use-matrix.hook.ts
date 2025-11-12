@@ -20,7 +20,7 @@ interface ThreatMeasure {
     measureImpact: MeasureImpact | undefined;
 }
 
-type ThreatWithMetrics = ExtendedThreat & {
+export type ThreatWithMetrics = ExtendedThreat & {
     risk: number;
     damage: number;
     measures: ThreatMeasure[];
@@ -54,7 +54,7 @@ interface TimelineData {
     maxValue: number;
 }
 
-interface SelectedMatrixCell {
+export interface SelectedMatrixCell {
     probability: number;
     damage: number;
 }
@@ -213,9 +213,9 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
             (arr, threat) => {
                 const y = 5 - threat.newProbability;
                 const x = threat.newDamage - 1;
-                if (x >= 0 && y >= 0 && arr[y]?.[x]?.amount !== undefined) {
+                if (x >= 0 && y >= 0 && arr[y]?.[x]) {
                     // if no protection goal is affected risk is not in the matrix
-                    if (typeof arr[y][x].amount !== "number") {
+                    if (typeof arr[y]?.[x]?.amount !== "number") {
                         arr[y][x].amount = 0;
                     }
                     arr[y][x].amount++;

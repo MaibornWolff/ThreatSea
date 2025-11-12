@@ -58,7 +58,7 @@ const projectsReducer = createReducer(defaultState, (builder) => {
 
     builder.addCase(ProjectsActions.setProject, (state, action) => {
         const extendedProject: ExtendedProject = {
-            image: null,
+            image: state.entities[action.payload.id]?.image ?? null,
             ...action.payload,
             role: USER_ROLES.OWNER,
         };

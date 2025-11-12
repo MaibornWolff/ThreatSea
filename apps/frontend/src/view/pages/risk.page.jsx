@@ -20,7 +20,7 @@ import { NavigationActions } from "../../application/actions/navigation.actions"
 import { ProjectsActions } from "../../application/actions/projects.actions";
 import { useConfirm } from "../../application/hooks/use-confirm.hook";
 import { useMatrix } from "../../application/hooks/use-matrix.hook";
-import MATRIX_COLOR from "../colors/matrix";
+import { MATRIX_COLOR } from "../colors/matrix";
 import { IconButton } from "../components/icon-button.component";
 import { LineOfToleranceSelector } from "../components/line-of-tolerance-selector.component";
 import { Matrix } from "../components/matrix.component";
@@ -30,7 +30,7 @@ import { SearchField } from "../components/search-field.component";
 import { Tooltip } from "../components/tooltip.component";
 import { CreatePage, HeaderNavigation } from "../components/with-menu.component";
 import { withProject } from "../components/with-project.hoc";
-import MeasureImpactByMeasureDialogPage from "./measure-impact-by-measure-dialog.page";
+import { MeasureImpactByMeasureDialogPage } from "./measure-impact-by-measure-dialog.page";
 import { useEditor } from "../../application/hooks/use-editor.hook";
 import ThreatDialogPage from "./threat-dialog.page";
 import AddMeasureDialogPage from "./add-measure-dialog.page";

@@ -22,7 +22,9 @@ const AssetDialogPage = () => {
     if (state) {
         const asset = state.asset;
 
-        return <AddAssetDialog open={true} projectId={projectId} asset={asset} userRole={userRole} />;
+        return (
+            <AddAssetDialog open={true} projectId={Number(projectId) || undefined} asset={asset} userRole={userRole} />
+        );
     } else {
         navigate(`/projects/${projectId}/assets`, { replace: true });
 

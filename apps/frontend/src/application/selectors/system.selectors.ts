@@ -6,9 +6,9 @@ import { systemConnectionsAdapter, type SystemConnection } from "../adapters/sys
 import { systemConnectionPointsAdapter, type SystemConnectionPoint } from "../adapters/system-connection-point.adapter";
 import { pointsOfAttackAdapter, type SystemPointOfAttack } from "../adapters/points-of-attack.adapter";
 
-type AugmentedSystemComponent = SystemComponent & { pointsOfAttack: SystemPointOfAttack[] };
+export type AugmentedSystemComponent = SystemComponent & { pointsOfAttack: SystemPointOfAttack[] };
 
-type AugmentedSystemConnection = SystemConnection & {
+export type AugmentedSystemConnection = SystemConnection & {
     from: SystemConnection["from"] & { component: SystemComponent | undefined };
     to: SystemConnection["to"] & { component: SystemComponent | undefined };
     pointsOfAttack: SystemPointOfAttack[];

@@ -1,4 +1,5 @@
 import type { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
+import type { POINTS_OF_ATTACK } from "./points-of-attack.types";
 
 export interface UpdateSystemRequest {
     projectId: number;
@@ -67,7 +68,7 @@ export interface Coordinate {
 export interface PointOfAttack {
     id: string;
     name: string | null;
-    type: string;
+    type: POINTS_OF_ATTACK;
     componentId: string | null;
     connectionId: string | null;
     projectId: number;

@@ -143,7 +143,6 @@ const EditorPageBody = ({ updateAutoSaveOnCLick }) => {
 
     const [communicationMenuOpen, setCommunicationMenuOpen] = useState(false);
     const [communicationMenuComponent, setCommunicationMenuComponent] = useState(null);
-    const communicationMenuRef = useRef(null);
     const [isCommunicationInterfaceDialogOpen, setIsCommunicationInterfaceDialogOpen] = useState(false);
 
     // Memoize line array
@@ -924,7 +923,6 @@ const EditorPageBody = ({ updateAutoSaveOnCLick }) => {
                             onContextMenuAction={handleContextMenuAction}
                             onMouseLeave={handleMouseOut}
                             onKeyUp={handleKeyUp}
-                            layerPosition={layerPosition}
                             mousePointers={mousePointers}
                             onScale={onStageScale}
                             scale={stageScale}
@@ -1208,7 +1206,6 @@ const EditorPageBody = ({ updateAutoSaveOnCLick }) => {
                     </Routes>
 
                     <CommunicationContextMenu
-                        ref={communicationMenuRef}
                         stageRef={stageRef}
                         open={communicationMenuOpen}
                         componentName={communicationMenuComponent?.name}
