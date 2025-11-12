@@ -2,8 +2,7 @@
  * @module points-of-attack.actions - Defines the actions
  *     for the points of attack.
  */
-import type { PointOfAttack } from "#api/types/system.types.ts";
-import type { SystemPointOfAttack } from "#application/adapters/points-of-attack.adapter.ts";
+import type { PointOfAttack, SystemPointOfAttack } from "#api/types/system.types.ts";
 import { createAction, type Update } from "@reduxjs/toolkit";
 
 /**

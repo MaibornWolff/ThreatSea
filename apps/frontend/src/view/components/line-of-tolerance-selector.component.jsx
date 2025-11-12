@@ -1,10 +1,10 @@
 import { styled } from "@mui/material/styles";
 import { Box, Slider, Typography } from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useAppSelector } from "../../application/hooks/use-app-redux.hook";
 import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
 import { calcRiskColourFromRisk } from "../../utils/calcRisk";
-import MATRIX_COLOR from "../colors/matrix";
+import { MATRIX_COLOR } from "../colors/matrix";
 
 const LineOfToleranceSlider = styled(Slider)(() => ({
     height: 2,
@@ -92,7 +92,7 @@ export const LineOfToleranceSelector = ({ title, greenValue, redValue, onLoTChan
         [marksvals]
     );
 
-    const userRole = useSelector((state) => state.projects.current?.role);
+    const userRole = useAppSelector((state) => state.projects.current?.role);
 
     const sliderRef = useRef();
 

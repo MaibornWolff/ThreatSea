@@ -1,6 +1,6 @@
 import React from "react";
 import { View } from "@react-pdf/renderer";
-import MATRIX_COLOR from "../../colors/matrix";
+import { MATRIX_COLOR } from "../../colors/matrix";
 import { Text } from "./text.report.component";
 import { largeFontSize, smallFontSize, backgroundColor, s1 } from "../report.style";
 import { useTranslation } from "react-i18next";

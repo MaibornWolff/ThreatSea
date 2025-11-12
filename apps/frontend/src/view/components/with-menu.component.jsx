@@ -5,7 +5,7 @@ import { IconButton, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import { useLayoutEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useDispatch, useSelector } from "react-redux";
+import { useAppDispatch, useAppSelector } from "../../application/hooks/use-app-redux.hook";
 import { Link, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import { store } from "#main.jsx";
 import { CatalogsActions } from "../../application/actions/catalogs.actions";
@@ -24,7 +24,7 @@ import { Edit } from "@mui/icons-material";
 
 export const CreatePage = (HeaderNavigation, PageBody, showAutoSave = false) => {
     const Inner = (props) => {
-        const dispatch = useDispatch();
+        const dispatch = useAppDispatch();
         const navigate = useNavigate();
         const { pathname } = useLocation();
         const {
@@ -33,21 +33,21 @@ export const CreatePage = (HeaderNavigation, PageBody, showAutoSave = false) => 
 
         const { projectId, catalogId } = useParams();
 
-        const projects = useSelector((state) => state.projects);
+        const projects = useAppSelector((state) => state.projects);
         let currentProjectJSON;
         if (projectId) {
             const currentProject = projects.entities[projectId];
             currentProjectJSON = JSON.stringify(currentProject);
         }
 
-        const project = useSelector((state) => state.projects.current);
-        const showProjectInfo = useSelector((state) => state.navigation.showProjectInfo);
-        const getCatalogInfo = useSelector((state) => state.navigation.getCatalogInfo);
+        const project = useAppSelector((state) => state.projects.current);
+        const showProjectInfo = useAppSelector((state) => state.navigation.showProjectInfo);
+        const getCatalogInfo = useAppSelector((state) => state.navigation.getCatalogInfo);
 
-        const catalog = useSelector((state) => state.catalogs.current);
+        const catalog = useAppSelector((state) => state.catalogs.current);
 
-        const autoSaveStatus = useSelector(editorSelectors.selectAutoSaveStatus);
-        const autoSaveText = useSelector(editorSelectors.selectAutoSaveHelperText);
+        const autoSaveStatus = useAppSelector(editorSelectors.selectAutoSaveStatus);
+        const autoSaveText = useAppSelector(editorSelectors.selectAutoSaveHelperText);
         const [autoSaveOnClick, setAutoSaveOnClick] = useState(undefined);
 
         const updateAutoSaveOnCLick = (onClick) => {
@@ -435,7 +435,7 @@ export const HeaderNavigation = () => {
     const navigate = useNavigate();
     const { t } = useTranslation("mainMenu");
 
-    const navigation = useSelector((state) => state.navigation);
+    const navigation = useAppSelector((state) => state.navigation);
 
     let defaultProjectButtons = [
         {
@@ -476,8 +476,8 @@ export const HeaderNavigation = () => {
     ];
 
     // viewer should not have access to the members page
-    const userProjectRole = useSelector((state) => state.projects.current?.role);
-    const userCatalogRole = useSelector((state) => state.catalogs.current?.role);
+    const userProjectRole = useAppSelector((state) => state.projects.current?.role);
+    const userCatalogRole = useAppSelector((state) => state.catalogs.current?.role);
     const userRole = userProjectRole ?? userCatalogRole;
 
     if (!checkUserRole(userRole, USER_ROLES.EDITOR)) {
@@ -486,7 +486,7 @@ export const HeaderNavigation = () => {
 
     let finalButtons;
     let finalOnChangePath = (e, path) => {
-        if (path !== null) navigate(path);
+        if (path != null) navigate(path);
     };
 
     // login page => language picker = A
@@ -512,7 +512,7 @@ export const HeaderNavigation = () => {
             finalButtons = defaultProjectButtons;
 
             finalOnChangePath = (e, path) => {
-                if (path !== null) {
+                if (path != null) {
                     const nextState = path === "/projects" ? null : state;
 
                     navigate(path, { state: nextState });

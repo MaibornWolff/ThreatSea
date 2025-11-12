@@ -3,10 +3,6 @@
  *     for the points of attack.
  */
 import { createEntityAdapter } from "@reduxjs/toolkit";
-import type { PointOfAttack } from "#api/types/system.types.ts";
-
-export interface SystemPointOfAttack extends PointOfAttack {
-    componentName: string | null;
-}
+import type { SystemPointOfAttack } from "#api/types/system.types.ts";
 
 export const pointsOfAttackAdapter = createEntityAdapter<SystemPointOfAttack>();

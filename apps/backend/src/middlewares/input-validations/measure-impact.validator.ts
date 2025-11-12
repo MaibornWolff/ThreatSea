@@ -26,7 +26,7 @@ export class MeasureImpactProbabilityValidator implements ValidatorConstraintInt
             return false;
         }
 
-        if (probability !== null && typeof probability !== "number") {
+        if (probability != null && typeof probability !== "number") {
             this.lastError = FIELD_MUST_BE_INT_MESSAGE(
                 "probability",
                 "or null if setsOutOfScope or not impacts probability"
@@ -53,7 +53,7 @@ export class MeasureImpactProbabilityValidator implements ValidatorConstraintInt
             return false;
         }
 
-        if (setsOutOfScope && probability !== null) {
+        if (setsOutOfScope && probability != null) {
             this.lastError = FIELD_MUST_BE_NULL_MESSAGE("probability", "when threat is set out of scope");
             return false;
         }
@@ -73,7 +73,7 @@ export class MeasureImpactProbabilityValidator implements ValidatorConstraintInt
             }
         }
 
-        if (!setsOutOfScope && !impactsProbability && probability !== null) {
+        if (!setsOutOfScope && !impactsProbability && probability != null) {
             this.lastError = FIELD_MUST_BE_NULL_MESSAGE("probability", "when impactsProbability is false");
             return false;
         }
@@ -104,7 +104,7 @@ export class MeasureImpactDamageValidator implements ValidatorConstraintInterfac
             return false;
         }
 
-        if (damage !== null && typeof damage !== "number") {
+        if (damage != null && typeof damage !== "number") {
             this.lastError = FIELD_MUST_BE_INT_MESSAGE("damage", "or null if setsOutOfScope or not impacts damage");
             return false;
         }
@@ -128,7 +128,7 @@ export class MeasureImpactDamageValidator implements ValidatorConstraintInterfac
             return false;
         }
 
-        if (setsOutOfScope && damage !== null) {
+        if (setsOutOfScope && damage != null) {
             this.lastError = FIELD_MUST_BE_NULL_MESSAGE("damage", "when threat is set out of scope");
             return false;
         }
@@ -144,7 +144,7 @@ export class MeasureImpactDamageValidator implements ValidatorConstraintInterfac
             }
         }
 
-        if (!setsOutOfScope && !impactsDamage && damage !== null) {
+        if (!setsOutOfScope && !impactsDamage && damage != null) {
             this.lastError = FIELD_MUST_BE_NULL_MESSAGE("damage", "when impactsDamage is false");
             return false;
         }

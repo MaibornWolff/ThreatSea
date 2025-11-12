@@ -4,9 +4,10 @@
  */
 import { createEntityAdapter } from "@reduxjs/toolkit";
 import type { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
+import type { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
 
 export interface EditorComponentType {
-    id: string | number;
+    id: STANDARD_COMPONENT_TYPES | number;
     name: string;
     pointsOfAttack: POINTS_OF_ATTACK[];
     symbol: string | null;

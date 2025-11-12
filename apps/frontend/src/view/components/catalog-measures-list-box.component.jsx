@@ -28,7 +28,7 @@ import { ListBoxToolbar } from "./list-box-toolbar.component";
 import { Delete } from "@mui/icons-material";
 import { useState } from "react";
 import { CatalogMeasuresActions } from "../../application/actions/catalog-measures.actions";
-import { useDispatch } from "react-redux";
+import { useAppDispatch } from "../../application/hooks/use-app-redux.hook";
 import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
 
 /**
@@ -47,7 +47,7 @@ export const CatalogMeasuresListBox = ({ catalogId, attacker, pointOfAttack, use
     const { showErrorMessage } = useAlert();
 
     const navigate = useNavigate();
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
 
     const [searchValue, setSearchValue] = useState("");
     const [sortDirection, setSortDirection] = useState("asc");

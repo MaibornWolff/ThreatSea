@@ -244,7 +244,7 @@ export async function importProject(request: Request<void>, response: Response, 
         const logId = Logger.error(
             `Error while importing project ${(error as Error).message ? (error as Error).message : ""}\ncause: ${(error as Error).cause}`
         );
-        next(new BadRequestError(`Error while importing project.${logId !== null ? ` (Error ID: ${logId})` : ""}`));
+        next(new BadRequestError(`Error while importing project.${logId != null ? ` (Error ID: ${logId})` : ""}`));
     }
 }
 

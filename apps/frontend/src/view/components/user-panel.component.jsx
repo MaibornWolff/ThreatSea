@@ -9,12 +9,12 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import Logout from "@mui/icons-material/Logout";
-import { useDispatch, useSelector } from "react-redux";
+import { useAppDispatch, useAppSelector } from "../../application/hooks/use-app-redux.hook";
 import { UserActions } from "../../application/actions/user.actions";
 
 const UserPanel = () => {
-    const dispatch = useDispatch();
-    const { firstname, lastname } = useSelector((state) => state.user);
+    const dispatch = useAppDispatch();
+    const { firstname, lastname } = useAppSelector((state) => state.user);
 
     const navigate = useNavigate();
     const [anchorEl, setAnchorEl] = useState(null);

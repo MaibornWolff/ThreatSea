@@ -34,5 +34,5 @@ function createServerError(error: Error): ServerError {
 }
 
 function isErrorWithCode(error: Error): error is Error & { code: string } {
-    return typeof error === "object" && error !== null && "code" in error && typeof error.code === "string";
+    return typeof error === "object" && error != null && "code" in error && typeof error.code === "string";
 }

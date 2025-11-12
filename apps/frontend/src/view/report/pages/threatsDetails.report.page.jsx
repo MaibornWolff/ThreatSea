@@ -3,7 +3,7 @@ import { s1, fontColor, backgroundColor, s2, s4 } from "../report.style";
 import { Page } from "../components/page.report.component";
 import { useTranslation } from "react-i18next";
 import { Text } from "../components/text.report.component";
-import MATRIX_COLOR from "../../colors/matrix";
+import { MATRIX_COLOR } from "../../colors/matrix";
 
 const LIST_BREAKPOINT = 30;
 

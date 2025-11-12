@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { AlertActions } from "../../application/actions/alert.actions";
-import { useDispatch } from "react-redux";
+import { useAppDispatch } from "../../application/hooks/use-app-redux.hook";
 
 export const useGetMarkdownText = (language, filename) => {
     const [markdownText, setMarkdownText] = useState("");
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
 
     useEffect(() => {
         fetch(filename)

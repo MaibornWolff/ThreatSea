@@ -4,9 +4,15 @@
  */
 import { createAsyncThunk, createAction, type Update } from "@reduxjs/toolkit";
 import { SystemAPI } from "#api/system.api.ts";
-import type { Component, Connection, ConnectionPoint, System, UpdateSystemRequest } from "#api/types/system.types.ts";
-import type { SystemComponent } from "#application/adapters/system-components.adapter.ts";
-import type { SystemConnection } from "#application/adapters/system-connections.adapter.ts";
+import type {
+    Component,
+    Connection,
+    ConnectionPoint,
+    System,
+    SystemComponent,
+    SystemConnection,
+    UpdateSystemRequest,
+} from "#api/types/system.types.ts";
 import type { SystemConnectionPoint } from "#application/adapters/system-connection-point.adapter.ts";
 
 /**

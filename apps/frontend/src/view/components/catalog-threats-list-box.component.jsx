@@ -23,14 +23,14 @@ import { ListBoxHeader } from "./list-box-header.component";
 import { useState } from "react";
 import { Delete } from "@mui/icons-material";
 import { CatalogThreatsActions } from "../../application/actions/catalog-threats.actions";
-import { useDispatch } from "react-redux";
+import { useAppDispatch } from "../../application/hooks/use-app-redux.hook";
 import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
 
 export const CatalogThreatsListBox = ({ catalogId, attacker, pointOfAttack, userRole }) => {
     const { t } = useTranslation("catalogPage");
     const { showErrorMessage } = useAlert();
     const navigate = useNavigate();
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const [searchValue, setSearchValue] = useState("");
     const [sortDirection, setSortDirection] = useState("asc");
     const [sortBy, setSortBy] = useState("name");
