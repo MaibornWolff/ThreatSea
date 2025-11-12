@@ -4,7 +4,7 @@
  */
 import { createAsyncThunk, createAction } from "@reduxjs/toolkit";
 import { MemberAPI } from "#api/members.api.ts";
-import type { USER_ROLES } from "#api/types/user-roles.types.ts";
+import type { USER_ROLES, UserRoleConfig } from "#api/types/user-roles.types.ts";
 
 /**
  * Wrapper class that defines functions
@@ -85,7 +85,7 @@ export class MemberActions {
             projectCatalogId: number;
             memberPath: string;
             role: USER_ROLES;
-            roleConfig: unknown;
+            roleConfig: UserRoleConfig;
         }) => {
             await MemberAPI.updateAddedMember(data);
             return {

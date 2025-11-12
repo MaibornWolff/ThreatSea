@@ -3,7 +3,7 @@ import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import { useList } from "./use-list.hooks";
 import { useThreats } from "./use-threats.hook";
 
-type ThreatListItem = ExtendedThreat & {
+export type ThreatListItem = ExtendedThreat & {
     risk: number;
     damage: number;
 };

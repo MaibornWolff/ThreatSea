@@ -34,10 +34,10 @@ const threatsReducer = createReducer(defaultState, (builder) => {
 
     builder.addCase(ThreatsActions.setThreat, (state, action) => {
         const extendedThreat: ExtendedThreat = {
-            componentName: null,
-            componentType: null,
-            interfaceName: null,
-            assets: [],
+            componentName: state.entities[action.payload.id]?.componentName ?? null,
+            componentType: state.entities[action.payload.id]?.componentType ?? null,
+            interfaceName: state.entities[action.payload.id]?.interfaceName ?? null,
+            assets: state.entities[action.payload.id]?.assets ?? [],
             ...action.payload,
         };
 

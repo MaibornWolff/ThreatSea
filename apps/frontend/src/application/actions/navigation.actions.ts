@@ -17,5 +17,5 @@ export class NavigationActions {
      * @param {string} type - Action type.
      * @returns Action function for setting the page header.
      */
-    static setPageHeader = createAction<Required<NavigationState>>("[navigation] setting the page header");
+    static setPageHeader = createAction<NavigationState>("[navigation] setting the page header");
 }

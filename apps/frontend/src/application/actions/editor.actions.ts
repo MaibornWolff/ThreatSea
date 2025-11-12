@@ -2,17 +2,19 @@
  * @module editor.actions - Defines the actions for
  *     the system view editing.
  */
-import { createAction, createAsyncThunk, type EntityId, type Update } from "@reduxjs/toolkit";
+import { createAction, createAsyncThunk, type Update } from "@reduxjs/toolkit";
 import { ComponentTypeAPI } from "#api/component-type.api.ts";
 import type {
     ComponentType,
     CreateComponentTypeRequest,
     UpdateComponentTypeRequest,
 } from "#api/types/component-types.types.ts";
-import type { EditorConnection, EditorEntityId, EditorPosition } from "#application/reducers/editor.reducer.ts";
+import type { EditorConnection, EditorEntityId } from "#application/reducers/editor.reducer.ts";
 import type { EditorMousePointer } from "#application/adapters/editor-mouse-pointers.adapter.ts";
 import type { EditorComponentType } from "#application/adapters/editor-component-type.adapter.ts";
 import type { EditorComponentConnectionLine } from "#application/adapters/editor-component-connection-lines.adapter.ts";
+import type { Coordinate } from "#api/types/system.types.ts";
+import type { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
 
 /**
  * Wrapper class the defines the functions
@@ -83,7 +85,7 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for centering the system view.
      */
-    static setLayerPosition = createAction<EditorPosition>("[editor] set layer position");
+    static setLayerPosition = createAction<Coordinate>("[editor] set layer position");
 
     /**
      * Action that zooms the system view in and out.
@@ -91,7 +93,7 @@ export class EditorActions {
      * @param {string} type - Action type.
      * @returns Action function for zooming the system view in and out.
      */
-    static setStageScale = createAction<{ scale: number; position: EditorPosition }>("[editor] set stage scale");
+    static setStageScale = createAction<{ scale: number; position: Coordinate }>("[editor] set stage scale");
 
     /**
      * Action that creates help lines when moving a component.
@@ -175,7 +177,8 @@ export class EditorActions {
      */
     static addComponentType = createAction<EditorComponentType>("[editor] add component type");
 
-    static setComponentType = createAction<Update<EditorComponentType, EntityId>>("[editor] set component type");
+    static setComponentType =
+        createAction<Update<EditorComponentType, STANDARD_COMPONENT_TYPES | number>>("[editor] set component type");
 
     /**
      * Action for removing a component from the system view.

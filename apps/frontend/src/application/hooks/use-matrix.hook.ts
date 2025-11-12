@@ -9,8 +9,9 @@ import { useThreats } from "./use-threats.hook.ts";
 import { useAppSelector } from "./use-app-redux.hook.ts";
 import { projectsSelectors } from "../selectors/projects.selectors.ts";
 import type { SortDirection } from "#application/actions/list.actions.ts";
+import type { MatrixColorKey } from "#view/colors/matrix.ts";
 
-interface ThreatMeasure {
+export interface ThreatMeasure {
     measureId: number;
     active: boolean;
     catalogMeasureId: number | null;
@@ -20,7 +21,7 @@ interface ThreatMeasure {
     measureImpact: MeasureImpact | undefined;
 }
 
-type ThreatWithMetrics = ExtendedThreat & {
+export type ThreatWithMetrics = ExtendedThreat & {
     risk: number;
     damage: number;
     measures: ThreatMeasure[];
@@ -32,12 +33,12 @@ type ThreatWithMetrics = ExtendedThreat & {
 };
 
 interface MatrixCell {
-    color: string;
+    color: MatrixColorKey;
     amount?: number;
     selected?: boolean;
 }
 
-type MatrixGrid = MatrixCell[][];
+export type MatrixGrid = MatrixCell[][];
 
 interface TimelineMark {
     value: number;
@@ -46,7 +47,7 @@ interface TimelineMark {
     label: string;
 }
 
-interface TimelineData {
+export interface TimelineData {
     marks: TimelineMark[];
     startDate: Date;
     endDate: Date;
@@ -54,7 +55,7 @@ interface TimelineData {
     maxValue: number;
 }
 
-interface SelectedMatrixCell {
+export interface SelectedMatrixCell {
     probability: number;
     damage: number;
 }
@@ -213,9 +214,9 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
             (arr, threat) => {
                 const y = 5 - threat.newProbability;
                 const x = threat.newDamage - 1;
-                if (x >= 0 && y >= 0 && arr[y]?.[x]?.amount !== undefined) {
+                if (x >= 0 && y >= 0 && arr[y]?.[x]) {
                     // if no protection goal is affected risk is not in the matrix
-                    if (typeof arr[y][x].amount !== "number") {
+                    if (typeof arr[y]?.[x]?.amount !== "number") {
                         arr[y][x].amount = 0;
                     }
                     arr[y][x].amount++;

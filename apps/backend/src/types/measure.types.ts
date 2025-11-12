@@ -43,7 +43,7 @@ export class UpdateMeasureRequest {
 }
 
 export class CreateMeasureRequest extends UpdateMeasureRequest {
-    @ValidateIf((_, value) => value !== null)
+    @ValidateIf((_, value) => value != null)
     @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("catalogMeasureId") })
     @IsInt({ message: FIELD_MUST_BE_INT_MESSAGE("catalogMeasureId") })
     catalogMeasureId!: number | null;

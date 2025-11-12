@@ -7,9 +7,7 @@ import { EditorActions } from "../../actions/editor.actions";
 import { PointsOfAttackActions } from "../../actions/points-of-attack.actions";
 import { SystemActions } from "../../actions/system.actions";
 import { ProjectsActions } from "../../actions/projects.actions";
-import type { SystemComponent } from "../../adapters/system-components.adapter";
-import type { SystemConnection } from "../../adapters/system-connections.adapter";
-import type { Connection, UpdateSystemRequest } from "#api/types/system.types.ts";
+import type { Connection, SystemComponent, SystemConnection, UpdateSystemRequest } from "#api/types/system.types.ts";
 import type { EditorState } from "#application/reducers/editor.reducer.ts";
 
 const handleSaveSystem: AppMiddleware =

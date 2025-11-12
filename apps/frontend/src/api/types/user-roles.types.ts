@@ -9,6 +9,13 @@ export enum USER_ROLES {
     VIEWER = "VIEWER",
 }
 
+export interface UserRoleConfig {
+    ownUserId?: number;
+    isProject?: boolean;
+    userProjectRole?: USER_ROLES;
+    userCatalogRole?: USER_ROLES;
+}
+
 /**
  * Function to check if the user has the required role
  *

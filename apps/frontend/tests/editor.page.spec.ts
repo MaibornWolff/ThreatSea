@@ -2,6 +2,7 @@ import { test, expect, type Page } from "@playwright/test";
 import type { ExtendedProject } from "#api/types/project.types.ts";
 import { getProjects, importProject, deleteProject, deleteCatalog } from "./test-utils.ts";
 import threatsFixture from "./fixtures/threats.json" with { type: "json" };
+import type { USER_ROLES } from "#api/types/user-roles.types.ts";
 
 async function addCommunication(page: Page) {
     await page
@@ -25,6 +26,7 @@ test.beforeAll(async () => {
         ...threatsFixture.project,
         project: {
             ...threatsFixture.project.project,
+            role: threatsFixture.project.project.role as USER_ROLES,
             createdAt: new Date(threatsFixture.project.project.createdAt),
             updatedAt: new Date(threatsFixture.project.project.updatedAt),
         },

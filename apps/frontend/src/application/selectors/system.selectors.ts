@@ -1,14 +1,18 @@
 import { createSelector } from "@reduxjs/toolkit";
 import type { RootState } from "#application/store.ts";
 import type { SystemState } from "#application/reducers/system.reducer.ts";
-import { systemComponentsAdapter, type SystemComponent } from "../adapters/system-components.adapter";
-import { systemConnectionsAdapter, type SystemConnection } from "../adapters/system-connections.adapter";
+import { systemComponentsAdapter } from "../adapters/system-components.adapter";
+import { systemConnectionsAdapter } from "../adapters/system-connections.adapter";
 import { systemConnectionPointsAdapter, type SystemConnectionPoint } from "../adapters/system-connection-point.adapter";
-import { pointsOfAttackAdapter, type SystemPointOfAttack } from "../adapters/points-of-attack.adapter";
+import { pointsOfAttackAdapter } from "../adapters/points-of-attack.adapter";
+import type {
+    AugmentedSystemComponent,
+    SystemComponent,
+    SystemConnection,
+    SystemPointOfAttack,
+} from "#api/types/system.types.ts";
 
-type AugmentedSystemComponent = SystemComponent & { pointsOfAttack: SystemPointOfAttack[] };
-
-type AugmentedSystemConnection = SystemConnection & {
+export type AugmentedSystemConnection = SystemConnection & {
     from: SystemConnection["from"] & { component: SystemComponent | undefined };
     to: SystemConnection["to"] & { component: SystemComponent | undefined };
     pointsOfAttack: SystemPointOfAttack[];

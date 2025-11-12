@@ -5,7 +5,7 @@ import { useThreats } from "./use-threats.hook";
 import { useMeasureImpacts } from "./use-measureImpacts.hook";
 import { useList } from "./use-list.hooks";
 
-interface MeasureThreatListItem {
+export interface MeasureThreat {
     measureImpactId: number;
     setsOutOfScope: boolean;
     netProbability: number | null;
@@ -18,13 +18,15 @@ interface MeasureThreatListItem {
     measureImpact: MeasureImpact;
 }
 
-const sortableFields: (keyof Pick<
-    MeasureThreatListItem,
-    "threatName" | "componentName" | "netProbability" | "netDamage"
->)[] = ["threatName", "componentName", "netProbability", "netDamage"];
+const sortableFields: (keyof Pick<MeasureThreat, "threatName" | "componentName" | "netProbability" | "netDamage">)[] = [
+    "threatName",
+    "componentName",
+    "netProbability",
+    "netDamage",
+];
 type MeasureThreatSortField = (typeof sortableFields)[number];
 
-const searchableFields: (keyof Pick<MeasureThreatListItem, "threatName" | "threatDescription">)[] = [
+const searchableFields: (keyof Pick<MeasureThreat, "threatName" | "threatDescription">)[] = [
     "threatName",
     "threatDescription",
 ];
@@ -51,7 +53,7 @@ export const useMeasureThreatsList = ({ projectId, measureId }: { projectId: num
         loadMeasureImpacts();
     }, [projectId, loadMeasureImpacts]);
 
-    const items: MeasureThreatListItem[] = useMemo(() => {
+    const items: MeasureThreat[] = useMemo(() => {
         if (threatsPending || measureImpactsPending) {
             //wait until all data is loaded
             return [];

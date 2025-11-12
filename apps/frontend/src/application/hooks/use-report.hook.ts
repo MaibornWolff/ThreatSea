@@ -5,25 +5,27 @@ import { useState, useCallback, useMemo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { ProjectsAPI } from "../../api/projects.api";
 import { calcRiskColour } from "../../utils/calcRisk";
+import type { MatrixColorKey } from "#view/colors/matrix.ts";
 
 type ReportThreat = ProjectReport["threats"][number];
 type ReportMeasure = ProjectReport["measures"][number];
-interface RiskMatrixCell {
-    color: string;
+export interface RiskMatrixCell {
+    color: MatrixColorKey;
     amount?: number;
 }
-type RiskMatrix = RiskMatrixCell[][];
+export type RiskMatrix = RiskMatrixCell[][];
 interface RiskBarGraph {
     green: number;
     yellow: number;
     red: number;
 }
 
-interface Milestone {
+export interface Milestone {
     scheduledAt: Date;
     matrix: RiskMatrix | null;
     barGraph: RiskBarGraph | null;
-    measures: ReportMeasure[];
+    measures?: ReportMeasure[];
+    active?: boolean;
 }
 
 const calcNetRiskMatrix = (
@@ -67,7 +69,7 @@ const calcNetRiskMatrix = (
             }, threat.damage);
             const y = 5 - probability;
             const x = damage - 1;
-            if (x >= 0 && y >= 0 && arr[y]?.[x]?.amount !== undefined) {
+            if (x >= 0 && y >= 0 && arr[y]?.[x]) {
                 // if no protection goal is affected risk is not in the matrix
                 if (typeof arr[y][x].amount !== "number") {
                     arr[y][x].amount = 0;
@@ -237,7 +239,7 @@ export const useReport = ({ projectId }: { projectId: number }) => {
             (arr, threat) => {
                 const y = 5 - threat.probability;
                 const x = threat.damage - 1;
-                if (x >= 0 && y >= 0 && arr[y]?.[x]?.amount !== undefined) {
+                if (x >= 0 && y >= 0 && arr[y]?.[x]) {
                     // if no protection goal is affected risk is not in the matrix
                     if (typeof arr[y][x]?.amount !== "number") {
                         arr[y][x].amount = 0;
@@ -258,7 +260,7 @@ export const useReport = ({ projectId }: { projectId: number }) => {
                 const { netProbability, netDamage } = threat;
                 const y = 5 - netProbability;
                 const x = netDamage - 1;
-                if (x >= 0 && y >= 0 && arr[y]?.[x]?.amount !== undefined) {
+                if (x >= 0 && y >= 0 && arr[y]?.[x]) {
                     // if no protection goal is affected risk is not in the matrix
                     if (typeof arr[y][x].amount !== "number") {
                         arr[y][x].amount = 0;
@@ -296,7 +298,7 @@ export const useReport = ({ projectId }: { projectId: number }) => {
                         measures: [],
                     };
                 }
-                obj[scheduledAtTime].measures.push(item);
+                obj[scheduledAtTime].measures?.push(item);
                 return obj;
             },
             {} as Record<number, Milestone>
@@ -304,7 +306,7 @@ export const useReport = ({ projectId }: { projectId: number }) => {
         return Object.values(map).sort((a, b) => (a.scheduledAt.getTime() < b.scheduledAt.getTime() ? -1 : 1));
     }, [filteredMeasures, filteredThreats, matrixDesign]);
 
-    const transformedMilestones: (Milestone & { active: boolean })[] | null = useMemo(() => {
+    const transformedMilestones: Milestone[] | null = useMemo(() => {
         if (!milestones) return null;
         return milestones.map((milestone) => {
             const { scheduledAt } = milestone;

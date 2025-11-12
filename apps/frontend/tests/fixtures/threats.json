@@ -11,7 +11,7 @@
       "createdAt": "2023-10-12T08:04:35.000Z",
       "updatedAt": "2023-10-12T08:04:35.000Z",
       "catalogId": 5663,
-      "role": 0
+      "role": "OWNER"
     },
     "assets": [
       {
@@ -292,7 +292,7 @@
       "language": "EN",
       "createdAt": "2023-10-06T12:43:09.000Z",
       "updatedAt": "2023-10-06T12:43:09.000Z",
-      "role": 0
+      "role": "OWNER"
     },
     "catalogThreats": [
       {

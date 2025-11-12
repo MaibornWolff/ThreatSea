@@ -10,15 +10,17 @@ import databaseImg from "../../images/database.png";
 import desktopImg from "../../images/desktop.png";
 import userImg from "../../images/user.png";
 import communicationInfrastructureImg from "../../images/communication-infrastructure.png";
-
-export interface EditorPosition {
-    x: number;
-    y: number;
-}
+import type { AnchorOrientation, Coordinate } from "#api/types/system.types.ts";
 
 export type EditorEntityId = string | number;
 
-export type EditorConnection = Record<string, unknown>;
+export interface EditorConnection {
+    from: {
+        id: string;
+        anchor: AnchorOrientation;
+        type: STANDARD_COMPONENT_TYPES | number;
+    };
+}
 
 type MousePointersState = ReturnType<typeof editorMousePointersAdapter.getInitialState>;
 type ComponentConnectionLinesState = ReturnType<typeof editorComponentConnectionLinesAdapter.getInitialState>;
@@ -35,9 +37,9 @@ export interface EditorState {
     selectedComponent: string | null;
     selectedConnection: string | null;
     connection: EditorConnection | null;
-    layerPosition: EditorPosition;
+    layerPosition: Coordinate;
     stageScale: number;
-    stagePosition: EditorPosition;
+    stagePosition: Coordinate;
     mousePointers: MousePointersState;
     showHelpLines: boolean;
     selectedPointOfAttack: string | null;
@@ -53,7 +55,7 @@ export interface EditorState {
     componentTypes: ComponentTypesState;
 }
 
-const standardComponentTypes: Record<string, EditorComponentType> = {
+const standardComponentTypes: Record<STANDARD_COMPONENT_TYPES, EditorComponentType> = {
     [STANDARD_COMPONENT_TYPES.USERS]: {
         id: STANDARD_COMPONENT_TYPES.USERS,
         name: "Users",
@@ -104,7 +106,7 @@ const componentTypesInitialState = editorComponentTypeAdapter.getInitialState({
     initialized: false,
 }) as ComponentTypesState;
 
-componentTypesInitialState.ids = Object.keys(standardComponentTypes);
+componentTypesInitialState.ids = Object.keys(standardComponentTypes) as STANDARD_COMPONENT_TYPES[];
 componentTypesInitialState.entities = {
     ...standardComponentTypes,
 };

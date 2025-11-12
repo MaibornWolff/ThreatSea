@@ -25,7 +25,7 @@ export const useMembersList = (projectCatalogId: number, memberPath: string, mem
             );
         });
 
-        if (memberRole !== null) {
+        if (memberRole != null) {
             resItems = resItems.filter((item) => item.role === memberRole);
         }
 
