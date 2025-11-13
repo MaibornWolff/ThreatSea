@@ -1,4 +1,4 @@
-FROM node:lts-alpine@sha256:f36fed0b2129a8492535e2853c64fbdbd2d29dc1219ee3217023ca48aebd3787 AS base
+FROM node:lts-alpine@sha256:10d711afd59d7025ccc97fc4f1f78be8588a5f025d3a8b179af64f6720f5d99b AS base
 
 ENV CI=true
 ENV PNPM_HOME="/pnpm"
@@ -55,7 +55,7 @@ RUN pnpm --filter "./${BACKEND_DIR}" deploy --legacy --prod /out
 
 
 # build production container
-FROM node:lts-alpine@sha256:f36fed0b2129a8492535e2853c64fbdbd2d29dc1219ee3217023ca48aebd3787
+FROM node:lts-alpine@sha256:10d711afd59d7025ccc97fc4f1f78be8588a5f025d3a8b179af64f6720f5d99b
 
 RUN apk --no-cache add dumb-init=1.2.5-r3
 
