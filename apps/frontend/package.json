@@ -22,9 +22,9 @@
   "dependencies": {
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.1",
-    "@mui/icons-material": "6.5.0",
-    "@mui/material": "6.5.0",
-    "@mui/system": "6.5.0",
+    "@mui/icons-material": "7.3.5",
+    "@mui/material": "7.3.5",
+    "@mui/system": "7.3.5",
     "@react-pdf/renderer": "4.3.1",
     "@react-pdf/zlib": "2.0.0",
     "@reduxjs/toolkit": "2.11.0",
