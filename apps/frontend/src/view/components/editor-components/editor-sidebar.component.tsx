@@ -16,7 +16,7 @@ import type {
 } from "#api/types/system.types.ts";
 
 interface EditorSidebarProps {
-    sidebarRef: RefObject<HTMLDivElement>;
+    sidebarRef: RefObject<HTMLDivElement | null>;
     selectedComponent: AugmentedSystemComponent | undefined;
     selectedComponentId: string | null | undefined;
     selectedPointOfAttack: SystemPointOfAttack | null | undefined;

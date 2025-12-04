@@ -2,8 +2,6 @@ import { MAX_NAME_LENGTH } from "#view/dialogs/validation-constants.ts";
 import { TextField } from "@mui/material";
 import type { TextFieldProps } from "@mui/material/TextField";
 import type { SxProps, Theme } from "@mui/material/styles";
-import { forwardRef } from "react";
-import type { ForwardedRef, ReactElement, RefAttributes } from "react";
 import type { FieldError, FieldPath, FieldValues, Path, UseFormRegister } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useAssets } from "../../application/hooks/use-assets.hook";
@@ -33,21 +31,18 @@ type NameTextFieldProps<TFieldValues extends FieldValues = FieldValues> = Omit<
     "fieldName" | "defaultSx"
 >;
 
-const BaseNameTextFieldInner = <TFieldValues extends FieldValues>(
-    {
-        placeholder,
-        error,
-        defaultSx,
-        sx,
-        fieldName,
-        register,
-        ownId,
-        type,
-        projectId,
-        ...props
-    }: BaseNameTextFieldProps<TFieldValues>,
-    ref: ForwardedRef<HTMLDivElement>
-) => {
+const BaseNameTextField = <TFieldValues extends FieldValues>({
+    placeholder,
+    error,
+    defaultSx,
+    sx,
+    fieldName,
+    register,
+    ownId,
+    type,
+    projectId,
+    ...props
+}: BaseNameTextFieldProps<TFieldValues>) => {
     const { t } = useTranslation();
 
     const { items: projectMeasureItems } = useMeasures({ projectId: projectId as number });
@@ -90,8 +85,6 @@ const BaseNameTextFieldInner = <TFieldValues extends FieldValues>(
 
     return (
         <TextField
-            // @ts-expect-error TODO: Fix ref typing
-            ref={ref}
             sx={mergedSx}
             autoFocus
             autoComplete="off"
@@ -110,12 +103,6 @@ const BaseNameTextFieldInner = <TFieldValues extends FieldValues>(
         />
     );
 };
-
-type BaseNameTextFieldComponent = <TFieldValues extends FieldValues = FieldValues>(
-    props: BaseNameTextFieldProps<TFieldValues> & RefAttributes<HTMLDivElement>
-) => ReactElement | null;
-
-const BaseNameTextField = forwardRef(BaseNameTextFieldInner) as BaseNameTextFieldComponent;
 
 const nameTextFieldSx = <TFieldValues extends FieldValues>(
     props: NameTextFieldProps<TFieldValues>
@@ -188,10 +175,7 @@ const boxNameTextFieldSx = <TFieldValues extends FieldValues>(
     },
 });
 
-const NameTextFieldInner = <TFieldValues extends FieldValues>(
-    props: NameTextFieldProps<TFieldValues>,
-    ref: ForwardedRef<HTMLDivElement>
-) => {
+export const NameTextField = <TFieldValues extends FieldValues>(props: NameTextFieldProps<TFieldValues>) => {
     const { t } = useTranslation();
 
     return (
@@ -200,39 +184,26 @@ const NameTextFieldInner = <TFieldValues extends FieldValues>(
             placeholder={t("name")}
             catalogId={props.catalogId}
             {...props}
-            ref={ref}
             defaultSx={nameTextFieldSx(props)}
         />
     );
 };
 
-type NameTextFieldComponent = <TFieldValues extends FieldValues = FieldValues>(
-    props: NameTextFieldProps<TFieldValues> & RefAttributes<HTMLDivElement>
-) => ReactElement | null;
-
-export const NameTextField = forwardRef(NameTextFieldInner) as NameTextFieldComponent;
-
-const BoxNameTextFieldInner = <TFieldValues extends FieldValues>(
-    props: NameTextFieldProps<TFieldValues>,
-    ref: ForwardedRef<HTMLDivElement>
-) => {
+export const BoxNameTextField = <TFieldValues extends FieldValues>(props: NameTextFieldProps<TFieldValues>) => {
     const { t } = useTranslation();
 
     return (
         <BaseNameTextField
-            InputLabelProps={{ shrink: true }}
+            slotProps={{
+                inputLabel: {
+                    shrink: true,
+                },
+            }}
             fieldName={"name" as Path<TFieldValues>}
             label={t("name")}
             projectId={props.projectId}
             {...props}
-            ref={ref}
             defaultSx={boxNameTextFieldSx(props)}
         />
     );
 };
-
-type BoxNameTextFieldComponent = <TFieldValues extends FieldValues = FieldValues>(
-    props: NameTextFieldProps<TFieldValues> & RefAttributes<HTMLDivElement>
-) => ReactElement | null;
-
-export const BoxNameTextField = forwardRef(BoxNameTextFieldInner) as BoxNameTextFieldComponent;

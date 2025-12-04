@@ -17,12 +17,12 @@ import {
     type Theme,
 } from "@mui/material";
 import {
-    forwardRef,
     useEffect,
     useImperativeHandle,
     useRef,
     useState,
-    type MutableRefObject,
+    type RefObject,
+    type Ref,
     type MouseEvent as ReactMouseEvent,
 } from "react";
 import { useTranslation } from "react-i18next";
@@ -44,10 +44,11 @@ let opened = {
 
 interface EditorContextMenuProps {
     onSelect: (component: EditorComponentType) => void;
-    stageRef: MutableRefObject<Stage | null>;
+    stageRef: RefObject<Stage | null>;
+    ref?: Ref<HTMLDivElement>;
 }
 
-export const EditorContextMenu = forwardRef<HTMLDivElement, EditorContextMenuProps>(({ onSelect, stageRef }, ref) => {
+export const EditorContextMenu = ({ onSelect, stageRef, ref }: EditorContextMenuProps) => {
     const { t } = useTranslation("editorPage");
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
@@ -243,7 +244,7 @@ export const EditorContextMenu = forwardRef<HTMLDivElement, EditorContextMenuPro
             </List>
         </Box>
     );
-});
+};
 
 EditorContextMenu.displayName = "EditorContextMenu";
 

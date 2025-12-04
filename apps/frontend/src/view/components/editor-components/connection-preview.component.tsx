@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import { Line } from "react-konva";
-import type { MutableRefObject } from "react";
+import type { RefObject } from "react";
 import type { Line as KonvaLine } from "konva/lib/shapes/Line";
 import type { Stage } from "konva/lib/Stage";
 import type { Coordinate, SystemComponent } from "#api/types/system.types.ts";
@@ -8,7 +8,7 @@ import type { Coordinate, SystemComponent } from "#api/types/system.types.ts";
 interface ConnectionPreviewProps {
     component: SystemComponent;
     draggedComponent?: SystemComponent;
-    stageRef: MutableRefObject<Stage | null>;
+    stageRef: RefObject<Stage | null>;
     layerPosition: Coordinate;
 }
 

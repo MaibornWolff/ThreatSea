@@ -1,7 +1,7 @@
 import { Circle, Group, Image, Rect, Text } from "react-konva";
 import useImage from "use-image";
 import smallIcon from "../../../images/plug-icon.png";
-import { useState, useMemo, useEffect, type MutableRefObject, type ReactNode } from "react";
+import { useState, useMemo, useEffect, type RefObject, type ReactNode, type JSX } from "react";
 import { ComponentSelectedCircle } from "./component-selected-circle.component";
 import { checkUserRole, USER_ROLES } from "../../../api/types/user-roles.types";
 import { STANDARD_COMPONENT_TYPES } from "../../../api/types/standard-component.types";
@@ -80,7 +80,7 @@ interface SystemComponentProps extends Omit<AugmentedSystemComponent, "communica
     onDragEnd: (event: KonvaEventObject<DragEvent>) => void;
     onDragStart: (event: KonvaEventObject<DragEvent>) => void;
     onPointOfAttackClicked: (event: KonvaEventObject<MouseEvent>, pointOfAttackId: string, componentId: string) => void;
-    stageRef: MutableRefObject<KonvaStage | null>;
+    stageRef: RefObject<KonvaStage | null>;
     userRole: USER_ROLES | undefined;
     openCommunicationInterfacesMenu: (component: AugmentedSystemComponent) => void;
     onClick: (event: KonvaEventObject<MouseEvent>) => void;
@@ -93,7 +93,7 @@ interface ConnectorGroupProps extends Partial<GroupConfig> {
     height: number;
     children: ReactNode;
     hover: boolean | null;
-    stageRef: MutableRefObject<KonvaStage | null>;
+    stageRef: RefObject<KonvaStage | null>;
     componentType: ComponentTypeValue;
 }
 
@@ -105,7 +105,7 @@ interface ConnectorProps {
     anchor: AnchorOrientation;
     selectedAnchor: AnchorOrientation | "";
     onSelectAnchor: (event: KonvaEventObject<MouseEvent>, anchor: AnchorOrientation) => void;
-    stageRef: MutableRefObject<KonvaStage | null>;
+    stageRef: RefObject<KonvaStage | null>;
 }
 
 const remapImagePath = (path: string | null | undefined): string | null | undefined => {

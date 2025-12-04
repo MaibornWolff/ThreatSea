@@ -1,6 +1,6 @@
 import { Alert as MaterialAlert, Box, Typography } from "@mui/material";
 import type { AlertColor } from "@mui/material/Alert";
-import { useLayoutEffect } from "react";
+import { useLayoutEffect, type JSX } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { useAlert } from "../../application/hooks/use-alert.hook";

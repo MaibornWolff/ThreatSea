@@ -1,7 +1,7 @@
 import { Add, WifiTethering, WifiTetheringOff } from "@mui/icons-material";
 import { Box, List, ListItem, ListItemAvatar, ListItemText, Typography, IconButton, Avatar } from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
-import React, { useEffect, useRef, useState, type ElementType, type MutableRefObject } from "react";
+import React, { useEffect, useRef, useState, type ElementType, type RefObject } from "react";
 import { useTranslation } from "react-i18next";
 import type { MouseEvent as ReactMouseEvent } from "react";
 import type { Stage } from "konva/lib/Stage";
@@ -27,7 +27,7 @@ interface CommunicationContextMenuProps {
         componentType?: STANDARD_COMPONENT_TYPES | number
     ) => void;
     onCreateNew: () => void;
-    stageRef: MutableRefObject<Stage | null>;
+    stageRef: RefObject<Stage | null>;
     open: boolean;
     componentName: string | undefined;
     onClose: () => void;

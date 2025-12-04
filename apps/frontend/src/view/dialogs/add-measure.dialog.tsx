@@ -134,8 +134,10 @@ const AddMeasureDialog = ({ project, measure, ...props }: AddMeasureDialogProps)
                     />
 
                     <DialogTextField
-                        InputLabelProps={{
-                            shrink: true,
+                        slotProps={{
+                            inputLabel: {
+                                shrink: true,
+                            },
                         }}
                         label={t("scheduledAt")}
                         type="date"

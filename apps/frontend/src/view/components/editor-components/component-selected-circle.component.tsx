@@ -1,4 +1,4 @@
-import { useMemo, useState, type MutableRefObject } from "react";
+import { useMemo, useState, type RefObject } from "react";
 import { Group, Arc } from "react-konva";
 import { POA_COLORS } from "../../colors/pointsOfAttack.colors";
 import { POINTS_OF_ATTACK } from "../../../api/types/points-of-attack.types";
@@ -16,7 +16,7 @@ interface ComponentSelectedCircleProps {
     onPointOfAttackClicked: (event: KonvaEventObject<MouseEvent>, pointOfAttackId: string, componentId: string) => void;
     selectedPointOfAttackId: string | null | undefined;
     component: SystemComponent;
-    stageRef: MutableRefObject<Stage | null>;
+    stageRef: RefObject<Stage | null>;
     onCommunicationInterfacesClicked: (
         event: KonvaEventObject<MouseEvent>,
         pointOfAttackId: string,
