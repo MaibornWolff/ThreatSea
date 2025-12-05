@@ -205,8 +205,8 @@ importers:
         specifier: 4.0.0
         version: 4.0.0
       konva:
-        specifier: 9.3.22
-        version: 9.3.22
+        specifier: 10.0.12
+        version: 10.0.12
       markdown-to-jsx:
         specifier: 9.3.5
         version: 9.3.5(react@18.3.1)
@@ -224,7 +224,7 @@ importers:
         version: 16.1.6(i18next@25.7.3(typescript@5.9.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
       react-konva:
         specifier: 19.2.1
-        version: 19.2.1(@types/react@19.2.7)(konva@9.3.22)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+        version: 19.2.1(@types/react@19.2.7)(konva@10.0.12)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       react-reconciler:
         specifier: 0.33.0
         version: 0.33.0(react@19.2.1)
@@ -3229,8 +3229,8 @@ packages:
   klaw@3.0.0:
     resolution: {integrity: sha512-0Fo5oir+O9jnXu5EefYbVK+mHMBeEVEy2cmctR1O1NECcCkPRreJKrS6Qt/j3KC2C148Dfo9i3pCmCMsdqGr0g==}
 
-  konva@9.3.22:
-    resolution: {integrity: sha512-yQI5d1bmELlD/fowuyfOp9ff+oamg26WOCkyqUyc+nczD/lhRa3EvD2MZOoc4c1293TAubW9n34fSQLgSeEgSw==}
+  konva@10.0.12:
+    resolution: {integrity: sha512-DHmkeG5FbW6tLCkbMQTi1ihWycfzljrn0V7umUUuewxx7aoINcI71ksgBX9fTPNXhlsK4/JoMgKwI/iCde+BRw==}
 
   lazystream@1.0.1:
     resolution: {integrity: sha512-b94GiNHQNy6JNTrt5w6zNyffMrNkXZb3KTkCZJb2V1xaEGCk093vkZ2jk3tpaeP33/OiXC+WvK9AxUebnf5nbw==}
@@ -7704,7 +7704,7 @@ snapshots:
     dependencies:
       graceful-fs: 4.2.11
 
-  konva@9.3.22: {}
+  konva@10.0.12: {}
 
   lazystream@1.0.1:
     dependencies:
@@ -8249,11 +8249,11 @@ snapshots:
 
   react-is@19.2.1: {}
 
-  react-konva@19.2.1(@types/react@19.2.7)(konva@9.3.22)(react-dom@19.2.1(react@19.2.1))(react@19.2.1):
+  react-konva@19.2.1(@types/react@19.2.7)(konva@10.0.12)(react-dom@19.2.1(react@19.2.1))(react@19.2.1):
     dependencies:
       '@types/react-reconciler': 0.32.3(@types/react@19.2.7)
       its-fine: 2.0.0(@types/react@19.2.7)(react@19.2.1)
-      konva: 9.3.22
+      konva: 10.0.12
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
       react-reconciler: 0.33.0(react@19.2.1)

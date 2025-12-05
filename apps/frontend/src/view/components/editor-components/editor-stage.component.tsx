@@ -14,7 +14,7 @@ interface EditorStageProps {
     children: ReactNode;
     onContextMenuOpen: () => void;
     onContextMenuAction: (component: EditorComponentType) => void;
-    onClick: (event: KonvaEventObject<MouseEvent>) => void;
+    onClick?: (event: KonvaEventObject<MouseEvent>) => void;
     handleMouseDown: (event: KonvaEventObject<MouseEvent>) => void;
     handleMouseMove: (event: KonvaEventObject<MouseEvent>) => void;
     handleMouseUp: (event: KonvaEventObject<MouseEvent>) => void;
@@ -117,7 +117,7 @@ export const EditorStage = ({
         (event: KonvaEventObject<MouseEvent>) => {
             if (event.evt.button === 0) {
                 dispatch(EditorActions.setOpenContextMenu(false));
-                onClick(event);
+                onClick?.(event);
             }
         },
         [dispatch, onClick]

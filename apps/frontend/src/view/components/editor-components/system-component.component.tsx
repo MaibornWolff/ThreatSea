@@ -82,7 +82,7 @@ interface SystemComponentProps extends Omit<AugmentedSystemComponent, "communica
     onPointOfAttackClicked: (event: KonvaEventObject<MouseEvent>, pointOfAttackId: string, componentId: string) => void;
     stageRef: RefObject<KonvaStage | null>;
     userRole: USER_ROLES | undefined;
-    openCommunicationInterfacesMenu: (component: AugmentedSystemComponent) => void;
+    toggleCommunicationInterfacesMenu: (component: AugmentedSystemComponent) => void;
     onClick: (event: KonvaEventObject<MouseEvent>) => void;
 }
 
@@ -137,7 +137,7 @@ export const SystemComponent = ({
     onPointOfAttackClicked,
     stageRef,
     userRole,
-    openCommunicationInterfacesMenu,
+    toggleCommunicationInterfacesMenu,
     onClick,
     ...props
 }: SystemComponentProps): JSX.Element => {
@@ -256,7 +256,7 @@ export const SystemComponent = ({
                         radius={(width - 20) / 2}
                         pointsOfAttack={filteredPointsOfAttack}
                         onPointOfAttackClicked={onPointOfAttackClicked}
-                        onCommunicationInterfacesClicked={() => openCommunicationInterfacesMenu(component)}
+                        onCommunicationInterfacesClicked={() => toggleCommunicationInterfacesMenu(component)}
                         selectedPointOfAttackId={selectedPointOfAttackId}
                         strokeWidth={hover ? 9 : 4}
                         component={component}
@@ -294,7 +294,7 @@ export const SystemComponent = ({
                         pointsOfAttack={filteredPointsOfAttack}
                         strokeWidth={9}
                         onPointOfAttackClicked={onPointOfAttackClicked}
-                        onCommunicationInterfacesClicked={() => openCommunicationInterfacesMenu(component)}
+                        onCommunicationInterfacesClicked={() => toggleCommunicationInterfacesMenu(component)}
                         selectedPointOfAttackId={selectedPointOfAttackId}
                         component={component}
                         stageRef={stageRef}
@@ -330,8 +330,8 @@ export const SystemComponent = ({
                     <Group
                         x={width - 10}
                         y={height - 10}
-                        onClick={() => openCommunicationInterfacesMenu(component)}
-                        onTap={() => openCommunicationInterfacesMenu(component)}
+                        onClick={() => toggleCommunicationInterfacesMenu(component)}
+                        onTap={() => toggleCommunicationInterfacesMenu(component)}
                         onMouseEnter={handleSmallIconMouseEnter}
                         onMouseLeave={handleSmallIconMouseLeave}
                     >

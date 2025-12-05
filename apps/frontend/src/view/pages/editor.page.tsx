@@ -86,6 +86,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     const { projectId: projectIdParam } = useParams<{ projectId: string }>();
     const projectId = Number.parseInt(projectIdParam ?? "", 10);
     const stageRef = useRef<KonvaStage | null>(null);
+    const [newConnectionMousePosition, setNewConnectionMousePosition] = useState<Coordinate | null>(null);
     const componentLayerRef = useRef<KonvaLayer | null>(null);
     const sidebarRef = useRef<HTMLDivElement | null>(null);
     const { openConfirm } = useConfirm();
@@ -483,19 +484,17 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         }
     };
 
-    const handleClickStage = ({ evt }: KonvaEventObject<MouseEvent>): void => {
-        if (!evt.defaultPrevented) {
-            if (communicationMenuOpen) {
-                handleCloseCommunicationMenu();
-                return;
-            }
-            deselectComponent();
-            closeSideBar();
-            deselectConnection();
-            deselectPointOfAttack();
-            deselectConnectionPoint();
-            deselectConnector();
+    const closeAndDeselectAll = (): void => {
+        if (communicationMenuOpen) {
+            handleCloseCommunicationMenu();
+            return;
         }
+        deselectComponent();
+        closeSideBar();
+        deselectConnection();
+        deselectPointOfAttack();
+        deselectConnectionPoint();
+        deselectConnector();
     };
 
     const getConnectedComponents = useCallback(
@@ -527,6 +526,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     const handleMouseDown = (event: KonvaEventObject<MouseEvent>): void => {
         const { evt, target } = event;
         if (evt.button === 0 && target.nodeType === "Stage") {
+            closeAndDeselectAll();
             event.cancelBubble = true;
             evt.preventDefault();
             evt.stopImmediatePropagation();
@@ -543,6 +543,16 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
             x: x,
             y: y,
         });
+
+        if (newConnection && stageRef.current) {
+            setNewConnectionMousePosition({
+                x: (x - stageRef.current.x()) / stageRef.current.scaleX() - layerPosition.x,
+                y: (y - stageRef.current.y()) / stageRef.current.scaleY() - layerPosition.y,
+            });
+        } else if (newConnectionMousePosition) {
+            setNewConnectionMousePosition(null);
+        }
+
         if (moveLayer && stageRef.current) {
             setLayerPosition(
                 layerPosition.x + evt.movementX * (GRID_CONFIG.speed / stageRef.current.scaleX()),
@@ -778,6 +788,10 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     };
 
     const handleKeyUp = ({ key }: KeyboardEvent): void => {
+        if (key === "Escape") {
+            closeAndDeselectAll();
+        }
+
         if (key === "Delete") {
             handleDeleteComponent();
             handleDeleteConnection();
@@ -860,9 +874,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         }
     };
 
-    const openCommunicationInterfacesMenu = (component: AugmentedSystemComponent): void => {
+    const toggleCommunicationInterfacesMenu = (component: AugmentedSystemComponent): void => {
         setCommunicationMenuComponent(component);
-        setCommunicationMenuOpen(true);
+        setCommunicationMenuOpen((prevState) => !prevState);
     };
 
     const handleCommunicationSelect = (communicationInterfaceId: string): void => {
@@ -995,7 +1009,6 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                     >
                         <EditorStage
                             ref={stageRef}
-                            onClick={handleClickStage}
                             handleMouseDown={handleMouseDown}
                             handleMouseMove={handleMouseMove}
                             handleMouseUp={handleMouseUp}
@@ -1114,9 +1127,8 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                 {newConnection && newConnectionPreviewComponent && (
                                     <ConnectionPreview
                                         key={`new-connection-${newConnection.from.id}-${Date.now()}`}
-                                        layerPosition={layerPosition}
                                         component={newConnectionPreviewComponent}
-                                        stageRef={stageRef}
+                                        newConnectionMousePosition={newConnectionMousePosition}
                                     />
                                 )}
 
@@ -1133,10 +1145,8 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                     return (
                                         <ConnectionPreview
                                             key={key}
-                                            layerPosition={layerPosition}
                                             component={otherComponent}
                                             draggedComponent={draggedComponent}
-                                            stageRef={stageRef}
                                         />
                                     );
                                 })}
@@ -1195,7 +1205,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                         component={component}
                                         stageRef={stageRef}
                                         userRole={userRole}
-                                        openCommunicationInterfacesMenu={openCommunicationInterfacesMenu}
+                                        toggleCommunicationInterfacesMenu={toggleCommunicationInterfacesMenu}
                                     />
                                 ))}
                             </Layer>
