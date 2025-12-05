@@ -21,8 +21,7 @@ import type { DialogProps } from "@mui/material/Dialog";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import { InfoOutlined } from "@mui/icons-material";
 import SelectBoxCategorySubHeader from "../components/selectBox-CategorySubHeader";
-import * as React from "react";
-import { useState, type ChangeEvent } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
@@ -83,7 +82,7 @@ const MeasureImpactByThreatDialog = ({
         projectId,
     });
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (measureImpact) {
             setCurrentThreatId(measureImpact.threatId);
         }

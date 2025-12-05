@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Avatar from "@mui/material/Avatar";
@@ -32,7 +32,7 @@ const UserPanel = () => {
     };
 
     return (
-        <Fragment>
+        <>
             <Box
                 sx={{
                     display: "flex",
@@ -110,7 +110,7 @@ const UserPanel = () => {
                     Logout
                 </MenuItem>
             </Menu>
-        </Fragment>
+        </>
     );
 };
 

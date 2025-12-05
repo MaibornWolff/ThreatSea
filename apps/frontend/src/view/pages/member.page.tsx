@@ -6,14 +6,7 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import {
-    useLayoutEffect,
-    useMemo,
-    useState,
-    type ChangeEvent,
-    type MouseEvent as ReactMouseEvent,
-    type SyntheticEvent,
-} from "react";
+import { useLayoutEffect, useMemo, useState, type ChangeEvent, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import type { Member } from "#api/types/members.types.ts";
@@ -179,7 +172,7 @@ const MemberPageBody = () => {
      * @param {SyntheticBaseEvent} e - Onclick delete event.
      * @param {object} catalog - Data of the catalogue.
      */
-    const onClickDeleteMember = (event: ReactMouseEvent<HTMLElement>, member: Member) => {
+    const onClickDeleteMember = (event: React.MouseEvent<HTMLElement>, member: Member) => {
         event.preventDefault();
 
         const message: { preHighlightText?: string; highlightedText?: string; afterHighlightText?: string } = {};
@@ -233,7 +226,7 @@ const MemberPageBody = () => {
         });
     };
 
-    const onClickEditMember = (event: ReactMouseEvent<HTMLElement>, member: Member) => {
+    const onClickEditMember = (event: React.MouseEvent<HTMLElement>, member: Member) => {
         if (checkUserRole(userRole, USER_ROLES.OWNER) && !event.isDefaultPrevented()) {
             event.preventDefault();
             navigate(`/${memberPath}/${projectCatalogId}/members/edit`, {
@@ -451,8 +444,8 @@ const MemberPageBody = () => {
  */
 interface MemberTableRowProps {
     member: Member;
-    onEdit: (event: ReactMouseEvent<HTMLElement>, member: Member) => void;
-    onDelete: (event: ReactMouseEvent<HTMLElement>, member: Member) => void;
+    onEdit: (event: React.MouseEvent<HTMLElement>, member: Member) => void;
+    onDelete: (event: React.MouseEvent<HTMLElement>, member: Member) => void;
     userRole: USER_ROLES | undefined;
 }
 

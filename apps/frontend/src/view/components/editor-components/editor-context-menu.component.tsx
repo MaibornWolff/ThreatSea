@@ -16,15 +16,7 @@ import {
     type SxProps,
     type Theme,
 } from "@mui/material";
-import {
-    useEffect,
-    useImperativeHandle,
-    useRef,
-    useState,
-    type RefObject,
-    type Ref,
-    type MouseEvent as ReactMouseEvent,
-} from "react";
+import { useEffect, useImperativeHandle, useRef, useState, type RefObject, type Ref } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { useParams } from "react-router-dom";
@@ -64,13 +56,13 @@ export const EditorContextMenu = ({ onSelect, stageRef, ref }: EditorContextMenu
     const contextMenuRef = useRef<HTMLDivElement>(null);
     useImperativeHandle(ref, () => contextMenuRef.current!);
 
-    const onToggleCustomComponents = (event: ReactMouseEvent<HTMLLIElement>) => {
+    const onToggleCustomComponents = (event: React.MouseEvent<HTMLLIElement>) => {
         if (!event.defaultPrevented) {
             setOpenCustomComponents((prev) => !prev);
         }
     };
 
-    const onCreateComponent = (event: ReactMouseEvent<HTMLButtonElement>) => {
+    const onCreateComponent = (event: React.MouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
 
         navigate(`/projects/${projectId}/system/components/edit`);
@@ -260,7 +252,7 @@ const ComponentListItem = ({ label, symbol, onEdit, onClickDelete, sx = {}, ...p
     const { t } = useTranslation("editorPage");
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-    const handleClick = (event: ReactMouseEvent<HTMLElement>) => {
+    const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
     };
 

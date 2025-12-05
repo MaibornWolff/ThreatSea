@@ -10,15 +10,8 @@ import {
     TableSortLabel,
     Typography,
 } from "@mui/material";
-import {
-    useEffect,
-    useLayoutEffect,
-    useState,
-    type ChangeEvent,
-    type MouseEvent as ReactMouseEvent,
-    type ReactNode,
-    type SyntheticEvent,
-} from "react";
+import { useEffect, useLayoutEffect, useState, type ChangeEvent, type ReactNode, type SyntheticEvent } from "react";
+
 import { useTranslation } from "react-i18next";
 import { Route } from "react-router";
 import { Routes, useNavigate, useParams } from "react-router-dom";
@@ -181,7 +174,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
         }
     };
 
-    const onClickEditAppliedMeasure = (event: ReactMouseEvent<HTMLElement>, measure: ThreatMeasure) => {
+    const onClickEditAppliedMeasure = (event: React.MouseEvent<HTMLElement>, measure: ThreatMeasure) => {
         event.stopPropagation();
 
         navigate(`/projects/${projectId}/risk/appliedMeasure/edit`, {
@@ -200,7 +193,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
     };
 
     const onClickDeleteMeasureImpact = (
-        event: ReactMouseEvent<HTMLElement>,
+        event: React.MouseEvent<HTMLElement>,
         measureName: string,
         threatName: string,
         measureImpact: MeasureImpact

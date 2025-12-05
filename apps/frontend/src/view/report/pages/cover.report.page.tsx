@@ -1,4 +1,4 @@
-import React, { type ComponentProps } from "react";
+import { type ComponentProps, type FC } from "react";
 import { Page as PdfPage, View, Image } from "@react-pdf/renderer";
 import { SystemImage } from "../components/system-image.report.component";
 import { styles, s3, s6, s2, s1 } from "../report.style";
@@ -18,7 +18,7 @@ interface CoverPageProps extends ProjectReport, PdfPageProps {
     language: string;
 }
 
-export const CoverPage: React.FC<CoverPageProps> = ({
+export const CoverPage: FC<CoverPageProps> = ({
     indexCallback,
     systemImageOnSeperatePage = false,
     systemImage,

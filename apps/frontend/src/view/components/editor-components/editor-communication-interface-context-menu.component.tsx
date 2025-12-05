@@ -1,9 +1,8 @@
 import { Add, WifiTethering, WifiTetheringOff } from "@mui/icons-material";
 import { Box, List, ListItem, ListItemAvatar, ListItemText, Typography, IconButton, Avatar } from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
-import React, { useEffect, useRef, useState, type ElementType, type RefObject } from "react";
+import { useEffect, useRef, useState, type ElementType, type RefObject } from "react";
 import { useTranslation } from "react-i18next";
-import type { MouseEvent as ReactMouseEvent } from "react";
 import type { Stage } from "konva/lib/Stage";
 import type { KonvaEventObject } from "konva/lib/Node";
 import { useLineDrawing } from "./contexts/LineDrawingContext";
@@ -105,7 +104,7 @@ export const CommunicationContextMenu = ({
     }, [stageRef, ref, open]);
 
     const handleClick = (
-        event: ReactMouseEvent<HTMLButtonElement>,
+        event: React.MouseEvent<HTMLButtonElement>,
         communicationInterface: SystemCommunicationInterface
     ) => {
         event.stopPropagation();
@@ -133,14 +132,14 @@ export const CommunicationContextMenu = ({
         onClose();
     };
 
-    const handleCreateNew = (event: ReactMouseEvent<HTMLLIElement>) => {
+    const handleCreateNew = (event: React.MouseEvent<HTMLLIElement>) => {
         event.stopPropagation();
         onCreateNew();
         onClose();
     };
 
     return (
-        <React.Fragment>
+        <>
             <Box
                 ref={ref}
                 sx={{
@@ -285,7 +284,7 @@ export const CommunicationContextMenu = ({
                     </ListItem>
                 </List>
             </Box>
-        </React.Fragment>
+        </>
     );
 };
 

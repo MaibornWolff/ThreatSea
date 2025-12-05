@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { EditorSidebarAssetList } from "./editor-sidebar-asset-list.component";
 import { SearchField } from "../search-field.component";
 import { TextField } from "../textfield.component";
-import React from "react";
 import { checkUserRole, USER_ROLES } from "../../../api/types/user-roles.types";
 import { Delete } from "@mui/icons-material";
 import type { ChangeEvent } from "react";
@@ -44,7 +43,7 @@ export const EditorSidebarSelectedCommunicationInterface = ({
 }: EditorSidebarSelectedCommunicationInterfaceProps) => {
     const { t } = useTranslation("editorPage");
     return (
-        <React.Fragment>
+        <>
             <Box>
                 <Box
                     sx={{
@@ -267,6 +266,6 @@ export const EditorSidebarSelectedCommunicationInterface = ({
                     </Box>
                 )}
             </Box>
-        </React.Fragment>
+        </>
     );
 };

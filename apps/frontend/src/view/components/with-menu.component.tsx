@@ -327,7 +327,7 @@ export const CreatePage = <P extends object>(
                                                 : ""}
                                         </Typography>
                                         <IconButton
-                                            onClick={(e) => handleProjectInfoClick(e)}
+                                            onClick={(event) => handleProjectInfoClick(event)}
                                             sx={{
                                                 ml: 1,
                                                 "&:hover": {

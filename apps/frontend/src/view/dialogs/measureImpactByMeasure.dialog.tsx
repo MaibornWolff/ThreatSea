@@ -21,7 +21,7 @@ import {
 import type { DialogProps } from "@mui/material/Dialog";
 import { Add, InfoOutlined } from "@mui/icons-material";
 import SelectBoxCategorySubHeader from "../components/selectBox-CategorySubHeader";
-import { useEffect, useState, type MouseEvent as ReactMouseEvent } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
@@ -151,7 +151,7 @@ const MeasureImpactByMeasureDialog = ({
         navigate(-1);
     };
 
-    const handleImplementCatalogMeasure = (event: ReactMouseEvent<HTMLElement>, catalogMeasure: CatalogMeasure) => {
+    const handleImplementCatalogMeasure = (event: React.MouseEvent<HTMLElement>, catalogMeasure: CatalogMeasure) => {
         event.preventDefault();
         event.stopPropagation();
         navigate(`/projects/${project.id}/risk/measures/add`, {
@@ -169,7 +169,7 @@ const MeasureImpactByMeasureDialog = ({
         });
     };
 
-    const handleNewBlankMeasure = (event: ReactMouseEvent<HTMLElement>) => {
+    const handleNewBlankMeasure = (event: React.MouseEvent<HTMLElement>) => {
         event.preventDefault();
         event.stopPropagation();
         navigate(`/projects/${project.id}/risk/measures/add`, {

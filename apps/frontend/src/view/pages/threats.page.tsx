@@ -6,14 +6,7 @@ import TableCell, { type TableCellProps } from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import {
-    useEffect,
-    useLayoutEffect,
-    useState,
-    type ChangeEvent,
-    type MouseEvent as ReactMouseEvent,
-    type SyntheticEvent,
-} from "react";
+import { useEffect, useLayoutEffect, useState, type ChangeEvent, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
@@ -93,7 +86,7 @@ const ThreatsPageBody = () => {
         }
     };
 
-    const onClickEditThreat = (event: ReactMouseEvent<HTMLElement>, threat: ThreatListItem) => {
+    const onClickEditThreat = (event: React.MouseEvent<HTMLElement>, threat: ThreatListItem) => {
         if (!event.isDefaultPrevented()) {
             navigate(`/projects/${projectId}/threats/edit`, {
                 state: { threat },
@@ -101,7 +94,7 @@ const ThreatsPageBody = () => {
         }
     };
 
-    const handleDuplicateThreat = (event: ReactMouseEvent<HTMLElement>, threat: ThreatListItem) => {
+    const handleDuplicateThreat = (event: React.MouseEvent<HTMLElement>, threat: ThreatListItem) => {
         event.preventDefault();
         openConfirm({
             state: threat,
@@ -115,7 +108,7 @@ const ThreatsPageBody = () => {
         });
     };
 
-    const handleDeleteThreat = (event: ReactMouseEvent<HTMLElement>, threat: ThreatListItem) => {
+    const handleDeleteThreat = (event: React.MouseEvent<HTMLElement>, threat: ThreatListItem) => {
         event.preventDefault();
         openConfirm({
             state: threat,
@@ -142,7 +135,7 @@ const ThreatsPageBody = () => {
      * @param {*} e - The event, containing the element the popper relates to
      * @param {*} assets - The list of assets for the currently selected threat
      */
-    const handleAssetHover = (event: ReactMouseEvent<HTMLElement>, assets: ExtendedThreat["assets"]) => {
+    const handleAssetHover = (event: React.MouseEvent<HTMLElement>, assets: ExtendedThreat["assets"]) => {
         setCurrentAssetList(assets);
         setAssetAnchorEl(event.currentTarget);
     };

@@ -1,4 +1,4 @@
-import React from "react";
+import type { FC } from "react";
 import { Page } from "../components/page.report.component";
 import { SystemImage } from "../components/system-image.report.component";
 import { SystemImageLegend } from "../components/system-image-legend.report.compoent";
@@ -17,7 +17,7 @@ interface SystemImagePageProps {
     date: string;
 }
 
-export const SystemImagePage: React.FC<SystemImagePageProps> = ({
+export const SystemImagePage: FC<SystemImagePageProps> = ({
     indexCallback,
     language,
     systemImage,

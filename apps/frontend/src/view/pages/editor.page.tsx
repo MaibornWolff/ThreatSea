@@ -5,7 +5,7 @@
 
 import { CenterFocusWeak, Download } from "@mui/icons-material";
 import { Box, IconButton, LinearProgress, Tooltip } from "@mui/material";
-import React, {
+import {
     memo,
     useCallback,
     useEffect,
@@ -14,7 +14,6 @@ import React, {
     useRef,
     useState,
     type ChangeEvent,
-    type MouseEvent as ReactMouseEvent,
 } from "react";
 import { useTranslation } from "react-i18next";
 import { Group, Layer, Line } from "react-konva";
@@ -759,7 +758,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         }
     };
 
-    const handleAddAssetToAllPointsOfAttack = (_event: ReactMouseEvent<HTMLElement>, asset: Asset): void => {
+    const handleAddAssetToAllPointsOfAttack = (_event: React.MouseEvent<HTMLElement>, asset: Asset): void => {
         if (checkUserRole(userRole, USER_ROLES.EDITOR) && selectedComponent != null) {
             pointsOfAttackOfSelectedComponent.forEach((pointOfAttack) => {
                 addAssetToPointOfAttack(asset, pointOfAttack);
@@ -767,7 +766,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         }
     };
 
-    const handleRemoveAssetFromAllPointsOfAttack = (_event: ReactMouseEvent<HTMLElement>, asset: Asset): void => {
+    const handleRemoveAssetFromAllPointsOfAttack = (_event: React.MouseEvent<HTMLElement>, asset: Asset): void => {
         if (checkUserRole(userRole, USER_ROLES.EDITOR) && selectedComponent != null) {
             pointsOfAttackOfSelectedComponent.forEach((pointOfAttack) => {
                 removeAssetFromPointOfAttack(asset, pointOfAttack);
@@ -971,7 +970,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     }
 
     return (
-        <React.Fragment>
+        <>
             <LineDrawingProvider>
                 <Page
                     sx={{
@@ -1308,7 +1307,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                     )}
                 </Page>
             </LineDrawingProvider>
-        </React.Fragment>
+        </>
     );
 };
 

@@ -14,7 +14,7 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import { useLayoutEffect, type ChangeEvent, type MouseEvent as ReactMouseEvent, type SyntheticEvent } from "react";
+import { useLayoutEffect, type ChangeEvent, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { Route, Routes } from "react-router-dom";
@@ -36,9 +36,9 @@ import CatalogDialogPage from "./catalog-dialog.page";
 
 interface CatalogListItemProps {
     catalog: CatalogWithRole;
-    onClick: (event: ReactMouseEvent<HTMLElement>, catalog: CatalogWithRole) => void;
-    onClickEdit: (event: ReactMouseEvent<HTMLElement>, catalog: CatalogWithRole | null) => void;
-    onClickDelete: (event: ReactMouseEvent<HTMLElement>, catalog: CatalogWithRole) => void;
+    onClick: (event: React.MouseEvent<HTMLElement>, catalog: CatalogWithRole) => void;
+    onClickEdit: (event: React.MouseEvent<HTMLElement>, catalog: CatalogWithRole | null) => void;
+    onClickDelete: (event: React.MouseEvent<HTMLElement>, catalog: CatalogWithRole) => void;
     [key: string]: unknown;
 }
 
@@ -83,9 +83,9 @@ const CatalogsPageBody = () => {
      * Opens the catalogue dialog to add one.
      *
      * @event IconButton#onClick
-     * @param {SyntheticBaseEvent} e - Onclick event.
+     * @param {SyntheticBaseEvent} event - Onclick event.
      */
-    const onClickAddCatalog = (event: ReactMouseEvent<HTMLElement>) => {
+    const onClickAddCatalog = (event: React.MouseEvent<HTMLElement>) => {
         onClickEditCatalog(event, null);
     };
 
@@ -93,7 +93,7 @@ const CatalogsPageBody = () => {
      * Changes the search value of the catalogues.
      *
      * @event SearchField#onChange
-     * @param {SyntheticBaseEvent} e - OnChange event.
+     * @param {SyntheticBaseEvent} event - OnChange event.
      */
     const onChangeSearchValue = (event: ChangeEvent<HTMLInputElement>) => {
         setSearchValue(event.target.value);
@@ -103,7 +103,7 @@ const CatalogsPageBody = () => {
      * Sets the attribute to sort the catalogues by.
      *
      * @event ToggleButtons#onChange
-     * @param {SyntheticBaseEvent} e - Onchange event.
+     * @param {SyntheticBaseEvent} _event - Onchange event.
      * @param {string} sortBy - The string attribute to sort by.
      */
     const onChangeSortBy = (_event: SyntheticEvent, sortBy: string | null) => {
@@ -116,7 +116,7 @@ const CatalogsPageBody = () => {
      * Sets the order of sorting => asc/desc.
      *
      * @event ToggleButtons#onChange
-     * @param {SyntheticBaseEvent} e - Onchange event.
+     * @param {SyntheticBaseEvent} _event - Onchange event.
      * @param {string} sortDirection - The key value to filter for.
      */
     const onChangeSortDirection = (_event: SyntheticEvent, sortDirection: "asc" | "desc" | null) => {
@@ -129,10 +129,10 @@ const CatalogsPageBody = () => {
      * Opens the clicked catalogue.
      *
      * @event CatalogListItem#onClick
-     * @param {SyntheticBaseEvent} e - Onclick event.
+     * @param {SyntheticBaseEvent} _event - Onclick event.
      * @param {object} catalog - Data of the catalogue.
      */
-    const onClickOpenCatalog = (_event: ReactMouseEvent<HTMLElement>, catalog: CatalogWithRole) => {
+    const onClickOpenCatalog = (_event: React.MouseEvent<HTMLElement>, catalog: CatalogWithRole) => {
         navigate(`/catalogs/${catalog.id}`, { state: { catalog } });
     };
 
@@ -141,10 +141,10 @@ const CatalogsPageBody = () => {
      * on it.
      *
      * @event CatalogListItem#onClickEdit
-     * @param {SyntheticBaseEvent} e - Onclick edit event.
+     * @param {SyntheticBaseEvent} _event - Onclick edit event.
      * @param {object} catalog - Data of the catalogue.
      */
-    const onClickEditCatalog = (_event: ReactMouseEvent<HTMLElement>, catalog: CatalogWithRole | null) => {
+    const onClickEditCatalog = (_event: React.MouseEvent<HTMLElement>, catalog: CatalogWithRole | null) => {
         navigate("/catalogs/edit", { state: { catalog } });
     };
 
@@ -153,10 +153,10 @@ const CatalogsPageBody = () => {
      * catalogue.
      *
      * @event CatalogListItem#onClickDelete
-     * @param {SyntheticBaseEvent} e - Onclick delete event.
+     * @param {SyntheticBaseEvent} _event - Onclick delete event.
      * @param {object} catalog - Data of the catalogue.
      */
-    const onClickDeleteCatalog = (_event: ReactMouseEvent<HTMLElement>, catalog: CatalogWithRole) => {
+    const onClickDeleteCatalog = (_event: React.MouseEvent<HTMLElement>, catalog: CatalogWithRole) => {
         openConfirm({
             state: catalog,
             message: t("deleteMessage", { catalogName: catalog.name }),
@@ -295,7 +295,7 @@ const CatalogListItem = ({ catalog, onClick, onClickEdit, onClickDelete, ...prop
         <ListItem
             divider
             component={Box}
-            onClick={(e) => onClick(e, catalog)}
+            onClick={(event) => onClick(event, catalog)}
             sx={{
                 cursor: "pointer",
                 color: "text.primary",
@@ -322,7 +322,7 @@ const CatalogListItem = ({ catalog, onClick, onClickEdit, onClickDelete, ...prop
                 <ListItemSecondaryAction>
                     <IconButton
                         data-testid="catalogs-page_rename-catalog-button"
-                        onClick={(e) => onClickEdit(e, catalog)}
+                        onClick={(event) => onClickEdit(event, catalog)}
                         title={t("editCatalogBtn")}
                         sx={{
                             color: "text.primary",
@@ -337,7 +337,7 @@ const CatalogListItem = ({ catalog, onClick, onClickEdit, onClickDelete, ...prop
                         sx={{
                             color: "text.primary",
                         }}
-                        onClick={(e) => onClickDelete(e, catalog)}
+                        onClick={(event) => onClickDelete(event, catalog)}
                     >
                         <Delete sx={{ fontSize: 18 }} />
                     </IconButton>

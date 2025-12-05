@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, type FC } from "react";
 import { Document, Font } from "@react-pdf/renderer";
 import { CoverPage } from "./pages/cover.report.page";
 import { SystemImagePage } from "./pages/system-image.report.page";
@@ -74,7 +74,7 @@ interface ReportProps {
     data: ProjectReport & { milestones?: Milestone[] | null };
 }
 
-export const Report: React.FC<ReportProps> = ({
+export const Report: FC<ReportProps> = ({
     tillScheduledAt,
     showCoverPage = true,
     showTableOfContentsPage = true,
