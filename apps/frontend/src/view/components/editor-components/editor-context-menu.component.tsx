@@ -114,6 +114,7 @@ export const EditorContextMenu = ({ onSelect, stageRef, ref }: EditorContextMenu
 
     useEffect(() => {
         if (!open) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setOpenCustomComponents(false);
         } else {
             const stage = stageRef.current;

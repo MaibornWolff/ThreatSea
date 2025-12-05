@@ -50,6 +50,7 @@ export const IconSelector = ({ value, onChange, label, error, helperText }: Icon
 
     useEffect(() => {
         if (searchTerm === "") {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setVisibleIcons(preselectedIcons);
         } else {
             const filteredIcons = Object.keys(MuiIcons)

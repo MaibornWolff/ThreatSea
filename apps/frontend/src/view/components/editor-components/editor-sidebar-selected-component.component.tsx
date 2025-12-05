@@ -94,6 +94,7 @@ export const EditorSidebarSelectedComponent = ({
 
     useEffect(() => {
         if (selectedComponent) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setCommunicationInterfaces(selectedComponent.communicationInterfaces ?? []);
             setLocalName(selectedComponent.name ?? "");
             setLocalDescription(selectedComponent.description ?? "");

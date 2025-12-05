@@ -9,6 +9,7 @@ import {
     memo,
     useCallback,
     useEffect,
+    useEffectEvent,
     useLayoutEffect,
     useMemo,
     useRef,
@@ -49,6 +50,7 @@ import type {
 import type { EditorComponentType } from "#application/adapters/editor-component-type.adapter.ts";
 import type { ConnectionPointMeta } from "#api/types/system.types.ts";
 import type { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
+import { useDebounce } from "#hooks/useDebounce.ts";
 
 // Move these outside the component to avoid recreating on each render
 const GRID_CONFIG = {
@@ -163,6 +165,8 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         projectId,
         showErrorMessage,
     });
+    const setLayerPositionEvent = useEffectEvent(setLayerPosition);
+    const setStageScaleEvent = useEffectEvent(setStageScale);
     const { t } = useTranslation("editorPage");
 
     const { loadAssets, items } = useAssets({
@@ -207,8 +211,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                 getCatalogInfo: false,
             })
         );
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [dispatch]);
 
     /**
      * Resets the current layer position and scale when open a project
@@ -217,18 +220,16 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     useEffect(() => {
         if (stageRef?.current && shouldCenter) {
             stageRef.current.scale({ x: 1, y: 1 });
-            setLayerPosition(0, 0);
-            setStageScale(1, { x: 0, y: 0 });
+            setLayerPositionEvent(0, 0);
+            setStageScaleEvent(1, { x: 0, y: 0 });
         }
         navigate(location.pathname, { replace: true, state: {} });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [shouldCenter]);
+    }, [shouldCenter, navigate, location.pathname]);
 
     useEffect(() => {
         if (blockAutoSave) {
             resetSaveTimeout();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [blockAutoSave]);
 
     //run if unmounted
@@ -239,17 +240,15 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                 saveTimeoutHandle = undefined;
             }
 
-            save(true);
+            saveEvent(true);
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
-        setTimeout(updateScreenshot, 100, true);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [makeScreenshot, componentLayerRef.current]);
+        updateScreenshotEvent();
+    }, [makeScreenshot]);
 
-    const updateScreenshot = (): void => {
+    const updateScreenshot = useDebounce((): void => {
         if (componentLayerRef?.current) {
             const componentsOfProject = components.filter((component) => component.projectId === projectId);
             let minX = componentsOfProject.length === 0 ? 0 : 9999;
@@ -306,7 +305,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                 lastLayerScreenshot = result;
             }
         }
-    };
+    }, 100);
+
+    const updateScreenshotEvent = useEffectEvent(updateScreenshot);
 
     const save = (forceSave = false): void => {
         if (shouldSave(forceSave)) {
@@ -315,6 +316,8 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
             }
         }
     };
+
+    const saveEvent = useEffectEvent(save);
 
     function shouldSave(forceSave?: boolean): boolean {
         // User with Viewer role should not trigger autosave
@@ -330,20 +333,20 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
 
     useEffect(() => {
         setAutoSaveStatus("saving");
-        updateAutoSaveOnClick?.(() => save(true));
+        updateAutoSaveOnClick?.(() => saveEvent(true));
         return () => {
             updateAutoSaveOnClick?.(undefined);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const resetSaveTimeout = (): void => {
+    const resetSaveTimeout = useEffectEvent((): void => {
         if (saveTimeoutHandle) {
             clearTimeout(saveTimeoutHandle);
         }
         saveTimeoutHandle = setTimeout(save, 1000);
         autoSaveBlocked();
-    };
+    });
 
     const handlComponentDragStart = (_event: KonvaEventObject<DragEvent>, componentId: string): void => {
         addInUseComponent(componentId);
