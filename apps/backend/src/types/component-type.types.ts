@@ -52,7 +52,7 @@ export class CreateComponentTypeRequest {
     })
     pointsOfAttack!: POINTS_OF_ATTACK[];
 
-    @ValidateIf((_, value) => value !== null)
+    @ValidateIf((_, value) => value != null)
     @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("symbol") })
     @IsString({ message: FIELD_MUST_BE_STRING_MESSAGE("symbol", "or null") })
     @Matches(/^data:image\/(png|jpeg|jpg);base64,[A-Za-z0-9+/=]+$/, {

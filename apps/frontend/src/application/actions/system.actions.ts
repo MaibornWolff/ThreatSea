@@ -2,9 +2,18 @@
  * @module systems.actions - Defines the actions
  *     for the system view.
  */
-import { createAsyncThunk, createAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createAction, type Update } from "@reduxjs/toolkit";
 import { SystemAPI } from "#api/system.api.ts";
-import type { UpdateSystemRequest } from "#api/types/system.types.ts";
+import type {
+    Component,
+    Connection,
+    ConnectionPoint,
+    System,
+    SystemComponent,
+    SystemConnection,
+    UpdateSystemRequest,
+} from "#api/types/system.types.ts";
+import type { SystemConnectionPoint } from "#application/adapters/system-connection-point.adapter.ts";
 
 /**
  * Wrapper class that defines the actions functions
@@ -23,7 +32,7 @@ export class SystemActions {
         return await SystemAPI.getSystem(data);
     });
 
-    static clearSystem = createAction("[system] clear system");
+    static clearSystem = createAction<void>("[system] clear system");
 
     /**
      * Action that updates the system using the backend api.
@@ -43,7 +52,7 @@ export class SystemActions {
      * @param {string} type - Action type.
      * @returns Action function for saving the system view.
      */
-    static saveSystem = createAction("[system] save system");
+    static saveSystem = createAction<Pick<System, "projectId" | "image">>("[system] save system");
 
     /**
      * Action that sets a component in the system view when its dragged.
@@ -51,7 +60,7 @@ export class SystemActions {
      * @param {string} type - Action type.
      * @returns Action function for setting a component in the system view.
      */
-    static setComponents = createAction("[system] set components");
+    static setComponents = createAction<Component[]>("[system] set components");
 
     /**
      * Action that sets a connection line in the system view.
@@ -59,7 +68,7 @@ export class SystemActions {
      * @param {string} type - Action type.
      * @returns Action function for setting a connection line in the system view.
      */
-    static setConnections = createAction("[system] set connections");
+    static setConnections = createAction<Connection[]>("[system] set connections");
 
     /**
      * Action that sets the pending state of a request.
@@ -67,7 +76,7 @@ export class SystemActions {
      * @param {string} type - Action type.
      * @returns Action function for setting the pending state of a request.
      */
-    static setPendingState = createAction("[system] set pending state");
+    static setPendingState = createAction<boolean>("[system] set pending state");
 
     /**
      * Action that creates a component in the system view.
@@ -75,7 +84,8 @@ export class SystemActions {
      * @param {string} type - Action type.
      * @returns Action function for creating a component in the system view.
      */
-    static createComponent = createAction("[system] create component");
+    static createComponent =
+        createAction<Omit<Component, "width" | "height" | "selected">>("[system] create component");
 
     /**
      * Action that creates a connection line in the system view.
@@ -83,7 +93,7 @@ export class SystemActions {
      * @param {string} type - Action type.
      * @returns Action function for creating a connection line in the system view.
      */
-    static createConnection = createAction("[system] create connection");
+    static createConnection = createAction<SystemConnection>("[system] create connection");
 
     /**
      * Action that removes a component in the system view.
@@ -91,7 +101,7 @@ export class SystemActions {
      * @param {string} type - Action type.
      * @returns Action function for removing a component in the system view.
      */
-    static removeComponent = createAction("[system] remove component");
+    static removeComponent = createAction<Pick<Component, "id">>("[system] remove component");
 
     /**
      * Action that sets the name of a component.
@@ -99,7 +109,7 @@ export class SystemActions {
      * @param {string} type - Action type.
      * @returns Action function for setting the name of a component.
      */
-    static setComponentName = createAction("[system] set component name");
+    static setComponentName = createAction<Update<SystemComponent, string>>("[system] set component name");
 
     /**
      * Action that creates a connection point in the system view.
@@ -107,7 +117,7 @@ export class SystemActions {
      * @param {string} type - Action type.
      * @returns Action function for creating a connection point in the system view.
      */
-    static createConnectionPoint = createAction("[system] create connection point");
+    static createConnectionPoint = createAction<SystemConnectionPoint>("[system] create connection point");
 
     /**
      * Action that changes a connection line in the system view when its dragged.
@@ -115,7 +125,7 @@ export class SystemActions {
      * @param {string} type - Action type.
      * @returns Action function for changing a connection line in the system view.
      */
-    static setConnectionPoint = createAction("[system] set connection point");
+    static setConnectionPoint = createAction<Update<SystemConnectionPoint, string>>("[system] set connection point");
 
     /**
      * Action that removes a connection point in the system view.
@@ -123,7 +133,7 @@ export class SystemActions {
      * @param {string} type - Action type.
      * @returns Action function for removing a connection point in the system view.
      */
-    static removeConnectionPoint = createAction("[system] remove connection point");
+    static removeConnectionPoint = createAction<Pick<SystemConnectionPoint, "id">>("[system] remove connection point");
 
     /**
      * Action that creates a connection line in the system view.
@@ -131,7 +141,8 @@ export class SystemActions {
      * @param {string} type - Action type.
      * @returns Action function for creating a connection line in the system view.
      */
-    static removeConnection = createAction("[editor] remove connection");
+    static removeConnection =
+        createAction<Pick<SystemConnection, "id" | "connectionPoints">>("[editor] remove connection");
 
     /**
      * Action that refreshes a system.
@@ -139,7 +150,7 @@ export class SystemActions {
      * @param {string} type - Action type.
      * @returns Action function for refreshing a system.
      */
-    static refresh = createAction("[editor] refresh");
+    static refresh = createAction<void>("[editor] refresh");
 
     /**
      * Action that sets a component in the system.
@@ -147,7 +158,7 @@ export class SystemActions {
      * @param {string} type - Action type.
      * @returns Action function for setting a component in the system.
      */
-    static setComponent = createAction("[system] set component");
+    static setComponent = createAction<Update<SystemComponent, string>>("[system] set component");
 
     /**
      * Action that sets a connection line in the system.
@@ -155,7 +166,7 @@ export class SystemActions {
      * @param {string} type - Action type.
      * @returns Action function for setting a connection line in the system.
      */
-    static setConnection = createAction("[system] set connection");
+    static setConnection = createAction<Update<SystemConnection, string>>("[system] set connection");
 
     /**
      * Action that indicates a system change.
@@ -163,7 +174,7 @@ export class SystemActions {
      * @param {string} type - Action type.
      * @returns Action function for indicating a system change
      */
-    static setHasChanged = createAction("[system] set has changed");
+    static setHasChanged = createAction<boolean>("[system] set has changed");
 
     /**
      * Action that sets the id of the system. Each system view is different
@@ -172,7 +183,7 @@ export class SystemActions {
      * @param {string} type - Action type.
      * @returns Action function for setting the system id.
      */
-    static setSystemId = createAction("[system] set system id");
+    static setSystemId = createAction<number>("[system] set system id");
 
     /**
      * Action that indicates that the auto save is blocked.
@@ -180,7 +191,7 @@ export class SystemActions {
      * @param {string} type - Action type.
      * @returns Action function for indicating that the auto save is blocked.
      */
-    static autoSavedBlocked = createAction("[system] auto save blocked");
+    static autoSavedBlocked = createAction<void>("[system] auto save blocked");
 
     /**
      * Action that sets the auto save to blocked.
@@ -188,7 +199,7 @@ export class SystemActions {
      * @param {string} type - Action type.
      * @returns Action function for setting the auto save to blocked.
      */
-    static setAutoSavedBlocked = createAction("[system] set auto save blocked");
+    static setAutoSavedBlocked = createAction<boolean>("[system] set auto save blocked");
 
     /**
      * Action that indicates that the system is properly initialised.
@@ -196,7 +207,7 @@ export class SystemActions {
      * @param {string} type - Action type.
      * @returns Action function for indicating that the system is initialised.
      */
-    static setInitialized = createAction("[system] set initialized");
+    static setInitialized = createAction<boolean>("[system] set initialized");
 
     /**
      * Action that sets the connection points in the system view
@@ -204,5 +215,5 @@ export class SystemActions {
      * @param {string} type - Action type.
      * @returns Action function for changing the connection points.
      */
-    static setConnectionPoints = createAction("[sysetm] set connection points");
+    static setConnectionPoints = createAction<ConnectionPoint[]>("[system] set connection points");
 }

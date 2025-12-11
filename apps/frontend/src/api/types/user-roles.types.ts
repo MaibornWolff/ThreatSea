@@ -9,6 +9,13 @@ export enum USER_ROLES {
     VIEWER = "VIEWER",
 }
 
+export interface UserRoleConfig {
+    ownUserId?: number;
+    isProject?: boolean;
+    userProjectRole?: USER_ROLES;
+    userCatalogRole?: USER_ROLES;
+}
+
 /**
  * Function to check if the user has the required role
  *
@@ -16,7 +23,7 @@ export enum USER_ROLES {
  * @param requiredRole - The required role to check against.
  * @returns {boolean} True if the user has the required role, false otherwise.
  */
-export function checkUserRole(userRole: USER_ROLES, requiredRole: USER_ROLES): boolean {
+export function checkUserRole(userRole: USER_ROLES | undefined, requiredRole: USER_ROLES): boolean {
     switch (requiredRole) {
         case USER_ROLES.OWNER:
             return userRole === USER_ROLES.OWNER;

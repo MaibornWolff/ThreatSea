@@ -1,4 +1,5 @@
 import type { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
+import type { POINTS_OF_ATTACK } from "./points-of-attack.types";
 
 export interface UpdateSystemRequest {
     projectId: number;
@@ -36,10 +37,18 @@ export interface Connection {
     projectId: number;
 }
 
+export interface SystemConnection extends Connection {
+    visible?: boolean;
+    communicationInterfaceId?: string | null;
+    communicationInterface: string | null;
+}
+
 export interface ConnectionAnchor {
     id: string;
     anchor: AnchorOrientation;
     type: STANDARD_COMPONENT_TYPES | number;
+    name?: string | null;
+    communicationInterfaceId?: string | null;
 }
 
 export enum AnchorOrientation {
@@ -47,6 +56,7 @@ export enum AnchorOrientation {
     top = "top",
     right = "right",
     bottom = "bottom",
+    center = "center",
 }
 
 export interface ConnectionPointMeta {
@@ -65,7 +75,7 @@ export interface Coordinate {
 export interface PointOfAttack {
     id: string;
     name: string | null;
-    type: string;
+    type: POINTS_OF_ATTACK;
     componentId: string | null;
     connectionId: string | null;
     projectId: number;
@@ -73,9 +83,14 @@ export interface PointOfAttack {
     assets: number[];
 }
 
+export interface SystemPointOfAttack extends PointOfAttack {
+    componentName: string | null;
+}
+
 export interface Component {
     id: string;
     name: string;
+    description?: string;
     type: STANDARD_COMPONENT_TYPES | number;
     x: number;
     y: number;
@@ -85,8 +100,27 @@ export interface Component {
     height: number;
     selected: boolean;
     projectId: number;
-    symbol: string;
+    symbol: string | null;
 }
+
+export interface SystemCommunicationInterface {
+    id: string;
+    name: string | null;
+    icon?: string | null;
+    type: string;
+    projectId: number;
+    componentId: string;
+    componentName?: string | null;
+}
+
+export interface SystemComponent extends Component {
+    communicationInterfaces?: SystemCommunicationInterface[];
+    alwaysShowAnchors?: boolean;
+}
+
+export type ConnectionEndpointWithComponent = ConnectionAnchor & { component: SystemComponent | undefined };
+
+export type AugmentedSystemComponent = SystemComponent & { pointsOfAttack: SystemPointOfAttack[] };
 
 export interface ConnectionPoint {
     id: string;

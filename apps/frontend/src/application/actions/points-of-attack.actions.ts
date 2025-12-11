@@ -2,7 +2,8 @@
  * @module points-of-attack.actions - Defines the actions
  *     for the points of attack.
  */
-import { createAction } from "@reduxjs/toolkit";
+import type { PointOfAttack, SystemPointOfAttack } from "#api/types/system.types.ts";
+import { createAction, type Update } from "@reduxjs/toolkit";
 
 /**
  * Wrapper class for defining functions for
@@ -15,7 +16,7 @@ export class PointsOfAttackActions {
      * @param {string} type - Action type.
      * @returns Action function for creating a point of attack.
      */
-    static createPointOfAttack = createAction("[points of attack] create point of attack");
+    static createPointOfAttack = createAction<SystemPointOfAttack>("[points of attack] create point of attack");
 
     /**
      * Action that changes a point of attack.
@@ -23,7 +24,9 @@ export class PointsOfAttackActions {
      * @param {string} type - Action type.
      * @returns Action function for changing a point of attack.
      */
-    static setPointOfAttack = createAction("[points of attack] set point of attack");
+    static setPointOfAttack = createAction<Update<SystemPointOfAttack, string>>(
+        "[points of attack] set point of attack"
+    );
 
     /**
      * Action that sets multiple points of attack under the risk page.
@@ -32,7 +35,7 @@ export class PointsOfAttackActions {
      * @returns Action function for changing multiple points of attack
      *     under the risk page.
      */
-    static setPointsOfAttack = createAction("[points of attack] set points of attack");
+    static setPointsOfAttack = createAction<PointOfAttack[]>("[points of attack] set points of attack");
 
     /**
      * Action that removes multiple points of attack
@@ -40,7 +43,7 @@ export class PointsOfAttackActions {
      * @param {string} type - Action type.
      * @returns Action function for removing multiple points of attack.
      */
-    static removePointsOfAttack = createAction("[points of attack] remove points of attack");
+    static removePointsOfAttack = createAction<string[]>("[points of attack] remove points of attack");
 
     /**
      * Action that removes a point of attack.
@@ -48,5 +51,7 @@ export class PointsOfAttackActions {
      * @param {string} type - Action type.
      * @returns Action function for removing a point of attack.
      */
-    static removePointOfAttack = createAction("[points of attack] remove point of attack");
+    static removePointOfAttack = createAction<Pick<SystemPointOfAttack, "id">>(
+        "[points of attack] remove point of attack"
+    );
 }

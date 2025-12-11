@@ -65,7 +65,7 @@ export class ThreatsActions {
      * @param {string} type - Action type.
      * @returns Action function for setting/changing a threat.
      */
-    static setThreat = createAction("[threats] set threat");
+    static setThreat = createAction<Threat>("[threats] set threat");
 
     /**
      * Action that removes a threat.
@@ -73,5 +73,5 @@ export class ThreatsActions {
      * @param {string} type - Action type.
      * @returns Action function for removing a threat.
      */
-    static removeThreat = createAction("[threats] remove threat");
+    static removeThreat = createAction<Threat>("[threats] remove threat");
 }

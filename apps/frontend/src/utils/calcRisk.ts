@@ -2,6 +2,8 @@
  * @module risk - calculate risk values and colors
  */
 
+import type { MatrixColorKey } from "#view/colors/matrix.ts";
+
 /**
  * returns the correct color for a risk
  *
@@ -15,7 +17,7 @@ export function calcRiskColourFromRisk(
     riskValue: number,
     lineOfToleranceGreen: number,
     lineOfToleranceRed: number
-): "grey" | "green" | "red" | "yellow" {
+): MatrixColorKey {
     if (riskValue === 0) {
         return "grey";
     }
@@ -43,7 +45,7 @@ export function calcRiskColour(
     probability: number,
     lineOfToleranceGreen: number,
     lineOfToleranceRed: number
-): "grey" | "green" | "red" | "yellow" {
+): MatrixColorKey {
     //out of scope handling
     if (damage === 0) {
         return "grey";

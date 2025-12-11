@@ -6,12 +6,11 @@ import { Theme } from "./view/wrappers/theme.wrapper";
 import ErrorBoundary from "./view/wrappers/error.wrapper";
 import RequireAuth from "./view/components/RequireAuth.component";
 import { useEffect, Suspense, lazy } from "react";
-import { useDispatch } from "react-redux";
 import { UserActions } from "./application/actions/user.actions";
 import { startTokenRefresh, stopTokenRefresh } from "./api/utils";
-import type { AppDispatch } from "./application/store";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
+import { useAppDispatch } from "#application/hooks/use-app-redux.hook.ts";
 
 // Lazy load all page components
 const CatalogsPage = lazy(() =>
@@ -40,7 +39,7 @@ const ProjectDialogPage = lazy(() => import("./view/pages/project-dialog.page"))
 
 // Loading component
 const PageLoader = () => (
-    <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+    <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "200px" }}>
         <CircularProgress />
     </Box>
 );
@@ -52,7 +51,7 @@ const PageLoader = () => (
  * @category Component
  */
 export function App(): React.JSX.Element {
-    const dispatch = useDispatch<AppDispatch>();
+    const dispatch = useAppDispatch();
 
     useEffect(() => {
         void startTokenRefresh();

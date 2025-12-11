@@ -12,7 +12,7 @@ import { createAction } from "@reduxjs/toolkit";
  *     alert will be gone.
  * @returns Payload for the alert action.
  */
-function prepareOpenAlert({ text, duration = 3000 }: { text: string; duration: number }): {
+function prepareOpenAlert({ text, duration = 3000 }: { text: string; duration?: number }): {
     payload: { text: string; duration: number };
 } {
     return {
@@ -21,6 +21,13 @@ function prepareOpenAlert({ text, duration = 3000 }: { text: string; duration: n
             duration,
         },
     };
+}
+
+interface AlertPayload {
+    text: string;
+    type: string;
+    visible: boolean;
+    duration?: number;
 }
 
 /**
@@ -53,7 +60,7 @@ export class AlertActions {
      * @param {string} type - Action type.
      * @returns Action for setting an alert.
      */
-    static setAlert = createAction("[alert] set alert");
+    static setAlert = createAction<AlertPayload>("[alert] set alert");
 
     /**
      * Action for closing an alert.
@@ -61,5 +68,5 @@ export class AlertActions {
      * @param {string} type - Action type.
      * @returns Action for closing an alert.
      */
-    static closeAlert = createAction("[alert] close alert");
+    static closeAlert = createAction<void>("[alert] close alert");
 }
