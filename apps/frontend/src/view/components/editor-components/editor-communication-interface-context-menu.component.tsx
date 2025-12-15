@@ -61,6 +61,7 @@ export const CommunicationContextMenu = ({
         if (open && componentId) {
             const component = components.find((c) => c.id === componentId);
             if (component && component.communicationInterfaces) {
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setCommunicationInterfaces(component.communicationInterfaces);
             } else {
                 setCommunicationInterfaces([]);
