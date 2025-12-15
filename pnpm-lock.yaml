@@ -190,8 +190,8 @@ importers:
         specifier: 2.0.0
         version: 2.0.0
       '@reduxjs/toolkit':
-        specifier: 2.11.1
-        version: 2.11.1(react-redux@9.2.0(@types/react@18.3.27)(react@18.3.1)(redux@5.0.1))(react@18.3.1)
+        specifier: 2.11.2
+        version: 2.11.2(react-redux@9.2.0(@types/react@18.3.27)(react@18.3.1)(redux@5.0.1))(react@18.3.1)
       exceljs:
         specifier: 4.4.0
         version: 4.4.0
@@ -1196,8 +1196,8 @@ packages:
   '@react-pdf/zlib@2.0.0':
     resolution: {integrity: sha512-0eY8A/u4WNGMNTTe13UlC5XumstDTWPYzHNXrCmFa08w/nUc8mSBU/yvu9IFoIjnDGHgPnfqN8jOAnKroe+mLg==}
 
-  '@reduxjs/toolkit@2.11.1':
-    resolution: {integrity: sha512-HjhlEREguAyBTGNzRlGNiDHGQ2EjLSPWwdhhpoEqHYy8hWak3Dp6/fU72OfqVsiMb8S6rbfPsWUF24fxpilrVA==}
+  '@reduxjs/toolkit@2.11.2':
+    resolution: {integrity: sha512-Kd6kAHTA6/nUpp8mySPqj3en3dm0tdMIgbttnQ1xFMVpufoj+ADi8pXLBsd4xzTRHQa7t/Jv8W5UnCuW4kuWMQ==}
     peerDependencies:
       react: ^16.9.0 || ^17.0.0 || ^18 || ^19
       react-redux: ^7.2.1 || ^8.1.3 || ^9.0.0
@@ -5455,7 +5455,7 @@ snapshots:
     dependencies:
       pako: 2.1.0
 
-  '@reduxjs/toolkit@2.11.1(react-redux@9.2.0(@types/react@18.3.27)(react@18.3.1)(redux@5.0.1))(react@18.3.1)':
+  '@reduxjs/toolkit@2.11.2(react-redux@9.2.0(@types/react@18.3.27)(react@18.3.1)(redux@5.0.1))(react@18.3.1)':
     dependencies:
       '@standard-schema/spec': 1.0.0
       '@standard-schema/utils': 0.3.0
