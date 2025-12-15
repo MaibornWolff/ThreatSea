@@ -548,3 +548,7 @@ export async function clean(request: APIRequestContext, token: string) {
     await deleteAllProjects(request, token);
     await deleteAllCatalogs(request, token);
 }
+
+export function browserNameTestId(browserName: string, testId: string): string {
+    return `${browserName}-${testId.slice(0, 16)}`;
+}

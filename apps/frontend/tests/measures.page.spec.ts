@@ -8,6 +8,7 @@ import {
     getCatalogs,
     deleteCatalog,
     deleteProjects,
+    browserNameTestId,
 } from "./test-utils.ts";
 import measuresFixture from "./fixtures/measures.json" with { type: "json" };
 import { CONFIDENTIALITY_LEVELS } from "#utils/confidentiality.ts";
@@ -38,13 +39,13 @@ test.beforeEach(async ({ page, request, browserName }, { testId }) => {
     await page.goto("/projects");
     const token = (await page.evaluate(() => localStorage.getItem("csrfToken")))!;
     const catalog = await createCatalog(request, token, {
-        name: `Sample Catalog ${browserName}-${testId.slice(0, 16)}`,
+        name: `Sample Catalog ${browserNameTestId(browserName, testId)}`,
         language: "EN",
         defaultContent: true,
     });
 
     const project = await createProject(request, token, {
-        name: `Sample Project ${browserName}-${testId.slice(0, 16)}`,
+        name: `Sample Project ${browserNameTestId(browserName, testId)}`,
         description: "Sample project description",
         confidentialityLevel: CONFIDENTIALITY_LEVELS.INTERNAL,
         catalogId: catalog.id,
@@ -61,12 +62,12 @@ test.afterEach(async ({ page, request, browserName }, { testId }) => {
 
     const projects = await getProjects(request, token);
     const projectIds = projects
-        .filter((project) => project.name.includes(`${browserName}-${testId.slice(0, 16)}`))
+        .filter((project) => project.name.includes(browserNameTestId(browserName, testId)))
         .map((project) => project.id);
     await deleteProjects(request, token, projectIds);
 
     const catalogs = await getCatalogs(request, token);
-    const catalogId = catalogs.find((catalog) => catalog.name.includes(`${browserName}-${testId.slice(0, 16)}`))!.id;
+    const catalogId = catalogs.find((catalog) => catalog.name.includes(browserNameTestId(browserName, testId)))!.id;
     await deleteCatalog(request, token, catalogId);
 });
 
@@ -77,7 +78,7 @@ test.describe("Measures Page tests", () => {
 
             await page
                 .locator('[data-testid="measure-creation-modal_name-input"] textarea[name="name"]')
-                .fill(measure.name + " " + `${browserName}-${testId.slice(0, 16)}`);
+                .fill(`${measure.name} ${browserNameTestId(browserName, testId)}`);
             await page
                 .locator('[data-testid="measure-creation-modal_description-input"] textarea[name="description"]')
                 .fill(measure.description);
