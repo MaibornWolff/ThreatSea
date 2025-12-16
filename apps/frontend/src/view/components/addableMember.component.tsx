@@ -42,11 +42,6 @@ interface AddableMemberProps<TFieldValues extends BaseAddableMemberFormValues> {
     form: AddableMemberForm<TFieldValues>;
 }
 
-interface ChosenMemberState {
-    id: number;
-    checkbox: HTMLElement;
-}
-
 /**
  * Component for the adding of addable members of a project.
  *
@@ -59,13 +54,9 @@ export const AddableMember = <TFieldValues extends BaseAddableMemberFormValues>(
     memberPath,
     form,
 }: AddableMemberProps<TFieldValues>): JSX.Element[] => {
-    const DEFAULT_CHOSEN_MEMBERSTATE: ChosenMemberState = {
-        id: -1,
-        checkbox: document.createElement("div"), // Dummy to dodge an if case.
-    };
-
     const { addableMembers, loadAddableMembers, setSearchValue } = useAddableMembersList();
-    const [chosenMemberToAdd, setMemberToAdd] = useState<ChosenMemberState>(DEFAULT_CHOSEN_MEMBERSTATE);
+    const [selectedMemberId, setSelectedMemberId] = useState<number>();
+    const [highlightListError, setHighlightListError] = useState<boolean>(false);
 
     const { t } = useTranslation();
 
@@ -80,7 +71,6 @@ export const AddableMember = <TFieldValues extends BaseAddableMemberFormValues>(
      * @param {string} name - name of the addable member.
      */
     const setSelectedAddableMember = (id: User["id"], name: User["name"], email: User["email"]) => {
-        chosenMemberToAdd.checkbox.style.display = "none";
         // @ts-expect-error Seems to be a known issue with react-hook-form and generics: https://github.com/react-hook-form/react-hook-form/issues/12828
         form.setValue("id" as Path<TFieldValues>, id);
         // @ts-expect-error Seems to be a known issue with react-hook-form and generics: https://github.com/react-hook-form/react-hook-form/issues/12828
@@ -88,20 +78,12 @@ export const AddableMember = <TFieldValues extends BaseAddableMemberFormValues>(
         // @ts-expect-error Seems to be a known issue with react-hook-form and generics: https://github.com/react-hook-form/react-hook-form/issues/12828
         form.setValue("email" as Path<TFieldValues>, email);
         form.clearErrors("id" as Path<TFieldValues>);
+        setHighlightListError(false);
 
-        if (id !== chosenMemberToAdd.id) {
-            const toCheck = document.getElementById(`icon-${id}`) as HTMLElement;
-            const addableMemberList = document.getElementById("addableMemberList") as HTMLElement;
-
-            toCheck.style.display = "block";
-            addableMemberList.style.border = "";
-
-            setMemberToAdd({
-                id,
-                checkbox: toCheck,
-            });
+        if (id !== selectedMemberId) {
+            setSelectedMemberId(id);
         } else {
-            setMemberToAdd(DEFAULT_CHOSEN_MEMBERSTATE);
+            setSelectedMemberId(undefined);
         }
     };
 
@@ -121,6 +103,7 @@ export const AddableMember = <TFieldValues extends BaseAddableMemberFormValues>(
             sx={{
                 margin: "20px 0px 15px 0px",
                 width: "100%",
+                border: highlightListError ? "1px solid #d32f2f" : "",
                 borderRadius: 5,
                 overflow: "hidden",
                 height: "200px",
@@ -141,15 +124,11 @@ export const AddableMember = <TFieldValues extends BaseAddableMemberFormValues>(
                     value={""}
                     {...form.register("id" as Path<TFieldValues>, {
                         validate: () => {
-                            if (chosenMemberToAdd.id !== DEFAULT_CHOSEN_MEMBERSTATE.id) {
+                            if (selectedMemberId) {
                                 return true;
-                            } else {
-                                const addableMemberList = document.getElementById("addableMemberList") as HTMLElement;
-
-                                addableMemberList.style.border = "1px solid #d32f2f";
-
-                                return t("errorMessages.memberRequired");
                             }
+                            setHighlightListError(true);
+                            return t("errorMessages.memberRequired");
                         },
                     })}
                 />
@@ -181,19 +160,21 @@ export const AddableMember = <TFieldValues extends BaseAddableMemberFormValues>(
                             >
                                 <ListItemText
                                     primary={name}
-                                    primaryTypographyProps={{
-                                        fontSize: "0.85em",
+                                    slotProps={{
+                                        primary: {
+                                            fontSize: "0.85em",
+                                        },
+                                        secondary: {
+                                            color: "#5e666e",
+                                            fontSize: "0.8em",
+                                        },
                                     }}
                                     secondary={email}
-                                    secondaryTypographyProps={{
-                                        color: "#5e666e",
-                                        fontSize: "0.8em",
-                                    }}
                                 />
                                 <CheckIcon
                                     id={`icon-${id}`}
                                     sx={{
-                                        display: "none",
+                                        display: selectedMemberId === id ? "block" : "none",
                                     }}
                                 />
                             </ListItem>

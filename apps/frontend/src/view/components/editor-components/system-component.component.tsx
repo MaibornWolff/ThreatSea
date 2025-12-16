@@ -196,6 +196,7 @@ export const SystemComponent = ({
 
     const [hover, setHover] = useState(false);
 
+    // eslint-disable-next-line react-hooks/preserve-manual-memoization
     const interactConfig: InteractConfig = useMemo(() => {
         if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
             return {

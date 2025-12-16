@@ -134,13 +134,14 @@ export const useReport = ({ projectId }: { projectId: number }) => {
     const filename = useMemo(() => {
         if (data) {
             const { project } = data;
-            return Date.now() + "_" + project.name;
+            return new Date().getTime() + "_" + project.name;
         } else {
             return "filename";
         }
     }, [data]);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchReport();
     }, [fetchReport]);
 
