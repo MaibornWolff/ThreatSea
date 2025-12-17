@@ -1,5 +1,5 @@
 import { Group, Line } from "react-konva";
-import { memo, useState, type MutableRefObject } from "react";
+import { memo, useState, type JSX, type RefObject } from "react";
 import { POA_COLORS } from "../../colors/pointsOfAttack.colors";
 import { POINTS_OF_ATTACK } from "../../../api/types/points-of-attack.types";
 import type { KonvaEventObject } from "konva/lib/Node";
@@ -27,7 +27,7 @@ interface SystemComponentConnectionProps extends AugmentedSystemConnection {
     onPointOfAttackClicked: (event: KonvaEventObject<MouseEvent>, pointOfAttackId: string) => void;
     selected: boolean;
     onRecalculated: (connectionId: string, waypoints: number[], connectionPointsMeta: ConnectionPointMeta[]) => void;
-    stageRef: MutableRefObject<KonvaStage | null>;
+    stageRef: RefObject<KonvaStage | null>;
     connectionPointsMeta: ConnectionPointMeta[];
     selectedConnectionPointId?: string | null;
     onConnectionPointClicked?: (event: KonvaEventObject<MouseEvent>, connectionPointId: string) => void;

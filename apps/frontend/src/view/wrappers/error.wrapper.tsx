@@ -7,7 +7,7 @@ import { Alert } from "@mui/material";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { Box } from "@mui/system";
-import React from "react";
+import { Component, type ErrorInfo, type ReactNode } from "react";
 import { useLocation, type Location } from "react-router-dom";
 import logo from "../../images/threatsealogo-dez.png";
 import { IconButton } from "../components/icon-button.component";
@@ -15,7 +15,7 @@ import { Page } from "../components/page.component";
 import { translationUtil } from "../../utils/translations";
 
 interface ErrorBoundaryProps {
-    children?: React.ReactNode;
+    children?: ReactNode;
 }
 
 interface ErrorBoundaryState {
@@ -24,7 +24,7 @@ interface ErrorBoundaryState {
 }
 
 interface ErrorMenuProps {
-    children?: React.ReactNode;
+    children?: ReactNode;
     sx?: unknown;
 }
 
@@ -35,7 +35,7 @@ interface ErrorHeaderLocationState {
 /**
  * React component used as a fallback ui when an exception occurs.
  */
-class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     /**
      * Initialises the state with an error flag.
      *
@@ -65,7 +65,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
      * @param {object} error - Stacktrace of the error formatted.
      * @param {object} errorInfo - Raw Stacktrace of the error as a string.
      */
-    override componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
+    override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
         console.log(error);
         console.log(errorInfo);
     }

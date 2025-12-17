@@ -26,7 +26,7 @@ const reactSettings = {
  */
 export const reactJsConfig = [
     ...baseConfig,
-    eslintReactHooks.configs["recommended-latest"],
+    eslintReactHooks.configs.flat.recommended,
     eslintReactRefresh.configs.vite,
     eslintReact.configs.flat.recommended,
     reactSettings,

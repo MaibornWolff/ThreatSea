@@ -9,6 +9,7 @@ import { SystemActions } from "../../actions/system.actions";
 import { ProjectsActions } from "../../actions/projects.actions";
 import type { Connection, SystemComponent, SystemConnection, UpdateSystemRequest } from "#api/types/system.types.ts";
 import type { EditorState } from "#application/reducers/editor.reducer.ts";
+import type { AppDispatch } from "#application/store.types.ts";
 
 const handleSaveSystem: AppMiddleware =
     ({ dispatch, getState }) =>
@@ -142,6 +143,15 @@ const compareConnections = (connection1: Connection, connection2: SystemConnecti
     );
 };
 
+let debounceScreenshotTimeoutTimer: ReturnType<typeof setTimeout>;
+export const debouncedMakeAScreenshot = (dispatch: AppDispatch) => {
+    clearTimeout(debounceScreenshotTimeoutTimer);
+
+    debounceScreenshotTimeoutTimer = setTimeout(() => {
+        dispatch(EditorActions.makeAScreenshot());
+    }, 500);
+};
+
 const handleUserDidSomething: AppMiddleware =
     ({ dispatch, getState }) =>
     (next) =>
@@ -165,7 +175,7 @@ const handleUserDidSomething: AppMiddleware =
             const { editor } = getState();
             const { autoSaveStatus, lastAutoSaveDate } = editor;
 
-            dispatch(EditorActions.makeAScreenshot());
+            debouncedMakeAScreenshot(dispatch);
 
             if (autoSaveStatus !== "notUpToDate" && autoSaveStatus !== "saving") {
                 dispatch(EditorActions.setAutoSaveStatus("notUpToDate"));

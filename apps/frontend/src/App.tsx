@@ -5,7 +5,7 @@ import { Confirm } from "./view/components/confirm.component";
 import { Theme } from "./view/wrappers/theme.wrapper";
 import ErrorBoundary from "./view/wrappers/error.wrapper";
 import RequireAuth from "./view/components/RequireAuth.component";
-import { useEffect, Suspense, lazy } from "react";
+import { useEffect, Suspense, lazy, type JSX } from "react";
 import { UserActions } from "./application/actions/user.actions";
 import { startTokenRefresh, stopTokenRefresh } from "./api/utils";
 import Box from "@mui/material/Box";
@@ -50,7 +50,7 @@ const PageLoader = () => (
  * @component
  * @category Component
  */
-export function App(): React.JSX.Element {
+export function App(): JSX.Element {
     const dispatch = useAppDispatch();
 
     useEffect(() => {

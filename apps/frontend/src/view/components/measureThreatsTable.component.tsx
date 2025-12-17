@@ -1,4 +1,4 @@
-import type { MouseEvent as ReactMouseEvent, SyntheticEvent } from "react";
+import type { SyntheticEvent } from "react";
 import TableCell from "@mui/material/TableCell";
 import { Box, Table, TableBody, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import { Delete, Edit } from "@mui/icons-material";
@@ -17,9 +17,9 @@ interface MeasureThreatsTableProps {
     onChangeSortBy: (_e: SyntheticEvent, newSortBy: string | null) => void;
     sortDirection: SortDirection;
     userRole: USER_ROLES | undefined;
-    onClickDeleteMeasureThreat: (event: ReactMouseEvent<HTMLElement>, measureThreat: MeasureThreat) => void;
-    onClickEditMeasureImpact: (event: ReactMouseEvent<HTMLElement>, measureImpact: MeasureImpact) => void;
-    onClickEditThreat: (event: ReactMouseEvent<HTMLElement>, threat: ExtendedThreat | undefined) => void;
+    onClickDeleteMeasureThreat: (event: React.MouseEvent<HTMLElement>, measureThreat: MeasureThreat) => void;
+    onClickEditMeasureImpact: (event: React.MouseEvent<HTMLElement>, measureImpact: MeasureImpact) => void;
+    onClickEditThreat: (event: React.MouseEvent<HTMLElement>, threat: ExtendedThreat | undefined) => void;
 }
 
 export const MeasureThreatsTable = ({
@@ -150,10 +150,10 @@ export const MeasureThreatsTable = ({
 
 interface MeasureThreatTableRowProps {
     measureThreat: MeasureThreat;
-    onClickDeleteMeasureThreat: (event: ReactMouseEvent<HTMLElement>, measureThreat: MeasureThreat) => void;
-    onClickEditMeasureImpact: (event: ReactMouseEvent<HTMLElement>, measureImpact: MeasureImpact) => void;
+    onClickDeleteMeasureThreat: (event: React.MouseEvent<HTMLElement>, measureThreat: MeasureThreat) => void;
+    onClickEditMeasureImpact: (event: React.MouseEvent<HTMLElement>, measureImpact: MeasureImpact) => void;
     userRole: USER_ROLES | undefined;
-    onClickEditThreat: (event: ReactMouseEvent<HTMLElement>, threat: ExtendedThreat | undefined) => void;
+    onClickEditThreat: (event: React.MouseEvent<HTMLElement>, threat: ExtendedThreat | undefined) => void;
 }
 
 const MeasureThreatTableRow = ({

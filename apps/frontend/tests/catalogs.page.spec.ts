@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import type { Catalog, CreateCatalogRequest } from "#api/types/catalogs.types.ts";
-import { createCatalog, createCatalogs, getCatalogs, deleteCatalogs } from "./test-utils.ts";
+import { createCatalog, createCatalogs, getCatalogs, deleteCatalogs, browserNameTestId } from "./test-utils.ts";
 import catalogsFixture from "./fixtures/catalogs.json" with { type: "json" };
 
 const catalogs: (CreateCatalogRequest & { createdAt: Date })[] = [];
@@ -29,7 +29,7 @@ test.afterEach(async ({ page, request, browserName }, { testId }) => {
 
     const catalogs = await getCatalogs(request, token);
     const catalogIds = catalogs
-        .filter((catalog) => catalog.name.includes(`${browserName}-${testId.slice(0, 16)}`))
+        .filter((catalog) => catalog.name.includes(browserNameTestId(browserName, testId)))
         .map((catalog) => catalog.id);
     await deleteCatalogs(request, token, catalogIds);
 });
@@ -40,7 +40,7 @@ test.describe("Catalogs Page Tests", () => {
             await page.locator('[data-testid="catalogs-page_add-catalog-button"]').click();
             await page
                 .locator('[data-testid="catalog-creation-modal_name-input"] input')
-                .fill(catalog.name + " " + `${browserName}-${testId.slice(0, 16)}`);
+                .fill(catalog.name + " " + browserNameTestId(browserName, testId));
             if (!catalog.defaultContent) {
                 await page.locator('[data-testid="catalog-creation-modal_empty-checkbox"]').click();
             }
@@ -50,14 +50,14 @@ test.describe("Catalogs Page Tests", () => {
         await expect(
             page
                 .locator('[data-testid="catalogs-page_catalogs-list-entry_name"] p')
-                .filter({ hasText: `${browserName}-${testId.slice(0, 16)}` })
+                .filter({ hasText: browserNameTestId(browserName, testId) })
         ).toHaveCount(3);
     });
 
     test("Should sort all catalogs by date", async ({ page, request, browserName }, { testId }) => {
         const sortedCatalogs = [...catalogs].sort((a, b) => +a.createdAt - +b.createdAt);
         sortedCatalogs.forEach(
-            (catalog) => (catalog.name = catalog.name + " " + `${browserName}-${testId.slice(0, 16)}`)
+            (catalog) => (catalog.name = `${catalog.name} ${browserNameTestId(browserName, testId)}`)
         );
 
         const token = (await page.evaluate(() => localStorage.getItem("csrfToken")))!;
@@ -78,7 +78,7 @@ test.describe("Catalogs Page Tests", () => {
 
         let entries = await page
             .locator('[data-testid="catalogs-page_catalogs-list-entry_name"] p')
-            .filter({ hasText: `${browserName}-${testId.slice(0, 16)}` });
+            .filter({ hasText: browserNameTestId(browserName, testId) });
 
         for (let i = 0; i < sortedCatalogs.length; i++) {
             await expect(entries.nth(i)).toContainText(sortedCatalogs[i]!.name);
@@ -92,7 +92,7 @@ test.describe("Catalogs Page Tests", () => {
 
         entries = await page
             .locator('[data-testid="catalogs-page_catalogs-list-entry_name"] p')
-            .filter({ hasText: `${browserName}-${testId.slice(0, 16)}` });
+            .filter({ hasText: browserNameTestId(browserName, testId) });
 
         for (let i = 0; i < sortedCatalogs.length; i++) {
             await expect(entries.nth(i)).toContainText(sortedCatalogs.toReversed()[i]!.name);
@@ -102,7 +102,7 @@ test.describe("Catalogs Page Tests", () => {
     test("Should sort all catalogs by name", async ({ page, request, browserName }, { testId }) => {
         const sortedCatalogs = [...catalogs].sort((a, b) => a.name.localeCompare(b.name));
         sortedCatalogs.forEach(
-            (catalog) => (catalog.name = catalog.name + " " + `${browserName}-${testId.slice(0, 16)}`)
+            (catalog) => (catalog.name = `${catalog.name} ${browserNameTestId(browserName, testId)}`)
         );
 
         const token = (await page.evaluate(() => localStorage.getItem("csrfToken")))!;
@@ -123,7 +123,7 @@ test.describe("Catalogs Page Tests", () => {
 
         let entries = await page
             .locator('[data-testid="catalogs-page_catalogs-list-entry_name"] p')
-            .filter({ hasText: `${browserName}-${testId.slice(0, 16)}` });
+            .filter({ hasText: browserNameTestId(browserName, testId) });
 
         for (let i = 0; i < sortedCatalogs.length; i++) {
             await expect(entries.nth(i)).toContainText(sortedCatalogs[i]!.name);
@@ -137,7 +137,7 @@ test.describe("Catalogs Page Tests", () => {
 
         entries = await page
             .locator('[data-testid="catalogs-page_catalogs-list-entry_name"] p')
-            .filter({ hasText: `${browserName}-${testId.slice(0, 16)}` });
+            .filter({ hasText: browserNameTestId(browserName, testId) });
 
         for (let i = 0; i < sortedCatalogs.length; i++) {
             await expect(entries.nth(i)).toContainText(sortedCatalogs.toReversed()[i]!.name);
@@ -146,8 +146,8 @@ test.describe("Catalogs Page Tests", () => {
 
     test("Should update an existing catalog", async ({ page, request, browserName }, { testId }) => {
         const catalog = catalogs[Math.floor(Math.random() * catalogs.length)]!;
-        catalog.name = catalog.name + " " + `${browserName}-${testId.slice(0, 16)}`;
-        const updatedName = "Updated test name " + `${browserName}-${testId.slice(0, 16)}`;
+        catalog.name = `${catalog.name} ${browserNameTestId(browserName, testId)}`;
+        const updatedName = `Updated test name ${browserNameTestId(browserName, testId)}`;
 
         const token = (await page.evaluate(() => localStorage.getItem("csrfToken")))!;
         await createCatalog(request, token, catalog);
@@ -155,7 +155,7 @@ test.describe("Catalogs Page Tests", () => {
 
         let entries = await page
             .locator('[data-testid="catalogs-page_catalogs-list-entry_name"] p')
-            .filter({ hasText: `${browserName}-${testId.slice(0, 16)}` });
+            .filter({ hasText: browserNameTestId(browserName, testId) });
 
         const parent = entries.first().locator("..").locator("..").locator("..");
 
@@ -166,15 +166,13 @@ test.describe("Catalogs Page Tests", () => {
 
         entries = await page
             .locator('[data-testid="catalogs-page_catalogs-list-entry_name"] p')
-            .filter({ hasText: `${browserName}-${testId.slice(0, 16)}` });
+            .filter({ hasText: browserNameTestId(browserName, testId) });
         await expect(entries).toContainText(updatedName);
     });
 
     test("Should delete an existing catalog", async ({ page, request, browserName }, { testId }) => {
         const testCatalogs = catalogs.slice(0, 2);
-        testCatalogs.forEach(
-            (catalog) => (catalog.name = catalog.name + " " + `${browserName}-${testId.slice(0, 16)}`)
-        );
+        testCatalogs.forEach((catalog) => (catalog.name = `${catalog.name} ${browserNameTestId(browserName, testId)}`));
 
         const token = (await page.evaluate(() => localStorage.getItem("csrfToken")))!;
         await createCatalogs(request, token, testCatalogs);
@@ -182,7 +180,7 @@ test.describe("Catalogs Page Tests", () => {
 
         let entries = await page
             .locator('[data-testid="catalogs-page_catalogs-list-entry_name"] p')
-            .filter({ hasText: `${browserName}-${testId.slice(0, 16)}` });
+            .filter({ hasText: browserNameTestId(browserName, testId) });
 
         const parent = entries.first().locator("..").locator("..").locator("..");
 
@@ -191,7 +189,7 @@ test.describe("Catalogs Page Tests", () => {
 
         entries = await page
             .locator('[data-testid="catalogs-page_catalogs-list-entry_name"] p')
-            .filter({ hasText: `${browserName}-${testId.slice(0, 16)}` });
+            .filter({ hasText: browserNameTestId(browserName, testId) });
 
         await expect(entries).toHaveCount(1);
     });
@@ -200,7 +198,7 @@ test.describe("Catalogs Page Tests", () => {
         testId,
     }) => {
         const catalog = catalogs[Math.floor(Math.random() * catalogs.length)]!;
-        catalog.name = catalog.name + " " + `${browserName}-${testId.slice(0, 16)}`;
+        catalog.name = `${catalog.name} ${browserNameTestId(browserName, testId)}`;
 
         const token = (await page.evaluate(() => localStorage.getItem("csrfToken")))!;
         await createCatalog(request, token, catalog);
@@ -216,7 +214,7 @@ test.describe("Catalogs Page Tests", () => {
                     const entries = await page
                         .locator('[data-testid="catalogs-page_catalogs-list-entry_name"] p')
                         .filter({
-                            hasText: `${browserName}-${testId.slice(0, 16)}`,
+                            hasText: browserNameTestId(browserName, testId),
                         });
                     const parent = entries.first().locator("..").locator("..").locator("..");
 

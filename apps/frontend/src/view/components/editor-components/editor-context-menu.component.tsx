@@ -16,15 +16,7 @@ import {
     type SxProps,
     type Theme,
 } from "@mui/material";
-import {
-    forwardRef,
-    useEffect,
-    useImperativeHandle,
-    useRef,
-    useState,
-    type MutableRefObject,
-    type MouseEvent as ReactMouseEvent,
-} from "react";
+import { useEffect, useImperativeHandle, useRef, useState, type RefObject, type Ref, useEffectEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { useParams } from "react-router-dom";
@@ -44,10 +36,11 @@ let opened = {
 
 interface EditorContextMenuProps {
     onSelect: (component: EditorComponentType) => void;
-    stageRef: MutableRefObject<Stage | null>;
+    stageRef: RefObject<Stage | null>;
+    ref?: Ref<HTMLDivElement>;
 }
 
-export const EditorContextMenu = forwardRef<HTMLDivElement, EditorContextMenuProps>(({ onSelect, stageRef }, ref) => {
+export const EditorContextMenu = ({ onSelect, stageRef, ref }: EditorContextMenuProps) => {
     const { t } = useTranslation("editorPage");
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
@@ -63,13 +56,17 @@ export const EditorContextMenu = forwardRef<HTMLDivElement, EditorContextMenuPro
     const contextMenuRef = useRef<HTMLDivElement>(null);
     useImperativeHandle(ref, () => contextMenuRef.current!);
 
-    const onToggleCustomComponents = (event: ReactMouseEvent<HTMLLIElement>) => {
+    const setOpenCustomComponentsEvent = useEffectEvent((isOpen: boolean) => {
+        setOpenCustomComponents(isOpen);
+    });
+
+    const onToggleCustomComponents = (event: React.MouseEvent<HTMLLIElement>) => {
         if (!event.defaultPrevented) {
             setOpenCustomComponents((prev) => !prev);
         }
     };
 
-    const onCreateComponent = (event: ReactMouseEvent<HTMLButtonElement>) => {
+    const onCreateComponent = (event: React.MouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
 
         navigate(`/projects/${projectId}/system/components/edit`);
@@ -121,7 +118,7 @@ export const EditorContextMenu = forwardRef<HTMLDivElement, EditorContextMenuPro
 
     useEffect(() => {
         if (!open) {
-            setOpenCustomComponents(false);
+            setOpenCustomComponentsEvent(false);
         } else {
             const stage = stageRef.current;
             if (stage) {
@@ -243,7 +240,7 @@ export const EditorContextMenu = forwardRef<HTMLDivElement, EditorContextMenuPro
             </List>
         </Box>
     );
-});
+};
 
 EditorContextMenu.displayName = "EditorContextMenu";
 
@@ -259,7 +256,7 @@ const ComponentListItem = ({ label, symbol, onEdit, onClickDelete, sx = {}, ...p
     const { t } = useTranslation("editorPage");
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-    const handleClick = (event: ReactMouseEvent<HTMLElement>) => {
+    const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
     };
 

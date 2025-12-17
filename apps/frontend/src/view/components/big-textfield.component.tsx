@@ -1,32 +1,30 @@
 import { TextField } from "@mui/material";
 import type { TextFieldProps } from "@mui/material/TextField";
-import type { ForwardedRef, ReactElement, RefAttributes } from "react";
-import { forwardRef } from "react";
 import type { FieldError, FieldPath, FieldValues, UseFormRegister } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { MAX_TEXT_LENGTH } from "#view/dialogs/validation-constants.ts";
 
-export type BigTextFieldProps<TFieldValues extends FieldValues = FieldValues> = Omit<
-    TextFieldProps,
-    "error" | "sx" | "ref"
-> & {
+export type BigTextFieldProps<TFieldValues extends FieldValues = FieldValues> = Omit<TextFieldProps, "error" | "sx"> & {
     sx?: TextFieldProps["sx"];
     error?: FieldError | undefined;
     fieldName: FieldPath<TFieldValues>;
     register: UseFormRegister<TFieldValues>;
 };
 
-const BigTextFieldInner = <TFieldValues extends FieldValues>(
-    { sx, error, fieldName, register, ...props }: BigTextFieldProps<TFieldValues>,
-    ref: ForwardedRef<HTMLInputElement | HTMLTextAreaElement>
-) => {
+export const BigTextField = <TFieldValues extends FieldValues>({
+    sx,
+    error,
+    fieldName,
+    register,
+    ...props
+}: BigTextFieldProps<TFieldValues>) => {
     const { t } = useTranslation();
     return (
         <TextField
-            // @ts-expect-error TODO: Fix ref typing
-            ref={ref}
-            InputLabelProps={{
-                shrink: true,
+            slotProps={{
+                inputLabel: {
+                    shrink: true,
+                },
             }}
             sx={{
                 "&:hover .MuiOutlinedInput-notchedOutline": {
@@ -71,9 +69,3 @@ const BigTextFieldInner = <TFieldValues extends FieldValues>(
         />
     );
 };
-
-type BigTextFieldComponent = <TFieldValues extends FieldValues = FieldValues>(
-    props: BigTextFieldProps<TFieldValues> & RefAttributes<HTMLInputElement | HTMLTextAreaElement>
-) => ReactElement | null;
-
-export const BigTextField = forwardRef(BigTextFieldInner) as BigTextFieldComponent;

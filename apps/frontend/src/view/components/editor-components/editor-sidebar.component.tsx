@@ -3,7 +3,7 @@ import { EditorSidebarSelectedComponent } from "./editor-sidebar-selected-compon
 import { EditorSidebarSelectedCommunicationInterface } from "./editor-sidebar-selected-communication-interface.component";
 import { EditorSidebarSelectedConnection } from "./editor-sidebar-selected-connection.component";
 import { EditorSidebarSelectedPointOfAttack } from "./editor-sidebar-selected-point-of-attack.component";
-import React, { type RefObject, type ChangeEvent, type MouseEvent as ReactMouseEvent } from "react";
+import { type RefObject, type ChangeEvent } from "react";
 import { POINTS_OF_ATTACK } from "../../../api/types/points-of-attack.types";
 import { USER_ROLES } from "../../../api/types/user-roles.types";
 import type { SystemConnectionPoint } from "#application/adapters/system-connection-point.adapter.ts";
@@ -16,7 +16,7 @@ import type {
 } from "#api/types/system.types.ts";
 
 interface EditorSidebarProps {
-    sidebarRef: RefObject<HTMLDivElement>;
+    sidebarRef: RefObject<HTMLDivElement | null>;
     selectedComponent: AugmentedSystemComponent | undefined;
     selectedComponentId: string | null | undefined;
     selectedPointOfAttack: SystemPointOfAttack | null | undefined;
@@ -27,8 +27,8 @@ interface EditorSidebarProps {
         type: POINTS_OF_ATTACK,
         pointOfAttack?: SystemPointOfAttack
     ) => void;
-    handleAddAssetToAllPointsOfAttack: (event: ReactMouseEvent<HTMLElement>, asset: Asset) => void;
-    handleRemoveAssetFromAllPointsOfAttack: (event: ReactMouseEvent<HTMLElement>, asset: Asset) => void;
+    handleAddAssetToAllPointsOfAttack: (event: React.MouseEvent<HTMLElement>, asset: Asset) => void;
+    handleRemoveAssetFromAllPointsOfAttack: (event: React.MouseEvent<HTMLElement>, asset: Asset) => void;
     assetSearchValue: string;
     handleAssetSearchChanged: (event: ChangeEvent<HTMLInputElement>) => void;
     items: Asset[];
@@ -82,7 +82,7 @@ export const EditorSidebar = ({
     handleDeleteCommunicationInterface,
 }: EditorSidebarProps) => {
     return (
-        <React.Fragment>
+        <>
             <Box
                 sx={{
                     position: "fixed",
@@ -180,6 +180,6 @@ export const EditorSidebar = ({
                         )}
                 </Box>
             </Box>
-        </React.Fragment>
+        </>
     );
 };

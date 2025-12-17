@@ -1,7 +1,7 @@
 import { Add, ContentCopyOutlined, Delete, Replay } from "@mui/icons-material";
 import { Box, LinearProgress, Table, TableBody, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import { useLayoutEffect } from "react";
-import type { ChangeEvent, MouseEvent as ReactMouseEvent, SyntheticEvent } from "react";
+import type { ChangeEvent, SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import type { ExtendedProject } from "#api/types/project.types.ts";
@@ -86,7 +86,7 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
         setSearchValue(event.target.value);
     };
 
-    const onClickDeleteMeasure = (event: ReactMouseEvent<HTMLElement>, measure: Measure) => {
+    const onClickDeleteMeasure = (event: React.MouseEvent<HTMLElement>, measure: Measure) => {
         event.stopPropagation();
         const isReset = measure.catalogMeasureId !== undefined && measure.catalogMeasureId != null;
         openConfirm({
@@ -116,7 +116,7 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
         });
     };
 
-    const onClickEditMeasure = (event: ReactMouseEvent<HTMLElement>, measure: Measure) => {
+    const onClickEditMeasure = (event: React.MouseEvent<HTMLElement>, measure: Measure) => {
         event.preventDefault();
         const scheduledAt = new Date(
             measure.scheduledAt.getTime() - measure.scheduledAt.getTimezoneOffset() * 60 * 1000
@@ -133,7 +133,7 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
         });
     };
 
-    const onClickDuplicateMeasure = (event: ReactMouseEvent<HTMLElement>, measure: Measure) => {
+    const onClickDuplicateMeasure = (event: React.MouseEvent<HTMLElement>, measure: Measure) => {
         event.stopPropagation();
         const measureState: MeasureDialogState = {
             ...measure,

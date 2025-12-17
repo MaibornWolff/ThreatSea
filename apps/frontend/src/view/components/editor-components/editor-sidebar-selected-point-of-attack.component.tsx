@@ -3,7 +3,6 @@ import { Box } from "@mui/system";
 import { useTranslation } from "react-i18next";
 import { EditorSidebarAssetList } from "./editor-sidebar-asset-list.component";
 import { SearchField } from "../search-field.component";
-import React from "react";
 import type { ChangeEvent } from "react";
 import type { Asset } from "#api/types/asset.types.ts";
 import type { SystemComponent, SystemPointOfAttack } from "#api/types/system.types.ts";
@@ -27,7 +26,7 @@ export const EditorSidebarSelectedPointOfAttack = ({
 }: EditorSidebarSelectedPointOfAttackProps) => {
     const { t } = useTranslation("editorPage");
     return (
-        <React.Fragment>
+        <>
             <Box>
                 <Box
                     sx={{
@@ -114,6 +113,6 @@ export const EditorSidebarSelectedPointOfAttack = ({
                     onChangeHandler={handleOnAssetChanged}
                 />
             </Box>
-        </React.Fragment>
+        </>
     );
 };

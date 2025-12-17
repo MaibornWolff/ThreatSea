@@ -1,6 +1,6 @@
 import { styled } from "@mui/material/styles";
 import { Box, Slider, Typography } from "@mui/material";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, type SyntheticEvent } from "react";
 import { useAppSelector } from "../../application/hooks/use-app-redux.hook";
 import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
 import { calcRiskColourFromRisk } from "../../utils/calcRisk";
@@ -154,7 +154,7 @@ export const LineOfToleranceSelector = ({ title, greenValue, redValue, onLoTChan
         }
     };
 
-    const OnValueSaved = (_: Event | React.SyntheticEvent, newValue: number | number[]) => {
+    const OnValueSaved = (_: Event | SyntheticEvent, newValue: number | number[]) => {
         const greenP = Array.isArray(newValue) ? newValue[0] : undefined;
         const redP = Array.isArray(newValue) ? newValue[1] : undefined;
         if (greenP && redP) {

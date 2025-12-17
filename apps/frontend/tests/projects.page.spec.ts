@@ -8,6 +8,7 @@ import {
     deleteProjects,
     getCatalogs,
     deleteCatalog,
+    browserNameTestId,
 } from "./test-utils.ts";
 import projectsFixture from "./fixtures/projects.json" with { type: "json" };
 
@@ -53,7 +54,7 @@ test.beforeEach(async ({ page, request, browserName }, { testId }) => {
     const token = (await page.evaluate(() => localStorage.getItem("csrfToken")))!;
 
     const catalog = await createCatalog(request, token, {
-        name: `Sample-Catalog-${browserName}-${testId.slice(0, 16)}`,
+        name: `Sample-Catalog-${browserNameTestId(browserName, testId)}`,
         language: "EN",
         defaultContent: true,
     });
@@ -67,12 +68,12 @@ test.afterEach(async ({ page, request, browserName }, { testId }) => {
 
     const projects = await getProjects(request, token);
     const projectIds = projects
-        .filter((project) => project.name.includes(`${browserName}-${testId.slice(0, 16)}`))
+        .filter((project) => project.name.includes(browserNameTestId(browserName, testId)))
         .map((project) => project.id);
     await deleteProjects(request, token, projectIds);
 
     const catalogs = await getCatalogs(request, token);
-    const catalogId = catalogs.find((catalog) => catalog.name.includes(`${browserName}-${testId.slice(0, 16)}`))!.id;
+    const catalogId = catalogs.find((catalog) => catalog.name.includes(browserNameTestId(browserName, testId)))!.id;
     await deleteCatalog(request, token, catalogId);
 });
 
@@ -82,7 +83,7 @@ test.describe("Projects Page Tests", () => {
             await page.locator('[data-testid="projects-page_add-project-button"]').click();
             await page
                 .locator('[data-testid="project-creation-modal_name-input"] input')
-                .fill(`${project.name}-${browserName}-${testId.slice(0, 16)}`);
+                .fill(`${project.name}-${browserNameTestId(browserName, testId)}`);
             await page
                 .locator('[data-testid="project-creation-modal_description-input"] textarea[name="description"]')
                 .fill(project.description);
@@ -90,20 +91,20 @@ test.describe("Projects Page Tests", () => {
 
             const options = await page.locator("role=option");
 
-            await options.filter({ hasText: `${browserName}-${testId.slice(0, 16)}` }).click();
+            await options.filter({ hasText: browserNameTestId(browserName, testId) }).click();
             await page.locator('[data-testid="save-button"]').click();
         }
 
         const entries = await page
             .locator('[data-testid="projects-page_project-card"] p')
-            .filter({ hasText: `${browserName}-${testId.slice(0, 16)}` });
+            .filter({ hasText: browserNameTestId(browserName, testId) });
         await expect(entries).toHaveCount(3);
     });
 
     test("Should sort all projects by date", async ({ page, request, browserName }, { testId }) => {
         const renamedProjects = projects.map((project) => {
-            if (!project.name.includes(`${browserName}-${testId.slice(0, 16)}`)) {
-                project.name = `${project.name}-${browserName}-${testId.slice(0, 16)}`;
+            if (!project.name.includes(browserNameTestId(browserName, testId))) {
+                project.name = `${project.name}-${browserNameTestId(browserName, testId)}`;
             }
             return project;
         });
@@ -128,7 +129,7 @@ test.describe("Projects Page Tests", () => {
         );
         await page
             .locator('[data-testid="projects-page_search-field"] input')
-            .fill(`${browserName}-${testId.slice(0, 16)}`);
+            .fill(browserNameTestId(browserName, testId));
 
         const entries = page.locator('[data-testid="projects-page_project-card_project-name"]');
         for (let i = 0; i < reorderedSortedProjects.length; i++) {
@@ -148,8 +149,8 @@ test.describe("Projects Page Tests", () => {
 
     test("Should sort all projects by name", async ({ page, request, browserName }, { testId }) => {
         const renamedProjects = projects.map((project) => {
-            if (!project.name.includes(`${browserName}-${testId.slice(0, 16)}`)) {
-                project.name = `${project.name}-${browserName}-${testId.slice(0, 16)}`;
+            if (!project.name.includes(browserNameTestId(browserName, testId))) {
+                project.name = `${project.name}-${browserNameTestId(browserName, testId)}`;
             }
             return project;
         });
@@ -174,7 +175,7 @@ test.describe("Projects Page Tests", () => {
         );
         await page
             .locator('[data-testid="projects-page_search-field"] input')
-            .fill(`${browserName}-${testId.slice(0, 16)}`);
+            .fill(browserNameTestId(browserName, testId));
 
         const entries = page.locator('[data-testid="projects-page_project-card_project-name"]');
         for (let i = 0; i < reorderedSortedProjects.length; i++) {
@@ -194,10 +195,10 @@ test.describe("Projects Page Tests", () => {
 
     test("Should update an existing project", async ({ page, request, browserName }, { testId }) => {
         const project = projects[Math.floor(Math.random() * projects.length)]!;
-        if (!project.name.includes(`${browserName}-${testId.slice(0, 16)}`)) {
-            project.name = `${project.name}-${browserName}-${testId.slice(0, 16)}`;
+        if (!project.name.includes(browserNameTestId(browserName, testId))) {
+            project.name = `${project.name}-${browserNameTestId(browserName, testId)}`;
         }
-        const updatedName = "Updated test project name " + `${browserName}-${testId.slice(0, 16)}`;
+        const updatedName = `Updated test project name ${browserNameTestId(browserName, testId)}`;
         const updatedDescription = "Updated test project description";
 
         const token = (await page.evaluate(() => localStorage.getItem("csrfToken")))!;
@@ -206,7 +207,7 @@ test.describe("Projects Page Tests", () => {
 
         await page
             .locator('[data-testid="projects-page_search-field"] input')
-            .fill(`${browserName}-${testId.slice(0, 16)}`);
+            .fill(browserNameTestId(browserName, testId));
 
         await page.locator('[data-testid="projects-page_project-card_action-menu-button"]').first().click();
         await page.locator('[data-testid="projects-page_project-card_action-menu_edit-project-button"]').click();
@@ -236,15 +237,13 @@ test.describe("Projects Page Tests", () => {
     test("Should delete an existing project", async ({ page, request, browserName }, { testId }) => {
         const token = (await page.evaluate(() => localStorage.getItem("csrfToken")))!;
         const testProjects = projects.slice(0, 2);
-        testProjects.forEach(
-            (catalog) => (catalog.name = catalog.name + " " + `${browserName}-${testId.slice(0, 16)}`)
-        );
+        testProjects.forEach((catalog) => (catalog.name = `${catalog.name} ${browserNameTestId(browserName, testId)}`));
         await createProjects(request, token, testProjects);
         await page.reload();
 
         await page
             .locator('[data-testid="projects-page_search-field"] input')
-            .fill(`${browserName}-${testId.slice(0, 16)}`);
+            .fill(browserNameTestId(browserName, testId));
 
         await page.locator('[data-testid="projects-page_project-card_action-menu-button"]').first().click();
         await page.locator('[data-testid="projects-page_project-card_action-menu_delete-project-button"]').click();
@@ -258,8 +257,8 @@ test.describe("Projects Page Tests", () => {
     }) => {
         const token = (await page.evaluate(() => localStorage.getItem("csrfToken")))!;
         const project = projects[Math.floor(Math.random() * projects.length)]!;
-        if (!project.name.includes(`${browserName}-${testId.slice(0, 16)}`)) {
-            project.name = `${project.name}-${browserName}-${testId.slice(0, 16)}`;
+        if (!project.name.includes(browserNameTestId(browserName, testId))) {
+            project.name = `${project.name}-${browserNameTestId(browserName, testId)}`;
         }
         const fetchedProject = (await createProject(request, token, project)).id;
         await page.reload();
@@ -272,7 +271,7 @@ test.describe("Projects Page Tests", () => {
                 } else if (scope === "edit") {
                     await page
                         .locator('[data-testid="projects-page_search-field"] input')
-                        .fill(`${browserName}-${testId.slice(0, 16)}`, {
+                        .fill(browserNameTestId(browserName, testId), {
                             timeout: 30000,
                         })
                         .then(async () => {
@@ -307,7 +306,7 @@ test.describe("Projects Page Tests", () => {
                     const options = await page.locator("role=option");
                     await options
                         .filter({
-                            hasText: `${browserName}-${testId.slice(0, 16)}`,
+                            hasText: browserNameTestId(browserName, testId),
                         })
                         .click();
                     await page.locator('[data-testid="save-button"]').click();
@@ -322,8 +321,8 @@ test.describe("Projects Page Tests", () => {
     test("Should test page navigation", async ({ page, request, browserName }, { testId }) => {
         const token = (await page.evaluate(() => localStorage.getItem("csrfToken")))!;
         const project = projects[Math.floor(Math.random() * projects.length)]!;
-        if (!project.name.includes(`${browserName}-${testId.slice(0, 16)}`)) {
-            project.name = `${project.name}-${browserName}-${testId.slice(0, 16)}`;
+        if (!project.name.includes(browserNameTestId(browserName, testId))) {
+            project.name = `${project.name}-${browserNameTestId(browserName, testId)}`;
         }
         const fetchedProject = (await createProject(request, token, project)).id;
         await page.reload();
@@ -350,7 +349,7 @@ test.describe("Projects Page Tests", () => {
         for (const link of projectCardLinks) {
             await page
                 .locator('[data-testid="projects-page_search-field"] input')
-                .fill(`${browserName}-${testId.slice(0, 16)}`);
+                .fill(browserNameTestId(browserName, testId));
             await page.locator(`[data-testid="projects-page_project-card_${link}-button"]`).first().click();
             await expect(page).toHaveURL(`/projects/${fetchedProject}/${link}`);
             await page.goto("/projects");

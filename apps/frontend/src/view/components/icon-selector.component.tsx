@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { createElement, useEffect, useEffectEvent, useState, type ReactNode } from "react";
 import { FormControl, FormHelperText, Grid, IconButton, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import * as MuiIcons from "@mui/icons-material";
@@ -8,7 +8,7 @@ interface IconSelectorProps {
     onChange: (iconName: string) => void;
     label: string;
     error?: boolean;
-    helperText?: React.ReactNode;
+    helperText?: ReactNode;
 }
 
 type MuiIconKey = keyof typeof MuiIcons;
@@ -48,14 +48,18 @@ export const IconSelector = ({ value, onChange, label, error, helperText }: Icon
     const [selectedIcon, setSelectedIcon] = useState(value || "");
     const [open, setOpen] = useState(false);
 
+    const setVisibleIconsEvent = useEffectEvent((icons: MuiIconKey[]) => {
+        setVisibleIcons(icons);
+    });
+
     useEffect(() => {
         if (searchTerm === "") {
-            setVisibleIcons(preselectedIcons);
+            setVisibleIconsEvent(preselectedIcons as MuiIconKey[]);
         } else {
             const filteredIcons = Object.keys(MuiIcons)
                 .filter((iconName) => iconName.toLowerCase().includes(searchTerm.toLowerCase()))
                 .slice(0, 25);
-            setVisibleIcons(filteredIcons as MuiIconKey[]);
+            setVisibleIconsEvent(filteredIcons as MuiIconKey[]);
         }
     }, [searchTerm]);
 
@@ -81,7 +85,7 @@ export const IconSelector = ({ value, onChange, label, error, helperText }: Icon
                             const IconComponent = selected
                                 ? (MuiIcons[selected as MuiIconKey] as React.ElementType | undefined)
                                 : undefined;
-                            return IconComponent ? React.createElement(IconComponent) : null;
+                            return IconComponent ? createElement(IconComponent) : null;
                         })()}
                     </IconButton>
                 )}
@@ -113,7 +117,7 @@ export const IconSelector = ({ value, onChange, label, error, helperText }: Icon
                                 >
                                     {(() => {
                                         const IconComponent = MuiIcons[iconName];
-                                        return IconComponent ? React.createElement(IconComponent) : null;
+                                        return IconComponent ? createElement(IconComponent) : null;
                                     })()}
                                 </IconButton>
                             </Grid>

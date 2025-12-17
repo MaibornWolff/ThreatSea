@@ -1,7 +1,7 @@
 import { Circle, Group, Image, Rect, Text } from "react-konva";
 import useImage from "use-image";
 import smallIcon from "../../../images/plug-icon.png";
-import { useState, useMemo, useEffect, type MutableRefObject, type ReactNode } from "react";
+import { useState, useMemo, useEffect, type RefObject, type ReactNode, type JSX } from "react";
 import { ComponentSelectedCircle } from "./component-selected-circle.component";
 import { checkUserRole, USER_ROLES } from "../../../api/types/user-roles.types";
 import { STANDARD_COMPONENT_TYPES } from "../../../api/types/standard-component.types";
@@ -80,9 +80,9 @@ interface SystemComponentProps extends Omit<AugmentedSystemComponent, "communica
     onDragEnd: (event: KonvaEventObject<DragEvent>) => void;
     onDragStart: (event: KonvaEventObject<DragEvent>) => void;
     onPointOfAttackClicked: (event: KonvaEventObject<MouseEvent>, pointOfAttackId: string, componentId: string) => void;
-    stageRef: MutableRefObject<KonvaStage | null>;
+    stageRef: RefObject<KonvaStage | null>;
     userRole: USER_ROLES | undefined;
-    openCommunicationInterfacesMenu: (component: AugmentedSystemComponent) => void;
+    toggleCommunicationInterfacesMenu: (component: AugmentedSystemComponent) => void;
     onClick: (event: KonvaEventObject<MouseEvent>) => void;
 }
 
@@ -93,7 +93,7 @@ interface ConnectorGroupProps extends Partial<GroupConfig> {
     height: number;
     children: ReactNode;
     hover: boolean | null;
-    stageRef: MutableRefObject<KonvaStage | null>;
+    stageRef: RefObject<KonvaStage | null>;
     componentType: ComponentTypeValue;
 }
 
@@ -105,7 +105,7 @@ interface ConnectorProps {
     anchor: AnchorOrientation;
     selectedAnchor: AnchorOrientation | "";
     onSelectAnchor: (event: KonvaEventObject<MouseEvent>, anchor: AnchorOrientation) => void;
-    stageRef: MutableRefObject<KonvaStage | null>;
+    stageRef: RefObject<KonvaStage | null>;
 }
 
 const remapImagePath = (path: string | null | undefined): string | null | undefined => {
@@ -137,7 +137,7 @@ export const SystemComponent = ({
     onPointOfAttackClicked,
     stageRef,
     userRole,
-    openCommunicationInterfacesMenu,
+    toggleCommunicationInterfacesMenu,
     onClick,
     ...props
 }: SystemComponentProps): JSX.Element => {
@@ -196,22 +196,19 @@ export const SystemComponent = ({
 
     const [hover, setHover] = useState(false);
 
-    const interactConfig: InteractConfig = useMemo(() => {
-        if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
-            return {
-                onMouseOver: handleMouseEnter,
-                onMouseOut: handleMouseOut,
-                hover,
-                draggable: true,
-            };
-        }
-        return {
-            onMouseOver: null,
-            onMouseOut: null,
-            hover: null,
-            draggable: false,
-        };
-    }, [userRole, hover]);
+    const interactConfig: InteractConfig = checkUserRole(userRole, USER_ROLES.EDITOR)
+        ? {
+              onMouseOver: handleMouseEnter,
+              onMouseOut: handleMouseOut,
+              hover,
+              draggable: true,
+          }
+        : {
+              onMouseOver: null,
+              onMouseOut: null,
+              hover: null,
+              draggable: false,
+          };
 
     // Custom components have a number (id) as type
     const shouldShowSmallIcon =
@@ -256,7 +253,7 @@ export const SystemComponent = ({
                         radius={(width - 20) / 2}
                         pointsOfAttack={filteredPointsOfAttack}
                         onPointOfAttackClicked={onPointOfAttackClicked}
-                        onCommunicationInterfacesClicked={() => openCommunicationInterfacesMenu(component)}
+                        onCommunicationInterfacesClicked={() => toggleCommunicationInterfacesMenu(component)}
                         selectedPointOfAttackId={selectedPointOfAttackId}
                         strokeWidth={hover ? 9 : 4}
                         component={component}
@@ -294,7 +291,7 @@ export const SystemComponent = ({
                         pointsOfAttack={filteredPointsOfAttack}
                         strokeWidth={9}
                         onPointOfAttackClicked={onPointOfAttackClicked}
-                        onCommunicationInterfacesClicked={() => openCommunicationInterfacesMenu(component)}
+                        onCommunicationInterfacesClicked={() => toggleCommunicationInterfacesMenu(component)}
                         selectedPointOfAttackId={selectedPointOfAttackId}
                         component={component}
                         stageRef={stageRef}
@@ -330,8 +327,8 @@ export const SystemComponent = ({
                     <Group
                         x={width - 10}
                         y={height - 10}
-                        onClick={() => openCommunicationInterfacesMenu(component)}
-                        onTap={() => openCommunicationInterfacesMenu(component)}
+                        onClick={() => toggleCommunicationInterfacesMenu(component)}
+                        onTap={() => toggleCommunicationInterfacesMenu(component)}
                         onMouseEnter={handleSmallIconMouseEnter}
                         onMouseLeave={handleSmallIconMouseLeave}
                     >

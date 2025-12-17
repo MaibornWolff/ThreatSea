@@ -5,7 +5,7 @@
 
 import { Box, DialogActions, DialogTitle, Tab, Tabs, Typography } from "@mui/material";
 import type { DialogProps } from "@mui/material/Dialog";
-import { useState, type ChangeEvent, type MouseEvent as ReactMouseEvent, type SyntheticEvent } from "react";
+import { useState, type ChangeEvent, type SyntheticEvent } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
@@ -109,7 +109,7 @@ const MeasureDetailsDialog = ({ project, measure, ...props }: MeasureDetailsDial
         setSearchValue(event.target.value);
     };
 
-    const onClickEditThreat = (event: ReactMouseEvent<HTMLElement>, threat: ExtendedThreat | undefined) => {
+    const onClickEditThreat = (event: React.MouseEvent<HTMLElement>, threat: ExtendedThreat | undefined) => {
         event.preventDefault();
         event.stopPropagation();
         if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
@@ -119,7 +119,7 @@ const MeasureDetailsDialog = ({ project, measure, ...props }: MeasureDetailsDial
         }
     };
 
-    const onClickDeleteMeasureThreat = (event: ReactMouseEvent<HTMLElement>, measureThreat: MeasureThreat) => {
+    const onClickDeleteMeasureThreat = (event: React.MouseEvent<HTMLElement>, measureThreat: MeasureThreat) => {
         event.preventDefault();
         event.stopPropagation();
         openConfirm({
@@ -144,7 +144,7 @@ const MeasureDetailsDialog = ({ project, measure, ...props }: MeasureDetailsDial
         });
     };
 
-    const onClickEditMeasureImpact = (event: ReactMouseEvent<HTMLElement>, measureImpact: MeasureImpact) => {
+    const onClickEditMeasureImpact = (event: React.MouseEvent<HTMLElement>, measureImpact: MeasureImpact) => {
         event.preventDefault();
         event.stopPropagation();
         navigate(`/projects/${projectId}/measures/${measureId}/measureImpacts/edit`, {
@@ -269,8 +269,10 @@ const MeasureDetailsDialog = ({ project, measure, ...props }: MeasureDetailsDial
                     />
 
                     <DialogTextField
-                        InputLabelProps={{
-                            shrink: true,
+                        slotProps={{
+                            inputLabel: {
+                                shrink: true,
+                            },
                         }}
                         label={t("scheduledAt")}
                         type="date"

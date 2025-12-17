@@ -1,8 +1,8 @@
 import { TextField } from "@mui/material";
 import type { TextFieldProps } from "@mui/material/TextField";
-import { forwardRef, type ForwardedRef } from "react";
+import type { JSX } from "react";
 
-const DialogTextFieldInner = ({ sx, ...props }: TextFieldProps, ref: ForwardedRef<HTMLDivElement>): JSX.Element => {
+export const DialogTextField = ({ sx, ...props }: TextFieldProps): JSX.Element => {
     let paddingLeft = 3;
     if (props.multiline) {
         paddingLeft = 1;
@@ -10,9 +10,10 @@ const DialogTextFieldInner = ({ sx, ...props }: TextFieldProps, ref: ForwardedRe
 
     return (
         <TextField
-            ref={ref}
-            InputLabelProps={{
-                shrink: true,
+            slotProps={{
+                inputLabel: {
+                    shrink: true,
+                },
             }}
             sx={{
                 "&:hover .MuiOutlinedInput-notchedOutline": {
@@ -47,5 +48,3 @@ const DialogTextFieldInner = ({ sx, ...props }: TextFieldProps, ref: ForwardedRe
         />
     );
 };
-
-export const DialogTextField = forwardRef<HTMLDivElement, TextFieldProps>(DialogTextFieldInner);

@@ -7,11 +7,11 @@ import { TextField } from "../textfield.component";
 import { SearchField } from "../search-field.component";
 import { ToggleButtons } from "../toggle-buttons.component";
 import { checkUserRole, USER_ROLES } from "../../../api/types/user-roles.types";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useEffectEvent } from "react";
 import { Box, FormGroup, ListItemAvatar, Typography, IconButton, Avatar } from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
 import { useDebounce } from "../../../hooks/useDebounce";
-import type { ChangeEvent, MouseEvent as ReactMouseEvent, ElementType } from "react";
+import type { ChangeEvent, ElementType } from "react";
 import type { Asset } from "#api/types/asset.types.ts";
 import type {
     AugmentedSystemComponent,
@@ -31,8 +31,8 @@ interface EditorSidebarSelectedComponentProps {
         type: POINTS_OF_ATTACK,
         pointOfAttack?: SystemPointOfAttack
     ) => void;
-    handleAddAssetToAllPointsOfAttack: (event: ReactMouseEvent<HTMLElement>, asset: Asset) => void;
-    handleRemoveAssetFromAllPointsOfAttack: (event: ReactMouseEvent<HTMLElement>, asset: Asset) => void;
+    handleAddAssetToAllPointsOfAttack: (event: React.MouseEvent<HTMLElement>, asset: Asset) => void;
+    handleRemoveAssetFromAllPointsOfAttack: (event: React.MouseEvent<HTMLElement>, asset: Asset) => void;
     assetSearchValue: string;
     handleAssetSearchChanged: (event: ChangeEvent<HTMLInputElement>) => void;
     items: Asset[];
@@ -92,16 +92,20 @@ export const EditorSidebarSelectedComponent = ({
     const debouncedHandleDescriptionChange = useDebounce(handleOnDescriptionChange);
     const debouncedHandleCommunicationInterfaceName = useDebounce(handleChangeCommunicationInterfaceName);
 
+    const setSelectedComponentValuesEvent = useEffectEvent((selectedComponent: AugmentedSystemComponent) => {
+        setCommunicationInterfaces(selectedComponent.communicationInterfaces ?? []);
+        setLocalName(selectedComponent.name ?? "");
+        setLocalDescription(selectedComponent.description ?? "");
+        const names: Record<string, string> = {};
+        selectedComponent.communicationInterfaces?.forEach((ci) => {
+            names[ci.id] = ci.name ?? "";
+        });
+        setInterfaceNames(names);
+    });
+
     useEffect(() => {
         if (selectedComponent) {
-            setCommunicationInterfaces(selectedComponent.communicationInterfaces ?? []);
-            setLocalName(selectedComponent.name ?? "");
-            setLocalDescription(selectedComponent.description ?? "");
-            const names: Record<string, string> = {};
-            selectedComponent.communicationInterfaces?.forEach((ci) => {
-                names[ci.id] = ci.name ?? "";
-            });
-            setInterfaceNames(names);
+            setSelectedComponentValuesEvent(selectedComponent);
         }
     }, [selectedComponent]);
 
@@ -128,7 +132,7 @@ export const EditorSidebarSelectedComponent = ({
     }
 
     return (
-        <React.Fragment>
+        <>
             <Box>
                 <Box
                     sx={{
@@ -347,7 +351,7 @@ export const EditorSidebarSelectedComponent = ({
                 </FormGroup>
                 {/* Display the communication interfaces section */}
                 {communicationInterfaces.length > 0 && (
-                    <React.Fragment>
+                    <>
                         <Box
                             sx={{
                                 display: "flex",
@@ -488,7 +492,7 @@ export const EditorSidebarSelectedComponent = ({
                                 );
                             })}
                         </Box>
-                    </React.Fragment>
+                    </>
                 )}
 
                 <Box
@@ -768,6 +772,6 @@ export const EditorSidebarSelectedComponent = ({
                     })}
                 </Box>
             </Box>
-        </React.Fragment>
+        </>
     );
 };

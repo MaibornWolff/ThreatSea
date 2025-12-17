@@ -1,9 +1,8 @@
 import { Add, WifiTethering, WifiTetheringOff } from "@mui/icons-material";
 import { Box, List, ListItem, ListItemAvatar, ListItemText, Typography, IconButton, Avatar } from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
-import React, { useEffect, useRef, useState, type ElementType, type MutableRefObject } from "react";
+import { useEffect, useEffectEvent, useRef, useState, type ElementType, type RefObject } from "react";
 import { useTranslation } from "react-i18next";
-import type { MouseEvent as ReactMouseEvent } from "react";
 import type { Stage } from "konva/lib/Stage";
 import type { KonvaEventObject } from "konva/lib/Node";
 import { useLineDrawing } from "./contexts/LineDrawingContext";
@@ -27,7 +26,7 @@ interface CommunicationContextMenuProps {
         componentType?: STANDARD_COMPONENT_TYPES | number
     ) => void;
     onCreateNew: () => void;
-    stageRef: MutableRefObject<Stage | null>;
+    stageRef: RefObject<Stage | null>;
     open: boolean;
     componentName: string | undefined;
     onClose: () => void;
@@ -58,13 +57,17 @@ export const CommunicationContextMenu = ({
     const [communicationInterfaces, setCommunicationInterfaces] = useState<SystemCommunicationInterface[]>([]);
     const { setDrawingState } = useLineDrawing();
 
+    const setCommunicationInterfacesEvent = useEffectEvent((interfaces: SystemCommunicationInterface[]) => {
+        setCommunicationInterfaces(interfaces);
+    });
+
     useEffect(() => {
         if (open && componentId) {
             const component = components.find((c) => c.id === componentId);
             if (component && component.communicationInterfaces) {
-                setCommunicationInterfaces(component.communicationInterfaces);
+                setCommunicationInterfacesEvent(component.communicationInterfaces);
             } else {
-                setCommunicationInterfaces([]);
+                setCommunicationInterfacesEvent([]);
             }
         }
     }, [open, componentId, components]);
@@ -105,7 +108,7 @@ export const CommunicationContextMenu = ({
     }, [stageRef, ref, open]);
 
     const handleClick = (
-        event: ReactMouseEvent<HTMLButtonElement>,
+        event: React.MouseEvent<HTMLButtonElement>,
         communicationInterface: SystemCommunicationInterface
     ) => {
         event.stopPropagation();
@@ -133,14 +136,14 @@ export const CommunicationContextMenu = ({
         onClose();
     };
 
-    const handleCreateNew = (event: ReactMouseEvent<HTMLLIElement>) => {
+    const handleCreateNew = (event: React.MouseEvent<HTMLLIElement>) => {
         event.stopPropagation();
         onCreateNew();
         onClose();
     };
 
     return (
-        <React.Fragment>
+        <>
             <Box
                 ref={ref}
                 sx={{
@@ -285,7 +288,7 @@ export const CommunicationContextMenu = ({
                     </ListItem>
                 </List>
             </Box>
-        </React.Fragment>
+        </>
     );
 };
 

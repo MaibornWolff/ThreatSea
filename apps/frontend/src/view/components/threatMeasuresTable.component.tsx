@@ -1,7 +1,7 @@
 import { Box, Table, TableBody, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import { Delete, Edit } from "@mui/icons-material";
 import TableCell from "@mui/material/TableCell";
-import type { MouseEvent as ReactMouseEvent, SyntheticEvent } from "react";
+import type { SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import type { ThreatMeasure } from "#application/hooks/use-threat-measures-list.hook.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
@@ -14,18 +14,18 @@ import { IconButton } from "./icon-button.component";
 
 interface ThreatMeasuresTableSharedProps {
     onClickDeleteMeasureThreat: (
-        event: ReactMouseEvent<HTMLElement>,
+        event: React.MouseEvent<HTMLElement>,
         threatMeasure: ThreatMeasure,
         measure: Measure
     ) => void;
     onClickEditMeasureImpact: (
-        event: ReactMouseEvent<HTMLElement>,
+        event: React.MouseEvent<HTMLElement>,
         measureImpact: MeasureImpact,
         measure: Measure
     ) => void;
     userRole: USER_ROLES | undefined;
     project: ExtendedProject;
-    onClickEditMeasure: (event: ReactMouseEvent<HTMLElement>, project: ExtendedProject, measure: Measure) => void;
+    onClickEditMeasure: (event: React.MouseEvent<HTMLElement>, project: ExtendedProject, measure: Measure) => void;
 }
 
 interface ThreatMeasuresTableProps extends ThreatMeasuresTableSharedProps {

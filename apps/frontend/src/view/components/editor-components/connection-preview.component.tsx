@@ -1,25 +1,20 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef } from "react";
 import { Line } from "react-konva";
-import type { MutableRefObject } from "react";
 import type { Line as KonvaLine } from "konva/lib/shapes/Line";
-import type { Stage } from "konva/lib/Stage";
 import type { Coordinate, SystemComponent } from "#api/types/system.types.ts";
 
 interface ConnectionPreviewProps {
     component: SystemComponent;
     draggedComponent?: SystemComponent;
-    stageRef: MutableRefObject<Stage | null>;
-    layerPosition: Coordinate;
+    newConnectionMousePosition?: Coordinate | null;
 }
 
 export const ConnectionPreview = ({
     component,
     draggedComponent = undefined,
-    stageRef,
-    layerPosition,
+    newConnectionMousePosition,
 }: ConnectionPreviewProps) => {
     const lineRef = useRef<KonvaLine | null>(null);
-    const [mousePosition, setMousePosition] = useState<Coordinate | null>(null);
 
     const getComponentCenter = (comp: SystemComponent): Coordinate => ({
         x: comp.x + comp.width / 2,
@@ -37,30 +32,6 @@ export const ConnectionPreview = ({
         };
     };
 
-    useEffect(() => {
-        const stage = stageRef.current;
-        if (!stage || draggedComponent) {
-            return;
-        }
-
-        const onMouseMove = () => {
-            const pointer = stage.getPointerPosition();
-            if (!pointer) {
-                return;
-            }
-            const newMousePosition: Coordinate = {
-                x: (pointer.x - stage.x()) / stage.scaleX() - layerPosition.x,
-                y: (pointer.y - stage.y()) / stage.scaleY() - layerPosition.y,
-            };
-            setMousePosition(newMousePosition);
-        };
-
-        stage.on("mousemove", onMouseMove);
-        return () => {
-            stage.off("mousemove", onMouseMove);
-        };
-    }, [draggedComponent, stageRef, layerPosition.x, layerPosition.y]);
-
     let points: number[] = [];
 
     if (draggedComponent) {
@@ -72,11 +43,11 @@ export const ConnectionPreview = ({
         const paddedEnd = getPaddedPoint(draggedComponentCenter, componentCenter);
 
         points = [paddedStart.x, paddedStart.y, paddedEnd.x, paddedEnd.y];
-    } else if (mousePosition) {
+    } else if (newConnectionMousePosition) {
         // Case: Creating a new connection
         const componentCenter = getComponentCenter(component);
 
-        points = [componentCenter.x, componentCenter.y, mousePosition.x, mousePosition.y];
+        points = [componentCenter.x, componentCenter.y, newConnectionMousePosition.x, newConnectionMousePosition.y];
     }
 
     return <Line points={points} stroke={"#3889ff"} strokeWidth={2} ref={lineRef} dash={[20, 5]} dashEnabled />;

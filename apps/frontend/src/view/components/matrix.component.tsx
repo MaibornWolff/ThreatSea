@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import { useMemo } from "react";
-import type { MouseEvent, ReactNode } from "react";
+import type { JSX, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { MATRIX_COLOR } from "../colors/matrix";
 import type { MatrixColorKey } from "../colors/matrix";
@@ -13,7 +13,7 @@ interface MatrixCellProps {
     size: number;
     probability: number;
     damage: number;
-    onClick: (event: MouseEvent<HTMLDivElement>, payload: SelectedMatrixCell | null) => void;
+    onClick: (event: React.MouseEvent<HTMLDivElement>, payload: SelectedMatrixCell | null) => void;
     amount?: number | string;
     color?: MatrixColorKey;
     selected?: boolean;

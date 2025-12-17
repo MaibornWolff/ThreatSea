@@ -82,7 +82,8 @@
     "PUBLIC": "public",
     "INTERNAL": "internal",
     "CONFIDENTIAL": "confidential",
-    "HIGHLY_CONFIDENTIAL": "highly confidential"
+    "HIGHLY_CONFIDENTIAL": "highly confidential",
+    "undefined": "Loading..."
   },
 
   "errorMessages": {

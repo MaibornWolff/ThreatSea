@@ -1,8 +1,7 @@
-import { useMemo, useState, type MutableRefObject } from "react";
+import { useMemo, useState, type RefObject } from "react";
 import { Group, Arc } from "react-konva";
 import { POA_COLORS } from "../../colors/pointsOfAttack.colors";
 import { POINTS_OF_ATTACK } from "../../../api/types/points-of-attack.types";
-import React from "react";
 import type { Stage } from "konva/lib/Stage";
 import type { KonvaEventObject } from "konva/lib/Node";
 import type { SystemComponent, SystemPointOfAttack } from "#api/types/system.types.ts";
@@ -16,7 +15,7 @@ interface ComponentSelectedCircleProps {
     onPointOfAttackClicked: (event: KonvaEventObject<MouseEvent>, pointOfAttackId: string, componentId: string) => void;
     selectedPointOfAttackId: string | null | undefined;
     component: SystemComponent;
-    stageRef: MutableRefObject<Stage | null>;
+    stageRef: RefObject<Stage | null>;
     onCommunicationInterfacesClicked: (
         event: KonvaEventObject<MouseEvent>,
         pointOfAttackId: string,
@@ -88,7 +87,7 @@ export const ComponentSelectedCircle = ({
     }, [pointsOfAttack, hover, selectedPointOfAttackId, lineIndex]);
 
     return (
-        <React.Fragment>
+        <>
             <Group x={x} y={y}>
                 {arcs.map((arc, arcIndex) => (
                     <Arc
@@ -112,6 +111,6 @@ export const ComponentSelectedCircle = ({
                     />
                 ))}
             </Group>
-        </React.Fragment>
+        </>
     );
 };

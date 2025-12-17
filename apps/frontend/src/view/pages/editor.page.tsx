@@ -5,16 +5,16 @@
 
 import { CenterFocusWeak, Download } from "@mui/icons-material";
 import { Box, IconButton, LinearProgress, Tooltip } from "@mui/material";
-import React, {
+import {
     memo,
     useCallback,
     useEffect,
+    useEffectEvent,
     useLayoutEffect,
     useMemo,
     useRef,
     useState,
     type ChangeEvent,
-    type MouseEvent as ReactMouseEvent,
 } from "react";
 import { useTranslation } from "react-i18next";
 import { Group, Layer, Line } from "react-konva";
@@ -50,6 +50,7 @@ import type {
 import type { EditorComponentType } from "#application/adapters/editor-component-type.adapter.ts";
 import type { ConnectionPointMeta } from "#api/types/system.types.ts";
 import type { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
+import { useDebounce } from "#hooks/useDebounce.ts";
 
 // Move these outside the component to avoid recreating on each render
 const GRID_CONFIG = {
@@ -85,6 +86,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     const { projectId: projectIdParam } = useParams<{ projectId: string }>();
     const projectId = Number.parseInt(projectIdParam ?? "", 10);
     const stageRef = useRef<KonvaStage | null>(null);
+    const [newConnectionMousePosition, setNewConnectionMousePosition] = useState<Coordinate | null>(null);
     const componentLayerRef = useRef<KonvaLayer | null>(null);
     const sidebarRef = useRef<HTMLDivElement | null>(null);
     const { openConfirm } = useConfirm();
@@ -164,6 +166,8 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         projectId,
         showErrorMessage,
     });
+    const setLayerPositionEvent = useEffectEvent(setLayerPosition);
+    const setStageScaleEvent = useEffectEvent(setStageScale);
     const { t } = useTranslation("editorPage");
 
     const { loadAssets, items } = useAssets({
@@ -208,8 +212,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                 getCatalogInfo: false,
             })
         );
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [dispatch]);
 
     /**
      * Resets the current layer position and scale when open a project
@@ -218,18 +221,16 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     useEffect(() => {
         if (stageRef?.current && shouldCenter) {
             stageRef.current.scale({ x: 1, y: 1 });
-            setLayerPosition(0, 0);
-            setStageScale(1, { x: 0, y: 0 });
+            setLayerPositionEvent(0, 0);
+            setStageScaleEvent(1, { x: 0, y: 0 });
         }
         navigate(location.pathname, { replace: true, state: {} });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [shouldCenter]);
+    }, [shouldCenter, navigate, location.pathname]);
 
     useEffect(() => {
         if (blockAutoSave) {
             resetSaveTimeout();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [blockAutoSave]);
 
     //run if unmounted
@@ -240,17 +241,15 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                 saveTimeoutHandle = undefined;
             }
 
-            save(true);
+            saveEvent(true);
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
-        setTimeout(updateScreenshot, 100, true);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [makeScreenshot, componentLayerRef.current]);
+        updateScreenshotEvent();
+    }, [makeScreenshot]);
 
-    const updateScreenshot = (): void => {
+    const updateScreenshot = useDebounce((): void => {
         if (componentLayerRef?.current) {
             const componentsOfProject = components.filter((component) => component.projectId === projectId);
             let minX = componentsOfProject.length === 0 ? 0 : 9999;
@@ -307,7 +306,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                 lastLayerScreenshot = result;
             }
         }
-    };
+    }, 100);
+
+    const updateScreenshotEvent = useEffectEvent(updateScreenshot);
 
     const save = (forceSave = false): void => {
         if (shouldSave(forceSave)) {
@@ -316,6 +317,8 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
             }
         }
     };
+
+    const saveEvent = useEffectEvent(save);
 
     function shouldSave(forceSave?: boolean): boolean {
         // User with Viewer role should not trigger autosave
@@ -331,20 +334,20 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
 
     useEffect(() => {
         setAutoSaveStatus("saving");
-        updateAutoSaveOnClick?.(() => save(true));
+        updateAutoSaveOnClick?.(() => saveEvent(true));
         return () => {
             updateAutoSaveOnClick?.(undefined);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const resetSaveTimeout = (): void => {
+    const resetSaveTimeout = useEffectEvent((): void => {
         if (saveTimeoutHandle) {
             clearTimeout(saveTimeoutHandle);
         }
         saveTimeoutHandle = setTimeout(save, 1000);
         autoSaveBlocked();
-    };
+    });
 
     const handlComponentDragStart = (_event: KonvaEventObject<DragEvent>, componentId: string): void => {
         addInUseComponent(componentId);
@@ -481,19 +484,17 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         }
     };
 
-    const handleClickStage = ({ evt }: KonvaEventObject<MouseEvent>): void => {
-        if (!evt.defaultPrevented) {
-            if (communicationMenuOpen) {
-                handleCloseCommunicationMenu();
-                return;
-            }
-            deselectComponent();
-            closeSideBar();
-            deselectConnection();
-            deselectPointOfAttack();
-            deselectConnectionPoint();
-            deselectConnector();
+    const closeAndDeselectAll = (): void => {
+        if (communicationMenuOpen) {
+            handleCloseCommunicationMenu();
+            return;
         }
+        deselectComponent();
+        closeSideBar();
+        deselectConnection();
+        deselectPointOfAttack();
+        deselectConnectionPoint();
+        deselectConnector();
     };
 
     const getConnectedComponents = useCallback(
@@ -525,6 +526,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     const handleMouseDown = (event: KonvaEventObject<MouseEvent>): void => {
         const { evt, target } = event;
         if (evt.button === 0 && target.nodeType === "Stage") {
+            closeAndDeselectAll();
             event.cancelBubble = true;
             evt.preventDefault();
             evt.stopImmediatePropagation();
@@ -541,6 +543,16 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
             x: x,
             y: y,
         });
+
+        if (newConnection && stageRef.current) {
+            setNewConnectionMousePosition({
+                x: (x - stageRef.current.x()) / stageRef.current.scaleX() - layerPosition.x,
+                y: (y - stageRef.current.y()) / stageRef.current.scaleY() - layerPosition.y,
+            });
+        } else if (newConnectionMousePosition) {
+            setNewConnectionMousePosition(null);
+        }
+
         if (moveLayer && stageRef.current) {
             setLayerPosition(
                 layerPosition.x + evt.movementX * (GRID_CONFIG.speed / stageRef.current.scaleX()),
@@ -759,7 +771,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         }
     };
 
-    const handleAddAssetToAllPointsOfAttack = (_event: ReactMouseEvent<HTMLElement>, asset: Asset): void => {
+    const handleAddAssetToAllPointsOfAttack = (_event: React.MouseEvent<HTMLElement>, asset: Asset): void => {
         if (checkUserRole(userRole, USER_ROLES.EDITOR) && selectedComponent != null) {
             pointsOfAttackOfSelectedComponent.forEach((pointOfAttack) => {
                 addAssetToPointOfAttack(asset, pointOfAttack);
@@ -767,7 +779,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         }
     };
 
-    const handleRemoveAssetFromAllPointsOfAttack = (_event: ReactMouseEvent<HTMLElement>, asset: Asset): void => {
+    const handleRemoveAssetFromAllPointsOfAttack = (_event: React.MouseEvent<HTMLElement>, asset: Asset): void => {
         if (checkUserRole(userRole, USER_ROLES.EDITOR) && selectedComponent != null) {
             pointsOfAttackOfSelectedComponent.forEach((pointOfAttack) => {
                 removeAssetFromPointOfAttack(asset, pointOfAttack);
@@ -776,6 +788,10 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     };
 
     const handleKeyUp = ({ key }: KeyboardEvent): void => {
+        if (key === "Escape") {
+            closeAndDeselectAll();
+        }
+
         if (key === "Delete") {
             handleDeleteComponent();
             handleDeleteConnection();
@@ -858,9 +874,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         }
     };
 
-    const openCommunicationInterfacesMenu = (component: AugmentedSystemComponent): void => {
+    const toggleCommunicationInterfacesMenu = (component: AugmentedSystemComponent): void => {
         setCommunicationMenuComponent(component);
-        setCommunicationMenuOpen(true);
+        setCommunicationMenuOpen((prevState) => !prevState);
     };
 
     const handleCommunicationSelect = (communicationInterfaceId: string): void => {
@@ -971,7 +987,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     }
 
     return (
-        <React.Fragment>
+        <>
             <LineDrawingProvider>
                 <Page
                     sx={{
@@ -993,7 +1009,6 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                     >
                         <EditorStage
                             ref={stageRef}
-                            onClick={handleClickStage}
                             handleMouseDown={handleMouseDown}
                             handleMouseMove={handleMouseMove}
                             handleMouseUp={handleMouseUp}
@@ -1112,9 +1127,8 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                 {newConnection && newConnectionPreviewComponent && (
                                     <ConnectionPreview
                                         key={`new-connection-${newConnection.from.id}-${Date.now()}`}
-                                        layerPosition={layerPosition}
                                         component={newConnectionPreviewComponent}
-                                        stageRef={stageRef}
+                                        newConnectionMousePosition={newConnectionMousePosition}
                                     />
                                 )}
 
@@ -1131,10 +1145,8 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                     return (
                                         <ConnectionPreview
                                             key={key}
-                                            layerPosition={layerPosition}
                                             component={otherComponent}
                                             draggedComponent={draggedComponent}
-                                            stageRef={stageRef}
                                         />
                                     );
                                 })}
@@ -1193,7 +1205,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                         component={component}
                                         stageRef={stageRef}
                                         userRole={userRole}
-                                        openCommunicationInterfacesMenu={openCommunicationInterfacesMenu}
+                                        toggleCommunicationInterfacesMenu={toggleCommunicationInterfacesMenu}
                                     />
                                 ))}
                             </Layer>
@@ -1308,7 +1320,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                     )}
                 </Page>
             </LineDrawingProvider>
-        </React.Fragment>
+        </>
     );
 };
 

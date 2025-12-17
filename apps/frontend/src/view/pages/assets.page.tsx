@@ -12,7 +12,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { Box } from "@mui/system";
-import { useLayoutEffect, type ChangeEvent, type MouseEvent as ReactMouseEvent, type SyntheticEvent } from "react";
+import { useLayoutEffect, type ChangeEvent, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import type { ExtendedProject } from "#api/types/project.types.ts";
@@ -36,8 +36,8 @@ interface AssetsPageBodyProps {
 
 interface AssetTableRowProps {
     asset: Asset;
-    onEdit: (event: ReactMouseEvent<HTMLElement>, asset: Asset) => void;
-    onDelete: (event: ReactMouseEvent<HTMLElement>, asset: Asset) => void;
+    onEdit: (event: React.MouseEvent<HTMLElement>, asset: Asset) => void;
+    onDelete: (event: React.MouseEvent<HTMLElement>, asset: Asset) => void;
     language: string;
     userRole: USER_ROLES | undefined;
 }
@@ -128,7 +128,7 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
      * @param {SyntheticBaseEvent} e - Onclick event.
      * @param {object} asset - Data of the asset.
      */
-    const onClickEditAsset = (event: ReactMouseEvent<HTMLElement>, asset: Asset) => {
+    const onClickEditAsset = (event: React.MouseEvent<HTMLElement>, asset: Asset) => {
         if (!event.isDefaultPrevented()) {
             event.preventDefault();
             navigate(`/projects/${projectId}/assets/edit`, {
@@ -147,7 +147,7 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
      * @param {SyntheticBaseEvent} e - Event of the click.
      * @param {object} asset - Data of the asset.
      */
-    const onClickDeleteAsset = (event: ReactMouseEvent<HTMLElement>, asset: Asset) => {
+    const onClickDeleteAsset = (event: React.MouseEvent<HTMLElement>, asset: Asset) => {
         event.preventDefault();
         openConfirm({
             state: asset,

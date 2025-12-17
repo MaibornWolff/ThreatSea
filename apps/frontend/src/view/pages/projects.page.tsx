@@ -1,7 +1,7 @@
 import { Add, ArrowDownward, ArrowUpward } from "@mui/icons-material";
 import { LinearProgress } from "@mui/material";
 import { Box } from "@mui/system";
-import { useLayoutEffect, type ChangeEvent, type MouseEvent as ReactMouseEvent, type SyntheticEvent } from "react";
+import { useLayoutEffect, type ChangeEvent, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { Route, Routes } from "react-router-dom";
@@ -80,7 +80,7 @@ export const ProjectsPage = CreatePage(HeaderNavigation, () => {
         navigate("/projects/add");
     };
 
-    const onClickDeleteProject = (_event: ReactMouseEvent<HTMLElement>, project: ExtendedProject) => {
+    const onClickDeleteProject = (_event: React.MouseEvent<HTMLElement>, project: ExtendedProject) => {
         openConfirm({
             state: project,
             message: t("deleteMessage", { projectName: project.name }),
@@ -92,7 +92,7 @@ export const ProjectsPage = CreatePage(HeaderNavigation, () => {
         });
     };
 
-    const onClickEditProject = (_event: ReactMouseEvent<HTMLElement>, project: ExtendedProject) => {
+    const onClickEditProject = (_event: React.MouseEvent<HTMLElement>, project: ExtendedProject) => {
         navigate(`/projects/${project.id}`, { state: { project } });
     };
 
