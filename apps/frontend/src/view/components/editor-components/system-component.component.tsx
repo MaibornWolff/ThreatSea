@@ -196,23 +196,19 @@ export const SystemComponent = ({
 
     const [hover, setHover] = useState(false);
 
-    // eslint-disable-next-line react-hooks/preserve-manual-memoization
-    const interactConfig: InteractConfig = useMemo(() => {
-        if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
-            return {
-                onMouseOver: handleMouseEnter,
-                onMouseOut: handleMouseOut,
-                hover,
-                draggable: true,
-            };
-        }
-        return {
-            onMouseOver: null,
-            onMouseOut: null,
-            hover: null,
-            draggable: false,
-        };
-    }, [userRole, hover]);
+    const interactConfig: InteractConfig = checkUserRole(userRole, USER_ROLES.EDITOR)
+        ? {
+              onMouseOver: handleMouseEnter,
+              onMouseOut: handleMouseOut,
+              hover,
+              draggable: true,
+          }
+        : {
+              onMouseOver: null,
+              onMouseOut: null,
+              hover: null,
+              draggable: false,
+          };
 
     // Custom components have a number (id) as type
     const shouldShowSmallIcon =

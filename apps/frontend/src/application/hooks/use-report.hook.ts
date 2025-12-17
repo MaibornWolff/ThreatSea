@@ -1,7 +1,7 @@
 import type { ProjectReport } from "#api/types/project.types.ts";
 import type { SortDirection } from "#application/actions/list.actions.ts";
 import { exportAsExcelFile } from "../../utils/export";
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useEffectEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { ProjectsAPI } from "../../api/projects.api";
 import { calcRiskColour } from "../../utils/calcRisk";
@@ -124,12 +124,12 @@ export const useReport = ({ projectId }: { projectId: number }) => {
     const threats = data?.threats;
     const measures = data?.measures;
 
-    const fetchReport = useCallback(async () => {
+    const fetchReport = useEffectEvent(async () => {
         const report = await ProjectsAPI.getReport({
             projectId,
         });
         setData(report);
-    }, [projectId]);
+    });
 
     const filename = useMemo(() => {
         if (data) {
@@ -141,9 +141,8 @@ export const useReport = ({ projectId }: { projectId: number }) => {
     }, [data]);
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchReport();
-    }, [fetchReport]);
+    }, []);
 
     const matrixDesign: RiskMatrix | null = useMemo(() => {
         if (typeof data?.project?.lineOfToleranceGreen !== "number") return null;

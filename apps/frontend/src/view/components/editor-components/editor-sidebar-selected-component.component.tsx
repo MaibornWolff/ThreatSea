@@ -7,7 +7,7 @@ import { TextField } from "../textfield.component";
 import { SearchField } from "../search-field.component";
 import { ToggleButtons } from "../toggle-buttons.component";
 import { checkUserRole, USER_ROLES } from "../../../api/types/user-roles.types";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useEffectEvent } from "react";
 import { Box, FormGroup, ListItemAvatar, Typography, IconButton, Avatar } from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
 import { useDebounce } from "../../../hooks/useDebounce";
@@ -92,17 +92,20 @@ export const EditorSidebarSelectedComponent = ({
     const debouncedHandleDescriptionChange = useDebounce(handleOnDescriptionChange);
     const debouncedHandleCommunicationInterfaceName = useDebounce(handleChangeCommunicationInterfaceName);
 
+    const setSelectedComponentValuesEvent = useEffectEvent((selectedComponent: AugmentedSystemComponent) => {
+        setCommunicationInterfaces(selectedComponent.communicationInterfaces ?? []);
+        setLocalName(selectedComponent.name ?? "");
+        setLocalDescription(selectedComponent.description ?? "");
+        const names: Record<string, string> = {};
+        selectedComponent.communicationInterfaces?.forEach((ci) => {
+            names[ci.id] = ci.name ?? "";
+        });
+        setInterfaceNames(names);
+    });
+
     useEffect(() => {
         if (selectedComponent) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setCommunicationInterfaces(selectedComponent.communicationInterfaces ?? []);
-            setLocalName(selectedComponent.name ?? "");
-            setLocalDescription(selectedComponent.description ?? "");
-            const names: Record<string, string> = {};
-            selectedComponent.communicationInterfaces?.forEach((ci) => {
-                names[ci.id] = ci.name ?? "";
-            });
-            setInterfaceNames(names);
+            setSelectedComponentValuesEvent(selectedComponent);
         }
     }, [selectedComponent]);
 

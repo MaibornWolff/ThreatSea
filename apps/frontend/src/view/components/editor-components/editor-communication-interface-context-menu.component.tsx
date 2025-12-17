@@ -1,7 +1,7 @@
 import { Add, WifiTethering, WifiTetheringOff } from "@mui/icons-material";
 import { Box, List, ListItem, ListItemAvatar, ListItemText, Typography, IconButton, Avatar } from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
-import { useEffect, useRef, useState, type ElementType, type RefObject } from "react";
+import { useEffect, useEffectEvent, useRef, useState, type ElementType, type RefObject } from "react";
 import { useTranslation } from "react-i18next";
 import type { Stage } from "konva/lib/Stage";
 import type { KonvaEventObject } from "konva/lib/Node";
@@ -57,14 +57,17 @@ export const CommunicationContextMenu = ({
     const [communicationInterfaces, setCommunicationInterfaces] = useState<SystemCommunicationInterface[]>([]);
     const { setDrawingState } = useLineDrawing();
 
+    const setCommunicationInterfacesEvent = useEffectEvent((interfaces: SystemCommunicationInterface[]) => {
+        setCommunicationInterfaces(interfaces);
+    });
+
     useEffect(() => {
         if (open && componentId) {
             const component = components.find((c) => c.id === componentId);
             if (component && component.communicationInterfaces) {
-                // eslint-disable-next-line react-hooks/set-state-in-effect
-                setCommunicationInterfaces(component.communicationInterfaces);
+                setCommunicationInterfacesEvent(component.communicationInterfaces);
             } else {
-                setCommunicationInterfaces([]);
+                setCommunicationInterfacesEvent([]);
             }
         }
     }, [open, componentId, components]);

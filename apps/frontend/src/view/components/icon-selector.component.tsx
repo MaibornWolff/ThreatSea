@@ -1,4 +1,4 @@
-import { createElement, useEffect, useState, type ReactNode } from "react";
+import { createElement, useEffect, useEffectEvent, useState, type ReactNode } from "react";
 import { FormControl, FormHelperText, Grid, IconButton, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import * as MuiIcons from "@mui/icons-material";
@@ -48,15 +48,18 @@ export const IconSelector = ({ value, onChange, label, error, helperText }: Icon
     const [selectedIcon, setSelectedIcon] = useState(value || "");
     const [open, setOpen] = useState(false);
 
+    const setVisibleIconsEvent = useEffectEvent((icons: MuiIconKey[]) => {
+        setVisibleIcons(icons);
+    });
+
     useEffect(() => {
         if (searchTerm === "") {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setVisibleIcons(preselectedIcons);
+            setVisibleIconsEvent(preselectedIcons as MuiIconKey[]);
         } else {
             const filteredIcons = Object.keys(MuiIcons)
                 .filter((iconName) => iconName.toLowerCase().includes(searchTerm.toLowerCase()))
                 .slice(0, 25);
-            setVisibleIcons(filteredIcons as MuiIconKey[]);
+            setVisibleIconsEvent(filteredIcons as MuiIconKey[]);
         }
     }, [searchTerm]);
 

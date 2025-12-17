@@ -16,7 +16,7 @@ import {
     type SxProps,
     type Theme,
 } from "@mui/material";
-import { useEffect, useImperativeHandle, useRef, useState, type RefObject, type Ref } from "react";
+import { useEffect, useImperativeHandle, useRef, useState, type RefObject, type Ref, useEffectEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { useParams } from "react-router-dom";
@@ -55,6 +55,10 @@ export const EditorContextMenu = ({ onSelect, stageRef, ref }: EditorContextMenu
     const { openConfirm } = useConfirm<EditorComponentType>();
     const contextMenuRef = useRef<HTMLDivElement>(null);
     useImperativeHandle(ref, () => contextMenuRef.current!);
+
+    const setOpenCustomComponentsEvent = useEffectEvent((isOpen: boolean) => {
+        setOpenCustomComponents(isOpen);
+    });
 
     const onToggleCustomComponents = (event: React.MouseEvent<HTMLLIElement>) => {
         if (!event.defaultPrevented) {
@@ -114,8 +118,7 @@ export const EditorContextMenu = ({ onSelect, stageRef, ref }: EditorContextMenu
 
     useEffect(() => {
         if (!open) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setOpenCustomComponents(false);
+            setOpenCustomComponentsEvent(false);
         } else {
             const stage = stageRef.current;
             if (stage) {
