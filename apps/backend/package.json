@@ -43,7 +43,7 @@
     "passport-microsoft": "2.1.0",
     "pg": "8.16.3",
     "reflect-metadata": "0.2.2",
-    "socket.io": "4.8.1"
+    "socket.io": "4.8.3"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
