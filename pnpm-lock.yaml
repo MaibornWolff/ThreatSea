@@ -184,8 +184,8 @@ importers:
         specifier: 4.3.2
         version: 4.3.2(react@19.2.3)
       '@react-pdf/types':
-        specifier: 2.9.1
-        version: 2.9.1
+        specifier: 2.9.2
+        version: 2.9.2
       '@react-pdf/zlib':
         specifier: 2.0.0
         version: 2.0.0
@@ -1189,9 +1189,6 @@ packages:
 
   '@react-pdf/textkit@6.1.0':
     resolution: {integrity: sha512-sFlzDC9CDFrJsnL3B/+NHrk9+Advqk7iJZIStiYQDdskbow8GF/AGYrpIk+vWSnh35YxaGbHkqXq53XOxnyrjQ==}
-
-  '@react-pdf/types@2.9.1':
-    resolution: {integrity: sha512-5GoCgG0G5NMgpPuHbKG2xcVRQt7+E5pg3IyzVIIozKG3nLcnsXW4zy25vG1ZBQA0jmo39q34au/sOnL/0d1A4w==}
 
   '@react-pdf/types@2.9.2':
     resolution: {integrity: sha512-dufvpKId9OajLLbgn9q7VLUmyo1Jf+iyGk2ZHmCL8nIDtL8N1Ejh9TH7+pXXrR0tdie1nmnEb5Bz9U7g4hI4/g==}
@@ -5393,12 +5390,6 @@ snapshots:
       bidi-js: 1.0.3
       hyphen: 1.13.0
       unicode-properties: 1.4.1
-
-  '@react-pdf/types@2.9.1':
-    dependencies:
-      '@react-pdf/font': 4.0.4
-      '@react-pdf/primitives': 4.1.1
-      '@react-pdf/stylesheet': 6.1.2
 
   '@react-pdf/types@2.9.2':
     dependencies:
