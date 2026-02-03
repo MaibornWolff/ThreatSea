@@ -148,13 +148,14 @@ jobs:
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=raw,value=next,enable=${{ github.ref == 'refs/heads/next' }}
+            type=ref,event=branch
             type=sha
       - name: Build and Push Container Image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
-          push: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/next' }}
+          push: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/next' || github.head_ref == 'feature/add-gitlab-deployment' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
