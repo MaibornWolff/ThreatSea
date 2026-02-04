@@ -223,8 +223,8 @@ importers:
         specifier: 16.5.4
         version: 16.5.4(i18next@25.8.1(typescript@5.9.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
       react-konva:
-        specifier: 19.2.1
-        version: 19.2.1(@types/react@19.2.10)(konva@10.2.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        specifier: 19.2.2
+        version: 19.2.2(@types/react@19.2.10)(konva@10.2.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react-reconciler:
         specifier: 0.33.0
         version: 0.33.0(react@19.2.4)
@@ -3850,8 +3850,8 @@ packages:
   react-is@19.2.4:
     resolution: {integrity: sha512-W+EWGn2v0ApPKgKKCy/7s7WHXkboGcsrXE+2joLyVxkbyVQfO3MUEaUQDHoSmb8TFFrSKYa9mw64WZHNHSDzYA==}
 
-  react-konva@19.2.1:
-    resolution: {integrity: sha512-sqZWCzQGpdMrU5aeunR0oxUY8UeCPbU8gnAYxMtAn6BT4coeSpiATKOctsoxRu6F56TAcF+s0c6Lul9ansNqQA==}
+  react-konva@19.2.2:
+    resolution: {integrity: sha512-fgIevJSiZ6mYxouR0XLq7oKgQkfHHySHyNpyc1f/3in0xXq8BV7M7Y82obyoBPOAj35TBUPuZ568qZcelYm3ag==}
     peerDependencies:
       konva: ^8.0.1 || ^7.2.5 || ^9.0.0 || ^10.0.0
       react: ^19.2.0
@@ -8179,7 +8179,7 @@ snapshots:
 
   react-is@19.2.4: {}
 
-  react-konva@19.2.1(@types/react@19.2.10)(konva@10.2.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
+  react-konva@19.2.2(@types/react@19.2.10)(konva@10.2.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
     dependencies:
       '@types/react-reconciler': 0.32.3(@types/react@19.2.10)
       its-fine: 2.0.0(@types/react@19.2.10)(react@19.2.4)
