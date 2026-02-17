@@ -15,25 +15,14 @@ function getEnvironmentVariable(key: string): string {
 
 export const JWT_SECRET = getEnvironmentVariable("JWT_SECRET") as Secret;
 
-export const PASSPORT_STRATEGY = process.env["PASSPORT_STRATEGY"] ?? "azure";
-
-// Config for authentication with microsoft.
-export const azureConfig = {
-    clientId: process.env["APP_REGISTRATION_CLIENT_ID"],
-    tenantId: process.env["AZURE_TENANT_ID"],
-    clientSecret: process.env["APP_REGISTRATION_CLIENT_SECRET"],
-    privilegedGroupId: process.env["THREATSEA_PRIVILEGED_GROUP_ID"],
-};
+export const PASSPORT_STRATEGY = process.env["PASSPORT_STRATEGY"];
 
 export const oidcConfig = {
-    clientId: getEnvironmentVariable("APP_REGISTRATION_CLIENT_ID"),
-    clientSecret: getEnvironmentVariable("APP_REGISTRATION_CLIENT_SECRET"),
-    issuer: `https://login.microsoftonline.com/${process.env["AZURE_TENANT_ID"]}/v2.0`,
-    authorizationURL: `https://login.microsoftonline.com/${process.env["AZURE_TENANT_ID"]}/oauth2/v2.0/authorize`,
-    tokenURL: `https://login.microsoftonline.com/${process.env["AZURE_TENANT_ID"]}/oauth2/v2.0/token`,
-    userInfoURL: `https://graph.microsoft.com/oidc/userinfo`,
-    callbackURL: `${getEnvironmentVariable("ORIGIN_BACKEND")}/auth/redirect`,
-    scope: "openid profile email User.Read",
+    clientId: getEnvironmentVariable("OIDC_CLIENT_ID"),
+    clientSecret: getEnvironmentVariable("OIDC_CLIENT_SECRET"),
+    issuerUrl: getEnvironmentVariable("OIDC_ISSUER_URL"),
+    callbackURL: `${getEnvironmentVariable("ORIGIN_BACKEND")}/api/auth/redirect`,
+    scope: "openid profile email",
 };
 
 export const originConfig = {

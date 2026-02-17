@@ -16,14 +16,9 @@ export const authRouter = express.Router();
 
 authRouter.get("/authenticationMode", authenticationMode);
 authRouter.get("/status", getAuthStatus);
-authRouter.get(
-    "/redirect",
-    (req, _res, next) => {
-        console.log("OIDC Redirect called", req.query);
-        next();
-    },
-    authenticate,
-    finalizeAuthentication
-);
-authRouter.get("/login", authenticate, finalizeAuthentication);
+
+authRouter.get("/login", authenticate);
+
+authRouter.get("/redirect", finalizeAuthentication);
+
 authRouter.post("/logout", logout);

@@ -1,9 +1,11 @@
 import "reflect-metadata";
-import { beforeAll, vi } from "vitest";
+import { beforeAll, vi, Mocked } from "vitest";
 import * as fs from "node:fs/promises";
 import jwt from "jsonwebtoken";
 
 vi.mock("jsonwebtoken");
+
+const mockedJwt = jwt as Mocked<typeof jwt>;
 
 beforeAll(async () => {
     const iat = Math.floor(Date.now() / 1000);
@@ -11,15 +13,13 @@ beforeAll(async () => {
 
     const testUserId = JSON.parse(await fs.readFile(".tmp/testUser.json", "utf-8")).id;
 
-    jwt.verify.mockImplementation(() => ({
+    mockedJwt.verify.mockImplementation((() => ({
         userId: testUserId,
-        azureId: "fakeAzureId",
-        tenantId: "fakeTenantId",
+        oidcId: "fakeOidcId",
         email: "fake@example.com",
         firstname: "fake",
         lastname: "user",
-        isPrivileged: 1,
         iat: iat,
         exp: exp,
-    }));
+    })) as unknown as typeof jwt.verify);
 }, 50000);

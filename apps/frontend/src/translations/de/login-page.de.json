@@ -2,7 +2,7 @@
   "signin": "Anmelden",
   "pw": "Passwort",
   "remember": "Eingeloggt bleiben",
-  "login": "mit Microsoft",
+  "login": "Login",
   "testUserPrivileged": "mit privilegiertem Benutzer",
   "testUserUnprivileged": "mit nicht privilegiertem Benutzer",
   "invalidtoken": "Token ist nicht valide"

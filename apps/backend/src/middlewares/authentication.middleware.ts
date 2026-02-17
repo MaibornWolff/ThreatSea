@@ -33,7 +33,7 @@ export async function CheckTokenHandler(request: Request, response: Response, ne
         return;
     }
 
-    request.user = { id: decodedToken["userId"], isPrivileged: decodedToken["isPrivileged"] };
+    request.user = { id: decodedToken["userId"] };
     response.header("Access-Control-Allow-Origin", originConfig.app);
 
     next();

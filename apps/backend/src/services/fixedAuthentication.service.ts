@@ -1,41 +1,36 @@
-import passport from "passport";
-import * as CustomStrategy from "passport-custom";
 import { buildThreatSeaAccessToken } from "#services/auth.service.js";
-import { Logger } from "#logging/index.js";
-import { GenericOidcUserProfile } from "#types/auth.types.js";
+import { OidcProfile } from "#services/auth.service.js";
 
-const strategySelector = "fixed";
-
-const profiles: GenericOidcUserProfile[] = [
+const profiles: OidcProfile[] = [
     {
-        givenName: "testfn",
-        surname: "testsn",
-        userPrincipalName: "test@test.test",
-        id: "testid",
+        firstName: "testfn",
+        lastName: "testsn",
+        email: "test@test.test",
+        sub: "testid",
     },
     {
-        givenName: "testIHave",
-        surname: "testNoPrivileges",
-        userPrincipalName: "test2@test.test",
-        id: "testid2",
+        firstName: "testIHave",
+        lastName: "testNoPrivileges",
+        email: "test2@test.test",
+        sub: "testid2",
     },
     {
-        givenName: "E2E",
-        surname: "Testing",
-        userPrincipalName: "test3@test.test",
-        id: "testid3",
+        firstName: "E2E",
+        lastName: "Testing",
+        email: "test3@test.test",
+        sub: "testid3",
     },
     {
-        givenName: "E2E",
-        surname: "Testing",
-        userPrincipalName: "test4@test.test",
-        id: "testid4",
+        firstName: "E2E",
+        lastName: "Testing",
+        email: "test4@test.test",
+        sub: "testid4",
     },
     {
-        givenName: "E2E",
-        surname: "Testing",
-        userPrincipalName: "test5@test.test",
-        id: "testid5",
+        firstName: "E2E",
+        lastName: "Testing",
+        email: "test5@test.test",
+        sub: "testid5",
     },
 ];
 
@@ -44,26 +39,9 @@ function tryParseInt(str: string, defaultValue = 0) {
     return isNaN(parsed) ? defaultValue : parsed;
 }
 
-const fixedStrategy = new CustomStrategy.Strategy(function (req, done) {
-    let isPrivileged;
-    const testUserId = tryParseInt(new URLSearchParams(req.url).get("/login?testUser")!);
-
+export function getFixedLoginToken(url: string): Promise<string> {
+    const testUserId = tryParseInt(new URLSearchParams(url).get("/login?testUser")!);
     const profile = profiles[testUserId]!;
 
-    if (testUserId === 1) {
-        isPrivileged = 0;
-    } else {
-        isPrivileged = 1;
-    }
-
-    buildThreatSeaAccessToken(profile, isPrivileged)
-        .then((threatSeaToken) => {
-            done(null, { threatSeaToken: threatSeaToken });
-        }) // pass threatSeaToken in user object as passport is not setup for session management
-        .catch((err) => {
-            Logger.error("Error in preparing Token", err);
-            done(err, false);
-        });
-});
-
-passport.use(strategySelector, fixedStrategy);
+    return buildThreatSeaAccessToken(profile);
+}

@@ -3,34 +3,26 @@
  */
 
 import jwt from "jsonwebtoken";
-import { azureConfig, JWT_SECRET } from "#config/config.js";
+import { JWT_SECRET } from "#config/config.js";
 import { db } from "#db/index.js";
 import { users } from "#db/schema.js";
 import { eq } from "drizzle-orm";
-import { GenericOidcUserProfile } from "#types/auth.types.js";
-import { mapGenericProfile } from "#utils/mapGenericProfile.js";
-
-export interface AzureProfile {
-    _json: {
-        givenName?: string;
-        surname?: string;
-        displayName?: string;
-        userPrincipalName: string;
-    };
-    id: string;
+export interface OidcProfile {
+    sub: string;
+    email?: string | undefined;
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    displayName?: string | undefined;
 }
 
-export async function buildThreatSeaAccessToken(
-    userObject: GenericOidcUserProfile,
-    isPrivileged: number,
-    tenantId = azureConfig.tenantId
-): Promise<string> {
-    // Extrahiere Felder!
-    const { email, firstname, lastname, displayName, providerId } = mapGenericProfile(userObject);
-
+export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promise<string> {
+    const email = userObject.email;
     if (!email) {
         throw new Error("No email found in user profile object.");
     }
+
+    const firstName = userObject.firstName ?? "";
+    const lastName = userObject.lastName ?? userObject.displayName ?? email;
 
     const user = await db.transaction(async (tx) => {
         const user = await tx.query.users.findFirst({ where: eq(users.email, email) });
@@ -43,8 +35,8 @@ export async function buildThreatSeaAccessToken(
             await tx
                 .insert(users)
                 .values({
-                    firstname,
-                    lastname,
+                    firstname: firstName,
+                    lastname: lastName,
                     email,
                 })
                 .returning()
@@ -58,13 +50,11 @@ export async function buildThreatSeaAccessToken(
     const threatseaAccessToken = jwt.sign(
         {
             userId: user.id,
-            providerId, // kann oid, id, sub je nach Provider sein!
-            tenantId,
-            email,
-            firstname,
-            lastname,
-            displayName,
-            isPrivileged,
+            oidcId: userObject.sub,
+            email: email,
+            firstname: firstName,
+            lastname: lastName,
+            displayName: userObject.displayName,
         },
         JWT_SECRET,
         { expiresIn: "7d" }
