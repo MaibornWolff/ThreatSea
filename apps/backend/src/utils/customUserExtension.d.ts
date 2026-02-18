@@ -3,4 +3,10 @@ declare namespace Express {
         id?: number;
         threatSeaToken?: string;
     }
+
+    interface Request {
+        user?: {
+            id: number;
+        };
+    }
 }

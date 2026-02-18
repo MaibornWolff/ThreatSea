@@ -2,8 +2,7 @@
   "signin": "Anmelden",
   "pw": "Passwort",
   "remember": "Eingeloggt bleiben",
-  "login": "Login",
-  "testUserPrivileged": "mit privilegiertem Benutzer",
-  "testUserUnprivileged": "mit nicht privilegiertem Benutzer",
+  "login": "mit OIDC",
+  "testUser": "mit Test Benutzer",
   "invalidtoken": "Token ist nicht valide"
 }

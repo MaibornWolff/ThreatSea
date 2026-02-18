@@ -68,19 +68,19 @@ const LoginPageBody = () => {
 
         const testUserLoginButtons = [
             <Button
-                key="test-user-privileged"
+                key="test-user"
                 component="a"
                 href={`${API_URI}/auth/login?testUser=0`}
                 data-testid="login-page_login-privileged"
                 sx={{ marginRight: 0, fontSize: 20 }}
             >
-                {t("testUserPrivileged")}
+                {t("testUser")}
             </Button>,
         ];
 
         const OIDCButtons = [
             <Button
-                key="ms-login"
+                key="login"
                 component="a"
                 href={`${API_URI}/auth/login`}
                 data-testid="SaveButton"
