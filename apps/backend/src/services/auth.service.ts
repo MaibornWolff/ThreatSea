@@ -38,7 +38,7 @@ export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promis
                 .values({
                     firstname: firstName,
                     lastname: lastName,
-                    email,
+                    email: email,
                 })
                 .returning()
         ).at(0);
