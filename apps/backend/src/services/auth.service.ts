@@ -7,6 +7,7 @@ import { JWT_SECRET } from "#config/config.js";
 import { db } from "#db/index.js";
 import { users } from "#db/schema.js";
 import { eq } from "drizzle-orm";
+import { UnauthorizedError } from "#errors/unauthorized.error.js";
 export interface OidcProfile {
     sub: string;
     email?: string | undefined;
@@ -18,7 +19,7 @@ export interface OidcProfile {
 export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promise<string> {
     const email = userObject.email;
     if (!email) {
-        throw new Error("No email found in user profile object.");
+        throw new UnauthorizedError("No email found in user profile object.");
     }
 
     const firstName = userObject.firstName ?? "";

@@ -1,7 +1,8 @@
-import * as client from "openid-client";
-import crypto from "crypto";
 import { oidcConfig } from "#config/config.js";
+import { UnauthorizedError } from "#errors/unauthorized.error.js";
 import { buildThreatSeaAccessToken, OidcProfile } from "#services/auth.service.js";
+import crypto from "crypto";
+import * as client from "openid-client";
 
 interface IdTokenClaims {
     sub: string;
@@ -56,9 +57,8 @@ export function buildLoginRedirectUrl(): string {
 export async function handleOidcCallback(callbackUrl: URL): Promise<string> {
     const state = callbackUrl.searchParams.get("state");
     if (!state || !pendingLogins.has(state)) {
-        throw new Error("Invalid or expired state parameter");
+        throw new UnauthorizedError("Invalid or expired state parameter");
     }
-
     const { nonce } = pendingLogins.get(state)!;
     pendingLogins.delete(state);
 
@@ -86,12 +86,12 @@ export function buildLogoutUrl(): string | null {
 function buildUserProfile(tokenSet: client.TokenEndpointResponse): OidcProfile {
     const idToken = tokenSet.id_token;
     if (!idToken) {
-        throw new Error("No ID token in response");
+        throw new UnauthorizedError("No ID token in response");
     }
 
     const parts = idToken.split(".");
     if (parts.length < 3) {
-        throw new Error("Invalid id_token format");
+        throw new UnauthorizedError("Invalid id_token format");
     }
 
     const payloadBase64 = parts[1] as string;
@@ -99,7 +99,7 @@ function buildUserProfile(tokenSet: client.TokenEndpointResponse): OidcProfile {
     const claims: IdTokenClaims = JSON.parse(payloadJson);
 
     if (!claims.sub) {
-        throw new Error("No 'sub' claim found in ID token");
+        throw new UnauthorizedError("No 'sub' claim found in ID token");
     }
 
     return {

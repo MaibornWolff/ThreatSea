@@ -1,3 +1,4 @@
+import { BadRequestError } from "#errors/bad-request.error.js";
 import { buildThreatSeaAccessToken } from "#services/auth.service.js";
 import { OidcProfile } from "#services/auth.service.js";
 
@@ -42,6 +43,10 @@ function tryParseInt(str: string, defaultValue = 0) {
 export function getFixedLoginToken(url: string): Promise<string> {
     const testUserId = tryParseInt(new URLSearchParams(url).get("/login?testUser")!);
     const profile = profiles[testUserId]!;
+
+    if (!profile) {
+        throw new BadRequestError(`Invalid test user ID: ${testUserId}`);
+    }
 
     return buildThreatSeaAccessToken(profile);
 }

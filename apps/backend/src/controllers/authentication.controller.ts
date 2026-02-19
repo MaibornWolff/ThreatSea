@@ -21,7 +21,7 @@ async function loadStrategy() {
     } else if (PASSPORT_STRATEGY === "fixed") {
         fixedService = await import("#services/fixedAuthentication.service.js");
     } else {
-        throw new Error("No known authentication strategy selected");
+        throw new Error("No known authentication strategy selected"); // UnexpectedError, created by error middleware
     }
 }
 
@@ -99,20 +99,27 @@ export async function authenticate(request: Request, response: Response): Promis
             return;
         }
 
+        // Is this Error necessary? The only way I can see, is when "oidc" strategy is selected and the import fails. How ever, in this case the loadStrategy() function woud fail earlier
         if (!oidcService) {
             throw new Error("OIDC service not initialized");
         }
+
         const redirectUrl = oidcService.buildLoginRedirectUrl();
         response.redirect(redirectUrl);
     } catch (err) {
-        Logger.error("Authentication error", err as string);
+        if (err instanceof Error) {
+            Logger.error("Authentication failed: " + err.message);
+        }
+        response.redirect(`${appOrigin}/login?failure`);
     }
 }
 
-export async function finalizeAuthentication(request: Request, response: Response): Promise<void> {
+export async function finalizeAuthentication(request: Request, response: Response, next: NextFunction): Promise<void> {
     try {
+        // Only occurs when "fixed" is selected and the User tries to call an oidc api http://localhost:8000/api/auth/redirect?code=fake&state=fake or similar
         if (!oidcService) {
-            throw new Error("OIDC service not initialized");
+            next(new Error("OIDC service not initialized"));
+            return;
         }
 
         const callbackUrl = new URL(request.originalUrl, `${request.protocol}://${request.get("host")}`);
@@ -126,8 +133,10 @@ export async function finalizeAuthentication(request: Request, response: Respons
 
         response.redirect(`${appOrigin}`);
     } catch (err) {
-        Logger.error("Authentication finalization failed", err as string);
-        response.redirect("/login?failure");
+        if (err instanceof Error) {
+            Logger.error("Authentication finalization failed: " + err.message);
+        }
+        response.redirect(`${appOrigin}/login?failure`);
     }
 }
 
