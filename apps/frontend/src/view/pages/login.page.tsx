@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate, type Location } from "react-router-dom";
 import { LoginAPI } from "../../api/login.api";
 import { API_URI } from "../../api/utils";
+import openIDLogo from "../../images/openid-logo.svg";
 import { ErrorActions } from "../../application/actions/error.actions";
 import { NavigationActions } from "../../application/actions/navigation.actions";
 import { ERR_MESS_SERVER_INTERNAL, ERR_TYPE_INTERNAL } from "../../application/reducers/error.reducer";
@@ -86,6 +87,12 @@ const LoginPageBody = () => {
                 data-testid="SaveButton"
                 sx={{ marginRight: 0, fontSize: 20 }}
             >
+                <Box
+                    component="img"
+                    sx={{ width: 25, height: 25, mr: 1 }}
+                    src={openIDLogo}
+                    data-testid="login-page_login-button"
+                ></Box>
                 {t("login")}
             </Button>,
         ];

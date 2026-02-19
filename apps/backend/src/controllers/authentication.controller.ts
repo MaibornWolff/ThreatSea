@@ -99,7 +99,6 @@ export async function authenticate(request: Request, response: Response): Promis
             return;
         }
 
-        // Is this Error necessary? The only way I can see, is when "oidc" strategy is selected and the import fails. How ever, in this case the loadStrategy() function woud fail earlier
         if (!oidcService) {
             throw new Error("OIDC service not initialized");
         }
@@ -114,11 +113,10 @@ export async function authenticate(request: Request, response: Response): Promis
     }
 }
 
-export async function finalizeAuthentication(request: Request, response: Response, next: NextFunction): Promise<void> {
+export async function finalizeAuthentication(request: Request, response: Response): Promise<void> {
     try {
-        // Only occurs when "fixed" is selected and the User tries to call an oidc api http://localhost:8000/api/auth/redirect?code=fake&state=fake or similar
         if (!oidcService) {
-            next(new Error("OIDC service not initialized"));
+            response.redirect(`${appOrigin}/login?failure`);
             return;
         }
 

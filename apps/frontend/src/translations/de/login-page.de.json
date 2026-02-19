@@ -2,7 +2,7 @@
   "signin": "Anmelden",
   "pw": "Passwort",
   "remember": "Eingeloggt bleiben",
-  "login": "mit OIDC",
+  "login": "Weiter mit OpenID",
   "testUser": "mit Test Benutzer",
   "invalidtoken": "Token ist nicht valide"
 }
