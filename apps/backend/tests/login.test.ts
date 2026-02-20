@@ -33,12 +33,21 @@ describe("login, logout and redirect", () => {
         expect(res.body.data.status.isLoggedIn).toBe(false);
     });
 
+    it("should reject invalid test user id", async () => {
+        const res = await request(app)
+            .get("/api/auth/login?testUser=99")
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(302);
+    });
+
     it("should get the authenticationMode", async () => {
         const res = await request(app)
             .get("/api/auth/authenticationMode")
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(200);
+        expect(res.body.authenticationMode).toBe("fixed");
     });
 
     it("should log out", async () => {
