@@ -43,7 +43,12 @@ import enMeasureDialog from "../translations/en/measure-dialog-page.en.json";
 import enCommon from "../translations/en/common.en.json";
 import enReport from "../translations/en/report.en.json";
 
-const cachedLang = localStorage.getItem("lang");
+const cachedLang =
+    typeof window !== "undefined" &&
+    typeof window.localStorage !== "undefined" &&
+    typeof window.localStorage.getItem === "function"
+        ? window.localStorage.getItem("lang")
+        : null;
 
 /**
  * Initialises the translation for english and german

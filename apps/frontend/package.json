@@ -17,7 +17,10 @@
     "test:e2e:ui": "playwright test --ui",
     "docs": "jsdoc -c jsdoc.conf.json",
     "dependency-check": "dependency-check --project \"ThreatSea Web App\" --scan . --out .",
-    "license-check": "license-checker --production --csv > licenses.csv"
+    "license-check": "license-checker --production --csv > licenses.csv",
+    "test": "vitest --run",
+    "test:watch": "vitest --watch",
+    "test:ci": "vitest run --coverage"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
@@ -61,13 +64,17 @@
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react-swc": "4.2.3",
+    "@vitest/coverage-v8": "4.0.17",
+    "@vitest/ui": "4.0.18",
     "dotenv": "17.3.1",
     "eslint": "9.39.3",
     "jsdoc": "4.0.5",
+    "jsdom": "28.1.0",
     "typescript": "5.9.3",
     "vite": "7.3.1",
     "vite-plugin-svgr": "4.5.0",
-    "vite-tsconfig-paths": "6.1.1"
+    "vite-tsconfig-paths": "6.1.1",
+    "vitest": "4.0.17"
   },
   "browserslist": {
     "production": [
