@@ -18,6 +18,10 @@ let oidcClientConfig: client.Configuration;
 const pendingLogins = new Map<string, { nonce: string }>();
 
 export async function initializeOidc(): Promise<void> {
+    if (!oidcConfig) {
+        throw new Error("OIDC config not available");
+    }
+
     const issuerUrl = new URL(oidcConfig.issuerUrl);
     const options: client.DiscoveryRequestOptions = {};
     if (issuerUrl.protocol === "http:") {
@@ -34,6 +38,10 @@ export async function initializeOidc(): Promise<void> {
 }
 
 export function buildLoginRedirectUrl(): string {
+    if (!oidcConfig) {
+        throw new Error("OIDC config not available");
+    }
+
     const state = crypto.randomUUID();
     const nonce = crypto.randomUUID();
 

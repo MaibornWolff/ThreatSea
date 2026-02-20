@@ -17,13 +17,18 @@ export const JWT_SECRET = getEnvironmentVariable("JWT_SECRET") as Secret;
 
 export const PASSPORT_STRATEGY = process.env["PASSPORT_STRATEGY"];
 
-export const oidcConfig = {
-    clientId: getEnvironmentVariable("OIDC_CLIENT_ID"),
-    clientSecret: getEnvironmentVariable("OIDC_CLIENT_SECRET"),
-    issuerUrl: getEnvironmentVariable("OIDC_ISSUER_URL"),
-    callbackURL: `${getEnvironmentVariable("ORIGIN_BACKEND")}/api/auth/redirect`,
-    scope: "openid profile email",
-};
+// getEnvironmentVariable -> variable needs to be set, in this case process.env suits best
+// But logically best would be to ask if PASSPORT_STRATEGY=oidc and then use getEnvironmentVariable
+export const oidcConfig =
+    PASSPORT_STRATEGY === "oidc"
+        ? {
+              clientId: getEnvironmentVariable("OIDC_CLIENT_ID"),
+              clientSecret: getEnvironmentVariable("OIDC_CLIENT_SECRET"),
+              issuerUrl: getEnvironmentVariable("OIDC_ISSUER_URL"),
+              callbackURL: `${getEnvironmentVariable("ORIGIN_BACKEND")}/api/auth/redirect`,
+              scope: "openid profile email",
+          }
+        : null;
 
 export const originConfig = {
     app: getEnvironmentVariable("ORIGIN_APP"),
