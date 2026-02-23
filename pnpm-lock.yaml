@@ -208,8 +208,8 @@ importers:
         specifier: 10.2.0
         version: 10.2.0
       markdown-to-jsx:
-        specifier: 9.7.5
-        version: 9.7.5(react@19.2.4)
+        specifier: 9.7.6
+        version: 9.7.6(react@19.2.4)
       react:
         specifier: 19.2.4
         version: 19.2.4
@@ -3387,8 +3387,8 @@ packages:
     resolution: {integrity: sha512-BuU2qnTti9YKgK5N+IeMubp14ZUKUUw7yeJbkjtosvHiP0AZ5c8IAgEMk79D0eC8F23r4Ac/q8cAIFdm2FtyoA==}
     hasBin: true
 
-  markdown-to-jsx@9.7.5:
-    resolution: {integrity: sha512-Cof4mo0UvadUgAilFCxRwT1yPWUT3mxvHn67C9Kiry80rqGnOwdKGXllM0GQebGAtKhc4V/zJQUKXDqf/OaxQw==}
+  markdown-to-jsx@9.7.6:
+    resolution: {integrity: sha512-oPckbBhWv/d2HmYzSv68g2UBTONmrFYlqUd+juolxTplJImhDEKFgAEcnxSTeZ1HISKzKxm+mVeUYP7OUhglJQ==}
     engines: {node: '>= 18'}
     peerDependencies:
       react: '>= 16.0.0'
@@ -7864,7 +7864,7 @@ snapshots:
       punycode.js: 2.3.1
       uc.micro: 2.1.0
 
-  markdown-to-jsx@9.7.5(react@19.2.4):
+  markdown-to-jsx@9.7.6(react@19.2.4):
     optionalDependencies:
       react: 19.2.4
 
