@@ -326,8 +326,8 @@ importers:
         specifier: 10.1.8
         version: 10.1.8(eslint@9.39.3)
       eslint-plugin-jsdoc:
-        specifier: 62.7.0
-        version: 62.7.0(eslint@9.39.3)
+        specifier: 62.7.1
+        version: 62.7.1(eslint@9.39.3)
       eslint-plugin-react:
         specifier: 7.37.5
         version: 7.37.5(eslint@9.39.3)
@@ -2598,8 +2598,8 @@ packages:
     peerDependencies:
       eslint: '>=7.0.0'
 
-  eslint-plugin-jsdoc@62.7.0:
-    resolution: {integrity: sha512-jootujJOIGMkCLN+/WgDFKtaclCt2MEEy9cZ1RyK19Az1JvVI3awbeMXNlJ6y4h8RWIJpcXqmxsu4t9NThYbNw==}
+  eslint-plugin-jsdoc@62.7.1:
+    resolution: {integrity: sha512-4Zvx99Q7d1uggYBUX/AIjvoyqXhluGbbKrRmG8SQTLprPFg6fa293tVJH1o1GQwNe3lUydd8ZHzn37OaSncgSQ==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
     peerDependencies:
       eslint: ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0
@@ -4916,7 +4916,7 @@ snapshots:
   '@es-joy/jsdoccomment@0.84.0':
     dependencies:
       '@types/estree': 1.0.8
-      '@typescript-eslint/types': 8.56.0
+      '@typescript-eslint/types': 8.56.1
       comment-parser: 1.4.5
       esquery: 1.7.0
       jsdoc-type-pratt-parser: 7.1.1
@@ -5922,7 +5922,7 @@ snapshots:
   '@typescript-eslint/project-service@8.56.0(typescript@5.9.3)':
     dependencies:
       '@typescript-eslint/tsconfig-utils': 8.56.0(typescript@5.9.3)
-      '@typescript-eslint/types': 8.56.0
+      '@typescript-eslint/types': 8.56.1
       debug: 4.4.3
       typescript: 5.9.3
     transitivePeerDependencies:
@@ -6949,7 +6949,7 @@ snapshots:
     dependencies:
       eslint: 9.39.3
 
-  eslint-plugin-jsdoc@62.7.0(eslint@9.39.3):
+  eslint-plugin-jsdoc@62.7.1(eslint@9.39.3):
     dependencies:
       '@es-joy/jsdoccomment': 0.84.0
       '@es-joy/resolve.exports': 1.2.0
