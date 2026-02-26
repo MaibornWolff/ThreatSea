@@ -26,6 +26,11 @@
   "engines": {
     "node": ">=24"
   },
+  "pnpm": {
+    "overrides": {
+      "vite": "8.0.0-beta.16"
+    }
+  },
   "lint-staged": {
     "*.{cjs,js,jsx,mjs,ts,tsx}": [
       "prettier --check"
