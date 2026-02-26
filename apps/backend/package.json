@@ -58,7 +58,7 @@
     "@types/passport": "1.0.17",
     "@types/passport-microsoft": "2.1.1",
     "@types/pg": "8.16.0",
-    "@types/supertest": "6.0.3",
+    "@types/supertest": "7.2.0",
     "@vitest/coverage-v8": "4.0.18",
     "drizzle-kit": "0.31.9",
     "eslint": "9.39.3",
