@@ -41,7 +41,7 @@
     "passport": "0.7.0",
     "passport-custom": "1.1.1",
     "passport-microsoft": "2.1.0",
-    "pg": "8.18.0",
+    "pg": "8.19.0",
     "reflect-metadata": "0.2.2",
     "socket.io": "4.8.3"
   },
