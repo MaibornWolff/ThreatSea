@@ -9,7 +9,7 @@ This guide explains how to setup ThreaSea to use your preferred OpenID Connect P
 
 ## Configure .env file
 
-- Set PASSPORT_Strategy to "oidc"
+- Set AUTH_METHOD to "oidc"
 - Set OIDC_ISSUER_URL to the URL given by your provider
 - Set OIDC_CLIENT_ID to the id given by your provider
 - Set OIDC_CLIENT_SECRET to the secret given by your provider
@@ -68,7 +68,7 @@ Set the .env variables as seen below, change the realm and client name if you us
 
 ```
 ORIGIN_BACKEND=http://localhost:8000
-PASSPORT_STRATEGY=oidc
+AUTH_METHOD=oidc
 OIDC_ISSUER_URL=http://localhost:9090/realms/ThreatSea-Realm
 OIDC_CLIENT_ID=threatsea-client
 OIDC_CLIENT_SECRET=dFeUP5wA5j0sztucuzhxGToPIq0eYrx2

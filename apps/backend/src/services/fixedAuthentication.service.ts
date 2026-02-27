@@ -10,8 +10,8 @@ const profiles: OidcProfile[] = [
         sub: "testid",
     },
     {
-        firstName: "testIHave",
-        lastName: "testNoPrivileges",
+        firstName: "E2E",
+        lastName: "Testing",
         email: "test2@test.test",
         sub: "testid2",
     },
@@ -26,12 +26,6 @@ const profiles: OidcProfile[] = [
         lastName: "Testing",
         email: "test4@test.test",
         sub: "testid4",
-    },
-    {
-        firstName: "E2E",
-        lastName: "Testing",
-        email: "test5@test.test",
-        sub: "testid5",
     },
 ];
 

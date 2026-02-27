@@ -15,18 +15,17 @@ function getEnvironmentVariable(key: string): string {
 
 export const JWT_SECRET = getEnvironmentVariable("JWT_SECRET") as Secret;
 
-export const PASSPORT_STRATEGY = process.env["PASSPORT_STRATEGY"];
+export const AUTH_METHOD = process.env["AUTH_METHOD"];
 
-// getEnvironmentVariable -> variable needs to be set, in this case process.env suits best
-// But logically best would be to ask if PASSPORT_STRATEGY=oidc and then use getEnvironmentVariable
 export const oidcConfig =
-    PASSPORT_STRATEGY === "oidc"
+    AUTH_METHOD === "oidc"
         ? {
               clientId: getEnvironmentVariable("OIDC_CLIENT_ID"),
               clientSecret: getEnvironmentVariable("OIDC_CLIENT_SECRET"),
               issuerUrl: getEnvironmentVariable("OIDC_ISSUER_URL"),
               callbackURL: `${getEnvironmentVariable("ORIGIN_BACKEND")}/api/auth/redirect`,
               scope: "openid profile email",
+              allowHttp: process.env["OIDC_ALLOW_HTTP"] === "true",
           }
         : null;
 

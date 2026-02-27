@@ -8,6 +8,7 @@ import { db } from "#db/index.js";
 import { users } from "#db/schema.js";
 import { eq } from "drizzle-orm";
 import { UnauthorizedError } from "#errors/unauthorized.error.js";
+
 export interface OidcProfile {
     sub: string;
     email?: string | undefined;

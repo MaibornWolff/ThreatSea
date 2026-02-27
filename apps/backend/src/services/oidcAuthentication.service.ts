@@ -24,7 +24,7 @@ export async function initializeOidc(): Promise<void> {
 
     const issuerUrl = new URL(oidcConfig.issuerUrl);
     const options: client.DiscoveryRequestOptions = {};
-    if (issuerUrl.protocol === "http:") {
+    if (oidcConfig.allowHttp) {
         options.execute = [client.allowInsecureRequests];
     }
 
