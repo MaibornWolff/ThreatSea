@@ -1,0 +1,107 @@
+name: Release
+
+on:
+  workflow_call:
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'MaibornWolff' && github.ref_type == 'branch' && (github.ref_name == 'main' || github.ref_name == 'next')
+    permissions:
+      contents: write
+      packages: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Repository
+        uses: ./.github/actions/repository-setup
+
+      - name: Create Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: release
+        run: |
+          pnpm dlx semantic-release
+
+      - name: Login to Docker Hub
+        if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'main'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to GitHub Container Registry
+        if: steps.release.outputs.new_release_published == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up QEMU
+        if: steps.release.outputs.new_release_published == 'true'
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        if: steps.release.outputs.new_release_published == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract metadata for next branch (prerelease)
+        if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'next'
+        id: meta-next
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ github.repository_owner }}/threatsea
+          tags: |
+            type=semver,pattern={{version}},value=${{ steps.release.outputs.new_release_version }}
+            type=ref,event=branch
+            type=sha
+
+      - name: Build and push for next branch (prerelease)
+        if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'next'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta-next.outputs.tags }}
+          labels: ${{ steps.meta-next.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Extract metadata for main branch
+        if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'main'
+        id: meta-main
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ github.repository_owner }}/threatsea
+            ghcr.io/${{ github.repository_owner }}/threatsea
+          tags: |
+            type=semver,pattern={{version}},value=${{ steps.release.outputs.new_release_version }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ steps.release.outputs.new_release_version }}
+            type=semver,pattern={{major}},value=${{ steps.release.outputs.new_release_version }}
+            type=raw,value=latest
+            type=ref,event=branch
+            type=sha
+
+      - name: Build and push for main branch
+        if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'main'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta-main.outputs.tags }}
+          labels: ${{ steps.meta-main.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
