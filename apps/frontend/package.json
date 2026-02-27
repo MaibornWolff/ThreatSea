@@ -12,6 +12,10 @@
     "type-check": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "test:unit:coverage": "vitest run --coverage",
+    "test:unit:ci": "vitest run --reporter=default --reporter=junit --outputFile.junit=./junit.xml --coverage",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:ui": "playwright test --ui",
@@ -61,11 +65,14 @@
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "6.0.1",
+    "@vitest/coverage-v8": "4.1.4",
     "dotenv": "17.4.2",
     "eslint": "9.39.4",
     "jsdoc": "4.0.5",
+    "jsdom": "29.0.2",
     "vite": "8.0.8",
-    "vite-plugin-svgr": "5.2.0"
+    "vite-plugin-svgr": "5.2.0",
+    "vitest": "4.1.4"
   },
   "browserslist": {
     "production": [
