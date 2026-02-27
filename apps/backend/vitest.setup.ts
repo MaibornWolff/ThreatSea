@@ -13,12 +13,11 @@ beforeAll(async () => {
 
     jwt.verify.mockImplementation(() => ({
         userId: testUserId,
-        azureId: "fakeAzureId",
-        tenantId: "fakeTenantId",
+        oidcId: "fakeOidcId",
         email: "fake@example.com",
         firstname: "fake",
         lastname: "user",
-        isPrivileged: 1,
+        displayName: "fake user",
         iat: iat,
         exp: exp,
     }));

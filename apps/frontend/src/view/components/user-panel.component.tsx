@@ -13,7 +13,25 @@ import { UserActions } from "../../application/actions/user.actions";
 
 const UserPanel = () => {
     const dispatch = useAppDispatch();
-    const { firstname, lastname } = useAppSelector((state) => state.user);
+    const { firstname, lastname, displayName } = useAppSelector((state) => state.user);
+
+    const hasFirstname = Boolean(firstname && firstname.trim());
+    const hasLastname = Boolean(lastname && lastname.trim());
+    const hasDisplayName = Boolean(displayName && displayName.trim());
+
+    let avatarContent = "";
+    let menuName = "";
+
+    if (hasFirstname && hasLastname) {
+        avatarContent = firstname.at(0) ?? "" + lastname.at(0);
+        menuName = firstname + " " + lastname;
+    } else if (hasDisplayName) {
+        avatarContent = displayName.at(0) ?? "";
+        menuName = displayName;
+    } else if (hasLastname) {
+        avatarContent = lastname.at(0) ?? "";
+        menuName = lastname;
+    }
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -57,8 +75,7 @@ const UserPanel = () => {
                                 color: "primary.main",
                             }}
                         >
-                            {firstname.at(0)}
-                            {lastname.at(0)}
+                            {avatarContent}
                         </Avatar>
                     </IconButton>
                 </Tooltip>
@@ -99,9 +116,7 @@ const UserPanel = () => {
                 transformOrigin={{ horizontal: "right", vertical: "top" }}
                 anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
             >
-                <MenuItem data-testid="account-menu_username">
-                    {firstname} {lastname}
-                </MenuItem>
+                <MenuItem data-testid="account-menu_username">{menuName}</MenuItem>
                 <Divider />
                 <MenuItem title="Logout" onClick={handleLogout} data-testid="account-menu_logout-button">
                     <ListItemIcon>

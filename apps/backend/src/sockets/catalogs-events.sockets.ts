@@ -18,11 +18,7 @@ export function initCatalogsEvents(socket: Socket, user: SocketUser) {
     socket.join("catalogspage");
 
     socket.on("create_catalog", (catalog: CreateCatalog) => {
-        const userData = userStore.getUserData(user.id);
-
-        if (userData?.isPrivileged) {
-            socket.to("catalogspage").emit("set_catalog", catalog);
-        }
+        socket.to("catalogspage").emit("set_catalog", catalog);
     });
 
     /**

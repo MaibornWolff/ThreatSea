@@ -70,7 +70,7 @@ jobs:
     env:
       JWT_SECRET: test-secret
       EXPRESS_SESSION_SECRET: test-session-secret
-      PASSPORT_STRATEGY: fixed
+      AUTH_METHOD: fixed
       ORIGIN_APP: http://localhost:3000
       ORIGIN_BACKEND: http://localhost:8000
       DATABASE_USER: user
