@@ -85,20 +85,20 @@ export async function getAuthStatus(request: Request, response: Response): Promi
 }
 
 export async function authenticate(request: Request, response: Response): Promise<void> {
-    if (AUTH_METHOD === "fixed" && fixedService) {
-        const threatSeaToken = await fixedService.getFixedLoginToken(request.url);
-
-        response.cookie("accessToken", threatSeaToken, {
-            httpOnly: true,
-            secure: jwtSecure,
-            sameSite: "strict",
-        });
-
-        response.redirect(`${appOrigin}`);
-        return;
-    }
-
     try {
+        if (AUTH_METHOD === "fixed" && fixedService) {
+            const threatSeaToken = await fixedService.getFixedLoginToken(request.url);
+
+            response.cookie("accessToken", threatSeaToken, {
+                httpOnly: true,
+                secure: jwtSecure,
+                sameSite: "strict",
+            });
+
+            response.redirect(`${appOrigin}`);
+            return;
+        }
+
         if (!oidcService) {
             throw new Error("OIDC service not initialized");
         }
