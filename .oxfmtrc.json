@@ -1,0 +1,23 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "useTabs": false,
+  "semi": true,
+  "singleQuote": false,
+  "endOfLine": "lf",
+  "sortPackageJson": true,
+  "trailingComma": "es5",
+  "ignorePatterns": [
+    ".pnpm-store",
+    "node_modules",
+    "pnpm-lock.yaml",
+    ".tmp",
+    "tmp",
+    "coverage",
+    "playwright-report",
+    "test-results",
+    ".turbo",
+    ".vite",
+    "build",
+    "dist"
+  ]
+}
