@@ -49,7 +49,7 @@ Notes for a monorepo:
 - Turborepo:
   - Used to orchestrate tasks (build, test, lint) across apps/packages.
 - Other tools:
-  - As specified by each app (e.g., ESLint, Prettier, TypeScript, etc.).
+  - As specified by each app (e.g., ESLint, Oxfmt, TypeScript, etc.).
 - Editors/IDEs:
   - Any you prefer, but please keep project-specific editor configs in place if present.
 - How to run tasks:

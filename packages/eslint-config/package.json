@@ -1,8 +1,8 @@
 {
   "name": "@repo/eslint-config",
   "version": "0.0.0",
-  "type": "module",
   "private": true,
+  "type": "module",
   "exports": {
     "./base": "./base.js",
     "./node-js": "./node.js",
@@ -25,11 +25,8 @@
   },
   "lint-staged": {
     "*.{cjs,js,jsx,mjs,ts,tsx}": [
-      "eslint",
-      "prettier --check"
+      "eslint"
     ],
-    "*.{html,json,md,yaml,yml,xml}": [
-      "prettier --check"
-    ]
+    "*": "oxfmt --no-error-on-unmatched-pattern"
   }
 }

@@ -5,6 +5,9 @@
   "license": "ISC",
   "author": "",
   "type": "module",
+  "imports": {
+    "#*": "./src/*"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -74,6 +77,12 @@
     "vite-plugin-svgr": "5.2.0",
     "vitest": "4.1.4"
   },
+  "lint-staged": {
+    "*.{cjs,js,jsx,mjs,ts,tsx}": [
+      "eslint"
+    ],
+    "*": "oxfmt --check --no-error-on-unmatched-pattern"
+  },
   "browserslist": {
     "production": [
       ">0.2%",
@@ -85,18 +94,6 @@
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
-    ]
-  },
-  "imports": {
-    "#*": "./src/*"
-  },
-  "lint-staged": {
-    "*.{cjs,js,jsx,mjs,ts,tsx}": [
-      "eslint",
-      "prettier --check"
-    ],
-    "*.{html,json,md,yaml,yml,xml}": [
-      "prettier --check"
     ]
   }
 }

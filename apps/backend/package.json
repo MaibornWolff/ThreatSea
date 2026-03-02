@@ -6,6 +6,9 @@
   "author": "",
   "type": "module",
   "main": "index.js",
+  "imports": {
+    "#*": "./src/*"
+  },
   "scripts": {
     "dev": "tsx --watch --env-file .env src/index.ts",
     "start": "node --env-file .env dist/src/index.js",
@@ -65,16 +68,10 @@
     "tsx": "4.21.0",
     "vitest": "4.1.4"
   },
-  "imports": {
-    "#*": "./src/*"
-  },
   "lint-staged": {
     "*.{cjs,js,jsx,mjs,ts,tsx}": [
-      "eslint",
-      "prettier --check"
+      "eslint"
     ],
-    "*.{html,json,md,yaml,yml,xml}": [
-      "prettier --check"
-    ]
+    "*": "oxfmt --check --no-error-on-unmatched-pattern"
   }
 }

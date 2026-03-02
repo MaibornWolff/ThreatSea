@@ -7,8 +7,7 @@
 .husky
 .node-version
 .pnpm-store
-.prettierignore
-.prettierrc
+.oxfmtrc.json
 .vscode
 CODE_OF_CONDUCT.md
 CONTRIBUTING.md
