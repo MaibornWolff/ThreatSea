@@ -31,7 +31,7 @@ services:
     environment:
       JWT_SECRET: somerandomstringtobeusedasJWTsecret
       EXPRESS_SESSION_SECRET: someRandomExpressSessionSecret
-      PASSPORT_STRATEGY: fixed
+      AUTH_METHOD: fixed
       ORIGIN_APP: http://127.0.0.1:8000
       ORIGIN_BACKEND: http://127.0.0.1:8000
       LOG_LEVEL: 0

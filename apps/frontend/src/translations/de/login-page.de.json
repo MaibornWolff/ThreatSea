@@ -2,8 +2,7 @@
   "signin": "Anmelden",
   "pw": "Passwort",
   "remember": "Eingeloggt bleiben",
-  "login": "mit Microsoft",
-  "testUserPrivileged": "mit privilegiertem Benutzer",
-  "testUserUnprivileged": "mit nicht privilegiertem Benutzer",
+  "login": "Weiter mit OpenID",
+  "testUser": "mit Test Benutzer",
   "invalidtoken": "Token ist nicht valide"
 }

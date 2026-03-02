@@ -20,7 +20,6 @@ import { initMemberEvents } from "#sockets/member-events.sockets.js";
 export interface SocketUser {
     id: number;
     name: string;
-    isPrivileged: boolean;
     projectId?: number;
     catalogId?: number;
 }
@@ -41,7 +40,6 @@ export function setupSocketEvents(socket: Socket) {
         const user: SocketUser = {
             id: decodedToken["userId"] as number,
             name: `${decodedToken["firstname"]} ${decodedToken["lastname"]}`,
-            isPrivileged: decodedToken["isPrivileged"],
         };
 
         initUserEvents(socket, user);

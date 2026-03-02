@@ -18,7 +18,6 @@ import ProjectDialogPage from "./project-dialog.page";
 import { ImportIconButton } from "../components/import-icon-button.component";
 import { ProjectsActions } from "../../application/actions/projects.actions";
 import { useProjects } from "../../application/hooks/use-projects.hook";
-import { useUser } from "../../application/hooks/use-user.hook";
 import { PageHeading } from "#view/components/page-heading.component.tsx";
 import type { SortDirection } from "#application/actions/list.actions.ts";
 import { useAppDispatch } from "#application/hooks/use-app-redux.hook.ts";
@@ -42,8 +41,6 @@ export const ProjectsPage = CreatePage(HeaderNavigation, () => {
     const dispatch = useAppDispatch();
 
     const { openConfirm } = useConfirm<ExtendedProject>();
-
-    const { isPrivileged } = useUser();
 
     /**
      * Layout effect to change the header bar
@@ -145,25 +142,17 @@ export const ProjectsPage = CreatePage(HeaderNavigation, () => {
                 >
                     <Box sx={{ display: "flex", alignItems: "center" }}>
                         <SearchField data-testid="projects-page_search-field" onChange={onChangeSearchValue} />
-                        {isPrivileged && (
-                            <IconButton
-                                onClick={onClickAddProject}
-                                sx={{
-                                    ml: 1,
-                                }}
-                                data-testid="projects-page_add-project-button"
-                                title={t("addProjectBtn")}
-                            >
-                                <Add sx={{ fontSize: 18 }} />
-                            </IconButton>
-                        )}
-                        {isPrivileged && (
-                            <ImportIconButton
-                                id="import-data"
-                                tooltipTitle={t("importProject")}
-                                onChange={handleImport}
-                            />
-                        )}
+                        <IconButton
+                            onClick={onClickAddProject}
+                            sx={{
+                                ml: 1,
+                            }}
+                            data-testid="projects-page_add-project-button"
+                            title={t("addProjectBtn")}
+                        >
+                            <Add sx={{ fontSize: 18 }} />
+                        </IconButton>
+                        <ImportIconButton id="import-data" tooltipTitle={t("importProject")} onChange={handleImport} />
                     </Box>
                     <Box
                         sx={{

@@ -7,10 +7,10 @@ import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate, type Location } from "react-router-dom";
 import { LoginAPI } from "../../api/login.api";
 import { API_URI } from "../../api/utils";
+import openIDLogo from "../../images/openid-logo.svg";
 import { ErrorActions } from "../../application/actions/error.actions";
 import { NavigationActions } from "../../application/actions/navigation.actions";
 import { ERR_MESS_SERVER_INTERNAL, ERR_TYPE_INTERNAL } from "../../application/reducers/error.reducer";
-import msLogo from "../../images/msLogo.png";
 import { Button } from "../components/button.component";
 import { Page } from "../components/page.component";
 import { CreatePage, HeaderNavigation } from "../components/with-menu.component";
@@ -69,41 +69,28 @@ const LoginPageBody = () => {
 
         const testUserLoginButtons = [
             <Button
-                key="test-user-privileged"
+                key="test-user"
                 component="a"
                 href={`${API_URI}/auth/login?testUser=0`}
                 data-testid="login-page_login-privileged"
                 sx={{ marginRight: 0, fontSize: 20 }}
             >
-                {t("testUserPrivileged")}
+                {t("testUser")}
             </Button>,
-            <br key="test-user-login-break" />,
-            <Button
-                key="test-user-unprivileged"
-                component="a"
-                href={`${API_URI}/auth/login?testUser=1`}
-                data-testid="login-page_login-unprivileged"
-                sx={{ marginRight: 0, fontSize: 20 }}
-            >
-                {t("testUserUnprivileged")}
-            </Button>,
-            <br key="test-user-login-trailing-break" />,
         ];
 
-        const MSLoginButtons = [
+        const OIDCButtons = [
             <Button
-                key="ms-login"
+                key="login"
                 component="a"
                 href={`${API_URI}/auth/login`}
-                // @ts-expect-error TODO: Should this Button not be displayed? If so, we should move display={"none"} to the sx prop, since display is not a prop of Button and it is therefore currently being displayed.
-                display={"none"}
                 data-testid="SaveButton"
                 sx={{ marginRight: 0, fontSize: 20 }}
             >
                 <Box
                     component="img"
-                    sx={{ width: 32, height: 32, mr: 1 }}
-                    src={msLogo}
+                    sx={{ width: 25, height: 25, mr: 1 }}
+                    src={openIDLogo}
                     data-testid="login-page_login-button"
                 ></Box>
                 {t("login")}
@@ -117,8 +104,8 @@ const LoginPageBody = () => {
         and should not normally be done.
          */
         LoginAPI.getAuthenticationMode().then((authenticationMode) => {
-            if (authenticationMode === "azure") {
-                setButtons(MSLoginButtons);
+            if (authenticationMode === "oidc") {
+                setButtons(OIDCButtons);
             } else {
                 setButtons(testUserLoginButtons);
             }

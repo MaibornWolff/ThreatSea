@@ -4,7 +4,8 @@ nav:
   - Home: README.md
   - User Manual: User Manual.md
   - Technical Documentation:
-      - Architectural Decision Record: Technical Documentation\Architectural Decision Record.md
+      - Architectural Decision Record: Technical Documentation/Architectural Decision Record.md
+      - OpenID Connect Setup: Technical Documentation/OpenID Connect Setup.md
   - Developer Setup: Developer Setup.md
 theme:
   name: material

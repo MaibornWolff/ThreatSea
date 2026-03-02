@@ -15,15 +15,19 @@ function getEnvironmentVariable(key: string): string {
 
 export const JWT_SECRET = getEnvironmentVariable("JWT_SECRET") as Secret;
 
-export const PASSPORT_STRATEGY = process.env["PASSPORT_STRATEGY"] ?? "azure";
+export const AUTH_METHOD = process.env["AUTH_METHOD"];
 
-// Config for authentication with microsoft.
-export const azureConfig = {
-    clientId: process.env["APP_REGISTRATION_CLIENT_ID"],
-    tenantId: process.env["AZURE_TENANT_ID"],
-    clientSecret: process.env["APP_REGISTRATION_CLIENT_SECRET"],
-    privilegedGroupId: process.env["THREATSEA_PRIVILEGED_GROUP_ID"],
-};
+export const oidcConfig =
+    AUTH_METHOD === "oidc"
+        ? {
+              clientId: getEnvironmentVariable("OIDC_CLIENT_ID"),
+              clientSecret: getEnvironmentVariable("OIDC_CLIENT_SECRET"),
+              issuerUrl: getEnvironmentVariable("OIDC_ISSUER_URL"),
+              callbackURL: `${getEnvironmentVariable("ORIGIN_BACKEND")}/api/auth/redirect`,
+              scope: "openid profile email",
+              allowHttp: process.env["OIDC_ALLOW_HTTP"] === "true",
+          }
+        : null;
 
 export const originConfig = {
     app: getEnvironmentVariable("ORIGIN_APP"),
@@ -77,7 +81,7 @@ export const sessionConfig: SessionOptions = {
         secure: true,
         path: "/",
         httpOnly: true,
-        sameSite: "strict",
+        sameSite: "lax",
         maxAge: 43200000,
     },
     secret: getEnvironmentVariable("EXPRESS_SESSION_SECRET"),

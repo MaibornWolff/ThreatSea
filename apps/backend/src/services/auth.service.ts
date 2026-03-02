@@ -3,36 +3,28 @@
  */
 
 import jwt from "jsonwebtoken";
-import { azureConfig, JWT_SECRET } from "#config/config.js";
+import { JWT_SECRET } from "#config/config.js";
 import { db } from "#db/index.js";
 import { users } from "#db/schema.js";
 import { eq } from "drizzle-orm";
+import { UnauthorizedError } from "#errors/unauthorized.error.js";
 
-export interface AzureProfile {
-    _json: {
-        givenName?: string;
-        surname?: string;
-        displayName?: string;
-        userPrincipalName: string;
-    };
-    id: string;
+export interface OidcProfile {
+    sub: string;
+    email?: string | undefined;
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    displayName?: string | undefined;
 }
 
-const tenantId = azureConfig.tenantId;
-
-export async function buildThreatSeaAccessToken(userObject: AzureProfile, isPrivileged: number): Promise<string> {
-    // UPN is mandatory in AD, whereas the other attributes are not
-    const email = userObject._json.userPrincipalName;
-    let firstName = "";
-    let lastname;
-    if (userObject._json.givenName && userObject._json.surname) {
-        firstName = userObject._json.givenName;
-        lastname = userObject._json.surname;
-    } else if (userObject._json.displayName) {
-        lastname = userObject._json.displayName;
-    } else {
-        lastname = email;
+export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promise<string> {
+    const email = userObject.email;
+    if (!email) {
+        throw new UnauthorizedError("No email found in user profile object.");
     }
+
+    const firstName = userObject.firstName ?? "";
+    const lastName = userObject.lastName ?? userObject.displayName ?? email;
 
     const user = await db.transaction(async (tx) => {
         const user = await tx.query.users.findFirst({ where: eq(users.email, email) });
@@ -46,7 +38,7 @@ export async function buildThreatSeaAccessToken(userObject: AzureProfile, isPriv
                 .insert(users)
                 .values({
                     firstname: firstName,
-                    lastname: lastname,
+                    lastname: lastName,
                     email: email,
                 })
                 .returning()
@@ -60,17 +52,14 @@ export async function buildThreatSeaAccessToken(userObject: AzureProfile, isPriv
     const threatseaAccessToken = jwt.sign(
         {
             userId: user.id,
-            azureId: userObject.id,
-            tenantId,
+            oidcId: userObject.sub,
             email: email,
             firstname: firstName,
-            lastname: lastname,
-            isPrivileged,
+            lastname: lastName,
+            displayName: userObject.displayName,
         },
         JWT_SECRET,
-        {
-            expiresIn: "7d",
-        }
+        { expiresIn: "7d" }
     );
 
     return threatseaAccessToken;

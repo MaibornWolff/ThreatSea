@@ -9,22 +9,6 @@ import { UnauthorizedError } from "#errors/unauthorized.error.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
 
 /**
- * Middleware function that checks if the user is privileged.
- *
- * @param request - The HTTP request.
- * @param _response - The HTTP response.
- * @param next - The next middleware function.
- */
-export function CheckPrivilegesHandler(request: Request<void>, _response: Response, next: NextFunction) {
-    if (request.user?.isPrivileged !== 1) {
-        next(new ForbiddenError("User is not authorized to perform this action"));
-        return;
-    }
-
-    next();
-}
-
-/**
  * Middleware function that checks if the user has the required role on a catalog.
  *
  * @param requiredRole - The role that the user must have to perform the action.

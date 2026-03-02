@@ -31,7 +31,6 @@ import { SearchField } from "../components/search-field.component";
 import { ToggleButtons } from "../components/toggle-buttons.component";
 import { CreatePage, HeaderNavigation } from "../components/with-menu.component";
 import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
-import { useUser } from "../../application/hooks/use-user.hook";
 import CatalogDialogPage from "./catalog-dialog.page";
 
 interface CatalogListItemProps {
@@ -57,8 +56,6 @@ const CatalogsPageBody = () => {
 
     const { setSortDirection, setSearchValue, setSortBy, isPending, sortDirection, sortBy, catalogs } =
         useCatalogsList();
-
-    const { isPrivileged } = useUser();
 
     const { deleteCatalog } = useCatalogs();
 
@@ -184,23 +181,21 @@ const CatalogsPageBody = () => {
                 >
                     <Box sx={{ display: "flex", alignItems: "center" }}>
                         <SearchField onChange={onChangeSearchValue} />
-                        {isPrivileged && (
-                            <IconButton
-                                onClick={onClickAddCatalog}
-                                sx={{
-                                    ml: 1,
-                                    "&:hover": {
-                                        color: "secondary.main",
-                                        bgcolor: "background.paper",
-                                    },
-                                    color: "text.primary",
-                                }}
-                            >
-                                <Tooltip title={t("addCatalogBtn")} data-testid="catalogs-page_add-catalog-button">
-                                    <Add sx={{ fontSize: 18 }} />
-                                </Tooltip>
-                            </IconButton>
-                        )}
+                        <IconButton
+                            onClick={onClickAddCatalog}
+                            sx={{
+                                ml: 1,
+                                "&:hover": {
+                                    color: "secondary.main",
+                                    bgcolor: "background.paper",
+                                },
+                                color: "text.primary",
+                            }}
+                        >
+                            <Tooltip title={t("addCatalogBtn")} data-testid="catalogs-page_add-catalog-button">
+                                <Add sx={{ fontSize: 18 }} />
+                            </Tooltip>
+                        </IconButton>
                     </Box>
                     <Box
                         sx={{

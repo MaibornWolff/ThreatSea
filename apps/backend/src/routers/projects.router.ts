@@ -15,7 +15,7 @@ import {
     updateProject,
 } from "#controllers/projects.controller.js";
 import { CheckProjectExistenceHandler } from "#middlewares/check-existence.middleware.js";
-import { CheckPrivilegesHandler, CheckProjectRoleHandler } from "#guards/authorisation.guard.js";
+import { CheckProjectRoleHandler } from "#guards/authorisation.guard.js";
 import {
     CreateProjectRequest,
     ExtendedProjectResponse,
@@ -47,7 +47,6 @@ projectsRouter.get<ProjectIdParam, ProjectResponse, void>(
 projectsRouter.post<void, ProjectResponse, CreateProjectRequest>(
     "/",
     ValidateBodyHandler(CreateProjectRequest),
-    CheckPrivilegesHandler,
     createProject
 );
 

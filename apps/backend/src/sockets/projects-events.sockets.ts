@@ -17,11 +17,7 @@ export function initProjectsEvents(socket: Socket, user: SocketUser) {
     socket.join("projectspage");
 
     socket.on("create_project", (projectData: CreateProject) => {
-        const userData = userStore.getUserData(user.id);
-
-        if (userData?.isPrivileged) {
-            socket.to("projectspage").emit("set_project", projectData);
-        }
+        socket.to("projectspage").emit("set_project", projectData);
     });
 
     /**

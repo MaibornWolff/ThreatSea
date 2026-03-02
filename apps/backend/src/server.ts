@@ -5,7 +5,6 @@ import cookieParser from "cookie-parser";
 import { csrfSync } from "csrf-sync";
 import cors from "cors";
 import path from "path";
-import passport from "passport";
 import helmet from "helmet";
 import { corsConfig, helmetConfig, sessionConfig } from "#config/config.js";
 import nocache from "nocache";
@@ -60,7 +59,6 @@ app.get("/api/csrf-token", function (req: express.Request, res: express.Response
     res.json({ token: generateToken(req) });
 });
 app.use(express.json({ limit: "200mb" }));
-app.use(passport.initialize());
 app.use(nocache());
 app.set("etag", false);
 

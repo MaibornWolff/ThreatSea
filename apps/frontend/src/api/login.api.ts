@@ -25,10 +25,10 @@ export class LoginAPI {
         );
     }
 
-    static async getAuthenticationStatus(): Promise<{ status: { isLoggedIn: boolean; isPrivileged: boolean } }> {
+    static async getAuthenticationStatus(): Promise<{ status: { isLoggedIn: boolean } }> {
         return await fetchAPI("/auth/status", null, (res) => {
             const statusResponse = res as {
-                data: { status: { isLoggedIn: boolean; isPrivileged: boolean } };
+                data: { status: { isLoggedIn: boolean } };
                 message: string;
             };
             return statusResponse.data;

@@ -13,7 +13,7 @@ import { catalogThreatsRouter } from "#routers/catalog-threats.router.js";
 import { catalogMeasuresRouter } from "#routers/catalog-measures.router.js";
 import { catalogMembersRouter } from "#routers/catalog-members.router.js";
 import { CheckCatalogExistenceHandler } from "#middlewares/check-existence.middleware.js";
-import { CheckCatalogRoleHandler, CheckPrivilegesHandler } from "#guards/authorisation.guard.js";
+import { CheckCatalogRoleHandler } from "#guards/authorisation.guard.js";
 import { CatalogIdParam, CatalogResponse, CreateCatalogRequest, UpdateCatalogRequest } from "#types/catalog.types.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
 import {
@@ -38,7 +38,6 @@ catalogsRouter.get<CatalogIdParam, CatalogResponse, void>(
 catalogsRouter.post<void, CatalogResponse, CreateCatalogRequest>(
     "/",
     ValidateBodyHandler(CreateCatalogRequest),
-    CheckPrivilegesHandler,
     createCatalog
 );
 

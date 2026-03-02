@@ -16,6 +16,9 @@ export const authRouter = express.Router();
 
 authRouter.get("/authenticationMode", authenticationMode);
 authRouter.get("/status", getAuthStatus);
-authRouter.get("/redirect", authenticate, finalizeAuthentication);
-authRouter.get("/login", authenticate, finalizeAuthentication);
+
+authRouter.get("/login", authenticate);
+
+authRouter.get("/redirect", finalizeAuthentication);
+
 authRouter.post("/logout", logout);

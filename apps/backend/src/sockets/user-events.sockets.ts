@@ -19,7 +19,6 @@ export interface UserData {
     socketAmount: number;
     deletedCatalogs: Set<number>;
     deletedProjects: Set<number>;
-    isPrivileged: boolean;
 }
 
 export class GrantProjectAccessData {
@@ -209,7 +208,6 @@ export function initUserEvents(socket: Socket, user: SocketUser) {
         socketAmount: 1,
         deletedCatalogs: new Set(),
         deletedProjects: new Set(),
-        isPrivileged: user.isPrivileged,
     };
 
     userStore.insertUserData(user.id, userData);

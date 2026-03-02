@@ -5,11 +5,9 @@ export const useUser = () => {
     const isPending = useAppSelector((state) => state.user.isPending);
 
     const isLoggedIn = status.isLoggedIn;
-    const isPrivileged = status.isPrivileged;
 
     return {
         isLoggedIn,
-        isPrivileged,
         isPending,
     };
 };
