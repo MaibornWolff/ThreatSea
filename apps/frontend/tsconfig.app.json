@@ -5,7 +5,7 @@
     /* Bundler mode */
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
-    "types": ["@testing-library/jest-dom"]
+  },
   },
   "include": ["src"]
 }
