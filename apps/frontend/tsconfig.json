@@ -9,6 +9,6 @@
     }
   ],
   "compilerOptions": {
-    "types": ["node", "vite/client"]
+    "types": ["node", "vite/client", "@testing-library/jest-dom"]
   }
 }
