@@ -112,7 +112,7 @@ jobs:
       - name: Setup Repository
         uses: ./.github/actions/repository-setup
       - name: Run component tests
-        run: pnpm --filter="..../apps/frontend" test:unit
+        run: pnpm --filter="..../apps/frontend" test:unit:coverage
       - name: Upload test results
         uses: actions/upload-artifact@v7
         if: always()
