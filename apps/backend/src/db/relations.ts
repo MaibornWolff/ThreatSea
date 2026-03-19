@@ -7,6 +7,8 @@ import {
     catalogThreats,
     componentTypes,
     threats,
+    parentThreats,
+    childThreats,
     measureImpacts,
     measures,
     systems,
@@ -56,6 +58,30 @@ export const catalogThreatsRelations = relations(catalogThreats, ({ one, many })
         references: [catalogs.id],
     }),
     threats: many(threats),
+}));
+
+export const parentThreatsRelations = relations(parentThreats, ({ one, many }) => ({
+    catalogThreat: one(catalogThreats, {
+        fields: [parentThreats.catalogThreatId],
+        references: [catalogThreats.id],
+    }),
+    project: one(projects, {
+        fields: [parentThreats.projectId],
+        references: [projects.id],
+    }),
+    childThreats: many(childThreats),
+}));
+
+export const childThreatsRelations = relations(childThreats, ({ one, many }) => ({
+    parentThreat: one(parentThreats, {
+        fields: [childThreats.parentThreatId],
+        references: [parentThreats.id],
+    }),
+    project: one(projects, {
+        fields: [childThreats.projectId],
+        references: [projects.id],
+    }),
+    measureImpacts: many(measureImpacts),
 }));
 
 export const componentTypesRelations = relations(componentTypes, ({ one }) => ({
