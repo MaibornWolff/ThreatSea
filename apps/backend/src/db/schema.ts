@@ -338,6 +338,84 @@ export const threats = pgTable(
     ]
 );
 
+export type ParentThreat = typeof parentThreats.$inferSelect;
+export type CreateParentThreat = Omit<typeof parentThreats.$inferInsert, DefaultFields>;
+export type UpdateParentThreat = Omit<
+    CreateParentThreat,
+    "pointOfAttackId" | "pointOfAttack" | "attacker" | "catalogThreatId"
+>;
+
+export const parentThreats = pgTable(
+    "parent_threats",
+    {
+        id: integer().notNull().primaryKey().generatedByDefaultAsIdentity(),
+        pointOfAttackId: varchar({ length: 21 }).notNull(),
+        name: varchar({ length: 255 }).notNull(),
+        description: text().notNull(),
+        pointOfAttack: PointsOfAttackEnum().notNull(),
+        attacker: AttackersEnum().notNull(),
+        createdAt: timestamp({ mode: "string", withTimezone: true })
+            .notNull()
+            .default(sql`now()`),
+        updatedAt: timestamp({ mode: "string", withTimezone: true })
+            .notNull()
+            .default(sql`now()`),
+        catalogThreatId: integer()
+            .notNull()
+            .references(() => catalogThreats.id, { onDelete: "cascade", onUpdate: "cascade" }),
+        projectId: integer()
+            .notNull()
+            .references(() => projects.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    },
+    (table) => [
+        check("parent_threats_name_not_empty", sql`${table.name} <> ''`),
+        index("parent_threats_catalog_threat_id").on(table.catalogThreatId),
+        index("parent_threats_project_id").on(table.projectId),
+    ]
+);
+
+export type ChildThreat = typeof childThreats.$inferSelect;
+export type CreateChildThreat = Omit<typeof childThreats.$inferInsert, DefaultFields>;
+export type UpdateChildThreat = Omit<
+    CreateChildThreat,
+    "pointOfAttackId" | "pointOfAttack" | "attacker" | "parentThreatId"
+>;
+
+export const childThreats = pgTable(
+    "child_threats",
+    {
+        id: integer().notNull().primaryKey().generatedByDefaultAsIdentity(),
+        pointOfAttackId: varchar({ length: 21 }).notNull(),
+        name: varchar({ length: 255 }).notNull(),
+        description: text().notNull(),
+        pointOfAttack: PointsOfAttackEnum().notNull(),
+        attacker: AttackersEnum().notNull(),
+        probability: integer().notNull(),
+        confidentiality: boolean().notNull(),
+        integrity: boolean().notNull(),
+        availability: boolean().notNull(),
+        doneEditing: boolean().notNull(),
+        createdAt: timestamp({ mode: "string", withTimezone: true })
+            .notNull()
+            .default(sql`now()`),
+        updatedAt: timestamp({ mode: "string", withTimezone: true })
+            .notNull()
+            .default(sql`now()`),
+        parentThreatId: integer()
+            .notNull()
+            .references(() => parentThreats.id, { onDelete: "cascade", onUpdate: "cascade" }),
+        projectId: integer()
+            .notNull()
+            .references(() => projects.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    },
+    (table) => [
+        check("child_threats_name_not_empty", sql`${table.name} <> ''`),
+        check("child_threats_probability_min_max", sql`${table.probability} between 1 and 5`),
+        index("child_threats_parent_threat_id").on(table.parentThreatId),
+        index("child_threats_project_id").on(table.projectId),
+    ]
+);
+
 export type Token = typeof tokens.$inferSelect;
 
 export const tokens = pgTable(
