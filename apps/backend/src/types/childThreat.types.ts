@@ -70,9 +70,9 @@ export class UpdateChildThreatRequest {
 }
 
 export class CreateChildThreatRequest extends UpdateChildThreatRequest {
-    @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("parentThreatId") })
-    @IsInt({ message: FIELD_MUST_BE_INT_MESSAGE("parentThreatId") })
-    parentThreatId!: number;
+    @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("genericThreatId") })
+    @IsInt({ message: FIELD_MUST_BE_INT_MESSAGE("genericThreatId") })
+    genericThreatId!: number;
 
     @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("pointOfAttackId") })
     @IsString({ message: FIELD_MUST_BE_STRING_MESSAGE("pointOfAttackId") })
