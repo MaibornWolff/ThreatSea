@@ -17,14 +17,14 @@ import {
 import { Type } from "class-transformer";
 import { Trim } from "#middlewares/input-validations/trim.decorator.js";
 
-export class ParentThreatIdParam extends ProjectIdParam {
-    @IsDefined({ message: PARAM_MUST_EXIST_MESSAGE("parentThreatId") })
+export class GenericThreatIdParam extends ProjectIdParam {
+    @IsDefined({ message: PARAM_MUST_EXIST_MESSAGE("genericThreatId") })
     @Type(() => Number)
-    @IsInt({ message: PARAM_MUST_BE_INT_MESSAGE("parentThreatId") })
-    parentThreatId!: number;
+    @IsInt({ message: PARAM_MUST_BE_INT_MESSAGE("genericThreatId") })
+    genericThreatId!: number;
 }
 
-export class UpdateParentThreatRequest {
+export class UpdateGenericThreatRequest {
     @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("name") })
     @IsString({ message: FIELD_MUST_BE_STRING_MESSAGE("name") })
     @Trim()
@@ -39,7 +39,7 @@ export class UpdateParentThreatRequest {
     description!: string;
 }
 
-export class CreateParentThreatRequest extends UpdateParentThreatRequest {
+export class CreateGenericThreatRequest extends UpdateGenericThreatRequest {
     @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("catalogThreatId") })
     @IsInt({ message: FIELD_MUST_BE_INT_MESSAGE("catalogThreatId") })
     catalogThreatId!: number;
@@ -61,7 +61,7 @@ export class CreateParentThreatRequest extends UpdateParentThreatRequest {
     attacker!: ATTACKERS;
 }
 
-export interface ParentThreatResponse extends CreateParentThreatRequest {
+export interface GenericThreatResponse extends CreateGenericThreatRequest {
     id: number;
     projectId: number;
     createdAt: string;

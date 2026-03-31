@@ -338,15 +338,15 @@ export const threats = pgTable(
     ]
 );
 
-export type ParentThreat = typeof parentThreats.$inferSelect;
-export type CreateParentThreat = Omit<typeof parentThreats.$inferInsert, DefaultFields>;
-export type UpdateParentThreat = Omit<
-    CreateParentThreat,
+export type GenericThreat = typeof genericThreats.$inferSelect;
+export type CreateGenericThreat = Omit<typeof genericThreats.$inferInsert, DefaultFields>;
+export type UpdateGenericThreat = Omit<
+    CreateGenericThreat,
     "pointOfAttackId" | "pointOfAttack" | "attacker" | "catalogThreatId"
 >;
 
-export const parentThreats = pgTable(
-    "parent_threats",
+export const genericThreats = pgTable(
+    "generic_threats",
     {
         id: integer().notNull().primaryKey().generatedByDefaultAsIdentity(),
         pointOfAttackId: varchar({ length: 21 }).notNull(),
@@ -368,17 +368,21 @@ export const parentThreats = pgTable(
             .references(() => projects.id, { onDelete: "cascade", onUpdate: "cascade" }),
     },
     (table) => [
-        check("parent_threats_name_not_empty", sql`${table.name} <> ''`),
-        index("parent_threats_catalog_threat_id").on(table.catalogThreatId),
-        index("parent_threats_project_id").on(table.projectId),
+        check("generic_threats_name_not_empty", sql`${table.name} <> ''`),
+        index("generic_threats_catalog_threat_id").on(table.catalogThreatId),
+        index("generic_threats_project_id").on(table.projectId),
     ]
 );
+
+/*
+ *   The child threats need to be renamed to just "threats" and the old "threats" table needs to be deleted.
+ */
 
 export type ChildThreat = typeof childThreats.$inferSelect;
 export type CreateChildThreat = Omit<typeof childThreats.$inferInsert, DefaultFields>;
 export type UpdateChildThreat = Omit<
     CreateChildThreat,
-    "pointOfAttackId" | "pointOfAttack" | "attacker" | "parentThreatId"
+    "pointOfAttackId" | "pointOfAttack" | "attacker" | "genericThreatId"
 >;
 
 export const childThreats = pgTable(
@@ -401,9 +405,9 @@ export const childThreats = pgTable(
         updatedAt: timestamp({ mode: "string", withTimezone: true })
             .notNull()
             .default(sql`now()`),
-        parentThreatId: integer()
+        genericThreatId: integer()
             .notNull()
-            .references(() => parentThreats.id, { onDelete: "cascade", onUpdate: "cascade" }),
+            .references(() => genericThreats.id, { onDelete: "cascade", onUpdate: "cascade" }),
         projectId: integer()
             .notNull()
             .references(() => projects.id, { onDelete: "cascade", onUpdate: "cascade" }),
@@ -411,7 +415,7 @@ export const childThreats = pgTable(
     (table) => [
         check("child_threats_name_not_empty", sql`${table.name} <> ''`),
         check("child_threats_probability_min_max", sql`${table.probability} between 1 and 5`),
-        index("child_threats_parent_threat_id").on(table.parentThreatId),
+        index("child_threats_generic_threat_id").on(table.genericThreatId),
         index("child_threats_project_id").on(table.projectId),
     ]
 );
