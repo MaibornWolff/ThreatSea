@@ -3,8 +3,15 @@
  * of catalog threats.
  */
 import { db, TransactionType } from "#db/index.js";
-import { CatalogThreat, catalogThreats, CreateCatalogThreat, UpdateCatalogThreat } from "#db/schema.js";
-import { eq } from "drizzle-orm";
+import {
+    catalogs,
+    CatalogThreat,
+    catalogThreats,
+    CreateCatalogThreat,
+    projects,
+    UpdateCatalogThreat,
+} from "#db/schema.js";
+import { eq, getTableColumns } from "drizzle-orm";
 import DefaultThreatMatrix from "../../templates/matrix/threats.matrix.json" with { type: "json" };
 import { POINTS_OF_ATTACK } from "#types/points-of-attack.types.js";
 import { ATTACKERS } from "#types/attackers.types.js";
@@ -49,6 +56,21 @@ function getDefaultCatalogThreats(catalogId: number, language = "DE"): CreateCat
     }
 
     return catalogThreats;
+}
+
+/**
+ * Gets the threads of the current catalogue used.
+ *
+ * @param {number} projectId - id of the current project.
+ * @returns Array of threads from the database.
+ */
+export async function getCatalogThreatsByProjectId(projectId: number): Promise<CatalogThreat[]> {
+    return await db
+        .select({ ...getTableColumns(catalogThreats) })
+        .from(catalogThreats)
+        .innerJoin(catalogs, eq(catalogThreats.catalogId, catalogs.id))
+        .innerJoin(projects, eq(projects.catalogId, catalogs.id))
+        .where(eq(projects.id, projectId));
 }
 
 /**
