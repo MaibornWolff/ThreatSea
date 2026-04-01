@@ -1,16 +1,32 @@
 /**
- * Module that defines the controlling function for
+ * Module that defines controller handlers for
  * the system routing.
  */
-import { NextFunction, Request, Response } from "express";
-import { and, eq, getTableColumns } from "drizzle-orm";
-import { PointOfAttack, SystemResponse, UpdateSystemRequest } from "#types/system.types.js";
 import { db } from "#db/index.js";
-import { catalogs, CatalogThreat, catalogThreats, projects, System, threats } from "#db/schema.js";
+import { CatalogThreat, GenericThreat, System, threats } from "#db/schema.js";
+import { NotFoundError } from "#errors/not-found.error.js";
+import { getCatalogThreatsByProjectId } from "#services/catalog-threats.service.js";
+import {
+    createThreatForGenericThreat,
+    deleteChildThreatsByPointOfAttackId,
+    getChildThreats,
+} from "#services/childThreats.service.js";
+import {
+    createGenericThreat,
+    deleteGenericThreatsByPointOfAttackId,
+    getGenericThreats,
+    getGenericThreatsByProjectId,
+} from "#services/genericThreats.service.js";
 import * as SystemService from "#services/system.service.js";
 import { createThreat } from "#services/threats.service.js";
-import { NotFoundError } from "#errors/not-found.error.js";
 import { ProjectIdParam } from "#types/project.types.js";
+import { PointOfAttack, SystemResponse, UpdateSystemRequest } from "#types/system.types.js";
+import { and, eq } from "drizzle-orm";
+import { NextFunction, Request, Response } from "express";
+
+// ------------------------------------------------------------------------------
+// TODO: Remove legacy threat logic and move non http handling logic to service layer
+// ------------------------------------------------------------------------------
 
 /**
  * Fetches the current system from the database.
@@ -67,6 +83,12 @@ export async function updateSystem(
             projectId
         );
 
+        await createChildThreatsForAssetAssignedPointsOfAttack(
+            getPointsOfAttackWithNewAssets(system, updatedSystem),
+            await getGenericThreatsByProjectId(projectId),
+            projectId
+        );
+
         response.json(updatedSystem);
     } catch (error) {
         next(error);
@@ -108,28 +130,38 @@ function getCreatedPointsOfAttack(oldSystem: System | undefined, newSystem: Syst
 }
 
 /**
- * Gets the threads of the current catalogue used.
+ * Diffs points of attack and returns those where assets were newly assigned.
  *
- * @param {number} projectId - id of the current project.
- * @returns Array of threads from the database.
+ * @param {System} oldSystem - Old system data.
+ * @param {System} newSystem - New system data.
+ * @returns The points of attack with a first-time asset assignment.
  */
-async function getCatalogThreatsByProjectId(projectId: number): Promise<CatalogThreat[]> {
-    return await db
-        .select({ ...getTableColumns(catalogThreats) })
-        .from(catalogThreats)
-        .innerJoin(catalogs, eq(catalogThreats.catalogId, catalogs.id))
-        .innerJoin(projects, eq(projects.catalogId, catalogs.id))
-        .where(eq(projects.id, projectId));
+function getPointsOfAttackWithNewAssets(oldSystem: System | undefined, newSystem: System): PointOfAttack[] {
+    const oldPointsOfAttack = oldSystem?.data?.pointsOfAttack || [];
+    const newPointsOfAttack = newSystem.data?.pointsOfAttack || [];
+
+    return newPointsOfAttack.filter((newPointOfAttack) => {
+        const oldPointOfAttack = oldPointsOfAttack.find((pointOfAttack) => pointOfAttack.id === newPointOfAttack.id);
+        const oldAssetCount = oldPointOfAttack?.assets?.length ?? 0;
+        const newAssetCount = newPointOfAttack.assets?.length ?? 0;
+
+        return oldAssetCount === 0 && newAssetCount > 0;
+    });
 }
 
+// TODO: Maybe this function should be moved to the service layer?
 /**
  * Deletes threats by their point of attack id.
  *
- * @param {array of object} pointsOfAttack - The points of attack
+ * @param {array of PointOfAttack} pointsOfAttack - The points of attack
  *     that are not used anymore.
  */
 async function deleteThreatsByPointsOfAttack(pointsOfAttack: PointOfAttack[]): Promise<void> {
     for (const pointOfAttack of pointsOfAttack) {
+        await deleteGenericThreatsByPointOfAttackId(pointOfAttack.id);
+
+        await deleteChildThreatsByPointOfAttackId(pointOfAttack.id);
+
         await db
             .delete(threats)
             .where(and(eq(threats.pointOfAttackId, pointOfAttack.id), eq(threats.projectId, pointOfAttack.projectId)));
@@ -137,7 +169,7 @@ async function deleteThreatsByPointsOfAttack(pointsOfAttack: PointOfAttack[]): P
 }
 
 /**
- * Creates new threats inside the database for the current project
+ * Creates new generic threats and legacy threats for the current project
  * based on the new points of attack.
  *
  * @param {array of PointOfAttack} pointsOfAttack - The new points of attack
@@ -151,6 +183,8 @@ async function createThreatsByPointsOfAttack(
     catalogThreats: CatalogThreat[],
     projectId: number
 ): Promise<void> {
+    const existingGenericThreats = await getGenericThreats(projectId);
+
     for (const pointOfAttack of pointsOfAttack) {
         const relevantCatalogThreats = catalogThreats.filter(
             (catalogThreat) => catalogThreat.pointOfAttack === pointOfAttack.type
@@ -183,6 +217,60 @@ async function createThreatsByPointsOfAttack(
                 availability,
                 doneEditing: false,
             });
+
+            let genericThreat = existingGenericThreats.find(
+                (existingThreat) =>
+                    existingThreat.catalogThreatId === catalogThreatId &&
+                    existingThreat.pointOfAttackId === pointOfAttack.id &&
+                    existingThreat.projectId === projectId
+            );
+
+            if (!genericThreat) {
+                genericThreat = await createGenericThreat({
+                    projectId,
+                    pointOfAttackId: pointOfAttack.id,
+                    catalogThreatId,
+                    name,
+                    description,
+                    attacker,
+                    pointOfAttack: catalogThreatPointOfAttack,
+                });
+                existingGenericThreats.push(genericThreat);
+            }
+        }
+    }
+}
+
+/**
+ * Ensures that points of attack with newly assigned assets have at least one child threat.
+ *
+ * @param {array of PointOfAttack} pointsOfAttack - points of attack with newly assigned assets.
+ * @param {array of GenericThreat} genericThreats - project generic threats.
+ * @param {number} projectId - id of the current project.
+ */
+async function createChildThreatsForAssetAssignedPointsOfAttack(
+    pointsOfAttack: PointOfAttack[],
+    genericThreats: GenericThreat[],
+    projectId: number
+): Promise<void> {
+    if (pointsOfAttack.length === 0) {
+        return;
+    }
+
+    for (const pointOfAttack of pointsOfAttack) {
+        const applicableGenericThreats = genericThreats.filter(
+            (genericThreat) =>
+                genericThreat.pointOfAttackId === pointOfAttack.id && genericThreat.projectId === projectId
+        );
+
+        for (const genericThreat of applicableGenericThreats) {
+            const existingChildThreats = await getChildThreats(genericThreat.id);
+
+            if (existingChildThreats.length > 0) {
+                continue;
+            }
+
+            await createThreatForGenericThreat(genericThreat.id);
         }
     }
 }
