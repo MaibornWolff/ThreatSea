@@ -16,7 +16,7 @@ import { NextFunction, Request, Response } from "express";
  * @param {NextFunction} next - The next middleware function.
  */
 export function LogHandler(request: Request, _response: Response, next: NextFunction): void {
-    Logger.debug(`Request: ${request.method} ${request.url}`);
+    Logger.debug(`Request: ${request.method} ${request.url} ${request.statusCode}`);
 
     next();
 }

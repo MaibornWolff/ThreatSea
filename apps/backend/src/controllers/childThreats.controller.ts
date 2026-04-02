@@ -37,6 +37,8 @@ export async function getChildThreatsByGenericThreatId(
         return;
     }
 
+    // TODO: Is this check necessary? If so, is this the right error to throw?
+    // Copilot suggests empty list with 200 as response
     if (childThreats.length === 0) {
         next(new NotFoundError("Child threats not found"));
         return;
