@@ -21,6 +21,13 @@ import { createThreat } from "#services/threats.service.js";
 import * as systemService from "#services/system.service.js";
 
 /**
+ * Update system edge cases which are probably not covered
+ *  only oldAssetCount === 0 and newAssetCount > 0 is the logic in place for generating child threats, this does not take following cases into account:
+ * - asset is removed and a new asset is added to the same point of attack (oldAssetCount > 0 and newAssetCount > 0)
+ *  - all assets are removed and new assets are added to the same point of attack (oldAssetCount > 0 and newAssetCount > 0)
+ */
+
+/**
  * Updates a system and synchronizes related threat data.
  *
  * @param {number} projectId - The id of the current project.

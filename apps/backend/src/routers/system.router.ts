@@ -32,8 +32,8 @@ systemRouter.put<ProjectIdParam, SystemResponse, UpdateSystemRequest>(
 );
 
 /** Put threats, measures and MeasureImpacts into this router */
-systemRouter.use("/child-threats", childThreatsRouter);
-systemRouter.use("/generic-threats", genericThreatsRouter);
+systemRouter.use("/childThreats", childThreatsRouter);
+systemRouter.use("/genericThreats", genericThreatsRouter);
 systemRouter.use("/threats", threatsRouter);
 systemRouter.use("/measures", measuresRouter);
 systemRouter.use("/measureImpacts", measureImpactRouter);
