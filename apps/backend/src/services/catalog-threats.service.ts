@@ -64,8 +64,11 @@ function getDefaultCatalogThreats(catalogId: number, language = "DE"): CreateCat
  * @param {number} projectId - id of the current project.
  * @returns Array of threads from the database.
  */
-export async function getCatalogThreatsByProjectId(projectId: number): Promise<CatalogThreat[]> {
-    return await db
+export async function getCatalogThreatsByProjectId(
+    projectId: number,
+    transaction: TransactionType | undefined = undefined
+): Promise<CatalogThreat[]> {
+    return await (transaction ?? db)
         .select({ ...getTableColumns(catalogThreats) })
         .from(catalogThreats)
         .innerJoin(catalogs, eq(catalogThreats.catalogId, catalogs.id))
@@ -92,8 +95,13 @@ export async function getCatalogThreatsByCatalogId(
  * @param {number} catalogThreatId - The id of the catalog threat.
  * @returns {Promise<CatalogThreat | null>} A promise that resolves to the catalog threat or null if not found.
  */
-export async function getCatalogThreatById(catalogThreatId: number): Promise<CatalogThreat | null> {
-    const catalogThreat = await db.query.catalogThreats.findFirst({ where: eq(catalogThreats.id, catalogThreatId) });
+export async function getCatalogThreatById(
+    catalogThreatId: number,
+    transaction: TransactionType | undefined = undefined
+): Promise<CatalogThreat | null> {
+    const catalogThreat = await (transaction ?? db).query.catalogThreats.findFirst({
+        where: eq(catalogThreats.id, catalogThreatId),
+    });
 
     return catalogThreat ?? null;
 }
