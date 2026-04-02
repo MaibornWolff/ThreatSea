@@ -2,7 +2,7 @@
  * Module that defines the access and manipulation
  * of threats.
  */
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db, TransactionType } from "#db/index.js";
 import { childThreats, ChildThreat, CreateChildThreat, UpdateChildThreat } from "#db/schema.js";
 import { getGenericThreat } from "./genericThreats.service.js";
@@ -19,8 +19,13 @@ import { NotFoundError } from "#errors/not-found.error.js";
  * @param {number} genericThreatId - The id of the generic threat.
  * @returns {Promise<ChildThreat[]>} A promise that resolves to an array of child threats.
  */
-export async function getChildThreats(genericThreatId: number): Promise<ChildThreat[]> {
-    return await db.query.childThreats.findMany({ where: eq(childThreats.genericThreatId, genericThreatId) });
+export async function getChildThreatsByGenericThreatId(
+    genericThreatId: number,
+    transaction: TransactionType | undefined = undefined
+): Promise<ChildThreat[]> {
+    return await (transaction ?? db).query.childThreats.findMany({
+        where: eq(childThreats.genericThreatId, genericThreatId),
+    });
 }
 
 /**
@@ -29,8 +34,8 @@ export async function getChildThreats(genericThreatId: number): Promise<ChildThr
  * @param {number} threatId - The id of the threat.
  * @returns {Promise<ChildThreat | null>} A promise that resolves to the child threat or null if not found.
  */
-export async function getChildThreat(threatId: number): Promise<ChildThreat | null> {
-    const threat = await db.query.childThreats.findFirst({ where: eq(childThreats.id, threatId) });
+export async function getChildThreat(childThreatId: number): Promise<ChildThreat | null> {
+    const threat = await db.query.childThreats.findFirst({ where: eq(childThreats.id, childThreatId) });
 
     return threat ?? null;
 }
@@ -60,13 +65,13 @@ export async function createThreatForGenericThreat(
     genericThreatId: number,
     transaction: TransactionType | undefined = undefined
 ): Promise<ChildThreat> {
-    const genericThreat = await getGenericThreat(genericThreatId);
+    const genericThreat = await getGenericThreat(genericThreatId, transaction);
 
     if (!genericThreat) {
         throw new NotFoundError("Generic threat not found");
     }
 
-    const catalogThreat = await getCatalogThreatById(genericThreat.catalogThreatId);
+    const catalogThreat = await getCatalogThreatById(genericThreat.catalogThreatId, transaction);
 
     if (!catalogThreat) {
         throw new NotFoundError("Catalog threat not found");
@@ -125,6 +130,15 @@ export async function deleteChildThreat(childThreatId: number): Promise<void> {
     await db.delete(childThreats).where(eq(childThreats.id, childThreatId));
 }
 
-export async function deleteChildThreatsByPointOfAttackId(pointOfAttackId: string): Promise<void> {
-    await db.delete(childThreats).where(eq(childThreats.pointOfAttackId, pointOfAttackId));
+export async function deleteChildThreatsByPointOfAttackId(
+    pointOfAttackId: string,
+    projectId: number,
+    transaction: TransactionType | undefined = undefined
+): Promise<void> {
+    const whereCondition =
+        projectId === undefined
+            ? eq(childThreats.pointOfAttackId, pointOfAttackId)
+            : and(eq(childThreats.pointOfAttackId, pointOfAttackId), eq(childThreats.projectId, projectId));
+
+    await (transaction ?? db).delete(childThreats).where(whereCondition);
 }

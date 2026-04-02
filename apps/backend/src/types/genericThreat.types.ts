@@ -67,3 +67,7 @@ export interface GenericThreatResponse extends CreateGenericThreatRequest {
     createdAt: string;
     updatedAt: string;
 }
+
+export interface GenericThreatWithChildCountResponse extends GenericThreatResponse {
+    childThreatCount: number;
+}
