@@ -7,11 +7,13 @@ import { getSystem, updateSystem } from "#controllers/system.controller.js";
 import { threatsRouter } from "#routers/threats.router.js";
 import { measuresRouter } from "#routers/measures.router.js";
 import { measureImpactRouter } from "#routers/measure-impact.router.js";
+import { genericThreatsRouter } from "#routers/generic-threats.router.js";
 import { CheckProjectRoleHandler } from "#guards/authorisation.guard.js";
 import { ProjectIdParam } from "#types/project.types.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
 import { SystemResponse, UpdateSystemRequest } from "#types/system.types.js";
 import { ValidateParamHandler } from "#middlewares/input-validations/input-validation.middleware.js";
+import { childThreatsRouter } from "./child-threat.router.js";
 
 export const systemRouter = express.Router({ mergeParams: true });
 
@@ -30,6 +32,8 @@ systemRouter.put<ProjectIdParam, SystemResponse, UpdateSystemRequest>(
 );
 
 /** Put threats, measures and MeasureImpacts into this router */
+systemRouter.use("/child-threats", childThreatsRouter);
+systemRouter.use("/generic-threats", genericThreatsRouter);
 systemRouter.use("/threats", threatsRouter);
 systemRouter.use("/measures", measuresRouter);
 systemRouter.use("/measureImpacts", measureImpactRouter);
