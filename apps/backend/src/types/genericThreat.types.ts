@@ -16,6 +16,7 @@ import {
 } from "#middlewares/input-validations/validator-messages.js";
 import { Type } from "class-transformer";
 import { Trim } from "#middlewares/input-validations/trim.decorator.js";
+import { ExtendedChildThreatResponse } from "./childThreat.types.js";
 
 export class GenericThreatIdParam extends ProjectIdParam {
     @IsDefined({ message: PARAM_MUST_EXIST_MESSAGE("genericThreatId") })
@@ -68,6 +69,6 @@ export interface GenericThreatResponse extends CreateGenericThreatRequest {
     updatedAt: string;
 }
 
-export interface GenericThreatWithChildCountResponse extends GenericThreatResponse {
-    childThreatCount: number;
+export interface GenericThreatWithChExtendedChildrenResponse extends GenericThreatResponse {
+    children: ExtendedChildThreatResponse[];
 }

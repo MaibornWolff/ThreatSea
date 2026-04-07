@@ -5,7 +5,9 @@
 import { and, eq, getTableColumns } from "drizzle-orm";
 import { db, TransactionType } from "#db/index.js";
 import { genericThreats, GenericThreat, CreateGenericThreat, UpdateGenericThreat } from "#db/schema.js";
-import { GenericThreatWithChildCountResponse } from "#types/genericThreat.types.js";
+import { GenericThreatWithChExtendedChildrenResponse } from "#types/genericThreat.types.js";
+import { getPointsOfAttack } from "#services/points-of-attack.service.js";
+import { POINTS_OF_ATTACK } from "#types/points-of-attack.types.js";
 
 /**
  * Gets a specific generic threat by its id.
@@ -40,23 +42,44 @@ export async function getGenericThreatsByProjectId(
         .where(eq(genericThreats.projectId, projectId));
 }
 
-export async function getGenericThreatsWithChildCount(
+export async function getGenericThreatsWithExtendedChildren(
     projectId: number
-): Promise<GenericThreatWithChildCountResponse[]> {
-    const genericThreatsWithChildren = await db.query.genericThreats.findMany({
+): Promise<GenericThreatWithChExtendedChildrenResponse[]> {
+    const genericThreatsWithExtendedChildren = await db.query.genericThreats.findMany({
         where: eq(genericThreats.projectId, projectId),
         with: {
             childThreats: true,
         },
     });
 
-    return genericThreatsWithChildren
+    const pointsOfAttack = await getPointsOfAttack(projectId);
+    const pointsOfAttackById = new Map(pointsOfAttack.map((pointOfAttack) => [pointOfAttack.id, pointOfAttack]));
+
+    return genericThreatsWithExtendedChildren
         .filter((genericThreat) => genericThreat.childThreats.length > 0)
         .map(({ childThreats, ...genericThreat }) => ({
             ...genericThreat,
-            childThreatCount: childThreats.length,
+            children: childThreats.map((childThreat) => {
+                const pointOfAttack = pointsOfAttackById.get(childThreat.pointOfAttackId);
+                const interfaceName =
+                    pointOfAttack?.type === POINTS_OF_ATTACK.COMMUNICATION_INTERFACES
+                        ? (pointOfAttack.name ?? null)
+                        : null;
+
+                return {
+                    ...childThreat,
+                    componentName: pointOfAttack?.componentName ?? null,
+                    componentType: pointOfAttack?.componentType ?? null,
+                    interfaceName,
+                    assets: (pointOfAttack?.assets ?? []).map((asset) => ({
+                        id: asset.id,
+                        name: asset.name,
+                    })),
+                };
+            }),
         }));
 }
+
 /**
  * Creates a generic threat.
  *
