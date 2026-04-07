@@ -22,7 +22,7 @@ export function getCSRFToken(): string {
     return localStorage.getItem("csrfToken") ?? "";
 }
 
-let intervalId: NodeJS.Timeout | null = null;
+let intervalId: number | null = null;
 
 /**
  * Starts an interval to refresh the CSRF token every 15 minutes.
@@ -73,7 +73,11 @@ export function stopTokenRefresh() {
  */
 export async function fetchAPI<T>(
     endpoint: string,
-    config: { headers?: Record<string, string>; method: string; body?: string } | null = null,
+    config: {
+        headers?: Record<string, string>;
+        method: string;
+        body?: string;
+    } | null = null,
     fetchDataFunc: ((data: unknown) => T) | null = null,
     retry = true
 ): Promise<T> {
