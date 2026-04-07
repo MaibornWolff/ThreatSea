@@ -3,7 +3,11 @@
  * for each project.
  */
 import express from "express";
-import { getGenericThreat, getGenericThreatsByProjectId } from "#controllers/genericThreats.controller.js";
+import {
+    getGenericThreat,
+    getGenericThreatsByProjectId,
+    getGenericThreatsWithExtendedChildren,
+} from "#controllers/genericThreats.controller.js";
 import { CheckProjectRoleHandler } from "#guards/authorisation.guard.js";
 import { ValidateParamHandler } from "#middlewares/input-validations/input-validation.middleware.js";
 import { GenericThreatIdParam } from "#types/genericThreat.types.js";
@@ -19,6 +23,13 @@ genericThreatsRouter.get(
     ValidateParamHandler(ProjectIdParam),
     CheckProjectRoleHandler(USER_ROLES.VIEWER),
     getGenericThreatsByProjectId
+);
+
+genericThreatsRouter.get(
+    `/with-children`,
+    ValidateParamHandler(ProjectIdParam),
+    CheckProjectRoleHandler(USER_ROLES.VIEWER),
+    getGenericThreatsWithExtendedChildren
 );
 
 genericThreatsRouter.get(
