@@ -4,12 +4,15 @@
  */
 import { NextFunction, Request, Response } from "express";
 import * as MeasureImpactsService from "#services/measureImpacts.service.js";
+import * as ChildThreatMeasureImpactsService from "#services/childThreatMeasureImpacts.service.js";
 import { getMeasure } from "#services/measures.service.js";
 import { cleanUpUnusedImpacts, getThreat } from "#services/threats.service.js";
+import { getChildThreat } from "#services/childThreats.service.js";
 import { NotFoundError } from "#errors/not-found.error.js";
 import { BadRequestError } from "#errors/bad-request.error.js";
 import { ProjectIdParam } from "#types/project.types.js";
 import {
+    ChildThreatMeasureImpactResponse,
     CreateMeasureImpactRequest,
     MeasureImpactIdParam,
     MeasureImpactResponse,
@@ -17,6 +20,7 @@ import {
 } from "#types/measure-impact.types.js";
 import { MeasureResponse } from "#types/measure.types.js";
 import { ThreatResponse } from "#types/threat.types.js";
+import { ChildThreatIdParam, ChildThreatResponse } from "#types/childThreat.types.js";
 
 /**
  * Gets all measure impacts of a project.
@@ -33,6 +37,38 @@ export async function getMeasureImpacts(
     await cleanUpUnusedImpacts(projectId);
 
     const measureImpacts: MeasureImpactResponse[] = await MeasureImpactsService.getMeasureImpactsByProject(projectId);
+
+    response.json(measureImpacts);
+}
+
+/**
+ * Gets all child-threat-linked measure impacts of a specific child threat.
+ *
+ * @param {object} request - The http request.
+ * @param {object} response - The http response.
+ * @param {NextFunction} next - The next middleware function.
+ */
+export async function getMeasureImpactsByChildThreat(
+    request: Request<ChildThreatIdParam, ChildThreatMeasureImpactResponse[], void>,
+    response: Response<ChildThreatMeasureImpactResponse[]>,
+    next: NextFunction
+): Promise<void> {
+    const projectId = request.params.projectId;
+    const childThreatId = request.params.childThreatId;
+
+    const childThreat: ChildThreatResponse | null = await getChildThreat(childThreatId);
+    if (childThreat === null) {
+        next(new NotFoundError("Child Threat not found"));
+        return;
+    }
+
+    if (childThreat.projectId !== projectId) {
+        next(new BadRequestError("Child Threat is not part of this project"));
+        return;
+    }
+
+    const measureImpacts: ChildThreatMeasureImpactResponse[] =
+        await ChildThreatMeasureImpactsService.getChildThreatMeasureImpactsByChildThreat(childThreatId);
 
     response.json(measureImpacts);
 }
