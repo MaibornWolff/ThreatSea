@@ -51,7 +51,7 @@
   },
   "devDependencies": {
     "@eslint/js": "9.39.4",
-    "@playwright/test": "1.58.2",
+    "@playwright/test": "1.59.1",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@testing-library/jest-dom": "6.9.1",
