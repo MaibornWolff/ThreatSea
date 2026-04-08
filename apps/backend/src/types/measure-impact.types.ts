@@ -65,3 +65,11 @@ export interface MeasureImpactResponse extends CreateMeasureImpactRequest {
     createdAt: string;
     updatedAt: string;
 }
+
+export interface ChildThreatMeasureImpactResponse extends UpdateMeasureImpactRequest {
+    id: number;
+    measureId: number;
+    childThreatId: number;
+    createdAt: string;
+    updatedAt: string;
+}
