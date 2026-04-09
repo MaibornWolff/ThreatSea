@@ -138,7 +138,7 @@ const MeasureImpactByMeasureDialog = ({
             ...data,
             probability: data.setsOutOfScope || !data.impactsProbability ? null : data.probability,
             damage: data.setsOutOfScope || !data.impactsDamage ? null : data.damage,
-            threatId: threat.id,
+            childThreatId: threat.id,
             projectId: project.id,
         });
         closeDialog();

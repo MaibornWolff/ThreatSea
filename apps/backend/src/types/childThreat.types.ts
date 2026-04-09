@@ -21,6 +21,7 @@ import {
 import { Type } from "class-transformer";
 import { Trim } from "#middlewares/input-validations/trim.decorator.js";
 import { ComponentType } from "./system.types.js";
+import { AssetResponse } from "./asset.types.js";
 
 export class ChildThreatIdParam extends ProjectIdParam {
     @IsDefined({ message: PARAM_MUST_EXIST_MESSAGE("childThreatId") })
@@ -103,5 +104,5 @@ export interface ExtendedChildThreatResponse extends ChildThreatResponse {
     componentName: string | null;
     componentType: number | ComponentType | null;
     interfaceName: string | null;
-    assets: { id: number; name: string }[];
+    assets: AssetResponse[];
 }

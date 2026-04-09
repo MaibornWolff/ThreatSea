@@ -163,7 +163,7 @@ const MeasureThreatTableRow = ({
     userRole,
     onClickEditThreat,
 }: MeasureThreatTableRowProps) => {
-    const { threatName, netProbability, netDamage, measureImpact, componentName, setsOutOfScope, threat } =
+    const { threatName, netProbability, netDamage, measureImpact, componentName, setsOutOfScope, editThreat } =
         measureThreat;
 
     const { t } = useTranslation("measureDialog");
@@ -196,7 +196,7 @@ const MeasureThreatTableRow = ({
                         textDecoration: "underline",
                     },
                 }}
-                onClick={(e) => onClickEditThreat(e, threat)}
+                onClick={(e) => onClickEditThreat(e, editThreat)}
             >
                 {threatName}
             </TableCell>

@@ -71,10 +71,7 @@ export async function getGenericThreatsWithExtendedChildren(
                     componentName: pointOfAttack?.componentName ?? null,
                     componentType: pointOfAttack?.componentType ?? null,
                     interfaceName,
-                    assets: (pointOfAttack?.assets ?? []).map((asset) => ({
-                        id: asset.id,
-                        name: asset.name,
-                    })),
+                    assets: pointOfAttack?.assets ?? [],
                 };
             }),
         }));

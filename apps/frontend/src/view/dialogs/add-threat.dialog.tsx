@@ -87,7 +87,7 @@ const AddThreatDialog = ({ threat, project, userRole, ...props }: AddThreatDialo
     const [tab, setTab] = useState<ThreatTab>("MAIN");
     const formRef = useRef<HTMLFormElement | null>(null);
     const projectId = project.id;
-    const threatId = threat.id;
+    const childThreatId = threat.id;
     const {
         control,
         register,
@@ -135,7 +135,7 @@ const AddThreatDialog = ({ threat, project, userRole, ...props }: AddThreatDialo
     };
 
     const { setSortDirection, setSearchValue, setSortBy, deleteMeasureImpact, sortDirection, sortBy, threatMeasures } =
-        useThreatMeasuresList({ projectId, threatId });
+        useThreatMeasuresList({ projectId, childThreatId });
 
     const onChangeSortBy = (_event: SyntheticEvent, newSortBy: string | null) => {
         // If the attribute is clicked again, the order is changed.

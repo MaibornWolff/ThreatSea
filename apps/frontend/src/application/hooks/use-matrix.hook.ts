@@ -120,7 +120,10 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
                         measures: measures
                             .filter((measure) => {
                                 return measureImpacts.some((measureImpact) => {
-                                    return measureImpact.measureId == measure.id && measureImpact.threatId == threat.id;
+                                    return (
+                                        measureImpact.measureId == measure.id &&
+                                        measureImpact.childThreatId == threat.id
+                                    );
                                 });
                             })
                             .map((measure) => {
@@ -135,7 +138,8 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
                                     scheduledAt: measure.scheduledAt,
                                     measureImpact: measureImpacts.find((measureImpact) => {
                                         return (
-                                            measureImpact.measureId == measure.id && measureImpact.threatId == threat.id
+                                            measureImpact.measureId == measure.id &&
+                                            measureImpact.childThreatId == threat.id
                                         );
                                     }),
                                 };
