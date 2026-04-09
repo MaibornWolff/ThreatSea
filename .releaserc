@@ -29,11 +29,6 @@
             "release": "patch"
           },
           {
-            "type": "docs",
-            "scope": "README",
-            "release": false
-          },
-          {
             "type": "style",
             "release": false
           },
@@ -47,7 +42,7 @@
           },
           {
             "type": "build",
-            "release": "patch"
+            "release": false
           },
           {
             "type": "chore",

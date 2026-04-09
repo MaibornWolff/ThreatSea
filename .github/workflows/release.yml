@@ -15,7 +15,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
 
@@ -27,18 +27,18 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         id: release
         run: |
-          pnpm dlx semantic-release
+          pnpm exec semantic-release
 
       - name: Login to Docker Hub
         if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'main'
-        uses: docker/login-action@v3
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Login to GitHub Container Registry
         if: steps.release.outputs.new_release_published == 'true'
-        uses: docker/login-action@v3
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -46,16 +46,16 @@ jobs:
 
       - name: Set up QEMU
         if: steps.release.outputs.new_release_published == 'true'
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a # v4
 
       - name: Set up Docker Buildx
         if: steps.release.outputs.new_release_published == 'true'
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4
 
       - name: Extract metadata for next branch (prerelease)
         if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'next'
         id: meta-next
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf # v5
         with:
           images: |
             ghcr.io/${{ github.repository_owner }}/threatsea
@@ -66,7 +66,7 @@ jobs:
 
       - name: Build and push for next branch (prerelease)
         if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'next'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7
         with:
           context: .
           file: ./Dockerfile
@@ -80,7 +80,7 @@ jobs:
       - name: Extract metadata for main branch
         if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'main'
         id: meta-main
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf # v5
         with:
           images: |
             ${{ github.repository_owner }}/threatsea
@@ -95,7 +95,7 @@ jobs:
 
       - name: Build and push for main branch
         if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'main'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7
         with:
           context: .
           file: ./Dockerfile
