@@ -29,7 +29,7 @@ export const useMeasureSuggestions = ({ selectedThreat, projectId, catalogId }: 
         () =>
             measures.filter((measure) => {
                 return measureImpacts.some((measureImpact) => {
-                    return measureImpact.measureId === measure.id && measureImpact.threatId === selectedThreat.id;
+                    return measureImpact.measureId === measure.id && measureImpact.childThreatId === selectedThreat.id;
                 });
             }),
         [selectedThreat, measures, measureImpacts]
@@ -46,7 +46,7 @@ export const useMeasureSuggestions = ({ selectedThreat, projectId, catalogId }: 
                         measureImpact.measureId === measure.id &&
                         threats.some((threat) => {
                             return (
-                                measureImpact.threatId === threat.id &&
+                                measureImpact.childThreatId === threat.id &&
                                 threat.attacker === selectedThreat.attacker &&
                                 threat.pointOfAttack === selectedThreat.pointOfAttack
                             );

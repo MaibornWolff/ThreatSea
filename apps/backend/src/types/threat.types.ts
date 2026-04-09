@@ -21,6 +21,7 @@ import {
 } from "#middlewares/input-validations/validator-messages.js";
 import { Type } from "class-transformer";
 import { Trim } from "#middlewares/input-validations/trim.decorator.js";
+import { AssetResponse } from "./asset.types.js";
 
 export class ThreatIdParam extends ProjectIdParam {
     @IsDefined({ message: PARAM_MUST_EXIST_MESSAGE("threatId") })
@@ -103,5 +104,5 @@ export interface ExtendedThreatResponse extends ThreatResponse {
     componentName: string | null;
     componentType: number | ComponentType | null;
     interfaceName: string | null;
-    assets: { id: number; name: string }[];
+    assets: AssetResponse[];
 }

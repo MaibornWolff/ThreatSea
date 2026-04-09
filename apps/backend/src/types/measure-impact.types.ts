@@ -51,13 +51,13 @@ export class UpdateMeasureImpactRequest {
 }
 
 export class CreateMeasureImpactRequest extends UpdateMeasureImpactRequest {
-    @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("measureImpactId") })
-    @IsInt({ message: FIELD_MUST_BE_INT_MESSAGE("measureImpactId") })
+    @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("measureId") })
+    @IsInt({ message: FIELD_MUST_BE_INT_MESSAGE("measureId") })
     measureId!: number;
 
-    @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("threatId") })
-    @IsInt({ message: FIELD_MUST_BE_INT_MESSAGE("threatId") })
-    threatId!: number;
+    @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("childThreatId") })
+    @IsInt({ message: FIELD_MUST_BE_INT_MESSAGE("childThreatId") })
+    childThreatId!: number;
 }
 
 export interface MeasureImpactResponse extends CreateMeasureImpactRequest {

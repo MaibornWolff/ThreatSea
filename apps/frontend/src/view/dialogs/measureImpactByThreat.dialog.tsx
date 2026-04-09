@@ -39,7 +39,7 @@ import type { DialogValue } from "#application/reducers/dialogs.reducer.ts";
 
 interface FormValues {
     id: number | undefined;
-    threatId: number | "";
+    childThreatId: number | "";
     description: string;
     setsOutOfScope: boolean;
     impactsProbability: boolean;
@@ -78,15 +78,15 @@ const MeasureImpactByThreatDialog = ({
         projectId,
     });
 
-    const { setCurrentThreatId, damagePlaceholder, probabilityPlaceholder } = useMeasureImpactPlaceholder({
+    const { setCurrentChildThreatId, damagePlaceholder, probabilityPlaceholder } = useMeasureImpactPlaceholder({
         projectId,
     });
 
     useEffect(() => {
         if (measureImpact) {
-            setCurrentThreatId(measureImpact.threatId);
+            setCurrentChildThreatId(measureImpact.childThreatId);
         }
-    }, [measureImpact, setCurrentThreatId]);
+    }, [measureImpact, setCurrentChildThreatId]);
 
     const disableSelect = !!measureImpact;
 
@@ -101,7 +101,7 @@ const MeasureImpactByThreatDialog = ({
         defaultValues: {
             ...measureImpact,
             id: measureImpact?.id ?? undefined,
-            threatId: measureImpact?.threatId ?? "",
+            childThreatId: measureImpact?.childThreatId ?? "",
             description: measureImpact?.description ?? "",
             setsOutOfScope: measureImpact?.setsOutOfScope ?? false,
             impactsProbability: measureImpact?.impactsProbability ?? false,
@@ -170,19 +170,19 @@ const MeasureImpactByThreatDialog = ({
                 <Box sx={{ display: "flex", alignItems: "center", mt: 2, mb: 1 }}>
                     <FormControl
                         fullWidth
-                        error={!!errors?.threatId}
-                        data-testid="threatIdError"
+                        error={!!errors?.childThreatId}
+                        data-testid="childThreatIdError"
                         sx={{
                             "&:hover fieldset": {
                                 borderColor: "#fcac0c !important",
                             },
                         }}
                     >
-                        <InputLabel shrink sx={{ marginLeft: 1, fontSize: "1rem" }} id="select-threatId-label">
+                        <InputLabel shrink sx={{ marginLeft: 1, fontSize: "1rem" }} id="select-childThreatId-label">
                             {t("threat")}
                         </InputLabel>
                         <Controller
-                            name="threatId"
+                            name="childThreatId"
                             control={control}
                             rules={{
                                 required: t("errorMessages.threatRequired"),
@@ -190,18 +190,18 @@ const MeasureImpactByThreatDialog = ({
                             render={({ field: { value, onChange: fieldOnChange } }) => (
                                 <Select
                                     disabled={disableSelect}
-                                    labelId="select-threatId-label"
+                                    labelId="select-childThreatId-label"
                                     id="select-threat"
                                     label={t("threat")}
                                     value={value ?? ""}
                                     multiple={false}
-                                    {...register("threatId", {
+                                    {...register("childThreatId", {
                                         validate: (value) => value != null,
                                         valueAsNumber: true,
                                     })}
                                     onChange={(event: SelectChangeEvent<number | string>) => {
                                         const selectedValue = Number(event.target.value);
-                                        setCurrentThreatId(selectedValue);
+                                        setCurrentChildThreatId(selectedValue);
                                         fieldOnChange(selectedValue);
                                     }}
                                     MenuProps={{
@@ -276,7 +276,7 @@ const MeasureImpactByThreatDialog = ({
                                 </Select>
                             )}
                         />
-                        <FormHelperText>{errors?.threatId?.message}</FormHelperText>
+                        <FormHelperText>{errors?.childThreatId?.message}</FormHelperText>
                     </FormControl>
                 </Box>
 

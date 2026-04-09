@@ -3,10 +3,8 @@
  *     for the routing of the members.
  */
 import { NextFunction, Request, Response } from "express";
-import * as MeasureImpactsService from "#services/measureImpacts.service.js";
 import * as ChildThreatMeasureImpactsService from "#services/childThreatMeasureImpacts.service.js";
 import { getMeasure } from "#services/measures.service.js";
-import { cleanUpUnusedImpacts, getThreat } from "#services/threats.service.js";
 import { getChildThreat } from "#services/childThreats.service.js";
 import { NotFoundError } from "#errors/not-found.error.js";
 import { BadRequestError } from "#errors/bad-request.error.js";
@@ -19,7 +17,6 @@ import {
     UpdateMeasureImpactRequest,
 } from "#types/measure-impact.types.js";
 import { MeasureResponse } from "#types/measure.types.js";
-import { ThreatResponse } from "#types/threat.types.js";
 import { ChildThreatIdParam, ChildThreatResponse } from "#types/childThreat.types.js";
 
 /**
@@ -34,9 +31,8 @@ export async function getMeasureImpacts(
 ): Promise<void> {
     const projectId = request.params.projectId;
 
-    await cleanUpUnusedImpacts(projectId);
-
-    const measureImpacts: MeasureImpactResponse[] = await MeasureImpactsService.getMeasureImpactsByProject(projectId);
+    const measureImpacts: MeasureImpactResponse[] =
+        await ChildThreatMeasureImpactsService.getChildThreatMeasureImpactsByProject(projectId);
 
     response.json(measureImpacts);
 }
@@ -88,15 +84,16 @@ export async function getMeasureImpact(
     const projectId = request.params.projectId;
     const measureImpactId = request.params.measureImpactId;
 
-    const measureImpact: MeasureImpactResponse | null = await MeasureImpactsService.getMeasureImpact(measureImpactId);
+    const measureImpact: MeasureImpactResponse | null =
+        await ChildThreatMeasureImpactsService.getChildThreatMeasureImpact(measureImpactId);
     if (measureImpact === null) {
         next(new NotFoundError("Measure Impact not found"));
         return;
     }
 
     const measure: MeasureResponse | null = await getMeasure(measureImpact.measureId);
-    const threat: ThreatResponse | null = await getThreat(measureImpact.threatId);
-    if (measure?.projectId !== projectId || threat?.projectId !== projectId) {
+    const childThreat: ChildThreatResponse | null = await getChildThreat(measureImpact.childThreatId!);
+    if (measure?.projectId !== projectId || childThreat?.projectId !== projectId) {
         next(new BadRequestError("Measure Impact is not part of this project"));
         return;
     }
@@ -118,30 +115,30 @@ export async function createMeasureImpact(
 ): Promise<void> {
     const projectId = request.params.projectId;
     const measureId = request.body.measureId;
-    const threatId = request.body.threatId;
+    const childThreatId = request.body.childThreatId;
 
     const measure: MeasureResponse | null = await getMeasure(measureId);
-    const threat: ThreatResponse | null = await getThreat(threatId);
+    const childThreat: ChildThreatResponse | null = await getChildThreat(childThreatId);
 
     if (measure === null) {
         next(new NotFoundError("Measure not found"));
         return;
     }
-    if (threat === null) {
-        next(new NotFoundError("Threat not found"));
+    if (childThreat === null) {
+        next(new NotFoundError("Child Threat not found"));
         return;
     }
     if (measure.projectId !== projectId) {
         next(new BadRequestError("Measure is not part of this project"));
         return;
     }
-    if (threat.projectId !== projectId) {
-        next(new BadRequestError("Threat is not part of this project"));
+    if (childThreat.projectId !== projectId) {
+        next(new BadRequestError("Child Threat is not part of this project"));
         return;
     }
 
     try {
-        const measureImpact = await MeasureImpactsService.createMeasureImpact(request.body);
+        const measureImpact = await ChildThreatMeasureImpactsService.createChildThreatMeasureImpact(request.body);
 
         response.json(measureImpact);
     } catch (error) {
@@ -164,25 +161,24 @@ export async function updateMeasureImpact(
     const projectId = request.params.projectId!;
     const measureImpactId = request.params.measureImpactId!;
 
-    const measureImpact: MeasureImpactResponse | null = await MeasureImpactsService.getMeasureImpact(measureImpactId);
+    const measureImpact: MeasureImpactResponse | null =
+        await ChildThreatMeasureImpactsService.getChildThreatMeasureImpact(measureImpactId);
     if (measureImpact === null) {
         next(new NotFoundError("Measure Impact not found"));
         return;
     }
 
     const measure: MeasureResponse | null = await getMeasure(measureImpact.measureId);
-    const threat: ThreatResponse | null = await getThreat(measureImpact.threatId);
-    if (measure?.projectId !== projectId || threat?.projectId !== projectId) {
+    const childThreat: ChildThreatResponse | null = await getChildThreat(measureImpact.childThreatId!);
+    if (measure?.projectId !== projectId || childThreat?.projectId !== projectId) {
         next(new BadRequestError("Measure Impact is not part of this project"));
         return;
     }
 
     const data = request.body;
     try {
-        const updatedMeasureImpact: MeasureImpactResponse = await MeasureImpactsService.updateMeasureImpact(
-            measureImpactId,
-            data
-        );
+        const updatedMeasureImpact: MeasureImpactResponse =
+            await ChildThreatMeasureImpactsService.updateChildThreatMeasureImpact(measureImpactId, data);
 
         response.json(updatedMeasureImpact);
     } catch (error) {
@@ -205,20 +201,21 @@ export async function deleteMeasureImpact(
     const projectId = request.params.projectId!;
     const measureImpactId = request.params.measureImpactId!;
 
-    const measureImpact: MeasureImpactResponse | null = await MeasureImpactsService.getMeasureImpact(measureImpactId);
+    const measureImpact: MeasureImpactResponse | null =
+        await ChildThreatMeasureImpactsService.getChildThreatMeasureImpact(measureImpactId);
     if (measureImpact === null) {
         next(new NotFoundError("Measure Impact not found"));
         return;
     }
 
     const measure = await getMeasure(measureImpact.measureId);
-    const threat = await getThreat(measureImpact.threatId);
-    if (measure?.projectId !== projectId || threat?.projectId !== projectId) {
+    const childThreat = await getChildThreat(measureImpact.childThreatId!);
+    if (measure?.projectId !== projectId || childThreat?.projectId !== projectId) {
         next(new BadRequestError("Measure Impact is not part of this project"));
         return;
     }
 
-    await MeasureImpactsService.deleteMeasureImpact(measureImpactId);
+    await ChildThreatMeasureImpactsService.deleteChildThreatMeasureImpact(measureImpactId);
 
     response.sendStatus(204);
 }
