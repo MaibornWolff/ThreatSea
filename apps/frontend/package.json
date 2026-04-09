@@ -65,7 +65,7 @@
     "eslint": "9.39.4",
     "jsdoc": "4.0.5",
     "vite": "8.0.7",
-    "vite-plugin-svgr": "4.5.0"
+    "vite-plugin-svgr": "5.2.0"
   },
   "browserslist": {
     "production": [
