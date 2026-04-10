@@ -33,6 +33,13 @@ genericThreatsRouter.get(
 );
 
 genericThreatsRouter.get(
+    `/with-children-extended`,
+    ValidateParamHandler(ProjectIdParam),
+    CheckProjectRoleHandler(USER_ROLES.VIEWER),
+    getGenericThreatsWithExtendedChildren
+);
+
+genericThreatsRouter.get(
     `/:${idParam}`,
     ValidateParamHandler(GenericThreatIdParam),
     CheckProjectRoleHandler(USER_ROLES.VIEWER),

@@ -44,6 +44,7 @@ import { SearchField } from "../components/search-field.component";
 import { useThreatMeasuresList } from "#application/hooks/use-threat-measures-list.hook.ts";
 import { useConfirm } from "../../application/hooks/use-confirm.hook";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
+import type { ExtendedChildThreat } from "#api/types/child-threat.types.ts";
 import type { DialogValue } from "#application/reducers/dialogs.reducer.ts";
 import type { ExtendedProject } from "#api/types/project.types.ts";
 import type { ThreatMeasure } from "#application/hooks/use-threat-measures-list.hook.ts";
@@ -64,10 +65,12 @@ interface FormValues {
     measures: ThreatMeasure[];
 }
 
-interface ThreatFormValues extends FormValues, Omit<ExtendedThreat, keyof FormValues>, DialogValue {}
+type EditableThreat = ExtendedThreat | ExtendedChildThreat;
+
+interface ThreatFormValues extends FormValues, Omit<EditableThreat, keyof FormValues>, DialogValue {}
 
 interface AddThreatDialogProps extends DialogProps {
-    threat: ExtendedThreat;
+    threat: EditableThreat;
     project: ExtendedProject;
     userRole: USER_ROLES | undefined;
 }
