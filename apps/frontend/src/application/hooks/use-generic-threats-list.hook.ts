@@ -3,6 +3,26 @@ import { GenericThreatsAPI } from "#api/generic-threats.api.ts";
 import type { GenericThreatWithExtendedChildren } from "#api/types/generic-threat.types.ts";
 import type { ExtendedChildThreat } from "#api/types/child-threat.types.ts";
 
+export type ExtendedChildThreatWithMetrics = ExtendedChildThreat & {
+    damage: number;
+    risk: number;
+};
+
+const calcChildThreatDamage = (threat: ExtendedChildThreat) => {
+    return threat.assets.reduce((value, asset) => {
+        if (threat.confidentiality && value < asset.confidentiality) {
+            value = asset.confidentiality;
+        }
+        if (threat.integrity && value < asset.integrity) {
+            value = asset.integrity;
+        }
+        if (threat.availability && value < asset.availability) {
+            value = asset.availability;
+        }
+        return value;
+    }, 0);
+};
+
 export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
     const [isPending, setIsPending] = useState<boolean>(false);
     const [genericThreats, setGenericThreats] = useState<GenericThreatWithExtendedChildren[]>([]);
@@ -10,7 +30,7 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
 
     const [expandedGenericThreatIds, setExpandedGenericThreatIds] = useState<Record<number, boolean>>({});
     const [childThreatsByGenericThreatId, setChildThreatsByGenericThreatId] = useState<
-        Record<number, ExtendedChildThreat[]>
+        Record<number, ExtendedChildThreatWithMetrics[]>
     >({});
     const [loadingChildrenByGenericThreatId, setLoadingChildrenByGenericThreatId] = useState<Record<number, boolean>>(
         {}
@@ -32,10 +52,20 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
                 return;
             }
 
-            const childThreatsMap = sortedThreats.reduce<Record<number, ExtendedChildThreat[]>>((result, threat) => {
-                result[threat.id] = threat.children;
-                return result;
-            }, {});
+            const childThreatsMap = sortedThreats.reduce<Record<number, ExtendedChildThreatWithMetrics[]>>(
+                (result, threat) => {
+                    result[threat.id] = threat.children.map((childThreat) => {
+                        const damage = calcChildThreatDamage(childThreat);
+                        return {
+                            ...childThreat,
+                            damage,
+                            risk: childThreat.probability * damage,
+                        };
+                    });
+                    return result;
+                },
+                {}
+            );
             setChildThreatsByGenericThreatId(childThreatsMap);
 
             const loadedState = sortedThreats.reduce<Record<number, boolean>>((result, threat) => {
