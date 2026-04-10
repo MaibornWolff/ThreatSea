@@ -160,10 +160,6 @@ const ThreatsPageBody = () => {
         setAssetAnchorEl(event.currentTarget);
     };
 
-    const getChildThreatDamage = (threat: { confidentiality: boolean; integrity: boolean; availability: boolean }) => {
-        return [threat.confidentiality, threat.integrity, threat.availability].filter(Boolean).length;
-    };
-
     return (
         <Box sx={{ overflow: "hidden", height: "100%", boxSizing: "border-box" }}>
             <LinearProgress
@@ -713,11 +709,10 @@ const ThreatsPageBody = () => {
                                                                         {childThreat.probability}
                                                                     </CustomTableCell>
                                                                     <CustomTableCell>
-                                                                        {getChildThreatDamage(childThreat)}
+                                                                        {childThreat.damage}
                                                                     </CustomTableCell>
                                                                     <CustomTableCell>
-                                                                        {childThreat.probability *
-                                                                            getChildThreatDamage(childThreat)}
+                                                                        {childThreat.risk}
                                                                     </CustomTableCell>
                                                                     <CustomTableCell showBorder={true}>
                                                                         {childThreat.doneEditing ? (
