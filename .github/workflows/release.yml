@@ -2,17 +2,19 @@ name: Release
 
 on:
   workflow_call:
+  workflow_dispatch:
 
 jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    if: github.repository_owner == 'MaibornWolff' && github.ref_type == 'branch' && (github.ref_name == 'main' || github.ref_name == 'next')
+    if: github.repository_owner == 'MaibornWolff' && github.ref_type == 'branch' && ((github.event_name == 'push' && github.ref_name == 'main') || (github.event_name == 'workflow_dispatch' && github.ref_name == 'next'))
     permissions:
       contents: write
       packages: write
-      issues: write
-      pull-requests: write
+    outputs:
+      new_release_published: ${{ steps.release.outputs.new_release_published }}
+      new_release_version: ${{ steps.release.outputs.new_release_version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -105,3 +107,15 @@ jobs:
           labels: ${{ steps.meta-main.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  create-sbom:
+    name: Create SBOM
+    needs: release
+    if: needs.release.outputs.new_release_published == 'true'
+    permissions:
+      contents: write
+    uses: ./.github/workflows/create_sbom.yml
+    with:
+      version: ${{ needs.release.outputs.new_release_version }}
+      tag: v${{ needs.release.outputs.new_release_version }}
+    secrets: inherit

@@ -168,12 +168,10 @@ jobs:
 
   release:
     name: Create and push Release
-    if: github.repository_owner == 'MaibornWolff' && github.ref_type == 'branch' && (github.ref_name == 'main' || github.ref_name == 'next')
+    if: github.repository_owner == 'MaibornWolff' && github.ref_type == 'branch' && github.ref_name == 'main'
     permissions:
       contents: write
       packages: write
-      issues: write
-      pull-requests: write
     needs:
       - test-backend
       - test-frontend
