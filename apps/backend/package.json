@@ -39,7 +39,7 @@
     "jsonwebtoken": "9.0.3",
     "nocache": "4.0.0",
     "node-fetch": "3.3.2",
-    "openid-client": "6.8.2",
+    "openid-client": "6.8.3",
     "pg": "8.20.0",
     "reflect-metadata": "0.2.2",
     "socket.io": "4.8.3"
