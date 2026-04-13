@@ -12,6 +12,8 @@ jobs:
     permissions:
       contents: write
       packages: write
+      issues: write
+      pull-requests: write
     outputs:
       new_release_published: ${{ steps.release.outputs.new_release_published }}
       new_release_version: ${{ steps.release.outputs.new_release_version }}

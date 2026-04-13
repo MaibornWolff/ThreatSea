@@ -172,6 +172,8 @@ jobs:
     permissions:
       contents: write
       packages: write
+      issues: write
+      pull-requests: write
     needs:
       - test-backend
       - test-frontend
