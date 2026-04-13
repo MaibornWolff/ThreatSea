@@ -6,7 +6,7 @@ import { NextFunction, Request, Response } from "express";
 import { BadRequestError } from "#errors/bad-request.error.js";
 import { NotFoundError } from "#errors/not-found.error.js";
 import {
-    GenericThreatWithChExtendedChildrenResponse,
+    GenericThreatWithExtendedChildrenResponse,
     GenericThreatIdParam,
     GenericThreatResponse,
 } from "#types/genericThreat.types.js";
@@ -67,8 +67,8 @@ export async function getGenericThreat(
  * @param {Response} response - The http response.
  */
 export async function getGenericThreatsWithExtendedChildren(
-    request: Request<ProjectIdParam, GenericThreatWithChExtendedChildrenResponse[], void>,
-    response: Response<GenericThreatWithChExtendedChildrenResponse[]>
+    request: Request<ProjectIdParam, GenericThreatWithExtendedChildrenResponse[], void>,
+    response: Response<GenericThreatWithExtendedChildrenResponse[]>
 ): Promise<void> {
     const projectId = request.params.projectId;
 
