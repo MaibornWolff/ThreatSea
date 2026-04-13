@@ -13,7 +13,6 @@ import { ProjectIdParam } from "#types/project.types.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
 import { SystemResponse, UpdateSystemRequest } from "#types/system.types.js";
 import { ValidateParamHandler } from "#middlewares/input-validations/input-validation.middleware.js";
-import { childThreatsRouter } from "./child-threat.router.js";
 
 export const systemRouter = express.Router({ mergeParams: true });
 
@@ -32,7 +31,6 @@ systemRouter.put<ProjectIdParam, SystemResponse, UpdateSystemRequest>(
 );
 
 /** Put threats, measures and MeasureImpacts into this router */
-systemRouter.use("/childThreats", childThreatsRouter);
 systemRouter.use("/genericThreats", genericThreatsRouter);
 systemRouter.use("/threats", threatsRouter);
 systemRouter.use("/measures", measuresRouter);

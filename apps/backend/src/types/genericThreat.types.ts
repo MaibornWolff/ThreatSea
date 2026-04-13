@@ -69,6 +69,6 @@ export interface GenericThreatResponse extends CreateGenericThreatRequest {
     updatedAt: string;
 }
 
-export interface GenericThreatWithChExtendedChildrenResponse extends GenericThreatResponse {
+export interface GenericThreatWithExtendedChildrenResponse extends GenericThreatResponse {
     children: ExtendedChildThreatResponse[];
 }

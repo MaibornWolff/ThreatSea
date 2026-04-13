@@ -7,14 +7,12 @@ import {
     createMeasureImpact,
     deleteMeasureImpact,
     getMeasureImpact,
-    getMeasureImpactsByChildThreat,
     getMeasureImpacts,
     updateMeasureImpact,
 } from "#controllers/measureImpacts.controller.js";
 import { CheckProjectRoleHandler } from "#guards/authorisation.guard.js";
 import { ProjectIdParam } from "#types/project.types.js";
 import {
-    ChildThreatMeasureImpactResponse,
     CreateMeasureImpactRequest,
     MeasureImpactIdParam,
     MeasureImpactResponse,
@@ -25,7 +23,6 @@ import {
     ValidateBodyHandler,
     ValidateParamHandler,
 } from "#middlewares/input-validations/input-validation.middleware.js";
-import { ChildThreatIdParam } from "#types/childThreat.types.js";
 
 export const measureImpactRouter = express.Router({ mergeParams: true });
 const idParam = "measureImpactId";
@@ -35,13 +32,6 @@ measureImpactRouter.get<ProjectIdParam, MeasureImpactResponse[], void>(
     ValidateParamHandler(ProjectIdParam),
     CheckProjectRoleHandler(USER_ROLES.VIEWER),
     getMeasureImpacts
-);
-
-measureImpactRouter.get<ChildThreatIdParam, ChildThreatMeasureImpactResponse[], void>(
-    "/by-child-threat/:childThreatId",
-    ValidateParamHandler(ChildThreatIdParam),
-    CheckProjectRoleHandler(USER_ROLES.VIEWER),
-    getMeasureImpactsByChildThreat
 );
 
 measureImpactRouter.get<MeasureImpactIdParam, MeasureImpactResponse, void>(

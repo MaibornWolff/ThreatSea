@@ -5,7 +5,7 @@
 import { and, eq, getTableColumns } from "drizzle-orm";
 import { db, TransactionType } from "#db/index.js";
 import { genericThreats, GenericThreat, CreateGenericThreat, UpdateGenericThreat } from "#db/schema.js";
-import { GenericThreatWithChExtendedChildrenResponse } from "#types/genericThreat.types.js";
+import { GenericThreatWithExtendedChildrenResponse } from "#types/genericThreat.types.js";
 import { getPointsOfAttack } from "#services/points-of-attack.service.js";
 import { POINTS_OF_ATTACK } from "#types/points-of-attack.types.js";
 
@@ -44,7 +44,7 @@ export async function getGenericThreatsByProjectId(
 
 export async function getGenericThreatsWithExtendedChildren(
     projectId: number
-): Promise<GenericThreatWithChExtendedChildrenResponse[]> {
+): Promise<GenericThreatWithExtendedChildrenResponse[]> {
     const genericThreatsWithExtendedChildren = await db.query.genericThreats.findMany({
         where: eq(genericThreats.projectId, projectId),
         with: {
