@@ -37,7 +37,7 @@ jobs:
         if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'main'
         uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Login to GitHub Container Registry

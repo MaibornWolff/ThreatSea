@@ -30,11 +30,11 @@ Please see the [Contributing Guidelines](CONTRIBUTING.md) for more information o
 
 ## Releases
 
-ThreatSea uses [semantic-release](https://semantic-release.gitbook.io/) for automated versioning and releases. Releases are automatically created when changes are pushed to the `main` or `next` branch, following [Conventional Commits](https://www.conventionalcommits.org/) specification.
+ThreatSea uses [semantic-release](https://semantic-release.gitbook.io/) for automated versioning and releases. Releases are automatically created when changes are pushed to the `main` branch, following [Conventional Commits](https://www.conventionalcommits.org/) specification.
 
 ### Release Process
 
-1. **Automatic Releases**: When code is pushed to `main` or `next` branch, the CI pipeline will:
+1. **Automatic Releases**: When code is pushed to `main` branch, the CI pipeline will:
    - Run all tests and quality checks
    - Analyze commit messages to determine the next version number
    - Create a GitHub release with release notes
