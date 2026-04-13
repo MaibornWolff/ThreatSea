@@ -8,6 +8,7 @@ import { childThreats, ChildThreat, CreateChildThreat, UpdateChildThreat } from 
 import { getGenericThreat } from "./genericThreats.service.js";
 import { getCatalogThreatById } from "./catalog-threats.service.js";
 import { NotFoundError } from "#errors/not-found.error.js";
+import { CHILD_THREAT_STATUSES } from "#types/child-threat-statuses.types.js";
 
 // ------------------------------------------------------------------------------
 // TODO: RENAMING TO THREAT INSTEAD OF CHILD THREAT LATER ON
@@ -88,7 +89,7 @@ export async function createThreatForGenericThreat(
         pointOfAttack: genericThreat.pointOfAttack,
         probability: catalogThreat.probability,
         pointOfAttackId: genericThreat.pointOfAttackId,
-        doneEditing: false,
+        status: CHILD_THREAT_STATUSES.NEW,
         genericThreatId: genericThreatId,
     };
 

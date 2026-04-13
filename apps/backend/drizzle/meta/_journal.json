@@ -36,6 +36,13 @@
       "when": 1775632598045,
       "tag": "0004_add_child_threat_measure_impacts",
       "breakpoints": false
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1776092638564,
+      "tag": "0005_add_status_to_child_threat",
+      "breakpoints": false
     }
   ]
 }

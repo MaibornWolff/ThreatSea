@@ -16,6 +16,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { LANGUAGES } from "#types/languages.type.js";
 import { ATTACKERS } from "#types/attackers.types.js";
+import { CHILD_THREAT_STATUSES } from "../types/child-threat-statuses.types.js";
 import { CONFIDENTIALITY_LEVELS } from "#types/confidentiality-levels.types.js";
 import { POINTS_OF_ATTACK } from "#types/points-of-attack.types.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
@@ -31,6 +32,8 @@ export const AttackersEnum = pgEnum("attacker", ATTACKERS);
 export const ConfidentialityLevelsEnum = pgEnum("confidentiality_level", CONFIDENTIALITY_LEVELS);
 
 export const PointsOfAttackEnum = pgEnum("point_of_attack", POINTS_OF_ATTACK);
+
+export const ChildThreatStatusesEnum = pgEnum("child_threat_status", CHILD_THREAT_STATUSES);
 
 export type CreateAsset = Omit<typeof assets.$inferInsert, DefaultFields>;
 export type UpdateAsset = Omit<CreateAsset, "projectId">;
@@ -448,7 +451,8 @@ export const childThreats = pgTable(
         confidentiality: boolean().notNull(),
         integrity: boolean().notNull(),
         availability: boolean().notNull(),
-        doneEditing: boolean().notNull(),
+        status: ChildThreatStatusesEnum().notNull().default(CHILD_THREAT_STATUSES.NEW),
+
         createdAt: timestamp({ mode: "string", withTimezone: true })
             .notNull()
             .default(sql`now()`),

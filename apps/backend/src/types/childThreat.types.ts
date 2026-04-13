@@ -1,6 +1,7 @@
 import { ProjectIdParam } from "#types/project.types.js";
 import { POINTS_OF_ATTACK } from "./points-of-attack.types.js";
 import { ATTACKERS } from "./attackers.types.js";
+import { CHILD_THREAT_STATUSES } from "./child-threat-statuses.types.js";
 import { IsBoolean, IsDefined, IsEnum, IsInt, IsNotEmpty, IsString, Length, Max, Min } from "class-validator";
 import {
     FIELD_MUST_BE_BOOLEAN_MESSAGE,
@@ -66,9 +67,12 @@ export class UpdateChildThreatRequest {
     @IsBoolean({ message: FIELD_MUST_BE_BOOLEAN_MESSAGE("availability") })
     availability!: boolean;
 
-    @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("doneEditing") })
-    @IsBoolean({ message: FIELD_MUST_BE_BOOLEAN_MESSAGE("doneEditing") })
-    doneEditing!: boolean;
+    @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("status") })
+    @IsString({ message: FIELD_MUST_BE_STRING_MESSAGE("status") })
+    @IsEnum(CHILD_THREAT_STATUSES, {
+        message: FIELD_MUST_BE_ONE_OF_MESSAGE("status", Object.values(CHILD_THREAT_STATUSES)),
+    })
+    status!: CHILD_THREAT_STATUSES;
 }
 
 export class CreateChildThreatRequest extends UpdateChildThreatRequest {
