@@ -169,8 +169,8 @@ importers:
         specifier: 6.5.0
         version: 6.5.0(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.5))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.5))(@types/react@19.2.14)(react@19.2.5))(@types/react@19.2.14)(react@19.2.5)
       '@react-pdf/renderer':
-        specifier: 4.4.0
-        version: 4.4.0(react@19.2.5)
+        specifier: 4.4.1
+        version: 4.4.1(react@19.2.5)
       '@react-pdf/types':
         specifier: 2.10.0
         version: 2.10.0
@@ -1180,8 +1180,8 @@ packages:
   '@react-pdf/render@4.4.1':
     resolution: {integrity: sha512-TBaEw6F+IBI4oVHUF7LL2OJX87unRrk6r7mkEmgjehN9BV5LF53I8CzVtdAchuO1+YhvE4MoMzkNelA+X2luRA==}
 
-  '@react-pdf/renderer@4.4.0':
-    resolution: {integrity: sha512-TtCcz1vyYD6fddhvBagwr9Aj3gRFLCqvduERQyNhTzHJi3zAKayHvJFr2PxcP4sRyIDRhibDW6ApqNhTqIVPoQ==}
+  '@react-pdf/renderer@4.4.1':
+    resolution: {integrity: sha512-mK7xyCdDUagO1kg8jraad3aUzdVAGBru08qyjjp8FMhGsh4BcuPGa0SycQ8Pv8EDEdyEOfmiE+XI1sBybSLwaQ==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
@@ -5341,7 +5341,7 @@ snapshots:
       parse-svg-path: 0.1.2
       svg-arc-to-cubic-bezier: 3.2.0
 
-  '@react-pdf/renderer@4.4.0(react@19.2.5)':
+  '@react-pdf/renderer@4.4.1(react@19.2.5)':
     dependencies:
       '@babel/runtime': 7.29.2
       '@react-pdf/fns': 3.1.3
