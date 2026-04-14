@@ -16,6 +16,9 @@
     "lint": {
       "dependsOn": ["^lint"]
     },
+    "oxlint": {
+      "dependsOn": ["^oxlint"]
+    },
     "lint:fix": {
       "dependsOn": ["^lint:fix"]
     },

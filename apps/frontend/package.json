@@ -14,6 +14,7 @@
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
     "lint": "eslint .",
+    "oxlint": "oxlint .",
     "lint:fix": "eslint --fix .",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
@@ -73,6 +74,7 @@
     "eslint": "9.39.4",
     "jsdoc": "4.0.5",
     "jsdom": "29.0.2",
+    "oxlint": "1.60.0",
     "vite": "8.0.8",
     "vite-plugin-svgr": "5.2.0",
     "vitest": "4.1.4"
