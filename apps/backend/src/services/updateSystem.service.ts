@@ -1,9 +1,8 @@
 /**
  * Module that defines the update-system use case orchestration.
  */
-import { and, eq } from "drizzle-orm";
 import { db, TransactionType } from "#db/index.js";
-import { CatalogThreat, GenericThreat, System, threats } from "#db/schema.js";
+import { CatalogThreat, GenericThreat, System } from "#db/schema.js";
 import { NotFoundError } from "#errors/not-found.error.js";
 import { PointOfAttack, UpdateSystemRequest } from "#types/system.types.js";
 import { getCatalogThreatsByProjectId } from "#services/catalog-threats.service.js";
@@ -17,7 +16,6 @@ import {
     deleteGenericThreatsByPointOfAttackId,
     getGenericThreatsByProjectId,
 } from "#services/genericThreats.service.js";
-import { createThreat } from "#services/threats.service.js";
 import * as systemService from "#services/system.service.js";
 
 /**
@@ -103,10 +101,6 @@ async function deleteThreatsByPointsOfAttack(
         await deleteGenericThreatsByPointOfAttackId(pointOfAttack.id, pointOfAttack.projectId, transaction);
 
         await deleteChildThreatsByPointOfAttackId(pointOfAttack.id, pointOfAttack.projectId, transaction);
-
-        await transaction
-            .delete(threats)
-            .where(and(eq(threats.pointOfAttackId, pointOfAttack.id), eq(threats.projectId, pointOfAttack.projectId)));
     }
 }
 
@@ -128,31 +122,9 @@ async function createThreatsByPointsOfAttack(
                 id: catalogThreatId,
                 name,
                 description,
-                probability,
                 attacker,
-                confidentiality,
-                integrity,
-                availability,
                 pointOfAttack: catalogThreatPointOfAttack,
             } = catalogThreat;
-
-            await createThreat(
-                {
-                    projectId,
-                    pointOfAttackId: pointOfAttack.id,
-                    catalogThreatId,
-                    name,
-                    description,
-                    attacker,
-                    pointOfAttack: catalogThreatPointOfAttack,
-                    probability,
-                    confidentiality,
-                    integrity,
-                    availability,
-                    doneEditing: false,
-                },
-                transaction
-            );
 
             let genericThreat = existingGenericThreats.find(
                 (existingThreat) =>
