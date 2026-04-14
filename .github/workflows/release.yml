@@ -4,6 +4,9 @@ on:
   workflow_call:
   workflow_dispatch:
 
+concurrency:
+  group: release-${{ github.repository }}
+
 jobs:
   release:
     name: Release
