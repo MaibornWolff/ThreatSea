@@ -1,0 +1,126 @@
+name: Release
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+concurrency:
+  group: release-${{ github.repository }}
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'MaibornWolff' && github.ref_type == 'branch' && ((github.event_name == 'push' && github.ref_name == 'main') || (github.event_name == 'workflow_dispatch' && github.ref_name == 'next'))
+    permissions:
+      contents: write
+      packages: write
+      issues: write
+      pull-requests: write
+    outputs:
+      new_release_published: ${{ steps.release.outputs.new_release_published }}
+      new_release_version: ${{ steps.release.outputs.new_release_version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Repository
+        uses: ./.github/actions/repository-setup
+
+      - name: Create Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: release
+        run: |
+          pnpm exec semantic-release
+
+      - name: Login to Docker Hub
+        if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'main'
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to GitHub Container Registry
+        if: steps.release.outputs.new_release_published == 'true'
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up QEMU
+        if: steps.release.outputs.new_release_published == 'true'
+        uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a # v4
+
+      - name: Set up Docker Buildx
+        if: steps.release.outputs.new_release_published == 'true'
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4
+
+      - name: Extract metadata for next branch (prerelease)
+        if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'next'
+        id: meta-next
+        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf # v5
+        with:
+          images: |
+            ghcr.io/maibornwolff/threatsea
+          tags: |
+            type=semver,pattern={{version}},value=${{ steps.release.outputs.new_release_version }}
+            type=ref,event=branch
+            type=sha
+
+      - name: Build and push for next branch (prerelease)
+        if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'next'
+        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta-next.outputs.tags }}
+          labels: ${{ steps.meta-next.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Extract metadata for main branch
+        if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'main'
+        id: meta-main
+        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf # v5
+        with:
+          images: |
+            maibornwolff/threatsea
+            ghcr.io/maibornwolff/threatsea
+          tags: |
+            type=semver,pattern={{version}},value=${{ steps.release.outputs.new_release_version }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ steps.release.outputs.new_release_version }}
+            type=semver,pattern={{major}},value=${{ steps.release.outputs.new_release_version }}
+            type=raw,value=latest
+            type=ref,event=branch
+            type=sha
+
+      - name: Build and push for main branch
+        if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'main'
+        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta-main.outputs.tags }}
+          labels: ${{ steps.meta-main.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  create-sbom:
+    name: Create SBOM
+    needs: release
+    if: needs.release.outputs.new_release_published == 'true'
+    permissions:
+      contents: write
+    uses: ./.github/workflows/create_sbom.yml
+    with:
+      version: ${{ needs.release.outputs.new_release_version }}
+      tag: v${{ needs.release.outputs.new_release_version }}
+    secrets: inherit
