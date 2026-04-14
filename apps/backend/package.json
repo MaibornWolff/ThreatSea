@@ -14,9 +14,8 @@
     "start": "node --env-file .env dist/src/index.js",
     "build": "tsc --project tsconfig.build.json && tsc-alias",
     "type-check": "tsc --noEmit",
-    "lint": "eslint .",
-    "oxlint": "oxlint .",
-    "lint:fix": "eslint --fix .",
+    "lint": "oxlint .",
+    "lint:fix": "oxlint --fix .",
     "test": "vitest run",
     "test:watch": "vitest watch",
     "test:ci": "vitest run --reporter=default --reporter=junit --outputFile.junit=./junit.xml --coverage",
@@ -49,7 +48,6 @@
     "socket.io": "4.8.3"
   },
   "devDependencies": {
-    "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/compression": "1.8.1",
     "@types/cookie-parser": "1.4.10",
@@ -62,7 +60,6 @@
     "@types/supertest": "7.2.0",
     "@vitest/coverage-v8": "4.1.4",
     "drizzle-kit": "0.31.10",
-    "eslint": "9.39.4",
     "nanoid": "5.1.7",
     "oxlint": "1.60.0",
     "supertest": "7.2.2",
@@ -72,7 +69,7 @@
   },
   "lint-staged": {
     "*.{cjs,js,jsx,mjs,ts,tsx}": [
-      "eslint"
+      "oxlint"
     ],
     "*": "oxfmt --check --no-error-on-unmatched-pattern"
   }

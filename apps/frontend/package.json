@@ -13,9 +13,8 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
-    "lint": "eslint .",
-    "oxlint": "oxlint .",
-    "lint:fix": "eslint --fix .",
+    "lint": "oxlint .",
+    "lint:fix": "oxlint --fix .",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
     "test:unit:coverage": "vitest run --coverage",
@@ -58,9 +57,7 @@
     "web-vitals": "5.2.0"
   },
   "devDependencies": {
-    "@eslint/js": "9.39.4",
     "@playwright/test": "1.59.1",
-    "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "16.3.2",
@@ -71,7 +68,6 @@
     "@vitejs/plugin-react": "6.0.1",
     "@vitest/coverage-v8": "4.1.4",
     "dotenv": "17.4.2",
-    "eslint": "9.39.4",
     "jsdoc": "4.0.5",
     "jsdom": "29.0.2",
     "oxlint": "1.60.0",
@@ -81,7 +77,7 @@
   },
   "lint-staged": {
     "*.{cjs,js,jsx,mjs,ts,tsx}": [
-      "eslint"
+      "oxlint"
     ],
     "*": "oxfmt --check --no-error-on-unmatched-pattern"
   },

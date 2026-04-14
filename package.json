@@ -6,7 +6,6 @@
     "build": "turbo run build",
     "test": "turbo run test",
     "lint": "turbo run lint",
-    "oxlint": "turbo run oxlint",
     "lint:fix": "turbo run lint:fix",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
