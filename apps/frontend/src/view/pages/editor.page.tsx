@@ -338,7 +338,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         return () => {
             updateAutoSaveOnClick?.(undefined);
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        // oxlint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const resetSaveTimeout = useEffectEvent((): void => {
@@ -439,7 +439,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                 gridY: gridPositionY,
             });
         },
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        // oxlint-disable-next-line react-hooks/exhaustive-deps
         [layerPosition, moveComponent]
     );
 
@@ -967,7 +967,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
             offsetX,
             offsetY,
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        // oxlint-disable-next-line react-hooks/exhaustive-deps
     }, [layerPosition, stageRef?.current]);
 
     useEffect(() => {
@@ -1325,3 +1325,4 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
 };
 
 export const EditorPage = memo(CreatePage(HeaderNavigation, EditorPageBody, true));
+EditorPage.displayName = "EditorPage";

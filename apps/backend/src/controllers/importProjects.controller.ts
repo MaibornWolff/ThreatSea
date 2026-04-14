@@ -223,7 +223,6 @@ export async function importProject(request: Request<void>, response: Response, 
                 oldMeasureImpact.threatId = threatIdsDict.get(oldMeasureImpact.threatId)!;
                 oldMeasureImpact.measureId = measureIdsDict.get(oldMeasureImpact.measureId)!;
 
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const { id: _id, ...insertMeasureImpact } = oldMeasureImpact;
 
                 await createMeasureImpact(insertMeasureImpact, tx);
@@ -231,7 +230,6 @@ export async function importProject(request: Request<void>, response: Response, 
 
             for (const componentType of body.componentTypes as ComponentType[]) {
                 componentType.projectId = newProjectId;
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const { id: _id, ...insertComponentType } = componentType;
                 await createComponentType(insertComponentType, tx);
             }

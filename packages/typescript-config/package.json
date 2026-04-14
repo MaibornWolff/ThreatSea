@@ -6,12 +6,6 @@
     "access": "public"
   },
   "lint-staged": {
-    "*.{cjs,js,jsx,mjs,ts,tsx}": [
-      "eslint",
-      "prettier --check"
-    ],
-    "*.{html,json,md,yaml,yml,xml}": [
-      "prettier --check"
-    ]
+    "*": "oxfmt --check --no-error-on-unmatched-pattern"
   }
 }

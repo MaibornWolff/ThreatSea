@@ -7,8 +7,8 @@
     "test": "turbo run test",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
     "type-check": "turbo run type-check",
     "dependency-check": "turbo run dependency-check",
     "license-check": "turbo run license-check",
@@ -23,21 +23,16 @@
     "cross-env": "10.1.0",
     "husky": "9.1.7",
     "lint-staged": "16.4.0",
-    "prettier": "3.8.2",
+    "oxfmt": "0.45.0",
     "semantic-release": "25.0.3",
     "turbo": "2.9.6",
     "typescript": "6.0.2"
   },
-  "packageManager": "pnpm@10.33.0",
+  "lint-staged": {
+    "*": "oxfmt --check --no-error-on-unmatched-pattern"
+  },
   "engines": {
     "node": ">=24"
   },
-  "lint-staged": {
-    "*.{cjs,js,jsx,mjs,ts,tsx}": [
-      "prettier --check"
-    ],
-    "*.{html,json,md,yaml,yml,xml}": [
-      "prettier --check"
-    ]
-  }
+  "packageManager": "pnpm@10.33.0"
 }

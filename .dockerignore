@@ -7,8 +7,7 @@
 .husky
 .node-version
 .pnpm-store
-.prettierignore
-.prettierrc
+.oxfmtrc.json
 .vscode
 CODE_OF_CONDUCT.md
 CONTRIBUTING.md
@@ -24,6 +23,7 @@ SECURITY.md
 **/.env
 **/.env.example
 **/.env.test
+**/.oxlintrc.json
 **/.scannerwork
 **/.tmp
 **/.turbo
@@ -32,7 +32,6 @@ SECURITY.md
 **/coverage
 **/dist
 **/drizzle.config.ts
-**/eslint.config.mjs
 **/node_modules
 **/npm-debug.log
 **/playwright.*

@@ -49,7 +49,7 @@ Notes for a monorepo:
 - Turborepo:
   - Used to orchestrate tasks (build, test, lint) across apps/packages.
 - Other tools:
-  - As specified by each app (e.g., ESLint, Prettier, TypeScript, etc.).
+  - As specified by each app (e.g., Oxlint, Oxfmt, TypeScript, etc.).
 - Editors/IDEs:
   - Any you prefer, but please keep project-specific editor configs in place if present.
 - How to run tasks:
@@ -64,7 +64,6 @@ Notes for a monorepo:
   - /backend — Node.js Express backend
   - /frontend — React frontend
 - /packages
-  - /eslint-config — shared ESLint configuration
   - /typescript-config — shared TypeScript configuration
 
 Root-level and common files:
