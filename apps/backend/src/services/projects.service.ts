@@ -5,31 +5,31 @@ import { and, eq, getTableColumns } from "drizzle-orm";
 import { db, TransactionType } from "#db/index.js";
 import {
     Asset,
+    ChildThreat,
+    ChildThreatMeasureImpact,
     CreateProject,
     Measure,
-    MeasureImpact,
     Project,
     projects,
-    Threat,
     UpdateProject,
     usersProjects,
 } from "#db/schema.js";
-import { ExtendedThreat, getThreats } from "#services/threats.service.js";
-import { getPointsOfAttack } from "#services/points-of-attack.service.js";
+import { getGenericThreatsWithExtendedChildren } from "#services/genericThreats.service.js";
 import { findSystem } from "#services/system.service.js";
 import { getAssets } from "#services/assets.service.js";
 import { getMeasures } from "#services/measures.service.js";
-import { getMeasureImpactsByProject } from "#services/measureImpacts.service.js";
+import { getChildThreatMeasureImpactsByProject } from "#services/childThreatMeasureImpacts.service.js";
+import { ComponentType } from "#types/system.types.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
 
 /**
  * Calculates the damage produced for the assets by a threat.
  *
- * @param {ExtendedThreat} threat - Data of the current threat.
+ * @param {ReportThreat} threat - Data of the current threat.
  * @returns The max value of the security aspects of the assets.
  *     or 0 if none are specified.
  */
-function calcDamage(threat: ExtendedThreat) {
+function calcDamage(threat: ReportThreat) {
     const { confidentiality, integrity, availability, assets } = threat;
 
     return assets.reduce((value, asset) => {
@@ -57,10 +57,10 @@ function calcDamage(threat: ExtendedThreat) {
  * @returns Array of object of the transformed threat data.
  */
 function transformThreats(
-    threats: ExtendedThreat[],
+    threats: ReportThreat[],
     measuresWithIds: ExtendedMeasure[],
     assetsWithId: ExtendedAsset[],
-    measureImpacts: MeasureImpact[]
+    measureImpacts: ChildThreatMeasureImpact[]
 ) {
     return threats
         .map((threat) => {
@@ -73,7 +73,9 @@ function transformThreats(
                     reportId: matchingAsset?.reportId,
                 };
             });
-            const threatMeasureImpacts = measureImpacts.filter((measureImpact) => measureImpact.threatId === threat.id);
+            const threatMeasureImpacts = measureImpacts.filter(
+                (measureImpact) => measureImpact.childThreatId === threat.id
+            );
             const measures = threatMeasureImpacts.map((measureImpact) => {
                 const measure = measuresWithIds.find((measure) => measure.id === measureImpact.measureId);
                 return {
@@ -133,13 +135,13 @@ type TransformedMeasure = Measure & {
 
 function transformMeasures(
     measures: Measure[],
-    threats: (Threat & { reportId: string })[],
-    measureImpacts: MeasureImpact[]
+    threats: (ChildThreat & { reportId: string })[],
+    measureImpacts: ChildThreatMeasureImpact[]
 ): TransformedMeasure[] {
     return measures.map((measure) => {
         const measureMeasureImpacts = measureImpacts.filter((measureImpact) => measureImpact.measureId === measure.id);
         const measureThreats = measureMeasureImpacts.map((measureImpact) => {
-            const matchingThreat = threats.find((threat) => threat.id === measureImpact.threatId);
+            const matchingThreat = threats.find((threat) => threat.id === measureImpact.childThreatId);
             return {
                 id: matchingThreat?.id,
                 reportId: matchingThreat?.reportId,
@@ -155,6 +157,12 @@ function transformMeasures(
 
 type ExtendedAsset = Asset & { reportId: string };
 type ExtendedMeasure = Measure & { reportId: string };
+type ReportThreat = ChildThreat & {
+    assets: Asset[];
+    componentName: string | null;
+    componentType: number | ComponentType | null;
+    interfaceName: string | null;
+};
 
 /**
  * Fetches the necessary data for creating a report of
@@ -176,20 +184,21 @@ export async function getReportData(projectId: number) {
     // Gets the images of the parsed system.
     const { image = null } = system || {};
 
-    // Get all the threats of the project.
-    let threats = await getThreats(projectId);
+    // Get all child threats of the project through generic threats.
+    let threats: ReportThreat[] = (await getGenericThreatsWithExtendedChildren(projectId))
+        .flatMap((genericThreat) => genericThreat.children)
+        .map((threat) => {
+            if (threat.pointOfAttack === "COMMUNICATION_INTERFACES" && threat.interfaceName) {
+                return {
+                    ...threat,
+                    componentName: threat.componentName
+                        ? `${threat.componentName} > ${threat.interfaceName}`
+                        : threat.interfaceName,
+                };
+            }
 
-    const pointsOfAttack = await getPointsOfAttack(projectId);
-
-    threats = threats.map((threat) => {
-        const pointOfAttack = pointsOfAttack.find((pointOfAttack) => pointOfAttack.id === threat.pointOfAttackId);
-
-        if (pointOfAttack?.type === "COMMUNICATION_INTERFACES") {
-            threat.componentName = pointOfAttack.componentName + " > " + pointOfAttack.name;
-        }
-
-        return threat;
-    });
+            return threat;
+        });
 
     //Get all the assets of the project
     const assets = await getAssets(projectId);
@@ -215,9 +224,9 @@ export async function getReportData(projectId: number) {
             };
         });
 
-    let measureImpacts = await getMeasureImpactsByProject(projectId);
+    let measureImpacts = await getChildThreatMeasureImpactsByProject(projectId);
     measureImpacts = measureImpacts.filter((measureImpact) =>
-        threats.some((threat) => threat.id === measureImpact.threatId)
+        threats.some((threat) => threat.id === measureImpact.childThreatId)
     );
 
     const threatsWithIds = transformThreats(threats, measuresWithIds, assetsWithIds, measureImpacts)
@@ -234,7 +243,7 @@ export async function getReportData(projectId: number) {
         return {
             ...measureImpact,
             measureReportId: measureReportIdsDict.get(measureImpact.measureId),
-            threatReportId: threatReportIdsDict.get(measureImpact.threatId),
+            threatReportId: threatReportIdsDict.get(measureImpact.childThreatId),
         };
     });
 
