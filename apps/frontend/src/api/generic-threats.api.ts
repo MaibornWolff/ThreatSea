@@ -7,6 +7,6 @@ export class GenericThreatsAPI {
     }: {
         projectId: number;
     }): Promise<GenericThreatWithExtendedChildren[]> {
-        return await fetchAPI(`/projects/${projectId}/system/genericThreats/with-children-extended`);
+        return await fetchAPI(`/projects/${projectId}/system/genericThreats`);
     }
 }

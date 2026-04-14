@@ -81,15 +81,11 @@ export async function createChildThreatMeasureImpact(
 ): Promise<ChildThreatMeasureImpact> {
     let measureImpact: ChildThreatMeasureImpact | undefined;
 
-    try {
-        [measureImpact] = await (transaction ?? db)
-            .insert(childThreatMeasureImpacts)
-            .values(createMeasureImpactData)
-            .returning();
-    } catch (error) {
-        console.log(error);
-    }
-
+    [measureImpact] = await (transaction ?? db)
+        .insert(childThreatMeasureImpacts)
+        .values(createMeasureImpactData)
+        .returning();
+    
     if (!measureImpact) {
         throw new Error("Failed to create child-threat measure impact");
     }
