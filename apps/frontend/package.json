@@ -54,7 +54,7 @@
     "web-vitals": "5.2.0"
   },
   "devDependencies": {
-    "@eslint/js": "9.39.4",
+    "@eslint/js": "10.0.1",
     "@playwright/test": "1.59.1",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
@@ -67,7 +67,7 @@
     "@vitejs/plugin-react": "6.0.1",
     "@vitest/coverage-v8": "4.1.4",
     "dotenv": "17.4.2",
-    "eslint": "9.39.4",
+    "eslint": "10.2.0",
     "jsdoc": "4.0.5",
     "jsdom": "29.0.2",
     "vite": "8.0.8",

@@ -58,7 +58,7 @@
     "@types/supertest": "7.2.0",
     "@vitest/coverage-v8": "4.1.4",
     "drizzle-kit": "0.31.10",
-    "eslint": "9.39.4",
+    "eslint": "10.2.0",
     "nanoid": "5.1.7",
     "supertest": "7.2.2",
     "tsc-alias": "1.8.16",
