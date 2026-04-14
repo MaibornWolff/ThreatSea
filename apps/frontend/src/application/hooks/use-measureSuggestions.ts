@@ -1,20 +1,20 @@
 import { useEffect, useMemo } from "react";
 import type { Measure } from "#api/types/measure.types.ts";
-import type { ExtendedThreat } from "#api/types/threat.types.ts";
-import { useThreats } from "./use-threats.hook";
+import type { ExtendedChildThreat } from "#api/types/child-threat.types.ts";
+import { useChildThreats } from "./use-child-threats.hook";
 import { useCatalogMeasures } from "./use-catalog-measures.hook";
 import { useMeasureImpacts } from "./use-measureImpacts.hook";
 import { useMeasures } from "./use-measures.hook";
 import type { CatalogMeasure } from "#api/types/catalog-measure.types.ts";
 
 interface UseMeasureSuggestionsArgs {
-    selectedThreat: ExtendedThreat;
+    selectedThreat: ExtendedChildThreat;
     projectId: number;
     catalogId: number;
 }
 
 export const useMeasureSuggestions = ({ selectedThreat, projectId, catalogId }: UseMeasureSuggestionsArgs) => {
-    const { items: threats, loadThreats } = useThreats({
+    const { items: threats, loadChildThreats } = useChildThreats({
         projectId,
     });
     const { items: measures, loadMeasures } = useMeasures({ projectId });
@@ -92,8 +92,8 @@ export const useMeasureSuggestions = ({ selectedThreat, projectId, catalogId }: 
     );
 
     useEffect(() => {
-        loadThreats();
-    }, [projectId, loadThreats]);
+        loadChildThreats();
+    }, [projectId, loadChildThreats]);
 
     useEffect(() => {
         loadCatalogMeasures();

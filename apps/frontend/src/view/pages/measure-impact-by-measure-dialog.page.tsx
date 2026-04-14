@@ -13,8 +13,7 @@ import type { ThreatWithMetrics } from "#application/hooks/use-matrix.hook.ts";
  * @return {JSX.Element}
  */
 interface MeasureImpactByMeasureDialogLocationState {
-    threat?: ThreatWithMetrics;
-    childThreat?: ThreatWithMetrics;
+    childThreat: ThreatWithMetrics;
     project: Project;
     measureImpact?: MeasureImpact | null;
 }
@@ -25,19 +24,13 @@ export const MeasureImpactByMeasureDialogPage = () => {
     const { state } = useLocation() as Location<MeasureImpactByMeasureDialogLocationState | undefined>;
 
     if (state) {
-        const { threat, childThreat, project, measureImpact } = state;
-        const selectedChildThreat = childThreat ?? threat;
-
-        if (!selectedChildThreat) {
-            navigate(`/projects/${projectId}/risk`, { replace: true });
-            return null;
-        }
+        const { childThreat, project, measureImpact } = state;
 
         return (
             <MeasureImpactByMeasureDialog
                 project={project}
                 open={true}
-                threat={selectedChildThreat}
+                threat={childThreat}
                 measureImpact={measureImpact ?? null}
             />
         );

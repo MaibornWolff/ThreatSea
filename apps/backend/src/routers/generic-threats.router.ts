@@ -14,7 +14,7 @@ import { USER_ROLES } from "#types/user-roles.types.js";
 export const genericThreatsRouter = express.Router({ mergeParams: true });
 
 genericThreatsRouter.get(
-    `/with-children-extended`,
+    `/`,
     ValidateParamHandler(ProjectIdParam),
     CheckProjectRoleHandler(USER_ROLES.VIEWER),
     getGenericThreatsWithExtendedChildren
