@@ -177,15 +177,44 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           lfs: true
+      - name: Run trivy_filesystem
+        uses: SecObserve/secobserve_actions_templates/actions/SCA/trivy_filesystem@main
+        with:
+          target: "pnpm-lock.yaml"
+          report_name: "trvivy_pnpm.json"
+          further_parameters: "--db-repository public.ecr.aws/aquasecurity/trivy-db:2"
+          so_api_base_url: ${{ vars.SO_API_BASE_URL }}
+          so_api_token: ${{ secrets.SO_API_TOKEN }}
+          so_product_name: ${{ vars.SO_PRODUCT_NAME }}
+          so_branch_name: $GITHUB_REF_NAME
+      - name: Run gitleaks
+        uses: SecObserve/secobserve_actions_templates/actions/secrets/gitleaks@main
+        with:
+          target: "."
+          report_name: "gitleaks.sarif"
+          so_api_base_url: ${{ vars.SO_API_BASE_URL }}
+          so_api_token: ${{ secrets.SO_API_TOKEN }}
+          so_product_name: ${{ vars.SO_PRODUCT_NAME }}
+          so_branch_name: $GITHUB_REF_NAME
+      - name: Run checkov
+        uses: SecObserve/secobserve_actions_templates/actions/SAST/checkov@main
+        with:
+          target: "."
+          report_name: "checkov.sarif"
+          so_api_base_url: ${{ vars.SO_API_BASE_URL }}
+          so_api_token: ${{ secrets.SO_API_TOKEN }}
+          so_product_name: ${{ vars.SO_PRODUCT_NAME }}
+          so_branch_name: $GITHUB_REF_NAME
       - name: Run semgrep
         uses: SecObserve/secobserve_actions_templates/actions/SAST/semgrep@main
         with:
-          target: "apps/frontend"
+          target: "."
           report_name: "semgrep_javascript.json"
           configuration: "r/javascript"
           so_api_base_url: ${{ vars.SO_API_BASE_URL }}
           so_api_token: ${{ secrets.SO_API_TOKEN }}
-          so_product_name: "ThreatSea - Frontend"
+          so_product_name: ${{ vars.SO_PRODUCT_NAME }}
+          so_branch_name: $GITHUB_REF_NAME
       - name: Run KICS
         uses: SecObserve/secobserve_actions_templates/actions/SAST/kics@main
         with:
@@ -193,7 +222,8 @@ jobs:
           report_name: "all_kics.sarif"
           so_api_base_url: ${{ vars.SO_API_BASE_URL }}
           so_api_token: ${{ secrets.SO_API_TOKEN }}
-          so_product_name: "ThreatSea - full"
+          so_product_name: ${{ vars.SO_PRODUCT_NAME }}
+          so_branch_name: $GITHUB_REF_NAME
 
   release:
     name: Create and push Release
