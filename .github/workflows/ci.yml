@@ -183,6 +183,7 @@ jobs:
           so_api_base_url: "https://secobserve-backend.maibornwolff.de"
           so_api_token: ${{ secrets.SO_API_TOKEN }}
           so_product_name: "ThreatSea - Backend"
+          so_branch_name: "dev"
 
   release:
     name: Create and push Release
