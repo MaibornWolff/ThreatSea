@@ -61,7 +61,7 @@ export async function getMeasureImpactByMeasure(measureId: number): Promise<Meas
  * @returns {Promise<MeasureImpact[]>} A promise that resolves to an array of measure impacts.
  */
 export async function getMeasureImpactsByThreat(threatId: number): Promise<MeasureImpact[]> {
-    return await db.query.measureImpacts.findMany({ where: eq(measureImpacts.threatId, threatId) });
+    return await db.query.measureImpacts.findMany({ where: eq(measureImpacts.childThreatId, threatId) });
 }
 
 /**
@@ -132,5 +132,5 @@ export async function deleteMeasureImpact(measureImpactId: number): Promise<void
  * @returns {Promise<void>} A promise that resolves when the measure impacts are deleted.
  */
 export async function deleteMeasureImpactsByThreat(threatId: number): Promise<void> {
-    await db.delete(measureImpacts).where(eq(measureImpacts.threatId, threatId));
+    await db.delete(measureImpacts).where(eq(measureImpacts.childThreatId, threatId));
 }

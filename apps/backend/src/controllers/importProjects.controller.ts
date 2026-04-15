@@ -220,7 +220,7 @@ export async function importProject(request: Request<void>, response: Response, 
             }
 
             for (const oldMeasureImpact of body.measureImpacts as MeasureImpact[]) {
-                oldMeasureImpact.threatId = threatIdsDict.get(oldMeasureImpact.threatId)!;
+                oldMeasureImpact.childThreatId = threatIdsDict.get(oldMeasureImpact.childThreatId)!;
                 oldMeasureImpact.measureId = measureIdsDict.get(oldMeasureImpact.measureId)!;
 
                 const { id: _id, ...insertMeasureImpact } = oldMeasureImpact;

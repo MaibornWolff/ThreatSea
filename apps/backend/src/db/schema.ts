@@ -182,53 +182,11 @@ export const componentTypes = pgTable(
 );
 
 export type CreateMeasureImpact = Omit<typeof measureImpacts.$inferInsert, DefaultFields>;
-export type UpdateMeasureImpact = Omit<CreateMeasureImpact, "threatId" | "measureId">;
+export type UpdateMeasureImpact = Omit<CreateMeasureImpact, "childThreatId" | "measureId">;
 export type MeasureImpact = typeof measureImpacts.$inferSelect;
 
 export const measureImpacts = pgTable(
     "measure_impacts",
-    {
-        id: integer().notNull().primaryKey().generatedByDefaultAsIdentity(),
-        description: text().notNull(),
-        setsOutOfScope: boolean().notNull(),
-        impactsProbability: boolean().notNull(),
-        impactsDamage: boolean().notNull(),
-        probability: integer(),
-        damage: integer(),
-        createdAt: timestamp({ mode: "string", withTimezone: true })
-            .notNull()
-            .default(sql`now()`),
-        updatedAt: timestamp({ mode: "string", withTimezone: true })
-            .notNull()
-            .default(sql`now()`),
-        threatId: integer()
-            .notNull()
-            .references(() => threats.id, { onDelete: "cascade", onUpdate: "cascade" }),
-        measureId: integer()
-            .notNull()
-            .references(() => measures.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    },
-    (table) => [
-        unique("measure_impacts_measure_id_threat_id_unique").on(table.measureId, table.threatId),
-        check("measure_impacts_probability_min_max", sql`${table.probability} between 1 and 5`),
-        check(
-            "measure_impacts_probability",
-            sql`${table.impactsProbability} = false OR ${table.probability} IS NOT NULL`
-        ),
-        check("measure_impacts_damage_min_max", sql`${table.damage} between 1 and 5`),
-        check("measure_impacts_damage", sql`${table.impactsDamage} = false OR ${table.damage} IS NOT NULL`),
-        index("measure_impacts_measure_id_threat_id").on(table.measureId, table.threatId),
-    ]
-);
-
-// TODO: Either change the "legacy" measure impacts to use child threats or remove them and stick with child threat measure impacts
-
-export type CreateChildThreatMeasureImpact = Omit<typeof childThreatMeasureImpacts.$inferInsert, DefaultFields>;
-export type UpdateChildThreatMeasureImpact = Omit<CreateChildThreatMeasureImpact, "childThreatId" | "measureId">;
-export type ChildThreatMeasureImpact = typeof childThreatMeasureImpacts.$inferSelect;
-
-export const childThreatMeasureImpacts = pgTable(
-    "child_threat_measure_impacts",
     {
         id: integer().notNull().primaryKey().generatedByDefaultAsIdentity(),
         description: text().notNull(),
@@ -251,25 +209,24 @@ export const childThreatMeasureImpacts = pgTable(
             .references(() => measures.id, { onDelete: "cascade", onUpdate: "cascade" }),
     },
     (table) => [
-        unique("child_threat_measure_impacts_measure_id_child_threat_id_unique").on(
-            table.measureId,
-            table.childThreatId
-        ),
-        check("child_threat_measure_impacts_probability_min_max", sql`${table.probability} between 1 and 5`),
+        unique("measure_impacts_measure_id_child_threat_id_unique").on(table.measureId, table.childThreatId),
+        check("measure_impacts_probability_min_max", sql`${table.probability} between 1 and 5`),
         check(
-            "child_threat_measure_impacts_probability",
+            "measure_impacts_probability",
             sql`${table.impactsProbability} = false OR ${table.probability} IS NOT NULL`
         ),
-        check("child_threat_measure_impacts_damage_min_max", sql`${table.damage} between 1 and 5`),
-        check(
-            "child_threat_measure_impacts_damage",
-            sql`${table.impactsDamage} = false OR ${table.damage} IS NOT NULL`
-        ),
-        index("child_threat_measure_impacts_measure_id_child_threat_id").on(table.measureId, table.childThreatId),
-        index("child_threat_measure_impacts_child_threat_id").on(table.childThreatId),
-        index("child_threat_measure_impacts_measure_id").on(table.measureId),
+        check("measure_impacts_damage_min_max", sql`${table.damage} between 1 and 5`),
+        check("measure_impacts_damage", sql`${table.impactsDamage} = false OR ${table.damage} IS NOT NULL`),
+        index("measure_impacts_measure_id_child_threat_id").on(table.measureId, table.childThreatId),
+        index("measure_impacts_child_threat_id").on(table.childThreatId),
+        index("measure_impacts_measure_id").on(table.measureId),
     ]
 );
+
+// TODO: Delete this types in an upcoming migration
+export type CreateChildThreatMeasureImpact = CreateMeasureImpact;
+export type UpdateChildThreatMeasureImpact = UpdateMeasureImpact;
+export type ChildThreatMeasureImpact = MeasureImpact;
 
 export type Measure = typeof measures.$inferSelect;
 export type CreateMeasure = Omit<typeof measures.$inferInsert, DefaultFields>;

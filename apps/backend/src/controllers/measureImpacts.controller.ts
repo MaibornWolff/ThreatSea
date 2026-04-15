@@ -3,7 +3,7 @@
  *     for the routing of the members.
  */
 import { NextFunction, Request, Response } from "express";
-import * as ChildThreatMeasureImpactsService from "#services/childThreatMeasureImpacts.service.js";
+import * as MeasureImpactsService from "#services/measureImpacts.service.js";
 import { getMeasure } from "#services/measures.service.js";
 import { getChildThreat } from "#services/childThreats.service.js";
 import { NotFoundError } from "#errors/not-found.error.js";
@@ -32,7 +32,7 @@ export async function getMeasureImpacts(
     const projectId = request.params.projectId;
 
     const measureImpacts: MeasureImpactResponse[] =
-        await ChildThreatMeasureImpactsService.getChildThreatMeasureImpactsByProject(projectId);
+        await MeasureImpactsService.getMeasureImpactsByProject(projectId);
 
     response.json(measureImpacts);
 }
@@ -64,7 +64,7 @@ export async function getMeasureImpactsByChildThreat(
     }
 
     const measureImpacts: ChildThreatMeasureImpactResponse[] =
-        await ChildThreatMeasureImpactsService.getChildThreatMeasureImpactsByChildThreat(childThreatId);
+        await MeasureImpactsService.getMeasureImpactsByThreat(childThreatId);
 
     response.json(measureImpacts);
 }
@@ -85,7 +85,7 @@ export async function getMeasureImpact(
     const measureImpactId = request.params.measureImpactId;
 
     const measureImpact: MeasureImpactResponse | null =
-        await ChildThreatMeasureImpactsService.getChildThreatMeasureImpact(measureImpactId);
+        await MeasureImpactsService.getMeasureImpact(measureImpactId);
     if (measureImpact === null) {
         next(new NotFoundError("Measure Impact not found"));
         return;
@@ -138,7 +138,7 @@ export async function createMeasureImpact(
     }
 
     try {
-        const measureImpact = await ChildThreatMeasureImpactsService.createChildThreatMeasureImpact(request.body);
+        const measureImpact = await MeasureImpactsService.createMeasureImpact(request.body);
 
         response.json(measureImpact);
     } catch (error) {
@@ -162,7 +162,7 @@ export async function updateMeasureImpact(
     const measureImpactId = request.params.measureImpactId!;
 
     const measureImpact: MeasureImpactResponse | null =
-        await ChildThreatMeasureImpactsService.getChildThreatMeasureImpact(measureImpactId);
+        await MeasureImpactsService.getMeasureImpact(measureImpactId);
     if (measureImpact === null) {
         next(new NotFoundError("Measure Impact not found"));
         return;
@@ -178,7 +178,7 @@ export async function updateMeasureImpact(
     const data = request.body;
     try {
         const updatedMeasureImpact: MeasureImpactResponse =
-            await ChildThreatMeasureImpactsService.updateChildThreatMeasureImpact(measureImpactId, data);
+            await MeasureImpactsService.updateMeasureImpact(measureImpactId, data);
 
         response.json(updatedMeasureImpact);
     } catch (error) {
@@ -202,7 +202,7 @@ export async function deleteMeasureImpact(
     const measureImpactId = request.params.measureImpactId!;
 
     const measureImpact: MeasureImpactResponse | null =
-        await ChildThreatMeasureImpactsService.getChildThreatMeasureImpact(measureImpactId);
+        await MeasureImpactsService.getMeasureImpact(measureImpactId);
     if (measureImpact === null) {
         next(new NotFoundError("Measure Impact not found"));
         return;
@@ -215,7 +215,7 @@ export async function deleteMeasureImpact(
         return;
     }
 
-    await ChildThreatMeasureImpactsService.deleteChildThreatMeasureImpact(measureImpactId);
+    await MeasureImpactsService.deleteMeasureImpact(measureImpactId);
 
     response.sendStatus(204);
 }
