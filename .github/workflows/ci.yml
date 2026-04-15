@@ -178,12 +178,16 @@ jobs:
         uses: SecObserve/secobserve_actions_templates/actions/SAST/semgrep@main
         with:
           target: "apps/backend"
-          report_name: "semgrep_javascipt.json"
+          report_name: "semgrep_javascript.json"
           configuration: "r/javascript"
           so_api_base_url: "https://secobserve-backend.maibornwolff.de"
           so_api_token: ${{ secrets.SO_API_TOKEN }}
           so_product_name: "ThreatSea - Backend"
-          so_branch_name: "dev"
+      - name: Upload artifact(s)
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
+        with:
+          name: "semgrep"
+          path: "semgrep_javascript.json"
 
   release:
     name: Create and push Release
