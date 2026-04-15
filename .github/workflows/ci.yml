@@ -171,6 +171,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - test-frontend
+      - test-backend
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -185,11 +186,14 @@ jobs:
           so_api_base_url: ${{ vars.SO_API_BASE_URL }}
           so_api_token: ${{ secrets.SO_API_TOKEN }}
           so_product_name: "ThreatSea - Frontend"
-      - name: Upload artifact(s)
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
+      - name: Run KICS
+        uses: SecObserve/secobserve_actions_templates/actions/SAST/kics@main
         with:
-          name: "semgrep"
-          path: "semgrep_javascript.json"
+          target: "."
+          report_name: "all_kics.sarif"
+          so_api_base_url: ${{ vars.SO_API_BASE_URL }}
+          so_api_token: ${{ secrets.SO_API_TOKEN }}
+          so_product_name: "ThreatSea - full"
 
   release:
     name: Create and push Release
