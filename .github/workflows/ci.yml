@@ -180,8 +180,8 @@ jobs:
           target: "apps/backend"
           report_name: "semgrep_javascipt.json"
           configuration: "r/javascript"
-          so_api_base_url: "semgrep_javascipt.json"
-          so_api_token: "api_token_NggiqyePcFkagNEkrLs770lDeQPt1cM0"
+          so_api_base_url: "https://secobserve-backend.maibornwolff.de"
+          so_api_token: ${{ secrets.SO_API_TOKEN }}
           so_product_name: "ThreatSea - Backend"
 
   release:
