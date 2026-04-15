@@ -15,6 +15,7 @@ on:
 env:
   TURBO_TELEMETRY_DISABLED: 1
   NODE_ENV: production
+  SOURCE_BRANCH: "${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
 
 jobs:
   lint:
@@ -186,7 +187,7 @@ jobs:
           so_api_base_url: ${{ vars.SO_API_BASE_URL }}
           so_api_token: ${{ secrets.SO_API_TOKEN }}
           so_product_name: ${{ vars.SO_PRODUCT_NAME }}
-          so_branch_name: ${{ github.ref_name }}
+          so_branch_name: $SOURCE_BRANCH
       - name: Run gitleaks
         uses: SecObserve/secobserve_actions_templates/actions/secrets/gitleaks@main
         with:
@@ -195,7 +196,7 @@ jobs:
           so_api_base_url: ${{ vars.SO_API_BASE_URL }}
           so_api_token: ${{ secrets.SO_API_TOKEN }}
           so_product_name: ${{ vars.SO_PRODUCT_NAME }}
-          so_branch_name: ${{ github.ref_name }}
+          so_branch_name: $SOURCE_BRANCH
       - name: Run checkov
         uses: SecObserve/secobserve_actions_templates/actions/SAST/checkov@main
         with:
@@ -204,7 +205,7 @@ jobs:
           so_api_base_url: ${{ vars.SO_API_BASE_URL }}
           so_api_token: ${{ secrets.SO_API_TOKEN }}
           so_product_name: ${{ vars.SO_PRODUCT_NAME }}
-          so_branch_name: ${{ github.ref_name }}
+          so_branch_name: $SOURCE_BRANCH
       - name: Run semgrep
         uses: SecObserve/secobserve_actions_templates/actions/SAST/semgrep@main
         with:
@@ -214,7 +215,7 @@ jobs:
           so_api_base_url: ${{ vars.SO_API_BASE_URL }}
           so_api_token: ${{ secrets.SO_API_TOKEN }}
           so_product_name: ${{ vars.SO_PRODUCT_NAME }}
-          so_branch_name: ${{ github.ref_name }}
+          so_branch_name: $SOURCE_BRANCH
       - name: Run KICS
         uses: SecObserve/secobserve_actions_templates/actions/SAST/kics@main
         with:
@@ -223,7 +224,7 @@ jobs:
           so_api_base_url: ${{ vars.SO_API_BASE_URL }}
           so_api_token: ${{ secrets.SO_API_TOKEN }}
           so_product_name: ${{ vars.SO_PRODUCT_NAME }}
-          so_branch_name: ${{ github.ref_name }}
+          so_branch_name: $SOURCE_BRANCH
 
   release:
     name: Create and push Release
