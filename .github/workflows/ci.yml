@@ -169,7 +169,7 @@ jobs:
   validate:
     name: Run Scanners
     runs-on: ubuntu-latest
-    if: ref_type == 'branch'
+    if: github.ref_type == 'branch'
     needs:
       - test-frontend
       - test-backend
