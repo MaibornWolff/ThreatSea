@@ -18,7 +18,7 @@ import { getGenericThreatsWithExtendedChildren } from "#services/genericThreats.
 import { findSystem } from "#services/system.service.js";
 import { getAssets } from "#services/assets.service.js";
 import { getMeasures } from "#services/measures.service.js";
-import { getChildThreatMeasureImpactsByProject } from "#services/childThreatMeasureImpacts.service.js";
+import { getMeasureImpactsByProject } from "#services/measureImpacts.service.js";
 import { ComponentType } from "#types/system.types.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
 
@@ -224,7 +224,7 @@ export async function getReportData(projectId: number) {
             };
         });
 
-    let measureImpacts = await getChildThreatMeasureImpactsByProject(projectId);
+    let measureImpacts = await getMeasureImpactsByProject(projectId);
     measureImpacts = measureImpacts.filter((measureImpact) =>
         threats.some((threat) => threat.id === measureImpact.childThreatId)
     );
