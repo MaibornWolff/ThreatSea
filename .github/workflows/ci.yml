@@ -19,6 +19,8 @@ env:
 jobs:
   lint:
     name: Lint and Format Check
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -33,6 +35,8 @@ jobs:
   build-backend:
     name: Build Backend
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs: lint
     steps:
       - name: Checkout code
@@ -52,6 +56,8 @@ jobs:
   build-frontend:
     name: Build Frontend
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs: lint
     steps:
       - name: Checkout code
@@ -71,6 +77,8 @@ jobs:
   test-backend:
     name: Test Backend
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs: build-backend
     services:
       postgres:
@@ -121,6 +129,8 @@ jobs:
   test-frontend:
     name: Test Frontend (Component Tests)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs: build-frontend
     env:
       NODE_ENV: test
@@ -146,6 +156,8 @@ jobs:
     name: Build Container Image
     runs-on: ubuntu-latest
     if: (github.ref_name != 'main' && github.ref_name != 'next') || github.ref_type != 'branch'
+    permissions:
+      contents: read
     needs:
       - test-backend
       - test-frontend
