@@ -30,6 +30,21 @@ export async function getChildThreatsByGenericThreatId(
 }
 
 /**
+ * Gets all child threats of a project.
+ *
+ * @param {number} projectId - The id of the project.
+ * @returns {Promise<ChildThreat[]>} A promise that resolves to an array of child threats.
+ */
+export async function getChildThreatsByProjectId(
+    projectId: number,
+    transaction: TransactionType | undefined = undefined
+): Promise<ChildThreat[]> {
+    return await (transaction ?? db).query.childThreats.findMany({
+        where: eq(childThreats.projectId, projectId),
+    });
+}
+
+/**
  * Gets a specific child threat by its id.
  *
  * @param {number} threatId - The id of the threat.
