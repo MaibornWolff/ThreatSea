@@ -108,8 +108,15 @@ export async function authenticate(request: Request, response: Response): Promis
             throw new Error("OIDC service not initialized");
         }
 
-        const redirectUrl = await oidcService.buildLoginRedirectUrl();
-        response.redirect(redirectUrl);
+        const loginData = await oidcService.buildLoginRedirectUrl();
+
+        request.session.oidc = {
+            state: loginData.state,
+            nonce: loginData.nonce,
+            codeVerifier: loginData.codeVerifier,
+        };
+
+        response.redirect(loginData.redirectUrl);
     } catch (err) {
         if (err instanceof Error) {
             Logger.error("Authentication failed: " + err.message);
@@ -125,9 +132,16 @@ export async function finalizeAuthentication(request: Request, response: Respons
             return;
         }
 
+        const oidcData = request.session.oidc;
+        if (!oidcData) {
+            throw new UnauthorizedError("No pending OIDC login found in session");
+        }
+
         const callbackUrl = new URL(oidcConfig!.callbackURL);
         callbackUrl.search = new URL(request.originalUrl, "http://localhost").search;
-        const threatSeaToken = await oidcService.handleOidcCallback(callbackUrl);
+        const threatSeaToken = await oidcService.handleOidcCallback(callbackUrl, oidcData);
+
+        delete request.session.oidc;
 
         response.cookie("accessToken", threatSeaToken, {
             httpOnly: true,
