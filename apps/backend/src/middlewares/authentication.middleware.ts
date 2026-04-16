@@ -1,4 +1,4 @@
-import { JWT_SECRET, originConfig } from "#config/config.js";
+import { JWT_SECRET, JWT_VERIFY_OPTIONS, originConfig } from "#config/config.js";
 import jwt, { JsonWebTokenError, JwtPayload, NotBeforeError, TokenExpiredError } from "jsonwebtoken";
 import { isTokenRevoked } from "#services/revoked-tokens.service.js";
 import { JWTError, UnauthorizedError } from "#errors/unauthorized.error.js";
@@ -21,7 +21,7 @@ export async function CheckTokenHandler(request: Request, response: Response, ne
 
     let decodedToken: JwtPayload;
     try {
-        decodedToken = jwt.verify(authToken, JWT_SECRET) as JwtPayload;
+        decodedToken = jwt.verify(authToken, JWT_SECRET, JWT_VERIFY_OPTIONS) as JwtPayload;
     } catch (error) {
         next(new JWTError(error as TokenExpiredError | JsonWebTokenError | NotBeforeError));
         return;
@@ -33,7 +33,12 @@ export async function CheckTokenHandler(request: Request, response: Response, ne
         return;
     }
 
-    request.user = { id: decodedToken["userId"] };
+    const userId = Number(decodedToken["userId"]);
+    if (!Number.isInteger(userId) || userId <= 0) {
+        next(new UnauthorizedError("Invalid token payload"));
+        return;
+    }
+    request.user = { id: userId };
     response.header("Access-Control-Allow-Origin", originConfig.app);
 
     next();

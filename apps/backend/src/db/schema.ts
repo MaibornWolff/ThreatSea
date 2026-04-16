@@ -344,7 +344,7 @@ export const tokens = pgTable(
     "tokens",
     {
         id: integer().notNull().primaryKey().generatedByDefaultAsIdentity(),
-        token: varchar({ length: 500 }).notNull(),
+        token: text().notNull(),
         expiresAt: integer().notNull(),
         createdAt: timestamp({ mode: "string", withTimezone: true })
             .notNull()
@@ -361,6 +361,7 @@ export const users = pgTable(
         firstname: varchar({ length: 255 }).notNull(),
         lastname: varchar({ length: 255 }).notNull(),
         email: varchar({ length: 255 }).notNull(),
+        oidcSub: varchar("oidc_sub", { length: 255 }),
         createdAt: timestamp({ mode: "string", withTimezone: true })
             .notNull()
             .default(sql`now()`),
@@ -368,7 +369,7 @@ export const users = pgTable(
             .notNull()
             .default(sql`now()`),
     },
-    (table) => [index("users_email").on(table.email)]
+    (table) => [index("users_email").on(table.email), uniqueIndex("users_oidc_sub").on(table.oidcSub)]
 );
 
 export type UserCatalog = typeof usersCatalogs.$inferSelect;

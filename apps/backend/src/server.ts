@@ -55,12 +55,12 @@ app.use(cookieParser());
 // Set up express-session middleware
 app.use(session(sessionConfig));
 app.use(helmet(helmetConfig));
+app.use(nocache());
+app.set("etag", false);
 app.get("/api/csrf-token", function (req: express.Request, res: express.Response) {
     res.json({ token: generateToken(req) });
 });
-app.use(express.json({ limit: "200mb" }));
-app.use(nocache());
-app.set("etag", false);
+app.use(express.json({ limit: "10mb" }));
 
 app.use(LogHandler);
 
@@ -70,7 +70,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/catalogs", CheckTokenHandler, catalogsRouter);
 app.use("/api/projects", CheckTokenHandler, projectsRouter);
 app.use("/api/export", CheckTokenHandler, exportRouter);
-app.use("/api/import", CheckTokenHandler, importRouter);
+app.use("/api/import", CheckTokenHandler, express.json({ limit: "200mb" }), importRouter);
 
 app.get("/api/health", (_req, res) => res.json({ ok: true, ts: Date.now() }));
 

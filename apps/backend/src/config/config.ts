@@ -14,6 +14,9 @@ function getEnvironmentVariable(key: string): string {
 }
 
 export const JWT_SECRET = getEnvironmentVariable("JWT_SECRET") as Secret;
+export const JWT_ISSUER = "threatsea";
+export const JWT_AUDIENCE = "threatsea-api";
+export const JWT_VERIFY_OPTIONS = { algorithms: ["HS256" as const], issuer: JWT_ISSUER, audience: JWT_AUDIENCE };
 
 export const AUTH_METHOD = process.env["AUTH_METHOD"];
 
@@ -78,7 +81,7 @@ export const helmetConfig: HelmetOptions = {
 export const sessionConfig: SessionOptions = {
     name: "threatSea_session_id",
     cookie: {
-        secure: true,
+        secure: process.env["COOKIES_SECURE_OPTION"] !== "disabled",
         path: "/",
         httpOnly: true,
         sameSite: "lax",
@@ -86,6 +89,6 @@ export const sessionConfig: SessionOptions = {
     },
     secret: getEnvironmentVariable("EXPRESS_SESSION_SECRET"),
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     rolling: true,
 };

@@ -25,6 +25,6 @@ authRouter.get("/status", getAuthStatus);
 
 authRouter.get("/login", authLimiter, authenticate);
 
-authRouter.get("/redirect", finalizeAuthentication);
+authRouter.get("/redirect", authLimiter, finalizeAuthentication);
 
-authRouter.post("/logout", logout);
+authRouter.post("/logout", authLimiter, logout);

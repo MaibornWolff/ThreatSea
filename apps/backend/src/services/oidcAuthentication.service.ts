@@ -15,7 +15,7 @@ interface IdTokenClaims {
 
 let oidcClientConfig: client.Configuration;
 
-const pendingLogins = new Map<string, { nonce: string }>();
+const pendingLogins = new Map<string, { nonce: string; codeVerifier: string }>();
 
 export async function initializeOidc(): Promise<void> {
     if (!oidcConfig) {
@@ -37,15 +37,17 @@ export async function initializeOidc(): Promise<void> {
     );
 }
 
-export function buildLoginRedirectUrl(): string {
+export async function buildLoginRedirectUrl(): Promise<string> {
     if (!oidcConfig) {
         throw new Error("OIDC config not available");
     }
 
     const state = crypto.randomUUID();
     const nonce = crypto.randomUUID();
+    const codeVerifier = client.randomPKCECodeVerifier();
+    const codeChallenge = await client.calculatePKCECodeChallenge(codeVerifier);
 
-    pendingLogins.set(state, { nonce });
+    pendingLogins.set(state, { nonce, codeVerifier });
 
     setTimeout(() => pendingLogins.delete(state), 10 * 60 * 1000);
 
@@ -55,6 +57,8 @@ export function buildLoginRedirectUrl(): string {
         response_type: "code",
         state,
         nonce,
+        code_challenge: codeChallenge,
+        code_challenge_method: "S256",
     };
 
     const redirectTo = client.buildAuthorizationUrl(oidcClientConfig, parameters);
@@ -67,12 +71,13 @@ export async function handleOidcCallback(callbackUrl: URL): Promise<string> {
     if (!state || !pendingLogins.has(state)) {
         throw new UnauthorizedError("Invalid or expired state parameter");
     }
-    const { nonce } = pendingLogins.get(state)!;
+    const { nonce, codeVerifier } = pendingLogins.get(state)!;
     pendingLogins.delete(state);
 
     const tokenSet = await client.authorizationCodeGrant(oidcClientConfig, callbackUrl, {
         expectedState: state,
         expectedNonce: nonce,
+        pkceCodeVerifier: codeVerifier,
     });
 
     const user = buildUserProfile(tokenSet);

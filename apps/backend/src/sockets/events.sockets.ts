@@ -4,7 +4,8 @@
  */
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { Socket } from "socket.io";
-import { JWT_SECRET } from "#config/config.js";
+import { JWT_SECRET, JWT_VERIFY_OPTIONS } from "#config/config.js";
+import { isTokenRevoked } from "#services/revoked-tokens.service.js";
 import { initAssetEvents } from "#sockets/asset-events.sockets.js";
 import { initCatalogEvents } from "#sockets/catalog-events.sockets.js";
 import { initCatalogsEvents } from "#sockets/catalogs-events.sockets.js";
@@ -30,15 +31,26 @@ export interface SocketUser {
  *
  * @param {Socket} socket - socket.io socket.
  */
-export function setupSocketEvents(socket: Socket) {
+export async function setupSocketEvents(socket: Socket) {
     const accessToken = socket.handshake.auth["token"];
-    let decodedToken: JwtPayload;
 
     try {
-        decodedToken = jwt.verify(accessToken, JWT_SECRET) as JwtPayload;
+        const decodedToken = jwt.verify(accessToken, JWT_SECRET, JWT_VERIFY_OPTIONS) as JwtPayload;
+
+        const revoked = await isTokenRevoked(accessToken);
+        if (revoked) {
+            socket.disconnect(true);
+            return;
+        }
+
+        const userId = Number(decodedToken["userId"]);
+        if (!Number.isInteger(userId) || userId <= 0) {
+            socket.disconnect(true);
+            return;
+        }
 
         const user: SocketUser = {
-            id: decodedToken["userId"] as number,
+            id: userId,
             name: `${decodedToken["firstname"]} ${decodedToken["lastname"]}`,
         };
 
