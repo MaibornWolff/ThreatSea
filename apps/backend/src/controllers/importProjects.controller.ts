@@ -243,6 +243,10 @@ export async function importProject(request: Request<void>, response: Response, 
             }
             Logger.debug("imported child threats");
 
+            /*
+            * The measure impacts import seem to have a race condition, in the form present and in the form commented underneath
+            * the console.log() lines seem to influence this behaviour sometimes. Maybe also a new const xy = await createMeasureImpact() could solve this
+            */
             for (const oldMeasureImpact of body.measureImpacts as MeasureImpact[]) {
                 oldMeasureImpact.childThreatId = childThreatIdsDict.get(oldMeasureImpact.childThreatId)!;
                 oldMeasureImpact.measureId = measureIdsDict.get(oldMeasureImpact.measureId)!;
@@ -250,7 +254,28 @@ export async function importProject(request: Request<void>, response: Response, 
                 const { id: _id, ...insertMeasureImpact } = oldMeasureImpact;
 
                await createMeasureImpact(insertMeasureImpact, tx);
+
+               console.log(oldMeasureImpact);
             }
+
+            // for (const oldMeasureImpact of body.measureImpacts as MeasureImpact[]) {
+            //     const mappedChildThreatId = childThreatIdsDict.get(oldMeasureImpact.childThreatId);
+            //     const mappedMeasureId = measureIdsDict.get(oldMeasureImpact.measureId);
+            //     if (!mappedChildThreatId || !mappedMeasureId) {
+            //         Logger.error(
+            //             `Import measure impact mapping failed: oldChildThreatId=${oldMeasureImpact.childThreatId}, mappedChildThreatId=${mappedChildThreatId}, oldMeasureId=${oldMeasureImpact.measureId}, mappedMeasureId=${mappedMeasureId}`
+            //         );
+            //         continue;
+            //     }
+            //     oldMeasureImpact.childThreatId = mappedChildThreatId;
+            //     oldMeasureImpact.measureId = mappedMeasureId;
+
+            //     const { id: _id, ...insertMeasureImpact } = oldMeasureImpact;
+
+            //     await createMeasureImpact(insertMeasureImpact, tx);
+
+            //     console.log(oldMeasureImpact);
+            // }
 
             for (const componentType of body.componentTypes as ComponentType[]) {
                 componentType.projectId = newProjectId;
