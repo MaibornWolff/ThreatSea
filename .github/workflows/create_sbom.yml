@@ -47,3 +47,13 @@ jobs:
         with:
           name: threatsea-sbom-v${{ inputs.version }}
           path: threatsea-sbom-v${{ inputs.version }}.json
+
+      - name: Import SBOM to SecObserve
+        uses: SecObserve/secobserve_actions_templates/actions/importer@main
+        with:
+          so_api_base_url: ${{ vars.SO_API_BASE_URL }}
+          so_api_token: ${{ secrets.SO_API_TOKEN }}
+          so_product_name: ${{ vars.SO_PRODUCT_NAME }}
+          so_branch_name: ${{ github.ref_name }}
+          so_parser_name: cdxgen
+          so_file_name: threatsea-sbom-v${{ inputs.version }}.json
