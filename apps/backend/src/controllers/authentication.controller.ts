@@ -2,14 +2,15 @@
  * Module that defines the controller functions
  * for the authentication routes.
  */
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { JWT_SECRET, originConfig, AUTH_METHOD } from "#config/config.js";
+import { JWT_SECRET, JWT_VERIFY_OPTIONS, originConfig, AUTH_METHOD, oidcConfig } from "#config/config.js";
 import { deleteExpiredTokens, isTokenRevoked, revokeToken } from "#services/revoked-tokens.service.js";
-import { JWTError, UnauthorizedError } from "#errors/unauthorized.error.js";
+import { UnauthorizedError } from "#errors/unauthorized.error.js";
 import { Logger } from "#logging/index.js";
 
 const appOrigin = originConfig.app;
+const ACCESS_TOKEN_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
 
 let oidcService: typeof import("#services/oidcAuthentication.service.js") | null = null;
 let fixedService: typeof import("#services/fixedAuthentication.service.js") | null = null;
@@ -19,6 +20,9 @@ async function loadStrategy() {
         oidcService = await import("#services/oidcAuthentication.service.js");
         await oidcService.initializeOidc();
     } else if (AUTH_METHOD === "fixed") {
+        if (process.env["NODE_ENV"] === "production") {
+            throw new Error("Fixed authentication is not allowed in production");
+        }
         fixedService = await import("#services/fixedAuthentication.service.js");
     } else {
         throw new Error("No known authentication strategy selected"); // UnexpectedError, created by error middleware
@@ -52,20 +56,20 @@ export async function getAuthStatus(request: Request, response: Response): Promi
     }
 
     try {
-        decodedToken = jwt.verify(authToken, JWT_SECRET) as JwtPayload;
+        decodedToken = jwt.verify(authToken, JWT_SECRET, JWT_VERIFY_OPTIONS) as JwtPayload;
 
         const isRevoked = await isTokenRevoked(authToken);
         if (isRevoked) {
             throw new UnauthorizedError("Token is revoked");
         }
-    } catch (error) {
+    } catch {
         response.json({
             data: {
                 status: {
                     isLoggedIn: false,
                 },
             },
-            message: (error as Error).message,
+            message: "Authentication check failed",
         });
         return;
     }
@@ -93,6 +97,7 @@ export async function authenticate(request: Request, response: Response): Promis
                 httpOnly: true,
                 secure: jwtSecure,
                 sameSite: "strict",
+                maxAge: ACCESS_TOKEN_MAX_AGE,
             });
 
             response.redirect(`${appOrigin}`);
@@ -103,8 +108,15 @@ export async function authenticate(request: Request, response: Response): Promis
             throw new Error("OIDC service not initialized");
         }
 
-        const redirectUrl = oidcService.buildLoginRedirectUrl();
-        response.redirect(redirectUrl);
+        const loginData = await oidcService.buildLoginRedirectUrl();
+
+        request.session.oidc = {
+            state: loginData.state,
+            nonce: loginData.nonce,
+            codeVerifier: loginData.codeVerifier,
+        };
+
+        response.redirect(loginData.redirectUrl);
     } catch (err) {
         if (err instanceof Error) {
             Logger.error("Authentication failed: " + err.message);
@@ -120,13 +132,22 @@ export async function finalizeAuthentication(request: Request, response: Respons
             return;
         }
 
-        const callbackUrl = new URL(request.originalUrl, `${request.protocol}://${request.get("host")}`);
-        const threatSeaToken = await oidcService.handleOidcCallback(callbackUrl);
+        const oidcData = request.session.oidc;
+        if (!oidcData) {
+            throw new UnauthorizedError("No pending OIDC login found in session");
+        }
+
+        const callbackUrl = new URL(oidcConfig!.callbackURL);
+        callbackUrl.search = new URL(request.originalUrl, "http://localhost").search;
+        const threatSeaToken = await oidcService.handleOidcCallback(callbackUrl, oidcData);
+
+        delete request.session.oidc;
 
         response.cookie("accessToken", threatSeaToken, {
             httpOnly: true,
             secure: jwtSecure,
             sameSite: "strict",
+            maxAge: ACCESS_TOKEN_MAX_AGE,
         });
 
         response.redirect(`${appOrigin}`);
@@ -138,22 +159,25 @@ export async function finalizeAuthentication(request: Request, response: Respons
     }
 }
 
-export async function logout(request: Request, response: Response, next: NextFunction): Promise<void> {
+export async function logout(request: Request, response: Response): Promise<void> {
     const token = request.cookies["accessToken"];
 
     if (token) {
-        let decodedToken: JwtPayload;
-        try {
-            decodedToken = jwt.verify(token, JWT_SECRET) as JwtPayload;
-        } catch (error) {
-            next(new JWTError(error as jwt.TokenExpiredError));
-            return;
-        }
-
         response.clearCookie("accessToken");
 
-        await deleteExpiredTokens();
-        await revokeToken(token, decodedToken.exp!);
+        try {
+            const decodedToken = jwt.verify(token, JWT_SECRET, {
+                ...JWT_VERIFY_OPTIONS,
+                ignoreExpiration: true,
+            }) as JwtPayload;
+
+            await deleteExpiredTokens();
+            if (decodedToken.exp) {
+                await revokeToken(token, decodedToken.exp);
+            }
+        } catch {
+            // Token is invalid (not just expired) -- cookie is already cleared
+        }
     }
 
     response.status(204).end();

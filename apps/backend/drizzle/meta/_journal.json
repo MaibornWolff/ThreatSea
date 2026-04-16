@@ -22,6 +22,13 @@
       "when": 1755519963293,
       "tag": "0002_update_user_role_type",
       "breakpoints": false
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1776333115730,
+      "tag": "0003_add-oidc-sub-to-user",
+      "breakpoints": false
     }
   ]
 }

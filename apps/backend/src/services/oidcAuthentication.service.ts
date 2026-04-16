@@ -4,18 +4,20 @@ import { buildThreatSeaAccessToken, OidcProfile } from "#services/auth.service.j
 import crypto from "crypto";
 import * as client from "openid-client";
 
-interface IdTokenClaims {
-    sub: string;
-    email?: string;
-    name?: string;
-    given_name?: string;
-    family_name?: string;
-    [key: string]: unknown;
+export interface OidcLoginInitiation {
+    redirectUrl: string;
+    state: string;
+    nonce: string;
+    codeVerifier: string;
+}
+
+export interface OidcCallbackParams {
+    state: string;
+    nonce: string;
+    codeVerifier: string;
 }
 
 let oidcClientConfig: client.Configuration;
-
-const pendingLogins = new Map<string, { nonce: string }>();
 
 export async function initializeOidc(): Promise<void> {
     if (!oidcConfig) {
@@ -37,17 +39,15 @@ export async function initializeOidc(): Promise<void> {
     );
 }
 
-export function buildLoginRedirectUrl(): string {
+export async function buildLoginRedirectUrl(): Promise<OidcLoginInitiation> {
     if (!oidcConfig) {
         throw new Error("OIDC config not available");
     }
 
     const state = crypto.randomUUID();
     const nonce = crypto.randomUUID();
-
-    pendingLogins.set(state, { nonce });
-
-    setTimeout(() => pendingLogins.delete(state), 10 * 60 * 1000);
+    const codeVerifier = client.randomPKCECodeVerifier();
+    const codeChallenge = await client.calculatePKCECodeChallenge(codeVerifier);
 
     const parameters: Record<string, string> = {
         redirect_uri: oidcConfig.callbackURL,
@@ -55,27 +55,44 @@ export function buildLoginRedirectUrl(): string {
         response_type: "code",
         state,
         nonce,
+        code_challenge: codeChallenge,
+        code_challenge_method: "S256",
     };
 
     const redirectTo = client.buildAuthorizationUrl(oidcClientConfig, parameters);
 
-    return redirectTo.href;
+    return {
+        redirectUrl: redirectTo.href,
+        state,
+        nonce,
+        codeVerifier,
+    };
 }
 
-export async function handleOidcCallback(callbackUrl: URL): Promise<string> {
-    const state = callbackUrl.searchParams.get("state");
-    if (!state || !pendingLogins.has(state)) {
-        throw new UnauthorizedError("Invalid or expired state parameter");
-    }
-    const { nonce } = pendingLogins.get(state)!;
-    pendingLogins.delete(state);
+export async function handleOidcCallback(callbackUrl: URL, oidcParams: OidcCallbackParams): Promise<string> {
+    const { state, nonce, codeVerifier } = oidcParams;
 
     const tokenSet = await client.authorizationCodeGrant(oidcClientConfig, callbackUrl, {
         expectedState: state,
         expectedNonce: nonce,
+        pkceCodeVerifier: codeVerifier,
     });
 
-    const user = buildUserProfile(tokenSet);
+    const idTokenClaims = tokenSet.claims();
+    if (!idTokenClaims?.sub) {
+        throw new UnauthorizedError("No 'sub' claim found in ID token");
+    }
+
+    const accessToken = tokenSet.access_token;
+    const userInfo = await client.fetchUserInfo(oidcClientConfig, accessToken, idTokenClaims.sub);
+
+    const user: OidcProfile = {
+        sub: idTokenClaims.sub,
+        email: userInfo.email,
+        displayName: userInfo.name,
+        firstName: userInfo.given_name,
+        lastName: userInfo.family_name,
+    };
 
     const threatSeaToken = await buildThreatSeaAccessToken(user);
 
@@ -89,32 +106,4 @@ export function buildLogoutUrl(): string | null {
     } catch {
         return null;
     }
-}
-
-function buildUserProfile(tokenSet: client.TokenEndpointResponse): OidcProfile {
-    const idToken = tokenSet.id_token;
-    if (!idToken) {
-        throw new UnauthorizedError("No ID token in response");
-    }
-
-    const parts = idToken.split(".");
-    if (parts.length < 3) {
-        throw new UnauthorizedError("Invalid id_token format");
-    }
-
-    const payloadBase64 = parts[1] as string;
-    const payloadJson = Buffer.from(payloadBase64, "base64url").toString("utf-8");
-    const claims: IdTokenClaims = JSON.parse(payloadJson);
-
-    if (!claims.sub) {
-        throw new UnauthorizedError("No 'sub' claim found in ID token");
-    }
-
-    return {
-        sub: claims.sub,
-        email: claims.email,
-        displayName: claims.name,
-        firstName: claims.given_name,
-        lastName: claims.family_name,
-    };
 }

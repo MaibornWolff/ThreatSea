@@ -3,10 +3,10 @@
  */
 
 import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "#config/config.js";
+import { JWT_AUDIENCE, JWT_ISSUER, JWT_SECRET } from "#config/config.js";
 import { db } from "#db/index.js";
 import { users } from "#db/schema.js";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import { UnauthorizedError } from "#errors/unauthorized.error.js";
 
 export interface OidcProfile {
@@ -25,11 +25,39 @@ export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promis
 
     const firstName = userObject.firstName ?? "";
     const lastName = userObject.lastName ?? userObject.displayName ?? email;
+    const displayName = userObject.displayName ?? (`${firstName} ${lastName}`.trim() || email);
 
     const user = await db.transaction(async (tx) => {
-        const user = await tx.query.users.findFirst({ where: eq(users.email, email) });
+        // Look up by OIDC sub first, fall back to email for initial account linking
+        let user = await tx.query.users.findFirst({ where: eq(users.oidcSub, userObject.sub) });
+
+        if (!user) {
+            const emailMatches = await tx.query.users.findMany({
+                where: and(eq(users.email, email), isNull(users.oidcSub)),
+            });
+
+            if (emailMatches.length > 1) {
+                throw new UnauthorizedError("Ambiguous account link for email");
+            }
+
+            user = emailMatches.at(0);
+            if (user) {
+                // Link existing email-matched user to their OIDC sub
+                await tx
+                    .update(users)
+                    .set({ oidcSub: userObject.sub, updatedAt: sql`now()` })
+                    .where(eq(users.id, user.id));
+            }
+        }
 
         if (user) {
+            // Update profile if name has changed
+            if (user.firstname !== firstName || user.lastname !== lastName || user.email !== email) {
+                await tx
+                    .update(users)
+                    .set({ firstname: firstName, lastname: lastName, email: email, updatedAt: sql`now()` })
+                    .where(eq(users.id, user.id));
+            }
             return user;
         }
 
@@ -40,6 +68,7 @@ export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promis
                     firstname: firstName,
                     lastname: lastName,
                     email: email,
+                    oidcSub: userObject.sub,
                 })
                 .returning()
         ).at(0);
@@ -56,10 +85,10 @@ export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promis
             email: email,
             firstname: firstName,
             lastname: lastName,
-            displayName: userObject.displayName,
+            displayName: displayName,
         },
         JWT_SECRET,
-        { expiresIn: "7d" }
+        { expiresIn: "7d", issuer: JWT_ISSUER, audience: JWT_AUDIENCE }
     );
 
     return threatseaAccessToken;

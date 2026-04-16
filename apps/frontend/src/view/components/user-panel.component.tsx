@@ -23,11 +23,14 @@ const UserPanel = () => {
     let menuName = "";
 
     if (hasFirstname && hasLastname) {
-        avatarContent = firstname.at(0) ?? "" + lastname.at(0);
+        avatarContent = `${firstname.at(0) ?? ""}${lastname.at(0) ?? ""}`;
         menuName = firstname + " " + lastname;
     } else if (hasDisplayName) {
         avatarContent = displayName.at(0) ?? "";
         menuName = displayName;
+    } else if (hasFirstname) {
+        avatarContent = firstname.at(0) ?? "";
+        menuName = firstname;
     } else if (hasLastname) {
         avatarContent = lastname.at(0) ?? "";
         menuName = lastname;
