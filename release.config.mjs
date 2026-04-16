@@ -57,6 +57,12 @@ export default {
                     'echo "new_release_published=true" >> $GITHUB_OUTPUT && echo "new_release_version=${nextRelease.version}" >> $GITHUB_OUTPUT',
             },
         ],
-        "@semantic-release/github",
+        [
+            "@semantic-release/github",
+            {
+                successComment: false,
+                releasedLabels: false,
+            },
+        ],
     ],
 };
