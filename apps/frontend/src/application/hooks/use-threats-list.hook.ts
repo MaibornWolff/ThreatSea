@@ -1,3 +1,23 @@
+/*
+ * LEGACY HOOK — `useThreatsList`
+ *
+ * Purpose:
+ * - Wrapper around the legacy `useThreats` hook that provides list helpers (sorting/search).
+ * - Kept to support the legacy tab on the Threats page; the page imports `useThreatsList`.
+ *
+ * Where referenced:
+ * - apps/frontend/src/view/pages/threats.page.tsx
+ *
+ * Caution before deletion:
+ * - If you remove this file, ensure all uses are migrated to the new model and tests are updated.
+ * - Consider disabling the legacy tab in the UI first and running the test/dev build to detect references.
+ *
+ * Migration notes:
+ * - New model functions are provided by `useGenericThreatsList` and related child-threat hooks.
+ * 
+ * samething as for the use-threats.hook.ts, it may be relevant for the new table ui but not for the model rework
+ */
+
 import { useEffect, useMemo } from "react";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import { useList } from "./use-list.hooks";

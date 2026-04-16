@@ -1,3 +1,27 @@
+/*
+ * LEGACY HOOK — `useThreats`
+ *
+ * Purpose:
+ * - Provides access to the legacy "threats" model and listens for socket updates.
+ * - Kept to support the legacy tab on the Threats page (legacy UI path).
+ *
+ * Where referenced:
+ * - apps/frontend/src/view/pages/threats.page.tsx (legacy tab uses `useThreatsList` which wraps this hook)
+ *
+ * Caution before deletion:
+ * - If you no longer have legacy threats the table will be empty; removing this file
+ *   may cause merge conflicts or break the legacy UI if references remain.
+ * - Before deleting: search for imports/usages, run tests and a dev build, and coordinate a cutover.
+ *
+ * Migration notes:
+ * - The new model uses `useGenericThreatsList` and child-threat hooks; measure impacts are
+ *   canonicalized on `childThreatId`.
+ * - Prefer to refactor UI to new hooks and remove this file during a planned cleanup.
+ * 
+ * This was generated, but since there are no more threats and the table is empty anyways it could be deleted
+ * But watch for new table UI update
+ */
+
 import { useCallback, useEffect } from "react";
 import type { ExtendedThreat, Threat } from "#api/types/threat.types.ts";
 import { socket } from "../../api/system-socket.api";
