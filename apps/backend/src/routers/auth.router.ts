@@ -21,7 +21,7 @@ const authLimiter = rateLimit({
 });
 
 authRouter.get("/authenticationMode", authenticationMode);
-authRouter.get("/status", getAuthStatus);
+authRouter.get("/status", authLimiter, getAuthStatus);
 
 authRouter.get("/login", authLimiter, authenticate);
 

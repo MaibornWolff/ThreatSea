@@ -1,4 +1,5 @@
 import express from "express";
+import rateLimit from "express-rate-limit";
 import session from "express-session";
 import compression from "compression";
 import cookieParser from "cookie-parser";
@@ -66,11 +67,18 @@ app.use(LogHandler);
 
 app.use(csrfSynchronisedProtection);
 
+const apiRateLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 authentication requests per windowMs
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
 app.use("/api/auth", authRouter);
-app.use("/api/catalogs", CheckTokenHandler, catalogsRouter);
-app.use("/api/projects", CheckTokenHandler, projectsRouter);
-app.use("/api/export", CheckTokenHandler, exportRouter);
-app.use("/api/import", CheckTokenHandler, express.json({ limit: "200mb" }), importRouter);
+app.use("/api/catalogs", apiRateLimiter, CheckTokenHandler, catalogsRouter);
+app.use("/api/projects", apiRateLimiter, CheckTokenHandler, projectsRouter);
+app.use("/api/export", apiRateLimiter, CheckTokenHandler, exportRouter);
+app.use("/api/import", apiRateLimiter, CheckTokenHandler, express.json({ limit: "200mb" }), importRouter);
 
 app.get("/api/health", (_req, res) => res.json({ ok: true, ts: Date.now() }));
 

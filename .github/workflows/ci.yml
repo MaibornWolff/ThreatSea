@@ -87,6 +87,7 @@ jobs:
         ports:
           - 5432:5432
     env:
+      NODE_ENV: development
       JWT_SECRET: test-secret
       EXPRESS_SESSION_SECRET: test-session-secret
       AUTH_METHOD: fixed

@@ -32,10 +32,21 @@ export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promis
         let user = await tx.query.users.findFirst({ where: eq(users.oidcSub, userObject.sub) });
 
         if (!user) {
-            user = await tx.query.users.findFirst({ where: and(eq(users.email, email), isNull(users.oidcSub)) });
+            const emailMatches = await tx.query.users.findMany({
+                where: and(eq(users.email, email), isNull(users.oidcSub)),
+            });
+
+            if (emailMatches.length > 1) {
+                throw new UnauthorizedError("Ambiguous account link for email");
+            }
+
+            user = emailMatches.at(0);
             if (user) {
                 // Link existing email-matched user to their OIDC sub
-                await tx.update(users).set({ oidcSub: userObject.sub }).where(eq(users.id, user.id));
+                await tx
+                    .update(users)
+                    .set({ oidcSub: userObject.sub, updatedAt: sql`now()` })
+                    .where(eq(users.id, user.id));
             }
         }
 
