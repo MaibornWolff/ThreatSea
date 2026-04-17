@@ -362,6 +362,7 @@ export const users = pgTable(
         lastname: varchar({ length: 255 }).notNull(),
         email: varchar({ length: 255 }).notNull(),
         oidcSub: varchar("oidc_sub", { length: 255 }),
+        picture: text(),
         createdAt: timestamp({ mode: "string", withTimezone: true })
             .notNull()
             .default(sql`now()`),

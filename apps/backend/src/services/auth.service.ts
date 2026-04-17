@@ -15,6 +15,7 @@ export interface OidcProfile {
     firstName?: string | undefined;
     lastName?: string | undefined;
     displayName?: string | undefined;
+    picture?: string | undefined;
 }
 
 export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promise<string> {
@@ -52,7 +53,12 @@ export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promis
 
         if (user) {
             // Update profile if name has changed
-            if (user.firstname !== firstName || user.lastname !== lastName || user.email !== email) {
+            if (
+                user.firstname !== firstName ||
+                user.lastname !== lastName ||
+                user.email !== email ||
+                user.picture !== userObject.picture
+            ) {
                 await tx
                     .update(users)
                     .set({ firstname: firstName, lastname: lastName, email: email, updatedAt: sql`now()` })
@@ -69,6 +75,7 @@ export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promis
                     lastname: lastName,
                     email: email,
                     oidcSub: userObject.sub,
+                    picture: userObject.picture,
                 })
                 .returning()
         ).at(0);
@@ -86,6 +93,7 @@ export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promis
             firstname: firstName,
             lastname: lastName,
             displayName: displayName,
+            picture: userObject.picture,
         },
         JWT_SECRET,
         { expiresIn: "7d", issuer: JWT_ISSUER, audience: JWT_AUDIENCE }
