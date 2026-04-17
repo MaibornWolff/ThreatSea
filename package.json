@@ -26,7 +26,7 @@
     "oxfmt": "0.45.0",
     "semantic-release": "25.0.3",
     "turbo": "2.9.6",
-    "typescript": "6.0.2"
+    "typescript": "6.0.3"
   },
   "lint-staged": {
     "*": "oxfmt --check --no-error-on-unmatched-pattern"
