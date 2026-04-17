@@ -4,7 +4,6 @@
  */
 import express from "express";
 import { getSystem, updateSystem } from "#controllers/system.controller.js";
-import { threatsRouter } from "#routers/threats.router.js";
 import { measuresRouter } from "#routers/measures.router.js";
 import { measureImpactRouter } from "#routers/measure-impact.router.js";
 import { genericThreatsRouter } from "#routers/generic-threats.router.js";
@@ -32,6 +31,5 @@ systemRouter.put<ProjectIdParam, SystemResponse, UpdateSystemRequest>(
 
 /** Put threats, measures and MeasureImpacts into this router */
 systemRouter.use("/genericThreats", genericThreatsRouter);
-systemRouter.use("/threats", threatsRouter);
 systemRouter.use("/measures", measuresRouter);
 systemRouter.use("/measureImpacts", measureImpactRouter);
