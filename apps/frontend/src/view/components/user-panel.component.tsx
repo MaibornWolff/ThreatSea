@@ -13,7 +13,7 @@ import { UserActions } from "../../application/actions/user.actions";
 
 const UserPanel = () => {
     const dispatch = useAppDispatch();
-    const { firstname, lastname, displayName } = useAppSelector((state) => state.user);
+    const { firstname, lastname, displayName, picture } = useAppSelector((state) => state.user);
 
     const hasFirstname = Boolean(firstname && firstname.trim());
     const hasLastname = Boolean(lastname && lastname.trim());
@@ -72,6 +72,7 @@ const UserPanel = () => {
                         data-testid="navigation-header_account-button"
                     >
                         <Avatar
+                            {...(picture ? { src: picture, alt: menuName } : {})}
                             sx={{
                                 width: 48,
                                 height: 48,

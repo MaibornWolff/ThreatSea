@@ -81,6 +81,7 @@ export async function getAuthStatus(request: Request, response: Response): Promi
             lastname: decodedToken["lastname"],
             displayName: decodedToken["displayName"],
             email: decodedToken["email"],
+            picture: decodedToken["picture"],
             status: {
                 isLoggedIn: true,
             },

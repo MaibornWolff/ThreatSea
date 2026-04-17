@@ -40,6 +40,7 @@ export interface UserResponse {
     lastname: string;
     email: string;
     oidcSub: string | null;
+    picture: string | null;
     createdAt: string;
     updatedAt: string;
 }

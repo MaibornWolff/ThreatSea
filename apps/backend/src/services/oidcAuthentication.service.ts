@@ -92,6 +92,7 @@ export async function handleOidcCallback(callbackUrl: URL, oidcParams: OidcCallb
         displayName: userInfo.name,
         firstName: userInfo.given_name,
         lastName: userInfo.family_name,
+        picture: userInfo.picture,
     };
 
     const threatSeaToken = await buildThreatSeaAccessToken(user);

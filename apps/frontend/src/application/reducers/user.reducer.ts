@@ -11,6 +11,7 @@ export interface UserState {
     lastname: string;
     displayName: string;
     email: string;
+    picture: string;
     status: UserStatus;
     isPending: boolean;
 }
@@ -21,6 +22,7 @@ export const userDefaultState: UserState = {
     lastname: "",
     displayName: "",
     email: "",
+    picture: "",
     status: {
         isLoggedIn: false,
     },
