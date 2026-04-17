@@ -9,7 +9,7 @@ import { MeasuresActions } from "../actions/measures.actions";
 import { MemberActions } from "../actions/members.actions";
 import { ProjectsActions } from "../actions/projects.actions";
 import { SystemActions } from "../actions/system.actions";
-import { ThreatsActions } from "../actions/threats.actions";
+// legacy ThreatsActions removed
 import { roleHandlingHelper } from "../reducers/members.reducer";
 import { MeasureImpactsActions } from "../actions/measureImpacts.actions";
 import { UserActions } from "../actions/user.actions";
@@ -61,10 +61,7 @@ const asyncThunks = [
     ProjectsActions.exportProjectToJson,
     SystemActions.getSystem,
     SystemActions.updateSystem,
-    ThreatsActions.getThreats,
-    ThreatsActions.createThreat,
-    ThreatsActions.updateThreat,
-    ThreatsActions.deleteThreat,
+    // legacy threats actions removed
     UserActions.getAuthStatus,
     UserActions.logOut,
 ] as const;

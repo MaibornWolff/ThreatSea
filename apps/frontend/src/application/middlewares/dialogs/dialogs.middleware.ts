@@ -4,12 +4,13 @@ import { ProjectsActions } from "../../actions/projects.actions";
 import { DialogsActions } from "../../actions/dialogs.actions";
 import { CatalogsActions } from "../../actions/catalogs.actions";
 import { CatalogThreatsActions } from "../../actions/catalog-threats.actions";
-import { ThreatsActions } from "../../actions/threats.actions";
 import { CatalogMeasuresActions } from "../../actions/catalog-measures.actions";
 import { MeasuresActions } from "../../actions/measures.actions";
 import { MeasureImpactsActions } from "../../actions/measureImpacts.actions";
 import { EditorActions } from "../../actions/editor.actions";
 import { MemberActions } from "../../actions/members.actions";
+import { GenericThreatsActions } from "../../actions/genericThreats.actions";
+import { ChildThreatsActions } from "../../actions/childThreats.actions";
 
 const handleConfirmDialog: AppMiddleware =
     ({ dispatch }) =>
@@ -51,8 +52,18 @@ const handleConfirmDialog: AppMiddleware =
                         );
                         break;
                     case "threats":
+                    case "genericThreats":
                         dispatch(
-                            ThreatsActions.updateThreat(data as Parameters<typeof ThreatsActions.updateThreat>[0])
+                            GenericThreatsActions.updateGenericThreat(
+                                data as Parameters<typeof GenericThreatsActions.updateGenericThreat>[0]
+                            )
+                        );
+                        break;
+                    case "childThreats":
+                        dispatch(
+                            ChildThreatsActions.updateChildThreat(
+                                data as Parameters<typeof ChildThreatsActions.updateChildThreat>[0]
+                            )
                         );
                         break;
                     case "measures":
@@ -119,9 +130,19 @@ const handleConfirmDialog: AppMiddleware =
                             )
                         );
                         break;
+                    case "genericThreats":
                     case "threats":
                         dispatch(
-                            ThreatsActions.createThreat(data as Parameters<typeof ThreatsActions.createThreat>[0])
+                            GenericThreatsActions.createGenericThreat(
+                                data as Parameters<typeof GenericThreatsActions.createGenericThreat>[0]
+                            )
+                        );
+                        break;
+                    case "childThreats":
+                        dispatch(
+                            ChildThreatsActions.createChildThreat(
+                                data as Parameters<typeof ChildThreatsActions.createChildThreat>[0]
+                            )
                         );
                         break;
                     case "measures":
