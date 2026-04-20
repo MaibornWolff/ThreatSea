@@ -53,7 +53,7 @@
     "@types/cookie-parser": "1.4.10",
     "@types/cors": "2.8.19",
     "@types/express": "5.0.6",
-    "@types/express-session": "1.18.2",
+    "@types/express-session": "1.19.0",
     "@types/jsonwebtoken": "9.0.10",
     "@types/node": "24.12.2",
     "@types/pg": "8.20.0",
