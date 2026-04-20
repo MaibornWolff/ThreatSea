@@ -31,6 +31,7 @@ import { Page } from "../components/page.component";
 import { SystemComponentConnection } from "../components/editor-components/system-component-connection.component";
 import { SystemComponent } from "../components/editor-components/system-component.component";
 import { CreatePage, HeaderNavigation } from "../components/with-menu.component";
+import AssetDialogPage from "./asset-dialog.page";
 import ComponentDialogPage from "./component-dialog.page";
 import { CommunicationContextMenu } from "../components/editor-components/editor-communication-interface-context-menu.component";
 import { useAlert } from "../../application/hooks/use-alert.hook";
@@ -223,8 +224,8 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
             stageRef.current.scale({ x: 1, y: 1 });
             setLayerPositionEvent(0, 0);
             setStageScaleEvent(1, { x: 0, y: 0 });
+            navigate(location.pathname, { replace: true, state: {} });
         }
-        navigate(location.pathname, { replace: true, state: {} });
     }, [shouldCenter, navigate, location.pathname]);
 
     useEffect(() => {
@@ -349,7 +350,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         autoSaveBlocked();
     });
 
-    const handlComponentDragStart = (_event: KonvaEventObject<DragEvent>, componentId: string): void => {
+    const handleComponentDragStart = (_event: KonvaEventObject<DragEvent>, componentId: string): void => {
         addInUseComponent(componentId);
         selectComponent(componentId);
         deselectConnection();
@@ -382,7 +383,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         });
     };
 
-    const handlComponentDragEnd = (event: KonvaEventObject<DragEvent>, componentId: string): void => {
+    const handleComponentDragEnd = (event: KonvaEventObject<DragEvent>, componentId: string): void => {
         removeInUseComponent(componentId);
         setShowHelpLines(false);
         updateConnectionsOfComponent();
@@ -735,6 +736,42 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         }
     };
 
+    const handlePointOfAttackLabelClick = (pointOfAttackId: string, componentId?: string): void => {
+        setAssetSearchValue("");
+        selectPointOfAttack(pointOfAttackId);
+        if (componentId) {
+            deselectConnection();
+            deselectConnectionPoint();
+            selectComponent(componentId);
+            showSideBar();
+        }
+    };
+
+    const handleAssetNameClick = (asset: Asset): void => {
+        navigate(`assets/${asset.id}/edit`);
+    };
+
+    const handleComponentBreadcrumbClick = (): void => {
+        deselectPointOfAttack();
+    };
+
+    const handleSelectConnectedComponent = (componentId: string, communicationInterfaceId?: string | null): void => {
+        setAssetSearchValue("");
+        deselectConnection();
+
+        if (communicationInterfaceId) {
+            selectConnectionPoint(communicationInterfaceId);
+            selectPointOfAttack(communicationInterfaceId);
+            deselectComponent();
+        } else {
+            deselectPointOfAttack();
+            selectComponent(componentId);
+            deselectConnectionPoint();
+        }
+
+        showSideBar();
+    };
+
     const handleChangePointOfAttack = (
         e: ChangeEvent<HTMLInputElement>,
         type: POINTS_OF_ATTACK,
@@ -987,242 +1024,264 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     }
 
     return (
-        <>
-            <LineDrawingProvider>
-                <Page
+        <LineDrawingProvider>
+            <Page
+                sx={{
+                    p: 0,
+                    paddingLeft: 0,
+                    paddingRight: 0,
+                }}
+            >
+                <Box
                     sx={{
-                        p: 0,
-                        paddingLeft: 0,
-                        paddingRight: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        bgcolor: "background.paper",
+                        boxShadow: 8,
+                        height: "100%",
+                        position: "realtive",
                     }}
                 >
-                    <Box
-                        sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            bgcolor: "background.paper",
-                            boxShadow: 8,
-                            height: "100%",
-                            position: "realtive",
-                        }}
+                    <EditorStage
+                        ref={stageRef}
+                        handleMouseDown={handleMouseDown}
+                        handleMouseMove={handleMouseMove}
+                        handleMouseUp={handleMouseUp}
+                        onContextMenuOpen={handleContextMenuOpen}
+                        onContextMenuAction={handleContextMenuAction}
+                        onMouseLeave={handleMouseOut}
+                        onKeyUp={handleKeyUp}
+                        mousePointers={mousePointers}
+                        onScale={onStageScale}
+                        scale={stageScale}
+                        position={stagePosition}
+                        userRole={userRole}
                     >
-                        <EditorStage
-                            ref={stageRef}
-                            handleMouseDown={handleMouseDown}
-                            handleMouseMove={handleMouseMove}
-                            handleMouseUp={handleMouseUp}
-                            onContextMenuOpen={handleContextMenuOpen}
-                            onContextMenuAction={handleContextMenuAction}
-                            onMouseLeave={handleMouseOut}
-                            onKeyUp={handleKeyUp}
-                            mousePointers={mousePointers}
-                            onScale={onStageScale}
-                            scale={stageScale}
-                            position={stagePosition}
-                            userRole={userRole}
-                        >
-                            <Layer>
-                                {lineArray.map((_item, index) => (
+                        <Layer>
+                            {lineArray.map((_item, index) => (
+                                <Line
+                                    key={index}
+                                    points={[
+                                        layerPosition.x - gridRenderConfig.offsetX - gridRenderConfig.stageOffsetX,
+                                        layerPosition.y -
+                                            gridRenderConfig.offsetY +
+                                            index * GRID_CONFIG.renderedGridSizeY -
+                                            gridRenderConfig.stageOffsetY,
+                                        500000,
+                                        layerPosition.y -
+                                            gridRenderConfig.offsetY +
+                                            index * GRID_CONFIG.renderedGridSizeY -
+                                            gridRenderConfig.stageOffsetY,
+                                    ]}
+                                    stroke={GRID_CONFIG.gridLineColor}
+                                    strokeWidth={0.75}
+                                />
+                            ))}
+
+                            {lineArray.map((_item, index) => {
+                                let stageOffsetX = 0;
+                                let stageOffsetY = 0;
+                                if (stageRef?.current) {
+                                    stageOffsetX = stageRef.current.x() / stageRef.current.scale().x;
+                                    stageOffsetY = stageRef.current.y() / stageRef.current.scale().y;
+                                }
+                                const columnsToTheTop =
+                                    Math.floor(layerPosition.y / GRID_CONFIG.renderedGridSizeY) + 75;
+                                const offsetY = columnsToTheTop * GRID_CONFIG.renderedGridSizeY;
+                                const columnsToTheLeft =
+                                    Math.floor(layerPosition.x / GRID_CONFIG.renderedGridSizeX) + 75;
+                                const offsetX = columnsToTheLeft * GRID_CONFIG.renderedGridSizeX;
+                                return (
                                     <Line
                                         key={index}
                                         points={[
-                                            layerPosition.x - gridRenderConfig.offsetX - gridRenderConfig.stageOffsetX,
-                                            layerPosition.y -
-                                                gridRenderConfig.offsetY +
-                                                index * GRID_CONFIG.renderedGridSizeY -
-                                                gridRenderConfig.stageOffsetY,
+                                            layerPosition.x -
+                                                offsetX +
+                                                index * GRID_CONFIG.renderedGridSizeX -
+                                                stageOffsetX,
+                                            layerPosition.y - offsetY - stageOffsetY,
+                                            layerPosition.x -
+                                                offsetX +
+                                                index * GRID_CONFIG.renderedGridSizeX -
+                                                stageOffsetX,
                                             500000,
-                                            layerPosition.y -
-                                                gridRenderConfig.offsetY +
-                                                index * GRID_CONFIG.renderedGridSizeY -
-                                                gridRenderConfig.stageOffsetY,
                                         ]}
                                         stroke={GRID_CONFIG.gridLineColor}
                                         strokeWidth={0.75}
                                     />
-                                ))}
+                                );
+                            })}
 
-                                {lineArray.map((_item, index) => {
-                                    let stageOffsetX = 0;
-                                    let stageOffsetY = 0;
-                                    if (stageRef?.current) {
-                                        stageOffsetX = stageRef.current.x() / stageRef.current.scale().x;
-                                        stageOffsetY = stageRef.current.y() / stageRef.current.scale().y;
-                                    }
-                                    const columnsToTheTop =
-                                        Math.floor(layerPosition.y / GRID_CONFIG.renderedGridSizeY) + 75;
-                                    const offsetY = columnsToTheTop * GRID_CONFIG.renderedGridSizeY;
-                                    const columnsToTheLeft =
-                                        Math.floor(layerPosition.x / GRID_CONFIG.renderedGridSizeX) + 75;
-                                    const offsetX = columnsToTheLeft * GRID_CONFIG.renderedGridSizeX;
-                                    return (
-                                        <Line
-                                            key={index}
-                                            points={[
-                                                layerPosition.x -
-                                                    offsetX +
-                                                    index * GRID_CONFIG.renderedGridSizeX -
-                                                    stageOffsetX,
-                                                layerPosition.y - offsetY - stageOffsetY,
-                                                layerPosition.x -
-                                                    offsetX +
-                                                    index * GRID_CONFIG.renderedGridSizeX -
-                                                    stageOffsetX,
-                                                500000,
-                                            ]}
-                                            stroke={GRID_CONFIG.gridLineColor}
-                                            strokeWidth={0.75}
-                                        />
-                                    );
-                                })}
+                            {showHelpLines && currentHelpLinesRef.current && (
+                                <Group>
+                                    <Line
+                                        points={[
+                                            -1000,
+                                            currentHelpLinesRef.current.y,
+                                            10000,
+                                            currentHelpLinesRef.current.y,
+                                        ]}
+                                        stroke={GRID_CONFIG.helpLineColor}
+                                        strokeWidth={0.75}
+                                    />
+                                    <Line
+                                        points={[
+                                            -1000,
+                                            currentHelpLinesRef.current.y2,
+                                            10000,
+                                            currentHelpLinesRef.current.y2,
+                                        ]}
+                                        stroke={GRID_CONFIG.helpLineColor}
+                                        strokeWidth={0.75}
+                                    />
+                                    <Line
+                                        points={[
+                                            currentHelpLinesRef.current.x,
+                                            -1000,
+                                            currentHelpLinesRef.current.x,
+                                            10000,
+                                        ]}
+                                        stroke={GRID_CONFIG.helpLineColor}
+                                        strokeWidth={0.75}
+                                    />
+                                    <Line
+                                        points={[
+                                            currentHelpLinesRef.current.x2,
+                                            -1000,
+                                            currentHelpLinesRef.current.x2,
+                                            10000,
+                                        ]}
+                                        stroke={GRID_CONFIG.helpLineColor}
+                                        strokeWidth={0.75}
+                                    />
+                                </Group>
+                            )}
+                        </Layer>
 
-                                {showHelpLines && currentHelpLinesRef.current && (
-                                    <Group>
-                                        <Line
-                                            points={[
-                                                -1000,
-                                                currentHelpLinesRef.current.y,
-                                                10000,
-                                                currentHelpLinesRef.current.y,
-                                            ]}
-                                            stroke={GRID_CONFIG.helpLineColor}
-                                            strokeWidth={0.75}
-                                        />
-                                        <Line
-                                            points={[
-                                                -1000,
-                                                currentHelpLinesRef.current.y2,
-                                                10000,
-                                                currentHelpLinesRef.current.y2,
-                                            ]}
-                                            stroke={GRID_CONFIG.helpLineColor}
-                                            strokeWidth={0.75}
-                                        />
-                                        <Line
-                                            points={[
-                                                currentHelpLinesRef.current.x,
-                                                -1000,
-                                                currentHelpLinesRef.current.x,
-                                                10000,
-                                            ]}
-                                            stroke={GRID_CONFIG.helpLineColor}
-                                            strokeWidth={0.75}
-                                        />
-                                        <Line
-                                            points={[
-                                                currentHelpLinesRef.current.x2,
-                                                -1000,
-                                                currentHelpLinesRef.current.x2,
-                                                10000,
-                                            ]}
-                                            stroke={GRID_CONFIG.helpLineColor}
-                                            strokeWidth={0.75}
-                                        />
-                                    </Group>
-                                )}
-                            </Layer>
+                        <Layer x={layerPosition.x} y={layerPosition.y}>
+                            {newConnection && newConnectionPreviewComponent && (
+                                <ConnectionPreview
+                                    key={`new-connection-${newConnection.from.id}-${Date.now()}`}
+                                    component={newConnectionPreviewComponent}
+                                    newConnectionMousePosition={newConnectionMousePosition}
+                                />
+                            )}
 
-                            <Layer x={layerPosition.x} y={layerPosition.y}>
-                                {newConnection && newConnectionPreviewComponent && (
+                            {componentConnectionLines.map((line, index) => {
+                                const key = `connection-preview-${line.otherComponentInfo.id}-${line.draggedComponentInfo.id}-${index}`;
+                                const otherComponent = components.filter(
+                                    (component) => component.id === line.otherComponentInfo.id
+                                )[0];
+                                const draggedComponent = components.filter(
+                                    (component) => component.id === line.draggedComponentInfo.id
+                                )[0];
+                                if (!otherComponent || !draggedComponent) return null;
+
+                                return (
                                     <ConnectionPreview
-                                        key={`new-connection-${newConnection.from.id}-${Date.now()}`}
-                                        component={newConnectionPreviewComponent}
-                                        newConnectionMousePosition={newConnectionMousePosition}
+                                        key={key}
+                                        component={otherComponent}
+                                        draggedComponent={draggedComponent}
                                     />
-                                )}
+                                );
+                            })}
+                        </Layer>
 
-                                {componentConnectionLines.map((line, index) => {
-                                    const key = `connection-preview-${line.otherComponentInfo.id}-${line.draggedComponentInfo.id}-${index}`;
-                                    const otherComponent = components.filter(
-                                        (component) => component.id === line.otherComponentInfo.id
-                                    )[0];
-                                    const draggedComponent = components.filter(
-                                        (component) => component.id === line.draggedComponentInfo.id
-                                    )[0];
-                                    if (!otherComponent || !draggedComponent) return null;
+                        <Layer x={layerPosition.x} y={layerPosition.y} ref={componentLayerRef}>
+                            {connections.map((connection, i) => {
+                                if (connection.visible === false) {
+                                    return <Group key={i}></Group>;
+                                }
 
-                                    return (
-                                        <ConnectionPreview
-                                            key={key}
-                                            component={otherComponent}
-                                            draggedComponent={draggedComponent}
-                                        />
-                                    );
-                                })}
-                            </Layer>
+                                const fromComponent = components.filter(
+                                    (component) => component.id === connection.from.id
+                                )[0];
+                                const toComponent = components.filter(
+                                    (component) => component.id === connection.to.id
+                                )[0];
+                                if (!fromComponent || !toComponent) return null;
 
-                            <Layer x={layerPosition.x} y={layerPosition.y} ref={componentLayerRef}>
-                                {connections.map((connection, i) => {
-                                    if (connection.visible === false) {
-                                        return <Group key={i}></Group>;
-                                    }
-
-                                    const fromComponent = components.filter(
-                                        (component) => component.id === connection.from.id
-                                    )[0];
-                                    const toComponent = components.filter(
-                                        (component) => component.id === connection.to.id
-                                    )[0];
-                                    if (!fromComponent || !toComponent) return null;
-
-                                    return (
-                                        <SystemComponentConnection
-                                            key={i}
-                                            {...connection}
-                                            onClick={handleSelectConnection}
-                                            onPointOfAttackClicked={handleOnPointOfAttackClicked}
-                                            fromComponent={fromComponent}
-                                            toComponent={toComponent}
-                                            components={components}
-                                            selected={selectedConnectionId === connection.id}
-                                            recalculate={connection.recalculate}
-                                            onRecalculated={onRecalculated}
-                                            onConnectionPointClicked={handleOnConnectionPointClicked}
-                                            selectedConnectionPointId={selectedConnectionPointId}
-                                            stageRef={stageRef}
-                                        />
-                                    );
-                                })}
-                                {components.map((component, i) => (
-                                    <SystemComponent
+                                return (
+                                    <SystemComponentConnection
                                         key={i}
-                                        {...component}
-                                        onSelectAnchor={handleSelectAnchor}
-                                        selectedAnchor={
-                                            newConnection
-                                                ? newConnection.from.id === component.id
-                                                    ? newConnection.from.anchor
-                                                    : ""
-                                                : ""
-                                        }
-                                        onDragMove={(e) => handleComponentDragMove(e, component.id)}
-                                        onClick={(e) => handleSelectComponent(e, component.id)}
-                                        onDragEnd={(e) => handlComponentDragEnd(e, component.id)}
-                                        onDragStart={(e) => handlComponentDragStart(e, component.id)}
+                                        {...connection}
+                                        onClick={handleSelectConnection}
                                         onPointOfAttackClicked={handleOnPointOfAttackClicked}
-                                        selectedPointOfAttackId={selectedPointOfAttack ? selectedPointOfAttack.id : ""}
-                                        component={component}
+                                        fromComponent={fromComponent}
+                                        toComponent={toComponent}
+                                        components={components}
+                                        selected={selectedConnectionId === connection.id}
+                                        recalculate={connection.recalculate}
+                                        onRecalculated={onRecalculated}
+                                        onConnectionPointClicked={handleOnConnectionPointClicked}
+                                        selectedConnectionPointId={selectedConnectionPointId}
                                         stageRef={stageRef}
-                                        userRole={userRole}
-                                        toggleCommunicationInterfacesMenu={toggleCommunicationInterfacesMenu}
                                     />
-                                ))}
-                            </Layer>
-                        </EditorStage>
+                                );
+                            })}
+                            {components.map((component, i) => (
+                                <SystemComponent
+                                    key={i}
+                                    {...component}
+                                    onSelectAnchor={handleSelectAnchor}
+                                    selectedAnchor={
+                                        newConnection
+                                            ? newConnection.from.id === component.id
+                                                ? newConnection.from.anchor
+                                                : ""
+                                            : ""
+                                    }
+                                    onDragMove={(e) => handleComponentDragMove(e, component.id)}
+                                    onClick={(e) => handleSelectComponent(e, component.id)}
+                                    onDragEnd={(e) => handleComponentDragEnd(e, component.id)}
+                                    onDragStart={(e) => handleComponentDragStart(e, component.id)}
+                                    onPointOfAttackClicked={handleOnPointOfAttackClicked}
+                                    selectedPointOfAttackId={selectedPointOfAttack ? selectedPointOfAttack.id : ""}
+                                    component={component}
+                                    stageRef={stageRef}
+                                    userRole={userRole}
+                                    toggleCommunicationInterfacesMenu={toggleCommunicationInterfacesMenu}
+                                />
+                            ))}
+                        </Layer>
+                    </EditorStage>
 
-                        <Box
+                    <Box
+                        sx={{
+                            position: "absolute",
+                            top: 8,
+                            left: 8,
+                            width: "38px",
+                            marginLeft: "auto",
+                            marginRight: "auto",
+                        }}
+                    >
+                        <IconButton
+                            onClick={handleCenterEditor}
                             sx={{
-                                position: "absolute",
-                                top: 8,
-                                left: 8,
-                                width: "38px",
-                                marginLeft: "auto",
-                                marginRight: "auto",
+                                backgroundColor: "background.paperIntransparent",
+                                "&:hover": {
+                                    backgroundColor: "rgba(149, 163, 181, 0.7)",
+                                },
                             }}
                         >
+                            <CenterFocusWeak sx={{ fontSize: 30, color: "primary.main" }} />
+                        </IconButton>
+                    </Box>
+                    <Box
+                        sx={{
+                            position: "absolute",
+                            top: 60,
+                            left: 8,
+                            width: "38px",
+                            marginLeft: "auto",
+                            marginRight: "auto",
+                        }}
+                    >
+                        <Tooltip title={t("canvas.exportSystemImage")}>
                             <IconButton
-                                onClick={handleCenterEditor}
+                                onClick={handleDownloadSystemView}
                                 sx={{
                                     backgroundColor: "background.paperIntransparent",
                                     "&:hover": {
@@ -1230,97 +1289,78 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                     },
                                 }}
                             >
-                                <CenterFocusWeak sx={{ fontSize: 30, color: "primary.main" }} />
-                            </IconButton>
-                        </Box>
-                        <Box
-                            sx={{
-                                position: "absolute",
-                                top: 60,
-                                left: 8,
-                                width: "38px",
-                                marginLeft: "auto",
-                                marginRight: "auto",
-                            }}
-                        >
-                            <Tooltip title={t("canvas.exportSystemImage")}>
-                                <IconButton
-                                    onClick={handleDownloadSystemView}
+                                <Download
                                     sx={{
-                                        backgroundColor: "background.paperIntransparent",
-                                        "&:hover": {
-                                            backgroundColor: "rgba(149, 163, 181, 0.7)",
-                                        },
+                                        fontSize: 30,
+                                        color: "primary.main",
                                     }}
-                                >
-                                    <Download
-                                        sx={{
-                                            fontSize: 30,
-                                            color: "primary.main",
-                                        }}
-                                    />
-                                </IconButton>
-                            </Tooltip>
-                        </Box>
+                                />
+                            </IconButton>
+                        </Tooltip>
                     </Box>
+                </Box>
 
-                    <EditorSidebar
-                        sidebarRef={sidebarRef}
-                        selectedComponent={selectedComponent}
-                        selectedComponentId={selectedComponentId}
-                        selectedPointOfAttack={selectedPointOfAttack}
-                        handleDeleteComponent={handleDeleteComponent}
-                        handleOnNameChange={handleOnNameChange}
-                        handleChangePointOfAttack={handleChangePointOfAttack}
-                        handleAddAssetToAllPointsOfAttack={handleAddAssetToAllPointsOfAttack}
-                        handleRemoveAssetFromAllPointsOfAttack={handleRemoveAssetFromAllPointsOfAttack}
-                        assetSearchValue={assetSearchValue}
-                        handleAssetSearchChanged={handleAssetSearchChanged}
-                        items={items}
-                        pointsOfAttackOfSelectedComponent={pointsOfAttackOfSelectedComponent}
-                        selectedConnectionId={selectedConnectionId}
-                        selectedConnection={selectedConnection}
-                        handleDeleteConnection={handleDeleteConnection}
-                        handleOnConnectionNameChange={handleConnectionNameChange}
-                        handleOnAssetChanged={handleOnAssetChanged}
-                        selectedConnectionPoint={selectedConnectionPoint}
-                        userRole={userRole}
-                        handleOnDescriptionChange={handleOnDescriptionChange}
-                        connectedComponents={getConnectedComponents(selectedComponentId)}
-                        handleDeleteConnectionBetweenComponents={handleDeleteConnectionBetweenComponents}
-                        handleOnConnectionPointDescriptionChange={handleOnConnectionPointDescriptionChange}
-                        handleChangeCommunicationInterfaceName={handleChangeCommunicationInterfaceName}
-                        handleDeleteCommunicationInterface={handleDeleteCommunicationInterfaceDialog}
+                <EditorSidebar
+                    sidebarRef={sidebarRef}
+                    selectedComponent={selectedComponent}
+                    selectedComponentId={selectedComponentId}
+                    selectedPointOfAttack={selectedPointOfAttack}
+                    handleDeleteComponent={handleDeleteComponent}
+                    handleOnNameChange={handleOnNameChange}
+                    handleChangePointOfAttack={handleChangePointOfAttack}
+                    handleAddAssetToAllPointsOfAttack={handleAddAssetToAllPointsOfAttack}
+                    handleRemoveAssetFromAllPointsOfAttack={handleRemoveAssetFromAllPointsOfAttack}
+                    assetSearchValue={assetSearchValue}
+                    handleAssetSearchChanged={handleAssetSearchChanged}
+                    items={items}
+                    pointsOfAttackOfSelectedComponent={pointsOfAttackOfSelectedComponent}
+                    selectedConnectionId={selectedConnectionId}
+                    selectedConnection={selectedConnection}
+                    handleDeleteConnection={handleDeleteConnection}
+                    handleOnConnectionNameChange={handleConnectionNameChange}
+                    handleOnAssetChanged={handleOnAssetChanged}
+                    selectedConnectionPoint={selectedConnectionPoint}
+                    userRole={userRole}
+                    handleOnDescriptionChange={handleOnDescriptionChange}
+                    connectedComponents={getConnectedComponents(selectedComponentId)}
+                    handleDeleteConnectionBetweenComponents={handleDeleteConnectionBetweenComponents}
+                    handleOnConnectionPointDescriptionChange={handleOnConnectionPointDescriptionChange}
+                    handleChangeCommunicationInterfaceName={handleChangeCommunicationInterfaceName}
+                    handleDeleteCommunicationInterface={handleDeleteCommunicationInterfaceDialog}
+                    handlePointOfAttackLabelClick={handlePointOfAttackLabelClick}
+                    handleAssetNameClick={handleAssetNameClick}
+                    handleSelectConnectedComponent={handleSelectConnectedComponent}
+                    handleComponentBreadcrumbClick={handleComponentBreadcrumbClick}
+                />
+
+                <Routes>
+                    <Route path="components/edit" element={<ComponentDialogPage />} />
+                    <Route path="assets/:assetId/edit" element={<AssetDialogPage />} />
+                </Routes>
+
+                <CommunicationContextMenu
+                    stageRef={stageRef}
+                    open={communicationMenuOpen}
+                    componentName={communicationMenuComponent?.name}
+                    onSelect={handleCommunicationSelect}
+                    onCreateNew={handleOpenCommunicationInterfaceDialog}
+                    onClose={handleCloseCommunicationMenu}
+                    onSelectAnchor={handleSelectAnchor}
+                    componentId={communicationMenuComponent?.id}
+                    componentType={communicationMenuComponent?.type}
+                    components={components}
+                    connections={connections}
+                    handleDeleteConnectionBetweenComponents={handleDeleteConnectionBetweenComponents}
+                />
+                {isCommunicationInterfaceDialogOpen && (
+                    <CommunicationInterfaceDialog
+                        open={true}
+                        onClose={handleCloseCommunicationInterfaceDialog}
+                        handleCreateNew={handleCreateNewCommunicationInterface}
                     />
-
-                    <Routes>
-                        <Route path="components/edit" element={<ComponentDialogPage />} />
-                    </Routes>
-
-                    <CommunicationContextMenu
-                        stageRef={stageRef}
-                        open={communicationMenuOpen}
-                        componentName={communicationMenuComponent?.name}
-                        onSelect={handleCommunicationSelect}
-                        onCreateNew={handleOpenCommunicationInterfaceDialog}
-                        onClose={handleCloseCommunicationMenu}
-                        onSelectAnchor={handleSelectAnchor}
-                        componentId={communicationMenuComponent?.id}
-                        componentType={communicationMenuComponent?.type}
-                        components={components}
-                        connections={connections}
-                        handleDeleteConnectionBetweenComponents={handleDeleteConnectionBetweenComponents}
-                    />
-                    {isCommunicationInterfaceDialogOpen && (
-                        <CommunicationInterfaceDialog
-                            open={true}
-                            onClose={handleCloseCommunicationInterfaceDialog}
-                            handleCreateNew={handleCreateNewCommunicationInterface}
-                        />
-                    )}
-                </Page>
-            </LineDrawingProvider>
-        </>
+                )}
+            </Page>
+        </LineDrawingProvider>
     );
 };
 
