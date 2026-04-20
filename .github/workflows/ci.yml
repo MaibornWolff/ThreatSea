@@ -183,12 +183,16 @@ jobs:
     name: Create and push Release
     if: github.repository_owner == 'MaibornWolff' && github.ref_type == 'branch' && github.ref_name == 'main'
     permissions:
+      id-token: write # for Sigstore-based provenance signing
+      attestations: write
       contents: write
       packages: write
       issues: write
-      pull-requests: write
     needs:
       - test-backend
       - test-frontend
     uses: ./.github/workflows/release.yml
-    secrets: inherit
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      SO_API_TOKEN: ${{ secrets.SO_API_TOKEN }}

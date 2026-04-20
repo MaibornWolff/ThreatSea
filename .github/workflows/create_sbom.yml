@@ -12,6 +12,9 @@ on:
         description: "Release tag (e.g. v1.2.3)"
         required: true
         type: string
+    secrets:
+      SO_API_TOKEN:
+        required: true
 
 jobs:
   sbom:
@@ -51,7 +54,7 @@ jobs:
           path: threatsea-sbom-v${{ inputs.version }}.json
 
       - name: Import SBOM to SecObserve
-        uses: SecObserve/secobserve_actions_templates/actions/importer@main
+        uses: SecObserve/secobserve_actions_templates/actions/importer@8da529a0ac7ddc4a6da5812b2617b4d173660619 # v2026_03
         with:
           so_api_base_url: ${{ vars.SO_API_BASE_URL }}
           so_api_token: ${{ secrets.SO_API_TOKEN }}
