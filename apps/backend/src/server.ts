@@ -9,7 +9,6 @@ import path from "path";
 import helmet from "helmet";
 import { corsConfig, helmetConfig, sessionConfig } from "#config/config.js";
 import nocache from "nocache";
-import { Logger } from "#logging/index.js";
 
 // Routers
 import { authRouter } from "#routers/auth.router.js";
@@ -44,11 +43,6 @@ if (process.env["USE_PROXY"] === "true") {
 
 // Set up csrf-sync middleware
 const { generateToken, csrfSynchronisedProtection } = csrfSync();
-if (process.env["COOKIES_SECURE_OPTION"] === "disabled") {
-    sessionConfig.cookie!.secure = false;
-}
-
-Logger.info(`cookie secure option: {secure: ${sessionConfig.cookie!.secure}}`);
 
 app.use(cors(corsConfig));
 app.use(cookieParser());
