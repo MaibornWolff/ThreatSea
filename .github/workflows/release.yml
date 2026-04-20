@@ -78,6 +78,8 @@ jobs:
           context: .
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
+          provenance: mode=max
+          sbom: true
           push: true
           tags: ${{ steps.meta-next.outputs.tags }}
           labels: ${{ steps.meta-next.outputs.labels }}
@@ -107,6 +109,8 @@ jobs:
           context: .
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
+          provenance: mode=max
+          sbom: true
           push: true
           tags: ${{ steps.meta-main.outputs.tags }}
           labels: ${{ steps.meta-main.outputs.labels }}
