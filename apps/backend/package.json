@@ -58,14 +58,14 @@
     "@types/node": "24.12.2",
     "@types/pg": "8.20.0",
     "@types/supertest": "7.2.0",
-    "@vitest/coverage-v8": "4.1.4",
+    "@vitest/coverage-v8": "4.1.5",
     "drizzle-kit": "0.31.10",
     "nanoid": "5.1.9",
     "oxlint": "1.61.0",
     "supertest": "7.2.2",
     "tsc-alias": "1.8.16",
     "tsx": "4.21.0",
-    "vitest": "4.1.4"
+    "vitest": "4.1.5"
   },
   "lint-staged": {
     "*.{cjs,js,jsx,mjs,ts,tsx}": [
