@@ -29,6 +29,7 @@ export interface EditorSidebarSelectedCommunicationInterfaceProps {
     ) => void;
     userRole: USER_ROLES | undefined;
     handleAssetNameClick: (asset: Asset) => void;
+    handleInterfaceBreadcrumbClick: () => void;
 }
 
 export const EditorSidebarSelectedCommunicationInterface = ({
@@ -43,6 +44,7 @@ export const EditorSidebarSelectedCommunicationInterface = ({
     handleDeleteCommunicationInterface,
     userRole,
     handleAssetNameClick,
+    handleInterfaceBreadcrumbClick,
 }: EditorSidebarSelectedCommunicationInterfaceProps) => {
     const { t } = useTranslation("editorPage");
     const [assetAnchorEl, setAssetAnchorEl] = useState<HTMLElement | null>(null);
@@ -85,13 +87,29 @@ export const EditorSidebarSelectedCommunicationInterface = ({
                 >
                     <Typography
                         sx={{
+                            display: "inline",
                             fontWeight: "bold",
                             fontSize: "0.875rem",
                             color: "text.primary",
                             marginBottom: "4px",
                         }}
                     >
-                        {selectedConnectionPoint?.componentName} Interface:
+                        <Typography
+                            component="span"
+                            onClick={handleInterfaceBreadcrumbClick}
+                            sx={{
+                                fontWeight: "bold",
+                                fontSize: "0.875rem",
+                                cursor: "pointer",
+                                "&:hover": { textDecoration: "underline" },
+                            }}
+                        >
+                            {selectedConnectionPoint?.componentName}
+                        </Typography>
+                        <Typography component="span" sx={{ display: "inline", marginLeft: 1, marginRight: 1 }}>
+                            &gt;
+                        </Typography>
+                        Interface:
                     </Typography>
                     <TextField
                         value={selectedConnectionPoint?.name ? selectedConnectionPoint.name : ""}

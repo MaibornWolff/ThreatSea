@@ -55,6 +55,7 @@ export interface EditorSidebarProps {
     handleAssetNameClick: (asset: Asset) => void;
     handleSelectConnectedComponent: (componentId: string, communicationInterfaceId?: string | null) => void;
     handleComponentBreadcrumbClick: () => void;
+    handleInterfaceBreadcrumbClick: () => void;
 }
 
 export const EditorSidebar = ({
@@ -88,6 +89,7 @@ export const EditorSidebar = ({
     handleAssetNameClick,
     handleSelectConnectedComponent,
     handleComponentBreadcrumbClick,
+    handleInterfaceBreadcrumbClick,
 }: EditorSidebarProps) => {
     return (
         <Box
@@ -172,6 +174,7 @@ export const EditorSidebar = ({
                         handleDeleteCommunicationInterface={handleDeleteCommunicationInterface}
                         userRole={userRole}
                         handleAssetNameClick={handleAssetNameClick}
+                        handleInterfaceBreadcrumbClick={handleInterfaceBreadcrumbClick}
                     />
                 )}
 

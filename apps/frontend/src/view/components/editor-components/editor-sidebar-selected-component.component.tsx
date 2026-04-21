@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { PointOfAttackSwitch } from "./point-of-attack-switch.component";
 import { POINTS_OF_ATTACK } from "../../../api/types/points-of-attack.types";
 import { POA_COLORS } from "../../colors/pointsOfAttack.colors";
-import { Delete } from "@mui/icons-material";
+import { Delete, Edit } from "@mui/icons-material";
 import { TextField } from "../textfield.component";
 import { SearchField } from "../search-field.component";
 import { ToggleButtons } from "../toggle-buttons.component";
@@ -93,6 +93,7 @@ export const EditorSidebarSelectedComponent = ({
     const [localName, setLocalName] = useState<string>("");
     const [localDescription, setLocalDescription] = useState<string>("");
     const [interfaceNames, setInterfaceNames] = useState<Record<string, string>>({});
+    const [editingInterfaceId, setEditingInterfaceId] = useState<string | null>(null);
 
     const debouncedHandleNameChange = useDebounce(handleOnNameChange);
     const debouncedHandleDescriptionChange = useDebounce(handleOnDescriptionChange);
@@ -442,61 +443,98 @@ export const EditorSidebarSelectedComponent = ({
                                             {IconComponent ? <IconComponent /> : null}
                                         </Avatar>
                                     </ListItemAvatar>
-                                    <TextField
-                                        value={interfaceNames[communicationInterface.id] || ""}
-                                        onChange={(event) =>
-                                            handleLocalInterfaceNameChange(
-                                                selectedComponent.id,
-                                                communicationInterface.id,
-                                                event.target.value
-                                            )
-                                        }
-                                        onKeyUp={(event) => {
-                                            if (event.key === "Delete") {
-                                                event.stopPropagation();
+                                    {editingInterfaceId === communicationInterface.id ? (
+                                        <TextField
+                                            value={interfaceNames[communicationInterface.id] || ""}
+                                            onChange={(event) =>
+                                                handleLocalInterfaceNameChange(
+                                                    selectedComponent.id,
+                                                    communicationInterface.id,
+                                                    event.target.value
+                                                )
                                             }
-                                        }}
-                                        autoFocus={false}
-                                        sx={{
-                                            border: "none !important",
-                                            width: "82.5%",
-                                            "& .MuiInputBase-root": {
-                                                borderBottom: "1px solid rgba(35, 60, 87, 0) !important",
-                                            },
-                                            "*": {
+                                            onBlur={() => setEditingInterfaceId(null)}
+                                            onKeyUp={(event) => {
+                                                if (event.key === "Enter") {
+                                                    setEditingInterfaceId(null);
+                                                }
+                                                if (event.key === "Delete") {
+                                                    event.stopPropagation();
+                                                }
+                                            }}
+                                            autoFocus
+                                            sx={{
                                                 border: "none !important",
+                                                width: "82.5%",
+                                                "& .MuiInputBase-root": {
+                                                    borderBottom: "1px solid rgba(35, 60, 87, 1) !important",
+                                                },
+                                                "*": {
+                                                    border: "none !important",
+                                                    padding: "0 !important",
+                                                    borderRadius: "0 !important",
+                                                    fontWeight: "bold",
+                                                },
+                                                input: {
+                                                    fontSize: "0.75rem !important",
+                                                    width: "100% !important",
+                                                },
+                                                color: "text.primary !important",
                                                 padding: "0 !important",
-                                                borderRadius: "0 !important",
+                                            }}
+                                        />
+                                    ) : (
+                                        <Typography
+                                            onClick={() =>
+                                                handleSelectConnectedComponent(
+                                                    selectedComponent.id,
+                                                    communicationInterface.id
+                                                )
+                                            }
+                                            sx={{
+                                                fontSize: "0.75rem",
                                                 fontWeight: "bold",
-                                            },
-                                            "& .Mui-focused": {
-                                                borderBottom: "1px solid rgba(35, 60, 87, 1) !important",
-                                            },
-                                            input: {
-                                                fontSize: "0.875rem !important",
-                                                width: "100% !important",
-                                            },
-                                            color: "text.primary !important",
-                                            padding: "0 !important",
-                                        }}
-                                    />
-                                    <IconButton
-                                        onClick={() =>
-                                            handleDeleteCommunicationInterface(
-                                                selectedComponent.id,
-                                                communicationInterface.id,
-                                                communicationInterface.name
-                                            )
-                                        }
-                                        sx={{
-                                            "&:hover": {
-                                                color: "#ef5350",
-                                                backgroundColor: "background.paperIntransparent",
-                                            },
-                                        }}
-                                    >
-                                        <Delete sx={{ fontSize: 18 }} />
-                                    </IconButton>
+                                                cursor: "pointer",
+                                                width: "82.5%",
+                                                "&:hover": { textDecoration: "underline" },
+                                            }}
+                                        >
+                                            {interfaceNames[communicationInterface.id] || ""}
+                                        </Typography>
+                                    )}
+                                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                                        {checkUserRole(userRole, USER_ROLES.EDITOR) && (
+                                            <IconButton
+                                                onClick={() => setEditingInterfaceId(communicationInterface.id)}
+                                                sx={{
+                                                    "&:hover": {
+                                                        backgroundColor: "background.paperIntransparent",
+                                                    },
+                                                }}
+                                            >
+                                                <Edit sx={{ fontSize: 18 }} />
+                                            </IconButton>
+                                        )}
+                                        {checkUserRole(userRole, USER_ROLES.EDITOR) && (
+                                            <IconButton
+                                                onClick={() =>
+                                                    handleDeleteCommunicationInterface(
+                                                        selectedComponent.id,
+                                                        communicationInterface.id,
+                                                        communicationInterface.name
+                                                    )
+                                                }
+                                                sx={{
+                                                    "&:hover": {
+                                                        color: "#ef5350",
+                                                        backgroundColor: "background.paperIntransparent",
+                                                    },
+                                                }}
+                                            >
+                                                <Delete sx={{ fontSize: 18 }} />
+                                            </IconButton>
+                                        )}
+                                    </Box>
                                 </Box>
                             );
                         })}

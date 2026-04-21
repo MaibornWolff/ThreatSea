@@ -755,6 +755,14 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         deselectPointOfAttack();
     };
 
+    const handleInterfaceBreadcrumbClick = (): void => {
+        if (selectedConnectionPoint?.componentId) {
+            deselectConnectionPoint();
+            deselectPointOfAttack();
+            selectComponent(selectedConnectionPoint.componentId);
+        }
+    };
+
     const handleSelectConnectedComponent = (componentId: string, communicationInterfaceId?: string | null): void => {
         setAssetSearchValue("");
         deselectConnection();
@@ -1331,6 +1339,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                     handleAssetNameClick={handleAssetNameClick}
                     handleSelectConnectedComponent={handleSelectConnectedComponent}
                     handleComponentBreadcrumbClick={handleComponentBreadcrumbClick}
+                    handleInterfaceBreadcrumbClick={handleInterfaceBreadcrumbClick}
                 />
 
                 <Routes>
