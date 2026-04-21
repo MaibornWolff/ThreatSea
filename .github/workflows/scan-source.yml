@@ -20,7 +20,7 @@ jobs:
         with:
           lfs: true
       - name: Run trivy_filesystem
-        uses: SecObserve/secobserve_actions_templates/actions/SCA/trivy_filesystem@main
+        uses: SecObserve/secobserve_actions_templates/actions/SCA/trivy_filesystem@8da529a0ac7ddc4a6da5812b2617b4d173660619 # v2026_03
         with:
           target: "pnpm-lock.yaml"
           report_name: "trvivy_pnpm.json"
@@ -30,7 +30,7 @@ jobs:
           so_product_name: ${{ vars.SO_PRODUCT_NAME }}
           so_branch_name: ${{ github.ref_name }}
       - name: Run gitleaks
-        uses: SecObserve/secobserve_actions_templates/actions/secrets/gitleaks@main
+        uses: SecObserve/secobserve_actions_templates/actions/secrets/gitleaks@8da529a0ac7ddc4a6da5812b2617b4d173660619 # v2026_03
         with:
           target: "."
           report_name: "gitleaks.sarif"
@@ -39,7 +39,7 @@ jobs:
           so_product_name: ${{ vars.SO_PRODUCT_NAME }}
           so_branch_name: ${{ github.ref_name }}
       - name: Run checkov
-        uses: SecObserve/secobserve_actions_templates/actions/SAST/checkov@main
+        uses: SecObserve/secobserve_actions_templates/actions/SAST/checkov@8da529a0ac7ddc4a6da5812b2617b4d173660619 # v2026_03
         with:
           target: "."
           report_name: "checkov.sarif"
@@ -48,7 +48,7 @@ jobs:
           so_product_name: ${{ vars.SO_PRODUCT_NAME }}
           so_branch_name: ${{ github.ref_name }}
       - name: Run semgrep
-        uses: SecObserve/secobserve_actions_templates/actions/SAST/semgrep@main
+        uses: SecObserve/secobserve_actions_templates/actions/SAST/semgrep@8da529a0ac7ddc4a6da5812b2617b4d173660619 # v2026_03
         with:
           target: "."
           report_name: "semgrep_javascript.json"
@@ -58,7 +58,7 @@ jobs:
           so_product_name: ${{ vars.SO_PRODUCT_NAME }}
           so_branch_name: ${{ github.ref_name }}
       - name: Run KICS
-        uses: SecObserve/secobserve_actions_templates/actions/SAST/kics@main
+        uses: SecObserve/secobserve_actions_templates/actions/SAST/kics@8da529a0ac7ddc4a6da5812b2617b4d173660619 # v2026_03
         with:
           target: "."
           report_name: "all_kics.sarif"
