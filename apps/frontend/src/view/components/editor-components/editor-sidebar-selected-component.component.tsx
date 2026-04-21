@@ -337,6 +337,7 @@ export const EditorSidebarSelectedComponent = ({
                                 key={i}
                                 label={
                                     <Typography
+                                        component="span"
                                         sx={{
                                             fontSize: "0.75rem",
                                             fontWeight: "bold",

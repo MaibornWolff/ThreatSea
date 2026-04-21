@@ -79,7 +79,9 @@ export const EditorSidebarSelectedPointOfAttack = ({
                     >
                         {selectedComponent.name}
                     </Typography>
-                    <Typography sx={{ display: "inline", marginLeft: 1, marginRight: 1 }}>&gt;</Typography>
+                    <Typography component="span" sx={{ display: "inline", marginLeft: 1, marginRight: 1 }}>
+                        &gt;
+                    </Typography>
                     {t(`pointsOfAttackList.${selectedPointOfAttack.type}`)}
                 </Typography>
             </Box>
