@@ -15,7 +15,7 @@ import type {
     SystemPointOfAttack,
 } from "#api/types/system.types.ts";
 
-interface EditorSidebarProps {
+export interface EditorSidebarProps {
     sidebarRef: RefObject<HTMLDivElement | null>;
     selectedComponent: AugmentedSystemComponent | undefined;
     selectedComponentId: string | null | undefined;

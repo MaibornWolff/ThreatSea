@@ -2,7 +2,7 @@ import { FormControlLabel, FormGroup, Switch, Typography } from "@mui/material";
 import type { ChangeEvent, MouseEvent } from "react";
 import type { Asset } from "#api/types/asset.types.ts";
 
-interface EditorSidebarAssetListProps {
+export interface EditorSidebarAssetListProps {
     items: Asset[];
     checkedAssets: number[];
     onChangeHandler: (event: ChangeEvent<HTMLInputElement>, asset: Asset) => void;

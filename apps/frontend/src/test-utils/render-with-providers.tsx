@@ -16,7 +16,7 @@ import type { ReactNode } from "react";
 import { render } from "@testing-library/react";
 import type { RenderOptions, RenderResult } from "@testing-library/react";
 import { Provider } from "react-redux";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, type InitialEntry } from "react-router-dom";
 import { I18nextProvider } from "react-i18next";
 import { createStore } from "../application/store";
 import type { RootState } from "../application/store";
@@ -26,7 +26,7 @@ interface RenderWithProvidersOptions extends Omit<RenderOptions, "wrapper"> {
     /** Partial Redux state to pre-load into the store. */
     preloadedState?: Partial<RootState>;
     /** Initial URL entries for MemoryRouter. Defaults to ["/"]. */
-    initialEntries?: string[];
+    initialEntries?: InitialEntry[];
 }
 
 /**

@@ -22,7 +22,7 @@ import type {
 
 const muiIconMap = MuiIcons as Record<string, ElementType>;
 
-interface EditorSidebarSelectedComponentProps {
+export interface EditorSidebarSelectedComponentProps {
     selectedComponent: AugmentedSystemComponent | undefined;
     handleDeleteComponent: () => void;
     handleOnNameChange: (event: ChangeEvent<HTMLInputElement>) => void;

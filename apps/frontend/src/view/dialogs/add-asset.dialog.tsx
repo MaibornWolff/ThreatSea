@@ -49,7 +49,7 @@ interface FormValues {
 
 interface AssetDialogFormValues extends FormValues, Omit<Partial<Asset>, keyof FormValues>, DialogValue {}
 
-interface AddAssetDialogProps extends DialogProps {
+export interface AddAssetDialogProps extends DialogProps {
     projectId: number | undefined;
     asset?: Partial<Asset>;
     userRole: USER_ROLES | undefined;

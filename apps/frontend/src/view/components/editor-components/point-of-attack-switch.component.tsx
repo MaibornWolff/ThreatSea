@@ -1,7 +1,7 @@
 import { Box, FormControlLabel, Switch, Typography, type SwitchProps } from "@mui/material";
 import type { ReactNode, MouseEvent } from "react";
 
-interface PointOfAttackSwitchProps extends Omit<SwitchProps, "color"> {
+export interface PointOfAttackSwitchProps extends Omit<SwitchProps, "color"> {
     color: string;
     label: ReactNode;
     onLabelClick: (event: MouseEvent<HTMLElement>) => void;

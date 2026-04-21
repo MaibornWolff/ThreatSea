@@ -12,7 +12,7 @@ import type { SystemConnectionPoint } from "#application/adapters/system-connect
 import type { Asset } from "#api/types/asset.types.ts";
 import type { SystemPointOfAttack } from "#api/types/system.types.ts";
 
-interface EditorSidebarSelectedCommunicationInterfaceProps {
+export interface EditorSidebarSelectedCommunicationInterfaceProps {
     selectedConnectionPoint: SystemConnectionPoint;
     selectedPointOfAttack: SystemPointOfAttack | null | undefined;
     assetSearchValue: string;

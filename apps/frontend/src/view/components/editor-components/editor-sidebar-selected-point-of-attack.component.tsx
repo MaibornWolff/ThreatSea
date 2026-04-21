@@ -8,7 +8,7 @@ import type { ChangeEvent, MouseEvent } from "react";
 import type { Asset } from "#api/types/asset.types.ts";
 import type { SystemComponent, SystemPointOfAttack } from "#api/types/system.types.ts";
 
-interface EditorSidebarSelectedPointOfAttackProps {
+export interface EditorSidebarSelectedPointOfAttackProps {
     selectedComponent: SystemComponent & { pointsOfAttack?: SystemPointOfAttack[] };
     selectedPointOfAttack: SystemPointOfAttack;
     assetSearchValue: string;
