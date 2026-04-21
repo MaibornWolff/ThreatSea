@@ -10,7 +10,7 @@ import { USER_ROLES } from "#api/types/user-roles.types.ts";
 
 const setup = (propsOverride: Partial<EditorSidebarSelectedCommunicationInterfaceProps> = {}) => {
     const props = {
-        selectedConnectionPoint: createConnectionPoint(),
+        selectedConnectionPoint: createConnectionPoint({ componentName: "Test Component" }),
         selectedPointOfAttack: createPointOfAttack({ assets: [1] }),
         assetSearchValue: "",
         handleAssetSearchChanged: vi.fn(),
@@ -23,6 +23,7 @@ const setup = (propsOverride: Partial<EditorSidebarSelectedCommunicationInterfac
         handleChangeCommunicationInterfaceName: vi.fn(),
         handleDeleteCommunicationInterface: vi.fn(),
         handleAssetNameClick: vi.fn(),
+        handleInterfaceBreadcrumbClick: vi.fn(),
         userRole: USER_ROLES.EDITOR,
         ...propsOverride,
     };
@@ -32,6 +33,24 @@ const setup = (propsOverride: Partial<EditorSidebarSelectedCommunicationInterfac
 };
 
 describe("EditorSidebarSelectedCommunicationInterface", () => {
+    describe("breadcrumb", () => {
+        it("renders the component name, separator, and Interface label", () => {
+            setup();
+
+            expect(screen.getByText("Test Component")).toBeInTheDocument();
+            expect(screen.getByText(">")).toBeInTheDocument();
+            expect(screen.getByText("Interface:")).toBeInTheDocument();
+        });
+
+        it("clicking the component name calls handleInterfaceBreadcrumbClick", async () => {
+            const { props, user } = setup();
+
+            await user.click(screen.getByText("Test Component"));
+
+            expect(props.handleInterfaceBreadcrumbClick).toHaveBeenCalledOnce();
+        });
+    });
+
     describe("asset name click", () => {
         it("calls handleAssetNameClick with the correct asset when an asset name is clicked", async () => {
             const { props, user } = setup();

@@ -56,6 +56,7 @@ const setup = (propsOverride: Partial<EditorSidebarProps> = {}) => {
         handleAssetNameClick: vi.fn(),
         handleSelectConnectedComponent: vi.fn(),
         handleComponentBreadcrumbClick: vi.fn(),
+        handleInterfaceBreadcrumbClick: vi.fn(),
         ...propsOverride,
     };
     renderWithProviders(<EditorSidebar {...props} />);

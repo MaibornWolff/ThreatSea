@@ -9,7 +9,11 @@ import { createAsset, createSystemComponent, createPointOfAttack } from "#test-u
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
-import { AnchorOrientation, type ConnectionEndpointWithComponent } from "#api/types/system.types.ts";
+import {
+    AnchorOrientation,
+    type ConnectionEndpointWithComponent,
+    type SystemCommunicationInterface,
+} from "#api/types/system.types.ts";
 
 const setup = (propsOverride: Partial<EditorSidebarSelectedComponentProps> = {}) => {
     const props = {
@@ -148,6 +152,76 @@ describe("EditorSidebarSelectedComponent — new click handlers", () => {
             await user.click(screen.getByText("Main DB"));
 
             expect(props.handleSelectConnectedComponent).toHaveBeenCalledWith("comp-3", null);
+        });
+    });
+
+    describe("communication interface items", () => {
+        const communicationInterfaces: SystemCommunicationInterface[] = [
+            {
+                id: "ci-1",
+                name: "API Gateway",
+                icon: null,
+                type: "REST",
+                projectId: 1,
+                componentId: "comp-1",
+                componentName: "Test Component",
+            },
+        ];
+
+        const componentWithInterfaces = createSystemComponent({ communicationInterfaces });
+
+        it("clicking an interface name calls handleSelectConnectedComponent with component and interface ids", async () => {
+            const { props, user } = setup({ selectedComponent: componentWithInterfaces });
+
+            await user.click(screen.getByText("API Gateway"));
+
+            expect(props.handleSelectConnectedComponent).toHaveBeenCalledOnce();
+            expect(props.handleSelectConnectedComponent).toHaveBeenCalledWith("comp-1", "ci-1");
+        });
+
+        it("clicking the edit icon shows a text input for renaming", async () => {
+            const { user } = setup({ selectedComponent: componentWithInterfaces });
+
+            expect(screen.getByText("API Gateway")).toBeInTheDocument();
+
+            const editIcon = screen.getByTestId("EditIcon");
+            await user.click(editIcon);
+
+            // The interface name should now be in a textbox, not as plain text
+            const textboxes = screen.getAllByRole("textbox");
+            const interfaceInput = textboxes.find((input) => (input as HTMLInputElement).value === "API Gateway");
+            expect(interfaceInput).toBeDefined();
+            expect(screen.queryByText("API Gateway")).not.toBeInTheDocument();
+        });
+
+        it("blurring the text input exits edit mode and shows clickable text again", async () => {
+            const { user } = setup({ selectedComponent: componentWithInterfaces });
+
+            await user.click(screen.getByTestId("EditIcon"));
+
+            await user.tab(); // moves focus away
+
+            expect(screen.getByText("API Gateway")).toBeInTheDocument();
+        });
+
+        it("pressing Enter in the text input exits edit mode", async () => {
+            const { user } = setup({ selectedComponent: componentWithInterfaces });
+
+            await user.click(screen.getByTestId("EditIcon"));
+
+            await user.keyboard("{Enter}");
+
+            expect(screen.getByText("API Gateway")).toBeInTheDocument();
+        });
+
+        it("edit and delete icons are not rendered for non-editor roles", () => {
+            setup({
+                selectedComponent: componentWithInterfaces,
+                userRole: USER_ROLES.VIEWER,
+            });
+
+            expect(screen.queryByTestId("EditIcon")).not.toBeInTheDocument();
+            expect(screen.queryByTestId("DeleteIcon")).not.toBeInTheDocument();
         });
     });
 });
