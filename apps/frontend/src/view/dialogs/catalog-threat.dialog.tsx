@@ -205,12 +205,14 @@ const CatalogThreatDialog = ({ catalogThreat, isNew, ...props }: CatalogThreatDi
                                         validate: (value) => !!value && value.length > 0,
                                     })}
                                     MenuProps={{
-                                        PaperProps: {
-                                            sx: {
-                                                bgcolor: "background.mainIntransparent",
-                                                borderRadius: 5,
-                                                "*": {
-                                                    fontSize: "0.875rem !important",
+                                        slotProps: {
+                                            paper: {
+                                                sx: {
+                                                    bgcolor: "background.mainIntransparent",
+                                                    borderRadius: 5,
+                                                    "*": {
+                                                        fontSize: "0.875rem !important",
+                                                    },
                                                 },
                                             },
                                         },
@@ -298,12 +300,14 @@ const CatalogThreatDialog = ({ catalogThreat, isNew, ...props }: CatalogThreatDi
                                         validate: (value) => !!value && value.length > 0,
                                     })}
                                     MenuProps={{
-                                        PaperProps: {
-                                            sx: {
-                                                bgcolor: "background.mainIntransparent",
-                                                borderRadius: 5,
-                                                "*": {
-                                                    fontSize: "0.875rem !important",
+                                        slotProps: {
+                                            paper: {
+                                                sx: {
+                                                    bgcolor: "background.mainIntransparent",
+                                                    borderRadius: 5,
+                                                    "*": {
+                                                        fontSize: "0.875rem !important",
+                                                    },
                                                 },
                                             },
                                         },

@@ -242,12 +242,14 @@ const AddMemberDialog = ({
                                     label={t("role")}
                                     {...field}
                                     MenuProps={{
-                                        PaperProps: {
-                                            sx: {
-                                                bgcolor: "background.mainIntransparent",
-                                                borderRadius: 5,
-                                                "*": {
-                                                    fontSize: "0.875rem !important",
+                                        slotProps: {
+                                            paper: {
+                                                sx: {
+                                                    bgcolor: "background.mainIntransparent",
+                                                    borderRadius: 5,
+                                                    "*": {
+                                                        fontSize: "0.875rem !important",
+                                                    },
                                                 },
                                             },
                                         },

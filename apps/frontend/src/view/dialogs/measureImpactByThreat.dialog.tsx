@@ -215,12 +215,14 @@ const MeasureImpactByThreatDialog = ({
                                         fieldOnChange(selectedValue);
                                     }}
                                     MenuProps={{
-                                        PaperProps: {
-                                            sx: {
-                                                bgcolor: "background.mainIntransparent",
-                                                borderRadius: 5,
-                                                "*": {
-                                                    fontSize: "0.875rem !important",
+                                        slotProps: {
+                                            paper: {
+                                                sx: {
+                                                    bgcolor: "background.mainIntransparent",
+                                                    borderRadius: 5,
+                                                    "*": {
+                                                        fontSize: "0.875rem !important",
+                                                    },
                                                 },
                                             },
                                         },
@@ -402,36 +404,38 @@ const MeasureImpactByThreatDialog = ({
                         })}
                         error={!!errors?.probability}
                         helperText={errors?.probability?.message}
-                        InputProps={{
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <Tooltip
-                                        title={
-                                            <>
-                                                1 - {t("probabilities.1.name")} <br />{" "}
-                                                {t("probabilities.1.description")} <br />
-                                                <br />2 - {t("probabilities.2.name")} <br />{" "}
-                                                {t("probabilities.2.description")} <br />
-                                                <br />3 - {t("probabilities.3.name")} <br />{" "}
-                                                {t("probabilities.3.description")} <br />
-                                                <br />4 - {t("probabilities.4.name")} <br />{" "}
-                                                {t("probabilities.4.description")} <br />
-                                                <br />5 - {t("probabilities.5.name")} <br />{" "}
-                                                {t("probabilities.5.description")} <br />
-                                            </>
-                                        }
-                                    >
-                                        <InfoOutlined
-                                            className="info-adornment"
-                                            sx={{
-                                                "&:hover": {
-                                                    color: "#fcac0c !important",
-                                                },
-                                            }}
-                                        />
-                                    </Tooltip>
-                                </InputAdornment>
-                            ),
+                        slotProps={{
+                            input: {
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <Tooltip
+                                            title={
+                                                <>
+                                                    1 - {t("probabilities.1.name")} <br />{" "}
+                                                    {t("probabilities.1.description")} <br />
+                                                    <br />2 - {t("probabilities.2.name")} <br />{" "}
+                                                    {t("probabilities.2.description")} <br />
+                                                    <br />3 - {t("probabilities.3.name")} <br />{" "}
+                                                    {t("probabilities.3.description")} <br />
+                                                    <br />4 - {t("probabilities.4.name")} <br />{" "}
+                                                    {t("probabilities.4.description")} <br />
+                                                    <br />5 - {t("probabilities.5.name")} <br />{" "}
+                                                    {t("probabilities.5.description")} <br />
+                                                </>
+                                            }
+                                        >
+                                            <InfoOutlined
+                                                className="info-adornment"
+                                                sx={{
+                                                    "&:hover": {
+                                                        color: "#fcac0c !important",
+                                                    },
+                                                }}
+                                            />
+                                        </Tooltip>
+                                    </InputAdornment>
+                                ),
+                            },
                         }}
                     />
                 </Box>
@@ -498,46 +502,48 @@ const MeasureImpactByThreatDialog = ({
                         })}
                         error={!!errors?.damage}
                         helperText={errors?.damage?.message}
-                        InputProps={{
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <Tooltip
-                                        title={
-                                            <>
-                                                1 - {t("damages.1.name")}
-                                                <br />
-                                                {t("damages.1.description")}
-                                                <br />
-                                                <br />2 - {t("damages.2.name")}
-                                                <br />
-                                                {t("damages.2.description")}
-                                                <br />
-                                                <br />3 - {t("damages.3.name")}
-                                                <br />
-                                                {t("damages.3.description")}
-                                                <br />
-                                                <br />4 - {t("damages.4.name")}
-                                                <br />
-                                                {t("damages.4.description")}
-                                                <br />
-                                                <br />5 - {t("damages.5.name")}
-                                                <br />
-                                                {t("damages.5.description")}
-                                                <br />
-                                            </>
-                                        }
-                                    >
-                                        <InfoOutlined
-                                            className="info-adornment"
-                                            sx={{
-                                                "&:hover": {
-                                                    color: "#fcac0c !important",
-                                                },
-                                            }}
-                                        />
-                                    </Tooltip>
-                                </InputAdornment>
-                            ),
+                        slotProps={{
+                            input: {
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <Tooltip
+                                            title={
+                                                <>
+                                                    1 - {t("damages.1.name")}
+                                                    <br />
+                                                    {t("damages.1.description")}
+                                                    <br />
+                                                    <br />2 - {t("damages.2.name")}
+                                                    <br />
+                                                    {t("damages.2.description")}
+                                                    <br />
+                                                    <br />3 - {t("damages.3.name")}
+                                                    <br />
+                                                    {t("damages.3.description")}
+                                                    <br />
+                                                    <br />4 - {t("damages.4.name")}
+                                                    <br />
+                                                    {t("damages.4.description")}
+                                                    <br />
+                                                    <br />5 - {t("damages.5.name")}
+                                                    <br />
+                                                    {t("damages.5.description")}
+                                                    <br />
+                                                </>
+                                            }
+                                        >
+                                            <InfoOutlined
+                                                className="info-adornment"
+                                                sx={{
+                                                    "&:hover": {
+                                                        color: "#fcac0c !important",
+                                                    },
+                                                }}
+                                            />
+                                        </Tooltip>
+                                    </InputAdornment>
+                                ),
+                            },
                         }}
                     />
                 </Box>

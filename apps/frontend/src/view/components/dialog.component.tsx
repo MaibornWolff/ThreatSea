@@ -8,11 +8,13 @@ export const Dialog = ({ open, onClose, children, ...props }: DialogProps) => {
             onClose={onClose}
             maxWidth="md"
             fullWidth
-            PaperProps={{
-                sx: {
-                    bgcolor: "#e6e8ec",
-                    borderRadius: 5,
-                    padding: "30px",
+            slotProps={{
+                paper: {
+                    sx: {
+                        bgcolor: "#e6e8ec",
+                        borderRadius: 5,
+                        padding: "30px",
+                    },
                 },
             }}
             {...props}

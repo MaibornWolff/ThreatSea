@@ -1,5 +1,5 @@
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlined";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutlined";
 import SyncIcon from "@mui/icons-material/Sync";
 import { IconButton, Typography } from "@mui/material";
 import Box from "@mui/material/Box";

@@ -357,36 +357,38 @@ const AddThreatDialog = ({ threat, project, userRole, ...props }: AddThreatDialo
                         error={!!errors?.probability}
                         helperText={errors?.probability?.message}
                         data-testid="EditThreatProbability"
-                        InputProps={{
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <Tooltip
-                                        title={
-                                            <>
-                                                1 - {t("probabilities.1.name")} <br />{" "}
-                                                {t("probabilities.1.description")} <br />
-                                                <br />2 - {t("probabilities.2.name")} <br />{" "}
-                                                {t("probabilities.2.description")} <br />
-                                                <br />3 - {t("probabilities.3.name")} <br />{" "}
-                                                {t("probabilities.3.description")} <br />
-                                                <br />4 - {t("probabilities.4.name")} <br />{" "}
-                                                {t("probabilities.4.description")} <br />
-                                                <br />5 - {t("probabilities.5.name")} <br />{" "}
-                                                {t("probabilities.5.description")} <br />
-                                            </>
-                                        }
-                                    >
-                                        <InfoOutlined
-                                            className="info-adornment"
-                                            sx={{
-                                                "&:hover": {
-                                                    color: "#fcac0c !important",
-                                                },
-                                            }}
-                                        />
-                                    </Tooltip>
-                                </InputAdornment>
-                            ),
+                        slotProps={{
+                            input: {
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <Tooltip
+                                            title={
+                                                <>
+                                                    1 - {t("probabilities.1.name")} <br />{" "}
+                                                    {t("probabilities.1.description")} <br />
+                                                    <br />2 - {t("probabilities.2.name")} <br />{" "}
+                                                    {t("probabilities.2.description")} <br />
+                                                    <br />3 - {t("probabilities.3.name")} <br />{" "}
+                                                    {t("probabilities.3.description")} <br />
+                                                    <br />4 - {t("probabilities.4.name")} <br />{" "}
+                                                    {t("probabilities.4.description")} <br />
+                                                    <br />5 - {t("probabilities.5.name")} <br />{" "}
+                                                    {t("probabilities.5.description")} <br />
+                                                </>
+                                            }
+                                        >
+                                            <InfoOutlined
+                                                className="info-adornment"
+                                                sx={{
+                                                    "&:hover": {
+                                                        color: "#fcac0c !important",
+                                                    },
+                                                }}
+                                            />
+                                        </Tooltip>
+                                    </InputAdornment>
+                                ),
+                            },
                         }}
                     />
 
@@ -590,11 +592,13 @@ const AddThreatDialog = ({ threat, project, userRole, ...props }: AddThreatDialo
                         }}
                     >
                         <Box
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="space-between"
-                            paddingTop={1}
-                            paddingBottom={2}
+                            sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                paddingTop: 1,
+                                paddingBottom: 2,
+                            }}
                         >
                             <Box sx={{ display: "flex", alignItems: "center" }}>
                                 <SearchField onChange={onChangeSearchValue} data-testid="SearchAsset" />
