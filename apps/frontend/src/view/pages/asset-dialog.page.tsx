@@ -29,9 +29,7 @@ const AssetDialogPage = () => {
     const assetFromStore = useAppSelector((state) =>
         assetId ? assetsSelectors.selectById(state, Number(assetId)) : undefined
     );
-    const isAssetsLoaded = useAppSelector(
-        (state) => !state.assets.isPending && assetsSelectors.selectAll(state).length > 0
-    );
+    const isAssetsLoaded = useAppSelector((state) => !state.assets.isPending);
 
     const handleEditorClose = useCallback(() => {
         navigate(`/projects/${projectId}/system`, { replace: true });
