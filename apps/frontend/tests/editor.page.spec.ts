@@ -55,11 +55,7 @@ test.afterEach(async ({ page, request }) => {
     const project = projects.find((project) => project.name === exportedProject.project.name)!;
     await deleteProject(request, token, project.id);
 
-    try {
-        await deleteCatalog(request, token, project.catalogId);
-    } catch {
-        // Catalog cleanup may fail if ownership wasn't set up during import
-    }
+    await deleteCatalog(request, token, project.catalogId);
 });
 
 test.describe("Editor Page Tests", () => {
