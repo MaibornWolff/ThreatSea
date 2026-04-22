@@ -5,6 +5,7 @@ import { POINTS_OF_ATTACK } from "../../../api/types/points-of-attack.types";
 import type { KonvaEventObject } from "konva/lib/Node";
 import type { Stage as KonvaStage } from "konva/lib/Stage";
 import { AnchorOrientation, type AugmentedSystemComponent, type ConnectionPointMeta } from "#api/types/system.types.ts";
+import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
 import type { AugmentedSystemConnection } from "#application/selectors/system.selectors.ts";
 
 const TURN_PENALTY = 200;
@@ -17,6 +18,7 @@ interface LineForPathProps {
     onPointOfAttackClicked: (event: KonvaEventObject<MouseEvent>) => void;
     selected: boolean;
     hover: boolean;
+    colors: { normal: string; selected: string; hover: string };
 }
 
 interface SystemComponentConnectionProps extends AugmentedSystemConnection {
@@ -56,8 +58,8 @@ function LineForPath({
     onPointOfAttackClicked,
     selected,
     hover,
+    colors,
 }: LineForPathProps) {
-    const COLORS = POA_COLORS[POINTS_OF_ATTACK.COMMUNICATION_INFRASTRUCTURE];
     return (
         <Group
             onMouseOver={onMouseEnter}
@@ -85,7 +87,7 @@ function LineForPath({
             {/* Visible connection line */}
             <Line
                 points={waypoints}
-                stroke={selected || hover ? COLORS.hover : COLORS.normal}
+                stroke={selected || hover ? colors.hover : colors.normal}
                 strokeWidth={selected || hover ? 5 : 3}
                 lineCap={"round"}
                 lineJoin={"round"}
@@ -126,6 +128,11 @@ const SystemComponentConnectionInner = ({
     let fromAnchor = from;
     let toAnchor = to;
 
+    const isUserConnection = from.type === STANDARD_COMPONENT_TYPES.USERS || to.type === STANDARD_COMPONENT_TYPES.USERS;
+    const connectionColors = isUserConnection
+        ? POA_COLORS[POINTS_OF_ATTACK.USER_BEHAVIOUR]
+        : POA_COLORS[POINTS_OF_ATTACK.COMMUNICATION_INFRASTRUCTURE];
+
     if (!fromComponent || !toComponent) {
         return null;
     }
@@ -165,6 +172,7 @@ const SystemComponentConnectionInner = ({
                     onPointOfAttackClicked={handleLinePointOfAttackClicked}
                     selected={selected}
                     hover={hover}
+                    colors={connectionColors}
                 />
             </Group>
         );
@@ -279,6 +287,7 @@ const SystemComponentConnectionInner = ({
                         onPointOfAttackClicked={handleLinePointOfAttackClicked}
                         selected={selected}
                         hover={hover}
+                        colors={connectionColors}
                     />
                 </Group>
             );

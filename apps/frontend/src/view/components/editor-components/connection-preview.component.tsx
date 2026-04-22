@@ -2,6 +2,9 @@ import { useRef } from "react";
 import { Line } from "react-konva";
 import type { Line as KonvaLine } from "konva/lib/shapes/Line";
 import type { Coordinate, SystemComponent } from "#api/types/system.types.ts";
+import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
+import { POA_COLORS } from "../../colors/pointsOfAttack.colors";
+import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 
 interface ConnectionPreviewProps {
     component: SystemComponent;
@@ -50,5 +53,11 @@ export const ConnectionPreview = ({
         points = [componentCenter.x, componentCenter.y, newConnectionMousePosition.x, newConnectionMousePosition.y];
     }
 
-    return <Line points={points} stroke={"#3889ff"} strokeWidth={2} ref={lineRef} dash={[20, 5]} dashEnabled />;
+    const isUserConnection =
+        component.type === STANDARD_COMPONENT_TYPES.USERS || draggedComponent?.type === STANDARD_COMPONENT_TYPES.USERS;
+    const strokeColor = isUserConnection
+        ? POA_COLORS[POINTS_OF_ATTACK.USER_BEHAVIOUR].normal
+        : POA_COLORS[POINTS_OF_ATTACK.COMMUNICATION_INFRASTRUCTURE].normal;
+
+    return <Line points={points} stroke={strokeColor} strokeWidth={2} ref={lineRef} dash={[20, 5]} dashEnabled />;
 };
