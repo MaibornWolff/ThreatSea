@@ -103,7 +103,17 @@ const AddProjectDialog = ({ project, ...props }: AddProjectDialogProps) => {
     useEffect(loadCatalogs, [loadCatalogs]);
 
     return (
-        <Dialog onBackdropClick={handleCancelDialog} maxWidth="xs" fullWidth {...props} open={true}>
+        <Dialog
+            onClose={(_event, reason) => {
+                if (reason === "backdropClick") {
+                    handleCancelDialog?.();
+                }
+            }}
+            maxWidth="xs"
+            fullWidth
+            {...props}
+            open={true}
+        >
             <DialogTitle
                 sx={{
                     padding: 0,

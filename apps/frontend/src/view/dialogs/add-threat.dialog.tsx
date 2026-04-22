@@ -223,7 +223,11 @@ const AddThreatDialog = ({ threat, project, userRole, ...props }: AddThreatDialo
 
     return (
         <Dialog
-            onBackdropClick={handleCancelDialog}
+            onClose={(_event, reason) => {
+                if (reason === "backdropClick") {
+                    handleCancelDialog?.();
+                }
+            }}
             maxWidth="md"
             fullWidth
             {...props}

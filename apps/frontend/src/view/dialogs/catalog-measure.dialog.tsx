@@ -140,7 +140,17 @@ const CatalogMeasureDialog = ({ catalogMeasure, isNew, catalogId, ...props }: Ca
     };
 
     return (
-        <Dialog onBackdropClick={handleCancelDialog} maxWidth="sm" fullWidth {...props} open={true}>
+        <Dialog
+            onClose={(_event, reason) => {
+                if (reason === "backdropClick") {
+                    handleCancelDialog?.();
+                }
+            }}
+            maxWidth="sm"
+            fullWidth
+            {...props}
+            open={true}
+        >
             <DialogTitle
                 sx={{
                     padding: 0,

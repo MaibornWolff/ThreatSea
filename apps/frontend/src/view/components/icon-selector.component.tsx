@@ -103,7 +103,7 @@ export const IconSelector = ({ value, onChange, label, error, helperText }: Icon
                 <MenuItem>
                     <Grid container spacing={1} sx={{ width: 250, height: 250 }}>
                         {visibleIcons.map((iconName) => (
-                            <Grid item xs={2.4} key={iconName}>
+                            <Grid size={2.4} key={iconName}>
                                 <IconButton
                                     size="small"
                                     onClick={(e) => {

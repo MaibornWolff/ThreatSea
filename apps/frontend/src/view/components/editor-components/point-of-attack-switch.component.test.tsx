@@ -26,19 +26,19 @@ describe("PointOfAttackSwitch", () => {
     it("renders a switch", () => {
         setup();
 
-        expect(screen.getByRole("checkbox")).toBeInTheDocument();
+        expect(screen.getByRole("switch")).toBeInTheDocument();
     });
 
     it("switch is unchecked by default", () => {
         setup({ checked: false });
 
-        expect(screen.getByRole("checkbox")).not.toBeChecked();
+        expect(screen.getByRole("switch")).not.toBeChecked();
     });
 
     it("switch reflects checked state", () => {
         setup({ checked: true });
 
-        expect(screen.getByRole("checkbox")).toBeChecked();
+        expect(screen.getByRole("switch")).toBeChecked();
     });
 
     it("toggling the switch calls onChange", async () => {
@@ -46,7 +46,7 @@ describe("PointOfAttackSwitch", () => {
 
         expect(props.onChange).not.toHaveBeenCalled();
 
-        await user.click(screen.getByRole("checkbox"));
+        await user.click(screen.getByRole("switch"));
 
         expect(props.onChange).toHaveBeenCalledOnce();
     });
