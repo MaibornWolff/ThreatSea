@@ -4,6 +4,11 @@ import { getProjects, importProject, deleteProject, deleteCatalog } from "./test
 import threatsFixture from "./fixtures/threats.json" with { type: "json" };
 import type { USER_ROLES } from "#api/types/user-roles.types.ts";
 
+// Canvas click positions for fixture components (center of each component body):
+// Users:  (500, 340)  — fixture pos (465, 305), size 80x80
+// Client: (845, 340)  — fixture pos (810, 305), size 80x80
+// Client CI connector: (885, 370) — opens communication interface context menu
+
 async function addCommunication(page: Page) {
     await page
         .locator("canvas")
@@ -50,7 +55,11 @@ test.afterEach(async ({ page, request }) => {
     const project = projects.find((project) => project.name === exportedProject.project.name)!;
     await deleteProject(request, token, project.id);
 
-    await deleteCatalog(request, token, project.catalogId);
+    try {
+        await deleteCatalog(request, token, project.catalogId);
+    } catch {
+        // Catalog cleanup may fail if ownership wasn't set up during import
+    }
 });
 
 test.describe("Editor Page Tests", () => {
@@ -259,6 +268,77 @@ test.describe("Editor Page Tests", () => {
             await page.locator('[data-testid="selected-communication-asset-search-field"] input').fill("NonExistent");
             const results = page.getByTestId("asset-search-results");
             await expect(results).toHaveCount(0);
+        });
+    });
+
+    test.describe("Asset Name Click Navigation Tests", () => {
+        test("Clicking asset name in component sidebar opens edit dialog", async ({ page }) => {
+            await page
+                .locator("canvas")
+                .nth(2)
+                .click({ position: { x: 845, y: 340 } });
+            await page.getByTestId("selected-component-asset-search-results").first().click();
+            await expect(page).toHaveURL(/\/system\/assets\/\d+\/edit/);
+            await expect(page.locator('[data-testid="asset-creation-modal_name-input"]')).toBeVisible();
+        });
+
+        test("Closing asset edit dialog returns to editor", async ({ page }) => {
+            await page
+                .locator("canvas")
+                .nth(2)
+                .click({ position: { x: 845, y: 340 } });
+            await page.getByTestId("selected-component-asset-search-results").first().click();
+            await expect(page).toHaveURL(/\/system\/assets\/\d+\/edit/);
+            await page.getByTestId("cancel-button").click();
+            await expect(page).toHaveURL(/\/system$/);
+        });
+
+        test("Clicking asset name in POA sidebar opens edit dialog", async ({ page }) => {
+            await page
+                .locator("canvas")
+                .nth(2)
+                .click({ position: { x: 845, y: 340 } });
+            await page.getByTestId("poa-switch-USER_INTERFACE").click();
+            await expect(page.locator('[data-testid="selected-point-of-attack-asset-search-field"]')).toBeVisible();
+            await page.getByTestId("asset-search-results").first().click();
+            await expect(page).toHaveURL(/\/system\/assets\/\d+\/edit/);
+        });
+    });
+
+    test.describe("POA Navigation Tests", () => {
+        test("Clicking POA label switches sidebar to POA view", async ({ page }) => {
+            await page
+                .locator("canvas")
+                .nth(2)
+                .click({ position: { x: 845, y: 340 } });
+            await page.getByTestId("poa-switch-USER_INTERFACE").click();
+            await expect(page.locator('[data-testid="selected-point-of-attack-asset-search-field"]')).toBeVisible();
+            await expect(page.getByTestId("poa-breadcrumb-component")).toBeVisible();
+            await expect(page.getByTestId("poa-breadcrumb-component")).toContainText("Client");
+        });
+
+        test("Clicking breadcrumb component name returns to component sidebar", async ({ page }) => {
+            await page
+                .locator("canvas")
+                .nth(2)
+                .click({ position: { x: 845, y: 340 } });
+            await page.getByTestId("poa-switch-USER_INTERFACE").click();
+            await expect(page.locator('[data-testid="selected-point-of-attack-asset-search-field"]')).toBeVisible();
+            await page.getByTestId("poa-breadcrumb-component").click();
+            await expect(page.locator('[data-testid="selected-component-asset-search-field"]')).toBeVisible();
+            await expect(page.locator('[data-testid="selected-point-of-attack-asset-search-field"]')).not.toBeVisible();
+        });
+    });
+
+    test.describe("Connected Component Navigation Tests", () => {
+        test("Clicking connected component name switches sidebar to that component", async ({ page }) => {
+            await page
+                .locator("canvas")
+                .nth(2)
+                .click({ position: { x: 845, y: 340 } });
+            await expect(page.getByTestId("connected-component-name").first()).toBeVisible();
+            await page.getByTestId("connected-component-name").first().click();
+            await expect(page.getByTestId("connected-component-name").first()).toContainText("Client");
         });
     });
 

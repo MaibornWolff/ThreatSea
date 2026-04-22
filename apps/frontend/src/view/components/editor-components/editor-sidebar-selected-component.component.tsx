@@ -339,6 +339,7 @@ export const EditorSidebarSelectedComponent = ({
                                 label={
                                     <Typography
                                         component="span"
+                                        data-testid={`poa-switch-${type}`}
                                         sx={{
                                             fontSize: "0.75rem",
                                             fontWeight: "bold",

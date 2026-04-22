@@ -70,6 +70,7 @@ export const EditorSidebarSelectedPointOfAttack = ({
                     <Typography
                         component="span"
                         onClick={handleComponentBreadcrumbClick}
+                        data-testid="poa-breadcrumb-component"
                         sx={{
                             fontWeight: "bold",
                             fontSize: "0.875rem",
