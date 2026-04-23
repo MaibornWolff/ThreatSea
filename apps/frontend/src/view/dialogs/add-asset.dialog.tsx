@@ -49,10 +49,11 @@ interface FormValues {
 
 interface AssetDialogFormValues extends FormValues, Omit<Partial<Asset>, keyof FormValues>, DialogValue {}
 
-interface AddAssetDialogProps extends DialogProps {
+export interface AddAssetDialogProps extends DialogProps {
     projectId: number | undefined;
     asset?: Partial<Asset>;
     userRole: USER_ROLES | undefined;
+    onDialogClose?: () => void;
 }
 
 /**
@@ -64,7 +65,7 @@ interface AddAssetDialogProps extends DialogProps {
  * @param {object} props - Dialog properties.
  * @returns React component for adding an asset.
  */
-const AddAssetDialog = ({ projectId, asset, userRole, ...props }: AddAssetDialogProps) => {
+const AddAssetDialog = ({ projectId, asset, userRole, onDialogClose, ...props }: AddAssetDialogProps) => {
     const { cancelDialog, confirmDialog } = useDialog<AssetDialogFormValues | null>("assets");
     const navigate = useNavigate();
     const { t } = useTranslation("assetDialogPage");
@@ -97,7 +98,11 @@ const AddAssetDialog = ({ projectId, asset, userRole, ...props }: AddAssetDialog
      * Closes the dialog.
      */
     const closeDialog = () => {
-        navigate(-1);
+        if (onDialogClose) {
+            onDialogClose();
+        } else {
+            navigate(-1);
+        }
     };
 
     /**

@@ -15,7 +15,7 @@ import type {
     SystemPointOfAttack,
 } from "#api/types/system.types.ts";
 
-interface EditorSidebarProps {
+export interface EditorSidebarProps {
     sidebarRef: RefObject<HTMLDivElement | null>;
     selectedComponent: AugmentedSystemComponent | undefined;
     selectedComponentId: string | null | undefined;
@@ -51,6 +51,11 @@ interface EditorSidebarProps {
         interfaceName: string | null,
         doCloseSidebar?: boolean
     ) => void;
+    handlePointOfAttackLabelClick: (pointOfAttackId: string, componentId?: string) => void;
+    handleAssetNameClick: (asset: Asset) => void;
+    handleSelectConnectedComponent: (componentId: string, communicationInterfaceId?: string | null) => void;
+    handleComponentBreadcrumbClick: () => void;
+    handleInterfaceBreadcrumbClick: () => void;
 }
 
 export const EditorSidebar = ({
@@ -80,106 +85,116 @@ export const EditorSidebar = ({
     handleOnConnectionPointDescriptionChange,
     handleChangeCommunicationInterfaceName,
     handleDeleteCommunicationInterface,
+    handlePointOfAttackLabelClick,
+    handleAssetNameClick,
+    handleSelectConnectedComponent,
+    handleComponentBreadcrumbClick,
+    handleInterfaceBreadcrumbClick,
 }: EditorSidebarProps) => {
     return (
-        <>
+        <Box
+            sx={{
+                position: "fixed",
+                top: "125px",
+                right: "-600px",
+                bottom: "40px",
+                width: "480px",
+                zIndex: 999,
+                bgcolor: "#e5e8ebEE",
+                boxShadow: 6,
+                borderRadius: 5,
+                transition: "right 0.3s",
+                overflow: "hidden",
+            }}
+            ref={sidebarRef}
+        >
             <Box
                 sx={{
-                    position: "fixed",
-                    top: "125px",
-                    right: "-600px",
-                    bottom: "40px",
-                    width: "480px",
-                    zIndex: 999,
-                    bgcolor: "#e5e8ebEE",
-                    boxShadow: 6,
-                    borderRadius: 5,
-                    transition: "right 0.3s",
-                    overflow: "hidden",
+                    display: "flex",
+                    flexDirection: "column",
+                    height: "100%",
+                    width: "100%",
+                    overflowX: "hidden",
+                    overflowY: "auto",
+                    padding: "30px",
+                    boxSizing: "border-box",
+                    "::-webkit-scrollbar-track": {
+                        borderTopLeftRadius: 0,
+                        borderBottomLeftRadius: 0,
+                        borderBottomRightRadius: 500,
+                        borderTopRightRadius: 500,
+                    },
                 }}
-                ref={sidebarRef}
             >
-                <Box
-                    sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        height: "100%",
-                        width: "100%",
-                        overflowX: "hidden",
-                        overflowY: "auto",
-                        padding: "30px",
-                        boxSizing: "border-box",
-                        "::-webkit-scrollbar-track": {
-                            borderTopLeftRadius: 0,
-                            borderBottomLeftRadius: 0,
-                            borderBottomRightRadius: 500,
-                            borderTopRightRadius: 500,
-                        },
-                    }}
-                >
-                    {selectedComponentId !== undefined &&
-                        selectedComponentId != null &&
-                        (selectedPointOfAttack === null || selectedPointOfAttack === undefined) && (
-                            <EditorSidebarSelectedComponent
-                                handleDeleteComponent={handleDeleteComponent}
-                                handleChangePointOfAttack={handleChangePointOfAttack}
-                                handleAddAssetToAllPointsOfAttack={handleAddAssetToAllPointsOfAttack}
-                                handleRemoveAssetFromAllPointsOfAttack={handleRemoveAssetFromAllPointsOfAttack}
-                                selectedComponent={selectedComponent}
-                                handleOnNameChange={handleOnNameChange}
-                                assetSearchValue={assetSearchValue}
-                                handleAssetSearchChanged={handleAssetSearchChanged}
-                                items={items}
-                                pointsOfAttackOfSelectedComponent={pointsOfAttackOfSelectedComponent}
-                                userRole={userRole}
-                                handleOnDescriptionChange={handleOnDescriptionChange}
-                                connectedComponents={connectedComponents}
-                                handleDeleteConnectionBetweenComponents={handleDeleteConnectionBetweenComponents}
-                                handleChangeCommunicationInterfaceName={handleChangeCommunicationInterfaceName}
-                                handleDeleteCommunicationInterface={handleDeleteCommunicationInterface}
-                            />
-                        )}
-
-                    {selectedConnectionId !== undefined && selectedConnectionId != null && (
-                        <EditorSidebarSelectedConnection
-                            selectedConnection={selectedConnection}
-                            handleDeleteConnection={handleDeleteConnection}
-                            handleOnConnectionNameChange={handleOnConnectionNameChange}
-                            userRole={userRole}
-                        />
-                    )}
-
-                    {selectedConnectionPoint !== undefined && selectedConnectionPoint != null && (
-                        <EditorSidebarSelectedCommunicationInterface
-                            selectedConnectionPoint={selectedConnectionPoint}
-                            handleChangeCommunicationInterfaceName={handleChangeCommunicationInterfaceName}
+                {selectedComponentId !== undefined &&
+                    selectedComponentId != null &&
+                    (selectedPointOfAttack === null || selectedPointOfAttack === undefined) && (
+                        <EditorSidebarSelectedComponent
+                            handleDeleteComponent={handleDeleteComponent}
+                            handleChangePointOfAttack={handleChangePointOfAttack}
+                            handleAddAssetToAllPointsOfAttack={handleAddAssetToAllPointsOfAttack}
+                            handleRemoveAssetFromAllPointsOfAttack={handleRemoveAssetFromAllPointsOfAttack}
+                            selectedComponent={selectedComponent}
+                            handleOnNameChange={handleOnNameChange}
                             assetSearchValue={assetSearchValue}
                             handleAssetSearchChanged={handleAssetSearchChanged}
-                            handleOnAssetChanged={handleOnAssetChanged}
                             items={items}
-                            selectedPointOfAttack={selectedPointOfAttack}
-                            handleOnConnectionPointDescriptionChange={handleOnConnectionPointDescriptionChange}
-                            handleDeleteCommunicationInterface={handleDeleteCommunicationInterface}
+                            pointsOfAttackOfSelectedComponent={pointsOfAttackOfSelectedComponent}
                             userRole={userRole}
+                            handleOnDescriptionChange={handleOnDescriptionChange}
+                            connectedComponents={connectedComponents}
+                            handleDeleteConnectionBetweenComponents={handleDeleteConnectionBetweenComponents}
+                            handleChangeCommunicationInterfaceName={handleChangeCommunicationInterfaceName}
+                            handleDeleteCommunicationInterface={handleDeleteCommunicationInterface}
+                            handlePointOfAttackLabelClick={handlePointOfAttackLabelClick}
+                            handleAssetNameClick={handleAssetNameClick}
+                            handleSelectConnectedComponent={handleSelectConnectedComponent}
                         />
                     )}
 
-                    {selectedComponent &&
-                        !selectedConnectionPoint &&
-                        !selectedConnection &&
-                        selectedPointOfAttack !== undefined &&
-                        selectedPointOfAttack != null && (
-                            <EditorSidebarSelectedPointOfAttack
-                                selectedComponent={selectedComponent}
-                                selectedPointOfAttack={selectedPointOfAttack}
-                                assetSearchValue={assetSearchValue}
-                                handleAssetSearchChanged={handleAssetSearchChanged}
-                                items={items}
-                                handleOnAssetChanged={handleOnAssetChanged}
-                            />
-                        )}
-                </Box>
+                {selectedConnectionId !== undefined && selectedConnectionId != null && (
+                    <EditorSidebarSelectedConnection
+                        selectedConnection={selectedConnection}
+                        handleDeleteConnection={handleDeleteConnection}
+                        handleOnConnectionNameChange={handleOnConnectionNameChange}
+                        userRole={userRole}
+                    />
+                )}
+
+                {selectedConnectionPoint !== undefined && selectedConnectionPoint != null && (
+                    <EditorSidebarSelectedCommunicationInterface
+                        selectedConnectionPoint={selectedConnectionPoint}
+                        handleChangeCommunicationInterfaceName={handleChangeCommunicationInterfaceName}
+                        assetSearchValue={assetSearchValue}
+                        handleAssetSearchChanged={handleAssetSearchChanged}
+                        handleOnAssetChanged={handleOnAssetChanged}
+                        items={items}
+                        selectedPointOfAttack={selectedPointOfAttack}
+                        handleOnConnectionPointDescriptionChange={handleOnConnectionPointDescriptionChange}
+                        handleDeleteCommunicationInterface={handleDeleteCommunicationInterface}
+                        userRole={userRole}
+                        handleAssetNameClick={handleAssetNameClick}
+                        handleInterfaceBreadcrumbClick={handleInterfaceBreadcrumbClick}
+                    />
+                )}
+
+                {selectedComponent &&
+                    !selectedConnectionPoint &&
+                    !selectedConnection &&
+                    selectedPointOfAttack !== undefined &&
+                    selectedPointOfAttack != null && (
+                        <EditorSidebarSelectedPointOfAttack
+                            selectedComponent={selectedComponent}
+                            selectedPointOfAttack={selectedPointOfAttack}
+                            assetSearchValue={assetSearchValue}
+                            handleAssetSearchChanged={handleAssetSearchChanged}
+                            items={items}
+                            handleOnAssetChanged={handleOnAssetChanged}
+                            handleAssetNameClick={handleAssetNameClick}
+                            handleComponentBreadcrumbClick={handleComponentBreadcrumbClick}
+                        />
+                    )}
             </Box>
-        </>
+        </Box>
     );
 };

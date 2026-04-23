@@ -1,19 +1,20 @@
 import { Box, FormControlLabel, Switch, Typography, type SwitchProps } from "@mui/material";
-import type { ReactNode } from "react";
+import type { ReactNode, MouseEvent } from "react";
 
-interface PointOfAttackSwitchProps extends Omit<SwitchProps, "color"> {
+export interface PointOfAttackSwitchProps extends Omit<SwitchProps, "color"> {
     color: string;
     label: ReactNode;
+    onLabelClick: (event: MouseEvent<HTMLElement>) => void;
 }
 
-export const PointOfAttackSwitch = ({ color, label, ...props }: PointOfAttackSwitchProps) => {
+export const PointOfAttackSwitch = ({ color, label, onLabelClick, ...props }: PointOfAttackSwitchProps) => {
     return (
         <Box
             sx={{
                 display: "flex",
                 flexDirection: "row",
                 alignItems: "center",
-                justifyContent: "space-between",
+                justifyContent: "flex-start",
                 marginBottom: 1,
                 color: "text.primary",
                 fontSize: "0.75rem",
@@ -40,9 +41,19 @@ export const PointOfAttackSwitch = ({ color, label, ...props }: PointOfAttackSwi
                 }
                 label={
                     <Typography
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onLabelClick(e);
+                        }}
                         sx={{
                             fontSize: "0.75rem",
                             marginLeft: 1,
+                            cursor: "default",
+                            ...(props.checked && {
+                                cursor: "pointer",
+                                "&:hover": { textDecoration: "underline" },
+                            }),
                         }}
                     >
                         {label}
@@ -52,16 +63,3 @@ export const PointOfAttackSwitch = ({ color, label, ...props }: PointOfAttackSwi
         </Box>
     );
 };
-
-/**
- *
- *
-<Box
-    sx={{
-        backgroundColor: color,
-        width: "16px",
-        height: "16px",
-        marginLeft: 1,
-        borderRadius: 50,
-    }}
-></Box> */
