@@ -15,7 +15,7 @@ export const ProjectsGridComponent = ({
     onClickDeleteProject,
     onClickEditProject,
 }: ProjectsGridComponentProps) => {
-    const columns = new Array(columnCount).fill(0);
+    const columns = Array.from({ length: columnCount }).fill(0);
     return (
         <Grid
             container
