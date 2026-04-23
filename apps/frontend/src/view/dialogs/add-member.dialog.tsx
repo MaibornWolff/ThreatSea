@@ -129,7 +129,17 @@ const AddMemberDialog = ({
     };
 
     return (
-        <Dialog onBackdropClick={handleCancelDialog} maxWidth="xs" fullWidth {...props} open={true}>
+        <Dialog
+            onClose={(_event, reason) => {
+                if (reason === "backdropClick") {
+                    handleCancelDialog?.();
+                }
+            }}
+            maxWidth="xs"
+            fullWidth
+            {...props}
+            open={true}
+        >
             <DialogTitle
                 sx={{
                     padding: 0,
@@ -232,12 +242,14 @@ const AddMemberDialog = ({
                                     label={t("role")}
                                     {...field}
                                     MenuProps={{
-                                        PaperProps: {
-                                            sx: {
-                                                bgcolor: "background.mainIntransparent",
-                                                borderRadius: 5,
-                                                "*": {
-                                                    fontSize: "0.875rem !important",
+                                        slotProps: {
+                                            paper: {
+                                                sx: {
+                                                    bgcolor: "background.mainIntransparent",
+                                                    borderRadius: 5,
+                                                    "*": {
+                                                        fontSize: "0.875rem !important",
+                                                    },
                                                 },
                                             },
                                         },

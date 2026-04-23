@@ -36,8 +36,7 @@ export const ProjectsGridComponent = ({
                 return (
                     <Grid
                         key={columnIndex}
-                        item
-                        xs={Math.floor(12 / columnCount)}
+                        size={Math.floor(12 / columnCount)}
                         sx={{
                             paddingTop: "0 !important",
                             overflow: "visible",

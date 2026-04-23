@@ -29,23 +29,23 @@ describe("EditorSidebarAssetList", () => {
     it("checked assets have their switch turned on", () => {
         setup({ checkedAssets: [1] });
 
-        const switches = screen.getAllByRole("checkbox");
+        const switches = screen.getAllByRole("switch");
         expect(switches[0]).toBeChecked();
-        expect(screen.getByRole("checkbox", { name: "DB Server" })).toBeChecked();
+        expect(screen.getByRole("switch", { name: "DB Server" })).toBeChecked();
     });
 
     it("assets not in checkedAssets have their switch turned off", () => {
         setup({ checkedAssets: [1] });
 
-        const switches = screen.getAllByRole("checkbox");
+        const switches = screen.getAllByRole("switch");
         expect(switches[1]).not.toBeChecked();
-        expect(screen.getByRole("checkbox", { name: "Web App" })).not.toBeChecked();
+        expect(screen.getByRole("switch", { name: "Web App" })).not.toBeChecked();
     });
 
     it("toggling a switch calls onChangeHandler with the correct asset", async () => {
         const { props, user } = setup();
 
-        await user.click(screen.getByRole("checkbox", { name: "Web App" }));
+        await user.click(screen.getByRole("switch", { name: "Web App" }));
 
         expect(props.onChangeHandler).toHaveBeenCalledOnce();
         expect(props.onChangeHandler).toHaveBeenCalledWith(expect.any(Object), props.items[1]);
@@ -89,7 +89,7 @@ describe("EditorSidebarAssetList", () => {
     it("renders nothing when items is empty", () => {
         setup({ items: [] });
 
-        expect(screen.queryAllByRole("checkbox")).toHaveLength(0);
+        expect(screen.queryAllByRole("switch")).toHaveLength(0);
         expect(screen.queryByText("DB Server")).not.toBeInTheDocument();
     });
 });
