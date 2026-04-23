@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 import svgrPlugin from "vite-plugin-svgr";
 
 export default defineConfig({
-    base: "./",
+    base: "/",
     plugins: [react(), svgrPlugin()],
     cacheDir: ".vite",
     publicDir: "public",
