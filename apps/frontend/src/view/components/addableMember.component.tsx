@@ -162,11 +162,10 @@ export const AddableMember = <TFieldValues extends BaseAddableMemberFormValues>(
                                     primary={name}
                                     slotProps={{
                                         primary: {
-                                            fontSize: "0.85em",
+                                            sx: { fontSize: "0.85em" },
                                         },
                                         secondary: {
-                                            color: "#5e666e",
-                                            fontSize: "0.8em",
+                                            sx: { color: "#5e666e", fontSize: "0.8em" },
                                         },
                                     }}
                                     secondary={email}

@@ -174,7 +174,16 @@ const ComponentDialog = ({ component, ...props }: ComponentDialogProps) => {
     const symbol = getValues("symbol") ?? "";
 
     return (
-        <Dialog onBackdropClick={handleCancelDialog} fullWidth={false} {...props} open={true}>
+        <Dialog
+            onClose={(_event, reason) => {
+                if (reason === "backdropClick") {
+                    handleCancelDialog?.();
+                }
+            }}
+            fullWidth={false}
+            {...props}
+            open={true}
+        >
             <DialogTitle
                 sx={{
                     padding: 0,

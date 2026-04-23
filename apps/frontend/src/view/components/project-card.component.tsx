@@ -144,12 +144,14 @@ export const ProjectCard = ({ project, onClickEditProject, onClickDeleteProject,
                             anchorEl={anchorEl}
                             open={open}
                             onClose={handleClose}
-                            MenuListProps={{
-                                sx: { bgcolor: "background.mainIntransparent" },
-                            }}
-                            PaperProps={{
-                                sx: {
-                                    borderRadius: 5,
+                            slotProps={{
+                                list: {
+                                    sx: { bgcolor: "background.mainIntransparent" },
+                                },
+                                paper: {
+                                    sx: {
+                                        borderRadius: 5,
+                                    },
                                 },
                             }}
                         >

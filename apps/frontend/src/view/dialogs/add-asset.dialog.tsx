@@ -144,7 +144,17 @@ const AddAssetDialog = ({ projectId, asset, userRole, onDialogClose, ...props }:
     };
 
     return (
-        <Dialog onBackdropClick={handleCancelDialog} maxWidth="sm" fullWidth {...props} open={true}>
+        <Dialog
+            onClose={(_event, reason) => {
+                if (reason === "backdropClick") {
+                    handleCancelDialog?.();
+                }
+            }}
+            maxWidth="sm"
+            fullWidth
+            {...props}
+            open={true}
+        >
             <DialogTitle
                 sx={{
                     padding: 0,
@@ -227,46 +237,48 @@ const AddAssetDialog = ({ projectId, asset, userRole, onDialogClose, ...props }:
                             error={!!errors?.confidentiality}
                             helperText={errors?.confidentiality?.message}
                             data-testid="asset-creation-modal_confidentiality-input"
-                            InputProps={{
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <Tooltip
-                                            title={
-                                                <>
-                                                    1 - {t("damages.1.name")}
-                                                    <br />
-                                                    {t("damages.1.description")}
-                                                    <br />
-                                                    <br />2 - {t("damages.2.name")}
-                                                    <br />
-                                                    {t("damages.2.description")}
-                                                    <br />
-                                                    <br />3 - {t("damages.3.name")}
-                                                    <br />
-                                                    {t("damages.3.description")}
-                                                    <br />
-                                                    <br />4 - {t("damages.4.name")}
-                                                    <br />
-                                                    {t("damages.4.description")}
-                                                    <br />
-                                                    <br />5 - {t("damages.5.name")}
-                                                    <br />
-                                                    {t("damages.5.description")}
-                                                    <br />
-                                                </>
-                                            }
-                                        >
-                                            <InfoOutlined
-                                                className="info-adornment"
-                                                sx={{
-                                                    "&:hover": {
-                                                        color: "#fcac0c !important",
-                                                    },
-                                                }}
-                                            />
-                                        </Tooltip>
-                                    </InputAdornment>
-                                ),
+                            slotProps={{
+                                input: {
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <Tooltip
+                                                title={
+                                                    <>
+                                                        1 - {t("damages.1.name")}
+                                                        <br />
+                                                        {t("damages.1.description")}
+                                                        <br />
+                                                        <br />2 - {t("damages.2.name")}
+                                                        <br />
+                                                        {t("damages.2.description")}
+                                                        <br />
+                                                        <br />3 - {t("damages.3.name")}
+                                                        <br />
+                                                        {t("damages.3.description")}
+                                                        <br />
+                                                        <br />4 - {t("damages.4.name")}
+                                                        <br />
+                                                        {t("damages.4.description")}
+                                                        <br />
+                                                        <br />5 - {t("damages.5.name")}
+                                                        <br />
+                                                        {t("damages.5.description")}
+                                                        <br />
+                                                    </>
+                                                }
+                                            >
+                                                <InfoOutlined
+                                                    className="info-adornment"
+                                                    sx={{
+                                                        "&:hover": {
+                                                            color: "#fcac0c !important",
+                                                        },
+                                                    }}
+                                                />
+                                            </Tooltip>
+                                        </InputAdornment>
+                                    ),
+                                },
                             }}
                         />
                         <Box
@@ -323,46 +335,48 @@ const AddAssetDialog = ({ projectId, asset, userRole, onDialogClose, ...props }:
                             error={!!errors?.integrity}
                             helperText={errors?.integrity?.message}
                             data-testid="asset-creation-modal_integrity-input"
-                            InputProps={{
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <Tooltip
-                                            title={
-                                                <>
-                                                    1 - {t("damages.1.name")}
-                                                    <br />
-                                                    {t("damages.1.description")}
-                                                    <br />
-                                                    <br />2 - {t("damages.2.name")}
-                                                    <br />
-                                                    {t("damages.2.description")}
-                                                    <br />
-                                                    <br />3 - {t("damages.3.name")}
-                                                    <br />
-                                                    {t("damages.3.description")}
-                                                    <br />
-                                                    <br />4 - {t("damages.4.name")}
-                                                    <br />
-                                                    {t("damages.4.description")}
-                                                    <br />
-                                                    <br />5 - {t("damages.5.name")}
-                                                    <br />
-                                                    {t("damages.5.description")}
-                                                    <br />
-                                                </>
-                                            }
-                                        >
-                                            <InfoOutlined
-                                                className="info-adornment"
-                                                sx={{
-                                                    "&:hover": {
-                                                        color: "#fcac0c !important",
-                                                    },
-                                                }}
-                                            />
-                                        </Tooltip>
-                                    </InputAdornment>
-                                ),
+                            slotProps={{
+                                input: {
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <Tooltip
+                                                title={
+                                                    <>
+                                                        1 - {t("damages.1.name")}
+                                                        <br />
+                                                        {t("damages.1.description")}
+                                                        <br />
+                                                        <br />2 - {t("damages.2.name")}
+                                                        <br />
+                                                        {t("damages.2.description")}
+                                                        <br />
+                                                        <br />3 - {t("damages.3.name")}
+                                                        <br />
+                                                        {t("damages.3.description")}
+                                                        <br />
+                                                        <br />4 - {t("damages.4.name")}
+                                                        <br />
+                                                        {t("damages.4.description")}
+                                                        <br />
+                                                        <br />5 - {t("damages.5.name")}
+                                                        <br />
+                                                        {t("damages.5.description")}
+                                                        <br />
+                                                    </>
+                                                }
+                                            >
+                                                <InfoOutlined
+                                                    className="info-adornment"
+                                                    sx={{
+                                                        "&:hover": {
+                                                            color: "#fcac0c !important",
+                                                        },
+                                                    }}
+                                                />
+                                            </Tooltip>
+                                        </InputAdornment>
+                                    ),
+                                },
                             }}
                         />
                         <Box
@@ -415,46 +429,48 @@ const AddAssetDialog = ({ projectId, asset, userRole, onDialogClose, ...props }:
                             error={!!errors?.availability}
                             helperText={errors?.availability?.message}
                             data-testid="asset-creation-modal_availability-input"
-                            InputProps={{
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <Tooltip
-                                            title={
-                                                <>
-                                                    1 - {t("damages.1.name")}
-                                                    <br />
-                                                    {t("damages.1.description")}
-                                                    <br />
-                                                    <br />2 - {t("damages.2.name")}
-                                                    <br />
-                                                    {t("damages.2.description")}
-                                                    <br />
-                                                    <br />3 - {t("damages.3.name")}
-                                                    <br />
-                                                    {t("damages.3.description")}
-                                                    <br />
-                                                    <br />4 - {t("damages.4.name")}
-                                                    <br />
-                                                    {t("damages.4.description")}
-                                                    <br />
-                                                    <br />5 - {t("damages.5.name")}
-                                                    <br />
-                                                    {t("damages.5.description")}
-                                                    <br />
-                                                </>
-                                            }
-                                        >
-                                            <InfoOutlined
-                                                className="info-adornment"
-                                                sx={{
-                                                    "&:hover": {
-                                                        color: "#fcac0c !important",
-                                                    },
-                                                }}
-                                            />
-                                        </Tooltip>
-                                    </InputAdornment>
-                                ),
+                            slotProps={{
+                                input: {
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <Tooltip
+                                                title={
+                                                    <>
+                                                        1 - {t("damages.1.name")}
+                                                        <br />
+                                                        {t("damages.1.description")}
+                                                        <br />
+                                                        <br />2 - {t("damages.2.name")}
+                                                        <br />
+                                                        {t("damages.2.description")}
+                                                        <br />
+                                                        <br />3 - {t("damages.3.name")}
+                                                        <br />
+                                                        {t("damages.3.description")}
+                                                        <br />
+                                                        <br />4 - {t("damages.4.name")}
+                                                        <br />
+                                                        {t("damages.4.description")}
+                                                        <br />
+                                                        <br />5 - {t("damages.5.name")}
+                                                        <br />
+                                                        {t("damages.5.description")}
+                                                        <br />
+                                                    </>
+                                                }
+                                            >
+                                                <InfoOutlined
+                                                    className="info-adornment"
+                                                    sx={{
+                                                        "&:hover": {
+                                                            color: "#fcac0c !important",
+                                                        },
+                                                    }}
+                                                />
+                                            </Tooltip>
+                                        </InputAdornment>
+                                    ),
+                                },
                             }}
                         />
                         <Box
