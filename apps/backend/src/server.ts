@@ -62,8 +62,8 @@ app.use(LogHandler);
 app.use(csrfSynchronisedProtection);
 
 const apiRateLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 authentication requests per windowMs
+    windowMs: 15 * 60 * 1000,
+    max: 3000,
     standardHeaders: true,
     legacyHeaders: false,
 });
