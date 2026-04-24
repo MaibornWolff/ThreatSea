@@ -38,11 +38,7 @@ export async function deleteCatalog(request: APIRequestContext, token: string, c
     await fetchApi(request, token, "DELETE", `/catalogs/${catalogId}`);
 }
 
-export async function deleteCatalogs(
-    request: APIRequestContext,
-    token: string,
-    catalogIds: number[]
-): Promise<void> {
+export async function deleteCatalogs(request: APIRequestContext, token: string, catalogIds: number[]): Promise<void> {
     for (const id of catalogIds) {
         await deleteCatalog(request, token, id);
     }
@@ -56,4 +52,3 @@ export async function deleteAllCatalogs(request: APIRequestContext, token: strin
         catalogs.map((c) => c.id)
     );
 }
-

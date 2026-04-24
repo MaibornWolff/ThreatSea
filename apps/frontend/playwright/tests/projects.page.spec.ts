@@ -4,7 +4,7 @@ import { createCatalog, deleteCatalog, getCatalogs } from "../utils/catalog.api.
 import { createProject, createProjects, deleteProjects, getProjects } from "../utils/project.api.ts";
 import { buildTestId, buildProject } from "../builder/test-data.builder.ts";
 import { ProjectsPage } from "../pages/projects.page.ts";
-import projectsFixture from "../../tests/fixtures/projects.json" with { type: "json" };
+import projectsFixture from "../fixtures/projects.json" with { type: "json" };
 
 const projects: {
     name: string;
@@ -77,7 +77,7 @@ test.describe("Projects Page Tests", () => {
             await projectsPage.nameInput.fill(`${project.name}-${tid}`);
             await projectsPage.descriptionInput.fill(project.description);
             await projectsPage.catalogSelection.click();
-            await page.locator("role=option").filter({ hasText: tid }).click();
+            await page.locator("role=option").filter({ hasText: tid }).first().click();
             await projectsPage.saveButton.click();
         }
 
@@ -156,7 +156,11 @@ test.describe("Projects Page Tests", () => {
         const token = await projectsPage.getCsrfToken();
 
         const project = { ...projects[0]!, name: `${projects[0]!.name}-${tid}` };
-        await createProject(request, token, buildProject(project.name, project.catalogId, project.confidentialityLevel));
+        await createProject(
+            request,
+            token,
+            buildProject(project.name, project.catalogId, project.confidentialityLevel)
+        );
         await page.reload();
 
         await projectsPage.searchField.fill(tid);
@@ -247,4 +251,3 @@ function reorderProjectsGrid<T>(items: T[]): T[] {
     }
     return result;
 }
-

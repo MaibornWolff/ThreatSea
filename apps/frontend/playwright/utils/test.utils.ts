@@ -24,4 +24,3 @@ export async function cleanAll(request: APIRequestContext, token: string): Promi
     await deleteAllProjects(request, token);
     await deleteAllCatalogs(request, token);
 }
-

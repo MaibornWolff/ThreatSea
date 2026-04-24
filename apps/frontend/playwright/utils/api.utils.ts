@@ -33,4 +33,3 @@ export async function fetchApi<T>(
         return (await response.text()) as T;
     }
 }
-

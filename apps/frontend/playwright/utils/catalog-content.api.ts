@@ -116,4 +116,3 @@ export async function deleteCatalogMeasures(
         await fetchApi(request, token, "DELETE", `/catalogs/${catalogId}/measures/${id}`);
     }
 }
-

@@ -18,6 +18,46 @@ $ pnpm i
 $ pnpm run dev
 ```
 
+## E2E Testing (Playwright)
+
+ThreatSea uses [Playwright](https://playwright.dev/) for end-to-end testing. The test suite is located under `apps/frontend/playwright/` and follows the **Page Object Model (POM)** pattern.
+
+### Setup
+
+Run the init script once to ensure Playwright browsers are installed on your machine:
+
+```bash
+cd apps/frontend
+npm run playwright:init
+```
+
+Make sure the following are running before executing tests:
+
+- **Database**: `docker compose up -d postgres`
+- **Backend**: `cd apps/backend && npm run dev`
+- **Frontend**: started automatically by Playwright if not already running
+
+### Run Tests
+
+```bash
+cd apps/frontend
+
+# Run all E2E tests (Chromium, 1 worker — recommended locally)
+npm run playwright
+
+# Open Playwright UI Mode (interactive, with time-travel debugging)
+npm run playwright:ui
+```
+
+After a test run, the HTML report is available at `apps/frontend/playwright-report/index.html`.
+
+### Playwright UI Mode
+
+Playwright UI Mode provides a time travel testing experience with watch mode, test file exploration, filtering, detailed test traces, and DOM snapshot debugging.
+More information in [Playwright's documentation](https://playwright.dev/docs/test-ui-mode).
+
+---
+
 ## Get Involved
 
 Do you have a **bug** or **feature request**? Please open [a new issue](https://github.com/MaibornWolff/ThreatSea/issues/new).
