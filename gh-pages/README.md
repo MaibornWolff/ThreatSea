@@ -26,15 +26,15 @@ Feedback is always welcome.
 
 ### Contributing
 
-Please see the [Contributing Guidelines](../CONTRIBUTING.md) for more information on how to get involved in the project.
+Please see the [Contributing Guidelines](https://github.com/MaibornWolff/ThreatSea/blob/main/CONTRIBUTING.md) for more information on how to get involved in the project.
 
 ## Code of Conduct
 
-Please note that this project is released with a [Code of Conduct](../CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
+Please note that this project is released with a [Code of Conduct](https://github.com/MaibornWolff/ThreatSea/blob/main/CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
 
 ## License
 
-ThreatSea is licensed under the [BSD-3-Clause License](../LICENSE)
+ThreatSea is licensed under the [BSD-3-Clause License](https://github.com/MaibornWolff/ThreatSea/blob/main/LICENSE)
 
 ---
 
