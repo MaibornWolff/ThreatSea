@@ -63,4 +63,3 @@ export class MeasuresPage extends BasePage {
         return this.page.locator(`[data-testid="navigation-header_${link}-button"]`);
     }
 }
-

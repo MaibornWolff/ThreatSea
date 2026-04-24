@@ -5,7 +5,7 @@ import { createMeasure, createMeasures } from "../utils/measure.api.ts";
 import { buildTestId } from "../builder/test-data.builder.ts";
 import { MeasuresPage } from "../pages/measures.page.ts";
 import { CONFIDENTIALITY_LEVELS } from "#utils/confidentiality.ts";
-import measuresFixture from "../../tests/fixtures/measures.json" with { type: "json" };
+import measuresFixture from "../fixtures/measures.json" with { type: "json" };
 
 const measures: { name: string; description: string; scheduledAt: Date; projectId: number }[] = [];
 const invalidMeasures: { name: string; description: string; scheduledAt: Date }[] = [];
@@ -16,8 +16,12 @@ function toDisplayFormat(date: Date): string {
 }
 
 test.beforeAll(() => {
-    measures.push(...measuresFixture.measures.map((m) => ({ ...m, scheduledAt: new Date(m.scheduledAt), projectId: -1 })));
-    invalidMeasures.push(...measuresFixture.invalidMeasures.map((m) => ({ ...m, scheduledAt: new Date(m.scheduledAt) })));
+    measures.push(
+        ...measuresFixture.measures.map((m) => ({ ...m, scheduledAt: new Date(m.scheduledAt), projectId: -1 }))
+    );
+    invalidMeasures.push(
+        ...measuresFixture.invalidMeasures.map((m) => ({ ...m, scheduledAt: new Date(m.scheduledAt) }))
+    );
 });
 
 test.beforeEach(async ({ page, request, browserName }, { testId }) => {
@@ -26,7 +30,11 @@ test.beforeEach(async ({ page, request, browserName }, { testId }) => {
     const token = await pg.getCsrfToken();
     const tid = buildTestId(browserName, testId);
 
-    const catalog = await createCatalog(request, token, { name: `Sample Catalog ${tid}`, language: "EN", defaultContent: true });
+    const catalog = await createCatalog(request, token, {
+        name: `Sample Catalog ${tid}`,
+        language: "EN",
+        defaultContent: true,
+    });
     const project = await createProject(request, token, {
         name: `Sample Project ${tid}`,
         description: "Sample project description",
@@ -44,7 +52,11 @@ test.afterEach(async ({ page, request, browserName }, { testId }) => {
     const tid = buildTestId(browserName, testId);
 
     const allProjects = await getProjects(request, token);
-    await deleteProjects(request, token, allProjects.filter((p) => p.name.includes(tid)).map((p) => p.id));
+    await deleteProjects(
+        request,
+        token,
+        allProjects.filter((p) => p.name.includes(tid)).map((p) => p.id)
+    );
 
     const allCatalogs = await getCatalogs(request, token);
     const catalog = allCatalogs.find((c) => c.name.includes(tid));
@@ -98,7 +110,8 @@ test.describe("Measures Page tests", () => {
         await pg.sortByScheduledAtButton.click();
         await expect(pg.sortByScheduledAtButton).toHaveAttribute("aria-sort", "descending");
         const reversed = await pg.measureListEntryScheduledAt.allTextContents();
-        for (let i = 0; i < sorted.length; i++) expect(reversed[i]).toContain(toDisplayFormat([...sorted].reverse()[i]!.scheduledAt));
+        for (let i = 0; i < sorted.length; i++)
+            expect(reversed[i]).toContain(toDisplayFormat([...sorted].reverse()[i]!.scheduledAt));
     });
 
     test("Should update an existing measure", async ({ page, request }) => {
@@ -209,4 +222,3 @@ test.describe("Measures Page tests", () => {
         await expect(pg.accountMenuLogout).toBeVisible();
     });
 });
-

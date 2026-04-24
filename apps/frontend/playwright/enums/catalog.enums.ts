@@ -65,4 +65,3 @@ export const POA_LABELS = {
     USER_INTERFACE: "User Interface",
     USER_BEHAVIOUR: "User Behaviour",
 } as const;
-

@@ -83,25 +83,45 @@ export class CatalogPage extends BasePage {
         this.sortMeasuresByNameButton = page.locator('[data-testid="catalog-page_sort-measures-by-name-button"]');
         this.sortMeasuresByDateButton = page.locator('[data-testid="catalog-page_sort-measures-by-date-button"]');
         this.ascendingMeasuresSortButton = page.locator('[data-testid="catalog-page_ascending-measures-sort-button"]');
-        this.descendingMeasuresSortButton = page.locator('[data-testid="catalog-page_descending-measures-sort-button"]');
+        this.descendingMeasuresSortButton = page.locator(
+            '[data-testid="catalog-page_descending-measures-sort-button"]'
+        );
 
         this.threatNameInput = page.locator('[data-testid="catalog-threat-creation-modal_name-input"] input');
-        this.threatDescriptionInput = page.locator('[data-testid="catalog-threat-creation-modal_description-input"] textarea[name="description"]');
+        this.threatDescriptionInput = page.locator(
+            '[data-testid="catalog-threat-creation-modal_description-input"] textarea[name="description"]'
+        );
         this.threatAttackerSelection = page.locator('[data-testid="catalog-threat-creation-modal_attacker-selection"]');
         this.threatPoaSelection = page.locator('[data-testid="catalog-threat-creation-modal_poa-selection"]');
-        this.threatProbabilityInput = page.locator('[data-testid="catalog-threat-creation-modal_probability-input"] input');
-        this.threatConfidentialitySwitch = page.locator('[data-testid="catalog-threat-creation-modal_confidentiality-switch"]');
+        this.threatProbabilityInput = page.locator(
+            '[data-testid="catalog-threat-creation-modal_probability-input"] input'
+        );
+        this.threatConfidentialitySwitch = page.locator(
+            '[data-testid="catalog-threat-creation-modal_confidentiality-switch"]'
+        );
         this.threatIntegritySwitch = page.locator('[data-testid="catalog-threat-creation-modal_integrity-switch"]');
-        this.threatAvailabilitySwitch = page.locator('[data-testid="catalog-threat-creation-modal_availability-switch"]');
+        this.threatAvailabilitySwitch = page.locator(
+            '[data-testid="catalog-threat-creation-modal_availability-switch"]'
+        );
 
         this.measureNameInput = page.locator('[data-testid="catalog-measure-creation-modal_name-input"] input');
-        this.measureDescriptionInput = page.locator('[data-testid="catalog-measure-creation-modal_description-input"] textarea[name="description"]');
-        this.measureAttackerSelection = page.locator('[data-testid="catalog-measure-creation-modal_attacker-selection"]');
+        this.measureDescriptionInput = page.locator(
+            '[data-testid="catalog-measure-creation-modal_description-input"] textarea[name="description"]'
+        );
+        this.measureAttackerSelection = page.locator(
+            '[data-testid="catalog-measure-creation-modal_attacker-selection"]'
+        );
         this.measurePoaSelection = page.locator('[data-testid="catalog-measure-creation-modal_poa-selection"]');
-        this.measureProbabilityInput = page.locator('[data-testid="catalog-measure-creation-modal_probability-input"] input');
-        this.measureConfidentialitySwitch = page.locator('[data-testid="catalog-measure-creation-modal_confidentiality-switch"]');
+        this.measureProbabilityInput = page.locator(
+            '[data-testid="catalog-measure-creation-modal_probability-input"] input'
+        );
+        this.measureConfidentialitySwitch = page.locator(
+            '[data-testid="catalog-measure-creation-modal_confidentiality-switch"]'
+        );
         this.measureIntegritySwitch = page.locator('[data-testid="catalog-measure-creation-modal_integrity-switch"]');
-        this.measureAvailabilitySwitch = page.locator('[data-testid="catalog-measure-creation-modal_availability-switch"]');
+        this.measureAvailabilitySwitch = page.locator(
+            '[data-testid="catalog-measure-creation-modal_availability-switch"]'
+        );
 
         this.saveButton = page.locator('[data-testid="save-button"]');
         this.cancelButton = page.locator('[data-testid="cancel-button"]');

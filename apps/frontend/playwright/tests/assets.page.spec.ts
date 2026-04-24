@@ -6,7 +6,7 @@ import { buildTestId } from "../builder/test-data.builder.ts";
 import { AssetsPage } from "../pages/assets.page.ts";
 import type { Asset } from "#api/types/asset.types.ts";
 import { CONFIDENTIALITY_LEVELS } from "#utils/confidentiality.ts";
-import assetsFixture from "../../tests/fixtures/assets.json" with { type: "json" };
+import assetsFixture from "../fixtures/assets.json" with { type: "json" };
 
 const assets: Omit<Asset, "id" | "updatedAt">[] = [];
 const invalidAssets: Partial<Asset>[] = [];
@@ -23,7 +23,11 @@ test.beforeEach(async ({ page, request, browserName }, { testId }) => {
     const token = await pg.getCsrfToken();
     const tid = buildTestId(browserName, testId);
 
-    const catalog = await createCatalog(request, token, { name: `Sample Catalog ${tid}`, language: "EN", defaultContent: true });
+    const catalog = await createCatalog(request, token, {
+        name: `Sample Catalog ${tid}`,
+        language: "EN",
+        defaultContent: true,
+    });
     const project = await createProject(request, token, {
         name: `Sample Project ${tid}`,
         description: "Sample project description",
@@ -41,7 +45,11 @@ test.afterEach(async ({ page, request, browserName }, { testId }) => {
     const tid = buildTestId(browserName, testId);
 
     const allProjects = await getProjects(request, token);
-    await deleteProjects(request, token, allProjects.filter((p) => p.name.includes(tid)).map((p) => p.id));
+    await deleteProjects(
+        request,
+        token,
+        allProjects.filter((p) => p.name.includes(tid)).map((p) => p.id)
+    );
 
     const allCatalogs = await getCatalogs(request, token);
     const catalog = allCatalogs.find((c) => c.name.includes(tid));
@@ -109,7 +117,9 @@ test.describe("Assets Page Tests", () => {
 
             await pg.sortByCiaButton(attr).click();
             await expect(pg.sortByCiaButton(attr)).toHaveAttribute("aria-sort", "descending");
-            expect(await pg.assetListEntryCia(attr).allTextContents()).toEqual([...sorted].reverse().map((a) => a[attr].toString()));
+            expect(await pg.assetListEntryCia(attr).allTextContents()).toEqual(
+                [...sorted].reverse().map((a) => a[attr].toString())
+            );
 
             await pg.sortByCiaButton(attr).click();
         }
@@ -218,4 +228,3 @@ test.describe("Assets Page Tests", () => {
         await expect(pg.accountMenuLogout).toBeVisible();
     });
 });
-

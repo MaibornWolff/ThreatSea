@@ -13,4 +13,3 @@ export class ThreatsPage extends BasePage {
         await this.page.goto(`/projects/${projectId}/threats`);
     }
 }
-

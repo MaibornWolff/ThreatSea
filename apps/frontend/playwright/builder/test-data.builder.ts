@@ -52,4 +52,3 @@ export function buildCatalogContentItems<
         attackers: item.attackers as ATTACKERS[],
     }));
 }
-

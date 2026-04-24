@@ -6,11 +6,7 @@ export async function getAssets(request: APIRequestContext, token: string, proje
     return fetchApi(request, token, "GET", `/projects/${projectId}/assets`);
 }
 
-export async function createAsset(
-    request: APIRequestContext,
-    token: string,
-    body: CreateAssetRequest
-): Promise<Asset> {
+export async function createAsset(request: APIRequestContext, token: string, body: CreateAssetRequest): Promise<Asset> {
     return fetchApi(request, token, "POST", `/projects/${body.projectId}/assets`, body);
 }
 
@@ -25,4 +21,3 @@ export async function createAssets(
     }
     return results;
 }
-

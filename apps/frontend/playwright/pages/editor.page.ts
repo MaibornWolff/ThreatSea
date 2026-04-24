@@ -51,7 +51,9 @@ export class EditorPage extends BasePage {
         this.poaAssetSearchContainer = page.locator('[data-testid="selected-point-of-attack-asset-search-field"]');
         this.poaBreadcrumbComponent = page.getByTestId("poa-breadcrumb-component");
 
-        this.communicationAssetSearchField = page.locator('[data-testid="selected-communication-asset-search-field"] input');
+        this.communicationAssetSearchField = page.locator(
+            '[data-testid="selected-communication-asset-search-field"] input'
+        );
 
         this.assetSearchResults = page.getByTestId("asset-search-results");
 

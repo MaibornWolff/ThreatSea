@@ -55,7 +55,8 @@ export class CatalogsPage extends BasePage {
     renameCatalogButton(nameFilter: string): Locator {
         return this.catalogEntryNameFilter(nameFilter)
             .first()
-            .locator("..").locator("..").locator("..")
+            .locator("..")
+            .locator("..")
             .locator('[data-testid="catalogs-page_rename-catalog-button"]');
     }
 
@@ -63,7 +64,8 @@ export class CatalogsPage extends BasePage {
     deleteCatalogButton(nameFilter: string): Locator {
         return this.catalogEntryNameFilter(nameFilter)
             .first()
-            .locator("..").locator("..").locator("..")
+            .locator("..")
+            .locator("..")
             .locator('[data-testid="catalogs-page_catalogs-list-entry_delete-button"]');
     }
 }

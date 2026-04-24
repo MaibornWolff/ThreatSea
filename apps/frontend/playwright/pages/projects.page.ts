@@ -59,9 +59,7 @@ export class ProjectsPage extends BasePage {
         this.projectCardDescriptionExpander = page.locator(
             '[data-testid="projects-page_project-card_description-expander"]'
         );
-        this.projectCardDescriptions = page.locator(
-            '[data-testid="projects-page_project-card_project-description"]'
-        );
+        this.projectCardDescriptions = page.locator('[data-testid="projects-page_project-card_project-description"]');
         this.actionMenuButton = page.locator('[data-testid="projects-page_project-card_action-menu-button"]');
         this.editProjectButton = page.locator(
             '[data-testid="projects-page_project-card_action-menu_edit-project-button"]'
@@ -93,4 +91,3 @@ export class ProjectsPage extends BasePage {
         return this.page.locator('[data-testid="projects-page_project-card"] p').filter({ hasText: text });
     }
 }
-

@@ -4,7 +4,7 @@ import type { USER_ROLES } from "#api/types/user-roles.types.ts";
 import { getProjects, importProject, deleteProject } from "../utils/project.api.ts";
 import { deleteCatalog } from "../utils/catalog.api.ts";
 import { ThreatsPage } from "../pages/threats.page.ts";
-import threatsFixture from "../../tests/fixtures/threats.json" with { type: "json" };
+import threatsFixture from "../fixtures/threats.json" with { type: "json" };
 
 let exportedProject: { project: Omit<ExtendedProject, "image" | "confidentialityLevel"> };
 let projectId: number;
@@ -45,4 +45,3 @@ test.describe("Threats Page Tests", () => {
         await expect(pg.threatListEntries).toHaveCount(4);
     });
 });
-

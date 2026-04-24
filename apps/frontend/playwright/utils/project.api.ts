@@ -38,11 +38,7 @@ export async function deleteProject(request: APIRequestContext, token: string, p
     await fetchApi(request, token, "DELETE", `/projects/${projectId}`);
 }
 
-export async function deleteProjects(
-    request: APIRequestContext,
-    token: string,
-    projectIds: number[]
-): Promise<void> {
+export async function deleteProjects(request: APIRequestContext, token: string, projectIds: number[]): Promise<void> {
     for (const id of projectIds) {
         await deleteProject(request, token, id);
     }
@@ -60,4 +56,3 @@ export async function deleteAllProjects(request: APIRequestContext, token: strin
 export async function importProject(request: APIRequestContext, token: string, project: object): Promise<void> {
     return fetchApi<void>(request, token, "POST", "/import", project);
 }
-
