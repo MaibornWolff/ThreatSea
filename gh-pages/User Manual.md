@@ -179,6 +179,10 @@ Since attack points are relevant for the creation of threats, their deletion cou
 
 ![Editor Page Delete Component Confirmation](assets/image-2025-1-10_15-3-57.png "Editor Delete Compoment Confirmation")
 
+When a point of attack has been selected in the sidebar, the sidebar header shows a breadcrumb of the form _ComponentName > Point-of-attack-type_. Clicking the component name returns to the component view without having to click on the canvas.
+
+![Editor Sidebar Breadcrumb](assets/sidebar-breadcrumb-poa.png "Editor Sidebar Breadcrumb")
+
 #### Assigning assets
 
 The third part of the dialog displays a color-coded overview of the asset assignments to the single attack points. In the example below, the purple dot indicates that the asset "Customer account data" is processed by the selected component ("Customer mobile client"), more concretely, that the asset is assigned to the "Processing Infrastructure" attack point of the selected component. The logic for communication interfaces is a little bit different: Here, a full light-blue dot means that the asset "Customer account data" is received via **all** communication interfaces of the component (GSM, WiFi), where a half light-blue dot (like for the asset "payment data") means that the asset is assigned to at least one but not all of the communication interfaces of the component.
@@ -186,6 +190,10 @@ The third part of the dialog displays a color-coded overview of the asset assign
 With the "Set All" and "Unset All" buttons, users have a quick possibility to assign or unassign a single asset to or from **all** attack points which the selected component comprises.
 
 ![Editor Page Edit Component Menu Details](assets/image-2025-4-10_9-25-36.png "Editor Page Edit Component Menu Details")
+
+Asset names in the sidebar are clickable shortcuts: clicking a name opens the "Edit asset" dialog directly on top of the system editor, so users do not have to navigate to the Assets page to adjust protection needs while refining the system model. Hovering an asset name in a POA sidebar additionally shows a small preview with the asset's protection-need values in the shorthand `(C <confidentiality> / I <integrity> / A <availability>)`.
+
+![Editor Sidebar Asset Hover Preview](assets/asset-hover-popper.png "Editor Sidebar Asset Hover Preview")
 
 ### Custom component types
 
@@ -244,6 +252,14 @@ Communication interface can either be edited or deleted via the previously shown
 
 ![Editor Page Communication Interface Component Menu](assets/image-2025-4-10_17-10-2.png "Editor Page Communication Interface Component Menu")
 
+In the selected-component sidebar, each communication interface now appears as a clickable label. Clicking the name navigates the sidebar directly into the interface's detail view, where assets can be assigned. To rename an interface without leaving the list, users with the `Editor` role (or higher) can click the <img src="../assets/image-2023-11-10_23-40-55.png" alt="Edit Icon" style="height:1em; width:auto; vertical-align:middle;"> icon next to the interface; the name becomes an input field and the new name is saved on `Enter` or when the field loses focus. The <img src="../assets/images_2_.png" alt="Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> button next to it deletes the interface as before.
+
+![Editor Sidebar Interface Inline Edit](assets/interface-inline-edit.png "Editor Sidebar Interface Inline Edit")
+
+When a communication interface has been selected, the sidebar header shows a breadcrumb of the form _ComponentName > Interface: \<name\>_. Clicking the component name returns to the component view.
+
+![Editor Sidebar Breadcrumb Interface](assets/sidebar-breadcrumb-interface.png "Editor Sidebar Breadcrumb Interface")
+
 #### Connecting communication interfaces to communication infrastructures
 
 Users can connect communication interfaces to communication infrastructures to visualize networks. This can be achieved by opening the list of interfaces via the <img src="../assets/connect-plug-icon-linear-logo-mark-in-black-and-white-vector.jpg" alt="Editor Page Link Icon" style="height:1em; width:auto; vertical-align:middle;"> button or the light blue component border and then selecting the <img src="../assets/Wifi-Tethering--Streamline-Outlined-Material-Symbols.png" alt="Editor Page Connection On Icon" style="height:1em; width:auto; vertical-align:middle;"> icon.
@@ -264,7 +280,7 @@ With the <img src="../assets/Wifi-Tethering-Off--Streamline-Sharp-Material-Symbo
 
 #### Editing communication infrastructures
 
-When clicking on a communication infrastructure, users can edit the name of the infrastructure and assign assets to this attack point by using the "Set All"/"Unset All" buttons. With the top-right <img src="../assets/images_2_.png" alt="Editor Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> button the user can delete the communication infrastructure. This action does not affect the communication interfaces linked to that communication infrastructure, only the visual connection is deleted. In the "Connected Components" part, the user can remove connections to other components via the single <img src="../assets/images_2_.png" alt="Editor Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> buttons.
+When clicking on a communication infrastructure, users can edit the name of the infrastructure and assign assets to this attack point by using the "Set All"/"Unset All" buttons. With the top-right <img src="../assets/images_2_.png" alt="Editor Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> button the user can delete the communication infrastructure. This action does not affect the communication interfaces linked to that communication infrastructure, only the visual connection is deleted. In the "Connected Components" part, clicking a connected component's name navigates directly to that component's sidebar view — if the connection runs through a specific communication interface, the interface detail view is opened automatically. The <img src="../assets/images_2_.png" alt="Editor Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> button next to each entry removes the connection.
 
 ![Editor Page Communication Infrastructure Menu](assets/image-2025-4-10_17-21-48.png "Editor Page Communication Infrastructure Menu")
 
@@ -309,6 +325,8 @@ Clicking on an asset entry opens the same dialog as when creating an asset that 
 ![Assets Page Edit Asset](assets/image-2024-7-30_14-17-30.png "Assets Page Edit Asset")
 
 ![Assets Page Edit Asset Dialog](assets/image-2024-7-30_14-17-54.png "Assets Page Edit Asset Dialog")
+
+Assets can also be edited directly from the **System editor**: clicking an asset name in the sidebar opens the same dialog over the editor canvas, and closing the dialog returns to the system view. The resulting URL (`/projects/<projectId>/system/assets/<assetId>/edit`) is shareable.
 
 ### Deleting an asset
 
