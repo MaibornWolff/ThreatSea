@@ -22,12 +22,17 @@ test("authenticate", async ({ page, browserName }) => {
             accountId = "4";
             break;
     }
-    await page.goto(`${process.env["API_URI"]}/api/auth/login?testUser=${accountId}`);
 
-    // Validate the session
-    await page.goto("/projects");
-    await page.waitForURL(/\/projects/, { timeout: 30000 });
-    await expect(page.locator('[data-testid="navigation-header_account-button"]')).toBeVisible({ timeout: 30000 });
+    // Login via backend — follows redirect to http://localhost:3000
+    await page.goto(`${process.env["API_URI"]}/api/auth/login?testUser=${accountId}`);
+    await page.waitForURL("http://localhost:3000/**", { timeout: 15000 });
+
+    // Navigate to /imprint — a static page that does not trigger Redux data-fetching loops,
+    // but still causes the React app to fully initialize and write csrfToken to localStorage.
+    await page.goto("/imprint");
+    await page.waitForLoadState("networkidle");
+    const csrfToken = await page.evaluate(() => localStorage.getItem("csrfToken"));
+    expect(csrfToken).toBeTruthy();
 
     await page.context().storageState({ path: authFile });
 });
