@@ -3,6 +3,7 @@ import type { ExtendedProject } from "#api/types/project.types.ts";
 import {
     AnchorOrientation,
     type AugmentedSystemComponent,
+    type ConnectionAnchor,
     type SystemConnection,
     type SystemPointOfAttack,
 } from "#api/types/system.types.ts";
@@ -81,6 +82,14 @@ export const createProject = (overrides: Partial<ExtendedProject> = {}): Extende
     updatedAt: new Date("2025-01-01"),
     role: USER_ROLES.EDITOR,
     image: null,
+    ...overrides,
+});
+
+export const createConnectionAnchor = (overrides: Partial<ConnectionAnchor> = {}) => ({
+    id: "comp-1",
+    anchor: AnchorOrientation.right,
+    type: STANDARD_COMPONENT_TYPES.CLIENT,
+    component: undefined,
     ...overrides,
 });
 
