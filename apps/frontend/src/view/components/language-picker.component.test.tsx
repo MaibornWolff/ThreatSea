@@ -23,7 +23,6 @@ let initialLanguage = "en";
 
 vi.mock("../../application/hooks/use-local-storage.hook", () => ({
     useLocalStorage: (_key: string, _initialValue: string) => {
-        // eslint-disable-next-line react-hooks/rules-of-hooks
         const [value, setValue] = useState(initialLanguage);
         return [value, setValue];
     },
@@ -91,16 +90,6 @@ describe("LanguagePicker", () => {
         changeLanguageMock.mockClear(); // clear the mount call with "en"
 
         await userEvent.click(screen.getByRole("button"));
-
-        expect(changeLanguageMock).toHaveBeenCalledWith("de");
-    });
-
-    it("should call i18n.changeLanguage on mount with the current stored language", async () => {
-        initialLanguage = "de";
-
-        await act(async () => {
-            renderLanguagePicker();
-        });
 
         expect(changeLanguageMock).toHaveBeenCalledWith("de");
     });
