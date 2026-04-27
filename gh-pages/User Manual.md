@@ -131,27 +131,27 @@ A component can be created by clicking with the secondary mouse button into any 
 
 After selecting a component type, a pre-filled component of that type appears at the location of the initial mouse-click. The color coding of the component border indicates the attack points the component comprises:
 
-- <span style="color: rgb(255, 204, 0);">Yellow:</span> Data Storage Infrastructure
-- <span style="color: rgb(128, 0, 128);">Purple:</span> Processing Infrastructure
-- <span style="color: rgb(255, 153, 0);">Orange:</span> User Interface
-- <span style="color: rgb(255, 0, 255);">Pink:</span> User Behaviour
+- <span style="color: rgb(241, 210, 0);">Yellow:</span> Data Storage Infrastructure
+- <span style="color: rgb(141, 90, 211);">Purple:</span> Processing Infrastructure
+- <span style="color: rgb(255, 167, 95);">Orange:</span> User Interface
+- <span style="color: rgb(255, 104, 189);">Pink:</span> User Behaviour
 
 ![Editor Page Attack Points on Component](assets/Attack_Points.png "Editor Page Attack Points on Component")
 
 The remaining two attack points are displayed in the following color-coding in the system editor:
 
-- <span style="color: rgb(0, 204, 255);">Light Blue:</span> Communication Interface
-- <span style="color: rgb(51, 102, 255);">Blue:</span> Communication Infrastructure
+- <span style="color: rgb(146, 224, 251);">Light Blue:</span> Communication Interface
+- <span style="color: rgb(87, 134, 255);">Blue:</span> Communication Infrastructure
 
 ### Default component types
 
 ThreatSea provides four default component types that represent very typical infrastructure components, that are also restricted to a subset of attack points:
 
-- User: A component representing a human user. It consists only of a "<span style="color: rgb(255, 0, 255);">user behaviour</span>" attack point, no other attack points can be enabled.
-- Client: A component representing a client device. It can consist of the attack points <span style="color: rgb(255, 204, 0);">data storage infrastructure</span>, a <span style="color: rgb(128, 0, 128);">processing infrastructure</span> and a <span style="color: rgb(255, 153, 0);">user interface</span> which are all activated by default. The attack point "<span style="color: rgb(255, 0, 255);">user behaviour</span>" is disabled for this component.
-- Server: A component representing a server or any backend component. It can consist of the attack points <span style="color: rgb(255, 204, 0);">data storage infrastructure</span>, a <span style="color: rgb(128, 0, 128);">processing infrastructure</span> and a <span style="color: rgb(255, 153, 0);">user interface</span> of which only the first two are activated by default. The attack point "<span style="color: rgb(255, 0, 255);">user behaviour</span>" is disabled for this component.
-- Database: A component representing a data storage component. It can consist of the attack points <span style="color: rgb(255, 204, 0);">data storage infrastructure</span>, a <span style="color: rgb(128, 0, 128);">processing infrastructure</span> and a <span style="color: rgb(255, 153, 0);">user interface</span> of which only the first two are activated by default. The attack point "<span style="color: rgb(255, 0, 255);">user behaviour</span>" is disabled for this component.
-- Communication infrastructure: Communication infrastructures represent infrastructures for data exchange between two or more parties, like for example the internet, but also a local WiFi network. These components do not have any other attack point than <span style="color: rgb(51, 102, 255);">Communication Infrastructure</span>. They can used to connect several other components using communication interface attack points.
+- User: A component representing a human user. It consists only of a "<span style="color: rgb(255, 104, 189);">user behaviour</span>" attack point, no other attack points can be enabled.
+- Client: A component representing a client device. It can consist of the attack points <span style="color: rgb(241, 210, 0);">data storage infrastructure</span>, a <span style="color: rgb(141, 90, 211);">processing infrastructure</span> and a <span style="color: rgb(255, 167, 95);">user interface</span> which are all activated by default. The attack point "<span style="color: rgb(255, 104, 189);">user behaviour</span>" is disabled for this component.
+- Server: A component representing a server or any backend component. It can consist of the attack points <span style="color: rgb(241, 210, 0);">data storage infrastructure</span>, a <span style="color: rgb(141, 90, 211);">processing infrastructure</span> and a <span style="color: rgb(255, 167, 95);">user interface</span> of which only the first two are activated by default. The attack point "<span style="color: rgb(255, 104, 189);">user behaviour</span>" is disabled for this component.
+- Database: A component representing a data storage component. It can consist of the attack points <span style="color: rgb(241, 210, 0);">data storage infrastructure</span>, a <span style="color: rgb(141, 90, 211);">processing infrastructure</span> and a <span style="color: rgb(255, 167, 95);">user interface</span> of which only the first two are activated by default. The attack point "<span style="color: rgb(255, 104, 189);">user behaviour</span>" is disabled for this component.
+- Communication infrastructure: Communication infrastructures represent infrastructures for data exchange between two or more parties, like for example the internet, but also a local WiFi network. These components do not have any other attack point than <span style="color: rgb(87, 134, 255);">Communication Infrastructure</span>. They can used to connect several other components using communication interface attack points.
 
 ### Moving a component
 
@@ -167,13 +167,13 @@ By clicking on a component, users can open the "edit component" pop-up pane. The
 
 #### Assigning attack points
 
-In the second part of the dialog, users can select which of the four non-communication related attack points the component comprises. As an example, a mobile client most typically consists of a <span style="color: rgb(255, 204, 0);">data storage infrastructure</span> (i.e. the phone storage), a <span style="color: rgb(128, 0, 128);">processing infrastructure</span> (i.e. the phone processor) and a <span style="color: rgb(255, 153, 0);">user interface</span> (i.e. the touchscreen UI). If a component should be displayed graphically within the system sketch but not generate any threats (<span style="color: rgb(165, 173, 186);">_out of scope_</span>), the user can deactivate all attack points with the toggle switches to achieve this behaviour.
+In the second part of the dialog, users can select which of the four non-communication related attack points the component comprises. As an example, a mobile client most typically consists of a <span style="color: rgb(241, 210, 0);">data storage infrastructure</span> (i.e. the phone storage), a <span style="color: rgb(141, 90, 211);">processing infrastructure</span> (i.e. the phone processor) and a <span style="color: rgb(255, 167, 95);">user interface</span> (i.e. the touchscreen UI). If a component should be displayed graphically within the system sketch but not generate any threats (<span style="color: rgb(165, 173, 186);">_out of scope_</span>), the user can deactivate all attack points with the toggle switches to achieve this behaviour.
 
 Tipp:
 
 - Although components out of scope do not affect the threat generation, they leverage the completeness and intuitiveness of the system sketch.
 
-This does not hold true for <span style="color: rgb(0, 204, 255);">Communication interfaces</span> however, as they behave differently. A component can have an arbirtrary number of communication interfaces. They are listed in the component pane, where their name can be edited and where they can be deleted again. Consequently they cannot be "deactivated" like the other attack points.
+This does not hold true for <span style="color: rgb(146, 224, 251);">Communication interfaces</span> however, as they behave differently. A component can have an arbirtrary number of communication interfaces. They are listed in the component pane, where their name can be edited and where they can be deleted again. Consequently they cannot be "deactivated" like the other attack points.
 
 Since attack points are relevant for the creation of threats, their deletion could lead to loss of work (e.g refinement of threats) as the threats related to the attack point will disappear. Therefore the deactivation or deletion of attack points in the system editor requires user confirmation.
 
@@ -233,8 +233,8 @@ Clicking on one of the entries leads to the same dialog as shown before, where t
 
 Users can connect components to visualize a communication relationship between them by using the attack point types "Communication Interface" and "Communication Infrastructure", visualized in the following color-coding:
 
-- <span style="color: rgb(0, 204, 255);">Light Blue:</span> Communication Interface
-- <span style="color: rgb(51, 102, 255);">Blue:</span> Communication Infrastructure
+- <span style="color: rgb(146, 224, 251);">Light Blue:</span> Communication Interface
+- <span style="color: rgb(87, 134, 255);">Blue:</span> Communication Infrastructure
 
 #### Creating a communication interface
 
@@ -266,7 +266,7 @@ Users can connect communication interfaces to communication infrastructures to v
 
 ![Editor Page Communication Interface Connection Symbol On](assets/image-2025-4-10_17-17-26.png "Editor Page Communication Interface Connection Symbol On")
 
-The mouse pointer then drags a blue line from the selected component. The user then can assign the target of the communication flow by clicking on one of the + buttons of the target component (of type <span style="color: rgb(51, 102, 255);">Communication Infrastructure</span>). The creation of a communication flow can be aborted by clicking into an empty space in the editor grid.
+The mouse pointer then drags a blue line from the selected component. The user then can assign the target of the communication flow by clicking on one of the + buttons of the target component (of type <span style="color: rgb(87, 134, 255);">Communication Infrastructure</span>). The creation of a communication flow can be aborted by clicking into an empty space in the editor grid.
 
 Note: when the source component is of type "user", the drag preview and the resulting connection are rendered in pink instead of blue. See [User components](#user-components) for details.
 
@@ -296,7 +296,7 @@ Tipp:
 
 Components of type "user" cannot be assigned with other attack points than "User behaviour" as they represent a concrete user group. Similarly to communication connections, user can be connected to other components to indicate that the specific user group uses this component. This assignment is only a graphical illustration within the editor and has no effect on the threat generation.
 
-To make user interactions visually distinct from regular communication flows, ThreatSea renders any connection where one endpoint is a "user" component in <span style="color: rgb(255, 104, 189);">pink</span> instead of the default <span style="color: rgb(51, 102, 255);">blue</span> used for communication connections. The pink matches the user component's own border color (the "User behaviour" attack point). This is purely a visual cue and does not affect threat generation.
+To make user interactions visually distinct from regular communication flows, ThreatSea renders any connection where one endpoint is a "user" component in <span style="color: rgb(255, 104, 189);">pink</span> instead of the default <span style="color: rgb(87, 134, 255);">blue</span> used for communication connections. The pink matches the user component's own border color (the "User behaviour" attack point). This is purely a visual cue and does not affect threat generation.
 
 ![Editor Page User Component](assets/image-2024-7-30_13-58-48.png "Editor Page User Component")
 
