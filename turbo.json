@@ -21,12 +21,6 @@
     },
     "test": {
       "dependsOn": ["^test"]
-    },
-    "dependency-check": {
-      "dependsOn": ["^dependency-check"]
-    },
-    "license-check": {
-      "dependsOn": ["^license-check"]
     }
   }
 }
