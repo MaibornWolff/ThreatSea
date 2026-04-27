@@ -268,6 +268,8 @@ Users can connect communication interfaces to communication infrastructures to v
 
 The mouse pointer then drags a blue line from the selected component. The user then can assign the target of the communication flow by clicking on one of the + buttons of the target component (of type <span style="color: rgb(51, 102, 255);">Communication Infrastructure</span>). The creation of a communication flow can be aborted by clicking into an empty space in the editor grid.
 
+Note: when the source component is of type "user", the drag preview and the resulting connection are rendered in pink instead of blue. See [User components](#user-components) for details.
+
 ![Editor Page Component Communication Infrastructure Connection Dotted](assets/image-2025-4-10_17-20-16.png "Editor Page Component Communication Infrastructure Connection Dotted")
 
 When completing the communication relationship, ThreatSea creates a visual connection between the component and the communication infrastructure.
@@ -293,6 +295,8 @@ Tipp:
 ### User components
 
 Components of type "user" cannot be assigned with other attack points than "User behaviour" as they represent a concrete user group. Similarly to communication connections, user can be connected to other components to indicate that the specific user group uses this component. This assignment is only a graphical illustration within the editor and has no effect on the threat generation.
+
+To make user interactions visually distinct from regular communication flows, ThreatSea renders any connection where one endpoint is a "user" component in <span style="color: rgb(255, 104, 189);">pink</span> instead of the default <span style="color: rgb(51, 102, 255);">blue</span> used for communication connections. The pink matches the user component's own border color (the "User behaviour" attack point). This is purely a visual cue and does not affect threat generation.
 
 ![Editor Page User Component](assets/image-2024-7-30_13-58-48.png "Editor Page User Component")
 
