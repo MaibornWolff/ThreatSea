@@ -1,10 +1,7 @@
-/// <reference types="@testing-library/jest-dom" />
-import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ExtendedProject } from "../../api/types/project.types";
-import { USER_ROLES } from "../../api/types/user-roles.types";
-import { CONFIDENTIALITY_LEVELS } from "../../utils/confidentiality";
+import { createProject } from "../../test-utils/builders";
 
 // Mock ProjectCard to avoid pulling in useNavigate / router context.
 // ProjectsGridComponent is responsible for layout and delegation – not card internals.
@@ -28,21 +25,6 @@ vi.mock("./project-card.component", () => ({
 
 import { ProjectsGridComponent } from "./projects-grid.component";
 
-const makeProject = (overrides: Partial<ExtendedProject> = {}): ExtendedProject => ({
-    id: 1,
-    catalogId: 10,
-    name: "Test Project",
-    description: "A test project",
-    confidentialityLevel: CONFIDENTIALITY_LEVELS.INTERNAL,
-    lineOfToleranceGreen: 3,
-    lineOfToleranceRed: 7,
-    createdAt: new Date("2024-01-01"),
-    updatedAt: new Date("2024-01-02"),
-    role: USER_ROLES.OWNER,
-    image: null,
-    ...overrides,
-});
-
 describe("ProjectsGridComponent", () => {
     it("should render the grid container", () => {
         render(
@@ -58,7 +40,7 @@ describe("ProjectsGridComponent", () => {
     });
 
     it("should render a card for each project", () => {
-        const projects = [makeProject({ id: 1, name: "Alpha" }), makeProject({ id: 2, name: "Beta" })];
+        const projects = [createProject({ id: 1, name: "Alpha" }), createProject({ id: 2, name: "Beta" })];
 
         render(
             <ProjectsGridComponent
@@ -91,7 +73,7 @@ describe("ProjectsGridComponent", () => {
 
     it("should call onClickDeleteProject when the delete button on a card is clicked", async () => {
         const handleDelete = vi.fn();
-        const project = makeProject({ id: 42, name: "Delete Me" });
+        const project = createProject({ id: 42, name: "Delete Me" });
 
         render(
             <ProjectsGridComponent
@@ -110,7 +92,7 @@ describe("ProjectsGridComponent", () => {
 
     it("should call onClickEditProject when the edit button on a card is clicked", async () => {
         const handleEdit = vi.fn();
-        const project = makeProject({ id: 7, name: "Edit Me" });
+        const project = createProject({ id: 7, name: "Edit Me" });
 
         render(
             <ProjectsGridComponent

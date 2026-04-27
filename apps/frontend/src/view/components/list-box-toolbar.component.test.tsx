@@ -1,38 +1,15 @@
-/// <reference types="@testing-library/jest-dom" />
-import { describe, it, expect, vi, beforeAll } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import i18next from "i18next";
-import { initReactI18next } from "react-i18next";
-
 import { ListBoxToolbar } from "./list-box-toolbar.component";
+import type { ListBoxToolbarProps } from "./list-box-toolbar.component";
 import { USER_ROLES } from "../../api/types/user-roles.types";
 import type { SortDirection } from "#application/actions/list.actions.ts";
-
-// ---------------------------------------------------------------------------
-// i18n bootstrap – mirrors the pattern used in src/utils/__mocks__/translations.ts
-// ---------------------------------------------------------------------------
-beforeAll(async () => {
-    if (!i18next.isInitialized) {
-        await i18next.use(initReactI18next).init({
-            lng: "en",
-            resources: {
-                en: {
-                    catalogPage: {
-                        name: "Name",
-                        creationDate: "Creation Date",
-                    },
-                },
-            },
-        });
-    }
-});
 
 // ---------------------------------------------------------------------------
 // Default props factory – keeps individual tests focused on the one thing they
 // change rather than repeating boilerplate.
 // ---------------------------------------------------------------------------
-function buildProps(overrides: Partial<Parameters<typeof ListBoxToolbar>[0]> = {}) {
+function buildProps(overrides: Partial<ListBoxToolbarProps> = {}) {
     return {
         type: "threat",
         setSearchValue: vi.fn(),
@@ -55,7 +32,7 @@ function buildProps(overrides: Partial<Parameters<typeof ListBoxToolbar>[0]> = {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-function renderToolbar(overrides: Partial<Parameters<typeof ListBoxToolbar>[0]> = {}) {
+function renderToolbar(overrides: Partial<ListBoxToolbarProps> = {}) {
     return render(<ListBoxToolbar {...buildProps(overrides)} />);
 }
 

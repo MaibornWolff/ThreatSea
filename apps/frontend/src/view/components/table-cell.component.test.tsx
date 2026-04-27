@@ -1,5 +1,3 @@
-/// <reference types="@testing-library/jest-dom" />
-import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { Table, TableBody, TableRow } from "@mui/material";
 import CustomTableCell from "./table-cell.component";
