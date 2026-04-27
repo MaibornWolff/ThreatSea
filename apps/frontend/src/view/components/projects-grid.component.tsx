@@ -15,7 +15,7 @@ export const ProjectsGridComponent = ({
     onClickDeleteProject,
     onClickEditProject,
 }: ProjectsGridComponentProps) => {
-    const columns = new Array(columnCount).fill(0);
+    const columns = Array.from({ length: columnCount }).fill(0);
     return (
         <Grid
             container
@@ -36,8 +36,7 @@ export const ProjectsGridComponent = ({
                 return (
                     <Grid
                         key={columnIndex}
-                        item
-                        xs={Math.floor(12 / columnCount)}
+                        size={Math.floor(12 / columnCount)}
                         sx={{
                             paddingTop: "0 !important",
                             overflow: "visible",

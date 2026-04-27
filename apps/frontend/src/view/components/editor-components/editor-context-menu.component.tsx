@@ -326,15 +326,17 @@ const ComponentListItem = ({ label, symbol, onEdit, onClickDelete, sx = {}, ...p
                             anchorEl={anchorEl}
                             open={open}
                             onClose={handleClose}
-                            MenuListProps={{
-                                sx: {
-                                    p: 0,
-                                    bgcolor: "background.mainIntransparent",
+                            slotProps={{
+                                list: {
+                                    sx: {
+                                        p: 0,
+                                        bgcolor: "background.mainIntransparent",
+                                    },
                                 },
-                            }}
-                            PaperProps={{
-                                sx: {
-                                    borderRadius: 5,
+                                paper: {
+                                    sx: {
+                                        borderRadius: 5,
+                                    },
                                 },
                             }}
                         >

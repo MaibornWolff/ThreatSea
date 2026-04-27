@@ -41,6 +41,7 @@ const BaseNameTextField = <TFieldValues extends FieldValues>({
     ownId,
     type,
     projectId,
+    catalogId: _catalogId,
     ...props
 }: BaseNameTextFieldProps<TFieldValues>) => {
     const { t } = useTranslation();

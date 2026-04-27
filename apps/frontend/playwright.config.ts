@@ -49,7 +49,7 @@ export default defineConfig({
             use: {
                 ...devices["Desktop Chrome"],
                 // Use prepared auth state.
-                storageState: "tmp/.auth/chromium-user.json",
+                storageState: path.join(__dirname, "tmp/.auth/chromium-user.json"),
             },
             dependencies: ["setup chromium"],
         },
@@ -65,7 +65,7 @@ export default defineConfig({
             use: {
                 ...devices["Desktop Firefox"],
                 // Use prepared auth state.
-                storageState: "tmp/.auth/firefox-user.json",
+                storageState: path.join(__dirname, "tmp/.auth/firefox-user.json"),
             },
             dependencies: ["setup firefox"],
         },
@@ -81,7 +81,7 @@ export default defineConfig({
             use: {
                 ...devices["Desktop Safari"],
                 // Use prepared auth state.
-                storageState: "tmp/.auth/webkit-user.json",
+                storageState: path.join(__dirname, "tmp/.auth/webkit-user.json"),
             },
             dependencies: ["setup webkit"],
         },

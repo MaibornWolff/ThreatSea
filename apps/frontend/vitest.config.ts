@@ -19,6 +19,9 @@ export default defineConfig({
             },
         },
         clearMocks: true,
+        pool: "threads",
+        isolate: false,
+        maxWorkers: 1,
         coverage: {
             include: ["src/**/*.{ts,tsx}"],
             exclude: ["src/**/*.{test,spec}.{ts,tsx}", "src/test-utils/**", "src/index.tsx", "src/reportWebVitals.ts"],

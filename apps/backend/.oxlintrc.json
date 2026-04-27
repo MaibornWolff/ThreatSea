@@ -18,6 +18,10 @@
     "coverage/*",
     "dist/*"
   ],
+  "options": {
+    "typeAware": true,
+    "typeCheck": true
+  },
   "rules": {
     "constructor-super": "error",
     "for-direction": "error",
@@ -113,6 +117,7 @@
           }
         ],
         "typescript/ban-ts-comment": "error",
+        "typescript/no-deprecated": "warn",
         "typescript/no-duplicate-enum-values": "error",
         "typescript/no-empty-object-type": "error",
         "typescript/no-explicit-any": "error",

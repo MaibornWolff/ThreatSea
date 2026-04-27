@@ -6,10 +6,11 @@ import { assetsAdapter } from "../adapters/asset.adapter";
 const selectAssetsEntities = (state: RootState) => state.assets.entities;
 const selectProjectId = (_state: RootState, projectId: number) => projectId;
 
+const { selectById } = assetsAdapter.getSelectors((state: RootState) => state.assets);
+
 export const assetsSelectors = {
     selectByProjectId: createSelector([selectAssetsEntities, selectProjectId], (entities, projectId): Asset[] => {
         return Object.values(entities).filter((item) => item.projectId === projectId);
     }),
-
-    selectAll: assetsAdapter.getSelectors((state: RootState) => state.assets).selectAll,
+    selectById,
 };

@@ -61,8 +61,8 @@ export const Matrix = ({ matrix, size = 120, onSelectCell }: MatrixProps): JSX.E
                     fontWeight: "bold",
                     marginTop: 0.5,
                     letterSpacing: "1px",
+                    fontSize: size / 5,
                 }}
-                fontSize={size / 5}
             >
                 {t("probabilityAxis")}
             </Typography>
@@ -120,8 +120,8 @@ const DamageAxis = ({ size, title }: DamageAxisProps): JSX.Element => {
                 ))}
             </Box>
             <Typography
-                fontSize={size / 5}
                 sx={{
+                    fontSize: size / 5,
                     letterSpacing: "1px",
                     fontWeight: "bold",
                     alignSelf: "flex-end",
@@ -150,8 +150,8 @@ const AxisCell = ({ children, variant, size, fontSize }: AxisCellProps): JSX.Ele
             }}
         >
             <Box
-                fontSize={fontSize ? fontSize : size / 3}
                 sx={{
+                    fontSize: fontSize ? fontSize : size / 3,
                     color: "matrix.axisCells.color",
                     fontWeight: "bold",
                 }}

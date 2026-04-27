@@ -152,6 +152,10 @@ export async function importProject(request: Request<void>, response: Response, 
 
             //Match new assets into System Json
             for (const pointOfAttack of body.system.data.pointsOfAttack as PointOfAttack[]) {
+                // Prevents DoS.
+                if (!(pointOfAttack.assets instanceof Array)) {
+                    continue;
+                }
                 // Iterate over each asset id in the current point of attack entry
                 for (let j = 0; j < pointOfAttack.assets.length; j++) {
                     // Find the corresponding new asset id for the old asset id

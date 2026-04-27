@@ -19,7 +19,16 @@ export const Confirm = () => {
     const confirmButtonColor = acceptColor as ComponentProps<typeof Button>["color"];
 
     return (
-        <Dialog open={open} maxWidth={"xs"} fullWidth={false} onBackdropClick={cancelConfirm}>
+        <Dialog
+            open={open}
+            maxWidth={"xs"}
+            fullWidth={false}
+            onClose={(_event, reason) => {
+                if (reason === "backdropClick") {
+                    cancelConfirm?.();
+                }
+            }}
+        >
             <Box>
                 <Typography>
                     {typeof message === "object"

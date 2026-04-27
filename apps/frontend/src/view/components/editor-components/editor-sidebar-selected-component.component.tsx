@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { PointOfAttackSwitch } from "./point-of-attack-switch.component";
 import { POINTS_OF_ATTACK } from "../../../api/types/points-of-attack.types";
 import { POA_COLORS } from "../../colors/pointsOfAttack.colors";
-import { Delete } from "@mui/icons-material";
+import { Delete, Edit } from "@mui/icons-material";
 import { TextField } from "../textfield.component";
 import { SearchField } from "../search-field.component";
 import { ToggleButtons } from "../toggle-buttons.component";
@@ -22,7 +22,7 @@ import type {
 
 const muiIconMap = MuiIcons as Record<string, ElementType>;
 
-interface EditorSidebarSelectedComponentProps {
+export interface EditorSidebarSelectedComponentProps {
     selectedComponent: AugmentedSystemComponent | undefined;
     handleDeleteComponent: () => void;
     handleOnNameChange: (event: ChangeEvent<HTMLInputElement>) => void;
@@ -48,6 +48,9 @@ interface EditorSidebarSelectedComponentProps {
         interfaceName: string | null,
         doCloseSidebar?: boolean
     ) => void;
+    handlePointOfAttackLabelClick: (pointOfAttackId: string, componentId?: string) => void;
+    handleAssetNameClick: (asset: Asset) => void;
+    handleSelectConnectedComponent: (componentId: string, communicationInterfaceId?: string | null) => void;
 }
 
 const getSortValueForPointOfAttack = (pointOfAttack: POINTS_OF_ATTACK) => {
@@ -81,12 +84,16 @@ export const EditorSidebarSelectedComponent = ({
     handleDeleteConnectionBetweenComponents,
     handleChangeCommunicationInterfaceName,
     handleDeleteCommunicationInterface,
+    handlePointOfAttackLabelClick,
+    handleAssetNameClick,
+    handleSelectConnectedComponent,
 }: EditorSidebarSelectedComponentProps) => {
     const { t } = useTranslation("editorPage");
     const [communicationInterfaces, setCommunicationInterfaces] = useState<SystemCommunicationInterface[]>([]);
     const [localName, setLocalName] = useState<string>("");
     const [localDescription, setLocalDescription] = useState<string>("");
     const [interfaceNames, setInterfaceNames] = useState<Record<string, string>>({});
+    const [editingInterfaceId, setEditingInterfaceId] = useState<string | null>(null);
 
     const debouncedHandleNameChange = useDebounce(handleOnNameChange);
     const debouncedHandleDescriptionChange = useDebounce(handleOnDescriptionChange);
@@ -132,110 +139,32 @@ export const EditorSidebarSelectedComponent = ({
     }
 
     return (
-        <>
-            <Box>
-                <Box
-                    sx={{
-                        display: "flex",
-                        backgroundColor: "#f2f4f500",
-                        borderRadius: 15,
-                        paddingLeft: 0,
-                        paddingRight: 0,
-                        alignItems: "flex-start",
-                        justifyContent: "space-between",
-                        marginBottom: "-10px",
-                    }}
-                >
-                    <TextField
-                        value={localName}
-                        onChange={handleLocalNameChange}
-                        autoFocus={false}
-                        // Don't delete the whole Component if Delete is pressed
-                        onKeyUp={(event) => {
-                            if (event.key === "Delete") {
-                                event.stopPropagation();
-                            }
-                        }}
-                        sx={{
-                            border: "none !important",
-                            width: "82.5%",
-                            "& .MuiInputBase-root": {
-                                borderBottom: "1px solid rgba(35, 60, 87, 0) !important",
-                            },
-                            "*": {
-                                border: "none !important",
-                                padding: "0 !important",
-                                borderRadius: "0 !important",
-                                fontWeight: "bold",
-                            },
-                            "& .Mui-focused": {
-                                borderBottom: "1px solid rgba(35, 60, 87, 1) !important",
-                            },
-                            input: {
-                                fontSize: "0.875rem !important",
-                                width: "100% !important",
-                            },
-                            color: "text.primary !important",
-                            padding: "0 !important",
-                        }}
-                    />
-                    {checkUserRole(userRole, USER_ROLES.EDITOR) && (
-                        <IconButton
-                            onClick={handleDeleteComponent}
-                            sx={{
-                                "&:hover": {
-                                    color: "#ef5350",
-                                    backgroundColor: "background.paperIntransparent",
-                                },
-                                marginTop: -1,
-                            }}
-                        >
-                            <Delete sx={{ fontSize: 18 }} />
-                        </IconButton>
-                    )}
-                </Box>
-
-                <Box
-                    sx={{
-                        display: "flex",
-                        backgroundColor: "#fff",
-                        borderRadius: 15,
-                        height: "31px",
-                        paddingLeft: 8,
-                        paddingRight: 0,
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        marginTop: 4,
-                        marginBottom: 2,
-                        marginLeft: -8,
-                        marginRight: -8,
-                    }}
-                >
-                    <Typography
-                        sx={{
-                            fontWeight: "bold",
-                            fontSize: "0.75rem",
-                            color: "text.primary",
-                        }}
-                    >
-                        {t("sidebar.description.title")}
-                    </Typography>
-                </Box>
+        <Box>
+            <Box
+                sx={{
+                    display: "flex",
+                    backgroundColor: "#f2f4f500",
+                    borderRadius: 15,
+                    paddingLeft: 0,
+                    paddingRight: 0,
+                    alignItems: "flex-start",
+                    justifyContent: "space-between",
+                    marginBottom: "-10px",
+                }}
+            >
                 <TextField
-                    value={localDescription}
-                    onChange={handleLocalDescriptionChange}
+                    value={localName}
+                    onChange={handleLocalNameChange}
+                    autoFocus={false}
+                    // Don't delete the whole Component if Delete is pressed
                     onKeyUp={(event) => {
                         if (event.key === "Delete") {
                             event.stopPropagation();
                         }
                     }}
-                    autoFocus={false}
-                    multiline
-                    minRows={1} // Start with the height of just 1 line
-                    maxRows={Infinity} // Allow it to grow as needed
                     sx={{
                         border: "none !important",
-                        width: "100%",
+                        width: "82.5%",
                         "& .MuiInputBase-root": {
                             borderBottom: "1px solid rgba(35, 60, 87, 0) !important",
                         },
@@ -243,196 +172,279 @@ export const EditorSidebarSelectedComponent = ({
                             border: "none !important",
                             padding: "0 !important",
                             borderRadius: "0 !important",
+                            fontWeight: "bold",
                         },
                         "& .Mui-focused": {
                             borderBottom: "1px solid rgba(35, 60, 87, 1) !important",
                         },
-                        textarea: {
+                        input: {
                             fontSize: "0.875rem !important",
                             width: "100% !important",
-                            lineHeight: "1.5 !important",
                         },
                         color: "text.primary !important",
                         padding: "0 !important",
                     }}
                 />
-
-                <Box
-                    sx={{
-                        display: "flex",
-                        backgroundColor: "#fff",
-                        borderRadius: 15,
-                        height: "31px",
-                        paddingLeft: 8,
-                        paddingRight: 0,
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        marginTop: 4,
-                        marginBottom: 2,
-                        marginLeft: -8,
-                        marginRight: -8,
-                    }}
-                >
-                    <Typography
+                {checkUserRole(userRole, USER_ROLES.EDITOR) && (
+                    <IconButton
+                        onClick={handleDeleteComponent}
                         sx={{
-                            fontWeight: "bold",
-                            fontSize: "0.75rem",
-                            color: "text.primary",
+                            "&:hover": {
+                                color: "#ef5350",
+                                backgroundColor: "background.paperIntransparent",
+                            },
+                            marginTop: -1,
                         }}
                     >
-                        {t("sidebar.pointsofattack.title")}
-                    </Typography>
-                </Box>
-                <FormGroup sx={{ marginLeft: 0.5 }}>
-                    {Object.values(POINTS_OF_ATTACK)
-                        .filter((type) => type !== POINTS_OF_ATTACK.COMMUNICATION_INTERFACES)
-                        .filter((type) => {
-                            switch (selectedComponent?.type) {
-                                case "USERS":
-                                    return (
-                                        type === POINTS_OF_ATTACK.USER_BEHAVIOUR &&
-                                        // @ts-expect-error TODO: Bug? Should it be type !== POINTS_OF_ATTACK.USER_BEHAVIOUR or || instead of &&?
-                                        type !== POINTS_OF_ATTACK.COMMUNICATION_INFRASTRUCTURE
-                                    );
-                                case "CLIENT":
+                        <Delete sx={{ fontSize: 18 }} />
+                    </IconButton>
+                )}
+            </Box>
+
+            <Box
+                sx={{
+                    display: "flex",
+                    backgroundColor: "#fff",
+                    borderRadius: 15,
+                    height: "31px",
+                    paddingLeft: 8,
+                    paddingRight: 0,
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginTop: 4,
+                    marginBottom: 2,
+                    marginLeft: -8,
+                    marginRight: -8,
+                }}
+            >
+                <Typography
+                    sx={{
+                        fontWeight: "bold",
+                        fontSize: "0.75rem",
+                        color: "text.primary",
+                    }}
+                >
+                    {t("sidebar.description.title")}
+                </Typography>
+            </Box>
+            <TextField
+                value={localDescription}
+                onChange={handleLocalDescriptionChange}
+                onKeyUp={(event) => {
+                    if (event.key === "Delete") {
+                        event.stopPropagation();
+                    }
+                }}
+                autoFocus={false}
+                multiline
+                minRows={1} // Start with the height of just 1 line
+                maxRows={Infinity} // Allow it to grow as needed
+                sx={{
+                    border: "none !important",
+                    width: "100%",
+                    "& .MuiInputBase-root": {
+                        borderBottom: "1px solid rgba(35, 60, 87, 0) !important",
+                    },
+                    "*": {
+                        border: "none !important",
+                        padding: "0 !important",
+                        borderRadius: "0 !important",
+                    },
+                    "& .Mui-focused": {
+                        borderBottom: "1px solid rgba(35, 60, 87, 1) !important",
+                    },
+                    textarea: {
+                        fontSize: "0.875rem !important",
+                        width: "100% !important",
+                        lineHeight: "1.5 !important",
+                    },
+                    color: "text.primary !important",
+                    padding: "0 !important",
+                }}
+            />
+
+            <Box
+                sx={{
+                    display: "flex",
+                    backgroundColor: "#fff",
+                    borderRadius: 15,
+                    height: "31px",
+                    paddingLeft: 8,
+                    paddingRight: 0,
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginTop: 4,
+                    marginBottom: 2,
+                    marginLeft: -8,
+                    marginRight: -8,
+                }}
+            >
+                <Typography
+                    sx={{
+                        fontWeight: "bold",
+                        fontSize: "0.75rem",
+                        color: "text.primary",
+                    }}
+                >
+                    {t("sidebar.pointsofattack.title")}
+                </Typography>
+            </Box>
+            <FormGroup sx={{ marginLeft: 0.5 }}>
+                {Object.values(POINTS_OF_ATTACK)
+                    .filter((type) => type !== POINTS_OF_ATTACK.COMMUNICATION_INTERFACES)
+                    .filter((type) => {
+                        switch (selectedComponent?.type) {
+                            case "USERS":
+                                return (
+                                    type === POINTS_OF_ATTACK.USER_BEHAVIOUR &&
+                                    // @ts-expect-error TODO: Bug? Should it be type !== POINTS_OF_ATTACK.USER_BEHAVIOUR or || instead of &&?
+                                    type !== POINTS_OF_ATTACK.COMMUNICATION_INFRASTRUCTURE
+                                );
+                            case "CLIENT":
+                                return (
+                                    type !== POINTS_OF_ATTACK.USER_BEHAVIOUR &&
+                                    type !== POINTS_OF_ATTACK.COMMUNICATION_INFRASTRUCTURE
+                                );
+                            case "SERVER":
+                                return (
+                                    type !== POINTS_OF_ATTACK.USER_BEHAVIOUR &&
+                                    type !== POINTS_OF_ATTACK.COMMUNICATION_INFRASTRUCTURE
+                                );
+                            case "DATABASE":
+                                return (
+                                    type !== POINTS_OF_ATTACK.USER_BEHAVIOUR &&
+                                    type !== POINTS_OF_ATTACK.COMMUNICATION_INFRASTRUCTURE
+                                );
+                            case "COMMUNICATION_INFRASTRUCTURE":
+                                return type === POINTS_OF_ATTACK.COMMUNICATION_INFRASTRUCTURE;
+                            default:
+                                // For custom components (where type is an integer)
+                                if (Number.isInteger(selectedComponent?.type)) {
                                     return (
                                         type !== POINTS_OF_ATTACK.USER_BEHAVIOUR &&
                                         type !== POINTS_OF_ATTACK.COMMUNICATION_INFRASTRUCTURE
                                     );
-                                case "SERVER":
-                                    return (
-                                        type !== POINTS_OF_ATTACK.USER_BEHAVIOUR &&
-                                        type !== POINTS_OF_ATTACK.COMMUNICATION_INFRASTRUCTURE
-                                    );
-                                case "DATABASE":
-                                    return (
-                                        type !== POINTS_OF_ATTACK.USER_BEHAVIOUR &&
-                                        type !== POINTS_OF_ATTACK.COMMUNICATION_INFRASTRUCTURE
-                                    );
-                                case "COMMUNICATION_INFRASTRUCTURE":
-                                    return type === POINTS_OF_ATTACK.COMMUNICATION_INFRASTRUCTURE;
-                                default:
-                                    // For custom components (where type is an integer)
-                                    if (Number.isInteger(selectedComponent?.type)) {
-                                        return (
-                                            type !== POINTS_OF_ATTACK.USER_BEHAVIOUR &&
-                                            type !== POINTS_OF_ATTACK.COMMUNICATION_INFRASTRUCTURE
-                                        );
+                                }
+                                return true;
+                        }
+                    })
+                    .sort((a, b) => {
+                        return getSortValueForPointOfAttack(a) < getSortValueForPointOfAttack(b) ? -1 : 1;
+                    })
+                    .map((type, i) => {
+                        const currPointOfAttack = selectedComponent?.pointsOfAttack?.find((item) => item.type === type);
+                        return (
+                            <PointOfAttackSwitch
+                                key={i}
+                                label={
+                                    <Typography
+                                        component="span"
+                                        data-testid={`poa-switch-${type}`}
+                                        sx={{
+                                            fontSize: "0.75rem",
+                                            fontWeight: "bold",
+                                        }}
+                                    >
+                                        {t(`pointsOfAttackList.${type}`)}
+                                    </Typography>
+                                }
+                                color={POA_COLORS[type].normal}
+                                onChange={(e) => handleChangePointOfAttack(e, type, currPointOfAttack)}
+                                checked={currPointOfAttack !== undefined}
+                                onLabelClick={() => {
+                                    if (currPointOfAttack) {
+                                        handlePointOfAttackLabelClick(currPointOfAttack.id, selectedComponent?.id);
                                     }
-                                    return true;
-                            }
-                        })
-                        .sort((a, b) => {
-                            return getSortValueForPointOfAttack(a) < getSortValueForPointOfAttack(b) ? -1 : 1;
-                        })
-                        .map((type, i) => {
-                            const currPointOfAttack = selectedComponent?.pointsOfAttack?.find(
-                                (item) => item.type === type
-                            );
-                            return (
-                                <PointOfAttackSwitch
-                                    key={i}
-                                    label={
-                                        <Typography
-                                            sx={{
-                                                fontSize: "0.75rem",
-                                                fontWeight: "bold",
-                                            }}
-                                        >
-                                            {t(`pointsOfAttackList.${type}`)}
-                                        </Typography>
-                                    }
-                                    color={POA_COLORS[type].normal}
-                                    onChange={(e) => handleChangePointOfAttack(e, type, currPointOfAttack)}
-                                    checked={currPointOfAttack !== undefined}
-                                />
-                            );
-                        })}
-                </FormGroup>
-                {/* Display the communication interfaces section */}
-                {communicationInterfaces.length > 0 && (
-                    <>
+                                }}
+                            />
+                        );
+                    })}
+            </FormGroup>
+            {/* Display the communication interfaces section */}
+            {communicationInterfaces.length > 0 && (
+                <>
+                    <Box
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            borderRadius: 15,
+                            height: "31px",
+                            paddingLeft: 8,
+                            paddingRight: 0,
+                            justifyContent: "space-between",
+                            marginTop: 4,
+                            marginLeft: -8,
+                            marginRight: -8,
+                            padding: 0,
+                            margin: 0,
+                            marginBottom: 1,
+                        }}
+                    >
                         <Box
                             sx={{
                                 display: "flex",
                                 alignItems: "center",
-                                borderRadius: 15,
-                                height: "31px",
-                                paddingLeft: 8,
-                                paddingRight: 0,
-                                justifyContent: "space-between",
-                                marginTop: 4,
-                                marginLeft: -8,
-                                marginRight: -8,
-                                padding: 0,
-                                margin: 0,
-                                marginBottom: 1,
                             }}
                         >
                             <Box
                                 sx={{
-                                    display: "flex",
-                                    alignItems: "center",
+                                    backgroundColor: POA_COLORS[POINTS_OF_ATTACK.COMMUNICATION_INTERFACES].normal,
+                                    width: "16px",
+                                    height: "16px",
+                                    marginLeft: 1,
+                                    borderRadius: 50,
+                                }}
+                            ></Box>
+                            <Typography
+                                sx={{
+                                    fontWeight: "bold",
+                                    fontSize: "0.75rem",
+                                    color: "text.primary",
+                                    marginLeft: 2,
                                 }}
                             >
+                                Communication Interfaces
+                            </Typography>
+                        </Box>
+                    </Box>
+                    <Box sx={{ paddingLeft: 4 }}>
+                        {communicationInterfaces.map((communicationInterface, index) => {
+                            const IconComponent =
+                                communicationInterface.icon != null
+                                    ? muiIconMap[communicationInterface.icon]
+                                    : undefined;
+
+                            return (
                                 <Box
+                                    key={index}
                                     sx={{
-                                        backgroundColor: POA_COLORS[POINTS_OF_ATTACK.COMMUNICATION_INTERFACES].normal,
-                                        width: "16px",
-                                        height: "16px",
-                                        marginLeft: 1,
-                                        borderRadius: 50,
-                                    }}
-                                ></Box>
-                                <Typography
-                                    sx={{
-                                        fontWeight: "bold",
-                                        fontSize: "0.75rem",
-                                        color: "text.primary",
-                                        marginLeft: 2,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "space-between",
+                                        marginBottom: 0,
                                     }}
                                 >
-                                    Communication Interfaces
-                                </Typography>
-                            </Box>
-                        </Box>
-                        <Box sx={{ paddingLeft: 4 }}>
-                            {communicationInterfaces.map((communicationInterface, index) => {
-                                const IconComponent =
-                                    communicationInterface.icon != null
-                                        ? muiIconMap[communicationInterface.icon]
-                                        : undefined;
-
-                                return (
-                                    <Box
-                                        key={index}
+                                    <ListItemAvatar
                                         sx={{
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "space-between",
-                                            marginBottom: 0,
+                                            marginTop: "-8px",
+                                            minWidth: "0px",
+                                            marginRight: "13px",
                                         }}
                                     >
-                                        <ListItemAvatar
+                                        <Avatar
                                             sx={{
-                                                marginTop: "-8px",
-                                                minWidth: "0px",
-                                                marginRight: "13px",
+                                                width: 20,
+                                                height: 20,
+                                                fontSize: 15,
+                                                padding: 0.25,
+                                                bgcolor: "transparent",
+                                                color: "primary.main",
                                             }}
                                         >
-                                            <Avatar
-                                                sx={{
-                                                    width: 20,
-                                                    height: 20,
-                                                    fontSize: 15,
-                                                    padding: 0.25,
-                                                    bgcolor: "transparent",
-                                                    color: "primary.main",
-                                                }}
-                                            >
-                                                {IconComponent ? <IconComponent /> : null}
-                                            </Avatar>
-                                        </ListItemAvatar>
+                                            {IconComponent ? <IconComponent /> : null}
+                                        </Avatar>
+                                    </ListItemAvatar>
+                                    {editingInterfaceId === communicationInterface.id ? (
                                         <TextField
                                             value={interfaceNames[communicationInterface.id] || ""}
                                             onChange={(event) =>
@@ -442,17 +454,21 @@ export const EditorSidebarSelectedComponent = ({
                                                     event.target.value
                                                 )
                                             }
+                                            onBlur={() => setEditingInterfaceId(null)}
                                             onKeyUp={(event) => {
+                                                if (event.key === "Enter") {
+                                                    setEditingInterfaceId(null);
+                                                }
                                                 if (event.key === "Delete") {
                                                     event.stopPropagation();
                                                 }
                                             }}
-                                            autoFocus={false}
+                                            autoFocus
                                             sx={{
                                                 border: "none !important",
                                                 width: "82.5%",
                                                 "& .MuiInputBase-root": {
-                                                    borderBottom: "1px solid rgba(35, 60, 87, 0) !important",
+                                                    borderBottom: "1px solid rgba(35, 60, 87, 1) !important",
                                                 },
                                                 "*": {
                                                     border: "none !important",
@@ -460,167 +476,177 @@ export const EditorSidebarSelectedComponent = ({
                                                     borderRadius: "0 !important",
                                                     fontWeight: "bold",
                                                 },
-                                                "& .Mui-focused": {
-                                                    borderBottom: "1px solid rgba(35, 60, 87, 1) !important",
-                                                },
                                                 input: {
-                                                    fontSize: "0.875rem !important",
+                                                    fontSize: "0.75rem !important",
                                                     width: "100% !important",
                                                 },
                                                 color: "text.primary !important",
                                                 padding: "0 !important",
                                             }}
                                         />
-                                        <IconButton
+                                    ) : (
+                                        <Typography
                                             onClick={() =>
-                                                handleDeleteCommunicationInterface(
+                                                handleSelectConnectedComponent(
                                                     selectedComponent.id,
-                                                    communicationInterface.id,
-                                                    communicationInterface.name
+                                                    communicationInterface.id
                                                 )
                                             }
                                             sx={{
-                                                "&:hover": {
-                                                    color: "#ef5350",
-                                                    backgroundColor: "background.paperIntransparent",
-                                                },
+                                                fontSize: "0.75rem",
+                                                fontWeight: "bold",
+                                                cursor: "pointer",
+                                                width: "82.5%",
+                                                "&:hover": { textDecoration: "underline" },
                                             }}
                                         >
-                                            <Delete sx={{ fontSize: 18 }} />
-                                        </IconButton>
+                                            {interfaceNames[communicationInterface.id] || ""}
+                                        </Typography>
+                                    )}
+                                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                                        {checkUserRole(userRole, USER_ROLES.EDITOR) && (
+                                            <IconButton
+                                                onClick={() => setEditingInterfaceId(communicationInterface.id)}
+                                                sx={{
+                                                    "&:hover": {
+                                                        backgroundColor: "background.paperIntransparent",
+                                                    },
+                                                }}
+                                            >
+                                                <Edit sx={{ fontSize: 18 }} />
+                                            </IconButton>
+                                        )}
+                                        {checkUserRole(userRole, USER_ROLES.EDITOR) && (
+                                            <IconButton
+                                                onClick={() =>
+                                                    handleDeleteCommunicationInterface(
+                                                        selectedComponent.id,
+                                                        communicationInterface.id,
+                                                        communicationInterface.name
+                                                    )
+                                                }
+                                                sx={{
+                                                    "&:hover": {
+                                                        color: "#ef5350",
+                                                        backgroundColor: "background.paperIntransparent",
+                                                    },
+                                                }}
+                                            >
+                                                <Delete sx={{ fontSize: 18 }} />
+                                            </IconButton>
+                                        )}
                                     </Box>
-                                );
-                            })}
-                        </Box>
-                    </>
-                )}
+                                </Box>
+                            );
+                        })}
+                    </Box>
+                </>
+            )}
 
-                <Box
+            <Box
+                sx={{
+                    display: "flex",
+                    backgroundColor: "#fff",
+                    borderRadius: 15,
+                    height: "31px",
+                    paddingLeft: 8,
+                    paddingRight: 0,
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginTop: 4,
+                    marginBottom: 2,
+                    marginLeft: -8,
+                    marginRight: -8,
+                }}
+            >
+                <Typography
                     sx={{
-                        display: "flex",
-                        backgroundColor: "#fff",
-                        borderRadius: 15,
-                        height: "31px",
-                        paddingLeft: 8,
-                        paddingRight: 0,
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        marginTop: 4,
-                        marginBottom: 2,
-                        marginLeft: -8,
-                        marginRight: -8,
+                        fontWeight: "bold",
+                        fontSize: "0.75rem",
+                        color: "text.primary",
                     }}
                 >
-                    <Typography
-                        sx={{
-                            fontWeight: "bold",
-                            fontSize: "0.75rem",
-                            color: "text.primary",
-                        }}
-                    >
-                        {t("sidebar.assets.title")}
-                    </Typography>
-                </Box>
-                <Box>
-                    <SearchField
-                        sx={{
-                            marginBottom: 1,
-                            marginLeft: -0.5,
-                            width: "40%",
-                            height: "31px",
-                            borderRadius: 5,
-                        }}
-                        inputSx={{ fontSize: "0.75rem" }}
-                        //don't delete the whole Component if Delete is pressed
-                        onKeyUp={(event) => {
-                            if (event.key === "Delete") {
-                                event.stopPropagation();
-                            }
-                        }}
-                        value={assetSearchValue}
-                        onChange={handleAssetSearchChanged}
-                        data-testid="selected-component-asset-search-field"
-                    />
-                    {items
-                        .filter((item) => {
-                            const lcSearchValue = assetSearchValue.toLowerCase();
-                            return (
-                                assetSearchValue === "" ||
-                                item.name.replace(/_/g, " ").toLowerCase().includes(lcSearchValue)
-                            );
-                        })
-                        .map((asset, index) => {
-                            let assetIsSetOnCommunicationInterfaces = false;
-                            return (
+                    {t("sidebar.assets.title")}
+                </Typography>
+            </Box>
+            <Box>
+                <SearchField
+                    sx={{
+                        marginBottom: 1,
+                        marginLeft: -0.5,
+                        width: "40%",
+                        height: "31px",
+                        borderRadius: 5,
+                    }}
+                    inputSx={{ fontSize: "0.75rem" }}
+                    //don't delete the whole Component if Delete is pressed
+                    onKeyUp={(event) => {
+                        if (event.key === "Delete") {
+                            event.stopPropagation();
+                        }
+                    }}
+                    value={assetSearchValue}
+                    onChange={handleAssetSearchChanged}
+                    data-testid="selected-component-asset-search-field"
+                />
+                {items
+                    .filter((item) => {
+                        const lcSearchValue = assetSearchValue.toLowerCase();
+                        return (
+                            assetSearchValue === "" ||
+                            item.name.replace(/_/g, " ").toLowerCase().includes(lcSearchValue)
+                        );
+                    })
+                    .map((asset, index) => {
+                        let assetIsSetOnCommunicationInterfaces = false;
+                        return (
+                            <Box
+                                key={index}
+                                sx={{
+                                    display: "flex",
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    marginBottom: 1,
+                                }}
+                            >
+                                <Typography
+                                    onClick={() => handleAssetNameClick(asset)}
+                                    sx={{
+                                        minWidth: "130px",
+                                        maxWidth: "130px",
+                                        color: "text.primary",
+                                        fontSize: "0.75rem",
+                                        fontWeight: "bold",
+                                        cursor: "pointer",
+                                        "&:hover": { textDecoration: "underline" },
+                                    }}
+                                    data-testid="selected-component-asset-search-results"
+                                >
+                                    {asset.name}
+                                </Typography>
                                 <Box
-                                    key={index}
                                     sx={{
                                         display: "flex",
                                         flexDirection: "row",
-                                        alignItems: "center",
-                                        marginBottom: 1,
+                                        minWidth: "104px",
                                     }}
                                 >
-                                    <Typography
-                                        sx={{
-                                            minWidth: "130px",
-                                            maxWidth: "130px",
-                                            color: "text.primary",
-                                            fontSize: "0.75rem",
-                                            fontWeight: "bold",
-                                        }}
-                                        data-testid="selected-component-asset-search-results"
-                                    >
-                                        {asset.name}
-                                    </Typography>
-                                    <Box
-                                        sx={{
-                                            display: "flex",
-                                            flexDirection: "row",
-                                            minWidth: "104px",
-                                        }}
-                                    >
-                                        {pointsOfAttackOfSelectedComponent
-                                            .sort((a, b) => b.type.localeCompare(a.type))
-                                            .map((pointOfAttack, pointOfAttackIndex) => {
-                                                if (
-                                                    !assetIsSetOnCommunicationInterfaces &&
-                                                    pointOfAttack.type === POINTS_OF_ATTACK.COMMUNICATION_INTERFACES
-                                                ) {
-                                                    assetIsSetOnCommunicationInterfaces = true;
-                                                    const communicationInterfaces =
-                                                        pointsOfAttackOfSelectedComponent.filter(
-                                                            (poa) =>
-                                                                poa.type === POINTS_OF_ATTACK.COMMUNICATION_INTERFACES
-                                                        );
-                                                    const setInterfaces = communicationInterfaces.filter((poa) =>
-                                                        poa.assets.includes(asset.id)
+                                    {pointsOfAttackOfSelectedComponent
+                                        .sort((a, b) => b.type.localeCompare(a.type))
+                                        .map((pointOfAttack, pointOfAttackIndex) => {
+                                            if (
+                                                !assetIsSetOnCommunicationInterfaces &&
+                                                pointOfAttack.type === POINTS_OF_ATTACK.COMMUNICATION_INTERFACES
+                                            ) {
+                                                assetIsSetOnCommunicationInterfaces = true;
+                                                const communicationInterfaces =
+                                                    pointsOfAttackOfSelectedComponent.filter(
+                                                        (poa) => poa.type === POINTS_OF_ATTACK.COMMUNICATION_INTERFACES
                                                     );
-                                                    if (setInterfaces.length > 0) {
-                                                        return (
-                                                            <Box key={pointOfAttackIndex}>
-                                                                <Box
-                                                                    sx={{
-                                                                        backgroundColor:
-                                                                            POA_COLORS[pointOfAttack.type].normal,
-                                                                        width: "16px",
-                                                                        height: "16px",
-                                                                        marginLeft: 1,
-                                                                        borderRadius: 50,
-                                                                        clipPath:
-                                                                            setInterfaces.length ===
-                                                                            communicationInterfaces.length
-                                                                                ? "circle(50%)"
-                                                                                : "polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%)",
-                                                                    }}
-                                                                ></Box>
-                                                            </Box>
-                                                        );
-                                                    }
-                                                } else if (
-                                                    pointOfAttack.type !== POINTS_OF_ATTACK.COMMUNICATION_INTERFACES &&
-                                                    pointOfAttack.assets.includes(asset.id)
-                                                ) {
+                                                const setInterfaces = communicationInterfaces.filter((poa) =>
+                                                    poa.assets.includes(asset.id)
+                                                );
+                                                if (setInterfaces.length > 0) {
                                                     return (
                                                         <Box key={pointOfAttackIndex}>
                                                             <Box
@@ -631,147 +657,173 @@ export const EditorSidebarSelectedComponent = ({
                                                                     height: "16px",
                                                                     marginLeft: 1,
                                                                     borderRadius: 50,
+                                                                    clipPath:
+                                                                        setInterfaces.length ===
+                                                                        communicationInterfaces.length
+                                                                            ? "circle(50%)"
+                                                                            : "polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%)",
                                                                 }}
                                                             ></Box>
                                                         </Box>
                                                     );
                                                 }
-                                                return null;
-                                            })}
-                                    </Box>
-                                    <Box
-                                        sx={{
-                                            display: "flex",
-                                            flexDirection: "row",
-                                            marginLeft: "auto",
-                                        }}
-                                    >
-                                        <ToggleButtons
-                                            value={(() => {
-                                                // Count how many POAs (including com interfaces) have this asset
-                                                const totalAssetOccurrences = pointsOfAttackOfSelectedComponent.reduce(
-                                                    (count, poa) => count + (poa.assets.includes(asset.id) ? 1 : 0),
-                                                    0
+                                            } else if (
+                                                pointOfAttack.type !== POINTS_OF_ATTACK.COMMUNICATION_INTERFACES &&
+                                                pointOfAttack.assets.includes(asset.id)
+                                            ) {
+                                                return (
+                                                    <Box key={pointOfAttackIndex}>
+                                                        <Box
+                                                            sx={{
+                                                                backgroundColor: POA_COLORS[pointOfAttack.type].normal,
+                                                                width: "16px",
+                                                                height: "16px",
+                                                                marginLeft: 1,
+                                                                borderRadius: 50,
+                                                            }}
+                                                        ></Box>
+                                                    </Box>
                                                 );
-
-                                                if (totalAssetOccurrences === 0) {
-                                                    return "unsetAll";
-                                                }
-
-                                                if (
-                                                    totalAssetOccurrences === pointsOfAttackOfSelectedComponent.length
-                                                ) {
-                                                    return "setAll";
-                                                }
-
-                                                return "";
-                                            })()}
-                                            buttonProps={{
-                                                width: "87px",
-                                            }}
-                                            buttons={[
-                                                {
-                                                    value: "setAll",
-                                                    text: t("setAllBtn"),
-                                                    onClick: (e) => handleAddAssetToAllPointsOfAttack(e, asset),
-                                                },
-                                                {
-                                                    value: "unsetAll",
-                                                    text: t("unsetAllBtn"),
-                                                    onClick: (e) => handleRemoveAssetFromAllPointsOfAttack(e, asset),
-                                                },
-                                            ]}
-                                        />
-                                    </Box>
+                                            }
+                                            return null;
+                                        })}
                                 </Box>
-                            );
-                        })}
-                </Box>
-                <Box
-                    sx={{
-                        display: "flex",
-                        backgroundColor: "#fff",
-                        borderRadius: 15,
-                        height: "31px",
-                        paddingLeft: 8,
-                        paddingRight: 0,
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        marginTop: 4,
-                        marginBottom: 2,
-                        marginLeft: -8,
-                        marginRight: -8,
-                    }}
-                >
-                    <Typography
-                        sx={{
-                            fontWeight: "bold",
-                            fontSize: "0.75rem",
-                            color: "text.primary",
-                        }}
-                    >
-                        {t("sidebar.connected_components.title")}
-                    </Typography>
-                </Box>
-                <Box>
-                    {connectedComponents.map((connection, index) => {
-                        const connectedComponent = connection.component;
-                        if (!connectedComponent) {
-                            return null;
-                        }
-
-                        const communicationInterfaceName =
-                            selectedComponent.type === "COMMUNICATION_INFRASTRUCTURE"
-                                ? connectedComponent.communicationInterfaces?.find(
-                                      (communicationInterface) =>
-                                          communicationInterface.id === connection.communicationInterfaceId
-                                  )?.name
-                                : undefined;
-
-                        const label =
-                            connectedComponent.name +
-                            (communicationInterfaceName ? ` > ${communicationInterfaceName}` : "");
-
-                        return (
-                            <Box
-                                key={index}
-                                sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "space-between",
-                                    marginBottom: 1,
-                                }}
-                            >
-                                <Typography
+                                <Box
                                     sx={{
-                                        fontSize: "0.75rem",
-                                        fontWeight: "bold",
-                                        color: "text.primary",
+                                        display: "flex",
+                                        flexDirection: "row",
+                                        marginLeft: "auto",
                                     }}
                                 >
-                                    {label}
-                                </Typography>
-                                <IconButton
-                                    onClick={() =>
-                                        handleDeleteConnectionBetweenComponents(
-                                            selectedComponent.id,
-                                            connectedComponent.id
-                                        )
-                                    }
-                                    sx={{
-                                        "&:hover": {
-                                            color: "#ef5350",
-                                            backgroundColor: "background.paperIntransparent",
-                                        },
-                                    }}
-                                >
-                                    <Delete sx={{ fontSize: 18 }} />
-                                </IconButton>
+                                    <ToggleButtons
+                                        value={(() => {
+                                            // Count how many POAs (including com interfaces) have this asset
+                                            const totalAssetOccurrences = pointsOfAttackOfSelectedComponent.reduce(
+                                                (count, poa) => count + (poa.assets.includes(asset.id) ? 1 : 0),
+                                                0
+                                            );
+
+                                            if (totalAssetOccurrences === 0) {
+                                                return "unsetAll";
+                                            }
+
+                                            if (totalAssetOccurrences === pointsOfAttackOfSelectedComponent.length) {
+                                                return "setAll";
+                                            }
+
+                                            return "";
+                                        })()}
+                                        buttonProps={{
+                                            width: "87px",
+                                        }}
+                                        buttons={[
+                                            {
+                                                value: "setAll",
+                                                text: t("setAllBtn"),
+                                                onClick: (e) => handleAddAssetToAllPointsOfAttack(e, asset),
+                                            },
+                                            {
+                                                value: "unsetAll",
+                                                text: t("unsetAllBtn"),
+                                                onClick: (e) => handleRemoveAssetFromAllPointsOfAttack(e, asset),
+                                            },
+                                        ]}
+                                    />
+                                </Box>
                             </Box>
                         );
                     })}
-                </Box>
             </Box>
-        </>
+            <Box
+                sx={{
+                    display: "flex",
+                    backgroundColor: "#fff",
+                    borderRadius: 15,
+                    height: "31px",
+                    paddingLeft: 8,
+                    paddingRight: 0,
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginTop: 4,
+                    marginBottom: 2,
+                    marginLeft: -8,
+                    marginRight: -8,
+                }}
+            >
+                <Typography
+                    sx={{
+                        fontWeight: "bold",
+                        fontSize: "0.75rem",
+                        color: "text.primary",
+                    }}
+                >
+                    {t("sidebar.connected_components.title")}
+                </Typography>
+            </Box>
+            <Box>
+                {connectedComponents.map((connection, index) => {
+                    const connectedComponent = connection.component;
+                    if (!connectedComponent) {
+                        return null;
+                    }
+
+                    const communicationInterfaceName =
+                        selectedComponent.type === "COMMUNICATION_INFRASTRUCTURE"
+                            ? connectedComponent.communicationInterfaces?.find(
+                                  (communicationInterface) =>
+                                      communicationInterface.id === connection.communicationInterfaceId
+                              )?.name
+                            : undefined;
+
+                    const label =
+                        connectedComponent.name +
+                        (communicationInterfaceName ? ` > ${communicationInterfaceName}` : "");
+
+                    return (
+                        <Box
+                            key={index}
+                            sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                marginBottom: 1,
+                            }}
+                        >
+                            <Typography
+                                onClick={() =>
+                                    handleSelectConnectedComponent(
+                                        connectedComponent.id,
+                                        connection.communicationInterfaceId
+                                    )
+                                }
+                                sx={{
+                                    fontSize: "0.75rem",
+                                    fontWeight: "bold",
+                                    color: "text.primary",
+                                    cursor: "pointer",
+                                    "&:hover": { textDecoration: "underline" },
+                                }}
+                                data-testid="connected-component-name"
+                            >
+                                {label}
+                            </Typography>
+                            <IconButton
+                                onClick={() =>
+                                    handleDeleteConnectionBetweenComponents(selectedComponent.id, connectedComponent.id)
+                                }
+                                sx={{
+                                    "&:hover": {
+                                        color: "#ef5350",
+                                        backgroundColor: "background.paperIntransparent",
+                                    },
+                                }}
+                            >
+                                <Delete sx={{ fontSize: 18 }} />
+                            </IconButton>
+                        </Box>
+                    );
+                })}
+            </Box>
+        </Box>
     );
 };

@@ -195,7 +195,17 @@ const MeasureDetailsDialog = ({ project, measure, ...props }: MeasureDetailsDial
     };
 
     return (
-        <Dialog onBackdropClick={handleCancelDialog} maxWidth="md" fullWidth {...props} open={true}>
+        <Dialog
+            onClose={(_event, reason) => {
+                if (reason === "backdropClick") {
+                    handleCancelDialog?.();
+                }
+            }}
+            maxWidth="md"
+            fullWidth
+            {...props}
+            open={true}
+        >
             <DialogTitle
                 sx={{
                     padding: 0,

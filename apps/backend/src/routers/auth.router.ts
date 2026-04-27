@@ -16,12 +16,17 @@ import {
 export const authRouter = express.Router();
 
 const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 authentication requests per windowMs
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+});
+
+const authStatusLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 500,
 });
 
 authRouter.get("/authenticationMode", authenticationMode);
-authRouter.get("/status", authLimiter, getAuthStatus);
+authRouter.get("/status", authStatusLimiter, getAuthStatus);
 
 authRouter.get("/login", authLimiter, authenticate);
 

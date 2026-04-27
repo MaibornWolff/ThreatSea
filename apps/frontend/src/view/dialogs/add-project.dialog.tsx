@@ -103,7 +103,17 @@ const AddProjectDialog = ({ project, ...props }: AddProjectDialogProps) => {
     useEffect(loadCatalogs, [loadCatalogs]);
 
     return (
-        <Dialog onBackdropClick={handleCancelDialog} maxWidth="xs" fullWidth {...props} open={true}>
+        <Dialog
+            onClose={(_event, reason) => {
+                if (reason === "backdropClick") {
+                    handleCancelDialog?.();
+                }
+            }}
+            maxWidth="xs"
+            fullWidth
+            {...props}
+            open={true}
+        >
             <DialogTitle
                 sx={{
                     padding: 0,
@@ -166,16 +176,18 @@ const AddProjectDialog = ({ project, ...props }: AddProjectDialogProps) => {
                                 label={t("catalog")}
                                 {...field}
                                 MenuProps={{
-                                    PaperProps: {
-                                        sx: {
-                                            bgcolor: "background.mainIntransparent",
-                                            borderRadius: 5,
-                                            "*": {
-                                                fontSize: "0.875rem !important",
-                                            },
-                                            sub: {
-                                                fontSize: "0.75em !important",
-                                                verticalAlign: "sub",
+                                    slotProps: {
+                                        paper: {
+                                            sx: {
+                                                bgcolor: "background.mainIntransparent",
+                                                borderRadius: 5,
+                                                "*": {
+                                                    fontSize: "0.875rem !important",
+                                                },
+                                                sub: {
+                                                    fontSize: "0.75em !important",
+                                                    verticalAlign: "sub",
+                                                },
                                             },
                                         },
                                     },
@@ -259,12 +271,14 @@ const AddProjectDialog = ({ project, ...props }: AddProjectDialogProps) => {
                                 label={t("confidentiality")}
                                 {...field}
                                 MenuProps={{
-                                    PaperProps: {
-                                        sx: {
-                                            bgcolor: "background.mainIntransparent",
-                                            borderRadius: 5,
-                                            "*": {
-                                                fontSize: "0.875rem !important",
+                                    slotProps: {
+                                        paper: {
+                                            sx: {
+                                                bgcolor: "background.mainIntransparent",
+                                                borderRadius: 5,
+                                                "*": {
+                                                    fontSize: "0.875rem !important",
+                                                },
                                             },
                                         },
                                     },
