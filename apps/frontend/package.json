@@ -32,7 +32,7 @@
     "@react-pdf/renderer": "4.5.1",
     "@reduxjs/toolkit": "2.11.2",
     "exceljs": "4.4.0",
-    "i18next": "26.0.7",
+    "i18next": "26.0.8",
     "jwt-decode": "4.0.0",
     "konva": "10.2.5",
     "markdown-to-jsx": "9.7.16",
