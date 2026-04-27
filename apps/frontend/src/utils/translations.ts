@@ -43,12 +43,12 @@ import enMeasureDialog from "../translations/en/measure-dialog-page.en.json";
 import enCommon from "../translations/en/common.en.json";
 import enReport from "../translations/en/report.en.json";
 
-const cachedLang = localStorage.getItem("lang");
-
 /**
  * Initialises the translation for english and german
  * with i18next.
  */
+const cachedLang = typeof localStorage?.getItem === "function" ? localStorage.getItem("lang") : null;
+
 i18next.init({
     lng: cachedLang ? JSON.parse(cachedLang) : "en",
     interpolation: {
