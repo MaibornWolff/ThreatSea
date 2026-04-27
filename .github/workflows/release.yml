@@ -20,11 +20,12 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository_owner == 'MaibornWolff' && github.ref_type == 'branch' && ((github.event_name == 'push' && github.ref_name == 'main') || (github.event_name == 'workflow_dispatch' && github.ref_name == 'next'))
     permissions:
-      id-token: write # for Sigstore-based provenance signing
+      artifact-metadata: write
       attestations: write
       contents: write
-      packages: write
+      id-token: write # for Sigstore-based provenance signing
       issues: write
+      packages: write
     outputs:
       new_release_published: ${{ steps.release.outputs.new_release_published }}
       new_release_version: ${{ steps.release.outputs.new_release_version }}
