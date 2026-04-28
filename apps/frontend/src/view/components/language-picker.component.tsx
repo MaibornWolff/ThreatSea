@@ -3,6 +3,7 @@ import LanguageIcon from "@mui/icons-material/Language";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocalStorage } from "../../application/hooks/use-local-storage.hook";
+import { getPreferredLanguage } from "../../utils/translations";
 
 const LANGUAGES = [
     {
@@ -18,7 +19,10 @@ let currentLanguageIndex = 0;
 
 export const LanguagePicker = () => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const [currentLanguage, setCurrentLanguage] = useLocalStorage("lang", "en");
+    const [currentLanguage, setCurrentLanguage] = useLocalStorage(
+        "lang",
+        getPreferredLanguage(LANGUAGES.map((l) => l.id))
+    );
     const { i18n } = useTranslation();
     const open = Boolean(anchorEl);
 
