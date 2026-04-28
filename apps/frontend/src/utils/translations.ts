@@ -64,8 +64,6 @@ export function getPreferredLanguage(supported: string[] = ["en", "de"]): string
  * Initialises the translation for english and german
  * with i18next.
  */
-const cachedLang = typeof localStorage?.getItem === "function" ? localStorage.getItem("lang") : null;
-
 i18next.init({
     lng: getPreferredLanguage(),
     interpolation: {
