@@ -1,37 +1,40 @@
-/**
- * Sample component test for Button.
- *
- * Button is a pure presentational component — no Redux, Router, or i18n needed.
- * We can render it directly with @testing-library/react.
- *
- * Run with:  pnpm test:unit
- */
-/// <reference types="@testing-library/jest-dom" />
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Button } from "./button.component";
 
 describe("Button", () => {
-    it("renders its label", () => {
-        render(<Button>Save</Button>);
-
-        expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
+    it("should render its children", () => {
+        render(<Button>Click me</Button>);
+        expect(screen.getByRole("button", { name: "Click me" })).toBeInTheDocument();
     });
 
-    it("calls onClick when clicked", async () => {
-        const user = userEvent.setup();
+    it("should call onClick when clicked", async () => {
         const handleClick = vi.fn();
+        render(<Button onClick={handleClick}>Submit</Button>);
 
-        render(<Button onClick={handleClick}>Delete</Button>);
+        await userEvent.click(screen.getByRole("button", { name: "Submit" }));
 
-        await user.click(screen.getByRole("button", { name: "Delete" }));
-
-        expect(handleClick).toHaveBeenCalledOnce();
+        expect(handleClick).toHaveBeenCalledTimes(1);
     });
 
-    it("is disabled when the disabled prop is set", () => {
-        render(<Button disabled>Submit</Button>);
+    it("should be disabled when the disabled prop is set", () => {
+        render(<Button disabled>Disabled</Button>);
+        expect(screen.getByRole("button", { name: "Disabled" })).toBeDisabled();
+    });
 
-        expect(screen.getByRole("button", { name: "Submit" })).toBeDisabled();
+    it("should not call onClick when disabled", async () => {
+        const handleClick = vi.fn();
+        render(
+            <Button disabled onClick={handleClick}>
+                Disabled
+            </Button>
+        );
+
+        // MUI disabled buttons have pointer-events:none; skip the CSS pointer-events check
+        await userEvent.click(screen.getByRole("button", { name: "Disabled" }), {
+            pointerEventsCheck: 0,
+        });
+
+        expect(handleClick).not.toHaveBeenCalled();
     });
 });

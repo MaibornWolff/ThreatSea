@@ -4,10 +4,20 @@ import path from "path";
 
 export default defineConfig({
     plugins: [react()],
+    resolve: {
+        // Ensure react-router and react-router-dom share a single module instance
+        // so that useNavigate() works inside a MemoryRouter in tests.
+        dedupe: ["react-router", "react-router-dom", "react", "react-dom"],
+    },
     test: {
         include: ["src/**/*.{test,spec}.{ts,tsx}"],
         globals: true,
         environment: "jsdom",
+        environmentOptions: {
+            jsdom: {
+                url: "http://localhost",
+            },
+        },
         clearMocks: true,
         pool: "threads",
         isolate: false,

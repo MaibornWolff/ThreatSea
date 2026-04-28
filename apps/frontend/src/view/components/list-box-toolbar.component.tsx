@@ -10,7 +10,7 @@ import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
 import type { ChangeEvent } from "react";
 import type { SortDirection } from "#application/actions/list.actions.ts";
 
-interface ListBoxToolbarProps<TSortBy extends string = string> {
+export interface ListBoxToolbarProps<TSortBy extends string = string> {
     type: string;
     setSearchValue: (value: string) => void;
     setSortBy: (value: TSortBy) => void;
