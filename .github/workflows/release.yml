@@ -158,14 +158,14 @@ jobs:
         env:
           COSIGN_YES: "true"
         run: |
-          cosign sign -r maibornwolff/threatsea@${{ steps.build-main.outputs.digest }}
+          cosign sign -r index.docker.io/maibornwolff/threatsea@${{ steps.build-main.outputs.digest }}
           cosign sign -r ghcr.io/maibornwolff/threatsea@${{ steps.build-main.outputs.digest }}
 
       - name: Attest Docker Hub image (main)
         if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'main'
         uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4
         with:
-          subject-name: maibornwolff/threatsea
+          subject-name: index.docker.io/maibornwolff/threatsea
           subject-digest: ${{ steps.build-main.outputs.digest }}
           push-to-registry: true
 
