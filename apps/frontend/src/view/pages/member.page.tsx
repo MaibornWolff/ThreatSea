@@ -89,8 +89,11 @@ const MemberPageBody = () => {
 
     useLayoutEffect(() => {
         if (isSelfRemoved) {
-            if (projectId) navigate("/projects");
-            else navigate("/catalogs");
+            if (projectId) {
+                navigate("/projects");
+            } else {
+                navigate("/catalogs");
+            }
 
             dispatch(MemberActions.resetIsSelfRemoved());
         }
@@ -245,7 +248,9 @@ const MemberPageBody = () => {
     };
 
     const handleParticipantCount = (): string => {
-        if (members.length > 1) return t("participants");
+        if (members.length > 1) {
+            return t("participants");
+        }
         return t("participant");
     };
 

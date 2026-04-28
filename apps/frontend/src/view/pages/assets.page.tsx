@@ -161,7 +161,9 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
     };
 
     const handleAssetsCount = (): string => {
-        if (assets.length > 1) return t("assetsFound");
+        if (assets.length > 1) {
+            return t("assetsFound");
+        }
         return t("assetFound");
     };
 

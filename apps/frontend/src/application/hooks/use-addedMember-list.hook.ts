@@ -39,11 +39,17 @@ export const useMembersList = (projectCatalogId: number, memberPath: string, mem
 
         return filteredItems.sort((a, b) => {
             if (sortDirection === "asc") {
-                if (sortField === "role") return a[sortField] < b[sortField] ? -1 : 1;
-                else return a[sortField].toLowerCase() < b[sortField].toLowerCase() ? -1 : 1;
+                if (sortField === "role") {
+                    return a[sortField] < b[sortField] ? -1 : 1;
+                } else {
+                    return a[sortField].toLowerCase() < b[sortField].toLowerCase() ? -1 : 1;
+                }
             } else {
-                if (sortField === "role") return a[sortField] > b[sortField] ? -1 : 1;
-                else return a[sortField].toLowerCase() > b[sortField].toLowerCase() ? -1 : 1;
+                if (sortField === "role") {
+                    return a[sortField] > b[sortField] ? -1 : 1;
+                } else {
+                    return a[sortField].toLowerCase() > b[sortField].toLowerCase() ? -1 : 1;
+                }
             }
         });
     }, [filteredItems, sortBy, sortDirection]);

@@ -109,7 +109,9 @@ interface ConnectorProps {
 }
 
 const remapImagePath = (path: string | null | undefined): string | null | undefined => {
-    if (!path) return path;
+    if (!path) {
+        return path;
+    }
 
     const match = path.match(/\/([^/]+?)(?:\.[a-f0-9]+)?\.(?:png|webp|jpg|jpeg|svg)$/i);
     if (match) {

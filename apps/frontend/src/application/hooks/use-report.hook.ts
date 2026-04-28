@@ -33,8 +33,12 @@ const calcNetRiskMatrix = (
     matrix: RiskMatrix | null,
     scheduledAt: Date
 ): RiskMatrix | null => {
-    if (!threats) return null;
-    if (!matrix) return null;
+    if (!threats) {
+        return null;
+    }
+    if (!matrix) {
+        return null;
+    }
     return threats.reduce(
         (arr, threat) => {
             const probability = threat.measures.reduce((min, measure) => {
@@ -83,7 +87,9 @@ const calcNetRiskMatrix = (
 };
 
 const calcRiskBarGraph = (matrix: RiskMatrix | null): RiskBarGraph | null => {
-    if (!matrix) return null;
+    if (!matrix) {
+        return null;
+    }
     return matrix.reduce(
         (summary, row) => {
             row.forEach((cell) => {
@@ -145,8 +151,12 @@ export const useReport = ({ projectId }: { projectId: number }) => {
     }, []);
 
     const matrixDesign: RiskMatrix | null = useMemo(() => {
-        if (typeof data?.project?.lineOfToleranceGreen !== "number") return null;
-        if (typeof data?.project?.lineOfToleranceRed !== "number") return null;
+        if (typeof data?.project?.lineOfToleranceGreen !== "number") {
+            return null;
+        }
+        if (typeof data?.project?.lineOfToleranceRed !== "number") {
+            return null;
+        }
         const lineOfToleranceGreen = data?.project?.lineOfToleranceGreen;
         const lineOfToleranceRed = data?.project?.lineOfToleranceRed;
         const matrix: RiskMatrix = [];
@@ -164,8 +174,12 @@ export const useReport = ({ projectId }: { projectId: number }) => {
     }, [data?.project?.lineOfToleranceGreen, data?.project?.lineOfToleranceRed]);
 
     const filteredThreats: ReportThreat[] | null = useMemo(() => {
-        if (!threats) return null;
-        if (!fromScheduledAt && !tillScheduledAt) return threats;
+        if (!threats) {
+            return null;
+        }
+        if (!fromScheduledAt && !tillScheduledAt) {
+            return threats;
+        }
         const from = fromScheduledAt ? new Date(fromScheduledAt) : null;
         const till = tillScheduledAt ? new Date(tillScheduledAt) : null;
         return threats.map((threat) => {
@@ -188,9 +202,15 @@ export const useReport = ({ projectId }: { projectId: number }) => {
     }, [threats, fromScheduledAt, tillScheduledAt]);
 
     const transformedThreats: (ReportThreat & { bruttoColor: string; nettoColor: string })[] | null = useMemo(() => {
-        if (!filteredThreats) return null;
-        if (typeof data?.project?.lineOfToleranceGreen !== "number") return null;
-        if (typeof data?.project?.lineOfToleranceRed !== "number") return null;
+        if (!filteredThreats) {
+            return null;
+        }
+        if (typeof data?.project?.lineOfToleranceGreen !== "number") {
+            return null;
+        }
+        if (typeof data?.project?.lineOfToleranceRed !== "number") {
+            return null;
+        }
         const lineOfToleranceGreen = data?.project?.lineOfToleranceGreen;
         const lineOfToleranceRed = data?.project?.lineOfToleranceRed;
         return filteredThreats.map((threat) => {
@@ -213,8 +233,12 @@ export const useReport = ({ projectId }: { projectId: number }) => {
     }, [filteredThreats, data?.project?.lineOfToleranceGreen, data?.project?.lineOfToleranceRed]);
 
     const filteredMeasures: ReportMeasure[] | null = useMemo(() => {
-        if (!measures) return null;
-        if (!fromScheduledAt && !tillScheduledAt) return measures;
+        if (!measures) {
+            return null;
+        }
+        if (!fromScheduledAt && !tillScheduledAt) {
+            return measures;
+        }
         const from = fromScheduledAt ? new Date(fromScheduledAt.substring(0, 10)) : null;
         const till = tillScheduledAt ? new Date(tillScheduledAt.substring(0, 10)) : null;
         return measures.filter((measure) => {
@@ -233,8 +257,12 @@ export const useReport = ({ projectId }: { projectId: number }) => {
     }, [measures, fromScheduledAt, tillScheduledAt]);
 
     const bruttoMatrix: RiskMatrix | null = useMemo(() => {
-        if (!transformedThreats) return null;
-        if (!matrixDesign) return null;
+        if (!transformedThreats) {
+            return null;
+        }
+        if (!matrixDesign) {
+            return null;
+        }
         return transformedThreats.reduce(
             (arr, threat) => {
                 const y = 5 - threat.probability;
@@ -253,8 +281,12 @@ export const useReport = ({ projectId }: { projectId: number }) => {
     }, [transformedThreats, matrixDesign]);
 
     const nettoMatrix: RiskMatrix | null = useMemo(() => {
-        if (!transformedThreats) return null;
-        if (!matrixDesign) return null;
+        if (!transformedThreats) {
+            return null;
+        }
+        if (!matrixDesign) {
+            return null;
+        }
         return transformedThreats.reduce(
             (arr, threat) => {
                 const { netProbability, netDamage } = threat;
@@ -274,9 +306,15 @@ export const useReport = ({ projectId }: { projectId: number }) => {
     }, [transformedThreats, matrixDesign]);
 
     const milestones: Milestone[] | null = useMemo(() => {
-        if (!filteredMeasures) return null;
-        if (!filteredThreats) return null;
-        if (!matrixDesign) return null;
+        if (!filteredMeasures) {
+            return null;
+        }
+        if (!filteredThreats) {
+            return null;
+        }
+        if (!matrixDesign) {
+            return null;
+        }
         const map: Record<number, Milestone> = filteredMeasures.reduce(
             (obj, item) => {
                 if (!item.scheduledAt) {
@@ -307,7 +345,9 @@ export const useReport = ({ projectId }: { projectId: number }) => {
     }, [filteredMeasures, filteredThreats, matrixDesign]);
 
     const transformedMilestones: Milestone[] | null = useMemo(() => {
-        if (!milestones) return null;
+        if (!milestones) {
+            return null;
+        }
         return milestones.map((milestone) => {
             const { scheduledAt } = milestone;
             const id = scheduledAt.toISOString().substring(0, 10);
@@ -319,7 +359,9 @@ export const useReport = ({ projectId }: { projectId: number }) => {
     }, [milestones, riskMatrixMeasures]);
 
     const sortedThreats: typeof transformedThreats = useMemo(() => {
-        if (!transformedThreats) return null;
+        if (!transformedThreats) {
+            return null;
+        }
 
         const threatsSortedBy = sortBy as keyof (typeof transformedThreats)[number];
         const threatsCopy: typeof transformedThreats = JSON.parse(JSON.stringify(transformedThreats));
