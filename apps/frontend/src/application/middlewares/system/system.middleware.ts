@@ -26,7 +26,6 @@ const handleSaveSystem: AppMiddleware =
             const { lastAutoSaveDate } = editor;
             const data: UpdateSystemRequest = {
                 projectId,
-                image,
                 data: {
                     connections: Object.values(connections.entities)
                         .filter((item) => item.projectId === projectId)
@@ -43,6 +42,10 @@ const handleSaveSystem: AppMiddleware =
                     lastAutoSaveDate,
                 },
             };
+            // Omit `image` when missing so the backend keeps the existing one.
+            if (image !== undefined) {
+                data.image = image;
+            }
             // TODO: Is id legacy? Should this check be removed/altered? As far as I can see it is not needed.
             if (id) {
                 (data as UpdateSystemRequest & { id: number | null }).id = id;
@@ -231,6 +234,7 @@ const handleSuccessfulRequest: AppMiddleware =
 
             dispatch(SystemActions.setPendingState(false));
             dispatch(SystemActions.setInitialized(true));
+            dispatch(SystemActions.setLoadedProjectId(action.meta.arg.projectId));
             dispatch(EditorActions.setAutoSaveStatus("upToDate"));
             dispatch(
                 EditorActions.setAutoSaveText(

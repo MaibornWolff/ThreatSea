@@ -20,8 +20,10 @@ import { useTranslation } from "react-i18next";
 import { Group, Layer, Line } from "react-konva";
 import { Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
+import { EditorActions } from "../../application/actions/editor.actions";
 import { NavigationActions } from "../../application/actions/navigation.actions";
 import { useAssets } from "../../application/hooks/use-assets.hook";
+import { useAutoSavePreview } from "../../application/hooks/use-auto-save-preview.hook";
 import { useEditor, type EditorConnectionAnchor } from "../../application/hooks/use-editor.hook";
 import { useConfirm } from "../../application/hooks/use-confirm.hook";
 import { ConnectionPreview } from "../components/editor-components/connection-preview.component";
@@ -47,11 +49,10 @@ import type {
     ConnectionEndpointWithComponent,
     Coordinate,
     SystemPointOfAttack,
+    ConnectionPointMeta,
 } from "#api/types/system.types.ts";
 import type { EditorComponentType } from "#application/adapters/editor-component-type.adapter.ts";
-import type { ConnectionPointMeta } from "#api/types/system.types.ts";
 import type { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
-import { useDebounce } from "#hooks/useDebounce.ts";
 
 // Move these outside the component to avoid recreating on each render
 const GRID_CONFIG = {
@@ -74,11 +75,6 @@ interface HelpLines {
     y2: number;
 }
 
-// Add variable for save timeout handle
-let saveTimeoutHandle: ReturnType<typeof setTimeout> | undefined;
-let lastLayerScreenshot: string | undefined;
-let moveLayer = false;
-
 interface EditorPageBodyProps {
     updateAutoSaveOnClick?: (handler: (() => void) | undefined) => void;
 }
@@ -90,11 +86,11 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     const [newConnectionMousePosition, setNewConnectionMousePosition] = useState<Coordinate | null>(null);
     const componentLayerRef = useRef<KonvaLayer | null>(null);
     const sidebarRef = useRef<HTMLDivElement | null>(null);
+    const moveLayerRef = useRef(false);
     const { openConfirm } = useConfirm();
     const { showErrorMessage } = useAlert();
     const location = useLocation();
     const navigate = useNavigate();
-    const shouldCenter = location.state?.shouldCenter;
     const {
         autoSaveBlocked,
         moveComponent,
@@ -167,8 +163,6 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         projectId,
         showErrorMessage,
     });
-    const setLayerPositionEvent = useEffectEvent(setLayerPosition);
-    const setStageScaleEvent = useEffectEvent(setStageScale);
     const { t } = useTranslation("editorPage");
 
     const { loadAssets, items } = useAssets({
@@ -180,6 +174,23 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     const userRole = useAppSelector((state) => state.projects.current?.role);
     const stageScale = useAppSelector((state) => state.editor.stageScale);
     const stagePosition = useAppSelector((state) => state.editor.stagePosition);
+    const lastCenteredProjectId = useAppSelector((state) => state.editor.lastCenteredProjectId);
+    const loadedProjectId = useAppSelector((state) => state.system.loadedProjectId);
+
+    const { downloadSystemView } = useAutoSavePreview({
+        componentLayerRef,
+        updateAutoSaveOnClick,
+        saveCurrentSystem,
+        autoSaveBlocked,
+        setAutoSaveStatus,
+        userRole,
+        systemPending,
+        initialized,
+        isAnyComponentInUse,
+        autoSaveStatus,
+        blockAutoSave,
+        makeScreenshot,
+    });
 
     type ConnectorSelection = EditorConnectionAnchor & {
         communicationInterfaceType?: string | null;
@@ -217,140 +228,28 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         );
     }, [dispatch]);
 
-    /**
-     * Resets the current layer position and scale when open a project
-     * and the editor view is rendered.
-     */
+    // Fit-to-view on first mount per project. Waits for the new project's data
+    // to land before measuring; skips on tab switch to preserve user's pan.
     useEffect(() => {
-        if (stageRef?.current && shouldCenter) {
-            stageRef.current.scale({ x: 1, y: 1 });
-            setLayerPositionEvent(0, 0);
-            setStageScaleEvent(1, { x: 0, y: 0 });
-            navigate(location.pathname, { replace: true, state: {} });
+        if (loadedProjectId !== projectId) {
+            return;
         }
-    }, [shouldCenter, navigate, location.pathname]);
-
-    useEffect(() => {
-        if (blockAutoSave) {
-            resetSaveTimeout();
+        if (lastCenteredProjectId === projectId) {
+            return;
         }
-    }, [blockAutoSave]);
 
-    //run if unmounted
-    useEffect(() => {
-        return () => {
-            if (saveTimeoutHandle) {
-                clearTimeout(saveTimeoutHandle);
-                saveTimeoutHandle = undefined;
+        const raf = requestAnimationFrame(() => {
+            if (!stageRef.current || !componentLayerRef.current) {
+                return;
             }
-
-            saveEvent(true);
-        };
-    }, []);
-
-    useEffect(() => {
-        updateScreenshotEvent();
-    }, [makeScreenshot]);
-
-    const updateScreenshot = useDebounce((): void => {
-        if (componentLayerRef?.current) {
-            const componentsOfProject = components.filter((component) => component.projectId === projectId);
-            let minX = componentsOfProject.length === 0 ? 0 : 9999;
-            let minY = componentsOfProject.length === 0 ? 0 : 9999;
-            let maxX = componentsOfProject.length === 0 ? 0 : -9999;
-            let maxY = componentsOfProject.length === 0 ? 0 : -9999;
-
-            componentsOfProject.map((component) => {
-                minX = Math.min(component.x, minX);
-                minY = Math.min(component.y, minY);
-                maxX = Math.max(component.x + component.width, maxX);
-                maxY = Math.max(component.y + component.height, maxY);
-            });
-
-            const offsetX = 400;
-
-            const diffX = Math.abs(maxX - minX);
-            const diffY = Math.abs(maxY - minY);
-            const factor = diffX / diffY;
-
-            const width = (factor < 2.25 ? diffY * 2.25 : diffX) + offsetX;
-            const height = Math.abs(maxY - minY) + offsetX;
-
-            let posX = minX - offsetX / 2;
-            let posY = minY - offsetX / 2;
-
-            let stageScaleX = 1;
-            let stageScaleY = 1;
-
-            posX += layerPosition.x;
-            posY += layerPosition.y;
-
-            if (stageRef?.current) {
-                const stage = stageRef.current;
-
-                posX *= stage.scale().x;
-                posY *= stage.scale().y;
-
-                posX += stage.x();
-                posY += stage.y();
-
-                stageScaleX = stage.scale().x;
-                stageScaleY = stage.scale().y;
+            centerOnComponentsEvent();
+            dispatch(EditorActions.setLastCenteredProjectId(projectId));
+            if (location.state) {
+                navigate(location.pathname, { replace: true, state: {} });
             }
-
-            const result = componentLayerRef.current.toDataURL({
-                x: posX,
-                y: posY,
-                width: width * stageScaleX,
-                height: height * stageScaleY,
-            });
-
-            if (result !== "data:,") {
-                lastLayerScreenshot = result;
-            }
-        }
-    }, 100);
-
-    const updateScreenshotEvent = useEffectEvent(updateScreenshot);
-
-    const save = (forceSave = false): void => {
-        if (shouldSave(forceSave)) {
-            if (componentLayerRef?.current || lastLayerScreenshot) {
-                saveCurrentSystem({ image: lastLayerScreenshot ?? null });
-            }
-        }
-    };
-
-    const saveEvent = useEffectEvent(save);
-
-    function shouldSave(forceSave?: boolean): boolean {
-        // User with Viewer role should not trigger autosave
-        if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
-            return (
-                (!systemPending && initialized && !isAnyComponentInUse && autoSaveStatus !== "saving") ||
-                forceSave === true
-            );
-        } else {
-            return false;
-        }
-    }
-
-    useEffect(() => {
-        setAutoSaveStatus("saving");
-        updateAutoSaveOnClick?.(() => saveEvent(true));
-        return () => {
-            updateAutoSaveOnClick?.(undefined);
-        };
-        // oxlint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    const resetSaveTimeout = useEffectEvent((): void => {
-        if (saveTimeoutHandle) {
-            clearTimeout(saveTimeoutHandle);
-        }
-        saveTimeoutHandle = setTimeout(save, 1000);
-        autoSaveBlocked();
-    });
+        });
+        return () => cancelAnimationFrame(raf);
+    }, [loadedProjectId, projectId, lastCenteredProjectId, dispatch, navigate, location.pathname, location.state]);
 
     const handleComponentDragStart = (_event: KonvaEventObject<DragEvent>, componentId: string): void => {
         addInUseComponent(componentId);
@@ -391,10 +290,13 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         updateConnectionsOfComponent();
         deselectComponent();
 
-        setMousePointers({
-            x: event.evt.x,
-            y: event.evt.y,
-        });
+        // event.evt is undefined when Konva fires dragend programmatically during unmount.
+        if (event.evt) {
+            setMousePointers({
+                x: event.evt.x,
+                y: event.evt.y,
+            });
+        }
 
         const theConnectionsOfTheComponent = connections.filter(
             (connection) => connection.from.id === componentId || connection.to.id === componentId
@@ -413,38 +315,33 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         });
     };
 
-    const handleComponentDragMove = useCallback(
-        (event: KonvaEventObject<DragEvent>, componentId: string) => {
-            moveLayer = false;
+    const handleComponentDragMove = (event: KonvaEventObject<DragEvent>, componentId: string): void => {
+        moveLayerRef.current = false;
 
-            const gridPositionX = Math.floor(event.target.position().x / GRID_CONFIG.gridSizeX);
-            const gridPositionY = Math.floor(event.target.position().y / GRID_CONFIG.gridSizeY);
+        const gridPositionX = Math.floor(event.target.position().x / GRID_CONFIG.gridSizeX);
+        const gridPositionY = Math.floor(event.target.position().y / GRID_CONFIG.gridSizeY);
 
-            const newx = gridPositionX * GRID_CONFIG.gridSizeX;
-            const newy = gridPositionY * GRID_CONFIG.gridSizeY;
+        const newx = gridPositionX * GRID_CONFIG.gridSizeX;
+        const newy = gridPositionY * GRID_CONFIG.gridSizeY;
 
-            event.target.setPosition({ x: newx, y: newy });
+        event.target.setPosition({ x: newx, y: newy });
 
-            // Update ref directly instead of using state
-            currentHelpLinesRef.current = {
-                x: newx + 9 + layerPosition.x,
-                x2: newx + 71 + layerPosition.x,
-                y: newy + 9 + layerPosition.y,
-                y2: newy + 71 + layerPosition.y,
-            };
+        currentHelpLinesRef.current = {
+            x: newx + 9 + layerPosition.x,
+            x2: newx + 71 + layerPosition.x,
+            y: newy + 9 + layerPosition.y,
+            y2: newy + 71 + layerPosition.y,
+        };
 
-            setShowHelpLines(true);
-            moveComponent({
-                id: componentId,
-                x: newx,
-                y: newy,
-                gridX: gridPositionX,
-                gridY: gridPositionY,
-            });
-        },
-        // oxlint-disable-next-line react-hooks/exhaustive-deps
-        [layerPosition, moveComponent]
-    );
+        setShowHelpLines(true);
+        moveComponent({
+            id: componentId,
+            x: newx,
+            y: newy,
+            gridX: gridPositionX,
+            gridY: gridPositionY,
+        });
+    };
 
     const handleSelectComponent = ({ evt }: KonvaEventObject<MouseEvent>, componentId: string): void => {
         if (!evt.defaultPrevented && evt.button === 0) {
@@ -514,6 +411,11 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         [connections]
     );
 
+    const connectedComponentsForSelected = useMemo(
+        () => getConnectedComponents(selectedComponentId),
+        [getConnectedComponents, selectedComponentId]
+    );
+
     const closeSideBar = () => {
         if (sidebarRef && sidebarRef.current) {
             sidebarRef.current.style.right = "-600px";
@@ -533,34 +435,71 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
             event.cancelBubble = true;
             evt.preventDefault();
             evt.stopImmediatePropagation();
-            moveLayer = true;
+            moveLayerRef.current = true;
             if (stageRef.current?.content) {
                 stageRef.current.content.style.cursor = "move";
             }
         }
     };
 
-    const handleMouseMove = ({ evt }: KonvaEventObject<MouseEvent>): void => {
-        const { layerX: x, layerY: y } = evt;
-        setMousePointers({
-            x: x,
-            y: y,
-        });
+    // Throttle Stage mousemove dispatches to one per animation frame — raw events fire 100+/sec on fast mice and would over-render the store.
+    const pendingMouseMoveRef = useRef<{
+        layerX: number;
+        layerY: number;
+        movementX: number;
+        movementY: number;
+    } | null>(null);
+    const mouseMoveRafRef = useRef<number | null>(null);
+
+    const flushMouseMove = useEffectEvent(() => {
+        mouseMoveRafRef.current = null;
+        const pending = pendingMouseMoveRef.current;
+        if (!pending) return;
+        pendingMouseMoveRef.current = null;
+
+        const { layerX, layerY, movementX, movementY } = pending;
+
+        setMousePointers({ x: layerX, y: layerY });
 
         if (newConnection && stageRef.current) {
             setNewConnectionMousePosition({
-                x: (x - stageRef.current.x()) / stageRef.current.scaleX() - layerPosition.x,
-                y: (y - stageRef.current.y()) / stageRef.current.scaleY() - layerPosition.y,
+                x: (layerX - stageRef.current.x()) / stageRef.current.scaleX() - layerPosition.x,
+                y: (layerY - stageRef.current.y()) / stageRef.current.scaleY() - layerPosition.y,
             });
         } else if (newConnectionMousePosition) {
             setNewConnectionMousePosition(null);
         }
 
-        if (moveLayer && stageRef.current) {
+        if (moveLayerRef.current && stageRef.current) {
             setLayerPosition(
-                layerPosition.x + evt.movementX * (GRID_CONFIG.speed / stageRef.current.scaleX()),
-                layerPosition.y + evt.movementY * (GRID_CONFIG.speed / stageRef.current.scaleY())
+                layerPosition.x + movementX * (GRID_CONFIG.speed / stageRef.current.scaleX()),
+                layerPosition.y + movementY * (GRID_CONFIG.speed / stageRef.current.scaleY())
             );
+        }
+    });
+
+    useEffect(() => {
+        return () => {
+            if (mouseMoveRafRef.current !== null) {
+                cancelAnimationFrame(mouseMoveRafRef.current);
+                mouseMoveRafRef.current = null;
+            }
+        };
+    }, []);
+
+    const handleMouseMove = ({ evt }: KonvaEventObject<MouseEvent>): void => {
+        const { layerX, layerY, movementX, movementY } = evt;
+
+        const prev = pendingMouseMoveRef.current;
+        pendingMouseMoveRef.current = {
+            layerX,
+            layerY,
+            movementX: (prev?.movementX ?? 0) + movementX,
+            movementY: (prev?.movementY ?? 0) + movementY,
+        };
+
+        if (mouseMoveRafRef.current === null) {
+            mouseMoveRafRef.current = requestAnimationFrame(flushMouseMove);
         }
     };
 
@@ -572,8 +511,8 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     };
 
     const handleMouseUp = ({ evt }: KonvaEventObject<MouseEvent>): void => {
-        if (evt.button === 0 && moveLayer) {
-            moveLayer = false;
+        if (evt.button === 0 && moveLayerRef.current) {
+            moveLayerRef.current = false;
             if (stageRef.current?.content) {
                 stageRef.current.content.style.cursor = "default";
             }
@@ -869,14 +808,6 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         setStageScale(newScale, newPos);
     };
 
-    const handleDownloadSystemView = () => {
-        updateScreenshot();
-        const link = document.createElement("a");
-        link.href = lastLayerScreenshot ?? "";
-        link.download = "systemView.png";
-        link.click();
-    };
-
     const handleCenterEditor = () => {
         let minX = 9999;
         let minY = 9999;
@@ -886,6 +817,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
 
         if (componentsOfProject.length === 0) {
             setLayerPosition(0, 0);
+            setStageScale(1, { x: 0, y: 0 });
             return;
         }
 
@@ -926,8 +858,12 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
             layerY += diffY / 2;
 
             setLayerPosition(-layerX, -layerY);
+            // Persist scale to Redux too; otherwise it resets on remount.
+            setStageScale(stage.scale().x, { x: stage.x(), y: stage.y() });
         }
     };
+
+    const centerOnComponentsEvent = useEffectEvent(() => handleCenterEditor());
 
     const toggleCommunicationInterfacesMenu = (component: AugmentedSystemComponent): void => {
         setCommunicationMenuComponent(component);
@@ -1078,7 +1014,8 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                         position={stagePosition}
                         userRole={userRole}
                     >
-                        <Layer>
+                        {/* Static helper grid — listening=false skips Konva hit-testing for these shapes on every pointer event. */}
+                        <Layer listening={false}>
                             {lineArray.map((_item, index) => (
                                 <Line
                                     key={index}
@@ -1305,7 +1242,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                     >
                         <Tooltip title={t("canvas.exportSystemImage")}>
                             <IconButton
-                                onClick={handleDownloadSystemView}
+                                onClick={downloadSystemView}
                                 sx={{
                                     backgroundColor: "background.paperIntransparent",
                                     "&:hover": {
@@ -1326,8 +1263,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
 
                 <EditorSidebar
                     sidebarRef={sidebarRef}
-                    selectedComponent={selectedComponent}
-                    selectedComponentId={selectedComponentId}
+                    // Drop selected component from sidebar during drag — avoids the MUI 9 FormControl/InputBase setAdornedStart re-render loop on the high-frequency drag path.
+                    selectedComponent={isAnyComponentInUse ? undefined : selectedComponent}
+                    selectedComponentId={isAnyComponentInUse ? null : selectedComponentId}
                     selectedPointOfAttack={selectedPointOfAttack}
                     handleDeleteComponent={handleDeleteComponent}
                     handleOnNameChange={handleOnNameChange}
@@ -1346,7 +1284,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                     selectedConnectionPoint={selectedConnectionPoint}
                     userRole={userRole}
                     handleOnDescriptionChange={handleOnDescriptionChange}
-                    connectedComponents={getConnectedComponents(selectedComponentId)}
+                    connectedComponents={connectedComponentsForSelected}
                     handleDeleteConnectionBetweenComponents={handleDeleteConnectionBetweenComponents}
                     handleOnConnectionPointDescriptionChange={handleOnConnectionPointDescriptionChange}
                     handleChangeCommunicationInterfaceName={handleChangeCommunicationInterfaceName}

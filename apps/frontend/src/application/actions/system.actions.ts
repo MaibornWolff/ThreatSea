@@ -8,7 +8,6 @@ import type {
     Component,
     Connection,
     ConnectionPoint,
-    System,
     SystemComponent,
     SystemConnection,
     UpdateSystemRequest,
@@ -52,7 +51,7 @@ export class SystemActions {
      * @param {string} type - Action type.
      * @returns Action function for saving the system view.
      */
-    static saveSystem = createAction<Pick<System, "projectId" | "image">>("[system] save system");
+    static saveSystem = createAction<{ projectId: number; image: string | null | undefined }>("[system] save system");
 
     /**
      * Action that sets a component in the system view when its dragged.
@@ -208,6 +207,8 @@ export class SystemActions {
      * @returns Action function for indicating that the system is initialised.
      */
     static setInitialized = createAction<boolean>("[system] set initialized");
+
+    static setLoadedProjectId = createAction<number | null>("[system] set loaded project id");
 
     /**
      * Action that sets the connection points in the system view

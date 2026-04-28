@@ -17,7 +17,7 @@ export const useSystem = ({ projectId }: { projectId: number }) => {
         dispatch(SystemActions.getSystem({ projectId }));
     }, [dispatch, projectId]);
 
-    const saveSystem = (image: string | null) => {
+    const saveSystem = (image: string | null | undefined) => {
         dispatch(
             SystemActions.saveSystem({
                 projectId,

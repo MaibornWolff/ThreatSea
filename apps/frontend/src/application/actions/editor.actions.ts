@@ -292,4 +292,8 @@ export class EditorActions {
      * @returns Action function for making a screenshot of the system view.
      */
     static makeAScreenshot = createAction<void>("[editor] make a screenshot");
+
+    static setLastCenteredProjectId = createAction<number | null>("[editor] set last centered project id");
+
+    static setIsCapturing = createAction<boolean>("[editor] set is capturing");
 }
