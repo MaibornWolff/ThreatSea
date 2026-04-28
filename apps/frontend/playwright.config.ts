@@ -24,8 +24,6 @@ export default defineConfig({
         trace: "on-first-retry",
         video: "on-first-retry",
     },
-    globalSetup: "./playwright.global.setup.ts",
-    globalTeardown: "./playwright.global.teardown.ts",
     projects: [
         {
             name: "setup chromium",
