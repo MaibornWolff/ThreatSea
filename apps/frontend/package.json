@@ -44,6 +44,7 @@
     "jwt-decode": "4.0.0",
     "konva": "10.2.5",
     "markdown-to-jsx": "9.7.16",
+    "pako": "^2.1.0",
     "react": "19.2.5",
     "react-dom": "19.2.5",
     "react-hook-form": "7.73.1",

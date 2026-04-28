@@ -207,6 +207,9 @@ importers:
       markdown-to-jsx:
         specifier: 9.7.16
         version: 9.7.16(react@19.2.5)
+      pako:
+        specifier: ^2.1.0
+        version: 2.1.0
       react:
         specifier: 19.2.5
         version: 19.2.5
