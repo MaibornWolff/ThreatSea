@@ -29,6 +29,7 @@ services:
       context: .
       dockerfile: "./Dockerfile"
     environment:
+      NODE_ENV: development
       JWT_SECRET: somerandomstringtobeusedasJWTsecret
       EXPRESS_SESSION_SECRET: someRandomExpressSessionSecret
       AUTH_METHOD: fixed

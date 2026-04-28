@@ -43,6 +43,23 @@ import enMeasureDialog from "../translations/en/measure-dialog-page.en.json";
 import enCommon from "../translations/en/common.en.json";
 import enReport from "../translations/en/report.en.json";
 
+export function getPreferredLanguage(supported: string[] = ["en", "de"]): string {
+    const cachedLang = localStorage.getItem("lang");
+
+    if (cachedLang) {
+        return JSON.parse(cachedLang);
+    }
+
+    const preferred = navigator?.languages || [navigator?.language];
+    const exactMatch = preferred.find((lang) => supported.includes(lang));
+    const languageMatch = preferred
+        .map((lang) => lang.split("-")[0])
+        .find((lang) => lang !== undefined && supported.includes(lang));
+    const localeFromNavigator = exactMatch || languageMatch || null;
+
+    return localeFromNavigator ?? "en";
+}
+
 /**
  * Initialises the translation for english and german
  * with i18next.
@@ -50,7 +67,7 @@ import enReport from "../translations/en/report.en.json";
 const cachedLang = typeof localStorage?.getItem === "function" ? localStorage.getItem("lang") : null;
 
 i18next.init({
-    lng: cachedLang ? JSON.parse(cachedLang) : "en",
+    lng: getPreferredLanguage(),
     interpolation: {
         escapeValue: false,
     },

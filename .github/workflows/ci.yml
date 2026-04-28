@@ -183,11 +183,12 @@ jobs:
     name: Create and push Release
     if: github.repository_owner == 'MaibornWolff' && github.ref_type == 'branch' && github.ref_name == 'main'
     permissions:
-      id-token: write # for Sigstore-based provenance signing
+      artifact-metadata: write
       attestations: write
       contents: write
-      packages: write
+      id-token: write # for Sigstore-based provenance signing
       issues: write
+      packages: write
     needs:
       - test-backend
       - test-frontend
