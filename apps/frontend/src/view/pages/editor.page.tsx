@@ -196,7 +196,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     const currentHelpLinesRef = useRef<HelpLines | null>(null);
 
     const newConnectionPreviewComponent = useMemo(() => {
-        if (!newConnection) return undefined;
+        if (!newConnection) {
+            return undefined;
+        }
         return components.filter((component) => component.id === newConnection.from.id)[0];
     }, [components, newConnection]);
 
@@ -689,21 +691,29 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     };
 
     const handleOnNameChange = (evt: ChangeEvent<HTMLInputElement>): void => {
-        if (checkUserRole(userRole, USER_ROLES.EDITOR)) setSelectedComponentName(evt.target.value);
+        if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
+            setSelectedComponentName(evt.target.value);
+        }
     };
 
     const handleOnDescriptionChange = (evt: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
-        if (checkUserRole(userRole, USER_ROLES.EDITOR)) setSelectedComponentDescription(evt.target.value);
+        if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
+            setSelectedComponentDescription(evt.target.value);
+        }
     };
 
     const handleOnConnectionPointDescriptionChange = (
         evt: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
     ): void => {
-        if (checkUserRole(userRole, USER_ROLES.EDITOR)) setSelectedConnectionPointDescription(evt.target.value);
+        if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
+            setSelectedConnectionPointDescription(evt.target.value);
+        }
     };
 
     const handleConnectionNameChange = (evt: ChangeEvent<HTMLInputElement>): void => {
-        if (checkUserRole(userRole, USER_ROLES.EDITOR)) setSelectedConnectionName(evt.target.value);
+        if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
+            setSelectedConnectionName(evt.target.value);
+        }
     };
 
     const handleOnConnectionPointClicked = ({ evt }: KonvaEventObject<MouseEvent>, connectionPointId: string): void => {
@@ -983,7 +993,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     };
 
     const handleCreateNewCommunicationInterface = ({ name, icon }: { name: string; icon: string }): void => {
-        if (!communicationMenuComponent) return;
+        if (!communicationMenuComponent) {
+            return;
+        }
         addCommunicationInterface(communicationMenuComponent.id, name, icon);
         setIsCommunicationInterfaceDialogOpen(false);
     };
@@ -1184,7 +1196,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                 const draggedComponent = components.filter(
                                     (component) => component.id === line.draggedComponentInfo.id
                                 )[0];
-                                if (!otherComponent || !draggedComponent) return null;
+                                if (!otherComponent || !draggedComponent) {
+                                    return null;
+                                }
 
                                 return (
                                     <ConnectionPreview
@@ -1208,7 +1222,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                 const toComponent = components.filter(
                                     (component) => component.id === connection.to.id
                                 )[0];
-                                if (!fromComponent || !toComponent) return null;
+                                if (!fromComponent || !toComponent) {
+                                    return null;
+                                }
 
                                 return (
                                     <SystemComponentConnection

@@ -476,7 +476,9 @@ const createGridForAStar = (
         // Apply walk costs in bulk
         for (let y = bounds.minY; y < bounds.maxY; y++) {
             const row = grid[y];
-            if (!row) continue;
+            if (!row) {
+                continue;
+            }
 
             const relativeY = y - componentGridY;
 
@@ -492,7 +494,9 @@ const createGridForAStar = (
                 }
 
                 const cell = row[x];
-                if (!cell) continue;
+                if (!cell) {
+                    continue;
+                }
 
                 // Set walk cost
                 cell.walkCost = relativeY >= 5 && relativeY <= 22 && relativeX >= 5 && relativeY <= 17 ? 500 : 300;
@@ -502,15 +506,21 @@ const createGridForAStar = (
         // Set unwalkable areas more efficiently
         for (let y = 3; y < 9; y++) {
             const gridY = componentGridY + y;
-            if (gridY < 0 || gridY >= grid.length) continue;
+            if (gridY < 0 || gridY >= grid.length) {
+                continue;
+            }
 
             const row = grid[gridY];
             for (let x = 3; x < 9; x++) {
                 const gridX = componentGridX + x;
-                if (gridX < 0 || gridX >= (row?.length ?? 0)) continue;
+                if (gridX < 0 || gridX >= (row?.length ?? 0)) {
+                    continue;
+                }
 
                 const cell = row?.[gridX];
-                if (!cell) continue;
+                if (!cell) {
+                    continue;
+                }
 
                 cell.walkable = false;
                 cell.walkCost = 400000;
@@ -563,7 +573,9 @@ const findPathOptimized = (grid: GridNode[][], startNode: GridNode, targetNode: 
     const openList = new FastPriorityQueue<GridNode>((a, b) => {
         const aF = a.gCost + a.hCost;
         const bF = b.gCost + b.hCost;
-        if (aF === bF) return a.hCost < b.hCost;
+        if (aF === bF) {
+            return a.hCost < b.hCost;
+        }
         return aF < bF;
     });
 
@@ -582,7 +594,9 @@ const findPathOptimized = (grid: GridNode[][], startNode: GridNode, targetNode: 
         }
         const nodeKey = `${currentNode.gridX},${currentNode.gridY}`;
 
-        if (visited.has(nodeKey)) continue;
+        if (visited.has(nodeKey)) {
+            continue;
+        }
         visited.add(nodeKey);
 
         if (currentNode === targetNode) {
@@ -641,7 +655,9 @@ const findPathOptimized = (grid: GridNode[][], startNode: GridNode, targetNode: 
 
         for (const neighbor of neighbors) {
             const neighborKey = `${neighbor.gridX},${neighbor.gridY}`;
-            if (!neighbor.walkable || visited.has(neighborKey)) continue;
+            if (!neighbor.walkable || visited.has(neighborKey)) {
+                continue;
+            }
 
             const pathLength = Math.abs(targetNode.x - startNode.x) + Math.abs(targetNode.y - startNode.y);
             const turnPenaltyMultiplier = Math.max(1, 1000 / pathLength);
@@ -720,7 +736,9 @@ class FastPriorityQueue<T> {
     }
 
     poll(): T | undefined {
-        if (this.isEmpty()) return undefined;
+        if (this.isEmpty()) {
+            return undefined;
+        }
         const value = this.heap[0];
         const last = this.heap.pop();
         if (this.heap.length > 0 && last !== undefined) {

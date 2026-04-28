@@ -487,7 +487,9 @@ export const HeaderNavigation = () => {
 
     let finalButtons: ToggleButtonConfig[] = [];
     let finalOnChangePath = (_event: SyntheticEvent, path: string) => {
-        if (path != null) navigate(path);
+        if (path != null) {
+            navigate(path);
+        }
     };
 
     // login page => language picker = A

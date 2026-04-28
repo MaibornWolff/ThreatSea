@@ -21,7 +21,9 @@ export const Alert = (): JSX.Element | null => {
             console.log(error.type + " " + error.message);
             if (error.type === ERR_TYPE_API) {
                 dispatch(UserActions.setUserLoggedOut());
-                if (location.pathname !== "/login") navigate("/login", { replace: true });
+                if (location.pathname !== "/login") {
+                    navigate("/login", { replace: true });
+                }
             } else if (error.type === ERR_TYPE_PROJECT_CATALOG_EXISTANCE) {
                 navigate("/projects", { replace: true });
             }

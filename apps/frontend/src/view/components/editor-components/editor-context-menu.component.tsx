@@ -100,7 +100,9 @@ export const EditorContextMenu = ({ onSelect, stageRef, ref }: EditorContextMenu
     };
 
     const handleOnContextMenuLoad = () => {
-        if (contextMenuRef.current == null) return;
+        if (contextMenuRef.current == null) {
+            return;
+        }
         new ResizeObserver(() => {
             const stage = stageRef.current;
             const contextMenu = contextMenuRef.current;

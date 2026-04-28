@@ -24,6 +24,7 @@
   },
   "rules": {
     "constructor-super": "error",
+    "curly": ["error", "all"],
     "for-direction": "error",
     "getter-return": "error",
     "no-async-promise-executor": "error",

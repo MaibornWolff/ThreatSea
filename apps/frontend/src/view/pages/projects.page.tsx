@@ -105,7 +105,9 @@ export const ProjectsPage = CreatePage(HeaderNavigation, () => {
 
             event.currentTarget.value = "";
 
-            if (!file) throw new Error("file not found");
+            if (!file) {
+                throw new Error("file not found");
+            }
 
             const fileReader = new FileReader();
             fileReader.readAsText(file, "UTF-8");

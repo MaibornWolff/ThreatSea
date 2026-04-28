@@ -72,9 +72,13 @@ const catalogsReducer = createReducer(defaultState, (builder) => {
         const role = action.payload;
         const id = state.current?.id;
 
-        if (id && state.entities[id]) state.entities[id].role = role;
+        if (id && state.entities[id]) {
+            state.entities[id].role = role;
+        }
 
-        if (state.current) state.current.role = role;
+        if (state.current) {
+            state.current.role = role;
+        }
     });
 });
 

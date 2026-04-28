@@ -140,7 +140,9 @@ export const CatalogThreatsListBox = ({ catalogId, attacker, pointOfAttack, user
         try {
             const file = event.currentTarget.files?.[0];
             event.currentTarget.value = "";
-            if (!file) throw new Error("file not found");
+            if (!file) {
+                throw new Error("file not found");
+            }
             const result = await importCsvFile(
                 file,
                 (row) => ({
@@ -155,14 +157,18 @@ export const CatalogThreatsListBox = ({ catalogId, attacker, pointOfAttack, user
                 }),
                 (data) => {
                     const { name, probability, attacker, pointOfAttack } = data as Partial<CatalogThreat>;
-                    if (!name || name === "") throw new Error("name required");
+                    if (!name || name === "") {
+                        throw new Error("name required");
+                    }
                     if (!probability || probability < 1) {
                         throw new Error("probability must be greater equals 1");
                     }
                     if (!probability || probability > 5) {
                         throw new Error("probability must be smaller equals 5");
                     }
-                    if (!attacker || !ATTACKERS[attacker]) throw new Error("attacker type is unknown");
+                    if (!attacker || !ATTACKERS[attacker]) {
+                        throw new Error("attacker type is unknown");
+                    }
                     if (!pointOfAttack || !POINTS_OF_ATTACK[pointOfAttack]) {
                         throw new Error("point of attack type is unknown");
                     }

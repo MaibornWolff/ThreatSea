@@ -152,7 +152,9 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
     };
 
     const handleMeasureCount = (): string => {
-        if (measures.length > 1) return t("measuresFound");
+        if (measures.length > 1) {
+            return t("measuresFound");
+        }
         return t("measureFound");
     };
 
