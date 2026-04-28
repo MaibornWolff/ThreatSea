@@ -31,6 +31,7 @@
     "@mui/system": "9.0.0",
     "@react-pdf/renderer": "4.5.1",
     "@reduxjs/toolkit": "2.11.2",
+    "buffer": "6.0.3",
     "exceljs": "4.4.0",
     "i18next": "26.0.8",
     "jwt-decode": "4.0.0",
