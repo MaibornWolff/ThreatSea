@@ -36,3 +36,8 @@ server.listen(PORT, async () => {
     await runMigrations();
     Logger.info(`server is running (port=${PORT})...`);
 });
+
+process.on("SIGTERM", () => {
+    // graceful shutdown logic
+    server.close(() => process.exit(0));
+});
