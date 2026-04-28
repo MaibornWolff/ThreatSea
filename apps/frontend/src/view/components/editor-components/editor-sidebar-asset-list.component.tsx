@@ -1,4 +1,4 @@
-import { FormControlLabel, FormGroup, Switch, Typography } from "@mui/material";
+import { Box, FormGroup, Switch, Typography } from "@mui/material";
 import type { ChangeEvent, MouseEvent } from "react";
 import type { Asset } from "#api/types/asset.types.ts";
 
@@ -18,54 +18,43 @@ export const EditorSidebarAssetList = ({
     onAssetNameClick,
     onAssetHover,
     onAssetLeave,
-}: EditorSidebarAssetListProps) => {
-    return (
-        <FormGroup sx={{ color: "text.primary", paddingLeft: 0.5 }}>
-            {items.map((asset, index) => {
-                return (
-                    <FormControlLabel
-                        key={index}
-                        control={
-                            <Switch
-                                checked={checkedAssets.includes(asset.id)}
-                                onChange={(e) => onChangeHandler(e, asset)}
-                                size="small"
-                                sx={{
-                                    "& .MuiSwitch-switchBase": {
-                                        "&.Mui-checked": {
-                                            "& + .MuiSwitch-track": {
-                                                backgroundColor: "#546481",
-                                                opacity: 0.8,
-                                            },
-                                        },
-                                    },
-                                }}
-                            />
-                        }
-                        label={
-                            <Typography
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    onAssetNameClick(asset);
-                                }}
-                                onMouseEnter={(e) => onAssetHover(e, asset)}
-                                onMouseLeave={onAssetLeave}
-                                sx={{
-                                    fontSize: "0.75rem",
-                                    fontWeight: "bold",
-                                    marginLeft: 1,
-                                    cursor: "pointer",
-                                    "&:hover": { textDecoration: "underline" },
-                                }}
-                                data-testid="asset-search-results"
-                            >
-                                {asset.name}
-                            </Typography>
-                        }
-                    />
-                );
-            })}
-        </FormGroup>
-    );
-};
+}: EditorSidebarAssetListProps) => (
+    <FormGroup sx={{ color: "text.primary", paddingLeft: 0.5 }}>
+        {items.map((asset, index) => (
+            <Box
+                key={index}
+                sx={{ display: "flex", flexDirection: "row", alignItems: "center", color: "text.primary" }}
+            >
+                <Switch
+                    checked={checkedAssets.includes(asset.id)}
+                    onChange={(e) => onChangeHandler(e, asset)}
+                    size="small"
+                    slotProps={{ input: { role: "switch", "aria-label": asset.name } }}
+                    sx={{
+                        "& .MuiSwitch-switchBase": {
+                            "&.Mui-checked": {
+                                "& + .MuiSwitch-track": { backgroundColor: "#546481", opacity: 0.8 },
+                            },
+                        },
+                    }}
+                />
+                <Typography
+                    component="span"
+                    onClick={() => onAssetNameClick(asset)}
+                    onMouseEnter={(e) => onAssetHover(e, asset)}
+                    onMouseLeave={onAssetLeave}
+                    data-testid="asset-search-results"
+                    sx={{
+                        fontSize: "0.75rem",
+                        fontWeight: "bold",
+                        marginLeft: 1,
+                        cursor: "pointer",
+                        "&:hover": { textDecoration: "underline" },
+                    }}
+                >
+                    {asset.name}
+                </Typography>
+            </Box>
+        ))}
+    </FormGroup>
+);
