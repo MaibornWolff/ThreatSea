@@ -53,6 +53,8 @@ export class AssetsPage extends BasePage {
 
     async goto(projectId: number): Promise<void> {
         await this.page.goto(`/projects/${projectId}/assets`);
+        await this.page.waitForURL(/\/projects\/\d+\/assets/);
+        await this.addAssetButton.waitFor({ state: "visible" });
     }
 
     sortByCiaButton(attribute: string): Locator {
