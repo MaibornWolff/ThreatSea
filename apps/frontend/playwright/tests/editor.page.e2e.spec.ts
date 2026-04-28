@@ -1,13 +1,16 @@
 import { test, expect } from "@playwright/test";
-import type { ExtendedProject } from "#api/types/project.types.ts";
 import type { USER_ROLES } from "#api/types/user-roles.types.ts";
 import { getProjects, importProject, deleteProject } from "../utils/project.api.ts";
 import { deleteCatalog } from "../utils/catalog.api.ts";
+import { buildTestId } from "../builder/test-data.builder.ts";
 import { EditorPage } from "../pages/editor.page.ts";
 import threatsFixture from "../fixtures/threats.json" with { type: "json" };
 
-let exportedProject: { project: Omit<ExtendedProject, "image" | "confidentialityLevel"> };
+type ExportedProject = typeof threatsFixture.project;
+let exportedProject: ExportedProject;
 let projectId: number;
+let catalogId: number;
+let projectName: string;
 
 test.beforeAll(() => {
     exportedProject = {
@@ -15,28 +18,40 @@ test.beforeAll(() => {
         project: {
             ...threatsFixture.project.project,
             role: threatsFixture.project.project.role as USER_ROLES,
-            createdAt: new Date(threatsFixture.project.project.createdAt),
-            updatedAt: new Date(threatsFixture.project.project.updatedAt),
         },
     };
 });
 
-test.beforeEach(async ({ page, request }) => {
+test.beforeEach(async ({ page, request, browserName }, { testId }) => {
     const pg = new EditorPage(page);
     await page.goto("/projects");
     const token = await pg.getCsrfToken();
-    await importProject(request, token, exportedProject);
+    const tid = buildTestId(browserName, testId);
+    const projectData = structuredClone(exportedProject);
+    projectName = `${exportedProject.project.name} ${tid}`;
+    projectData.project.name = projectName;
+    projectData.catalog.name = `${exportedProject.catalog.name} ${tid}`;
+    await importProject(request, token, projectData);
     const projects = await getProjects(request, token);
-    projectId = projects.find((p) => p.name === exportedProject.project.name)!.id;
+    const project = projects.find((p) => p.name === projectName);
+    expect(project).toBeTruthy();
+    projectId = project!.id;
+    catalogId = project!.catalogId;
     await pg.goto(projectId);
 });
 
 test.afterEach(async ({ page, request }) => {
     const token = await new EditorPage(page).getCsrfToken();
     const projects = await getProjects(request, token);
-    const project = projects.find((p) => p.name === exportedProject.project.name)!;
-    await deleteProject(request, token, project.id);
-    await deleteCatalog(request, token, project.catalogId);
+    const project = projects.find((p) => p.id === projectId || p.name === projectName);
+    if (project) {
+        await deleteProject(request, token, project.id);
+    }
+    const remaining = await getProjects(request, token);
+    const stillUsed = remaining.some((p) => p.catalogId === catalogId);
+    if (catalogId && !stillUsed) {
+        await deleteCatalog(request, token, catalogId);
+    }
 });
 
 test.describe("Editor Page Tests", () => {

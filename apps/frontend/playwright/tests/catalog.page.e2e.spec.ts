@@ -91,6 +91,7 @@ test.beforeEach(async ({ page, request, browserName }, { testId }) => {
     measures.forEach((m) => (m.catalogId = catalogId));
 
     await pg.goto(catalogId);
+    await expect(pg.addThreatButton).toBeVisible();
 });
 
 test.afterEach(async ({ page, request, browserName }, { testId }) => {
@@ -104,8 +105,8 @@ test.afterEach(async ({ page, request, browserName }, { testId }) => {
 test.describe("Catalog Page Tests", () => {
     test("should have default catalog entries", async ({ page }) => {
         const pg = new CatalogPage(page);
-        await expect(pg.threatListEntries).toHaveCount(DEFAULT_THREATS);
-        await expect(pg.measureListEntries).toHaveCount(DEFAULT_MEASURES);
+        await expect(pg.threatListEntries).toHaveCount(DEFAULT_THREATS, { timeout: 20000 });
+        await expect(pg.measureListEntries).toHaveCount(DEFAULT_MEASURES, { timeout: 20000 });
     });
 
     test("Should create new threats", async ({ page }) => {

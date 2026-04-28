@@ -38,6 +38,7 @@ test.beforeEach(async ({ page, request, browserName }, { testId }) => {
     assets.forEach((a) => (a.projectId = projectId));
 
     await pg.goto(projectId);
+    await expect(pg.addAssetButton).toBeVisible();
 });
 
 test.afterEach(async ({ page, request, browserName }, { testId }) => {
@@ -167,6 +168,7 @@ test.describe("Assets Page Tests", () => {
         await createAsset(request, token, assets[1]!);
         await createAsset(request, token, assets[2]!);
         await page.reload();
+        await expect(pg.addAssetButton).toBeVisible();
 
         for (const invalidAsset of invalidAssets) {
             for (const scope of ["add", "edit"]) {
@@ -203,6 +205,7 @@ test.describe("Assets Page Tests", () => {
         const token = await pg.getCsrfToken();
         await createAsset(request, token, assets[0]!);
         await page.reload();
+        await expect(pg.addAssetButton).toBeVisible();
 
         await pg.addAssetButton.click();
         await expect(page).toHaveURL(`/projects/${projectId}/assets/edit`);

@@ -67,6 +67,8 @@ export class EditorPage extends BasePage {
     }
 
     async clickCanvas(x: number, y: number): Promise<void> {
+        await this.page.waitForURL(/\/projects\/\d+\/system/);
+        await this.canvas.waitFor({ state: "visible" });
         await this.canvas.click({ position: { x, y } });
     }
 
