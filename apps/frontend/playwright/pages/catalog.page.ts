@@ -142,12 +142,12 @@ export class CatalogPage extends BasePage {
 
     /** Attacker option inside threat or measure modal. Type = "threat" | "measure" */
     attackerOption(testId: string, type: "threat" | "measure"): Locator {
-        return this.page.locator(`[data-testid="${testId.replace("*", type)}"]`);
+        return this.page.locator(`[data-testid="${testId.replaceAll("*", type)}"]`);
     }
 
     /** POA option inside threat or measure modal. Type = "threat" | "measure" */
     poaOption(testId: string, type: "threat" | "measure"): Locator {
-        return this.page.locator(`[data-testid="${testId.replace("*", type)}"]`);
+        return this.page.locator(`[data-testid="${testId.replaceAll("*", type)}"]`);
     }
 
     /** Filter button on catalog page (attacker or POA filter) */
