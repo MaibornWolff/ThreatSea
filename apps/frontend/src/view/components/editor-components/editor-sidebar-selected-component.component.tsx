@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { AssetSecurityNeedsPopper } from "./asset-security-needs-popper.component";
 import { PointOfAttackSwitch } from "./point-of-attack-switch.component";
 import { POINTS_OF_ATTACK } from "../../../api/types/points-of-attack.types";
 import { POA_COLORS } from "../../colors/pointsOfAttack.colors";
@@ -10,6 +11,7 @@ import { checkUserRole, USER_ROLES } from "../../../api/types/user-roles.types";
 import { useState, useEffect, useEffectEvent } from "react";
 import { Box, FormGroup, ListItemAvatar, Typography, IconButton, Avatar } from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
+import { useAssetHoverPopper } from "../../../application/hooks/useAssetHoverPopper";
 import { useDebounce } from "../../../hooks/useDebounce";
 import type { ChangeEvent, ElementType } from "react";
 import type { Asset } from "#api/types/asset.types.ts";
@@ -94,6 +96,7 @@ export const EditorSidebarSelectedComponent = ({
     const [localDescription, setLocalDescription] = useState<string>("");
     const [interfaceNames, setInterfaceNames] = useState<Record<string, string>>({});
     const [editingInterfaceId, setEditingInterfaceId] = useState<string | null>(null);
+    const { anchorEl: assetAnchorEl, hoveredAsset, handleAssetHover, handleAssetLeave } = useAssetHoverPopper();
 
     const debouncedHandleNameChange = useDebounce(handleOnNameChange);
     const debouncedHandleDescriptionChange = useDebounce(handleOnDescriptionChange);
@@ -612,6 +615,8 @@ export const EditorSidebarSelectedComponent = ({
                             >
                                 <Typography
                                     onClick={() => handleAssetNameClick(asset)}
+                                    onMouseEnter={(event) => handleAssetHover(event, asset)}
+                                    onMouseLeave={handleAssetLeave}
                                     sx={{
                                         minWidth: "130px",
                                         maxWidth: "130px",
@@ -734,7 +739,9 @@ export const EditorSidebarSelectedComponent = ({
                             </Box>
                         );
                     })}
+                <AssetSecurityNeedsPopper anchorEl={assetAnchorEl} asset={hoveredAsset} />
             </Box>
+
             <Box
                 sx={{
                     display: "flex",

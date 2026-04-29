@@ -1,10 +1,11 @@
-import { Popper, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { AssetSecurityNeedsPopper } from "./asset-security-needs-popper.component";
 import { EditorSidebarAssetList } from "./editor-sidebar-asset-list.component";
 import { SearchField } from "../search-field.component";
-import type { ChangeEvent, MouseEvent } from "react";
+import { useAssetHoverPopper } from "../../../application/hooks/useAssetHoverPopper";
+import type { ChangeEvent } from "react";
 import type { Asset } from "#api/types/asset.types.ts";
 import type { SystemComponent, SystemPointOfAttack } from "#api/types/system.types.ts";
 
@@ -30,18 +31,7 @@ export const EditorSidebarSelectedPointOfAttack = ({
     handleComponentBreadcrumbClick,
 }: EditorSidebarSelectedPointOfAttackProps) => {
     const { t } = useTranslation("editorPage");
-    const [assetAnchorEl, setAssetAnchorEl] = useState<HTMLElement | null>(null);
-    const [hoveredAsset, setHoveredAsset] = useState<Asset | null>(null);
-
-    const handleAssetHover = (event: MouseEvent<HTMLElement>, asset: Asset) => {
-        setHoveredAsset(asset);
-        setAssetAnchorEl(event.currentTarget);
-    };
-
-    const handleAssetLeave = () => {
-        setHoveredAsset(null);
-        setAssetAnchorEl(null);
-    };
+    const { anchorEl: assetAnchorEl, hoveredAsset, handleAssetHover, handleAssetLeave } = useAssetHoverPopper();
 
     return (
         <Box>
@@ -147,25 +137,7 @@ export const EditorSidebarSelectedPointOfAttack = ({
                 onAssetLeave={handleAssetLeave}
             />
 
-            <Popper
-                open={assetAnchorEl != null}
-                anchorEl={assetAnchorEl}
-                placement="bottom-start"
-                sx={{
-                    backgroundColor: "background.defaultIntransparent",
-                    borderRadius: 5,
-                    boxShadow: 1,
-                    zIndex: 1000,
-                }}
-            >
-                {hoveredAsset && (
-                    <Box sx={{ padding: 1, margin: 0.5 }}>
-                        <Typography sx={{ fontSize: "0.75rem" }}>
-                            {`(C ${hoveredAsset.confidentiality} / I ${hoveredAsset.integrity} / A ${hoveredAsset.availability})`}
-                        </Typography>
-                    </Box>
-                )}
-            </Popper>
+            <AssetSecurityNeedsPopper anchorEl={assetAnchorEl} asset={hoveredAsset} />
         </Box>
     );
 };

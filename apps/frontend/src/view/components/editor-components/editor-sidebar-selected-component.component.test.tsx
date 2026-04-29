@@ -224,4 +224,53 @@ describe("EditorSidebarSelectedComponent — new click handlers", () => {
             expect(screen.queryByTestId("DeleteIcon")).not.toBeInTheDocument();
         });
     });
+
+    describe("asset hover popper", () => {
+        it("hovering an asset name shows the (C / I / A) popper for that asset", async () => {
+            const items = [
+                createAsset({ id: 1, name: "DB Server", confidentiality: 4, integrity: 3, availability: 2 }),
+                createAsset({ id: 2, name: "Web App", confidentiality: 1, integrity: 5, availability: 0 }),
+            ];
+
+            const { user } = setup({ items });
+
+            expect(screen.queryByText(/^\(C \d+ \/ I \d+ \/ A \d+\)$/)).not.toBeInTheDocument();
+
+            await user.hover(screen.getByText("DB Server"));
+
+            expect(screen.getByText("(C 4 / I 3 / A 2)")).toBeInTheDocument();
+        });
+
+        it("unhovering the asset name hides the popper text", async () => {
+            const items = [
+                createAsset({ id: 1, name: "DB Server", confidentiality: 4, integrity: 3, availability: 2 }),
+            ];
+
+            const { user } = setup({ items });
+
+            await user.hover(screen.getByText("DB Server"));
+            expect(screen.getByText("(C 4 / I 3 / A 2)")).toBeInTheDocument();
+
+            await user.unhover(screen.getByText("DB Server"));
+
+            expect(screen.queryByText("(C 4 / I 3 / A 2)")).not.toBeInTheDocument();
+        });
+
+        it("hovering a different asset switches the popper to that asset's values", async () => {
+            const items = [
+                createAsset({ id: 1, name: "DB Server", confidentiality: 4, integrity: 3, availability: 2 }),
+                createAsset({ id: 2, name: "Web App", confidentiality: 1, integrity: 5, availability: 0 }),
+            ];
+
+            const { user } = setup({ items });
+
+            await user.hover(screen.getByText("DB Server"));
+            expect(screen.getByText("(C 4 / I 3 / A 2)")).toBeInTheDocument();
+
+            await user.hover(screen.getByText("Web App"));
+
+            expect(screen.getByText("(C 1 / I 5 / A 0)")).toBeInTheDocument();
+            expect(screen.queryByText("(C 4 / I 3 / A 2)")).not.toBeInTheDocument();
+        });
+    });
 });
