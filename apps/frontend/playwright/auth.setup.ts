@@ -27,9 +27,8 @@ test("authenticate", async ({ page, browserName }) => {
     await page.goto(`${process.env["API_URI"]}/api/auth/login?testUser=${accountId}`);
     await page.waitForURL("http://localhost:3000/**", { timeout: 15000 });
 
-    // Navigate to /imprint — a static page that does not trigger Redux data-fetching loops,
-    // but still causes the React app to fully initialize and write csrfToken to localStorage.
-    await page.goto("/imprint");
+    // Navigate to /projects — initializes the app and writes csrfToken to localStorage.
+    await page.goto("/projects");
     await page.waitForLoadState("networkidle");
     const csrfToken = await page.evaluate(() => localStorage.getItem("csrfToken"));
     expect(csrfToken).toBeTruthy();
