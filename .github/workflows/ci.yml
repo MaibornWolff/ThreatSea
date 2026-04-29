@@ -84,7 +84,7 @@ jobs:
       postgres:
         image: postgres:18.3-alpine
         env:
-          POSTGRES_DB: threatsea
+          POSTGRES_DB: threatsea_test
           POSTGRES_USER: user
           POSTGRES_PASSWORD: user
         options: >-
@@ -103,7 +103,7 @@ jobs:
       ORIGIN_BACKEND: http://localhost:8000
       DATABASE_USER: user
       DATABASE_PASSWORD: user
-      DATABASE_NAME: threatsea
+      DATABASE_NAME: threatsea_test
       DATABASE_HOST: localhost
       DATABASE_TLS: disabled
       COOKIES_SECURE_OPTION: disabled
