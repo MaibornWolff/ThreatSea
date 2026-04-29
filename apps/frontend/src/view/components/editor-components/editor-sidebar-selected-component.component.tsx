@@ -118,6 +118,7 @@ const EditorSidebarSelectedComponentInner = ({
             setSelectedComponentValuesEvent(selectedComponent);
         }
         // Depend on id only — selectedComponent reference can change on unrelated re-renders without the underlying component changing.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedComponent?.id]);
 
     const handleLocalNameChange = (event: ChangeEvent<HTMLInputElement>) => {

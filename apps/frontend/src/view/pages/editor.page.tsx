@@ -454,7 +454,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     const flushMouseMove = useEffectEvent(() => {
         mouseMoveRafRef.current = null;
         const pending = pendingMouseMoveRef.current;
-        if (!pending) return;
+        if (!pending) {
+            return;
+        }
         pendingMouseMoveRef.current = null;
 
         const { layerX, layerY, movementX, movementY } = pending;
