@@ -99,7 +99,9 @@ test.afterEach(async ({ page, request, browserName }, { testId }) => {
     const tid = buildTestId(browserName, testId);
     const all = await getCatalogs(request, token);
     const found = all.find((c) => c.name.includes(tid));
-    if (found) await deleteCatalog(request, token, found.id);
+    if (found) {
+        await deleteCatalog(request, token, found.id);
+    }
 });
 
 test.describe("Catalog Page Tests", () => {
@@ -133,9 +135,15 @@ test.describe("Catalog Page Tests", () => {
             }
             await page.keyboard.press("Escape");
             await pg.threatProbabilityInput.fill(threat.probability.toString());
-            if (threat.confidentiality) await pg.threatConfidentialitySwitch.click();
-            if (threat.integrity) await pg.threatIntegritySwitch.click();
-            if (threat.availability) await pg.threatAvailabilitySwitch.click();
+            if (threat.confidentiality) {
+                await pg.threatConfidentialitySwitch.click();
+            }
+            if (threat.integrity) {
+                await pg.threatIntegritySwitch.click();
+            }
+            if (threat.availability) {
+                await pg.threatAvailabilitySwitch.click();
+            }
             await pg.saveButton.click();
         }
         await expect(pg.threatListEntries).toHaveCount(DEFAULT_THREATS + count);
@@ -165,9 +173,15 @@ test.describe("Catalog Page Tests", () => {
             }
             await page.keyboard.press("Escape");
             await pg.measureProbabilityInput.fill(measure.probability.toString());
-            if (measure.confidentiality) await pg.measureConfidentialitySwitch.click();
-            if (measure.integrity) await pg.measureIntegritySwitch.click();
-            if (measure.availability) await pg.measureAvailabilitySwitch.click();
+            if (measure.confidentiality) {
+                await pg.measureConfidentialitySwitch.click();
+            }
+            if (measure.integrity) {
+                await pg.measureIntegritySwitch.click();
+            }
+            if (measure.availability) {
+                await pg.measureAvailabilitySwitch.click();
+            }
             await pg.saveButton.click();
         }
         await expect(pg.measureListEntries).toHaveCount(DEFAULT_MEASURES + count);

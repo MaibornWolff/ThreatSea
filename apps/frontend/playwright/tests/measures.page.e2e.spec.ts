@@ -60,7 +60,9 @@ test.afterEach(async ({ page, request, browserName }, { testId }) => {
 
     const allCatalogs = await getCatalogs(request, token);
     const catalog = allCatalogs.find((c) => c.name.includes(tid));
-    if (catalog) await deleteCatalog(request, token, catalog.id);
+    if (catalog) {
+        await deleteCatalog(request, token, catalog.id);
+    }
 });
 
 test.describe("Measures Page tests", () => {
@@ -87,12 +89,16 @@ test.describe("Measures Page tests", () => {
 
         await expect(pg.sortByNameButton).toHaveAttribute("aria-sort", "ascending");
         const entries = await pg.measureListEntryNames.allTextContents();
-        for (let i = 0; i < sorted.length; i++) expect(entries[i]).toContain(sorted[i]!.name);
+        for (let i = 0; i < sorted.length; i++) {
+            expect(entries[i]).toContain(sorted[i]!.name);
+        }
 
         await pg.sortByNameButton.click();
         await expect(pg.sortByNameButton).toHaveAttribute("aria-sort", "descending");
         const reversed = await pg.measureListEntryNames.allTextContents();
-        for (let i = 0; i < sorted.length; i++) expect(reversed[i]).toContain([...sorted].reverse()[i]!.name);
+        for (let i = 0; i < sorted.length; i++) {
+            expect(reversed[i]).toContain([...sorted].reverse()[i]!.name);
+        }
     });
 
     test("Should sort all measures by scheduled at date", async ({ page, request }) => {
@@ -105,13 +111,16 @@ test.describe("Measures Page tests", () => {
         await pg.sortByScheduledAtButton.click();
         await expect(pg.sortByScheduledAtButton).toHaveAttribute("aria-sort", "ascending");
         const entries = await pg.measureListEntryScheduledAt.allTextContents();
-        for (let i = 0; i < sorted.length; i++) expect(entries[i]).toContain(toDisplayFormat(sorted[i]!.scheduledAt));
+        for (let i = 0; i < sorted.length; i++) {
+            expect(entries[i]).toContain(toDisplayFormat(sorted[i]!.scheduledAt));
+        }
 
         await pg.sortByScheduledAtButton.click();
         await expect(pg.sortByScheduledAtButton).toHaveAttribute("aria-sort", "descending");
         const reversed = await pg.measureListEntryScheduledAt.allTextContents();
-        for (let i = 0; i < sorted.length; i++)
+        for (let i = 0; i < sorted.length; i++) {
             expect(reversed[i]).toContain(toDisplayFormat([...sorted].reverse()[i]!.scheduledAt));
+        }
     });
 
     test("Should update an existing measure", async ({ page, request }) => {
