@@ -6,7 +6,7 @@ import { useAppDispatch } from "./use-app-redux.hook";
 import { useDebounce } from "../../hooks/useDebounce";
 import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
 
-interface UseAutoSavePreviewArgs {
+export interface UseAutoSavePreviewArgs {
     componentLayerRef: RefObject<KonvaLayer | null>;
     updateAutoSaveOnClick: ((handler: (() => void) | undefined) => void) | undefined;
     saveCurrentSystem: (params: { image: string | null | undefined }) => void;
@@ -22,7 +22,7 @@ interface UseAutoSavePreviewArgs {
 }
 
 interface UseAutoSavePreviewReturn {
-    downloadSystemView: () => void;
+    downloadSystemView: () => Promise<void>;
 }
 
 // Owns the editor's autosave + canvas-screenshot pipeline. Captures on
@@ -46,56 +46,64 @@ export const useAutoSavePreview = ({
     const screenshotRef = useRef<string | undefined>(undefined);
     const didMountScreenshotRef = useRef(false);
 
-    const captureScreenshot = (attempt = 0): void => {
-        const layer = componentLayerRef.current;
-        if (!layer) {
-            return;
-        }
-
-        // Wait up to ~1s for icon images to load — toDataURL skips them otherwise.
-        const imageNodes = layer.find("Image") as KonvaImage[];
-        const notReady = imageNodes.some((node) => !node.image());
-        if (notReady && attempt < 20) {
-            setTimeout(() => captureScreenshot(attempt + 1), 50);
-            return;
-        }
-
-        // Mask selection/hover for one frame so they don't bake into the image.
-        dispatch(EditorActions.setIsCapturing(true));
-        requestAnimationFrame(() => {
-            try {
-                const rect = layer.getClientRect();
-                if (rect.width <= 0 || rect.height <= 0) {
-                    return;
-                }
-
-                // Ratio padding keeps framing monitor-independent.
-                const paddingRatio = 0.05;
-                const minAspect = 2.25;
-                let { x, y, width, height } = rect;
-
-                const xPadding = width * paddingRatio;
-                const yPadding = height * paddingRatio;
-                x -= xPadding;
-                y -= yPadding;
-                width += xPadding * 2;
-                height += yPadding * 2;
-
-                if (width / height < minAspect) {
-                    const target = height * minAspect;
-                    x -= (target - width) / 2;
-                    width = target;
-                }
-
-                const result = layer.toDataURL({ x, y, width, height, pixelRatio: 2 });
-                if (result !== "data:,") {
-                    screenshotRef.current = result;
-                }
-            } finally {
-                dispatch(EditorActions.setIsCapturing(false));
+    const captureScreenshot = (attempt = 0): Promise<string | undefined> =>
+        new Promise((resolve) => {
+            const layer = componentLayerRef.current;
+            if (!layer) {
+                resolve(undefined);
+                return;
             }
+
+            // Wait up to ~1s for icon images to load — toDataURL skips them otherwise.
+            const imageNodes = layer.find("Image") as KonvaImage[];
+            const notReady = imageNodes.some((node) => !node.image());
+            if (notReady && attempt < 20) {
+                setTimeout(() => {
+                    captureScreenshot(attempt + 1).then(resolve);
+                }, 50);
+                return;
+            }
+
+            // Mask selection/hover for one frame so they don't bake into the image.
+            dispatch(EditorActions.setIsCapturing(true));
+            requestAnimationFrame(() => {
+                try {
+                    const rect = layer.getClientRect();
+                    if (rect.width <= 0 || rect.height <= 0) {
+                        resolve(undefined);
+                        return;
+                    }
+
+                    // Ratio padding keeps framing monitor-independent.
+                    const paddingRatio = 0.05;
+                    const minAspect = 2.25;
+                    let { x, y, width, height } = rect;
+
+                    const xPadding = width * paddingRatio;
+                    const yPadding = height * paddingRatio;
+                    x -= xPadding;
+                    y -= yPadding;
+                    width += xPadding * 2;
+                    height += yPadding * 2;
+
+                    if (width / height < minAspect) {
+                        const target = height * minAspect;
+                        x -= (target - width) / 2;
+                        width = target;
+                    }
+
+                    const result = layer.toDataURL({ x, y, width, height, pixelRatio: 2 });
+                    if (result !== "data:,") {
+                        screenshotRef.current = result;
+                        resolve(result);
+                    } else {
+                        resolve(undefined);
+                    }
+                } finally {
+                    dispatch(EditorActions.setIsCapturing(false));
+                }
+            });
         });
-    };
 
     const updateScreenshot = useDebounce((): void => {
         captureScreenshot();
@@ -167,10 +175,15 @@ export const useAutoSavePreview = ({
         };
     }, []);
 
-    const downloadSystemView = (): void => {
-        updateScreenshot();
+    const downloadSystemView = async (): Promise<void> => {
+        // Wait for a fresh capture; bail if the canvas can't produce one
+        // (otherwise the browser writes a 0-byte / corrupt .png).
+        const image = await captureScreenshot();
+        if (!image) {
+            return;
+        }
         const link = document.createElement("a");
-        link.href = screenshotRef.current ?? "";
+        link.href = image;
         link.download = "systemView.png";
         link.click();
     };

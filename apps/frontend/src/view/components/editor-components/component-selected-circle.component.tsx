@@ -90,30 +90,28 @@ export const ComponentSelectedCircle = ({
     }, [pointsOfAttack, visualHover, selectedPointOfAttackId, lineIndex]);
 
     return (
-        <>
-            <Group x={x} y={y}>
-                {arcs.map((arc, arcIndex) => (
-                    <Arc
-                        key={arcIndex}
-                        x={0}
-                        y={0}
-                        innerRadius={radius - strokeWidth / 2}
-                        outerRadius={radius + strokeWidth / 2}
-                        angle={360 / pointsOfAttack.length}
-                        rotation={arc.startAngle}
-                        fill={arc.stroke}
-                        onClick={(e) => {
-                            if (arc.pointOfAttack.type === POINTS_OF_ATTACK.COMMUNICATION_INTERFACES) {
-                                onCommunicationInterfacesClicked(e, arc.pointOfAttack.id, component.id);
-                            } else {
-                                onPointOfAttackClicked(e, arc.pointOfAttack.id, component.id);
-                            }
-                        }}
-                        onMouseOver={() => onMouseEnter(arcIndex)}
-                        onMouseOut={() => onMouseLeave()}
-                    />
-                ))}
-            </Group>
-        </>
+        <Group x={x} y={y}>
+            {arcs.map((arc, arcIndex) => (
+                <Arc
+                    key={arcIndex}
+                    x={0}
+                    y={0}
+                    innerRadius={radius - strokeWidth / 2}
+                    outerRadius={radius + strokeWidth / 2}
+                    angle={360 / pointsOfAttack.length}
+                    rotation={arc.startAngle}
+                    fill={arc.stroke}
+                    onClick={(e) => {
+                        if (arc.pointOfAttack.type === POINTS_OF_ATTACK.COMMUNICATION_INTERFACES) {
+                            onCommunicationInterfacesClicked(e, arc.pointOfAttack.id, component.id);
+                        } else {
+                            onPointOfAttackClicked(e, arc.pointOfAttack.id, component.id);
+                        }
+                    }}
+                    onMouseOver={() => onMouseEnter(arcIndex)}
+                    onMouseOut={() => onMouseLeave()}
+                />
+            ))}
+        </Group>
     );
 };
