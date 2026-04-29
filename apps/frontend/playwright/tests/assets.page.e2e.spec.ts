@@ -54,7 +54,9 @@ test.afterEach(async ({ page, request, browserName }, { testId }) => {
 
     const allCatalogs = await getCatalogs(request, token);
     const catalog = allCatalogs.find((c) => c.name.includes(tid));
-    if (catalog) await deleteCatalog(request, token, catalog.id);
+    if (catalog) {
+        await deleteCatalog(request, token, catalog.id);
+    }
 });
 
 test.describe("Assets Page Tests", () => {

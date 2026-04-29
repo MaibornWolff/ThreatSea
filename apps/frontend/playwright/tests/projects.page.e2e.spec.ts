@@ -64,7 +64,9 @@ test.afterEach(async ({ page, request, browserName }, { testId }) => {
 
     const catalogs = await getCatalogs(request, token);
     const catalog = catalogs.find((c) => c.name.includes(tid));
-    if (catalog) await deleteCatalog(request, token, catalog.id);
+    if (catalog) {
+        await deleteCatalog(request, token, catalog.id);
+    }
 });
 
 test.describe("Projects Page Tests", () => {
@@ -246,7 +248,9 @@ function reorderProjectsGrid<T>(items: T[]): T[] {
     const columnHeight = Math.ceil(items.length / 3);
     for (let i = 0; i < items.length; i++) {
         let newIndex = (i % 3) * columnHeight + Math.floor(i / 3);
-        if (items.length % 3 === 1 && i % 3 === 2) newIndex--;
+        if (items.length % 3 === 1 && i % 3 === 2) {
+            newIndex--;
+        }
         result[newIndex] = items[i]!;
     }
     return result;
