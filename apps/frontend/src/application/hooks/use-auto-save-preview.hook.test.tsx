@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import type { Layer as KonvaLayer } from "konva/lib/Layer";
 import { useAutoSavePreview, type UseAutoSavePreviewArgs } from "./use-auto-save-preview.hook";
 import { createStore } from "../store";
+import { EditorActions } from "../actions/editor.actions";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 
 const buildLayerMock = () => ({
@@ -168,5 +169,27 @@ describe("useAutoSavePreview", () => {
         expect(clickSpy).not.toHaveBeenCalled();
 
         createElementSpy.mockRestore();
+    });
+
+    it("downloadSystemView rejects when toDataURL throws and still clears capturing state", async () => {
+        const captureError = new Error("tainted canvas");
+        const layer = {
+            ...buildLayerMock(),
+            toDataURL: vi.fn(() => {
+                throw captureError;
+            }),
+        };
+        const componentLayerRef = { current: layer as unknown as KonvaLayer };
+        const setIsCapturingSpy = vi.spyOn(EditorActions, "setIsCapturing");
+
+        const { result } = renderUseAutoSavePreview(buildArgs({ componentLayerRef }));
+
+        await expect(result.current.downloadSystemView()).rejects.toBe(captureError);
+
+        expect(layer.toDataURL).toHaveBeenCalled();
+        expect(setIsCapturingSpy).toHaveBeenCalledWith(true);
+        expect(setIsCapturingSpy).toHaveBeenCalledWith(false);
+
+        setIsCapturingSpy.mockRestore();
     });
 });

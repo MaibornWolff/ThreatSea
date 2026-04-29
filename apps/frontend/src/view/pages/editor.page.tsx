@@ -867,6 +867,13 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
 
     const centerOnComponentsEvent = useEffectEvent(() => handleCenterEditor());
 
+    const handleDownloadSystemView = (): void => {
+        // Silent on failure today; if needed, surface a toast via showErrorMessage here.
+        downloadSystemView().catch((err) => {
+            console.error("Failed to export system view", err);
+        });
+    };
+
     const toggleCommunicationInterfacesMenu = (component: AugmentedSystemComponent): void => {
         setCommunicationMenuComponent(component);
         setCommunicationMenuOpen((prevState) => !prevState);
@@ -1244,7 +1251,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                     >
                         <Tooltip title={t("canvas.exportSystemImage")}>
                             <IconButton
-                                onClick={downloadSystemView}
+                                onClick={handleDownloadSystemView}
                                 sx={{
                                     backgroundColor: "background.paperIntransparent",
                                     "&:hover": {

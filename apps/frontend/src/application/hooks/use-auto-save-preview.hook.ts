@@ -47,7 +47,7 @@ export const useAutoSavePreview = ({
     const didMountScreenshotRef = useRef(false);
 
     const captureScreenshot = (attempt = 0): Promise<string | undefined> =>
-        new Promise((resolve) => {
+        new Promise((resolve, reject) => {
             const layer = componentLayerRef.current;
             if (!layer) {
                 resolve(undefined);
@@ -59,7 +59,7 @@ export const useAutoSavePreview = ({
             const notReady = imageNodes.some((node) => !node.image());
             if (notReady && attempt < 20) {
                 setTimeout(() => {
-                    captureScreenshot(attempt + 1).then(resolve);
+                    captureScreenshot(attempt + 1).then(resolve, reject);
                 }, 50);
                 return;
             }
@@ -99,6 +99,8 @@ export const useAutoSavePreview = ({
                     } else {
                         resolve(undefined);
                     }
+                } catch (err) {
+                    reject(err);
                 } finally {
                     dispatch(EditorActions.setIsCapturing(false));
                 }
