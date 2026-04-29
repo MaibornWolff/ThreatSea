@@ -11,7 +11,7 @@ import { checkUserRole, USER_ROLES } from "../../../api/types/user-roles.types";
 import { useState, useEffect, useEffectEvent } from "react";
 import { Box, FormGroup, ListItemAvatar, Typography, IconButton, Avatar } from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
-import { useAssetHoverPopper } from "../../../hooks/useAssetHoverPopper";
+import { useAssetHoverPopper } from "../../../application/hooks/useAssetHoverPopper";
 import { useDebounce } from "../../../hooks/useDebounce";
 import type { ChangeEvent, ElementType } from "react";
 import type { Asset } from "#api/types/asset.types.ts";
@@ -739,9 +739,8 @@ export const EditorSidebarSelectedComponent = ({
                             </Box>
                         );
                     })}
+                <AssetSecurityNeedsPopper anchorEl={assetAnchorEl} asset={hoveredAsset} />
             </Box>
-
-            <AssetSecurityNeedsPopper anchorEl={assetAnchorEl} asset={hoveredAsset} />
 
             <Box
                 sx={{

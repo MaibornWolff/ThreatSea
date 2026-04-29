@@ -1,5 +1,4 @@
-import { Popper, Typography } from "@mui/material";
-import { Box } from "@mui/system";
+import { Popper, Typography, Box } from "@mui/material";
 import type { Asset } from "#api/types/asset.types.ts";
 
 export interface AssetSecurityNeedsPopperProps {

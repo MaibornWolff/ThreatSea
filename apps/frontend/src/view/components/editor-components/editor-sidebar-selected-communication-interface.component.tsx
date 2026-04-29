@@ -1,5 +1,4 @@
-import { IconButton, Typography } from "@mui/material";
-import { Box } from "@mui/system";
+import { IconButton, Typography, Box } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { AssetSecurityNeedsPopper } from "./asset-security-needs-popper.component";
 import { EditorSidebarAssetList } from "./editor-sidebar-asset-list.component";
@@ -7,7 +6,7 @@ import { SearchField } from "../search-field.component";
 import { TextField } from "../textfield.component";
 import { checkUserRole, USER_ROLES } from "../../../api/types/user-roles.types";
 import { Delete } from "@mui/icons-material";
-import { useAssetHoverPopper } from "../../../hooks/useAssetHoverPopper";
+import { useAssetHoverPopper } from "../../../application/hooks/useAssetHoverPopper";
 import type { ChangeEvent } from "react";
 import type { SystemConnectionPoint } from "#application/adapters/system-connection-point.adapter.ts";
 import type { Asset } from "#api/types/asset.types.ts";
