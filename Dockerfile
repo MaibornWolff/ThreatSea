@@ -55,7 +55,7 @@ RUN pnpm --filter "./${BACKEND_DIR}" deploy --legacy --prod /out
 
 
 # build production container with gcr.io/distroless/nodejs24-debian13:nonroot
-FROM gcr.io/distroless/nodejs24-debian13@sha256:f16acace4aa70086d4a2caad6c716f01e3e2fe0dd8274c4530c7c17d987bdb1a
+FROM gcr.io/distroless/nodejs24-debian13:nonroot@sha256:f16acace4aa70086d4a2caad6c716f01e3e2fe0dd8274c4530c7c17d987bdb1a
 
 WORKDIR /app
 
