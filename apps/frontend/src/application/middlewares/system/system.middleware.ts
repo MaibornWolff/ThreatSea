@@ -1,4 +1,3 @@
-import { batch } from "react-redux";
 import type { AppMiddleware } from "../types";
 import { checkUserRole, USER_ROLES } from "../../../api/types/user-roles.types";
 import { translationUtil } from "../../../utils/translations";
@@ -197,51 +196,49 @@ const handleSuccessfulRequest: AppMiddleware =
     (action) => {
         next(action);
         if (SystemActions.getSystem.fulfilled.match(action)) {
-            batch(() => {
-                if (action.payload) {
-                    const { data, id } = action.payload;
+            if (action.payload) {
+                const { data, id } = action.payload;
 
-                    if (data) {
-                        const { components, connections, connectionPoints, pointsOfAttack, lastAutoSaveDate } = data;
-                        if (id) {
-                            dispatch(SystemActions.setSystemId(id));
-                        }
-                        if (components) {
-                            dispatch(SystemActions.setComponents(components));
-                        }
-                        if (connections) {
-                            dispatch(SystemActions.setConnections(connections));
-                        }
-                        if (connectionPoints) {
-                            dispatch(SystemActions.setConnectionPoints(connectionPoints));
-                        }
-                        if (pointsOfAttack) {
-                            dispatch(PointsOfAttackActions.setPointsOfAttack(pointsOfAttack));
-                        }
-                        if (lastAutoSaveDate) {
-                            dispatch(EditorActions.setLastAutoSaveDate(lastAutoSaveDate));
-                        } else {
-                            dispatch(EditorActions.setLastAutoSaveDate(""));
-                        }
+                if (data) {
+                    const { components, connections, connectionPoints, pointsOfAttack, lastAutoSaveDate } = data;
+                    if (id) {
+                        dispatch(SystemActions.setSystemId(id));
                     }
-                } else {
-                    dispatch(SystemActions.clearSystem());
+                    if (components) {
+                        dispatch(SystemActions.setComponents(components));
+                    }
+                    if (connections) {
+                        dispatch(SystemActions.setConnections(connections));
+                    }
+                    if (connectionPoints) {
+                        dispatch(SystemActions.setConnectionPoints(connectionPoints));
+                    }
+                    if (pointsOfAttack) {
+                        dispatch(PointsOfAttackActions.setPointsOfAttack(pointsOfAttack));
+                    }
+                    if (lastAutoSaveDate) {
+                        dispatch(EditorActions.setLastAutoSaveDate(lastAutoSaveDate));
+                    } else {
+                        dispatch(EditorActions.setLastAutoSaveDate(""));
+                    }
                 }
+            } else {
+                dispatch(SystemActions.clearSystem());
+            }
 
-                const { editor } = getState();
-                const { lastAutoSaveDate } = editor;
+            const { editor } = getState();
+            const { lastAutoSaveDate } = editor;
 
-                dispatch(SystemActions.setPendingState(false));
-                dispatch(SystemActions.setInitialized(true));
-                dispatch(EditorActions.setAutoSaveStatus("upToDate"));
-                dispatch(
-                    EditorActions.setAutoSaveText(
-                        translationUtil.t("editorPage:autoSave.upToDate", {
-                            date: lastAutoSaveDate,
-                        })
-                    )
-                );
-            });
+            dispatch(SystemActions.setPendingState(false));
+            dispatch(SystemActions.setInitialized(true));
+            dispatch(EditorActions.setAutoSaveStatus("upToDate"));
+            dispatch(
+                EditorActions.setAutoSaveText(
+                    translationUtil.t("editorPage:autoSave.upToDate", {
+                        date: lastAutoSaveDate,
+                    })
+                )
+            );
         } else if (SystemActions.updateSystem.fulfilled.match(action)) {
             const { system, editor } = getState();
             // TODO: Bug? Should blockAutoSave come from SystemState instead?
@@ -278,28 +275,24 @@ const handleSuccessfulRequest: AppMiddleware =
             }
 
             if (equal) {
-                batch(() => {
-                    dispatch(EditorActions.setAutoSaveStatus("upToDate"));
-                    dispatch(
-                        EditorActions.setAutoSaveText(
-                            translationUtil.t("editorPage:autoSave.upToDate", {
-                                date: lastAutoSaveDate,
-                            })
-                        )
-                    );
-                });
+                dispatch(EditorActions.setAutoSaveStatus("upToDate"));
+                dispatch(
+                    EditorActions.setAutoSaveText(
+                        translationUtil.t("editorPage:autoSave.upToDate", {
+                            date: lastAutoSaveDate,
+                        })
+                    )
+                );
             } else {
-                batch(() => {
-                    dispatch(EditorActions.setAutoSaveStatus("notUpToDate"));
-                    dispatch(
-                        EditorActions.setAutoSaveText(
-                            translationUtil.t("editorPage:autoSave.notUpToDate", {
-                                date: lastAutoSaveDate,
-                            })
-                        )
-                    );
-                    dispatch(SystemActions.setAutoSavedBlocked(!blockAutoSave)); // Trigger another auto save
-                });
+                dispatch(EditorActions.setAutoSaveStatus("notUpToDate"));
+                dispatch(
+                    EditorActions.setAutoSaveText(
+                        translationUtil.t("editorPage:autoSave.notUpToDate", {
+                            date: lastAutoSaveDate,
+                        })
+                    )
+                );
+                dispatch(SystemActions.setAutoSavedBlocked(!blockAutoSave)); // Trigger another auto save
             }
         }
     };
