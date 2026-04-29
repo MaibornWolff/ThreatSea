@@ -28,13 +28,13 @@ Run the init script once to ensure Playwright browsers are installed on your mac
 
 ```bash
 cd apps/frontend
-npm run playwright:init
+pnpm run playwright:init
 ```
 
 Make sure the following are running before executing tests:
 
 - **Database**: `docker compose up -d postgres`
-- **Backend**: `cd apps/backend && npm run dev`
+- **Backend**: `pnpm dev --filter=threatsea_be`
 - **Frontend**: started automatically by Playwright if not already running
 
 ### Run Tests
@@ -43,10 +43,10 @@ Make sure the following are running before executing tests:
 cd apps/frontend
 
 # Run all E2E tests (Chromium, 1 worker — recommended locally)
-npm run playwright
+pnpm run playwright
 
 # Open Playwright UI Mode (interactive, with time-travel debugging)
-npm run playwright:ui
+pnpm run playwright:ui
 ```
 
 After a test run, the HTML report is available at `apps/frontend/playwright-report/index.html`.
