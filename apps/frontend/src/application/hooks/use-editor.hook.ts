@@ -1,7 +1,6 @@
 import { nanoid } from "@reduxjs/toolkit";
 import { useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { batch } from "react-redux";
 import type { Asset } from "#api/types/asset.types.ts";
 import type { ComponentType } from "#api/types/component-types.types.ts";
 import type {
@@ -182,31 +181,29 @@ export const useEditor = ({
         componentType,
         ...component
     }: { componentType: EditorComponentType } & Pick<Component, "x" | "y" | "gridX" | "gridY">): void => {
-        batch(() => {
-            const componentId = nanoid();
-            dispatch(
-                SystemActions.createComponent({
-                    id: componentId,
-                    projectId: projectId,
-                    x: component.x,
-                    y: component.y,
-                    gridX: component.gridX,
-                    gridY: component.gridY,
-                    type: componentType.id,
-                    name: componentType.name,
-                    symbol: componentType.symbol,
-                })
-            );
+        const componentId = nanoid();
+        dispatch(
+            SystemActions.createComponent({
+                id: componentId,
+                projectId: projectId,
+                x: component.x,
+                y: component.y,
+                gridX: component.gridX,
+                gridY: component.gridY,
+                type: componentType.id,
+                name: componentType.name,
+                symbol: componentType.symbol,
+            })
+        );
 
-            componentType.pointsOfAttack.forEach((type: POINTS_OF_ATTACK) => {
-                const pointOfAttackId = nanoid();
+        componentType.pointsOfAttack.forEach((type: POINTS_OF_ATTACK) => {
+            const pointOfAttackId = nanoid();
 
-                createPointOfAttack({
-                    id: pointOfAttackId,
-                    type: type,
-                    componentId: componentId,
-                    projectId: projectId,
-                });
+            createPointOfAttack({
+                id: pointOfAttackId,
+                type: type,
+                componentId: componentId,
+                projectId: projectId,
             });
         });
     };
@@ -287,21 +284,19 @@ export const useEditor = ({
             return;
         }
 
-        batch(() => {
-            connectionsOfComponent.forEach((connection) => {
-                removeConnection(connection);
-            });
-
-            pointsOfAttackOfSelectedComponent.forEach((pointOfAttack) => {
-                dispatch(
-                    PointsOfAttackActions.removePointOfAttack({
-                        id: pointOfAttack.id,
-                    })
-                );
-            });
-
-            dispatch(SystemActions.removeComponent({ id: selectedComponentId }));
+        connectionsOfComponent.forEach((connection) => {
+            removeConnection(connection);
         });
+
+        pointsOfAttackOfSelectedComponent.forEach((pointOfAttack) => {
+            dispatch(
+                PointsOfAttackActions.removePointOfAttack({
+                    id: pointOfAttack.id,
+                })
+            );
+        });
+
+        dispatch(SystemActions.removeComponent({ id: selectedComponentId }));
     };
 
     const removeConnection = (connection?: SystemConnection | null): void => {
@@ -310,25 +305,21 @@ export const useEditor = ({
             return;
         }
 
-        batch(() => {
-            const pointsOfAttackOfConnection = pointsOfAttack.filter(
-                (item) => item.connectionId === targetConnection.id
-            );
-            pointsOfAttackOfConnection.forEach((pointOfAttack) => {
-                dispatch(
-                    PointsOfAttackActions.removePointOfAttack({
-                        id: pointOfAttack.id,
-                    })
-                );
-            });
-
+        const pointsOfAttackOfConnection = pointsOfAttack.filter((item) => item.connectionId === targetConnection.id);
+        pointsOfAttackOfConnection.forEach((pointOfAttack) => {
             dispatch(
-                SystemActions.removeConnection({
-                    id: targetConnection.id,
-                    connectionPoints: targetConnection.connectionPoints,
+                PointsOfAttackActions.removePointOfAttack({
+                    id: pointOfAttack.id,
                 })
             );
         });
+
+        dispatch(
+            SystemActions.removeConnection({
+                id: targetConnection.id,
+                connectionPoints: targetConnection.connectionPoints,
+            })
+        );
     };
 
     const removeConnectionById = (connectionId: string): void => {
@@ -564,74 +555,72 @@ export const useEditor = ({
             (connector.id === newConnection.from.id && connector.anchor !== newConnection.from.anchor)
         ) {
             // Second connection, set the to, end connection preview, dispatch create connection
-            batch(() => {
-                const connectionId = nanoid();
-                const connectionPoints: string[] = [];
-                const connectionPointsMeta: ConnectionPointMeta[] = [];
-                const waypoints: number[] = [];
-                const from = newConnection.from;
-                const to = connector;
-                const fromComponent = components.find((component) => component.id === from.id);
-                const toComponent = components.find((component) => component.id === to.id);
+            const connectionId = nanoid();
+            const connectionPoints: string[] = [];
+            const connectionPointsMeta: ConnectionPointMeta[] = [];
+            const waypoints: number[] = [];
+            const from = newConnection.from;
+            const to = connector;
+            const fromComponent = components.find((component) => component.id === from.id);
+            const toComponent = components.find((component) => component.id === to.id);
 
-                if (!fromComponent || !toComponent) {
-                    return;
-                }
+            if (!fromComponent || !toComponent) {
+                return;
+            }
 
-                // Check connection rules
-                if (from.type === "USERS") {
-                    if (!isSystemOrCustomComponent(to.type)) {
-                        showErrorMessage?.({
-                            message: t("errors.userConnectionInvalid"),
-                        });
-                        return;
-                    }
-                } else if (to.type === "USERS") {
-                    if (!isSystemOrCustomComponent(from.type)) {
-                        showErrorMessage?.({
-                            message: t("errors.componentToUserInvalid"),
-                        });
-                        return;
-                    }
-                } else if (isSystemOrCustomComponent(from.type)) {
-                    if (to.type !== "COMMUNICATION_INFRASTRUCTURE" || !from.communicationInterfaceId) {
-                        showErrorMessage?.({
-                            message: t("errors.componentToCommunicationInfraInvalid"),
-                        });
-                        return;
-                    }
-                } else if (from.type === "COMMUNICATION_INFRASTRUCTURE") {
-                    if (!isSystemOrCustomComponent(to.type) || !to.communicationInterfaceId) {
-                        showErrorMessage?.({
-                            message: t("errors.communicationInfraToComponentInvalid"),
-                        });
-                        return;
-                    }
-                } else {
+            // Check connection rules
+            if (from.type === "USERS") {
+                if (!isSystemOrCustomComponent(to.type)) {
                     showErrorMessage?.({
-                        message: t("errors.invalidConnection"),
+                        message: t("errors.userConnectionInvalid"),
                     });
                     return;
                 }
+            } else if (to.type === "USERS") {
+                if (!isSystemOrCustomComponent(from.type)) {
+                    showErrorMessage?.({
+                        message: t("errors.componentToUserInvalid"),
+                    });
+                    return;
+                }
+            } else if (isSystemOrCustomComponent(from.type)) {
+                if (to.type !== "COMMUNICATION_INFRASTRUCTURE" || !from.communicationInterfaceId) {
+                    showErrorMessage?.({
+                        message: t("errors.componentToCommunicationInfraInvalid"),
+                    });
+                    return;
+                }
+            } else if (from.type === "COMMUNICATION_INFRASTRUCTURE") {
+                if (!isSystemOrCustomComponent(to.type) || !to.communicationInterfaceId) {
+                    showErrorMessage?.({
+                        message: t("errors.communicationInfraToComponentInvalid"),
+                    });
+                    return;
+                }
+            } else {
+                showErrorMessage?.({
+                    message: t("errors.invalidConnection"),
+                });
+                return;
+            }
 
-                dispatch(
-                    SystemActions.createConnection({
-                        id: connectionId,
-                        name: t("connection") + ": " + fromComponent.name + " -> " + toComponent.name,
-                        from,
-                        to,
-                        connectionPoints,
-                        connectionPointsMeta,
-                        waypoints,
-                        recalculate: true,
-                        projectId,
-                        communicationInterfaceId: from.communicationInterfaceId ?? null,
-                        communicationInterface: null,
-                    })
-                );
+            dispatch(
+                SystemActions.createConnection({
+                    id: connectionId,
+                    name: t("connection") + ": " + fromComponent.name + " -> " + toComponent.name,
+                    from,
+                    to,
+                    connectionPoints,
+                    connectionPointsMeta,
+                    waypoints,
+                    recalculate: true,
+                    projectId,
+                    communicationInterfaceId: from.communicationInterfaceId ?? null,
+                    communicationInterface: null,
+                })
+            );
 
-                dispatch(EditorActions.resetConnection());
-            });
+            dispatch(EditorActions.resetConnection());
         }
     };
 
