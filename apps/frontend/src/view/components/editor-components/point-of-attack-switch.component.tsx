@@ -17,6 +17,7 @@ export const PointOfAttackSwitch = ({ color, label, ariaLabel, onLabelClick, ...
             color: "text.primary",
             marginBottom: 1,
             fontSize: "0.75rem",
+            marginLeft: "-11px",
         }}
     >
         <Switch

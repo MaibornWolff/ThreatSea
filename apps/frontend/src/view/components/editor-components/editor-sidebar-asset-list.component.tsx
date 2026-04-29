@@ -23,7 +23,13 @@ export const EditorSidebarAssetList = ({
         {items.map((asset, index) => (
             <Box
                 key={index}
-                sx={{ display: "flex", flexDirection: "row", alignItems: "center", color: "text.primary" }}
+                sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    color: "text.primary",
+                    marginLeft: "-11px",
+                }}
             >
                 <Switch
                     checked={checkedAssets.includes(asset.id)}
