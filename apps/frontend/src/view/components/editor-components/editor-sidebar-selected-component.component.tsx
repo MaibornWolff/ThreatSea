@@ -336,6 +336,7 @@ export const EditorSidebarSelectedComponent = ({
                         return (
                             <PointOfAttackSwitch
                                 key={i}
+                                ariaLabel={t(`pointsOfAttackList.${type}`)}
                                 label={
                                     <Typography
                                         component="span"
