@@ -811,11 +811,20 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     };
 
     const handleCenterEditor = () => {
-        let minX = 9999;
-        let minY = 9999;
-        let maxX = -9999;
-        let maxY = -9999;
+        let minX = Infinity;
+        let minY = Infinity;
+        let maxX = -Infinity;
+        let maxY = -Infinity;
         const componentsOfProject = components.filter((component) => component.projectId === projectId);
+
+        // TODO: remove after dev-env diagnosis of empty-viewport-on-center.
+        console.log("[handleCenterEditor] entry", {
+            projectId,
+            componentsTotal: components.length,
+            componentsForProject: componentsOfProject.length,
+            componentProjectIds: components.slice(0, 5).map((c) => c.projectId),
+            stageReady: !!stageRef?.current,
+        });
 
         if (componentsOfProject.length === 0) {
             setLayerPosition(0, 0);
