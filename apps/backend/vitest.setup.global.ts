@@ -2,7 +2,7 @@ import { databaseConfig } from "#config/config.js";
 import { db, runMigrations } from "#db/index.js";
 import { CreateCatalog, users } from "#db/schema.js";
 import { createDefaultCatalog } from "#services/catalogs.service.js";
-import { LANGUAGES } from "#types/languages.type.ts";
+import { LANGUAGES } from "#types/languages.type.js";
 import * as fs from "node:fs/promises";
 import { Client } from "pg";
 

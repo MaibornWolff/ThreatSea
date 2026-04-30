@@ -3,7 +3,7 @@
  * for the authentication routes.
  */
 import { Request, Response } from "express";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import { JWTPayload, jwtVerify } from "jose";
 import { JWT_SECRET, JWT_VERIFY_OPTIONS, originConfig, AUTH_METHOD, oidcConfig } from "#config/config.js";
 import { deleteExpiredTokens, isTokenRevoked, revokeToken } from "#services/revoked-tokens.service.js";
 import { UnauthorizedError } from "#errors/unauthorized.error.js";
@@ -41,7 +41,7 @@ export async function authenticationMode(_request: Request, response: Response):
 }
 
 export async function getAuthStatus(request: Request, response: Response): Promise<void> {
-    let decodedToken: JwtPayload;
+    let decodedToken: JWTPayload;
     const authToken = request.cookies["accessToken"];
     if (!authToken) {
         response.status(200).json({
@@ -56,7 +56,8 @@ export async function getAuthStatus(request: Request, response: Response): Promi
     }
 
     try {
-        decodedToken = jwt.verify(authToken, JWT_SECRET, JWT_VERIFY_OPTIONS) as JwtPayload;
+        const { payload } = await jwtVerify(authToken, JWT_SECRET, JWT_VERIFY_OPTIONS);
+        decodedToken = payload;
 
         const isRevoked = await isTokenRevoked(authToken);
         if (isRevoked) {
@@ -166,14 +167,11 @@ export async function logout(request: Request, response: Response): Promise<void
         response.clearCookie("accessToken");
 
         try {
-            const decodedToken = jwt.verify(token, JWT_SECRET, {
-                ...JWT_VERIFY_OPTIONS,
-                ignoreExpiration: true,
-            }) as JwtPayload;
+            const { payload } = await jwtVerify(token, JWT_SECRET, { ...JWT_VERIFY_OPTIONS, currentDate: new Date(0) });
 
             await deleteExpiredTokens();
-            if (decodedToken.exp) {
-                await revokeToken(token, decodedToken.exp);
+            if (payload.exp) {
+                await revokeToken(token, payload.exp);
             }
         } catch {
             // Token is invalid (not just expired) -- cookie is already cleared

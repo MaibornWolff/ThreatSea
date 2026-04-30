@@ -2,7 +2,7 @@
  * @module events.sockets - Defines all events
  *     of the sockets.
  */
-import jwt, { JwtPayload } from "jsonwebtoken";
+import { jwtVerify } from "jose";
 import { Socket } from "socket.io";
 import { JWT_SECRET, JWT_VERIFY_OPTIONS } from "#config/config.js";
 import { isTokenRevoked } from "#services/revoked-tokens.service.js";
@@ -35,7 +35,7 @@ export async function setupSocketEvents(socket: Socket) {
     const accessToken = socket.handshake.auth["token"];
 
     try {
-        const decodedToken = jwt.verify(accessToken, JWT_SECRET, JWT_VERIFY_OPTIONS) as JwtPayload;
+        const { payload: decodedToken } = await jwtVerify(accessToken, JWT_SECRET, JWT_VERIFY_OPTIONS);
 
         const revoked = await isTokenRevoked(accessToken);
         if (revoked) {

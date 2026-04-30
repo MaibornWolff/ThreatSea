@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { Secret } from "jsonwebtoken";
+import { JWTVerifyOptions } from "jose";
 import { PoolConfig } from "pg";
 import { CorsOptions } from "cors";
 import { HelmetOptions } from "helmet";
@@ -13,10 +13,14 @@ function getEnvironmentVariable(key: string): string {
     return value;
 }
 
-export const JWT_SECRET = getEnvironmentVariable("JWT_SECRET") as Secret;
+export const JWT_SECRET = new TextEncoder().encode(getEnvironmentVariable("JWT_SECRET"));
 export const JWT_ISSUER = "threatsea";
 export const JWT_AUDIENCE = "threatsea-api";
-export const JWT_VERIFY_OPTIONS = { algorithms: ["HS256" as const], issuer: JWT_ISSUER, audience: JWT_AUDIENCE };
+export const JWT_VERIFY_OPTIONS: JWTVerifyOptions = {
+    algorithms: ["HS256" as const],
+    issuer: JWT_ISSUER,
+    audience: JWT_AUDIENCE,
+};
 
 export const AUTH_METHOD = process.env["AUTH_METHOD"];
 
