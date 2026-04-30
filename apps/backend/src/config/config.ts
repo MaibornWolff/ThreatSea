@@ -67,6 +67,8 @@ export const helmetConfig: HelmetOptions = {
             "script-src": ["'self'", "'wasm-unsafe-eval'"],
             "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com/"],
             "font-src": ["'self'", "https://fonts.gstatic.com/"],
+            "worker-src": ["'self'", "blob:"],
+            "connect-src": ["'self'", "data:"],
         },
     },
     strictTransportSecurity: {
