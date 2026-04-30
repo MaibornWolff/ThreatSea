@@ -159,7 +159,8 @@ export const useAutoSavePreview = ({
         if (saveTimeoutRef.current) {
             clearTimeout(saveTimeoutRef.current);
         }
-        saveTimeoutRef.current = setTimeout(save, 1000);
+        // Read save through the ref so the timer reflects current state
+        saveTimeoutRef.current = setTimeout(() => saveRef.current(), 1000);
         autoSaveBlocked();
     });
 
