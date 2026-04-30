@@ -242,7 +242,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
             if (!stageRef.current || !componentLayerRef.current) {
                 return;
             }
-            centerOnComponentsEvent();
+            handleCenterEditorRef.current();
             dispatch(EditorActions.setLastCenteredProjectId(projectId));
             if (location.state) {
                 navigate(location.pathname, { replace: true, state: {} });
@@ -835,15 +835,10 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
             const diffX = Math.abs(maxX - minX);
             const diffY = Math.abs(maxY - minY);
 
-            if (diffX > stage.width() / stage.scale().x) {
-                let newScale = (stage.width() - 100) / diffX;
-                newScale = Math.min(5, Math.max(newScale, 0.5));
-                stage.scale({ x: newScale, y: newScale });
-            }
-
-            if (diffY > stage.height() / stage.scale().y) {
-                let newScale = (stage.height() - 100) / diffY;
-                newScale = Math.min(5, Math.max(newScale, 0.5));
+            // Zoom out enough to fit both axes; the tighter axis wins.
+            if (diffX > stage.width() / stage.scale().x || diffY > stage.height() / stage.scale().y) {
+                const fitScale = Math.min((stage.width() - 100) / diffX, (stage.height() - 100) / diffY);
+                const newScale = Math.min(5, Math.max(0.5, fitScale));
                 stage.scale({ x: newScale, y: newScale });
             }
 
@@ -859,13 +854,37 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
             layerX += diffX / 2;
             layerY += diffY / 2;
 
+            // TODO: remove after dev-env diagnosis of empty-viewport-on-center.
+            console.log("[handleCenterEditor]", {
+                projectId,
+                components: componentsOfProject.map((c) => ({
+                    id: c.id,
+                    x: c.x,
+                    y: c.y,
+                    width: c.width,
+                    height: c.height,
+                })),
+                bounds: { minX, minY, maxX, maxY, diffX, diffY },
+                stage: {
+                    width: stage.width(),
+                    height: stage.height(),
+                    scale: stage.scale(),
+                    x: stage.x(),
+                    y: stage.y(),
+                },
+                output: { layerPosition: { x: -layerX, y: -layerY }, scale: stage.scale().x },
+            });
+
             setLayerPosition(-layerX, -layerY);
             // Persist scale to Redux too; otherwise it resets on remount.
             setStageScale(stage.scale().x, { x: stage.x(), y: stage.y() });
         }
     };
 
-    const centerOnComponentsEvent = useEffectEvent(() => handleCenterEditor());
+    // Plain ref — the rAF callback runs outside React's "inside an Effect"
+    // window, where useEffectEvent has undefined behavior in production builds.
+    const handleCenterEditorRef = useRef(handleCenterEditor);
+    handleCenterEditorRef.current = handleCenterEditor;
 
     const handleDownloadSystemView = (): void => {
         // Silent on failure today; if needed, surface a toast via showErrorMessage here.

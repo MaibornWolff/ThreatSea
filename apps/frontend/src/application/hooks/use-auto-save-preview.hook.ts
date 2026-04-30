@@ -141,11 +141,14 @@ export const useAutoSavePreview = ({
         }
     };
 
-    const saveEvent = useEffectEvent(save);
+    // Plain ref instead of useEffectEvent: the unmount cleanup needs to call
+    // this, and useEffectEvent in cleanup is undefined behavior in production.
+    const saveRef = useRef(save);
+    saveRef.current = save;
 
     useEffect(() => {
         setAutoSaveStatus("saving");
-        updateAutoSaveOnClick?.(() => saveEvent(true));
+        updateAutoSaveOnClick?.(() => saveRef.current(true));
         return () => {
             updateAutoSaveOnClick?.(undefined);
         };
@@ -173,7 +176,7 @@ export const useAutoSavePreview = ({
                 clearTimeout(saveTimeoutRef.current);
                 saveTimeoutRef.current = undefined;
             }
-            saveEvent(true);
+            saveRef.current(true);
         };
     }, []);
 
