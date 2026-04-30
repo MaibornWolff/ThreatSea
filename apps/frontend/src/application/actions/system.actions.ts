@@ -14,6 +14,19 @@ import type {
 } from "#api/types/system.types.ts";
 import type { SystemConnectionPoint } from "#application/adapters/system-connection-point.adapter.ts";
 
+// Lets getSystem wait for an in-flight save so a fast leave-and-return
+// doesn't race PUT vs GET and overwrite the unsaved edit with stale data.
+let inFlightSave: Promise<unknown> | undefined;
+
+export const trackInFlightSave = (promise: Promise<unknown>): void => {
+    inFlightSave = promise;
+    promise.finally(() => {
+        if (inFlightSave === promise) {
+            inFlightSave = undefined;
+        }
+    });
+};
+
 /**
  * Wrapper class that defines the actions functions
  * for the system actions.
@@ -28,6 +41,9 @@ export class SystemActions {
      * @returns Action function for getting the system view.
      */
     static getSystem = createAsyncThunk("[system] get system", async (data: { projectId: number }) => {
+        if (inFlightSave) {
+            await inFlightSave;
+        }
         return await SystemAPI.getSystem(data);
     });
 

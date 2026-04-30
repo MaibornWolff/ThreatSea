@@ -4,7 +4,7 @@ import { translationUtil } from "../../../utils/translations";
 import { AlertActions } from "../../actions/alert.actions";
 import { EditorActions } from "../../actions/editor.actions";
 import { PointsOfAttackActions } from "../../actions/points-of-attack.actions";
-import { SystemActions } from "../../actions/system.actions";
+import { SystemActions, trackInFlightSave } from "../../actions/system.actions";
 import { ProjectsActions } from "../../actions/projects.actions";
 import type { Connection, SystemComponent, SystemConnection, UpdateSystemRequest } from "#api/types/system.types.ts";
 import type { EditorState } from "#application/reducers/editor.reducer.ts";
@@ -52,7 +52,9 @@ const handleSaveSystem: AppMiddleware =
             }
             dispatch(EditorActions.setAutoSaveStatus("saving"));
             dispatch(EditorActions.setAutoSaveText(""));
-            dispatch(SystemActions.updateSystem(data))
+            const dispatched = dispatch(SystemActions.updateSystem(data));
+            trackInFlightSave(dispatched);
+            dispatched
                 .unwrap()
                 .then((result) => {
                     if (!result) {

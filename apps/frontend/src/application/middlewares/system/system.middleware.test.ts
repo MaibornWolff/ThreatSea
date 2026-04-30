@@ -67,3 +67,53 @@ describe("system.middleware — handleSaveSystem", () => {
         expect(updateSystemSpy).not.toHaveBeenCalled();
     });
 });
+
+describe("system.middleware — getSystem awaits in-flight save", () => {
+    const systemResponse = { id: 1, projectId: 1, data: null, image: null };
+    let getSystemSpy: MockInstance;
+
+    const deferUpdateSystem = () => {
+        let settle!: (resolve: boolean) => void;
+        const promise = new Promise<typeof systemResponse>((resolve, reject) => {
+            settle = (ok) => (ok ? resolve(systemResponse) : reject(new Error("save failed")));
+        });
+        vi.spyOn(SystemAPI, "updateSystem").mockReturnValue(promise);
+        return settle;
+    };
+
+    beforeEach(() => {
+        getSystemSpy = vi.spyOn(SystemAPI, "getSystem").mockResolvedValue(systemResponse);
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    it("delays the GET until the in-flight save resolves", async () => {
+        const settle = deferUpdateSystem();
+        const store = createStore({ projects: buildProjectsState(USER_ROLES.EDITOR) });
+
+        store.dispatch(SystemActions.saveSystem({ projectId: 1, image: undefined }));
+        store.dispatch(SystemActions.getSystem({ projectId: 1 }));
+
+        await Promise.resolve();
+        expect(getSystemSpy).not.toHaveBeenCalled();
+
+        settle(true);
+        await vi.waitFor(() => expect(getSystemSpy).toHaveBeenCalled());
+    });
+
+    it("proceeds with the GET when the in-flight save rejects", async () => {
+        const settle = deferUpdateSystem();
+        const store = createStore({ projects: buildProjectsState(USER_ROLES.EDITOR) });
+
+        store.dispatch(SystemActions.saveSystem({ projectId: 1, image: undefined }));
+        store.dispatch(SystemActions.getSystem({ projectId: 1 }));
+
+        await Promise.resolve();
+        expect(getSystemSpy).not.toHaveBeenCalled();
+
+        settle(false);
+        await vi.waitFor(() => expect(getSystemSpy).toHaveBeenCalled());
+    });
+});
