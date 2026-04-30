@@ -1,4 +1,3 @@
-import { describe, it, expect, vi } from "vitest";
 import { screen } from "@testing-library/react";
 import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
 import { POA_COLORS } from "../../colors/pointsOfAttack.colors";
