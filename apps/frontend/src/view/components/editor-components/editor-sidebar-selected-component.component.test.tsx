@@ -6,6 +6,7 @@ import {
 } from "./editor-sidebar-selected-component.component";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { createAsset, createSystemComponent, createPointOfAttack } from "#test-utils/builders.ts";
+import type { Asset } from "#api/types/asset.types.ts";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
@@ -152,6 +153,56 @@ describe("EditorSidebarSelectedComponent — new click handlers", () => {
             await user.click(screen.getByText("Main DB"));
 
             expect(props.handleSelectConnectedComponent).toHaveBeenCalledWith("comp-3", null);
+        });
+    });
+
+    describe("local input state across re-renders", () => {
+        it("preserves typed name when parent re-renders with a new selectedComponent reference but same id", async () => {
+            const user = userEvent.setup();
+            const initialComponent = createSystemComponent({ id: "comp-1", name: "Original" });
+
+            const baseProps = {
+                handleDeleteComponent: vi.fn(),
+                handleOnNameChange: vi.fn(),
+                handleChangePointOfAttack: vi.fn(),
+                handleAddAssetToAllPointsOfAttack: vi.fn(),
+                handleRemoveAssetFromAllPointsOfAttack: vi.fn(),
+                assetSearchValue: "",
+                handleAssetSearchChanged: vi.fn(),
+                items: [] as Asset[],
+                pointsOfAttackOfSelectedComponent: [],
+                userRole: USER_ROLES.EDITOR,
+                handleOnDescriptionChange: vi.fn(),
+                connectedComponents: [] as ConnectionEndpointWithComponent[],
+                handleDeleteConnectionBetweenComponents: vi.fn(),
+                handleChangeCommunicationInterfaceName: vi.fn(),
+                handleDeleteCommunicationInterface: vi.fn(),
+                handlePointOfAttackLabelClick: vi.fn(),
+                handleAssetNameClick: vi.fn(),
+                handleSelectConnectedComponent: vi.fn(),
+            };
+
+            const { rerender } = renderWithProviders(
+                <EditorSidebarSelectedComponent {...baseProps} selectedComponent={initialComponent} />
+            );
+
+            const nameInput = screen.getByDisplayValue("Original");
+            await user.type(nameInput, "X");
+            expect(screen.getByDisplayValue("OriginalX")).toBeInTheDocument();
+
+            // New reference, same id. Also flip a non-memoized prop so the memo
+            // wrapper actually lets the inner re-render — otherwise the test
+            // can't distinguish "memo skipped" from "effect skipped".
+            const sameIdNewRef = { ...initialComponent, x: 999 };
+            rerender(
+                <EditorSidebarSelectedComponent
+                    {...baseProps}
+                    selectedComponent={sameIdNewRef}
+                    connectedComponents={[]}
+                />
+            );
+
+            expect(screen.getByDisplayValue("OriginalX")).toBeInTheDocument();
         });
     });
 

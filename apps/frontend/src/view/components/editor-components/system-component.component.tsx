@@ -20,6 +20,7 @@ import type { Stage as KonvaStage } from "konva/lib/Stage";
 import type { GroupConfig } from "konva/lib/Group";
 import { AnchorOrientation, type AugmentedSystemComponent, type SystemPointOfAttack } from "#api/types/system.types.ts";
 import type { EditorConnectionAnchor } from "#application/hooks/use-editor.hook.ts";
+import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 
 const COLORS = {
     normal: "#ffffffAA",
@@ -197,12 +198,19 @@ export const SystemComponent = ({
     };
 
     const [hover, setHover] = useState(false);
+    const isCapturing = useAppSelector((state) => state.editor.isCapturing);
+
+    // Hide selection / hover styling while a screenshot is being captured.
+    const visualSelected = selected && !isCapturing;
+    const visualHover = hover && !isCapturing;
+    const visualSelectedAnchor = isCapturing ? "" : selectedAnchor;
+    const visualSelectedPOA = isCapturing ? null : selectedPointOfAttackId;
 
     const interactConfig: InteractConfig = checkUserRole(userRole, USER_ROLES.EDITOR)
         ? {
               onMouseOver: handleMouseEnter,
               onMouseOut: handleMouseOut,
-              hover,
+              hover: visualHover,
               draggable: true,
           }
         : {
@@ -228,8 +236,8 @@ export const SystemComponent = ({
             y={y}
             width={width}
             height={height}
-            selected={selected}
-            selectedAnchor={selectedAnchor}
+            selected={visualSelected}
+            selectedAnchor={visualSelectedAnchor}
             onSelectAnchor={handleSelectAnchor}
             onDragMove={onDragMove}
             onDragEnd={onDragEnd}
@@ -244,11 +252,11 @@ export const SystemComponent = ({
                     y={10}
                     width={width - 20}
                     height={height - 20}
-                    fill={hover ? COLORS.hover : selected ? COLORS.selected : COLORS.normal}
+                    fill={visualHover ? COLORS.hover : visualSelected ? COLORS.selected : COLORS.normal}
                     cornerRadius={150}
                     strokeWidth={2}
                 />
-                {!selected && (
+                {!visualSelected && (
                     <ComponentSelectedCircle
                         x={40}
                         y={40}
@@ -256,8 +264,8 @@ export const SystemComponent = ({
                         pointsOfAttack={filteredPointsOfAttack}
                         onPointOfAttackClicked={onPointOfAttackClicked}
                         onCommunicationInterfacesClicked={() => toggleCommunicationInterfacesMenu(component)}
-                        selectedPointOfAttackId={selectedPointOfAttackId}
-                        strokeWidth={hover ? 9 : 4}
+                        selectedPointOfAttackId={visualSelectedPOA}
+                        strokeWidth={visualHover ? 9 : 4}
                         component={component}
                         stageRef={stageRef}
                     />
@@ -269,7 +277,7 @@ export const SystemComponent = ({
                         y={40}
                         radius={(width - 20) / 2}
                         stroke={"#e5e8eb"}
-                        strokeWidth={hover || selected ? 9 : 4}
+                        strokeWidth={visualHover || visualSelected ? 9 : 4}
                     />
                 )}
 
@@ -285,7 +293,7 @@ export const SystemComponent = ({
                     onMouseOut={handleMouseOutImage}
                 />
 
-                {selected && (
+                {visualSelected && (
                     <ComponentSelectedCircle
                         radius={(width - 20) / 2}
                         x={40}
@@ -294,7 +302,7 @@ export const SystemComponent = ({
                         strokeWidth={9}
                         onPointOfAttackClicked={onPointOfAttackClicked}
                         onCommunicationInterfacesClicked={() => toggleCommunicationInterfacesMenu(component)}
-                        selectedPointOfAttackId={selectedPointOfAttackId}
+                        selectedPointOfAttackId={visualSelectedPOA}
                         component={component}
                         stageRef={stageRef}
                     />

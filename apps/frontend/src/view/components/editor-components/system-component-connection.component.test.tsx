@@ -1,8 +1,10 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
 import { POA_COLORS } from "../../colors/pointsOfAttack.colors";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { createSystemComponent, createConnectionAnchor } from "#test-utils/builders.ts";
+import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
+import editorReducer from "#application/reducers/editor.reducer.ts";
 import { SystemComponentConnection } from "./system-component-connection.component";
 
 vi.mock("react-konva", () => ({
@@ -17,6 +19,8 @@ vi.mock("react-konva", () => ({
         />
     ),
 }));
+
+const defaultEditorState = editorReducer(undefined, { type: "@@INIT" });
 
 const defaultProps = {
     id: "connection-1",
@@ -39,7 +43,7 @@ const defaultProps = {
 describe("SystemComponentConnection", () => {
     describe("connection color based on component type", () => {
         it("uses USER_BEHAVIOUR colors when from.type is USERS", () => {
-            render(
+            renderWithProviders(
                 <SystemComponentConnection
                     {...defaultProps}
                     from={createConnectionAnchor({ type: STANDARD_COMPONENT_TYPES.USERS })}
@@ -54,7 +58,7 @@ describe("SystemComponentConnection", () => {
         });
 
         it("uses USER_BEHAVIOUR colors when to.type is USERS", () => {
-            render(
+            renderWithProviders(
                 <SystemComponentConnection
                     {...defaultProps}
                     from={createConnectionAnchor()}
@@ -69,7 +73,7 @@ describe("SystemComponentConnection", () => {
         });
 
         it("uses COMMUNICATION_INFRASTRUCTURE colors when neither endpoint is USERS", () => {
-            render(
+            renderWithProviders(
                 <SystemComponentConnection
                     {...defaultProps}
                     from={createConnectionAnchor({ type: STANDARD_COMPONENT_TYPES.SERVER })}
@@ -89,7 +93,7 @@ describe("SystemComponentConnection", () => {
         it("passes waypoints through to the Line when recalculate is false", () => {
             const waypoints = [50, 50, 200, 100, 350, 350];
 
-            render(
+            renderWithProviders(
                 <SystemComponentConnection
                     {...defaultProps}
                     waypoints={waypoints}
@@ -106,7 +110,7 @@ describe("SystemComponentConnection", () => {
         });
 
         it("applies hover color when selected", () => {
-            render(
+            renderWithProviders(
                 <SystemComponentConnection
                     {...defaultProps}
                     selected={true}
@@ -119,6 +123,23 @@ describe("SystemComponentConnection", () => {
 
             const visibleLine = screen.getAllByTestId("konva-line").find((el) => el.dataset["listening"] === "false");
             expect(visibleLine).toHaveAttribute("data-stroke", POA_COLORS[POINTS_OF_ATTACK.USER_BEHAVIOUR].hover);
+        });
+
+        it("masks selected styling when state.editor.isCapturing is true", () => {
+            renderWithProviders(
+                <SystemComponentConnection
+                    {...defaultProps}
+                    selected={true}
+                    from={createConnectionAnchor({ type: STANDARD_COMPONENT_TYPES.USERS })}
+                    to={createConnectionAnchor({ id: "comp-2" })}
+                    fromComponent={createSystemComponent({ type: STANDARD_COMPONENT_TYPES.USERS })}
+                    toComponent={createSystemComponent({ id: "comp-2" })}
+                />,
+                { preloadedState: { editor: { ...defaultEditorState, isCapturing: true } } }
+            );
+
+            const visibleLine = screen.getAllByTestId("konva-line").find((el) => el.dataset["listening"] === "false");
+            expect(visibleLine).toHaveAttribute("data-stroke", POA_COLORS[POINTS_OF_ATTACK.USER_BEHAVIOUR].normal);
         });
     });
 });

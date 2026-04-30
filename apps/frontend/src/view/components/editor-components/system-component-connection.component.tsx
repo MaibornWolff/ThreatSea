@@ -7,6 +7,7 @@ import type { Stage as KonvaStage } from "konva/lib/Stage";
 import { AnchorOrientation, type AugmentedSystemComponent, type ConnectionPointMeta } from "#api/types/system.types.ts";
 import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
 import type { AugmentedSystemConnection } from "#application/selectors/system.selectors.ts";
+import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 
 const TURN_PENALTY = 200;
 
@@ -124,6 +125,9 @@ const SystemComponentConnectionInner = ({
 }: SystemComponentConnectionProps): JSX.Element | null => {
     let connectionPointsMeta = initialConnectionPointsMeta;
     const [hover, setHover] = useState<boolean>(false);
+    const isCapturing = useAppSelector((state) => state.editor.isCapturing);
+    const visualSelected = selected && !isCapturing;
+    const visualHover = hover && !isCapturing;
     let calculatedWaypoints = waypoints;
     let fromAnchor = from;
     let toAnchor = to;
@@ -170,8 +174,8 @@ const SystemComponentConnectionInner = ({
                     onMouseEnter={onMouseEnter}
                     onMouseLeave={onMouseLeave}
                     onPointOfAttackClicked={handleLinePointOfAttackClicked}
-                    selected={selected}
-                    hover={hover}
+                    selected={visualSelected}
+                    hover={visualHover}
                     colors={connectionColors}
                 />
             </Group>
@@ -285,8 +289,8 @@ const SystemComponentConnectionInner = ({
                         onMouseEnter={onMouseEnter}
                         onMouseLeave={onMouseLeave}
                         onPointOfAttackClicked={handleLinePointOfAttackClicked}
-                        selected={selected}
-                        hover={hover}
+                        selected={visualSelected}
+                        hover={visualHover}
                         colors={connectionColors}
                     />
                 </Group>

@@ -159,7 +159,7 @@ export const useEditor = ({
         };
     }, [projectId]);
 
-    const saveCurrentSystem = ({ image }: { image: string | null }): void => {
+    const saveCurrentSystem = ({ image }: { image: string | null | undefined }): void => {
         const saveDate = new Date().toLocaleString(i18n.language);
         dispatch(EditorActions.setLastAutoSaveDate(saveDate));
         saveSystem(image);

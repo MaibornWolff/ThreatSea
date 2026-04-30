@@ -4,7 +4,7 @@ import type { POINTS_OF_ATTACK } from "./points-of-attack.types";
 export interface UpdateSystemRequest {
     projectId: number;
     data: SystemData | null;
-    image: string | null;
+    image?: string | null;
 }
 
 export interface System {

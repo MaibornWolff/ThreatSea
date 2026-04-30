@@ -1,11 +1,13 @@
 export interface UpdateSystemRequest {
     data: SystemData | null;
-    image: string | null;
+    image?: string | null;
 }
 
-export interface SystemResponse extends UpdateSystemRequest {
+export interface SystemResponse {
     id: number;
     projectId: number;
+    data: SystemData | null;
+    image: string | null;
 }
 
 export interface SystemData {

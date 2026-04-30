@@ -4,11 +4,10 @@ import { translationUtil } from "../../../utils/translations";
 import { AlertActions } from "../../actions/alert.actions";
 import { EditorActions } from "../../actions/editor.actions";
 import { PointsOfAttackActions } from "../../actions/points-of-attack.actions";
-import { SystemActions } from "../../actions/system.actions";
+import { SystemActions, trackInFlightSave } from "../../actions/system.actions";
 import { ProjectsActions } from "../../actions/projects.actions";
 import type { Connection, SystemComponent, SystemConnection, UpdateSystemRequest } from "#api/types/system.types.ts";
 import type { EditorState } from "#application/reducers/editor.reducer.ts";
-import type { AppDispatch } from "#application/store.types.ts";
 
 const handleSaveSystem: AppMiddleware =
     ({ dispatch, getState }) =>
@@ -26,7 +25,6 @@ const handleSaveSystem: AppMiddleware =
             const { lastAutoSaveDate } = editor;
             const data: UpdateSystemRequest = {
                 projectId,
-                image,
                 data: {
                     connections: Object.values(connections.entities)
                         .filter((item) => item.projectId === projectId)
@@ -43,13 +41,19 @@ const handleSaveSystem: AppMiddleware =
                     lastAutoSaveDate,
                 },
             };
+            // Omit `image` when missing so the backend keeps the existing one.
+            if (image !== undefined) {
+                data.image = image;
+            }
             // TODO: Is id legacy? Should this check be removed/altered? As far as I can see it is not needed.
             if (id) {
                 (data as UpdateSystemRequest & { id: number | null }).id = id;
             }
             dispatch(EditorActions.setAutoSaveStatus("saving"));
             dispatch(EditorActions.setAutoSaveText(""));
-            dispatch(SystemActions.updateSystem(data))
+            const dispatched = dispatch(SystemActions.updateSystem(data));
+            trackInFlightSave(dispatched);
+            dispatched
                 .unwrap()
                 .then((result) => {
                     if (!result) {
@@ -142,15 +146,6 @@ const compareConnections = (connection1: Connection, connection2: SystemConnecti
     );
 };
 
-let debounceScreenshotTimeoutTimer: ReturnType<typeof setTimeout>;
-export const debouncedMakeAScreenshot = (dispatch: AppDispatch) => {
-    clearTimeout(debounceScreenshotTimeoutTimer);
-
-    debounceScreenshotTimeoutTimer = setTimeout(() => {
-        dispatch(EditorActions.makeAScreenshot());
-    }, 500);
-};
-
 const handleUserDidSomething: AppMiddleware =
     ({ dispatch, getState }) =>
     (next) =>
@@ -174,7 +169,7 @@ const handleUserDidSomething: AppMiddleware =
             const { editor } = getState();
             const { autoSaveStatus, lastAutoSaveDate } = editor;
 
-            debouncedMakeAScreenshot(dispatch);
+            dispatch(EditorActions.makeAScreenshot());
 
             if (autoSaveStatus !== "notUpToDate" && autoSaveStatus !== "saving") {
                 dispatch(EditorActions.setAutoSaveStatus("notUpToDate"));
@@ -231,6 +226,7 @@ const handleSuccessfulRequest: AppMiddleware =
 
             dispatch(SystemActions.setPendingState(false));
             dispatch(SystemActions.setInitialized(true));
+            dispatch(SystemActions.setLoadedProjectId(action.meta.arg.projectId));
             dispatch(EditorActions.setAutoSaveStatus("upToDate"));
             dispatch(
                 EditorActions.setAutoSaveText(

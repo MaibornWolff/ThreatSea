@@ -53,6 +53,8 @@ export interface EditorState {
     lastAutoSaveDate: string;
     makeScreenShot: boolean;
     componentTypes: ComponentTypesState;
+    lastCenteredProjectId: number | null;
+    isCapturing: boolean;
 }
 
 const standardComponentTypes: Record<STANDARD_COMPONENT_TYPES, EditorComponentType> = {
@@ -138,6 +140,8 @@ const defaultState: EditorState = {
     lastAutoSaveDate: "",
     makeScreenShot: false,
     componentTypes: componentTypesInitialState,
+    lastCenteredProjectId: null,
+    isCapturing: false,
 };
 
 const editorReducer = createReducer(defaultState, (builder) => {
@@ -271,6 +275,14 @@ const editorReducer = createReducer(defaultState, (builder) => {
 
     builder.addCase(EditorActions.setLastAutoSaveDate, (state, action) => {
         state.lastAutoSaveDate = action.payload;
+    });
+
+    builder.addCase(EditorActions.setLastCenteredProjectId, (state, action) => {
+        state.lastCenteredProjectId = action.payload;
+    });
+
+    builder.addCase(EditorActions.setIsCapturing, (state, action) => {
+        state.isCapturing = action.payload;
     });
 });
 

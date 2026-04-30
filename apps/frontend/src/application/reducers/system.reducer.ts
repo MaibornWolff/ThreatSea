@@ -23,6 +23,7 @@ export interface SystemState {
     hasChanged: boolean;
     blockAutoSave: boolean;
     refreshCounter: number;
+    loadedProjectId: number | null;
 }
 
 const defaultState: SystemState = {
@@ -36,6 +37,7 @@ const defaultState: SystemState = {
     hasChanged: false,
     blockAutoSave: false,
     refreshCounter: 0,
+    loadedProjectId: null,
 };
 
 const systemReducer = createReducer(defaultState, (builder) => {
@@ -241,6 +243,10 @@ const systemReducer = createReducer(defaultState, (builder) => {
 
     builder.addCase(SystemActions.setInitialized, (state, action) => {
         state.initialized = action.payload;
+    });
+
+    builder.addCase(SystemActions.setLoadedProjectId, (state, action) => {
+        state.loadedProjectId = action.payload;
     });
 });
 

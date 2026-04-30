@@ -59,7 +59,7 @@ export async function createEmptySystem(
  */
 export async function updateSystem(
     projectId: number,
-    updateSystemData: UpdateSystem,
+    updateSystemData: Partial<UpdateSystem>,
     transaction: TransactionType | undefined = undefined
 ): Promise<System> {
     const [system] = await (transaction ?? db)

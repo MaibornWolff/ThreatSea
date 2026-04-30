@@ -8,12 +8,24 @@ import type {
     Component,
     Connection,
     ConnectionPoint,
-    System,
     SystemComponent,
     SystemConnection,
     UpdateSystemRequest,
 } from "#api/types/system.types.ts";
 import type { SystemConnectionPoint } from "#application/adapters/system-connection-point.adapter.ts";
+
+// Lets getSystem wait for an in-flight save so a fast leave-and-return
+// doesn't race PUT vs GET and overwrite the unsaved edit with stale data.
+let inFlightSave: Promise<unknown> | undefined;
+
+export const trackInFlightSave = (promise: Promise<unknown>): void => {
+    inFlightSave = promise;
+    promise.finally(() => {
+        if (inFlightSave === promise) {
+            inFlightSave = undefined;
+        }
+    });
+};
 
 /**
  * Wrapper class that defines the actions functions
@@ -29,6 +41,9 @@ export class SystemActions {
      * @returns Action function for getting the system view.
      */
     static getSystem = createAsyncThunk("[system] get system", async (data: { projectId: number }) => {
+        if (inFlightSave) {
+            await inFlightSave;
+        }
         return await SystemAPI.getSystem(data);
     });
 
@@ -52,7 +67,7 @@ export class SystemActions {
      * @param {string} type - Action type.
      * @returns Action function for saving the system view.
      */
-    static saveSystem = createAction<Pick<System, "projectId" | "image">>("[system] save system");
+    static saveSystem = createAction<{ projectId: number; image: string | null | undefined }>("[system] save system");
 
     /**
      * Action that sets a component in the system view when its dragged.
@@ -208,6 +223,8 @@ export class SystemActions {
      * @returns Action function for indicating that the system is initialised.
      */
     static setInitialized = createAction<boolean>("[system] set initialized");
+
+    static setLoadedProjectId = createAction<number | null>("[system] set loaded project id");
 
     /**
      * Action that sets the connection points in the system view
