@@ -11,6 +11,9 @@ dotenv.config({ path: path.resolve(__dirname, ".env.test") });
 // Make the frontend root available to auth.setup.ts (import.meta.url resolves to cache dir in Playwright)
 process.env["PLAYWRIGHT_FRONTEND_ROOT"] = __dirname;
 
+const enableAltBrowsers =
+    !!process.env["CI"] || process.env["PW_ALL_BROWSERS"] === "1" || process.env["PW_ALL_BROWSERS"] === "true";
+
 export default defineConfig({
     timeout: 40000,
     testDir: "./playwright/tests",
@@ -41,36 +44,38 @@ export default defineConfig({
             },
             dependencies: ["setup chromium"],
         },
-        /*
-        {
-            name: "setup firefox",
-            use: { ...devices["Desktop Firefox"] },
-            testMatch: /.*\.setup\.ts/,
-            testDir: "./playwright",
-        },
-        {
-            name: "firefox",
-            use: {
-                ...devices["Desktop Firefox"],
-                storageState: path.join(__dirname, "tmp/.auth/firefox-user.json"),
-            },
-            dependencies: ["setup firefox"],
-        },
-        {
-            name: "setup webkit",
-            use: { ...devices["Desktop Safari"] },
-            testMatch: /.*\.setup\.ts/,
-            testDir: "./playwright",
-        },
-        {
-            name: "webkit",
-            use: {
-                ...devices["Desktop Safari"],
-                storageState: path.join(__dirname, "tmp/.auth/webkit-user.json"),
-            },
-            dependencies: ["setup webkit"],
-        },
-        */
+        ...(enableAltBrowsers
+            ? [
+                  {
+                      name: "setup firefox",
+                      use: { ...devices["Desktop Firefox"] },
+                      testMatch: /.*\.setup\.ts/,
+                      testDir: "./playwright",
+                  },
+                  {
+                      name: "firefox",
+                      use: {
+                          ...devices["Desktop Firefox"],
+                          storageState: path.join(__dirname, "tmp/.auth/firefox-user.json"),
+                      },
+                      dependencies: ["setup firefox"],
+                  },
+                  {
+                      name: "setup webkit",
+                      use: { ...devices["Desktop Safari"] },
+                      testMatch: /.*\.setup\.ts/,
+                      testDir: "./playwright",
+                  },
+                  {
+                      name: "webkit",
+                      use: {
+                          ...devices["Desktop Safari"],
+                          storageState: path.join(__dirname, "tmp/.auth/webkit-user.json"),
+                      },
+                      dependencies: ["setup webkit"],
+                  },
+              ]
+            : []),
     ],
     webServer: {
         command: "npm run dev",
