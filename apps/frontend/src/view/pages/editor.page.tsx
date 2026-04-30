@@ -817,15 +817,6 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         let maxY = -Infinity;
         const componentsOfProject = components.filter((component) => component.projectId === projectId);
 
-        // TODO: remove after dev-env diagnosis of empty-viewport-on-center.
-        console.log("[handleCenterEditor] entry", {
-            projectId,
-            componentsTotal: components.length,
-            componentsForProject: componentsOfProject.length,
-            componentProjectIds: components.slice(0, 5).map((c) => c.projectId),
-            stageReady: !!stageRef?.current,
-        });
-
         if (componentsOfProject.length === 0) {
             setLayerPosition(0, 0);
             setStageScale(1, { x: 0, y: 0 });
@@ -862,27 +853,6 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
 
             layerX += diffX / 2;
             layerY += diffY / 2;
-
-            // TODO: remove after dev-env diagnosis of empty-viewport-on-center.
-            console.log("[handleCenterEditor]", {
-                projectId,
-                components: componentsOfProject.map((c) => ({
-                    id: c.id,
-                    x: c.x,
-                    y: c.y,
-                    width: c.width,
-                    height: c.height,
-                })),
-                bounds: { minX, minY, maxX, maxY, diffX, diffY },
-                stage: {
-                    width: stage.width(),
-                    height: stage.height(),
-                    scale: stage.scale(),
-                    x: stage.x(),
-                    y: stage.y(),
-                },
-                output: { layerPosition: { x: -layerX, y: -layerY }, scale: stage.scale().x },
-            });
 
             setLayerPosition(-layerX, -layerY);
             // Persist scale to Redux too; otherwise it resets on remount.

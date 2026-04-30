@@ -134,16 +134,8 @@ export const useAutoSavePreview = ({
     }
 
     const save = (forceSave = false): void => {
-        // TODO: remove after dev-env diagnosis of unmount save not firing.
-        console.log("[useAutoSavePreview save] called", {
-            forceSave,
-            shouldSave: shouldSave(forceSave),
-            hasLayer: !!componentLayerRef?.current,
-            hasScreenshot: !!screenshotRef.current,
-            userRole,
-        });
         if (shouldSave(forceSave)) {
-            if (componentLayerRef?.current || screenshotRef.current) {
+            if (forceSave || componentLayerRef?.current || screenshotRef.current) {
                 saveCurrentSystem({ image: screenshotRef.current });
             }
         }
@@ -180,11 +172,6 @@ export const useAutoSavePreview = ({
     // Force-save on unmount.
     useEffect(() => {
         return () => {
-            // TODO: remove after dev-env diagnosis of unmount save not firing.
-            console.log("[useAutoSavePreview cleanup] running", {
-                hadTimeout: !!saveTimeoutRef.current,
-                saveRefSet: !!saveRef.current,
-            });
             if (saveTimeoutRef.current) {
                 clearTimeout(saveTimeoutRef.current);
                 saveTimeoutRef.current = undefined;
