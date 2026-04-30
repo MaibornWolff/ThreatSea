@@ -188,7 +188,7 @@ Guidelines:
 ## Testing
 
 - Run tests for a specific app:
-  - Frontend: pnpm -w run test:e2e --filter threatsea_fe (running backend has to be available)
+  - Frontend: pnpm -w run playwright --filter threatsea_fe (running backend has to be available)
   - Backend: pnpm -w run test --filter threatsea_be
 
 ---

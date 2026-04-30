@@ -19,14 +19,11 @@
     "test:unit:watch": "vitest",
     "test:unit:coverage": "vitest run --coverage",
     "test:unit:ci": "vitest run --reporter=default --reporter=junit --outputFile.junit=./junit.xml --coverage",
-    "test:e2e": "playwright test --project=chromium --workers=1",
-    "test:e2e:ui": "playwright test --ui",
     "playwright:init": "playwright install",
-    "playwright": "playwright test --project=chromium --workers=1",
+    "playwright": "playwright test",
     "playwright:ui": "playwright test --ui",
     "docs": "jsdoc -c jsdoc.conf.json",
-    "dependency-check": "dependency-check --project \"ThreatSea Web App\" --scan . --out .",
-    "license-check": "license-checker --production --csv > licenses.csv"
+    "dependency-check": "dependency-check --project \"ThreatSea Web App\" --scan . --out ."
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
@@ -44,7 +41,7 @@
     "jwt-decode": "4.0.0",
     "konva": "10.2.5",
     "markdown-to-jsx": "9.7.16",
-    "pako": "^2.1.0",
+    "pako": "2.1.0",
     "react": "19.2.5",
     "react-dom": "19.2.5",
     "react-hook-form": "7.73.1",
