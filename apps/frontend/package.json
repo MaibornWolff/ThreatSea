@@ -21,9 +21,7 @@
     "test:unit:ci": "vitest run --reporter=default --reporter=junit --outputFile.junit=./junit.xml --coverage",
     "playwright:init": "playwright install",
     "playwright": "playwright test",
-    "playwright:ui": "playwright test --ui",
-    "docs": "jsdoc -c jsdoc.conf.json",
-    "dependency-check": "dependency-check --project \"ThreatSea Web App\" --scan . --out ."
+    "playwright:ui": "playwright test --ui"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
