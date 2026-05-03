@@ -84,7 +84,7 @@ interface AddThreatDialogProps extends DialogProps {
  * @returns React component for changing a threat.
  */
 const AddThreatDialog = ({ threat, project, userRole, ...props }: AddThreatDialogProps) => {
-    const { confirmDialog, cancelDialog } = useDialog<ThreatFormValues | null>("threats");
+    const { confirmDialog, cancelDialog } = useDialog<ThreatFormValues | null>("childThreats");
     const navigate = useNavigate();
     const { t } = useTranslation("threatDialogPage");
     const [tab, setTab] = useState<ThreatTab>("MAIN");

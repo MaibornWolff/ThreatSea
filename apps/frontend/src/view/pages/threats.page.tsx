@@ -12,6 +12,7 @@ import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
 import { NavigationActions } from "../../application/actions/navigation.actions";
+import { ChildThreatsActions } from "../../application/actions/childThreats.actions";
 import { useConfirm } from "../../application/hooks/use-confirm.hook";
 import { useEditor } from "../../application/hooks/use-editor.hook";
 import { useGenericThreatsList } from "../../application/hooks/use-generic-threats-list.hook";
@@ -23,6 +24,7 @@ import { CreatePage, HeaderNavigation } from "../components/with-menu.component"
 import ThreatDialogPage from "./threat-dialog.page";
 import { withProject } from "../components/with-project.hoc";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
+import type { ChildThreat } from "#api/types/child-threat.types.ts";
 
 /**
  * on this page all threats are listed
@@ -32,7 +34,7 @@ import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux
 const ThreatsPageBody = () => {
     const { projectId: projectIdParam = "0" } = useParams<{ projectId?: string }>();
     const projectId = Number.parseInt(projectIdParam, 10);
-    const { openConfirm } = useConfirm<ExtendedThreat>();
+    const { openConfirm } = useConfirm<ExtendedThreat | ChildThreat>();
     const navigate = useNavigate();
     const { t } = useTranslation("threatsPage");
 
@@ -81,6 +83,81 @@ const ThreatsPageBody = () => {
     const handleAssetHover = (event: React.MouseEvent<HTMLElement>, assets: ExtendedThreat["assets"]) => {
         setCurrentAssetList(assets);
         setAssetAnchorEl(event.currentTarget);
+    };
+
+    const onClickEditChildThreat = (event: React.MouseEvent<HTMLElement>, childThreat: ChildThreat | undefined) => {
+        event.preventDefault();
+        if (!event.isDefaultPrevented() && childThreat) {
+            navigate(`/projects/${projectId}/threats/edit`, { state: { childThreat } });
+        }
+    };
+
+    const handleDuplicateChildThreat = (event: React.MouseEvent<HTMLElement>, childThreat: ChildThreat) => {
+        event.preventDefault();
+        openConfirm({
+            state: childThreat,
+            message: t("duplicateMessage", { threatName: childThreat.name }),
+            acceptText: t("duplicate"),
+            cancelText: t("cancel"),
+            acceptColor: "secondary",
+            onAccept: async (threat) => {
+                try {
+                    const childThreat = threat as ChildThreat;
+
+                    const payload = {
+                        projectId: Number(projectId),
+                        genericThreatId: childThreat.genericThreatId,
+                        name: `${childThreat.name} (${t("copy")})`,
+                        description: childThreat.description,
+                        probability: childThreat.probability,
+                        confidentiality: childThreat.confidentiality,
+                        integrity: childThreat.integrity,
+                        availability: childThreat.availability,
+                        status: "new",
+                        pointOfAttackId: childThreat.pointOfAttackId,
+                        pointOfAttack: childThreat.pointOfAttack,
+                        attacker: childThreat.attacker,
+                    } as any;
+
+                    await dispatch(ChildThreatsActions.createChildThreat(payload)).unwrap();
+                    void loadGenericThreats();
+                } catch (err) {
+                    // swallow; error handling via global error handler
+                }
+            },
+        });
+    };
+
+    const handleDeleteChildThreat = (event: React.MouseEvent<HTMLElement>, childThreat: ChildThreat) => {
+        event.preventDefault();
+        // Prevent deleting the only child threat for a generic threat
+        const siblings = childThreatsByGenericThreatId[childThreat.genericThreatId] ?? [];
+        if (siblings.length <= 1) {
+            openConfirm({
+                state: childThreat,
+                message: t("cannotDeleteOnlyChildThreat", { threatName: childThreat.name }),
+                acceptText: t("ok"),
+                cancelText: t("cancel"),
+            });
+            return;
+        }
+
+        openConfirm({
+            state: childThreat,
+            message: t("deleteMessage", { threatName: childThreat.name }),
+            acceptText: t("delete"),
+            cancelText: t("cancel"),
+            onAccept: async (childThreat) => {
+                try {
+                    await dispatch(
+                        ChildThreatsActions.deleteChildThreat({ id: childThreat.id, projectId: Number(projectId) })
+                    ).unwrap();
+                    void loadGenericThreats();
+                } catch (err) {
+                    // handled globally
+                }
+            },
+        });
     };
 
     return (
@@ -307,7 +384,27 @@ const ThreatsPageBody = () => {
                                                                 <CustomTableCell>{childThreat.damage}</CustomTableCell>
                                                                 <CustomTableCell>{childThreat.risk}</CustomTableCell>
                                                                 <CustomTableCell showBorder={true}>{childThreat.doneEditing ? <Check /> : <Clear />}</CustomTableCell>
-                                                                <CustomTableCell align="left">Read-only for now</CustomTableCell>
+                                                                <CustomTableCell padding="none" align="right">
+                                                                    <Box sx={{ display: "flex", gap: 1, pr: 1 }}>
+                                                                        {checkUserRole(userRole, USER_ROLES.EDITOR) && (
+                                                                            <>
+                                                                                <IconButton
+                                                                                    title={t("duplicateThreat")}
+                                                                                    onClick={(e) => handleDuplicateChildThreat(e, childThreat)}
+                                                                                >
+                                                                                    <ContentCopy sx={{ fontSize: 18 }} />
+                                                                                </IconButton>
+                                                                                <IconButton
+                                                                                    title={t("deleteThreat")}
+                                                                                    hoverColor="error"
+                                                                                    onClick={(e) => handleDeleteChildThreat(e, childThreat)}
+                                                                                >
+                                                                                    <Delete sx={{ fontSize: 18 }} />
+                                                                                </IconButton>
+                                                                            </>
+                                                                        )}
+                                                                    </Box>
+                                                                </CustomTableCell>
                                                             </TableRow>
                                                         ))}
                                                     {isExpanded && !isLoadingChildren && childThreats.length === 0 && (
