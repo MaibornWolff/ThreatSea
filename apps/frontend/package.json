@@ -39,7 +39,7 @@
     "markdown-to-jsx": "9.7.16",
     "react": "19.2.5",
     "react-dom": "19.2.5",
-    "react-hook-form": "7.74.0",
+    "react-hook-form": "7.75.0",
     "react-i18next": "17.0.6",
     "react-konva": "19.2.3",
     "react-redux": "9.2.0",
