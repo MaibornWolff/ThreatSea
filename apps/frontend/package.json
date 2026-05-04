@@ -35,7 +35,7 @@
     "exceljs": "4.4.0",
     "i18next": "26.0.8",
     "jwt-decode": "4.0.0",
-    "konva": "10.2.5",
+    "konva": "10.3.0",
     "markdown-to-jsx": "9.7.16",
     "react": "19.2.5",
     "react-dom": "19.2.5",
