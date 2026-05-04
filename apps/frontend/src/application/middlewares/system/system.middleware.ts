@@ -21,7 +21,7 @@ const handleSaveSystem: AppMiddleware =
         ) {
             const { projectId, image } = action.payload;
             const { system, editor } = getState();
-            const { id, connections, components, pointsOfAttack, connectionPoints } = system;
+            const { id, connections, components, pointsOfAttack, connectionPoints, annotations } = system;
             const { lastAutoSaveDate } = editor;
             const data: UpdateSystemRequest = {
                 projectId,
@@ -38,6 +38,7 @@ const handleSaveSystem: AppMiddleware =
                     connectionPoints: Object.values(connectionPoints.entities).filter(
                         (item) => item.projectId === projectId
                     ),
+                    annotations: Object.values(annotations.entities).filter((item) => item.projectId === projectId),
                     lastAutoSaveDate,
                 },
             };
@@ -162,6 +163,9 @@ const handleUserDidSomething: AppMiddleware =
             SystemActions.removeComponent.match(action) ||
             SystemActions.removeConnection.match(action) ||
             SystemActions.removeConnectionPoint.match(action) ||
+            SystemActions.createAnnotation.match(action) ||
+            SystemActions.setAnnotation.match(action) ||
+            SystemActions.removeAnnotation.match(action) ||
             PointsOfAttackActions.createPointOfAttack.match(action) ||
             PointsOfAttackActions.setPointOfAttack.match(action) ||
             PointsOfAttackActions.removePointOfAttack.match(action)
@@ -195,7 +199,8 @@ const handleSuccessfulRequest: AppMiddleware =
                 const { data, id } = action.payload;
 
                 if (data) {
-                    const { components, connections, connectionPoints, pointsOfAttack, lastAutoSaveDate } = data;
+                    const { components, connections, connectionPoints, pointsOfAttack, annotations, lastAutoSaveDate } =
+                        data;
                     if (id) {
                         dispatch(SystemActions.setSystemId(id));
                     }
@@ -211,6 +216,7 @@ const handleSuccessfulRequest: AppMiddleware =
                     if (pointsOfAttack) {
                         dispatch(PointsOfAttackActions.setPointsOfAttack(pointsOfAttack));
                     }
+                    dispatch(SystemActions.setAnnotations(annotations ?? []));
                     if (lastAutoSaveDate) {
                         dispatch(EditorActions.setLastAutoSaveDate(lastAutoSaveDate));
                     } else {

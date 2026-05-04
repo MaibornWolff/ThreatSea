@@ -2,6 +2,7 @@ import { createReducer } from "@reduxjs/toolkit";
 import { PointsOfAttackActions } from "../actions/points-of-attack.actions";
 import { SystemActions } from "../actions/system.actions";
 import { pointsOfAttackAdapter } from "../adapters/points-of-attack.adapter";
+import { systemAnnotationsAdapter } from "../adapters/system-annotations.adapter";
 import { systemComponentsAdapter } from "../adapters/system-components.adapter";
 import { systemConnectionPointsAdapter, type SystemConnectionPoint } from "../adapters/system-connection-point.adapter";
 import { systemConnectionsAdapter } from "../adapters/system-connections.adapter";
@@ -11,6 +12,7 @@ type ComponentsState = ReturnType<typeof systemComponentsAdapter.getInitialState
 type ConnectionsState = ReturnType<typeof systemConnectionsAdapter.getInitialState>;
 type ConnectionPointsState = ReturnType<typeof systemConnectionPointsAdapter.getInitialState>;
 type PointsOfAttackState = ReturnType<typeof pointsOfAttackAdapter.getInitialState>;
+type AnnotationsState = ReturnType<typeof systemAnnotationsAdapter.getInitialState>;
 
 export interface SystemState {
     id: number | null;
@@ -18,6 +20,7 @@ export interface SystemState {
     connections: ConnectionsState;
     connectionPoints: ConnectionPointsState;
     pointsOfAttack: PointsOfAttackState;
+    annotations: AnnotationsState;
     isPending: boolean;
     initialized: boolean;
     hasChanged: boolean;
@@ -32,6 +35,7 @@ const defaultState: SystemState = {
     connections: systemConnectionsAdapter.getInitialState(),
     connectionPoints: systemConnectionPointsAdapter.getInitialState(),
     pointsOfAttack: pointsOfAttackAdapter.getInitialState(),
+    annotations: systemAnnotationsAdapter.getInitialState(),
     isPending: false,
     initialized: false,
     hasChanged: false,
@@ -247,6 +251,29 @@ const systemReducer = createReducer(defaultState, (builder) => {
 
     builder.addCase(SystemActions.setLoadedProjectId, (state, action) => {
         state.loadedProjectId = action.payload;
+    });
+
+    builder.addCase(SystemActions.createAnnotation, (state, action) => {
+        systemAnnotationsAdapter.addOne(state.annotations, action.payload);
+        state.hasChanged = true;
+        state.blockAutoSave = true;
+    });
+
+    builder.addCase(SystemActions.setAnnotation, (state, action) => {
+        systemAnnotationsAdapter.updateOne(state.annotations, action.payload);
+        state.hasChanged = true;
+        state.blockAutoSave = true;
+    });
+
+    builder.addCase(SystemActions.removeAnnotation, (state, action) => {
+        systemAnnotationsAdapter.removeOne(state.annotations, action.payload.id);
+        state.hasChanged = true;
+        state.blockAutoSave = true;
+    });
+
+    builder.addCase(SystemActions.setAnnotations, (state, action) => {
+        systemAnnotationsAdapter.upsertMany(state.annotations, action);
+        state.hasChanged = true;
     });
 });
 

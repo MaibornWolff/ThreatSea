@@ -15,7 +15,26 @@ export interface SystemData {
     components: Component[];
     pointsOfAttack: PointOfAttack[];
     connectionPoints: ConnectionPoint[];
+    annotations: Annotation[];
     lastAutoSaveDate: string;
+}
+
+export type AnnotationType = "rect" | "circle" | "line" | "arrow";
+
+export interface Annotation {
+    id: string;
+    type: AnnotationType;
+    projectId: number;
+    x: number;
+    y: number;
+    width?: number;
+    height?: number;
+    radius?: number;
+    points?: number[];
+    rotation?: number;
+    stroke: string;
+    strokeWidth: number;
+    fill?: string;
 }
 
 export interface Connection {

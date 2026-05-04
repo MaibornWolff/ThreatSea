@@ -10,7 +10,7 @@ import databaseImg from "../../images/database.png";
 import desktopImg from "../../images/desktop.png";
 import userImg from "../../images/user.png";
 import communicationInfrastructureImg from "../../images/communication-infrastructure.png";
-import type { AnchorOrientation, Coordinate } from "#api/types/system.types.ts";
+import type { AnchorOrientation, AnnotationType, Coordinate } from "#api/types/system.types.ts";
 
 export type EditorEntityId = string | number;
 
@@ -55,6 +55,8 @@ export interface EditorState {
     componentTypes: ComponentTypesState;
     lastCenteredProjectId: number | null;
     isCapturing: boolean;
+    selectedAnnotation: string | null;
+    annotationTool: AnnotationType | null;
 }
 
 const standardComponentTypes: Record<STANDARD_COMPONENT_TYPES, EditorComponentType> = {
@@ -142,6 +144,8 @@ const defaultState: EditorState = {
     componentTypes: componentTypesInitialState,
     lastCenteredProjectId: null,
     isCapturing: false,
+    selectedAnnotation: null,
+    annotationTool: null,
 };
 
 const editorReducer = createReducer(defaultState, (builder) => {
@@ -283,6 +287,18 @@ const editorReducer = createReducer(defaultState, (builder) => {
 
     builder.addCase(EditorActions.setIsCapturing, (state, action) => {
         state.isCapturing = action.payload;
+    });
+
+    builder.addCase(EditorActions.selectAnnotation, (state, action) => {
+        state.selectedAnnotation = action.payload;
+    });
+
+    builder.addCase(EditorActions.deselectAnnotation, (state) => {
+        state.selectedAnnotation = null;
+    });
+
+    builder.addCase(EditorActions.setAnnotationTool, (state, action) => {
+        state.annotationTool = action.payload;
     });
 });
 

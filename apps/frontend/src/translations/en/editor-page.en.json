@@ -6,7 +6,16 @@
     "riskBtn": "Risk"
   },
   "canvas": {
-    "exportSystemImage": "Export System Image"
+    "exportSystemImage": "Export System Image",
+    "annotation": {
+      "shapes": "Shapes",
+      "rectangle": "Rectangle",
+      "circle": "Circle",
+      "line": "Line",
+      "arrow": "Arrow",
+      "color": "Pick color",
+      "defaultColor": "Default color"
+    }
   },
   "connection": "Connection",
   "autoSave": {
@@ -35,6 +44,11 @@
     },
     "connected_components": {
       "title": "Connected Components"
+    },
+    "annotation": {
+      "title": "Annotation",
+      "stroke": "Color",
+      "delete": "Delete annotation"
     }
   },
   "contextMenu": {

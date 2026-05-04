@@ -3,8 +3,7 @@
  *     page.
  */
 
-import { CenterFocusWeak, Download } from "@mui/icons-material";
-import { Box, IconButton, LinearProgress, Tooltip } from "@mui/material";
+import { Box, LinearProgress } from "@mui/material";
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Group, Layer, Line } from "react-konva";
@@ -14,11 +13,16 @@ import { EditorActions } from "../../application/actions/editor.actions";
 import { NavigationActions } from "../../application/actions/navigation.actions";
 import { useAssets } from "../../application/hooks/use-assets.hook";
 import { useAutoSavePreview } from "../../application/hooks/use-auto-save-preview.hook";
+import { useAnnotationDrawing, ANNOTATION_STROKE_WIDTH } from "../../application/hooks/use-annotation-drawing.hook";
 import { useEditor, type EditorConnectionAnchor } from "../../application/hooks/use-editor.hook";
+import { useEditorAnnotations } from "../../application/hooks/use-editor-annotations.hook";
 import { useConfirm } from "../../application/hooks/use-confirm.hook";
+import { AnnotationDrawingPreview } from "../components/editor-components/annotation-drawing-preview.component";
 import { ConnectionPreview } from "../components/editor-components/connection-preview.component";
+import { EditorAnnotation } from "../components/editor-components/editor-annotation.component";
 import { EditorSidebar } from "../components/editor-components/editor-sidebar.component";
 import { EditorStage } from "../components/editor-components/editor-stage.component";
+import { EditorToolbar } from "../components/editor-components/editor-toolbar.component";
 import { Page } from "../components/page.component";
 import { SystemComponentConnection } from "../components/editor-components/system-component-connection.component";
 import { SystemComponent } from "../components/editor-components/system-component.component";
@@ -36,6 +40,8 @@ import type { Stage as KonvaStage } from "konva/lib/Stage";
 import type { Layer as KonvaLayer } from "konva/lib/Layer";
 import type { Asset } from "#api/types/asset.types.ts";
 import type {
+    Annotation,
+    AnnotationType,
     AugmentedSystemComponent,
     ConnectionEndpointWithComponent,
     Coordinate,
@@ -182,6 +188,38 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         blockAutoSave,
         makeScreenshot,
     });
+
+    const {
+        annotations,
+        selectedAnnotation,
+        selectedAnnotationId,
+        annotationTool,
+        createAnnotation,
+        updateAnnotation,
+        removeAnnotation,
+        selectAnnotation,
+        deselectAnnotation,
+        setAnnotationTool,
+    } = useEditorAnnotations({ projectId });
+
+    const isEditor = checkUserRole(userRole, USER_ROLES.EDITOR);
+
+    const {
+        drawingPreview,
+        annotationColor,
+        setAnnotationColor,
+        cancelDrawing,
+        tryStartDrawing,
+        updateDrawingPreview,
+        commitDrawing,
+    } = useAnnotationDrawing({ stageRef, layerPosition, isEditor, createAnnotation });
+
+    const handleAnnotationChange = useCallback(
+        (id: string, changes: Partial<Annotation>): void => {
+            updateAnnotation(id, changes);
+        },
+        [updateAnnotation]
+    );
 
     type ConnectorSelection = EditorConnectionAnchor & {
         communicationInterfaceType?: string | null;
@@ -348,6 +386,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
             deselectConnection();
             deselectPointOfAttack();
             deselectConnectionPoint();
+            deselectAnnotation();
             showSideBar();
         }
     };
@@ -360,7 +399,38 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
             selectConnection(id);
             deselectComponent();
             deselectConnectionPoint();
+            deselectAnnotation();
             showSideBar();
+        }
+    };
+
+    const handleSelectAnnotation = (id: string): void => {
+        selectAnnotation(id);
+        deselectComponent();
+        deselectConnection();
+        deselectPointOfAttack();
+        deselectConnectionPoint();
+        deselectConnector();
+        showSideBar();
+    };
+
+    const handleAnnotationColorChange = (stroke: string): void => {
+        if (selectedAnnotationId) {
+            updateAnnotation(selectedAnnotationId, { stroke });
+        }
+    };
+
+    const handleSetAnnotationTool = (tool: AnnotationType | null): void => {
+        if (tool !== null) {
+            closeAndDeselectAll();
+        }
+        setAnnotationTool(tool);
+    };
+
+    const handleDeleteAnnotation = (): void => {
+        if (selectedAnnotationId) {
+            removeAnnotation();
+            closeSideBar();
         }
     };
 
@@ -386,6 +456,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         deselectPointOfAttack();
         deselectConnectionPoint();
         deselectConnector();
+        deselectAnnotation();
     };
 
     const getConnectedComponents = useCallback(
@@ -421,6 +492,12 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
 
     const handleMouseDown = (event: KonvaEventObject<MouseEvent>): void => {
         const { evt, target } = event;
+
+        // Annotation drawing intercepts the stage before pan/deselect.
+        if (tryStartDrawing(annotationTool, event)) {
+            return;
+        }
+
         if (evt.button === 0 && target.nodeType === "Stage") {
             closeAndDeselectAll();
             event.cancelBubble = true;
@@ -453,6 +530,10 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         const { layerX, layerY, movementX, movementY } = pending;
 
         setMousePointers({ x: layerX, y: layerY });
+
+        if (updateDrawingPreview(layerX, layerY)) {
+            return;
+        }
 
         if (newConnection && stageRef.current) {
             setNewConnectionMousePosition({
@@ -518,6 +599,20 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     };
 
     const handleMouseUp = ({ evt }: KonvaEventObject<MouseEvent>): void => {
+        if (evt.button === 0 && drawingPreview) {
+            const newId = commitDrawing(annotationTool);
+            setAnnotationTool(null);
+            if (newId) {
+                selectAnnotation(newId);
+                deselectComponent();
+                deselectConnection();
+                deselectPointOfAttack();
+                deselectConnectionPoint();
+                deselectConnector();
+            }
+            return;
+        }
+
         if (evt.button === 0 && moveLayerRef.current) {
             moveLayerRef.current = false;
             if (stageRef.current?.content) {
@@ -669,6 +764,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
             selectConnectionPoint(connectionPointId);
             deselectComponent();
             deselectConnection();
+            deselectAnnotation();
             showSideBar();
         }
     };
@@ -683,6 +779,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         if (evt.button === 0) {
             setAssetSearchValue("");
             selectPointOfAttack(pointOfAttackId);
+            deselectAnnotation();
             if (componentId) {
                 deselectConnection();
                 deselectConnectionPoint();
@@ -790,12 +887,20 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
 
     const handleKeyUp = ({ key }: KeyboardEvent): void => {
         if (key === "Escape") {
+            if (annotationTool || drawingPreview) {
+                setAnnotationTool(null);
+                cancelDrawing();
+            }
             closeAndDeselectAll();
         }
 
         if (key === "Delete") {
             handleDeleteComponent();
             handleDeleteConnection();
+            if (selectedAnnotationId) {
+                removeAnnotation();
+                closeSideBar();
+            }
         }
     };
 
@@ -1193,6 +1298,22 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                     />
                                 );
                             })}
+                            {annotations.map((annotation) => (
+                                <EditorAnnotation
+                                    key={annotation.id}
+                                    annotation={annotation}
+                                    selected={annotation.id === selectedAnnotationId}
+                                    editable={isEditor}
+                                    onSelect={handleSelectAnnotation}
+                                    onChange={handleAnnotationChange}
+                                />
+                            ))}
+                            <AnnotationDrawingPreview
+                                drawingPreview={drawingPreview}
+                                annotationTool={annotationTool}
+                                color={annotationColor}
+                                strokeWidth={ANNOTATION_STROKE_WIDTH}
+                            />
                             {components.map((component, i) => (
                                 <SystemComponent
                                     key={i}
@@ -1220,57 +1341,15 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                         </Layer>
                     </EditorStage>
 
-                    <Box
-                        sx={{
-                            position: "absolute",
-                            top: 8,
-                            left: 8,
-                            width: "38px",
-                            marginLeft: "auto",
-                            marginRight: "auto",
-                        }}
-                    >
-                        <IconButton
-                            onClick={handleCenterEditor}
-                            sx={{
-                                backgroundColor: "background.paperIntransparent",
-                                "&:hover": {
-                                    backgroundColor: "rgba(149, 163, 181, 0.7)",
-                                },
-                            }}
-                        >
-                            <CenterFocusWeak sx={{ fontSize: 30, color: "primary.main" }} />
-                        </IconButton>
-                    </Box>
-                    <Box
-                        sx={{
-                            position: "absolute",
-                            top: 60,
-                            left: 8,
-                            width: "38px",
-                            marginLeft: "auto",
-                            marginRight: "auto",
-                        }}
-                    >
-                        <Tooltip title={t("canvas.exportSystemImage")}>
-                            <IconButton
-                                onClick={handleDownloadSystemView}
-                                sx={{
-                                    backgroundColor: "background.paperIntransparent",
-                                    "&:hover": {
-                                        backgroundColor: "rgba(149, 163, 181, 0.7)",
-                                    },
-                                }}
-                            >
-                                <Download
-                                    sx={{
-                                        fontSize: 30,
-                                        color: "primary.main",
-                                    }}
-                                />
-                            </IconButton>
-                        </Tooltip>
-                    </Box>
+                    <EditorToolbar
+                        onCenterEditor={handleCenterEditor}
+                        onDownloadSystemView={handleDownloadSystemView}
+                        showAnnotationTools={isEditor}
+                        annotationTool={annotationTool}
+                        onSetAnnotationTool={handleSetAnnotationTool}
+                        annotationColor={annotationColor}
+                        onSetAnnotationColor={setAnnotationColor}
+                    />
                 </Box>
 
                 <EditorSidebar
@@ -1306,6 +1385,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                     handleSelectConnectedComponent={handleSelectConnectedComponent}
                     handleComponentBreadcrumbClick={handleComponentBreadcrumbClick}
                     handleInterfaceBreadcrumbClick={handleInterfaceBreadcrumbClick}
+                    selectedAnnotation={selectedAnnotation}
+                    handleAnnotationColorChange={handleAnnotationColorChange}
+                    handleDeleteAnnotation={handleDeleteAnnotation}
                 />
 
                 <Routes>

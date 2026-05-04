@@ -13,7 +13,7 @@ import type { EditorConnection, EditorEntityId } from "#application/reducers/edi
 import type { EditorMousePointer } from "#application/adapters/editor-mouse-pointers.adapter.ts";
 import type { EditorComponentType } from "#application/adapters/editor-component-type.adapter.ts";
 import type { EditorComponentConnectionLine } from "#application/adapters/editor-component-connection-lines.adapter.ts";
-import type { Coordinate } from "#api/types/system.types.ts";
+import type { AnnotationType, Coordinate } from "#api/types/system.types.ts";
 import type { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
 
 /**
@@ -296,4 +296,10 @@ export class EditorActions {
     static setLastCenteredProjectId = createAction<number | null>("[editor] set last centered project id");
 
     static setIsCapturing = createAction<boolean>("[editor] set is capturing");
+
+    static selectAnnotation = createAction<string>("[editor] select annotation");
+
+    static deselectAnnotation = createAction<void>("[editor] deselect annotation");
+
+    static setAnnotationTool = createAction<AnnotationType | null>("[editor] set annotation tool");
 }
