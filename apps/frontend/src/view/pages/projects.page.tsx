@@ -111,11 +111,16 @@ export const ProjectsPage = CreatePage(HeaderNavigation, () => {
 
             const fileReader = new FileReader();
             fileReader.readAsText(file, "UTF-8");
-            fileReader.onload = (loadEvent: ProgressEvent<FileReader>) => {
+            fileReader.onload = async (loadEvent: ProgressEvent<FileReader>) => {
                 const content = loadEvent.target?.result;
-                if (typeof content === "string") {
-                    dispatch(ProjectsActions.importProjectFromJson(JSON.parse(content)));
+                if (typeof content !== "string") {
+                    return;
+                }
+                try {
+                    await dispatch(ProjectsActions.importProjectFromJson(JSON.parse(content))).unwrap();
                     loadProjects();
+                } catch (error) {
+                    console.log(error);
                 }
             };
         } catch (error) {
