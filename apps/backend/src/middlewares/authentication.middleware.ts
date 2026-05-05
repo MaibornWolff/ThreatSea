@@ -1,5 +1,5 @@
 import { JWT_SECRET, JWT_VERIFY_OPTIONS, originConfig } from "#config/config.js";
-import jwt, { JsonWebTokenError, JwtPayload, NotBeforeError, TokenExpiredError } from "jsonwebtoken";
+import { errors, JWTPayload, jwtVerify } from "jose";
 import { isTokenRevoked } from "#services/revoked-tokens.service.js";
 import { JWTError, UnauthorizedError } from "#errors/unauthorized.error.js";
 import { NextFunction, Request, Response } from "express";
@@ -19,11 +19,12 @@ export async function CheckTokenHandler(request: Request, response: Response, ne
         return;
     }
 
-    let decodedToken: JwtPayload;
+    let decodedToken: JWTPayload;
     try {
-        decodedToken = jwt.verify(authToken, JWT_SECRET, JWT_VERIFY_OPTIONS) as JwtPayload;
+        const { payload } = await jwtVerify(authToken, JWT_SECRET, JWT_VERIFY_OPTIONS);
+        decodedToken = payload;
     } catch (error) {
-        next(new JWTError(error as TokenExpiredError | JsonWebTokenError | NotBeforeError));
+        next(new JWTError(error as errors.JOSEError));
         return;
     }
 

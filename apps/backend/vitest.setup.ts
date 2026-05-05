@@ -1,24 +1,28 @@
 import "reflect-metadata";
-import { beforeAll, vi } from "vitest";
+import { vi } from "vitest";
 import * as fs from "node:fs/promises";
-import jwt from "jsonwebtoken";
+import * as jose from "jose";
 
-vi.mock("jsonwebtoken");
+const iat = Math.floor(Date.now() / 1000);
+const exp = iat + 60 * 60;
 
-beforeAll(async () => {
-    const iat = Math.floor(Date.now() / 1000);
-    const exp = iat + 60 * 60;
+const testUserId = JSON.parse(await fs.readFile(".tmp/testUser.json", "utf-8")).id;
 
-    const testUserId = JSON.parse(await fs.readFile(".tmp/testUser.json", "utf-8")).id;
-
-    jwt.verify.mockImplementation(() => ({
-        userId: testUserId,
-        oidcId: "fakeOidcId",
-        email: "fake@example.com",
-        firstname: "fake",
-        lastname: "user",
-        displayName: "fake user",
-        iat: iat,
-        exp: exp,
-    }));
-}, 50000);
+vi.mock("jose", async (importOriginal) => {
+    const actual = await importOriginal<typeof jose>();
+    return {
+        ...actual,
+        jwtVerify: vi.fn().mockResolvedValue({
+            payload: {
+                userId: testUserId,
+                oidcId: "fakeOidcId",
+                email: "fake@example.com",
+                firstname: "fake",
+                lastname: "user",
+                displayName: "fake user",
+                iat: iat,
+                exp: exp,
+            },
+        } as any),
+    };
+});
