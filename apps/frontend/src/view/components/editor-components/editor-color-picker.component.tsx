@@ -55,26 +55,29 @@ export const EditorColorPicker = ({ color, onChange, disabled = false }: EditorC
                 </Box>
             </Tooltip>
             <Tooltip title={t("canvas.annotation.defaultColor")}>
-                <IconButton
-                    onClick={() => onChange(DEFAULT_ANNOTATION_COLOR)}
-                    disabled={disabled}
-                    sx={{ width: "20px", height: "20px", padding: 0 }}
-                    aria-label={DEFAULT_ANNOTATION_COLOR}
-                    aria-pressed={color.toLowerCase() === DEFAULT_ANNOTATION_COLOR.toLowerCase()}
-                >
-                    <Box
-                        sx={{
-                            width: "16px",
-                            height: "16px",
-                            borderRadius: "50%",
-                            backgroundColor: DEFAULT_ANNOTATION_COLOR,
-                            border:
-                                color.toLowerCase() === DEFAULT_ANNOTATION_COLOR.toLowerCase()
-                                    ? "2px solid rgba(35, 60, 87, 1)"
-                                    : "1px solid rgba(0,0,0,0.25)",
-                        }}
-                    />
-                </IconButton>
+                {/* span wrapper keeps the Tooltip listenable when the IconButton is disabled */}
+                <Box component="span" sx={{ display: "inline-flex" }}>
+                    <IconButton
+                        onClick={() => onChange(DEFAULT_ANNOTATION_COLOR)}
+                        disabled={disabled}
+                        sx={{ width: "20px", height: "20px", padding: 0 }}
+                        aria-label={DEFAULT_ANNOTATION_COLOR}
+                        aria-pressed={color.toLowerCase() === DEFAULT_ANNOTATION_COLOR.toLowerCase()}
+                    >
+                        <Box
+                            sx={{
+                                width: "16px",
+                                height: "16px",
+                                borderRadius: "50%",
+                                backgroundColor: DEFAULT_ANNOTATION_COLOR,
+                                border:
+                                    color.toLowerCase() === DEFAULT_ANNOTATION_COLOR.toLowerCase()
+                                        ? "2px solid rgba(35, 60, 87, 1)"
+                                        : "1px solid rgba(0,0,0,0.25)",
+                            }}
+                        />
+                    </IconButton>
+                </Box>
             </Tooltip>
 
             {POA_PALETTE.map(({ poaType, color: presetColor }) => {

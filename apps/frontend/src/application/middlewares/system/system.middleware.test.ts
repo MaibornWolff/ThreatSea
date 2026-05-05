@@ -2,13 +2,12 @@ import { type MockInstance } from "vitest";
 import { SystemActions } from "../../actions/system.actions";
 import { SystemAPI } from "#api/system.api.ts";
 import { createStore } from "../../store";
-import projectsReducer from "../../reducers/projects.reducer";
+import projectsReducer, { type ProjectsState } from "../../reducers/projects.reducer";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
-import { createProject } from "#test-utils/builders.ts";
 
 const buildProjectsState = (role: USER_ROLES) => {
     const base = projectsReducer(undefined, { type: "@@INIT" });
-    return { ...base, current: createProject({ role }) };
+    return { ...base, current: { role } as ProjectsState["current"] };
 };
 
 describe("system.middleware — handleSaveSystem", () => {
