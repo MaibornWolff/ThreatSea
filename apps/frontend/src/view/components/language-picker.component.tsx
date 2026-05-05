@@ -1,6 +1,6 @@
-import { Box, Typography, Menu, MenuItem, Button } from "@mui/material";
+import { Box, Typography, Button } from "@mui/material";
 import LanguageIcon from "@mui/icons-material/Language";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocalStorage } from "../../application/hooks/use-local-storage.hook";
 import { getPreferredLanguage } from "../../utils/translations";
@@ -18,13 +18,11 @@ const LANGUAGES = [
 let currentLanguageIndex = 0;
 
 export const LanguagePicker = () => {
-    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [currentLanguage, setCurrentLanguage] = useLocalStorage(
         "lang",
         getPreferredLanguage(LANGUAGES.map((l) => l.id))
     );
     const { i18n } = useTranslation();
-    const open = Boolean(anchorEl);
 
     const handleClick = () => {
         currentLanguageIndex = getLanguageIndexForLanguage(currentLanguage);
@@ -46,15 +44,6 @@ export const LanguagePicker = () => {
             }
         }
         return 0;
-    };
-
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
-
-    const handleSelect = (_event: React.MouseEvent<HTMLElement>, value: string) => {
-        setAnchorEl(null);
-        setCurrentLanguage(value);
     };
 
     useEffect(() => {
@@ -90,16 +79,6 @@ export const LanguagePicker = () => {
                     {languageLabel}
                 </Typography>
             </Button>
-            <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-                {Object.values(LANGUAGES).map((language, i) => {
-                    const { label, id } = language;
-                    return (
-                        <MenuItem key={i} onClick={(e) => handleSelect(e, id)}>
-                            {label}
-                        </MenuItem>
-                    );
-                })}
-            </Menu>
         </Box>
     );
 };

@@ -91,9 +91,4 @@ describe("LanguagePicker", () => {
 
         expect(changeLanguageMock).toHaveBeenCalledWith("de");
     });
-
-    it("should not show the language menu by default", () => {
-        renderLanguagePicker();
-        expect(screen.queryByRole("menu")).not.toBeInTheDocument();
-    });
 });
