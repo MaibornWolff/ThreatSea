@@ -1,6 +1,7 @@
-import { Fragment, useEffect, useRef } from "react";
+import { Fragment, memo, useEffect, useRef } from "react";
 import { Arrow, Circle, Line, Rect, Transformer } from "react-konva";
 import type { KonvaEventObject, Node as KonvaNode } from "konva/lib/Node";
+import type { Line as KonvaLineNode } from "konva/lib/shapes/Line";
 import type { Transformer as KonvaTransformer } from "konva/lib/shapes/Transformer";
 import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import type { Annotation } from "#api/types/system.types.ts";
@@ -9,22 +10,40 @@ interface EditorAnnotationProps {
     annotation: Annotation;
     selected: boolean;
     editable: boolean;
-    onSelect: (id: string) => void;
+    onSelect: (id: string, options?: { openSidebar?: boolean }) => void;
     onChange: (id: string, changes: Partial<Annotation>) => void;
+    onDragStateChange?: (isDragging: boolean) => void;
 }
 
 const MIN_DIMENSION = 5;
 // Mirrors the connection-line pattern in `system-component-connection.component.tsx`
 const ANNOTATION_HIT_STROKE_WIDTH = 20;
+// Endpoint-anchor visuals for line/arrow editing
+const ANCHOR_RADIUS = 6;
 
-export const EditorAnnotation = ({ annotation, selected, editable, onSelect, onChange }: EditorAnnotationProps) => {
+const EditorAnnotationInner = ({
+    annotation,
+    selected,
+    editable,
+    onSelect,
+    onChange,
+    onDragStateChange,
+}: EditorAnnotationProps) => {
     const shapeRef = useRef<KonvaNode | null>(null);
     const transformerRef = useRef<KonvaTransformer | null>(null);
+    const anchor0Ref = useRef<KonvaNode | null>(null);
+    const anchor1Ref = useRef<KonvaNode | null>(null);
     // Hide the Transformer's anchors/rotation handle during screenshot capture
     const isCapturing = useAppSelector((state) => state.editor.isCapturing);
 
     const setShapeRef = (node: KonvaNode | null): void => {
         shapeRef.current = node;
+    };
+    const setAnchor0Ref = (node: KonvaNode | null): void => {
+        anchor0Ref.current = node;
+    };
+    const setAnchor1Ref = (node: KonvaNode | null): void => {
+        anchor1Ref.current = node;
     };
 
     useEffect(() => {
@@ -37,7 +56,42 @@ export const EditorAnnotation = ({ annotation, selected, editable, onSelect, onC
             transformer.nodes([shape]);
             transformer.getLayer()?.batchDraw();
         }
-    }, [selected, editable]);
+    }, [selected, editable, isCapturing]);
+
+    const isLineLike = annotation.type === "line" || annotation.type === "arrow";
+    const points = annotation.points ?? [0, 0, 0, 0];
+
+    const computeNextPoints = (idx: 0 | 1, target: KonvaNode): number[] => {
+        const next = [...(annotation.points ?? [0, 0, 0, 0])];
+        next[idx * 2] = target.x() - annotation.x;
+        next[idx * 2 + 1] = target.y() - annotation.y;
+        return next;
+    };
+
+    //  No React state mutations during drag — that's what was
+    // causing the controlled-prop fight with Konva's internal drag.
+    const handleAnchorDragStart = (): void => {
+        onDragStateChange?.(true);
+    };
+
+    const handleAnchorDragMove =
+        (idx: 0 | 1) =>
+        (event: KonvaEventObject<DragEvent>): void => {
+            const next = computeNextPoints(idx, event.target);
+            const shape = shapeRef.current as KonvaLineNode | null;
+            if (shape) {
+                shape.points(next);
+                shape.getLayer()?.batchDraw();
+            }
+        };
+
+    const handleAnchorDragEnd =
+        (idx: 0 | 1) =>
+        (event: KonvaEventObject<DragEvent>): void => {
+            const next = computeNextPoints(idx, event.target);
+            onChange(annotation.id, { points: next });
+            onDragStateChange?.(false);
+        };
 
     const handleClick = (event: KonvaEventObject<MouseEvent>): void => {
         if (event.evt.button !== 0) {
@@ -48,8 +102,48 @@ export const EditorAnnotation = ({ annotation, selected, editable, onSelect, onC
         onSelect(annotation.id);
     };
 
+    // Sets the cursor on the stage container — same DOM target the rest of
+    // the canvas (system components/connections, stage panning) uses.
+    const setStageCursor = (event: KonvaEventObject<MouseEvent | DragEvent>, cursor: string): void => {
+        const stage = event.target.getStage();
+        if (stage?.content) {
+            stage.content.style.cursor = cursor;
+        }
+    };
+
+    const handleMouseEnter = (event: KonvaEventObject<MouseEvent>): void => {
+        if (editable) {
+            setStageCursor(event, "pointer");
+        }
+    };
+
+    const handleMouseLeave = (event: KonvaEventObject<MouseEvent>): void => {
+        setStageCursor(event, "default");
+    };
+
+    // Hide endpoint anchors while the line/arrow body is being dragged
+    const handleDragStart = (event: KonvaEventObject<DragEvent>): void => {
+        setStageCursor(event, "move");
+        onDragStateChange?.(true);
+        if (!isLineLike) {
+            return;
+        }
+        anchor0Ref.current?.visible(false);
+        anchor1Ref.current?.visible(false);
+        event.target.getLayer()?.batchDraw();
+    };
+
     const handleDragEnd = (event: KonvaEventObject<DragEvent>): void => {
+        setStageCursor(event, "default");
+        if (isLineLike) {
+            anchor0Ref.current?.visible(true);
+            anchor1Ref.current?.visible(true);
+            event.target.getLayer()?.batchDraw();
+        }
+
+        onSelect(annotation.id, { openSidebar: false });
         onChange(annotation.id, { x: event.target.x(), y: event.target.y() });
+        onDragStateChange?.(false);
     };
 
     // Konva's Transformer applies scaleX/scaleY to the node. Persist the
@@ -75,7 +169,6 @@ export const EditorAnnotation = ({ annotation, selected, editable, onSelect, onC
             changes.radius = Math.max(MIN_DIMENSION, (annotation.radius ?? 0) * scaleX);
         } else if (annotation.type === "line" || annotation.type === "arrow") {
             // Lines/arrows store geometry in `points` rather than width/height,
-            // so bake the scale into each coordinate before resetting it.
             const oldPoints = annotation.points ?? [];
             changes.points = oldPoints.map((coord, idx) => coord * (idx % 2 === 0 ? scaleX : scaleY));
         }
@@ -107,6 +200,9 @@ export const EditorAnnotation = ({ annotation, selected, editable, onSelect, onC
                         listening={editable}
                         draggable={editable}
                         onClick={handleClick}
+                        onMouseEnter={handleMouseEnter}
+                        onMouseLeave={handleMouseLeave}
+                        onDragStart={handleDragStart}
                         onDragEnd={handleDragEnd}
                         onTransformEnd={handleTransformEnd}
                         {...sharedHitProps}
@@ -127,6 +223,9 @@ export const EditorAnnotation = ({ annotation, selected, editable, onSelect, onC
                         listening={editable}
                         draggable={editable}
                         onClick={handleClick}
+                        onMouseEnter={handleMouseEnter}
+                        onMouseLeave={handleMouseLeave}
+                        onDragStart={handleDragStart}
                         onDragEnd={handleDragEnd}
                         onTransformEnd={handleTransformEnd}
                         {...sharedHitProps}
@@ -138,13 +237,16 @@ export const EditorAnnotation = ({ annotation, selected, editable, onSelect, onC
                         ref={setShapeRef}
                         x={annotation.x}
                         y={annotation.y}
-                        points={annotation.points ?? []}
+                        points={points}
                         rotation={annotation.rotation ?? 0}
                         stroke={annotation.stroke}
                         strokeWidth={annotation.strokeWidth}
                         listening={editable}
                         draggable={editable}
                         onClick={handleClick}
+                        onMouseEnter={handleMouseEnter}
+                        onMouseLeave={handleMouseLeave}
+                        onDragStart={handleDragStart}
                         onDragEnd={handleDragEnd}
                         onTransformEnd={handleTransformEnd}
                         {...sharedHitProps}
@@ -156,7 +258,7 @@ export const EditorAnnotation = ({ annotation, selected, editable, onSelect, onC
                         ref={setShapeRef}
                         x={annotation.x}
                         y={annotation.y}
-                        points={annotation.points ?? []}
+                        points={points}
                         rotation={annotation.rotation ?? 0}
                         stroke={annotation.stroke}
                         strokeWidth={annotation.strokeWidth}
@@ -166,6 +268,9 @@ export const EditorAnnotation = ({ annotation, selected, editable, onSelect, onC
                         listening={editable}
                         draggable={editable}
                         onClick={handleClick}
+                        onMouseEnter={handleMouseEnter}
+                        onMouseLeave={handleMouseLeave}
+                        onDragStart={handleDragStart}
                         onDragEnd={handleDragEnd}
                         onTransformEnd={handleTransformEnd}
                         {...sharedHitProps}
@@ -174,10 +279,13 @@ export const EditorAnnotation = ({ annotation, selected, editable, onSelect, onC
         }
     };
 
+    const showTransformer = selected && editable && !isCapturing && !isLineLike;
+    const showAnchors = selected && editable && !isCapturing && isLineLike;
+
     return (
         <Fragment>
             {renderShape()}
-            {selected && editable && !isCapturing && (
+            {showTransformer && (
                 <Transformer
                     ref={transformerRef}
                     flipEnabled={false}
@@ -193,6 +301,58 @@ export const EditorAnnotation = ({ annotation, selected, editable, onSelect, onC
                     }}
                 />
             )}
+            {showAnchors && (
+                <>
+                    <Circle
+                        ref={setAnchor0Ref}
+                        x={annotation.x + (points[0] ?? 0)}
+                        y={annotation.y + (points[1] ?? 0)}
+                        radius={ANCHOR_RADIUS}
+                        fill="#ffffff"
+                        stroke="#233c57"
+                        strokeWidth={1}
+                        draggable
+                        onMouseEnter={handleMouseEnter}
+                        onMouseLeave={handleMouseLeave}
+                        onDragStart={(event) => {
+                            setStageCursor(event, "move");
+                            handleAnchorDragStart();
+                        }}
+                        onDragMove={handleAnchorDragMove(0)}
+                        onDragEnd={(event) => {
+                            setStageCursor(event, "default");
+                            handleAnchorDragEnd(0)(event);
+                        }}
+                    />
+                    <Circle
+                        ref={setAnchor1Ref}
+                        x={annotation.x + (points[2] ?? 0)}
+                        y={annotation.y + (points[3] ?? 0)}
+                        radius={ANCHOR_RADIUS}
+                        fill="#ffffff"
+                        stroke="#233c57"
+                        strokeWidth={1}
+                        draggable
+                        onMouseEnter={handleMouseEnter}
+                        onMouseLeave={handleMouseLeave}
+                        onDragStart={(event) => {
+                            setStageCursor(event, "move");
+                            handleAnchorDragStart();
+                        }}
+                        onDragMove={handleAnchorDragMove(1)}
+                        onDragEnd={(event) => {
+                            setStageCursor(event, "default");
+                            handleAnchorDragEnd(1)(event);
+                        }}
+                    />
+                </>
+            )}
         </Fragment>
     );
 };
+
+// Skip re-render when only callback identities change. Comparing data props only
+// keeps re-renders tied to genuine annotation changes.
+export const EditorAnnotation = memo(EditorAnnotationInner, (prev, next) => {
+    return prev.annotation === next.annotation && prev.selected === next.selected && prev.editable === next.editable;
+});

@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { nanoid } from "@reduxjs/toolkit";
 import { EditorActions } from "../actions/editor.actions";
 import { SystemActions } from "../actions/system.actions";
@@ -20,9 +21,12 @@ export const useEditorAnnotations = ({ projectId }: { projectId: number }) => {
         return id;
     };
 
-    const updateAnnotation = (id: string, changes: Partial<Annotation>): void => {
-        dispatch(SystemActions.setAnnotation({ id, changes }));
-    };
+    const updateAnnotation = useCallback(
+        (id: string, changes: Partial<Annotation>): void => {
+            dispatch(SystemActions.setAnnotation({ id, changes }));
+        },
+        [dispatch]
+    );
 
     const removeAnnotation = (id?: string): void => {
         const targetId = id ?? selectedAnnotationId;

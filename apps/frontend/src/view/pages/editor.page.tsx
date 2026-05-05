@@ -40,7 +40,6 @@ import type { Stage as KonvaStage } from "konva/lib/Stage";
 import type { Layer as KonvaLayer } from "konva/lib/Layer";
 import type { Asset } from "#api/types/asset.types.ts";
 import type {
-    Annotation,
     AnnotationType,
     AugmentedSystemComponent,
     ConnectionEndpointWithComponent,
@@ -84,6 +83,14 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     const componentLayerRef = useRef<KonvaLayer | null>(null);
     const sidebarRef = useRef<HTMLDivElement | null>(null);
     const moveLayerRef = useRef(false);
+    // True while any annotation (line body or endpoint anchor) is being
+    // dragged. Used to suppress per-frame mousePointer dispatches that would
+    // otherwise re-render the editor page on every pointer move and make drag
+    // feel laggy. Collaborative cursors briefly stop tracking — acceptable.
+    const isAnnotationDraggingRef = useRef(false);
+    const handleAnnotationDragStateChange = useCallback((isDragging: boolean): void => {
+        isAnnotationDraggingRef.current = isDragging;
+    }, []);
     const { openConfirm } = useConfirm();
     const { showErrorMessage } = useAlert();
     const location = useLocation();
@@ -213,13 +220,6 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         updateDrawingPreview,
         commitDrawing,
     } = useAnnotationDrawing({ stageRef, layerPosition, isEditor, createAnnotation });
-
-    const handleAnnotationChange = useCallback(
-        (id: string, changes: Partial<Annotation>): void => {
-            updateAnnotation(id, changes);
-        },
-        [updateAnnotation]
-    );
 
     type ConnectorSelection = EditorConnectionAnchor & {
         communicationInterfaceType?: string | null;
@@ -404,14 +404,20 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         }
     };
 
-    const handleSelectAnnotation = (id: string): void => {
+    const handleSelectAnnotation = (id: string, options?: { openSidebar?: boolean }): void => {
         selectAnnotation(id);
         deselectComponent();
         deselectConnection();
         deselectPointOfAttack();
         deselectConnectionPoint();
         deselectConnector();
-        showSideBar();
+        // Drag passes `openSidebar: false` — close any sidebar lingering from
+        // the previous selection so it doesn't show stale properties.
+        if (options?.openSidebar === false) {
+            closeSideBar();
+        } else {
+            showSideBar();
+        }
     };
 
     const handleAnnotationColorChange = (stroke: string): void => {
@@ -529,9 +535,14 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
 
         const { layerX, layerY, movementX, movementY } = pending;
 
-        setMousePointers({ x: layerX, y: layerY });
+        // Skip the collaborative-cursor dispatch while an annotation is being
+        // dragged — it would otherwise trigger a Redux update + page re-render
+        // on every pointer move, swamping the drag.
+        if (!isAnnotationDraggingRef.current) {
+            setMousePointers({ x: layerX, y: layerY });
+        }
 
-        if (updateDrawingPreview(layerX, layerY)) {
+        if (updateDrawingPreview()) {
             return;
         }
 
@@ -1305,7 +1316,8 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                     selected={annotation.id === selectedAnnotationId}
                                     editable={isEditor}
                                     onSelect={handleSelectAnnotation}
-                                    onChange={handleAnnotationChange}
+                                    onChange={updateAnnotation}
+                                    onDragStateChange={handleAnnotationDragStateChange}
                                 />
                             ))}
                             <AnnotationDrawingPreview

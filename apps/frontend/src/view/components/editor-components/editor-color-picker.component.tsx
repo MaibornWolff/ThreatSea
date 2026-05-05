@@ -1,10 +1,8 @@
 import { IconButton, Tooltip } from "@mui/material";
 import { Box } from "@mui/system";
 import { useTranslation } from "react-i18next";
+import { DEFAULT_ANNOTATION_COLOR } from "../../../application/hooks/use-annotation-drawing.hook";
 import { POA_COLORS } from "../../colors/pointsOfAttack.colors";
-
-// Default annotation color preset — matches the system's connection-line blue
-export const DEFAULT_ANNOTATION_COLOR = "#5786ff";
 
 const POA_PALETTE = Object.entries(POA_COLORS)
     .map(([poaType, palette]) => ({ poaType, color: palette.normal }))

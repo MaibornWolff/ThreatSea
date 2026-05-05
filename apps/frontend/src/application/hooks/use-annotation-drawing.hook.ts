@@ -2,15 +2,21 @@ import { useState, type RefObject } from "react";
 import type { Stage as KonvaStage } from "konva/lib/Stage";
 import type { KonvaEventObject } from "konva/lib/Node";
 import type { AnnotationType, Coordinate } from "#api/types/system.types.ts";
-import type { AnnotationDrawingState } from "../../view/components/editor-components/annotation-drawing-preview.component";
-import { DEFAULT_ANNOTATION_COLOR } from "../../view/components/editor-components/editor-color-picker.component";
 import type { useEditorAnnotations } from "./use-editor-annotations.hook";
 
+// Default annotation color preset — matches the system's connection-line blue
+export const DEFAULT_ANNOTATION_COLOR = "#5786ff";
 // Visible stroke width for new annotations — matches the system connection-line
 export const ANNOTATION_STROKE_WIDTH = 3;
-// Drag distance below this is treated as a click (no shape committed) — except
-// for line, where a horizontal/vertical line legitimately has zero in one axis.
+// Minimum dimension for a drawn annotation
 const MIN_DRAW_DIMENSION = 5;
+
+export interface AnnotationDrawingState {
+    startX: number;
+    startY: number;
+    currentX: number;
+    currentY: number;
+}
 
 interface UseAnnotationDrawingArgs {
     stageRef: RefObject<KonvaStage | null>;
@@ -28,15 +34,12 @@ export const useAnnotationDrawing = ({
     const [annotationColor, setAnnotationColor] = useState<string>(DEFAULT_ANNOTATION_COLOR);
     const [drawingPreview, setDrawingPreview] = useState<AnnotationDrawingState | null>(null);
 
-    const stageToLayerCoords = (pointerX: number, pointerY: number): { x: number; y: number } | null => {
-        const stage = stageRef.current;
-        if (!stage) {
+    const stageToLayerCoords = (): { x: number; y: number } | null => {
+        const pos = stageRef.current?.getRelativePointerPosition();
+        if (!pos) {
             return null;
         }
-        return {
-            x: (pointerX - stage.x()) / stage.scaleX() - layerPosition.x,
-            y: (pointerY - stage.y()) / stage.scaleY() - layerPosition.y,
-        };
+        return { x: pos.x - layerPosition.x, y: pos.y - layerPosition.y };
     };
 
     const cancelDrawing = (): void => {
@@ -49,12 +52,7 @@ export const useAnnotationDrawing = ({
         if (!annotationTool || !isEditor || evt.button !== 0 || target.nodeType !== "Stage") {
             return false;
         }
-        const stage = stageRef.current;
-        const pointer = stage?.getPointerPosition();
-        if (!stage || !pointer) {
-            return false;
-        }
-        const local = stageToLayerCoords(pointer.x, pointer.y);
+        const local = stageToLayerCoords();
         if (!local) {
             return false;
         }
@@ -64,12 +62,12 @@ export const useAnnotationDrawing = ({
         return true;
     };
 
-    /** Update the in-progress preview from a layer-pointer position. Returns true if a draw is active. */
-    const updateDrawingPreview = (layerX: number, layerY: number): boolean => {
+    /** Update the in-progress preview from the current pointer position. Returns true if a draw is active. */
+    const updateDrawingPreview = (): boolean => {
         if (!drawingPreview) {
             return false;
         }
-        const local = stageToLayerCoords(layerX, layerY);
+        const local = stageToLayerCoords();
         if (local) {
             setDrawingPreview((prev) => (prev ? { ...prev, currentX: local.x, currentY: local.y } : prev));
         }
@@ -87,7 +85,7 @@ export const useAnnotationDrawing = ({
 
         const width = Math.abs(currentX - startX);
         const height = Math.abs(currentY - startY);
-        if (width < MIN_DRAW_DIMENSION && height < MIN_DRAW_DIMENSION && annotationTool !== "line") {
+        if (width < MIN_DRAW_DIMENSION && height < MIN_DRAW_DIMENSION) {
             return null;
         }
 
