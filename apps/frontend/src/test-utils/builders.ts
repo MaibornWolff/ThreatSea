@@ -2,6 +2,7 @@ import type { Asset } from "#api/types/asset.types.ts";
 import type { ExtendedProject } from "#api/types/project.types.ts";
 import {
     AnchorOrientation,
+    type Annotation,
     type AugmentedSystemComponent,
     type ConnectionAnchor,
     type SystemConnection,
@@ -90,6 +91,19 @@ export const createConnectionAnchor = (overrides: Partial<ConnectionAnchor> = {}
     anchor: AnchorOrientation.right,
     type: STANDARD_COMPONENT_TYPES.CLIENT,
     component: undefined,
+    ...overrides,
+});
+
+export const createAnnotation = (overrides: Partial<Annotation> = {}): Annotation => ({
+    id: "ann-1",
+    type: "rect",
+    projectId: 1,
+    x: 0,
+    y: 0,
+    width: 100,
+    height: 100,
+    stroke: "#5786ff",
+    strokeWidth: 3,
     ...overrides,
 });
 

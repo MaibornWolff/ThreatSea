@@ -39,4 +39,50 @@ describe("editorReducer", () => {
             expect(next.isCapturing).toBe(false);
         });
     });
+
+    describe("annotation selection", () => {
+        it("starts with selectedAnnotation set to null", () => {
+            expect(getInitialState().selectedAnnotation).toBeNull();
+        });
+
+        it("selectAnnotation stores the provided id", () => {
+            const next = editorReducer(getInitialState(), EditorActions.selectAnnotation("ann-1"));
+            expect(next.selectedAnnotation).toBe("ann-1");
+        });
+
+        it("deselectAnnotation clears the selection", () => {
+            const seeded = editorReducer(getInitialState(), EditorActions.selectAnnotation("ann-1"));
+            const next = editorReducer(seeded, EditorActions.deselectAnnotation());
+            expect(next.selectedAnnotation).toBeNull();
+        });
+
+        it("selectAnnotation replaces a previously selected id", () => {
+            const seeded = editorReducer(getInitialState(), EditorActions.selectAnnotation("ann-1"));
+            const next = editorReducer(seeded, EditorActions.selectAnnotation("ann-2"));
+            expect(next.selectedAnnotation).toBe("ann-2");
+        });
+    });
+
+    describe("annotationTool", () => {
+        it("starts with annotationTool set to null", () => {
+            expect(getInitialState().annotationTool).toBeNull();
+        });
+
+        it("setAnnotationTool stores the provided tool", () => {
+            const next = editorReducer(getInitialState(), EditorActions.setAnnotationTool("rect"));
+            expect(next.annotationTool).toBe("rect");
+        });
+
+        it("setAnnotationTool with null clears the active tool", () => {
+            const seeded = editorReducer(getInitialState(), EditorActions.setAnnotationTool("circle"));
+            const next = editorReducer(seeded, EditorActions.setAnnotationTool(null));
+            expect(next.annotationTool).toBeNull();
+        });
+
+        it("setAnnotationTool replaces the previous tool", () => {
+            const seeded = editorReducer(getInitialState(), EditorActions.setAnnotationTool("line"));
+            const next = editorReducer(seeded, EditorActions.setAnnotationTool("arrow"));
+            expect(next.annotationTool).toBe("arrow");
+        });
+    });
 });

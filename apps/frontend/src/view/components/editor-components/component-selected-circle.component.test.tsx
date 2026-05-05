@@ -6,19 +6,6 @@ import { createPointOfAttack, createSystemComponent } from "#test-utils/builders
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import editorReducer from "#application/reducers/editor.reducer.ts";
 import { ComponentSelectedCircle } from "./component-selected-circle.component";
-import type { ReactNode } from "react";
-
-vi.mock("react-konva", () => ({
-    Group: ({ children }: { children?: ReactNode }) => <div data-testid="konva-group">{children}</div>,
-    Arc: (props: Record<string, unknown>) => (
-        <div
-            data-testid="konva-arc"
-            data-fill={props["fill"]}
-            onMouseOver={props["onMouseOver"] as () => void}
-            onMouseOut={props["onMouseOut"] as () => void}
-        />
-    ),
-}));
 
 const defaultEditorState = editorReducer(undefined, { type: "@@INIT" });
 

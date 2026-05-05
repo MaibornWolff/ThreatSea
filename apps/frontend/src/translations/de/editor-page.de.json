@@ -6,6 +6,7 @@
     "riskBtn": "Risikomatrix"
   },
   "canvas": {
+    "centerEditor": "Editor zentrieren",
     "exportSystemImage": "Systembild exportieren",
     "annotation": {
       "shapes": "Formen",

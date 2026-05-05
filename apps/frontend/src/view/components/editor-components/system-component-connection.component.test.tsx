@@ -7,19 +7,6 @@ import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import editorReducer from "#application/reducers/editor.reducer.ts";
 import { SystemComponentConnection } from "./system-component-connection.component";
 
-vi.mock("react-konva", () => ({
-    Group: ({ children }: { children?: React.ReactNode }) => <div data-testid="konva-group">{children}</div>,
-    Line: (props: Record<string, unknown>) => (
-        <div
-            data-testid="konva-line"
-            data-stroke={props["stroke"]}
-            data-stroke-width={props["strokeWidth"]}
-            data-listening={String(props["listening"])}
-            data-points={JSON.stringify(props["points"])}
-        />
-    ),
-}));
-
 const defaultEditorState = editorReducer(undefined, { type: "@@INIT" });
 
 const defaultProps = {

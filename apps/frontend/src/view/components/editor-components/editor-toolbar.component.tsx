@@ -13,7 +13,7 @@ import { useTranslation } from "react-i18next";
 import { EditorColorPicker } from "./editor-color-picker.component";
 import type { AnnotationType } from "#api/types/system.types.ts";
 
-interface EditorToolbarProps {
+export interface EditorToolbarProps {
     onCenterEditor: () => void;
     onDownloadSystemView: () => void;
     showAnnotationTools: boolean;
@@ -78,13 +78,19 @@ export const EditorToolbar = ({
     return (
         <>
             <Box sx={{ ...buttonContainerSx, top: 8 }}>
-                <IconButton onClick={onCenterEditor} sx={iconButtonSx}>
-                    <CenterFocusWeak sx={iconSx} />
-                </IconButton>
+                <Tooltip title={t("canvas.centerEditor")}>
+                    <IconButton onClick={onCenterEditor} aria-label={t("canvas.centerEditor")} sx={iconButtonSx}>
+                        <CenterFocusWeak sx={iconSx} />
+                    </IconButton>
+                </Tooltip>
             </Box>
             <Box sx={{ ...buttonContainerSx, top: 60 }}>
                 <Tooltip title={t("canvas.exportSystemImage")}>
-                    <IconButton onClick={onDownloadSystemView} sx={iconButtonSx}>
+                    <IconButton
+                        onClick={onDownloadSystemView}
+                        aria-label={t("canvas.exportSystemImage")}
+                        sx={iconButtonSx}
+                    >
                         <Download sx={iconSx} />
                     </IconButton>
                 </Tooltip>
@@ -96,6 +102,8 @@ export const EditorToolbar = ({
                             <IconButton
                                 ref={shapesButtonRef}
                                 onClick={() => setShapesOpen((open) => !open)}
+                                aria-label={t("canvas.annotation.shapes")}
+                                aria-pressed={isShapesActive}
                                 sx={isShapesActive ? activeIconButtonSx : iconButtonSx}
                             >
                                 <ShapeLineOutlined sx={isShapesActive ? activeIconSx : iconSx} />
@@ -127,6 +135,8 @@ export const EditorToolbar = ({
                                 <Tooltip key={tool} title={t(labelKey)}>
                                     <IconButton
                                         onClick={() => toggleTool(tool)}
+                                        aria-label={t(labelKey)}
+                                        aria-pressed={isActive}
                                         sx={isActive ? activeIconButtonSx : iconButtonSx}
                                     >
                                         <Icon sx={isActive ? activeIconSx : iconSx} />

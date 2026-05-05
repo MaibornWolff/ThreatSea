@@ -102,8 +102,6 @@ const EditorAnnotationInner = ({
         onSelect(annotation.id);
     };
 
-    // Sets the cursor on the stage container — same DOM target the rest of
-    // the canvas (system components/connections, stage panning) uses.
     const setStageCursor = (event: KonvaEventObject<MouseEvent | DragEvent>, cursor: string): void => {
         const stage = event.target.getStage();
         if (stage?.content) {

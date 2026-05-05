@@ -6,6 +6,7 @@
     "riskBtn": "Risk"
   },
   "canvas": {
+    "centerEditor": "Center editor",
     "exportSystemImage": "Export System Image",
     "annotation": {
       "shapes": "Shapes",

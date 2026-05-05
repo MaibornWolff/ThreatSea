@@ -60,6 +60,7 @@ export const EditorColorPicker = ({ color, onChange, disabled = false }: EditorC
                     disabled={disabled}
                     sx={{ width: "20px", height: "20px", padding: 0 }}
                     aria-label={DEFAULT_ANNOTATION_COLOR}
+                    aria-pressed={color.toLowerCase() === DEFAULT_ANNOTATION_COLOR.toLowerCase()}
                 >
                     <Box
                         sx={{
@@ -85,6 +86,7 @@ export const EditorColorPicker = ({ color, onChange, disabled = false }: EditorC
                         disabled={disabled}
                         sx={{ width: "20px", height: "20px", padding: 0 }}
                         aria-label={presetColor}
+                        aria-pressed={isCurrent}
                     >
                         <Box
                             sx={{
