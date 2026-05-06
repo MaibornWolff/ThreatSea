@@ -33,15 +33,8 @@
     {
       "idx": 4,
       "version": "7",
-      "when": 1775632598045,
-      "tag": "0004_update_measure_impacts_threatid",
-      "breakpoints": false
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1776092638564,
-      "tag": "0005_add_status_to_child_threat",
+      "when": 1777835799684,
+      "tag": "0004_new-model-migration",
       "breakpoints": false
     }
   ]
