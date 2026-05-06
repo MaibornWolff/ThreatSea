@@ -21,7 +21,15 @@ const handleSaveSystem: AppMiddleware =
         ) {
             const { projectId, image } = action.payload;
             const { system, editor } = getState();
-            const { id, connections, components, pointsOfAttack, connectionPoints, annotations } = system;
+            const {
+                id,
+                connections,
+                components,
+                pointsOfAttack,
+                connectionPoints,
+                annotations,
+                defaultAnnotationColorByProject,
+            } = system;
             const { lastAutoSaveDate } = editor;
             const data: UpdateSystemRequest = {
                 projectId,
@@ -39,6 +47,7 @@ const handleSaveSystem: AppMiddleware =
                         (item) => item.projectId === projectId
                     ),
                     annotations: Object.values(annotations.entities).filter((item) => item.projectId === projectId),
+                    defaultAnnotationColor: defaultAnnotationColorByProject[projectId] ?? null,
                     lastAutoSaveDate,
                 },
             };
@@ -166,6 +175,7 @@ const handleUserDidSomething: AppMiddleware =
             SystemActions.createAnnotation.match(action) ||
             SystemActions.setAnnotation.match(action) ||
             SystemActions.removeAnnotation.match(action) ||
+            SystemActions.setDefaultAnnotationColor.match(action) ||
             PointsOfAttackActions.createPointOfAttack.match(action) ||
             PointsOfAttackActions.setPointOfAttack.match(action) ||
             PointsOfAttackActions.removePointOfAttack.match(action)
@@ -226,6 +236,12 @@ const handleSuccessfulRequest: AppMiddleware =
                     dispatch(SystemActions.clearSystem());
                     dispatch(EditorActions.setLastAutoSaveDate(""));
                 }
+                dispatch(
+                    SystemActions.setDefaultAnnotationColorFromBackend({
+                        projectId: action.meta.arg.projectId,
+                        color: data?.defaultAnnotationColor ?? null,
+                    })
+                );
             } else {
                 dispatch(SystemActions.clearSystem());
             }

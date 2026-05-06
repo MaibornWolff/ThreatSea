@@ -16,6 +16,7 @@ export interface SystemData {
     pointsOfAttack: PointOfAttack[];
     connectionPoints: ConnectionPoint[];
     annotations: Annotation[];
+    defaultAnnotationColor?: string | null;
     lastAutoSaveDate: string;
 }
 

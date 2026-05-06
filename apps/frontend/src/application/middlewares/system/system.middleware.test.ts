@@ -116,3 +116,81 @@ describe("system.middleware — getSystem awaits in-flight save", () => {
         await vi.waitFor(() => expect(getSystemSpy).toHaveBeenCalled());
     });
 });
+
+describe("system.middleware — getSystem hydrates the per-project default annotation color", () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    it("does not touch project A's saved color when project B (with no saved data) is loaded", async () => {
+        const store = createStore({ projects: buildProjectsState(USER_ROLES.EDITOR) });
+        // Simulate: user customized project A
+        store.dispatch(SystemActions.setDefaultAnnotationColor({ projectId: 1, color: "#ff00aa" }));
+        expect(store.getState().system.defaultAnnotationColorByProject).toEqual({ 1: "#ff00aa" });
+
+        // User opens project B — fresh project, backend has no system data yet
+        vi.spyOn(SystemAPI, "getSystem").mockResolvedValue({
+            id: 2,
+            projectId: 2,
+            data: null,
+            image: null,
+        });
+        store.dispatch(SystemActions.getSystem({ projectId: 2 }));
+
+        await vi.waitFor(() =>
+            expect(store.getState().system.defaultAnnotationColorByProject).toEqual({ 1: "#ff00aa" })
+        );
+    });
+
+    it("loads the saved color into the entry for the new project when one is present in the data", async () => {
+        const store = createStore({ projects: buildProjectsState(USER_ROLES.EDITOR) });
+        store.dispatch(SystemActions.setDefaultAnnotationColor({ projectId: 1, color: "#ff00aa" }));
+
+        vi.spyOn(SystemAPI, "getSystem").mockResolvedValue({
+            id: 3,
+            projectId: 3,
+            data: {
+                components: [],
+                connections: [],
+                connectionPoints: [],
+                pointsOfAttack: [],
+                annotations: [],
+                defaultAnnotationColor: "#00ff00",
+                lastAutoSaveDate: "",
+            },
+            image: null,
+        });
+        store.dispatch(SystemActions.getSystem({ projectId: 3 }));
+
+        await vi.waitFor(() =>
+            expect(store.getState().system.defaultAnnotationColorByProject).toEqual({
+                1: "#ff00aa",
+                3: "#00ff00",
+            })
+        );
+    });
+
+    it("leaves the entry unset when the loaded data has no defaultAnnotationColor field (legacy data)", async () => {
+        const store = createStore({ projects: buildProjectsState(USER_ROLES.EDITOR) });
+        store.dispatch(SystemActions.setDefaultAnnotationColor({ projectId: 1, color: "#ff00aa" }));
+
+        vi.spyOn(SystemAPI, "getSystem").mockResolvedValue({
+            id: 4,
+            projectId: 4,
+            data: {
+                components: [],
+                connections: [],
+                connectionPoints: [],
+                pointsOfAttack: [],
+                annotations: [],
+                lastAutoSaveDate: "",
+            },
+            image: null,
+        });
+        store.dispatch(SystemActions.getSystem({ projectId: 4 }));
+
+        await vi.waitFor(() =>
+            expect(store.getState().system.defaultAnnotationColorByProject).toEqual({ 1: "#ff00aa" })
+        );
+    });
+});

@@ -175,5 +175,80 @@ describe("systemReducer", () => {
 
             expect(next.annotations.ids).toEqual([]);
         });
+
+        it("clears all per-project default colors", () => {
+            const seeded = systemReducer(
+                getInitialState(),
+                SystemActions.setDefaultAnnotationColor({ projectId: 1, color: "#123456" })
+            );
+            const next = systemReducer(seeded, SystemActions.clearSystem());
+
+            expect(next.defaultAnnotationColorByProject).toEqual({});
+        });
+    });
+
+    describe("setDefaultAnnotationColor", () => {
+        it("stores the chosen color under the given projectId, keeping other projects untouched", () => {
+            const seeded = systemReducer(
+                getInitialState(),
+                SystemActions.setDefaultAnnotationColor({ projectId: 1, color: "#aaaaaa" })
+            );
+            const next = systemReducer(
+                seeded,
+                SystemActions.setDefaultAnnotationColor({ projectId: 2, color: "#bbbbbb" })
+            );
+
+            expect(next.defaultAnnotationColorByProject).toEqual({ 1: "#aaaaaa", 2: "#bbbbbb" });
+        });
+
+        it("marks the system as changed and unblocks auto-save so it kicks off shortly after", () => {
+            const next = systemReducer(
+                getInitialState(),
+                SystemActions.setDefaultAnnotationColor({ projectId: 1, color: "#abcdef" })
+            );
+
+            expect(next.hasChanged).toBe(true);
+            expect(next.blockAutoSave).toBe(true);
+        });
+    });
+
+    describe("setDefaultAnnotationColorFromBackend", () => {
+        it("stores the loaded color under the given projectId without flipping change/auto-save flags", () => {
+            const fresh = { ...getInitialState(), hasChanged: false, blockAutoSave: false };
+            const next = systemReducer(
+                fresh,
+                SystemActions.setDefaultAnnotationColorFromBackend({ projectId: 1, color: "#abcdef" })
+            );
+
+            expect(next.defaultAnnotationColorByProject).toEqual({ 1: "#abcdef" });
+            expect(next.hasChanged).toBe(false);
+            expect(next.blockAutoSave).toBe(false);
+        });
+
+        it("removes the entry when the loaded value is null (project has never been customized)", () => {
+            const seeded = systemReducer(
+                getInitialState(),
+                SystemActions.setDefaultAnnotationColor({ projectId: 1, color: "#abcdef" })
+            );
+            const next = systemReducer(
+                seeded,
+                SystemActions.setDefaultAnnotationColorFromBackend({ projectId: 1, color: null })
+            );
+
+            expect(next.defaultAnnotationColorByProject).toEqual({});
+        });
+
+        it("never touches other projects' entries", () => {
+            const seeded = systemReducer(
+                getInitialState(),
+                SystemActions.setDefaultAnnotationColor({ projectId: 1, color: "#aaaaaa" })
+            );
+            const next = systemReducer(
+                seeded,
+                SystemActions.setDefaultAnnotationColorFromBackend({ projectId: 2, color: "#bbbbbb" })
+            );
+
+            expect(next.defaultAnnotationColorByProject).toEqual({ 1: "#aaaaaa", 2: "#bbbbbb" });
+        });
     });
 });

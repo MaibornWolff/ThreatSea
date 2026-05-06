@@ -11,7 +11,7 @@ import { Box, IconButton, Popover, Tooltip } from "@mui/material";
 import { useRef, useState, type ComponentType } from "react";
 import { useTranslation } from "react-i18next";
 import { EditorColorPicker } from "./editor-color-picker.component";
-import type { AnnotationType } from "#api/types/system.types.ts";
+import { ANNOTATION_TYPE_LABEL_KEYS, type AnnotationType } from "#api/types/system.types.ts";
 
 export interface EditorToolbarProps {
     onCenterEditor: () => void;
@@ -48,11 +48,11 @@ const activeIconButtonSx = {
 const iconSx = { fontSize: 30, color: "primary.main" };
 const activeIconSx = { fontSize: 30, color: "#ffffff" };
 
-const ANNOTATION_TOOLS: { tool: AnnotationType; labelKey: string; Icon: ComponentType<{ sx?: object }> }[] = [
-    { tool: "rect", labelKey: "canvas.annotation.rectangle", Icon: CropSquare },
-    { tool: "circle", labelKey: "canvas.annotation.circle", Icon: RadioButtonUnchecked },
-    { tool: "line", labelKey: "canvas.annotation.line", Icon: HorizontalRule },
-    { tool: "arrow", labelKey: "canvas.annotation.arrow", Icon: TrendingFlat },
+const ANNOTATION_TOOLS: { tool: AnnotationType; Icon: ComponentType<{ sx?: object }> }[] = [
+    { tool: "rect", Icon: CropSquare },
+    { tool: "circle", Icon: RadioButtonUnchecked },
+    { tool: "line", Icon: HorizontalRule },
+    { tool: "arrow", Icon: TrendingFlat },
 ];
 
 export const EditorToolbar = ({
@@ -129,13 +129,14 @@ export const EditorToolbar = ({
                             },
                         }}
                     >
-                        {ANNOTATION_TOOLS.map(({ tool, labelKey, Icon }) => {
+                        {ANNOTATION_TOOLS.map(({ tool, Icon }) => {
                             const isActive = annotationTool === tool;
+                            const label = t(ANNOTATION_TYPE_LABEL_KEYS[tool]);
                             return (
-                                <Tooltip key={tool} title={t(labelKey)}>
+                                <Tooltip key={tool} title={label}>
                                     <IconButton
                                         onClick={() => toggleTool(tool)}
-                                        aria-label={t(labelKey)}
+                                        aria-label={label}
                                         aria-pressed={isActive}
                                         sx={isActive ? activeIconButtonSx : iconButtonSx}
                                     >

@@ -4,7 +4,7 @@ import { Box } from "@mui/system";
 import { useTranslation } from "react-i18next";
 import { checkUserRole, USER_ROLES } from "../../../api/types/user-roles.types";
 import { EditorColorPicker } from "./editor-color-picker.component";
-import type { Annotation } from "#api/types/system.types.ts";
+import { ANNOTATION_TYPE_LABEL_KEYS, type Annotation } from "#api/types/system.types.ts";
 
 interface EditorSidebarSelectedAnnotationProps {
     selectedAnnotation: Annotation;
@@ -33,7 +33,7 @@ export const EditorSidebarSelectedAnnotation = ({
                 }}
             >
                 <Typography sx={{ fontWeight: "bold", fontSize: "0.875rem" }}>
-                    {t("sidebar.annotation.title")}
+                    {`${t("sidebar.annotation.title")}: ${t(ANNOTATION_TYPE_LABEL_KEYS[selectedAnnotation.type])}`}
                 </Typography>
                 {isEditor && (
                     <IconButton

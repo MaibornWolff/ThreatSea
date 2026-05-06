@@ -2,7 +2,8 @@ import { act, renderHook } from "@testing-library/react";
 import type { RefObject } from "react";
 import type { Stage as KonvaStage } from "konva/lib/Stage";
 import type { KonvaEventObject } from "konva/lib/Node";
-import { useAnnotationDrawing, DEFAULT_ANNOTATION_COLOR, ANNOTATION_STROKE_WIDTH } from "./use-annotation-drawing.hook";
+import { useAnnotationDrawing, ANNOTATION_STROKE_WIDTH } from "./use-annotation-drawing.hook";
+import { DEFAULT_ANNOTATION_COLOR } from "#api/types/system.types.ts";
 
 const makeStageRef = (pointer: { x: number; y: number } | null): RefObject<KonvaStage | null> =>
     ({
@@ -31,6 +32,7 @@ const setup = (overrides: Partial<Parameters<typeof useAnnotationDrawing>[0]> = 
             stageRef,
             layerPosition: { x: 0, y: 0 },
             isEditor: true,
+            annotationColor: DEFAULT_ANNOTATION_COLOR,
             createAnnotation,
             ...overrides,
         })
@@ -39,26 +41,9 @@ const setup = (overrides: Partial<Parameters<typeof useAnnotationDrawing>[0]> = 
 
 describe("useAnnotationDrawing", () => {
     describe("initial state", () => {
-        it("starts with annotationColor set to the default", () => {
-            const { result } = setup();
-            expect(result.current.annotationColor).toBe(DEFAULT_ANNOTATION_COLOR);
-        });
-
         it("starts with no drawing preview", () => {
             const { result } = setup();
             expect(result.current.drawingPreview).toBeNull();
-        });
-    });
-
-    describe("setAnnotationColor", () => {
-        it("updates the active drawing color", () => {
-            const { result } = setup();
-
-            act(() => {
-                result.current.setAnnotationColor("#ff0000");
-            });
-
-            expect(result.current.annotationColor).toBe("#ff0000");
         });
     });
 
@@ -338,17 +323,13 @@ describe("useAnnotationDrawing", () => {
             });
         });
 
-        it("uses the current annotationColor for the stroke", () => {
+        it("uses the supplied annotationColor for the stroke", () => {
             const pointer = { x: 0, y: 0 };
             const stageRef = {
                 current: { getRelativePointerPosition: () => pointer },
             } as unknown as RefObject<KonvaStage | null>;
             const createAnnotation = vi.fn().mockReturnValue("ann-1");
-            const { result } = setup({ stageRef, createAnnotation });
-
-            act(() => {
-                result.current.setAnnotationColor("#abcdef");
-            });
+            const { result } = setup({ stageRef, createAnnotation, annotationColor: "#abcdef" });
 
             act(() => {
                 result.current.tryStartDrawing("rect", makeStageEvent());

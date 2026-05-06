@@ -4,10 +4,10 @@ import { EditorSidebarSelectedAnnotation } from "./editor-sidebar-selected-annot
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { createAnnotation } from "#test-utils/builders.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
-import { DEFAULT_ANNOTATION_COLOR } from "../../../application/hooks/use-annotation-drawing.hook";
+import { DEFAULT_ANNOTATION_COLOR } from "#api/types/system.types.ts";
 
 describe("EditorSidebarSelectedAnnotation", () => {
-    it("renders the sidebar title and stroke label", () => {
+    it("renders the sidebar title with the shape type and the stroke label", () => {
         renderWithProviders(
             <EditorSidebarSelectedAnnotation
                 selectedAnnotation={createAnnotation()}
@@ -17,8 +17,26 @@ describe("EditorSidebarSelectedAnnotation", () => {
             />
         );
 
-        expect(screen.getByText("Annotation")).toBeInTheDocument();
+        expect(screen.getByText("Annotation: Rectangle")).toBeInTheDocument();
         expect(screen.getByText("Color")).toBeInTheDocument();
+    });
+
+    it.each([
+        ["rect", "Annotation: Rectangle"],
+        ["circle", "Annotation: Circle"],
+        ["line", "Annotation: Line"],
+        ["arrow", "Annotation: Arrow"],
+    ] as const)("renders %s annotations as '%s' in the header", (type, expected) => {
+        renderWithProviders(
+            <EditorSidebarSelectedAnnotation
+                selectedAnnotation={createAnnotation({ type })}
+                userRole={USER_ROLES.EDITOR}
+                onColorChange={vi.fn()}
+                onDelete={vi.fn()}
+            />
+        );
+
+        expect(screen.getByText(expected)).toBeInTheDocument();
     });
 
     it("renders a delete button for editors that calls onDelete when clicked", async () => {

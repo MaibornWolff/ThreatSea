@@ -242,4 +242,12 @@ export class SystemActions {
     static removeAnnotation = createAction<Pick<Annotation, "id">>("[system] remove annotation");
 
     static setAnnotations = createAction<Annotation[]>("[system] set annotations");
+
+    static setDefaultAnnotationColor = createAction<{ projectId: number; color: string }>(
+        "[system] set default annotation color"
+    );
+
+    static setDefaultAnnotationColorFromBackend = createAction<{ projectId: number; color: string | null }>(
+        "[system] set default annotation color from backend"
+    );
 }

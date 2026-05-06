@@ -4,8 +4,6 @@ import type { KonvaEventObject } from "konva/lib/Node";
 import type { AnnotationType, Coordinate } from "#api/types/system.types.ts";
 import type { useEditorAnnotations } from "./use-editor-annotations.hook";
 
-// Default annotation color preset — matches the system's connection-line blue
-export const DEFAULT_ANNOTATION_COLOR = "#5786ff";
 // Visible stroke width for new annotations — matches the system connection-line
 export const ANNOTATION_STROKE_WIDTH = 3;
 // Minimum dimension for a drawn annotation
@@ -22,6 +20,7 @@ interface UseAnnotationDrawingArgs {
     stageRef: RefObject<KonvaStage | null>;
     layerPosition: Coordinate;
     isEditor: boolean;
+    annotationColor: string;
     createAnnotation: ReturnType<typeof useEditorAnnotations>["createAnnotation"];
 }
 
@@ -29,9 +28,9 @@ export const useAnnotationDrawing = ({
     stageRef,
     layerPosition,
     isEditor,
+    annotationColor,
     createAnnotation,
 }: UseAnnotationDrawingArgs) => {
-    const [annotationColor, setAnnotationColor] = useState<string>(DEFAULT_ANNOTATION_COLOR);
     const [drawingPreview, setDrawingPreview] = useState<AnnotationDrawingState | null>(null);
 
     const stageToLayerCoords = (): { x: number; y: number } | null => {
@@ -123,8 +122,6 @@ export const useAnnotationDrawing = ({
 
     return {
         drawingPreview,
-        annotationColor,
-        setAnnotationColor,
         cancelDrawing,
         tryStartDrawing,
         updateDrawingPreview,

@@ -35,6 +35,8 @@ import { useAlert } from "../../application/hooks/use-alert.hook";
 import CommunicationInterfaceDialog from "../dialogs/add-communication-interface.dialog";
 import { LineDrawingProvider } from "../components/editor-components/contexts/LineDrawingProvider";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
+import { SystemActions } from "#application/actions/system.actions.ts";
+import { systemSelectors } from "#application/selectors/system.selectors.ts";
 import type { KonvaEventObject } from "konva/lib/Node";
 import type { Stage as KonvaStage } from "konva/lib/Stage";
 import type { Layer as KonvaLayer } from "konva/lib/Layer";
@@ -211,15 +213,13 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
 
     const isEditor = checkUserRole(userRole, USER_ROLES.EDITOR);
 
-    const {
-        drawingPreview,
-        annotationColor,
-        setAnnotationColor,
-        cancelDrawing,
-        tryStartDrawing,
-        updateDrawingPreview,
-        commitDrawing,
-    } = useAnnotationDrawing({ stageRef, layerPosition, isEditor, createAnnotation });
+    const annotationColor = useAppSelector((state) => systemSelectors.selectDefaultAnnotationColor(state, projectId));
+    const setAnnotationColor = (color: string): void => {
+        dispatch(SystemActions.setDefaultAnnotationColor({ projectId, color }));
+    };
+
+    const { drawingPreview, cancelDrawing, tryStartDrawing, updateDrawingPreview, commitDrawing } =
+        useAnnotationDrawing({ stageRef, layerPosition, isEditor, annotationColor, createAnnotation });
 
     type ConnectorSelection = EditorConnectionAnchor & {
         communicationInterfaceType?: string | null;

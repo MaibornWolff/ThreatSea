@@ -1,4 +1,5 @@
 import type { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
+import { POA_COLORS } from "../../view/colors/pointsOfAttack.colors";
 import type { POINTS_OF_ATTACK } from "./points-of-attack.types";
 
 export interface UpdateSystemRequest {
@@ -20,10 +21,20 @@ export interface SystemData {
     pointsOfAttack: PointOfAttack[];
     connectionPoints: ConnectionPoint[];
     annotations: Annotation[];
+    defaultAnnotationColor?: string | null;
     lastAutoSaveDate: string;
 }
 
 export type AnnotationType = "rect" | "circle" | "line" | "arrow";
+
+export const DEFAULT_ANNOTATION_COLOR = POA_COLORS.COMMUNICATION_INFRASTRUCTURE.normal;
+
+export const ANNOTATION_TYPE_LABEL_KEYS: Record<AnnotationType, string> = {
+    rect: "canvas.annotation.rectangle",
+    circle: "canvas.annotation.circle",
+    line: "canvas.annotation.line",
+    arrow: "canvas.annotation.arrow",
+};
 
 export interface Annotation {
     id: string;

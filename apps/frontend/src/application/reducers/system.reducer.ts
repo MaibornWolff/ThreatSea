@@ -21,6 +21,7 @@ export interface SystemState {
     connectionPoints: ConnectionPointsState;
     pointsOfAttack: PointsOfAttackState;
     annotations: AnnotationsState;
+    defaultAnnotationColorByProject: Record<number, string>;
     isPending: boolean;
     initialized: boolean;
     hasChanged: boolean;
@@ -36,6 +37,7 @@ const defaultState: SystemState = {
     connectionPoints: systemConnectionPointsAdapter.getInitialState(),
     pointsOfAttack: pointsOfAttackAdapter.getInitialState(),
     annotations: systemAnnotationsAdapter.getInitialState(),
+    defaultAnnotationColorByProject: {},
     isPending: false,
     initialized: false,
     hasChanged: false,
@@ -274,6 +276,21 @@ const systemReducer = createReducer(defaultState, (builder) => {
     builder.addCase(SystemActions.setAnnotations, (state, action) => {
         systemAnnotationsAdapter.upsertMany(state.annotations, action);
         state.hasChanged = true;
+    });
+
+    builder.addCase(SystemActions.setDefaultAnnotationColor, (state, action) => {
+        state.defaultAnnotationColorByProject[action.payload.projectId] = action.payload.color;
+        state.hasChanged = true;
+        state.blockAutoSave = true;
+    });
+
+    builder.addCase(SystemActions.setDefaultAnnotationColorFromBackend, (state, action) => {
+        const { projectId, color } = action.payload;
+        if (color === null) {
+            delete state.defaultAnnotationColorByProject[projectId];
+        } else {
+            state.defaultAnnotationColorByProject[projectId] = color;
+        }
     });
 });
 

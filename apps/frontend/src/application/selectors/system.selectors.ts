@@ -6,12 +6,13 @@ import { systemComponentsAdapter } from "../adapters/system-components.adapter";
 import { systemConnectionsAdapter } from "../adapters/system-connections.adapter";
 import { systemConnectionPointsAdapter, type SystemConnectionPoint } from "../adapters/system-connection-point.adapter";
 import { pointsOfAttackAdapter } from "../adapters/points-of-attack.adapter";
-import type {
-    Annotation,
-    AugmentedSystemComponent,
-    SystemComponent,
-    SystemConnection,
-    SystemPointOfAttack,
+import {
+    DEFAULT_ANNOTATION_COLOR,
+    type Annotation,
+    type AugmentedSystemComponent,
+    type SystemComponent,
+    type SystemConnection,
+    type SystemPointOfAttack,
 } from "#api/types/system.types.ts";
 
 export type AugmentedSystemConnection = SystemConnection & {
@@ -267,4 +268,11 @@ export const systemSelectors = {
             return annotationEntities[annotationId];
         }
     ),
+
+    selectDefaultAnnotationColor: createSelector([selectSystemState, selectProjectId], (system, projectId): string => {
+        if (projectId == null) {
+            return DEFAULT_ANNOTATION_COLOR;
+        }
+        return system.defaultAnnotationColorByProject[projectId] ?? DEFAULT_ANNOTATION_COLOR;
+    }),
 };
