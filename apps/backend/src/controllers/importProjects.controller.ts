@@ -248,18 +248,18 @@ export async function importProject(request: Request<void>, response: Response, 
             Logger.debug("imported child threats");
 
             /*
-            * The measure impacts import seem to have a race condition, in the form present and in the form commented underneath
-            * the console.log() lines seem to influence this behaviour sometimes. Maybe also a new const xy = await createMeasureImpact() could solve this
-            */
+             * The measure impacts import seem to have a race condition, in the form present and in the form commented underneath
+             * the console.log() lines seem to influence this behaviour sometimes. Maybe also a new const xy = await createMeasureImpact() could solve this
+             */
             for (const oldMeasureImpact of body.measureImpacts as MeasureImpact[]) {
                 oldMeasureImpact.childThreatId = childThreatIdsDict.get(oldMeasureImpact.childThreatId)!;
                 oldMeasureImpact.measureId = measureIdsDict.get(oldMeasureImpact.measureId)!;
 
                 const { id: _id, ...insertMeasureImpact } = oldMeasureImpact;
 
-               await createMeasureImpact(insertMeasureImpact, tx);
+                await createMeasureImpact(insertMeasureImpact, tx);
 
-               console.log(oldMeasureImpact);
+                console.log(oldMeasureImpact);
             }
 
             // for (const oldMeasureImpact of body.measureImpacts as MeasureImpact[]) {

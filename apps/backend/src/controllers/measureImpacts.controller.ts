@@ -31,8 +31,7 @@ export async function getMeasureImpacts(
 ): Promise<void> {
     const projectId = request.params.projectId;
 
-    const measureImpacts: MeasureImpactResponse[] =
-        await MeasureImpactsService.getMeasureImpactsByProject(projectId);
+    const measureImpacts: MeasureImpactResponse[] = await MeasureImpactsService.getMeasureImpactsByProject(projectId);
 
     response.json(measureImpacts);
 }
@@ -84,8 +83,7 @@ export async function getMeasureImpact(
     const projectId = request.params.projectId;
     const measureImpactId = request.params.measureImpactId;
 
-    const measureImpact: MeasureImpactResponse | null =
-        await MeasureImpactsService.getMeasureImpact(measureImpactId);
+    const measureImpact: MeasureImpactResponse | null = await MeasureImpactsService.getMeasureImpact(measureImpactId);
     if (measureImpact === null) {
         next(new NotFoundError("Measure Impact not found"));
         return;
@@ -161,8 +159,7 @@ export async function updateMeasureImpact(
     const projectId = request.params.projectId!;
     const measureImpactId = request.params.measureImpactId!;
 
-    const measureImpact: MeasureImpactResponse | null =
-        await MeasureImpactsService.getMeasureImpact(measureImpactId);
+    const measureImpact: MeasureImpactResponse | null = await MeasureImpactsService.getMeasureImpact(measureImpactId);
     if (measureImpact === null) {
         next(new NotFoundError("Measure Impact not found"));
         return;
@@ -177,8 +174,10 @@ export async function updateMeasureImpact(
 
     const data = request.body;
     try {
-        const updatedMeasureImpact: MeasureImpactResponse =
-            await MeasureImpactsService.updateMeasureImpact(measureImpactId, data);
+        const updatedMeasureImpact: MeasureImpactResponse = await MeasureImpactsService.updateMeasureImpact(
+            measureImpactId,
+            data
+        );
 
         response.json(updatedMeasureImpact);
     } catch (error) {
@@ -201,8 +200,7 @@ export async function deleteMeasureImpact(
     const projectId = request.params.projectId!;
     const measureImpactId = request.params.measureImpactId!;
 
-    const measureImpact: MeasureImpactResponse | null =
-        await MeasureImpactsService.getMeasureImpact(measureImpactId);
+    const measureImpact: MeasureImpactResponse | null = await MeasureImpactsService.getMeasureImpact(measureImpactId);
     if (measureImpact === null) {
         next(new NotFoundError("Measure Impact not found"));
         return;

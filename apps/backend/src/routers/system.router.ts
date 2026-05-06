@@ -34,4 +34,4 @@ systemRouter.put<ProjectIdParam, SystemResponse, UpdateSystemRequest>(
 systemRouter.use("/genericThreats", genericThreatsRouter);
 systemRouter.use("/measures", measuresRouter);
 systemRouter.use("/measureImpacts", measureImpactRouter);
-systemRouter.use("/childThreats", childThreatsRouter); 
+systemRouter.use("/childThreats", childThreatsRouter);

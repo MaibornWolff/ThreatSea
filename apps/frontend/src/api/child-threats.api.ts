@@ -2,23 +2,29 @@ import { fetchAPI } from "#api/utils.ts";
 import type { ChildThreat } from "#api/types/child-threat.types.ts";
 
 export class ChildThreatsAPI {
-    static async getChildThreatsByGenericThreat({ projectId, genericThreatId }: { projectId: number; genericThreatId: number }): Promise<ChildThreat[]> {
-        return await fetchAPI(`/projects/${projectId}/system/genericThreats/${genericThreatId}/childThreats`);
+    static async getChildThreatsByGenericThreat({
+        projectId,
+        genericThreatId,
+    }: {
+        projectId: number;
+        genericThreatId: number;
+    }): Promise<ChildThreat[]> {
+        return await fetchAPI(`/projects/${projectId}/system/childThreats/${genericThreatId}/list`);
     }
 
-    static async getChildThreat({ projectId, genericThreatId, id }: { projectId: number; genericThreatId: number; id: number }): Promise<ChildThreat> {
-        return await fetchAPI(`/projects/${projectId}/system/genericThreats/${genericThreatId}/childThreats/${id}`);
+    static async getChildThreat({ projectId, id }: { projectId: number; id: number }): Promise<ChildThreat> {
+        return await fetchAPI(`/projects/${projectId}/system/childThreats/${id}`);
     }
 
     static async createChildThreat(data: { projectId: number; [key: string]: any }): Promise<ChildThreat> {
-        const { projectId, ...body } = data;
+        const { projectId, genericThreatId, ...body } = data;
 
-        return await fetchAPI(`/projects/${projectId}/system/childThreats`, {
+        return await fetchAPI(`/projects/${projectId}/system/childThreats/${genericThreatId}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(body),
+            body: JSON.stringify({ ...body, genericThreatId }),
         });
     }
 

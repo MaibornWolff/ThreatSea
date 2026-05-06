@@ -315,7 +315,8 @@ const ThreatsPageBody = () => {
                                         genericThreats.map((genericThreat) => {
                                             const isExpanded = expandedGenericThreatIds[genericThreat.id] ?? false;
                                             const childThreats = childThreatsByGenericThreatId[genericThreat.id] ?? [];
-                                            const isLoadingChildren = loadingChildrenByGenericThreatId[genericThreat.id] ?? false;
+                                            const isLoadingChildren =
+                                                loadingChildrenByGenericThreatId[genericThreat.id] ?? false;
 
                                             return (
                                                 <Fragment key={`generic-group-${genericThreat.id}`}>
@@ -339,7 +340,11 @@ const ThreatsPageBody = () => {
                                                                 )}
                                                             </IconButton>
                                                         </CustomTableCell>
-                                                        <CustomTableCell showBorder={true} align="left" sx={{ fontWeight: "bold" }}>
+                                                        <CustomTableCell
+                                                            showBorder={true}
+                                                            align="left"
+                                                            sx={{ fontWeight: "bold" }}
+                                                        >
                                                             {genericThreat.name}
                                                         </CustomTableCell>
                                                         <CustomTableCell showBorder={true}>-</CustomTableCell>
@@ -355,7 +360,9 @@ const ThreatsPageBody = () => {
                                                         <CustomTableCell>-</CustomTableCell>
                                                         <CustomTableCell showBorder={true}>-</CustomTableCell>
                                                         <CustomTableCell align="left">
-                                                            {isLoadingChildren ? "Loading children..." : `${childThreats.length} child threats`}
+                                                            {isLoadingChildren
+                                                                ? "Loading children..."
+                                                                : `${childThreats.length} child threats`}
                                                         </CustomTableCell>
                                                     </TableRow>
                                                     {isExpanded &&
@@ -369,35 +376,64 @@ const ThreatsPageBody = () => {
                                                                 }}
                                                             >
                                                                 <CustomTableCell />
-                                                                <CustomTableCell showBorder={true} align="left" sx={{ pl: 4 }}>
+                                                                <CustomTableCell
+                                                                    showBorder={true}
+                                                                    align="left"
+                                                                    sx={{ pl: 4 }}
+                                                                >
                                                                     {childThreat.name}
                                                                 </CustomTableCell>
-                                                                <CustomTableCell showBorder={true}>{childThreat.assets.length}</CustomTableCell>
+                                                                <CustomTableCell showBorder={true}>
+                                                                    {childThreat.assets.length}
+                                                                </CustomTableCell>
                                                                 <CustomTableCell>
-                                                                    {childThreat.pointOfAttack === "COMMUNICATION_INTERFACES"
+                                                                    {childThreat.pointOfAttack ===
+                                                                    "COMMUNICATION_INTERFACES"
                                                                         ? `${childThreat.componentName || t("unknown")}${childThreat.interfaceName ? ` > ${childThreat.interfaceName}` : ""}`
                                                                         : childThreat.componentName}
                                                                 </CustomTableCell>
-                                                                <CustomTableCell>{t(`pointsOfAttackList.${childThreat.pointOfAttack}`)}</CustomTableCell>
-                                                                <CustomTableCell showBorder={true}>{t(`attackerList.${childThreat.attacker}`)}</CustomTableCell>
-                                                                <CustomTableCell>{childThreat.probability}</CustomTableCell>
+                                                                <CustomTableCell>
+                                                                    {t(
+                                                                        `pointsOfAttackList.${childThreat.pointOfAttack}`
+                                                                    )}
+                                                                </CustomTableCell>
+                                                                <CustomTableCell showBorder={true}>
+                                                                    {t(`attackerList.${childThreat.attacker}`)}
+                                                                </CustomTableCell>
+                                                                <CustomTableCell>
+                                                                    {childThreat.probability}
+                                                                </CustomTableCell>
                                                                 <CustomTableCell>{childThreat.damage}</CustomTableCell>
                                                                 <CustomTableCell>{childThreat.risk}</CustomTableCell>
-                                                                <CustomTableCell showBorder={true}>{childThreat.doneEditing ? <Check /> : <Clear />}</CustomTableCell>
+                                                                <CustomTableCell showBorder={true}>
+                                                                    {childThreat.doneEditing ? <Check /> : <Clear />}
+                                                                </CustomTableCell>
                                                                 <CustomTableCell padding="none" align="right">
                                                                     <Box sx={{ display: "flex", gap: 1, pr: 1 }}>
                                                                         {checkUserRole(userRole, USER_ROLES.EDITOR) && (
                                                                             <>
                                                                                 <IconButton
                                                                                     title={t("duplicateThreat")}
-                                                                                    onClick={(e) => handleDuplicateChildThreat(e, childThreat)}
+                                                                                    onClick={(e) =>
+                                                                                        handleDuplicateChildThreat(
+                                                                                            e,
+                                                                                            childThreat
+                                                                                        )
+                                                                                    }
                                                                                 >
-                                                                                    <ContentCopy sx={{ fontSize: 18 }} />
+                                                                                    <ContentCopy
+                                                                                        sx={{ fontSize: 18 }}
+                                                                                    />
                                                                                 </IconButton>
                                                                                 <IconButton
                                                                                     title={t("deleteThreat")}
                                                                                     hoverColor="error"
-                                                                                    onClick={(e) => handleDeleteChildThreat(e, childThreat)}
+                                                                                    onClick={(e) =>
+                                                                                        handleDeleteChildThreat(
+                                                                                            e,
+                                                                                            childThreat
+                                                                                        )
+                                                                                    }
                                                                                 >
                                                                                     <Delete sx={{ fontSize: 18 }} />
                                                                                 </IconButton>

@@ -5,7 +5,12 @@
 import { NextFunction, Request, Response } from "express";
 import { BadRequestError } from "#errors/bad-request.error.js";
 import { NotFoundError } from "#errors/not-found.error.js";
-import { ChildThreatIdParam, ChildThreatResponse, CreateChildThreatRequest, UpdateChildThreatRequest } from "#types/childThreat.types.js";
+import {
+    ChildThreatIdParam,
+    ChildThreatResponse,
+    CreateChildThreatRequest,
+    UpdateChildThreatRequest,
+} from "#types/childThreat.types.js";
 import { GenericThreatIdParam } from "#types/genericThreat.types.js";
 import * as childThreatsService from "#services/childThreats.service.js";
 import * as genericThreatsService from "#services/genericThreats.service.js";
@@ -86,8 +91,8 @@ export async function createChildThreat(
     next: NextFunction
 ): Promise<void> {
     const projectId = request.params.projectId;
+    const createBody = request.body as CreateChildThreatRequest;
     const genericThreatId = request.params.genericThreatId;
-    const createBody = request.body as any;
 
     try {
         // Ensure generic threat exists and belongs to project
@@ -102,15 +107,13 @@ export async function createChildThreat(
             return;
         }
 
-        // If body contains genericThreatId, ensure it matches the URL param
-        if (createBody.genericThreatId && createBody.genericThreatId !== genericThreatId) {
+        if (createBody.genericThreatId !== genericThreatId) {
             next(new BadRequestError("genericThreatId in body does not match url"));
             return;
         }
 
         const created = await childThreatsService.createChildThreat({
             ...createBody,
-            genericThreatId,
             projectId,
         });
 
