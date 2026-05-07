@@ -44,7 +44,10 @@ import enCommon from "../translations/en/common.en.json";
 import enReport from "../translations/en/report.en.json";
 
 export function getPreferredLanguage(supported: string[] = ["en", "de"]): string {
-    const cachedLang = localStorage.getItem("lang");
+    const cachedLang =
+        typeof localStorage !== "undefined" && typeof localStorage.getItem === "function"
+            ? localStorage.getItem("lang")
+            : null;
 
     if (cachedLang) {
         return JSON.parse(cachedLang);
