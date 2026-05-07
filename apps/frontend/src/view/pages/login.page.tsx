@@ -13,7 +13,8 @@ import { NavigationActions } from "../../application/actions/navigation.actions"
 import { ERR_MESS_SERVER_INTERNAL, ERR_TYPE_INTERNAL } from "../../application/reducers/error.reducer";
 import { Button } from "../components/button.component";
 import { Page } from "../components/page.component";
-import { CreatePage, HeaderNavigation } from "../components/with-menu.component";
+import { CreatePage } from "../components/create-page.component";
+import { HeaderUtilityControls } from "../components/header-utility-controls.component";
 import { useUser } from "../../application/hooks/use-user.hook";
 import { useAppDispatch } from "../../application/hooks/use-app-redux.hook";
 
@@ -134,4 +135,4 @@ const LoginPageBody = () => {
     );
 };
 
-export const LoginPage = CreatePage(HeaderNavigation, LoginPageBody);
+export const LoginPage = CreatePage(HeaderUtilityControls, LoginPageBody);

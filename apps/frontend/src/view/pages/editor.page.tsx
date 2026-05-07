@@ -32,7 +32,8 @@ import { EditorStage } from "../components/editor-components/editor-stage.compon
 import { Page } from "../components/page.component";
 import { SystemComponentConnection } from "../components/editor-components/system-component-connection.component";
 import { SystemComponent } from "../components/editor-components/system-component.component";
-import { CreatePage, HeaderNavigation } from "../components/with-menu.component";
+import { CreatePage } from "../components/create-page.component";
+import { HeaderUtilityControls } from "../components/header-utility-controls.component";
 import AssetDialogPage from "./asset-dialog.page";
 import ComponentDialogPage from "./component-dialog.page";
 import { CommunicationContextMenu } from "../components/editor-components/editor-communication-interface-context-menu.component";
@@ -1334,5 +1335,5 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     );
 };
 
-export const EditorPage = memo(CreatePage(HeaderNavigation, EditorPageBody, true));
+export const EditorPage = memo(CreatePage(HeaderUtilityControls, EditorPageBody, true));
 EditorPage.displayName = "EditorPage";

@@ -10,7 +10,8 @@ import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
 import { NavigationActions } from "../../application/actions/navigation.actions";
 import { useConfirm } from "../../application/hooks/use-confirm.hook";
 import { Page } from "../components/page.component";
-import { CreatePage, HeaderNavigation } from "../components/with-menu.component";
+import { CreatePage } from "../components/create-page.component";
+import { HeaderUtilityControls } from "../components/header-utility-controls.component";
 import { withProject } from "../components/with-project.hoc";
 import MeasureDetailsDialogPage from "./measure-details-dialog.page";
 import { IconButton } from "../components/icon-button.component";
@@ -458,4 +459,4 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
     );
 };
 
-export const MeasuresPage = CreatePage(HeaderNavigation, withProject(MeasuresPageBody), true);
+export const MeasuresPage = CreatePage(HeaderUtilityControls, withProject(MeasuresPageBody), true);

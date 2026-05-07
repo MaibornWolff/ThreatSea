@@ -17,9 +17,12 @@ mockUseAlert();
 
 // --- Child component mocks (isolate page from canvas/sidebar internals) ---
 
-vi.mock("../components/with-menu.component", () => ({
+vi.mock("../components/create-page.component", () => ({
     CreatePage: (_Header: unknown, Body: unknown) => Body,
-    HeaderNavigation: () => null,
+}));
+
+vi.mock("../components/header-utility-controls.component", () => ({
+    HeaderUtilityControls: () => null,
 }));
 
 vi.mock("../components/editor-components/editor-sidebar.component", () => ({

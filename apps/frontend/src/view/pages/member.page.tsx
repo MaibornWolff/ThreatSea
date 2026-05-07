@@ -19,7 +19,8 @@ import { MatrixFilterToggleButtonGroup } from "../components/matrix-filter-toggl
 import { Page } from "../components/page.component";
 import { SearchField } from "../components/search-field.component";
 import { CustomTableHeaderCell } from "../components/table-header.component";
-import { CreatePage, HeaderNavigation } from "../components/with-menu.component";
+import { CreatePage } from "../components/create-page.component";
+import { HeaderUtilityControls } from "../components/header-utility-controls.component";
 import MemberDialogPage from "./member-dialog.page";
 import { NavigationActions } from "../../application/actions/navigation.actions";
 import { AlertActions } from "../../application/actions/alert.actions";
@@ -534,4 +535,4 @@ const MemberTableRow = ({ member, onEdit, onDelete, userRole }: MemberTableRowPr
     );
 };
 
-export const MemberPage = CreatePage(HeaderNavigation, MemberPageBody, true);
+export const MemberPage = CreatePage(HeaderUtilityControls, MemberPageBody, true);

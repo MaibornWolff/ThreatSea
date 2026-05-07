@@ -13,8 +13,8 @@ export const Page = ({ sx = {}, ...props }: BoxProps<"main">) => {
                 padding: 1,
                 maxHeight: "100%",
                 position: "relative",
-                paddingLeft: 6,
-                paddingRight: 6,
+                paddingLeft: { xs: 2, md: 6 },
+                paddingRight: { xs: 2, md: 6 },
                 ...sx,
             }}
             {...props}

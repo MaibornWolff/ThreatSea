@@ -2,11 +2,12 @@ import type { ElementType, ReactNode } from "react";
 import { ToggleButtonGroup, ToggleButton } from "@mui/material";
 import type { ToggleButtonGroupProps, ToggleButtonProps } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
+import type { ResponsiveStyleValue } from "@mui/system";
 
 interface ButtonStyleOverrides {
     borderRightColor?: string;
-    fontSize?: string | number;
-    width?: string | number;
+    fontSize?: ResponsiveStyleValue<string | number>;
+    width?: ResponsiveStyleValue<string | number>;
     backgroundColor?: string;
     hoverBackgroundColor?: string;
     selectedBackgroundColor?: string;
