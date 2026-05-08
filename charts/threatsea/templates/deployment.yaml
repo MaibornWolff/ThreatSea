@@ -1,0 +1,133 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "threatsea.fullname" . }}
+  labels:
+    {{- include "threatsea.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "threatsea.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        # Roll pods when the chart-managed secret changes
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "threatsea.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "threatsea.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: threatsea
+          securityContext:
+            {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ include "threatsea.imageTag" . }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.containerPort }}
+              protocol: TCP
+          env:
+            # ── Logging ──────────────────────────────────────────────────
+            - name: LOG_LEVEL
+              value: {{ .Values.config.logLevel | quote }}
+
+            # ── Origins ───────────────────────────────────────────────────
+            - name: ORIGIN_APP
+              value: {{ .Values.config.originApp | quote }}
+            - name: ORIGIN_BACKEND
+              value: {{ .Values.config.originBackend | quote }}
+
+            # ── Auth ──────────────────────────────────────────────────────
+            - name: AUTH_METHOD
+              value: {{ .Values.config.authMethod | quote }}
+            {{- if eq .Values.config.authMethod "oidc" }}
+            - name: OIDC_ISSUER_URL
+              value: {{ required "config.oidc.issuerUrl is required when authMethod=oidc" .Values.config.oidc.issuerUrl | quote }}
+            - name: OIDC_CLIENT_ID
+              value: {{ required "config.oidc.clientId is required when authMethod=oidc" .Values.config.oidc.clientId | quote }}
+            - name: OIDC_ALLOW_HTTP
+              value: {{ .Values.config.oidc.allowHttp | quote }}
+            - name: OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "threatsea.secretName" . }}
+                  key: {{ .Values.secret.keys.oidcClientSecret }}
+            {{- end }}
+
+            # ── Cookies ───────────────────────────────────────────────────
+            - name: COOKIES_SECURE_OPTION
+              value: {{ .Values.config.cookies.secureOption | quote }}
+
+            # ── App Proxy ─────────────────────────────────────────────────
+            - name: USE_PROXY
+              value: {{ .Values.config.useProxy | quote }}
+
+            # ── Secrets ───────────────────────────────────────────────────
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "threatsea.secretName" . }}
+                  key: {{ .Values.secret.keys.jwtSecret }}
+            - name: EXPRESS_SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "threatsea.secretName" . }}
+                  key: {{ .Values.secret.keys.sessionSecret }}
+
+            # ── Database ──────────────────────────────────────────────────
+            - name: DATABASE_HOST
+              value: {{ include "threatsea.databaseHost" . | quote }}
+            - name: DATABASE_PORT
+              value: {{ .Values.database.port | quote }}
+            - name: DATABASE_NAME
+              value: {{ .Values.database.name | quote }}
+            - name: DATABASE_USER
+              value: {{ .Values.database.user | quote }}
+            - name: DATABASE_TLS
+              value: {{ .Values.database.tls | quote }}
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "threatsea.databasePasswordSecretName" . }}
+                  key: {{ include "threatsea.databasePasswordSecretKey" . }}
+
+            # ── Extra env ─────────────────────────────────────────────────
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          startupProbe:
+            {{- toYaml .Values.startupProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
