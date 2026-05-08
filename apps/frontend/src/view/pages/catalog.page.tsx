@@ -18,7 +18,8 @@ import { CatalogMeasuresListBox } from "../components/catalog-measures-list-box.
 import { CatalogThreatsListBox } from "../components/catalog-threats-list-box.component";
 import { MatrixFilterToggleButtonGroup } from "../components/matrix-filter-toggle-button-group.component";
 import { Page } from "../components/page.component";
-import { CreatePage, HeaderNavigation } from "../components/with-menu.component";
+import { CreatePage } from "../components/create-page.component";
+import { HeaderUtilityControls } from "../components/header-utility-controls.component";
 import CatalogMeasureDialogPage from "../pages/catalog-measure-dialog.page";
 import CatalogThreatDialogPage from "../pages/catalog-threat-dialog.page";
 
@@ -229,4 +230,4 @@ const CatalogPageBody = () => {
     );
 };
 
-export const CatalogPage = CreatePage(HeaderNavigation, CatalogPageBody);
+export const CatalogPage = CreatePage(HeaderUtilityControls, CatalogPageBody);

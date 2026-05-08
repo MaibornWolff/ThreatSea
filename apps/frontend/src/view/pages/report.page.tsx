@@ -16,7 +16,8 @@ import { Button } from "../components/button.component";
 import { DialogTextField } from "../components/dialog.textfield.component";
 import { Page } from "../components/page.component";
 import { ToggleButtons } from "../components/toggle-buttons.component";
-import { CreatePage, HeaderNavigation } from "../components/with-menu.component";
+import { CreatePage } from "../components/create-page.component";
+import { HeaderUtilityControls } from "../components/header-utility-controls.component";
 import { Report } from "../report/report";
 import { ExportIconButton } from "../components/export-icon-button.component";
 import { withProject } from "../components/with-project.hoc";
@@ -773,4 +774,4 @@ const PdfDocumentToolbar = ({ filename, ...props }: PdfDocumentToolbarProps) => 
     );
 };
 
-export const ReportPage = CreatePage(HeaderNavigation, withProject(ReportPageBody));
+export const ReportPage = CreatePage(HeaderUtilityControls, withProject(ReportPageBody));

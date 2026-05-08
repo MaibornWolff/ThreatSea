@@ -97,6 +97,7 @@ const UserPanel = () => {
                             overflow: "visible",
                             filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
                             mt: 1.5,
+                            bgcolor: "background.paperIntransparent",
                             "& .MuiAvatar-root": {
                                 width: 32,
                                 height: 32,
@@ -111,7 +112,7 @@ const UserPanel = () => {
                                 right: 22,
                                 width: 10,
                                 height: 10,
-                                bgcolor: "background.paper",
+                                bgcolor: "background.paperIntransparent",
                                 transform: "translateY(-50%) rotate(45deg)",
                                 zIndex: 0,
                             },
