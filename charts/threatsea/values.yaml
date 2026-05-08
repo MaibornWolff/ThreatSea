@@ -1,0 +1,210 @@
+# ──────────────────────────────────────────────
+# ThreatSea Helm Chart – Default Values
+# ──────────────────────────────────────────────
+
+# -- Number of replicas. Note: ThreatSea should not be scaled horizontally
+# unless session affinity or an external session store is configured.
+replicaCount: 1
+
+image:
+  repository: ghcr.io/maibornwolff/threatsea
+  pullPolicy: IfNotPresent
+  tag: ""
+
+imagePullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: false
+  annotations: {}
+  name: ""
+  automountServiceAccountToken: false
+
+podAnnotations: {}
+
+podLabels: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  capabilities:
+    drop:
+      - ALL
+
+# ──────────────────────────────────────────────
+# Application Configuration
+# ──────────────────────────────────────────────
+config:
+  # -- Log level: 0 (debug), 1 (info), 2 (warning), 3 (error)
+  logLevel: "3"
+
+  # -- Origin of the frontend (used for CORS)
+  originApp: ""
+  # -- Origin of the backend (used for CORS)
+  originBackend: ""
+
+  authMethod: "oidc"
+  oidc:
+    # -- OIDC issuer URL (required when authMethod=oidc)
+    issuerUrl: ""
+    # -- OIDC client ID
+    clientId: ""
+    # -- Allow plain HTTP for OIDC (never enable in production)
+    allowHttp: "false"
+
+  cookies:
+    # -- Set to "disabled" only in development (non-HTTPS)
+    secureOption: "enabled"
+
+  # -- Set to "true" when behind a reverse proxy / ingress (enables trust proxy)
+  useProxy: "true"
+
+# ──────────────────────────────────────────────
+# Secrets
+# ──────────────────────────────────────────────
+secret:
+  # -- If true, the chart creates a Kubernetes Secret from the values below.
+  # If false, provide an existing secret via existingSecret.
+  create: true
+
+  # -- Name of an existing Secret to use (when create=false).
+  # The secret must contain the keys defined in secret.keys.
+  existingSecret: ""
+
+  # -- Key names inside the existing Secret (only relevant when create=false)
+  keys:
+    jwtSecret: jwt-secret
+    sessionSecret: session-secret
+    oidcClientSecret: oidc-client-secret
+    databasePassword: database-password
+
+  # -- Values used when secret.create=true
+  values:
+    jwtSecret: ""
+    sessionSecret: ""
+    # -- OIDC client secret (only required when config.authMethod=oidc)
+    oidcClientSecret: ""
+    # -- Database password (only used when postgresql.enabled=false)
+    databasePassword: ""
+
+# ──────────────────────────────────────────────
+# Database (external)
+# ──────────────────────────────────────────────
+database:
+  host: ""
+  name: "threatsea"
+  user: "threatsea"
+  tls: "enabled"
+  port: 5432
+
+# ──────────────────────────────────────────────
+# PostgreSQL subchart (Bitnami)
+# Set postgresql.enabled=true to deploy PostgreSQL as a sidecar dependency.
+# When enabled, database.host is automatically set to the subchart service.
+# ──────────────────────────────────────────────
+postgresql:
+  enabled: true
+  auth:
+    database: threatsea
+    username: threatsea
+    password: ""
+    existingSecret: ""
+  primary:
+    persistence:
+      enabled: true
+      size: 8Gi
+
+# ──────────────────────────────────────────────
+# Service
+# ──────────────────────────────────────────────
+service:
+  type: ClusterIP
+  port: 80
+  containerPort: 8000
+
+# ──────────────────────────────────────────────
+# Ingress
+# ──────────────────────────────────────────────
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: threatsea.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  # - secretName: threatsea-tls
+  #   hosts:
+  #     - threatsea.example.com
+
+# ──────────────────────────────────────────────
+# Gateway API (alternative to Ingress)
+# Requires the Gateway API CRDs to be installed in the cluster.
+# ──────────────────────────────────────────────
+gateway:
+  enabled: false
+  gatewayName: ""
+  gatewayNamespace: ""
+  hostname: threatsea.example.com
+  tlsSecretName: ""
+
+# ──────────────────────────────────────────────
+# Resources
+# ──────────────────────────────────────────────
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 512Mi
+
+# ──────────────────────────────────────────────
+# Probes
+# ──────────────────────────────────────────────
+livenessProbe:
+  httpGet:
+    path: /api/health
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /api/health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+startupProbe:
+  httpGet:
+    path: /api/health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  failureThreshold: 30
+
+# -- Node selector
+nodeSelector: {}
+
+# -- Tolerations
+tolerations: []
+
+# -- Affinity rules
+affinity: {}
+
+# -- Extra environment variables to inject into the container
+extraEnv: []
