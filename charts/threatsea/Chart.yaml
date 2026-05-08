@@ -1,0 +1,26 @@
+apiVersion: v2
+name: threatsea
+description: A Helm chart for ThreatSea - an open-source threat modeling tool
+type: application
+version: 0.1.0
+appVersion: 1.0.0
+
+keywords:
+  - threatsea
+  - threat-modeling
+  - security
+  - risk-management
+
+home: https://github.com/MaibornWolff/ThreatSea
+sources:
+  - https://github.com/MaibornWolff/ThreatSea
+
+maintainers:
+  - name: MaibornWolff GmbH
+    url: https://www.maibornwolff.de/en
+
+dependencies:
+  - name: postgresql
+    version: "18.x.x"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: postgresql.enabled

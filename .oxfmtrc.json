@@ -19,6 +19,7 @@
     ".vite",
     "build",
     "dist",
-    "**/testData/**"
+    "**/testData/**",
+    "charts"
   ]
 }
