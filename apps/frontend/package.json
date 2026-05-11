@@ -36,7 +36,7 @@
     "i18next": "26.1.0",
     "jwt-decode": "4.0.0",
     "konva": "10.3.0",
-    "markdown-to-jsx": "9.7.16",
+    "markdown-to-jsx": "9.8.0",
     "react": "19.2.6",
     "react-dom": "19.2.6",
     "react-hook-form": "7.75.0",
