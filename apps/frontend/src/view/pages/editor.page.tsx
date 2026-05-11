@@ -20,6 +20,7 @@ import { useConfirm } from "../../application/hooks/use-confirm.hook";
 import { AnnotationDrawingPreview } from "../components/editor-components/annotation-drawing-preview.component";
 import { ConnectionPreview } from "../components/editor-components/connection-preview.component";
 import { EditorAnnotation } from "../components/editor-components/editor-annotation.component";
+import { TextEditingOverlay } from "../components/editor-components/text-editing-overlay.component";
 import { EditorSidebar } from "../components/editor-components/editor-sidebar.component";
 import { EditorStage } from "../components/editor-components/editor-stage.component";
 import { EditorToolbar } from "../components/editor-components/editor-toolbar.component";
@@ -42,6 +43,7 @@ import type { Stage as KonvaStage } from "konva/lib/Stage";
 import type { Layer as KonvaLayer } from "konva/lib/Layer";
 import type { Asset } from "#api/types/asset.types.ts";
 import type {
+    Annotation,
     AnnotationType,
     AugmentedSystemComponent,
     ConnectionEndpointWithComponent,
@@ -220,6 +222,39 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
 
     const { drawingPreview, cancelDrawing, tryStartDrawing, updateDrawingPreview, commitDrawing } =
         useAnnotationDrawing({ stageRef, layerPosition, isEditor, annotationColor, createAnnotation });
+
+    const [editingAnnotationId, setEditingAnnotationId] = useState<string | null>(null);
+    const editingAnnotation = editingAnnotationId
+        ? (annotations.find((annotation) => annotation.id === editingAnnotationId) ?? null)
+        : null;
+    const handleRequestEdit = useCallback((id: string) => {
+        setEditingAnnotationId(id);
+    }, []);
+
+    const handleEditCommit = useCallback(
+        (text: string): void => {
+            if (!editingAnnotationId) {
+                return;
+            }
+            if (!text.trim()) {
+                removeAnnotation(editingAnnotationId);
+            } else if (editingAnnotation && editingAnnotation.text !== text) {
+                updateAnnotation(editingAnnotationId, { text });
+            }
+            setEditingAnnotationId(null);
+        },
+        [editingAnnotationId, editingAnnotation, removeAnnotation, updateAnnotation]
+    );
+    const handleEditCancel = useCallback((): void => {
+        if (!editingAnnotationId) {
+            return;
+        }
+
+        if (editingAnnotation && !editingAnnotation.text) {
+            removeAnnotation(editingAnnotationId);
+        }
+        setEditingAnnotationId(null);
+    }, [editingAnnotationId, editingAnnotation, removeAnnotation]);
 
     type ConnectorSelection = EditorConnectionAnchor & {
         communicationInterfaceType?: string | null;
@@ -426,6 +461,12 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         }
     };
 
+    const handleAnnotationChange = (changes: Partial<Annotation>): void => {
+        if (selectedAnnotationId) {
+            updateAnnotation(selectedAnnotationId, changes);
+        }
+    };
+
     const handleSetAnnotationTool = (tool: AnnotationType | null): void => {
         if (tool !== null) {
             closeAndDeselectAll();
@@ -500,7 +541,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         const { evt, target } = event;
 
         // Annotation drawing intercepts the stage before pan/deselect.
-        if (tryStartDrawing(annotationTool, event)) {
+        if (!editingAnnotationId && tryStartDrawing(annotationTool, event)) {
             return;
         }
 
@@ -611,8 +652,11 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
 
     const handleMouseUp = ({ evt }: KonvaEventObject<MouseEvent>): void => {
         if (evt.button === 0 && drawingPreview) {
+            const toolBeforeCommit = annotationTool;
             const newId = commitDrawing(annotationTool);
-            setAnnotationTool(null);
+            if (toolBeforeCommit !== "freehand") {
+                setAnnotationTool(null);
+            }
             if (newId) {
                 selectAnnotation(newId);
                 deselectComponent();
@@ -620,6 +664,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                 deselectPointOfAttack();
                 deselectConnectionPoint();
                 deselectConnector();
+                if (toolBeforeCommit === "text") {
+                    setEditingAnnotationId(newId);
+                }
             }
             return;
         }
@@ -1315,9 +1362,11 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                     annotation={annotation}
                                     selected={annotation.id === selectedAnnotationId}
                                     editable={isEditor}
+                                    editing={annotation.id === editingAnnotationId}
                                     onSelect={handleSelectAnnotation}
                                     onChange={updateAnnotation}
                                     onDragStateChange={handleAnnotationDragStateChange}
+                                    onRequestEdit={handleRequestEdit}
                                 />
                             ))}
                             <AnnotationDrawingPreview
@@ -1364,6 +1413,18 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                     />
                 </Box>
 
+                {editingAnnotation?.type === "text" && (
+                    <TextEditingOverlay
+                        annotation={editingAnnotation}
+                        stageRef={stageRef}
+                        layerPosition={layerPosition}
+                        stageScale={stageScale}
+                        stagePosition={stagePosition}
+                        onCommit={handleEditCommit}
+                        onCancel={handleEditCancel}
+                    />
+                )}
+
                 <EditorSidebar
                     sidebarRef={sidebarRef}
                     // Drop selected component from sidebar during drag — avoids the MUI 9 FormControl/InputBase setAdornedStart re-render loop on the high-frequency drag path.
@@ -1399,6 +1460,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                     handleInterfaceBreadcrumbClick={handleInterfaceBreadcrumbClick}
                     selectedAnnotation={selectedAnnotation}
                     handleAnnotationColorChange={handleAnnotationColorChange}
+                    handleAnnotationChange={handleAnnotationChange}
                     handleDeleteAnnotation={handleDeleteAnnotation}
                 />
 

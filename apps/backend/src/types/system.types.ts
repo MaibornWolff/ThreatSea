@@ -20,7 +20,7 @@ export interface SystemData {
     lastAutoSaveDate: string;
 }
 
-export type AnnotationType = "rect" | "circle" | "line" | "arrow";
+export type AnnotationType = "rect" | "circle" | "line" | "arrow" | "freehand" | "text";
 
 export interface Annotation {
     id: string;
@@ -36,6 +36,11 @@ export interface Annotation {
     stroke: string;
     strokeWidth: number;
     fill?: string;
+    text?: string;
+    fontSize?: number;
+    bold?: boolean;
+    italic?: boolean;
+    underline?: boolean;
 }
 
 export interface Connection {

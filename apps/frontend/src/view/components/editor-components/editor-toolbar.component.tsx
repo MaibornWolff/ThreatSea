@@ -1,10 +1,12 @@
 import {
     CenterFocusWeak,
+    CreateOutlined,
     CropSquare,
     Download,
     ShapeLineOutlined,
     HorizontalRule,
     RadioButtonUnchecked,
+    TextFields,
     TrendingFlat,
 } from "@mui/icons-material";
 import { Box, IconButton, Popover, Tooltip } from "@mui/material";
@@ -66,14 +68,17 @@ export const EditorToolbar = ({
 }: EditorToolbarProps) => {
     const { t } = useTranslation("editorPage");
     const shapesButtonRef = useRef<HTMLButtonElement | null>(null);
+    const colorButtonRef = useRef<HTMLButtonElement | null>(null);
     const [shapesOpen, setShapesOpen] = useState(false);
+    const [colorOpen, setColorOpen] = useState(false);
 
     const toggleTool = (tool: AnnotationType): void => {
         onSetAnnotationTool(annotationTool === tool ? null : tool);
         setShapesOpen(false);
     };
 
-    const isShapesActive = annotationTool !== null;
+    // Pencil and text are standalone now.
+    const isShapesActive = ANNOTATION_TOOLS.some(({ tool }) => tool === annotationTool);
 
     return (
         <>
@@ -145,9 +150,71 @@ export const EditorToolbar = ({
                                 </Tooltip>
                             );
                         })}
-                        <Box
-                            sx={{ width: "1px", height: "28px", backgroundColor: "rgba(0,0,0,0.15)", margin: "0 4px" }}
-                        />
+                    </Popover>
+                    <Box sx={{ ...buttonContainerSx, top: 180 }}>
+                        <Tooltip title={t("canvas.annotation.freehand")}>
+                            <IconButton
+                                onClick={() => onSetAnnotationTool(annotationTool === "freehand" ? null : "freehand")}
+                                aria-label={t("canvas.annotation.freehand")}
+                                aria-pressed={annotationTool === "freehand"}
+                                sx={annotationTool === "freehand" ? activeIconButtonSx : iconButtonSx}
+                            >
+                                <CreateOutlined sx={annotationTool === "freehand" ? activeIconSx : iconSx} />
+                            </IconButton>
+                        </Tooltip>
+                    </Box>
+                    <Box sx={{ ...buttonContainerSx, top: 240 }}>
+                        <Tooltip title={t("canvas.annotation.text")}>
+                            <IconButton
+                                onClick={() => onSetAnnotationTool(annotationTool === "text" ? null : "text")}
+                                aria-label={t("canvas.annotation.text")}
+                                aria-pressed={annotationTool === "text"}
+                                sx={annotationTool === "text" ? activeIconButtonSx : iconButtonSx}
+                            >
+                                <TextFields sx={annotationTool === "text" ? activeIconSx : iconSx} />
+                            </IconButton>
+                        </Tooltip>
+                    </Box>
+                    <Box sx={{ ...buttonContainerSx, top: 300 }}>
+                        <Tooltip title={t("canvas.annotation.color")}>
+                            <IconButton
+                                ref={colorButtonRef}
+                                onClick={() => setColorOpen((open) => !open)}
+                                aria-label={t("canvas.annotation.color")}
+                                sx={iconButtonSx}
+                            >
+                                <Box
+                                    sx={{
+                                        width: "24px",
+                                        height: "24px",
+                                        borderRadius: "50%",
+                                        backgroundColor: annotationColor,
+                                        border: "2px solid #ffffff",
+                                        boxShadow: "0 0 0 1px rgba(35, 60, 87, 0.6)",
+                                    }}
+                                />
+                            </IconButton>
+                        </Tooltip>
+                    </Box>
+                    <Popover
+                        open={colorOpen}
+                        anchorEl={colorButtonRef.current}
+                        onClose={() => setColorOpen(false)}
+                        anchorOrigin={{ vertical: "center", horizontal: "right" }}
+                        transformOrigin={{ vertical: "center", horizontal: "left" }}
+                        slotProps={{
+                            paper: {
+                                sx: {
+                                    marginLeft: "8px",
+                                    borderRadius: "12px",
+                                    padding: "6px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "4px",
+                                },
+                            },
+                        }}
+                    >
                         <EditorColorPicker color={annotationColor} onChange={onSetAnnotationColor} />
                     </Popover>
                 </>

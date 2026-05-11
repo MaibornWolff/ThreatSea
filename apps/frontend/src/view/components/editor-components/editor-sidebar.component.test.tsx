@@ -59,6 +59,7 @@ const setup = (propsOverride: Partial<EditorSidebarProps> = {}) => {
         handleInterfaceBreadcrumbClick: vi.fn(),
         selectedAnnotation: undefined,
         handleAnnotationColorChange: vi.fn(),
+        handleAnnotationChange: vi.fn(),
         handleDeleteAnnotation: vi.fn(),
         ...propsOverride,
     };

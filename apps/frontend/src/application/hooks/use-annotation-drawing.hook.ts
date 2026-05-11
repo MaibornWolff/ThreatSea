@@ -1,20 +1,31 @@
 import { useState, type RefObject } from "react";
 import type { Stage as KonvaStage } from "konva/lib/Stage";
 import type { KonvaEventObject } from "konva/lib/Node";
-import type { AnnotationType, Coordinate } from "#api/types/system.types.ts";
+import { DEFAULT_TEXT_FONT_SIZE, type AnnotationType, type Coordinate } from "#api/types/system.types.ts";
 import type { useEditorAnnotations } from "./use-editor-annotations.hook";
 
 // Visible stroke width for new annotations — matches the system connection-line
 export const ANNOTATION_STROKE_WIDTH = 3;
+const DEFAULT_TEXT_COLOR = "#000000";
 // Minimum dimension for a drawn annotation
 const MIN_DRAW_DIMENSION = 5;
+const DEFAULT_TEXT_BOX_WIDTH = 160;
+const DEFAULT_TEXT_BOX_HEIGHT = 40;
 
-export interface AnnotationDrawingState {
+export interface BoxDrawingState {
+    kind: "box";
     startX: number;
     startY: number;
     currentX: number;
     currentY: number;
 }
+
+export interface FreehandDrawingState {
+    kind: "freehand";
+    points: number[];
+}
+
+export type AnnotationDrawingState = BoxDrawingState | FreehandDrawingState;
 
 interface UseAnnotationDrawingArgs {
     stageRef: RefObject<KonvaStage | null>;
@@ -57,7 +68,17 @@ export const useAnnotationDrawing = ({
         }
         evt.preventDefault();
         event.cancelBubble = true;
-        setDrawingPreview({ startX: local.x, startY: local.y, currentX: local.x, currentY: local.y });
+        if (annotationTool === "freehand") {
+            setDrawingPreview({ kind: "freehand", points: [local.x, local.y] });
+        } else {
+            setDrawingPreview({
+                kind: "box",
+                startX: local.x,
+                startY: local.y,
+                currentX: local.x,
+                currentY: local.y,
+            });
+        }
         return true;
     };
 
@@ -67,9 +88,20 @@ export const useAnnotationDrawing = ({
             return false;
         }
         const local = stageToLayerCoords();
-        if (local) {
-            setDrawingPreview((prev) => (prev ? { ...prev, currentX: local.x, currentY: local.y } : prev));
+        if (!local) {
+            return true;
         }
+        if (drawingPreview.kind === "freehand") {
+            setDrawingPreview((prev) =>
+                prev && prev.kind === "freehand"
+                    ? { kind: "freehand", points: [...prev.points, local.x, local.y] }
+                    : prev
+            );
+            return true;
+        }
+        setDrawingPreview((prev) =>
+            prev && prev.kind === "box" ? { ...prev, currentX: local.x, currentY: local.y } : prev
+        );
         return true;
     };
 
@@ -79,11 +111,48 @@ export const useAnnotationDrawing = ({
             setDrawingPreview(null);
             return null;
         }
-        const { startX, startY, currentX, currentY } = drawingPreview;
+        const preview = drawingPreview;
         setDrawingPreview(null);
 
+        if (annotationTool === "freehand") {
+            if (preview.kind !== "freehand" || preview.points.length < 4) {
+                // Single click or zero-length stroke — not enough geometry to render
+                return null;
+            }
+            return createAnnotation({
+                type: "freehand",
+                x: 0,
+                y: 0,
+                points: preview.points,
+                stroke: annotationColor,
+                strokeWidth: ANNOTATION_STROKE_WIDTH,
+            });
+        }
+
+        if (preview.kind !== "box") {
+            return null;
+        }
+        const { startX, startY, currentX, currentY } = preview;
         const width = Math.abs(currentX - startX);
         const height = Math.abs(currentY - startY);
+
+        if (annotationTool === "text") {
+            const usingDefault = width < MIN_DRAW_DIMENSION && height < MIN_DRAW_DIMENSION;
+            const finalWidth = usingDefault ? DEFAULT_TEXT_BOX_WIDTH : Math.max(width, MIN_DRAW_DIMENSION);
+            const finalHeight = usingDefault ? DEFAULT_TEXT_BOX_HEIGHT : Math.max(height, MIN_DRAW_DIMENSION);
+            return createAnnotation({
+                type: "text",
+                x: Math.min(startX, currentX),
+                y: Math.min(startY, currentY),
+                width: finalWidth,
+                height: finalHeight,
+                text: "",
+                fontSize: DEFAULT_TEXT_FONT_SIZE,
+                stroke: DEFAULT_TEXT_COLOR,
+                strokeWidth: ANNOTATION_STROKE_WIDTH,
+            });
+        }
+
         if (width < MIN_DRAW_DIMENSION && height < MIN_DRAW_DIMENSION) {
             return null;
         }

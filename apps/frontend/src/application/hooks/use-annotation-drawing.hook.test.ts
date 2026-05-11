@@ -120,7 +120,13 @@ describe("useAnnotationDrawing", () => {
             });
 
             expect(started).toBe(true);
-            expect(result.current.drawingPreview).toEqual({ startX: 70, startY: 80, currentX: 70, currentY: 80 });
+            expect(result.current.drawingPreview).toEqual({
+                kind: "box",
+                startX: 70,
+                startY: 80,
+                currentX: 70,
+                currentY: 80,
+            });
             expect(event.evt.preventDefault).toHaveBeenCalledTimes(1);
             expect(event.cancelBubble).toBe(true);
         });
@@ -159,6 +165,7 @@ describe("useAnnotationDrawing", () => {
 
             expect(updated).toBe(true);
             expect(result.current.drawingPreview).toEqual({
+                kind: "box",
                 startX: 100,
                 startY: 100,
                 currentX: 220,
@@ -366,6 +373,188 @@ describe("useAnnotationDrawing", () => {
             });
 
             expect(result.current.drawingPreview).toBeNull();
+        });
+    });
+
+    describe("freehand drawing", () => {
+        it("seeds a freehand preview with the start point on tryStartDrawing", () => {
+            const stageRef = makeStageRef({ x: 100, y: 100 });
+            const { result } = setup({ stageRef, layerPosition: { x: 30, y: 20 } });
+
+            act(() => {
+                result.current.tryStartDrawing("freehand", makeStageEvent());
+            });
+
+            expect(result.current.drawingPreview).toEqual({ kind: "freehand", points: [70, 80] });
+        });
+
+        it("appends new points on updateDrawingPreview", () => {
+            const pointer = { x: 100, y: 100 };
+            const stageRef = {
+                current: { getRelativePointerPosition: () => pointer },
+            } as unknown as RefObject<KonvaStage | null>;
+            const { result } = setup({ stageRef });
+
+            act(() => {
+                result.current.tryStartDrawing("freehand", makeStageEvent());
+            });
+            pointer.x = 110;
+            pointer.y = 105;
+            act(() => {
+                result.current.updateDrawingPreview();
+            });
+            pointer.x = 130;
+            pointer.y = 120;
+            act(() => {
+                result.current.updateDrawingPreview();
+            });
+
+            expect(result.current.drawingPreview).toEqual({
+                kind: "freehand",
+                points: [100, 100, 110, 105, 130, 120],
+            });
+        });
+
+        it("commits a freehand annotation with the captured points", () => {
+            const pointer = { x: 50, y: 50 };
+            const stageRef = {
+                current: { getRelativePointerPosition: () => pointer },
+            } as unknown as RefObject<KonvaStage | null>;
+            const createAnnotation = vi.fn().mockReturnValue("ann-fh");
+            const { result } = setup({ stageRef, createAnnotation });
+
+            act(() => {
+                result.current.tryStartDrawing("freehand", makeStageEvent());
+            });
+            pointer.x = 70;
+            pointer.y = 65;
+            act(() => {
+                result.current.updateDrawingPreview();
+            });
+            pointer.x = 100;
+            pointer.y = 80;
+            act(() => {
+                result.current.updateDrawingPreview();
+            });
+
+            let id: string | null = null;
+            act(() => {
+                id = result.current.commitDrawing("freehand");
+            });
+
+            expect(id).toBe("ann-fh");
+            expect(createAnnotation).toHaveBeenCalledWith({
+                type: "freehand",
+                x: 0,
+                y: 0,
+                points: [50, 50, 70, 65, 100, 80],
+                stroke: DEFAULT_ANNOTATION_COLOR,
+                strokeWidth: ANNOTATION_STROKE_WIDTH,
+            });
+        });
+
+        it("returns null and skips createAnnotation when only one point was captured (single click)", () => {
+            const stageRef = makeStageRef({ x: 100, y: 100 });
+            const createAnnotation = vi.fn();
+            const { result } = setup({ stageRef, createAnnotation });
+
+            act(() => {
+                result.current.tryStartDrawing("freehand", makeStageEvent());
+            });
+            // No moves — commit immediately
+
+            let id: string | null = "stub";
+            act(() => {
+                id = result.current.commitDrawing("freehand");
+            });
+
+            expect(id).toBeNull();
+            expect(createAnnotation).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("text drawing", () => {
+        it("commits a dragged text annotation with the bounding-box dimensions", () => {
+            const pointer = { x: 50, y: 60 };
+            const stageRef = {
+                current: { getRelativePointerPosition: () => pointer },
+            } as unknown as RefObject<KonvaStage | null>;
+            const createAnnotation = vi.fn().mockReturnValue("ann-text");
+            const { result } = setup({ stageRef, createAnnotation });
+
+            act(() => {
+                result.current.tryStartDrawing("text", makeStageEvent());
+            });
+            pointer.x = 250;
+            pointer.y = 120;
+            act(() => {
+                result.current.updateDrawingPreview();
+            });
+
+            let id: string | null = null;
+            act(() => {
+                id = result.current.commitDrawing("text");
+            });
+
+            expect(id).toBe("ann-text");
+            expect(createAnnotation).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    type: "text",
+                    x: 50,
+                    y: 60,
+                    width: 200,
+                    height: 60,
+                    text: "",
+                })
+            );
+        });
+
+        it("commits a text annotation with a black stroke regardless of the active color", () => {
+            const stageRef = makeStageRef({ x: 100, y: 100 });
+            const createAnnotation = vi.fn().mockReturnValue("ann-text");
+            const { result } = setup({ stageRef, createAnnotation, annotationColor: "#ff0000" });
+
+            act(() => {
+                result.current.tryStartDrawing("text", makeStageEvent());
+            });
+            let id: string | null = null;
+            act(() => {
+                id = result.current.commitDrawing("text");
+            });
+
+            expect(id).toBe("ann-text");
+            expect(createAnnotation).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    type: "text",
+                    stroke: "#000000",
+                })
+            );
+        });
+
+        it("falls back to default dimensions on a click without drag", () => {
+            const stageRef = makeStageRef({ x: 100, y: 100 });
+            const createAnnotation = vi.fn().mockReturnValue("ann-text");
+            const { result } = setup({ stageRef, createAnnotation });
+
+            act(() => {
+                result.current.tryStartDrawing("text", makeStageEvent());
+            });
+            // No drag — commit at the same point
+            let id: string | null = null;
+            act(() => {
+                id = result.current.commitDrawing("text");
+            });
+
+            expect(id).toBe("ann-text");
+            expect(createAnnotation).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    type: "text",
+                    x: 100,
+                    y: 100,
+                    width: 160,
+                    height: 40,
+                })
+            );
         });
     });
 });

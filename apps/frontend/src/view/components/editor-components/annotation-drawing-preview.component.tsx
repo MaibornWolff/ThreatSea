@@ -20,10 +20,26 @@ export const AnnotationDrawingPreview = ({
     if (!drawingPreview || !annotationTool) {
         return null;
     }
+
+    if (drawingPreview.kind === "freehand") {
+        return (
+            <Line
+                listening={false}
+                points={drawingPreview.points}
+                stroke={color}
+                strokeWidth={strokeWidth}
+                tension={0.5}
+                lineCap="round"
+                lineJoin="round"
+            />
+        );
+    }
+
     const { startX, startY, currentX, currentY } = drawingPreview;
 
     switch (annotationTool) {
-        case "rect": {
+        case "rect":
+        case "text": {
             const x = Math.min(startX, currentX);
             const y = Math.min(startY, currentY);
             const width = Math.abs(currentX - startX);
@@ -78,5 +94,7 @@ export const AnnotationDrawingPreview = ({
                     dash={DASH}
                 />
             );
+        case "freehand":
+            return null;
     }
 };

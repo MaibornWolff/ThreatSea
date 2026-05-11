@@ -13,7 +13,7 @@ describe("AnnotationDrawingPreview", () => {
     it("renders nothing when annotationTool is null", () => {
         const { container } = render(
             <AnnotationDrawingPreview
-                drawingPreview={{ startX: 0, startY: 0, currentX: 10, currentY: 10 }}
+                drawingPreview={{ kind: "box", startX: 0, startY: 0, currentX: 10, currentY: 10 }}
                 annotationTool={null}
                 color="#000000"
                 strokeWidth={3}
@@ -28,7 +28,7 @@ describe("AnnotationDrawingPreview", () => {
             // Drag bottom-right → top-left (start > current)
             render(
                 <AnnotationDrawingPreview
-                    drawingPreview={{ startX: 200, startY: 150, currentX: 100, currentY: 80 }}
+                    drawingPreview={{ kind: "box", startX: 200, startY: 150, currentX: 100, currentY: 80 }}
                     annotationTool="rect"
                     color="#5786ff"
                     strokeWidth={3}
@@ -47,7 +47,7 @@ describe("AnnotationDrawingPreview", () => {
         it("renders with a dashed stroke (preview marker)", () => {
             render(
                 <AnnotationDrawingPreview
-                    drawingPreview={{ startX: 0, startY: 0, currentX: 10, currentY: 10 }}
+                    drawingPreview={{ kind: "box", startX: 0, startY: 0, currentX: 10, currentY: 10 }}
                     annotationTool="rect"
                     color="#000"
                     strokeWidth={2}
@@ -63,7 +63,7 @@ describe("AnnotationDrawingPreview", () => {
         it("renders centered between start and current with the larger half-extent as radius", () => {
             render(
                 <AnnotationDrawingPreview
-                    drawingPreview={{ startX: 100, startY: 100, currentX: 200, currentY: 140 }}
+                    drawingPreview={{ kind: "box", startX: 100, startY: 100, currentX: 200, currentY: 140 }}
                     annotationTool="circle"
                     color="#ff0000"
                     strokeWidth={4}
@@ -82,7 +82,7 @@ describe("AnnotationDrawingPreview", () => {
         it("renders the raw start/current as the points array", () => {
             render(
                 <AnnotationDrawingPreview
-                    drawingPreview={{ startX: 50, startY: 60, currentX: 200, currentY: 240 }}
+                    drawingPreview={{ kind: "box", startX: 50, startY: 60, currentX: 200, currentY: 240 }}
                     annotationTool="line"
                     color="#00ff00"
                     strokeWidth={5}
@@ -96,11 +96,29 @@ describe("AnnotationDrawingPreview", () => {
         });
     });
 
+    describe("freehand", () => {
+        it("renders the captured polyline as a Konva Line", () => {
+            render(
+                <AnnotationDrawingPreview
+                    drawingPreview={{ kind: "freehand", points: [10, 20, 30, 40, 50, 70] }}
+                    annotationTool="freehand"
+                    color="#abcdef"
+                    strokeWidth={4}
+                />
+            );
+
+            const line = screen.getByTestId("konva-line");
+            expect(line).toHaveAttribute("data-points", "[10,20,30,40,50,70]");
+            expect(line).toHaveAttribute("data-stroke", "#abcdef");
+            expect(line).toHaveAttribute("data-stroke-width", "4");
+        });
+    });
+
     describe("arrow", () => {
         it("renders with both stroke and fill set to the same color", () => {
             render(
                 <AnnotationDrawingPreview
-                    drawingPreview={{ startX: 10, startY: 20, currentX: 110, currentY: 220 }}
+                    drawingPreview={{ kind: "box", startX: 10, startY: 20, currentX: 110, currentY: 220 }}
                     annotationTool="arrow"
                     color="#ff00ff"
                     strokeWidth={3}

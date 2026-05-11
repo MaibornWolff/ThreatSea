@@ -14,6 +14,8 @@
       "circle": "Kreis",
       "line": "Linie",
       "arrow": "Pfeil",
+      "freehand": "Stift",
+      "text": "Text",
       "color": "Farbe wählen",
       "defaultColor": "Standardfarbe"
     }
@@ -49,7 +51,12 @@
     "annotation": {
       "title": "Anmerkung",
       "stroke": "Farbe",
-      "delete": "Anmerkung löschen"
+      "delete": "Anmerkung löschen",
+      "format": "Format",
+      "bold": "Fett",
+      "italic": "Kursiv",
+      "underline": "Unterstrichen",
+      "fontSize": "Schriftgröße"
     }
   },
   "contextMenu": {

@@ -25,15 +25,19 @@ export interface SystemData {
     lastAutoSaveDate: string;
 }
 
-export type AnnotationType = "rect" | "circle" | "line" | "arrow";
+export type AnnotationType = "rect" | "circle" | "line" | "arrow" | "freehand" | "text";
 
 export const DEFAULT_ANNOTATION_COLOR = POA_COLORS.COMMUNICATION_INFRASTRUCTURE.normal;
+export const DEFAULT_TEXT_FONT_SIZE = 16;
+export const TEXT_FONT_FAMILY = "Poppins, Roboto, sans-serif";
 
 export const ANNOTATION_TYPE_LABEL_KEYS: Record<AnnotationType, string> = {
     rect: "canvas.annotation.rectangle",
     circle: "canvas.annotation.circle",
     line: "canvas.annotation.line",
     arrow: "canvas.annotation.arrow",
+    freehand: "canvas.annotation.freehand",
+    text: "canvas.annotation.text",
 };
 
 export interface Annotation {
@@ -50,6 +54,11 @@ export interface Annotation {
     stroke: string;
     strokeWidth: number;
     fill?: string;
+    text?: string;
+    fontSize?: number;
+    bold?: boolean;
+    italic?: boolean;
+    underline?: boolean;
 }
 
 export interface Connection {

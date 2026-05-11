@@ -14,6 +14,8 @@
       "circle": "Circle",
       "line": "Line",
       "arrow": "Arrow",
+      "freehand": "Pencil",
+      "text": "Text",
       "color": "Pick color",
       "defaultColor": "Default color"
     }
@@ -49,7 +51,12 @@
     "annotation": {
       "title": "Annotation",
       "stroke": "Color",
-      "delete": "Delete annotation"
+      "delete": "Delete annotation",
+      "format": "Format",
+      "bold": "Bold",
+      "italic": "Italic",
+      "underline": "Underline",
+      "fontSize": "Font size"
     }
   },
   "contextMenu": {

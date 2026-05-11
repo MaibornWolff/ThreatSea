@@ -1,26 +1,37 @@
-import { Delete } from "@mui/icons-material";
-import { IconButton, Typography } from "@mui/material";
+import { Delete, FormatBold, FormatItalic, FormatUnderlined } from "@mui/icons-material";
+import { FormControl, IconButton, MenuItem, Select, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { useTranslation } from "react-i18next";
 import { checkUserRole, USER_ROLES } from "../../../api/types/user-roles.types";
 import { EditorColorPicker } from "./editor-color-picker.component";
-import { ANNOTATION_TYPE_LABEL_KEYS, type Annotation } from "#api/types/system.types.ts";
+import { ANNOTATION_TYPE_LABEL_KEYS, DEFAULT_TEXT_FONT_SIZE, type Annotation } from "#api/types/system.types.ts";
 
 interface EditorSidebarSelectedAnnotationProps {
     selectedAnnotation: Annotation;
     userRole: USER_ROLES | undefined;
     onColorChange: (stroke: string) => void;
+    onChange: (changes: Partial<Annotation>) => void;
     onDelete: () => void;
 }
+
+const FONT_SIZE_CHOICES = [12, 14, 16, 18, 24, 32, 48];
 
 export const EditorSidebarSelectedAnnotation = ({
     selectedAnnotation,
     userRole,
     onColorChange,
+    onChange,
     onDelete,
 }: EditorSidebarSelectedAnnotationProps) => {
     const { t } = useTranslation("editorPage");
     const isEditor = checkUserRole(userRole, USER_ROLES.EDITOR);
+    const isText = selectedAnnotation.type === "text";
+    const fontSize = selectedAnnotation.fontSize ?? DEFAULT_TEXT_FONT_SIZE;
+
+    const formatToggleSx = (active: boolean) => ({
+        color: active ? "primary.main" : "text.secondary",
+        backgroundColor: active ? "background.paperIntransparent" : "transparent",
+    });
 
     return (
         <Box>
@@ -54,8 +65,73 @@ export const EditorSidebarSelectedAnnotation = ({
 
             <Box sx={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <Typography sx={{ fontSize: "0.8rem", minWidth: "70px" }}>{t("sidebar.annotation.stroke")}</Typography>
-                <EditorColorPicker color={selectedAnnotation.stroke} onChange={onColorChange} disabled={!isEditor} />
+                <EditorColorPicker
+                    color={selectedAnnotation.stroke}
+                    onChange={onColorChange}
+                    disabled={!isEditor}
+                    includeBlackPreset={isText}
+                />
             </Box>
+
+            {isText && (
+                <>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "12px" }}>
+                        <Typography sx={{ fontSize: "0.8rem", minWidth: "70px" }}>
+                            {t("sidebar.annotation.format")}
+                        </Typography>
+                        <IconButton
+                            size="small"
+                            disabled={!isEditor}
+                            onClick={() => onChange({ bold: !selectedAnnotation.bold })}
+                            aria-label={t("sidebar.annotation.bold")}
+                            aria-pressed={!!selectedAnnotation.bold}
+                            sx={formatToggleSx(!!selectedAnnotation.bold)}
+                        >
+                            <FormatBold sx={{ fontSize: 20 }} />
+                        </IconButton>
+                        <IconButton
+                            size="small"
+                            disabled={!isEditor}
+                            onClick={() => onChange({ italic: !selectedAnnotation.italic })}
+                            aria-label={t("sidebar.annotation.italic")}
+                            aria-pressed={!!selectedAnnotation.italic}
+                            sx={formatToggleSx(!!selectedAnnotation.italic)}
+                        >
+                            <FormatItalic sx={{ fontSize: 20 }} />
+                        </IconButton>
+                        <IconButton
+                            size="small"
+                            disabled={!isEditor}
+                            onClick={() => onChange({ underline: !selectedAnnotation.underline })}
+                            aria-label={t("sidebar.annotation.underline")}
+                            aria-pressed={!!selectedAnnotation.underline}
+                            sx={formatToggleSx(!!selectedAnnotation.underline)}
+                        >
+                            <FormatUnderlined sx={{ fontSize: 20 }} />
+                        </IconButton>
+                    </Box>
+
+                    <Box sx={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "12px" }}>
+                        <Typography sx={{ fontSize: "0.8rem", minWidth: "70px" }}>
+                            {t("sidebar.annotation.fontSize")}
+                        </Typography>
+                        <FormControl size="small" sx={{ minWidth: "80px" }}>
+                            <Select
+                                value={fontSize}
+                                disabled={!isEditor}
+                                onChange={(event) => onChange({ fontSize: Number(event.target.value) })}
+                                inputProps={{ "aria-label": t("sidebar.annotation.fontSize") }}
+                            >
+                                {FONT_SIZE_CHOICES.map((size) => (
+                                    <MenuItem key={size} value={size}>
+                                        {size}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </Box>
+                </>
+            )}
         </Box>
     );
 };
