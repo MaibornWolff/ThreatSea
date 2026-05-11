@@ -51,7 +51,7 @@
     "web-vitals": "5.2.0"
   },
   "devDependencies": {
-    "@playwright/test": "1.59.1",
+    "@playwright/test": "1.60.0",
     "@react-pdf/types": "2.11.1",
     "@repo/typescript-config": "workspace:*",
     "@testing-library/jest-dom": "6.9.1",
