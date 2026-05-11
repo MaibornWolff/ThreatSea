@@ -22,6 +22,11 @@ async function ensureTestDatabaseExists() {
     } finally {
         await client.end();
     }
+
+    // Reset schema so an interrupted previous run can't leak rows into this one.
+    await db.execute(
+        "DROP SCHEMA IF EXISTS public CASCADE; DROP SCHEMA IF EXISTS drizzle CASCADE; CREATE SCHEMA public"
+    );
 }
 
 export async function setup() {
