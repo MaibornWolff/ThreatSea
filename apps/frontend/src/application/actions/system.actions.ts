@@ -42,7 +42,7 @@ export class SystemActions {
      */
     static getSystem = createAsyncThunk("[system] get system", async (data: { projectId: number }) => {
         if (inFlightSave) {
-            await inFlightSave;
+            await inFlightSave.catch(() => undefined);
         }
         return await SystemAPI.getSystem(data);
     });
