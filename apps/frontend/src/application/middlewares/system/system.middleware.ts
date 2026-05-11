@@ -216,6 +216,9 @@ const handleSuccessfulRequest: AppMiddleware =
                     } else {
                         dispatch(EditorActions.setLastAutoSaveDate(""));
                     }
+                } else {
+                    dispatch(SystemActions.clearSystem());
+                    dispatch(EditorActions.setLastAutoSaveDate(""));
                 }
             } else {
                 dispatch(SystemActions.clearSystem());

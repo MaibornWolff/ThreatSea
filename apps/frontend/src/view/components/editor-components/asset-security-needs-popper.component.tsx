@@ -7,9 +7,13 @@ export interface AssetSecurityNeedsPopperProps {
 }
 
 export const AssetSecurityNeedsPopper = ({ anchorEl, asset }: AssetSecurityNeedsPopperProps) => {
+    if (!anchorEl || !asset) {
+        return null;
+    }
+
     return (
         <Popper
-            open={anchorEl != null}
+            open
             anchorEl={anchorEl}
             placement="bottom-start"
             sx={{
@@ -19,13 +23,11 @@ export const AssetSecurityNeedsPopper = ({ anchorEl, asset }: AssetSecurityNeeds
                 zIndex: 1000,
             }}
         >
-            {asset && (
-                <Box sx={{ padding: 1, margin: 0.5 }}>
-                    <Typography sx={{ fontSize: "0.75rem" }}>
-                        {`(C ${asset.confidentiality} / I ${asset.integrity} / A ${asset.availability})`}
-                    </Typography>
-                </Box>
-            )}
+            <Box sx={{ padding: 1, margin: 0.5 }}>
+                <Typography sx={{ fontSize: "0.75rem" }}>
+                    {`(C ${asset.confidentiality} / I ${asset.integrity} / A ${asset.availability})`}
+                </Typography>
+            </Box>
         </Popper>
     );
 };
