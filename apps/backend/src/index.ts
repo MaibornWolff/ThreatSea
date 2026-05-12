@@ -38,6 +38,8 @@ server.listen(PORT, async () => {
 });
 
 process.on("SIGTERM", () => {
-    // graceful shutdown logic
-    server.close(() => process.exit(0));
+    // graceful shutdown logic — io.close() disconnects all Socket.IO clients,
+    // closes engine.io, and closes the underlying HTTP server in one call.
+    io.close(() => process.exit(0));
+    setTimeout(() => process.exit(1), 10_000).unref();
 });
