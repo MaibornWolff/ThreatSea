@@ -502,6 +502,15 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     };
 
     const handleMouseOut = () => {
+        // If the user released the button outside the stage, handleMouseUp
+        // never fires — mirror its reset so re-entry doesn't resume panning.
+        if (moveLayerRef.current) {
+            moveLayerRef.current = false;
+            if (stageRef.current?.content) {
+                stageRef.current.content.style.cursor = "default";
+            }
+        }
+
         setMousePointers({
             x: -20000,
             y: -20000,
