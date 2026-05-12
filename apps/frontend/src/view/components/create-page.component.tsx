@@ -197,7 +197,7 @@ export const CreatePage = <P extends object>(
                                         sx={{
                                             display: "inline-block",
                                             position: "relative",
-                                            width: autoSaveOnClick && showButton === true ? "20px" : "20px",
+                                            width: autoSaveOnClick && showButton === true ? "28px" : "20px",
                                             height: autoSaveOnClick && showButton === true ? "28px" : "20px",
                                             marginLeft: 1.25,
                                             "&:hover .auto-save-info": {
@@ -436,6 +436,7 @@ const renderAutoSaveIcon = (autoSaveStatus: string, color: string) => {
         case "notUpToDate":
             return <CheckCircleOutlineIcon sx={{ fontSize: 20, color: color }} />;
         case "saving":
+        default:
             return (
                 <SyncIcon
                     sx={{
@@ -448,15 +449,4 @@ const renderAutoSaveIcon = (autoSaveStatus: string, color: string) => {
                 />
             );
     }
-    return (
-        <SyncIcon
-            sx={{
-                animationName: "autoSaveSavingAnimation",
-                animationDuration: "1s",
-                animationIterationCount: "infinite",
-                fontSize: 20,
-                color: color,
-            }}
-        />
-    );
 };

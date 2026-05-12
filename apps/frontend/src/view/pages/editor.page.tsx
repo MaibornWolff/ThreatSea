@@ -5,17 +5,7 @@
 
 import { CenterFocusWeak, Download } from "@mui/icons-material";
 import { Box, IconButton, LinearProgress, Tooltip } from "@mui/material";
-import {
-    memo,
-    useCallback,
-    useEffect,
-    useEffectEvent,
-    useLayoutEffect,
-    useMemo,
-    useRef,
-    useState,
-    type ChangeEvent,
-} from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Group, Layer, Line } from "react-konva";
 import { Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
@@ -452,7 +442,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     } | null>(null);
     const mouseMoveRafRef = useRef<number | null>(null);
 
-    const flushMouseMove = useEffectEvent(() => {
+    const flushMouseMove = () => {
         mouseMoveRafRef.current = null;
         const pending = pendingMouseMoveRef.current;
         if (!pending) {
@@ -479,7 +469,12 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                 layerPosition.y + movementY * (GRID_CONFIG.speed / stageRef.current.scaleY())
             );
         }
-    });
+    };
+
+    // Plain ref — rAF callbacks run outside React's "inside an Effect" window,
+    // where useEffectEvent has undefined behavior in production builds.
+    const flushMouseMoveRef = useRef(flushMouseMove);
+    flushMouseMoveRef.current = flushMouseMove;
 
     useEffect(() => {
         return () => {

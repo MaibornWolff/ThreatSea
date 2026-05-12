@@ -108,7 +108,9 @@ export const useAutoSavePreview = ({
         });
 
     const updateScreenshot = useDebounce((): void => {
-        captureScreenshot();
+        captureScreenshot().catch((err) => {
+            console.error("Failed to capture screenshot:", err);
+        });
     }, 100);
 
     const updateScreenshotEvent = useEffectEvent(updateScreenshot);
