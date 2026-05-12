@@ -76,7 +76,7 @@ const projectsReducer = createReducer(defaultState, (builder) => {
         const role = action.payload;
         const id = state.current?.id;
 
-        if (id && state.entities[id]) {
+        if (id != null && state.entities[id]) {
             state.entities[id]!.role = role;
         }
 
