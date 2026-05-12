@@ -22,7 +22,7 @@ import { ConnectionPreview } from "../components/editor-components/connection-pr
 import { EditorAnnotation } from "../components/editor-components/editor-annotation.component";
 import { TextEditingOverlay } from "../components/editor-components/text-editing-overlay.component";
 import { EditorSidebar } from "../components/editor-components/editor-sidebar.component";
-import { EditorStage } from "../components/editor-components/editor-stage.component";
+import { EditorStage, MAX_STAGE_SCALE, MIN_STAGE_SCALE } from "../components/editor-components/editor-stage.component";
 import { EditorToolbar } from "../components/editor-components/editor-toolbar.component";
 import { Page } from "../components/page.component";
 import { SystemComponentConnection } from "../components/editor-components/system-component-connection.component";
@@ -67,6 +67,19 @@ const GRID_CONFIG = {
 
 // Memoize line array creation
 const createLineArray = (): number[] => new Array(400).fill(0);
+
+// True when a keyboard event originated from a focused text input — used by
+// the global key handler to skip canvas deletes while the user is typing.
+const isEditableEventTarget = (target: EventTarget | null): boolean => {
+    if (!(target instanceof HTMLElement)) {
+        return false;
+    }
+    if (target.isContentEditable) {
+        return true;
+    }
+    const tag = target.tagName;
+    return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
+};
 
 interface HelpLines {
     x: number;
@@ -222,6 +235,22 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
 
     const { drawingPreview, cancelDrawing, tryStartDrawing, updateDrawingPreview, commitDrawing } =
         useAnnotationDrawing({ stageRef, layerPosition, isEditor, annotationColor, createAnnotation });
+
+    useEffect(() => {
+        const stage = stageRef.current;
+        if (!stage?.content) {
+            return;
+        }
+        if (annotationTool === null) {
+            return;
+        }
+        stage.content.style.cursor = annotationTool === "text" ? "text" : "crosshair";
+        return () => {
+            if (stage.content) {
+                stage.content.style.cursor = "default";
+            }
+        };
+    }, [annotationTool]);
 
     const [editingAnnotationId, setEditingAnnotationId] = useState<string | null>(null);
     const editingAnnotation = editingAnnotationId
@@ -478,6 +507,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         if (selectedAnnotationId) {
             removeAnnotation();
             closeSideBar();
+            setEditingAnnotationId(null);
         }
     };
 
@@ -504,6 +534,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         deselectConnectionPoint();
         deselectConnector();
         deselectAnnotation();
+        setEditingAnnotationId(null);
     };
 
     const getConnectedComponents = useCallback(
@@ -658,7 +689,13 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                 setAnnotationTool(null);
             }
             if (newId) {
-                selectAnnotation(newId);
+                // Skip auto-select for freehand: pencil mode is for drawing,
+                // not selecting. Selecting attaches Konva's Transformer whose
+                // anchor mouseleave wipes our tool cursor.
+                if (toolBeforeCommit !== "freehand") {
+                    selectAnnotation(newId);
+                    showSideBar();
+                }
                 deselectComponent();
                 deselectConnection();
                 deselectPointOfAttack();
@@ -943,7 +980,8 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         }
     };
 
-    const handleKeyUp = ({ key }: KeyboardEvent): void => {
+    const handleKeyUp = (event: KeyboardEvent): void => {
+        const { key } = event;
         if (key === "Escape") {
             if (annotationTool || drawingPreview) {
                 setAnnotationTool(null);
@@ -952,12 +990,17 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
             closeAndDeselectAll();
         }
 
-        if (key === "Delete") {
+        if (key === "Delete" || key === "Backspace") {
+            // Skip when the keystroke came from an editable field
+            if (isEditableEventTarget(event.target)) {
+                return;
+            }
             handleDeleteComponent();
             handleDeleteConnection();
             if (selectedAnnotationId) {
                 removeAnnotation();
                 closeSideBar();
+                setEditingAnnotationId(null);
             }
         }
     };
@@ -979,53 +1022,40 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     };
 
     const handleCenterEditor = () => {
-        let minX = Infinity;
-        let minY = Infinity;
-        let maxX = -Infinity;
-        let maxY = -Infinity;
-        const componentsOfProject = components.filter((component) => component.projectId === projectId);
+        if (!stageRef.current || !componentLayerRef.current) {
+            return;
+        }
+        const stage = stageRef.current;
+        const layer = componentLayerRef.current;
 
-        if (componentsOfProject.length === 0) {
+        const rect = layer.getClientRect({ relativeTo: layer });
+
+        if (rect.width <= 0 || rect.height <= 0) {
             setLayerPosition(0, 0);
             setStageScale(1, { x: 0, y: 0 });
             return;
         }
 
-        componentsOfProject.map((component) => {
-            minX = Math.min(component.x, minX);
-            minY = Math.min(component.y, minY);
-            maxX = Math.max(component.x + component.width, maxX);
-            maxY = Math.max(component.y + component.height, maxY);
-        });
+        // Same 5% padding as captureScreenshot in use-auto-save-preview.hook.
+        const paddingRatio = 0.05;
+        const paddedWidth = rect.width * (1 + paddingRatio * 2);
+        const paddedHeight = rect.height * (1 + paddingRatio * 2);
 
-        if (stageRef?.current) {
-            const stage = stageRef.current;
-            const diffX = Math.abs(maxX - minX);
-            const diffY = Math.abs(maxY - minY);
+        // Fit-to-view scale, clamped to the editor's existing zoom bounds.
+        const fitScale = Math.min(stage.width() / paddedWidth, stage.height() / paddedHeight);
+        const newScale = Math.min(MAX_STAGE_SCALE, Math.max(MIN_STAGE_SCALE, fitScale));
+        stage.scale({ x: newScale, y: newScale });
 
-            // Zoom out enough to fit both axes; the tighter axis wins.
-            if (diffX > stage.width() / stage.scale().x || diffY > stage.height() / stage.scale().y) {
-                const fitScale = Math.min((stage.width() - 100) / diffX, (stage.height() - 100) / diffY);
-                const newScale = Math.min(5, Math.max(0.5, fitScale));
-                stage.scale({ x: newScale, y: newScale });
-            }
+        // Solve for layerPosition that puts the bbox center at the viewport center.
+        // screen = (layerLocal + layerPosition) * newScale + stage.{x,y}
+        const bboxCenterX = rect.x + rect.width / 2;
+        const bboxCenterY = rect.y + rect.height / 2;
+        const layerX = (stage.width() / 2 - stage.x()) / newScale - bboxCenterX;
+        const layerY = (stage.height() / 2 - stage.y()) / newScale - bboxCenterY;
 
-            let layerX = minX;
-            let layerY = minY;
-
-            layerX += stage.x() / stage.scale().x;
-            layerY += stage.y() / stage.scale().y;
-
-            layerX -= stage.width() / 2 / stage.scale().x;
-            layerY -= stage.height() / 2 / stage.scale().x;
-
-            layerX += diffX / 2;
-            layerY += diffY / 2;
-
-            setLayerPosition(-layerX, -layerY);
-            // Persist scale to Redux too; otherwise it resets on remount.
-            setStageScale(stage.scale().x, { x: stage.x(), y: stage.y() });
-        }
+        setLayerPosition(layerX, layerY);
+        // Persist scale to Redux too; otherwise it resets on remount.
+        setStageScale(newScale, { x: stage.x(), y: stage.y() });
     };
 
     // Plain ref — the rAF callback runs outside React's "inside an Effect"

@@ -117,6 +117,7 @@ export const EditorSidebar = ({
                 overflow: "hidden",
             }}
             ref={sidebarRef}
+            data-edit-protected
         >
             <Box
                 sx={{

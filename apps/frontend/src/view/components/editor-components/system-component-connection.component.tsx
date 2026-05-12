@@ -8,6 +8,7 @@ import { AnchorOrientation, type AugmentedSystemComponent, type ConnectionPointM
 import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
 import type { AugmentedSystemConnection } from "#application/selectors/system.selectors.ts";
 import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
+import { editorSelectors } from "#application/selectors/editor.selectors.ts";
 
 const TURN_PENALTY = 200;
 
@@ -126,6 +127,7 @@ const SystemComponentConnectionInner = ({
     let connectionPointsMeta = initialConnectionPointsMeta;
     const [hover, setHover] = useState<boolean>(false);
     const isCapturing = useAppSelector((state) => state.editor.isCapturing);
+    const annotationTool = useAppSelector(editorSelectors.selectAnnotationTool);
     const visualSelected = selected && !isCapturing;
     const visualHover = hover && !isCapturing;
     let calculatedWaypoints = waypoints;
@@ -146,17 +148,23 @@ const SystemComponentConnectionInner = ({
     };
 
     const onMouseEnter = () => {
+        setHover(true);
+        if (annotationTool !== null) {
+            return;
+        }
         if (stageRef && stageRef.current) {
             stageRef.current.content.style.cursor = "pointer";
         }
-        setHover(true);
     };
 
     const onMouseLeave = () => {
+        setHover(false);
+        if (annotationTool !== null) {
+            return;
+        }
         if (stageRef && stageRef.current) {
             stageRef.current.content.style.cursor = "default";
         }
-        setHover(false);
     };
 
     const handleLinePointOfAttackClicked = (event: KonvaEventObject<MouseEvent>) => {

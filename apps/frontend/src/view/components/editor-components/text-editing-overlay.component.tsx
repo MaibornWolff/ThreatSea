@@ -8,13 +8,25 @@
  * Keys: Enter inserts a newline. Commit happens on blur / outside-click;
  * Escape cancels.
  */
-import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type FocusEvent, type KeyboardEvent } from "react";
 import { createPortal } from "react-dom";
 import type { Stage as KonvaStage } from "konva/lib/Stage";
 import { DEFAULT_TEXT_FONT_SIZE, TEXT_FONT_FAMILY, type Annotation, type Coordinate } from "#api/types/system.types.ts";
 
 const TEXT_PADDING = 4;
 const OVERLAY_Z_INDEX = 1000;
+
+// True when a click/focus lands somewhere we don't want to treat as "outside"
+// the text edit — i.e. chrome that exists to style the annotation.
+const isProtectedTarget = (target: Element): boolean => {
+    if (target.closest("[data-edit-protected]")) {
+        return true;
+    }
+    if (target.closest(".MuiPopover-root, .MuiModal-root, .MuiTooltip-popper")) {
+        return true;
+    }
+    return false;
+};
 
 interface TextEditingOverlayProps {
     annotation: Annotation;
@@ -75,6 +87,9 @@ export const TextEditingOverlay = ({
             if (textareaRef.current && target && textareaRef.current.contains(target)) {
                 return;
             }
+            if (target instanceof Element && isProtectedTarget(target)) {
+                return;
+            }
             commit();
         };
         const t = setTimeout(() => {
@@ -132,13 +147,22 @@ export const TextEditingOverlay = ({
         zIndex: OVERLAY_Z_INDEX,
     };
 
+    // Blur commits — except when focus moves to edit-protected
+    const handleBlur = (event: FocusEvent<HTMLTextAreaElement>): void => {
+        const next = event.relatedTarget;
+        if (next instanceof Element && isProtectedTarget(next)) {
+            return;
+        }
+        commit();
+    };
+
     return createPortal(
         <textarea
             ref={textareaRef}
             value={value}
             onChange={(event) => setValue(event.target.value)}
             onKeyDown={handleKeyDown}
-            onBlur={commit}
+            onBlur={handleBlur}
             aria-label="Edit annotation text"
             style={style}
         />,

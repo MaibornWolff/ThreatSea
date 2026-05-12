@@ -28,7 +28,9 @@ interface EditorStageProps {
     ref?: Ref<KonvaStage>;
 }
 
-const scaleBy = 1.025;
+const scaleBy = 1.1;
+export const MIN_STAGE_SCALE = 0.5;
+export const MAX_STAGE_SCALE = 20;
 
 export const EditorStage = ({
     children,
@@ -73,7 +75,7 @@ export const EditorStage = ({
             };
 
             let newScale = event.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy;
-            newScale = Math.min(5, Math.max(newScale, 0.5));
+            newScale = Math.min(MAX_STAGE_SCALE, Math.max(newScale, MIN_STAGE_SCALE));
 
             stage.scale({ x: newScale, y: newScale });
 

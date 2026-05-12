@@ -1,14 +1,11 @@
-import { Fragment, memo, useEffect, useRef } from "react";
-import { Arrow, Circle, Group, Line, Rect, Text, Transformer } from "react-konva";
+import { Fragment, memo, useRef } from "react";
+import { Arrow, Circle, Line, Rect, Transformer } from "react-konva";
 import type { KonvaEventObject, Node as KonvaNode } from "konva/lib/Node";
 import type { Line as KonvaLineNode } from "konva/lib/shapes/Line";
-import type { Rect as KonvaRectNode } from "konva/lib/shapes/Rect";
-import type { Text as KonvaTextNode } from "konva/lib/shapes/Text";
 import type { Transformer as KonvaTransformer } from "konva/lib/shapes/Transformer";
-import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
-import { DEFAULT_TEXT_FONT_SIZE, TEXT_FONT_FAMILY, type Annotation } from "#api/types/system.types.ts";
-
-const TEXT_PADDING = 4;
+import { useAnnotationInteraction } from "#application/hooks/use-annotation-interaction.hook.ts";
+import type { Annotation } from "#api/types/system.types.ts";
+import { EditorTextAnnotation } from "./editor-text-annotation.component";
 
 interface EditorAnnotationProps {
     annotation: Annotation;
@@ -31,22 +28,23 @@ const EditorAnnotationInner = ({
     annotation,
     selected,
     editable,
-    editing = false,
     onSelect,
     onChange,
     onDragStateChange,
-    onRequestEdit,
 }: EditorAnnotationProps) => {
     const shapeRef = useRef<KonvaNode | null>(null);
     const transformerRef = useRef<KonvaTransformer | null>(null);
     const anchor0Ref = useRef<KonvaNode | null>(null);
     const anchor1Ref = useRef<KonvaNode | null>(null);
-    // Inner nodes for the text annotation — needed so we can update their
-    // width/height live during a Transformer resize without scaling the fontSize
-    const textRectRef = useRef<KonvaRectNode | null>(null);
-    const textNodeRef = useRef<KonvaTextNode | null>(null);
-    // Hide the Transformer's anchors/rotation handle during screenshot capture
-    const isCapturing = useAppSelector((state) => state.editor.isCapturing);
+
+    const { isCapturing, setStageCursor, handleClick, handleMouseEnter, handleMouseLeave } = useAnnotationInteraction({
+        annotation,
+        selected,
+        editable,
+        shapeRef,
+        transformerRef,
+        onSelect,
+    });
 
     const setShapeRef = (node: KonvaNode | null): void => {
         shapeRef.current = node;
@@ -58,33 +56,8 @@ const EditorAnnotationInner = ({
         anchor1Ref.current = node;
     };
 
-    useEffect(() => {
-        if (!selected || !editable) {
-            return;
-        }
-        const transformer = transformerRef.current;
-        const shape = shapeRef.current;
-        if (transformer && shape) {
-            transformer.nodes([shape]);
-            transformer.getLayer()?.batchDraw();
-        }
-    }, [selected, editable, isCapturing]);
-
     const isLineLike = annotation.type === "line" || annotation.type === "arrow";
-    const isText = annotation.type === "text";
     const points = annotation.points ?? [0, 0, 0, 0];
-
-    // Konva's <Text> uses a single `fontStyle` string for bold/italic combos.
-    const textFontStyle = (() => {
-        const parts: string[] = [];
-        if (annotation.italic) {
-            parts.push("italic");
-        }
-        if (annotation.bold) {
-            parts.push("bold");
-        }
-        return parts.length > 0 ? parts.join(" ") : "normal";
-    })();
 
     const computeNextPoints = (idx: 0 | 1, target: KonvaNode): number[] => {
         const next = [...(annotation.points ?? [0, 0, 0, 0])];
@@ -118,41 +91,6 @@ const EditorAnnotationInner = ({
             onDragStateChange?.(false);
         };
 
-    const handleClick = (event: KonvaEventObject<MouseEvent>): void => {
-        if (event.evt.button !== 0) {
-            return;
-        }
-        event.cancelBubble = true;
-        event.evt.preventDefault();
-        onSelect(annotation.id);
-    };
-
-    const handleTextDblClick = (event: KonvaEventObject<MouseEvent | TouchEvent>): void => {
-        if (!editable || !isText) {
-            return;
-        }
-        event.cancelBubble = true;
-        event.evt.preventDefault();
-        onRequestEdit?.(annotation.id);
-    };
-
-    const setStageCursor = (event: KonvaEventObject<MouseEvent | DragEvent>, cursor: string): void => {
-        const stage = event.target.getStage();
-        if (stage?.content) {
-            stage.content.style.cursor = cursor;
-        }
-    };
-
-    const handleMouseEnter = (event: KonvaEventObject<MouseEvent>): void => {
-        if (editable) {
-            setStageCursor(event, "pointer");
-        }
-    };
-
-    const handleMouseLeave = (event: KonvaEventObject<MouseEvent>): void => {
-        setStageCursor(event, "default");
-    };
-
     // Hide endpoint anchors while the line/arrow body is being dragged
     const handleDragStart = (event: KonvaEventObject<DragEvent>): void => {
         setStageCursor(event, "move");
@@ -178,25 +116,6 @@ const EditorAnnotationInner = ({
         onDragStateChange?.(false);
     };
 
-    const handleTextTransform = (event: KonvaEventObject<Event>): void => {
-        const node = event.target;
-        const scaleX = node.scaleX();
-        const scaleY = node.scaleY();
-        const rect = textRectRef.current;
-        const text = textNodeRef.current;
-        if (!rect || !text) {
-            return;
-        }
-        const newWidth = Math.max(MIN_DIMENSION, rect.width() * scaleX);
-        const newHeight = Math.max(MIN_DIMENSION, rect.height() * scaleY);
-        rect.width(newWidth);
-        rect.height(newHeight);
-        text.width(newWidth);
-        text.height(newHeight);
-        node.scaleX(1);
-        node.scaleY(1);
-    };
-
     // Konva's Transformer applies scaleX/scaleY to the node. Persist the
     // resolved width/height/radius and reset scale to 1 — otherwise scale
     // accumulates on subsequent transforms.
@@ -213,13 +132,7 @@ const EditorAnnotationInner = ({
             rotation: node.rotation(),
         };
 
-        if (annotation.type === "text") {
-            const rect = textRectRef.current;
-            if (rect) {
-                changes.width = Math.max(MIN_DIMENSION, rect.width());
-                changes.height = Math.max(MIN_DIMENSION, rect.height());
-            }
-        } else if (annotation.type === "rect") {
+        if (annotation.type === "rect") {
             changes.width = Math.max(MIN_DIMENSION, (annotation.width ?? 0) * scaleX);
             changes.height = Math.max(MIN_DIMENSION, (annotation.height ?? 0) * scaleY);
         } else if (annotation.type === "circle") {
@@ -359,56 +272,12 @@ const EditorAnnotationInner = ({
                     />
                 );
             case "text":
-                return (
-                    <Group
-                        ref={setShapeRef}
-                        x={annotation.x}
-                        y={annotation.y}
-                        rotation={annotation.rotation ?? 0}
-                        visible={!editing}
-                        listening={editable}
-                        draggable={editable}
-                        onClick={handleClick}
-                        onDblClick={handleTextDblClick}
-                        onDblTap={handleTextDblClick}
-                        onMouseEnter={handleMouseEnter}
-                        onMouseLeave={handleMouseLeave}
-                        onDragStart={handleDragStart}
-                        onDragEnd={handleDragEnd}
-                        onTransform={handleTextTransform}
-                        onTransformEnd={handleTransformEnd}
-                    >
-                        {/* Full-box hit target — Konva's <Text> hit-tests glyphs only, so clicks in empty space inside the box would miss. */}
-                        <Rect
-                            ref={textRectRef}
-                            width={annotation.width ?? 0}
-                            height={annotation.height ?? 0}
-                            fill="rgba(0,0,0,0)"
-                            fillEnabled
-                            listening
-                        />
-                        <Text
-                            ref={textNodeRef}
-                            width={annotation.width ?? 0}
-                            height={annotation.height ?? 0}
-                            text={annotation.text ?? ""}
-                            fontSize={annotation.fontSize ?? DEFAULT_TEXT_FONT_SIZE}
-                            fontFamily={TEXT_FONT_FAMILY}
-                            fontStyle={textFontStyle}
-                            textDecoration={annotation.underline ? "underline" : ""}
-                            fill={annotation.stroke}
-                            align="left"
-                            verticalAlign="top"
-                            padding={TEXT_PADDING}
-                            wrap="word"
-                            listening={false}
-                        />
-                    </Group>
-                );
+                // Dispatched at the EditorAnnotation level — should never reach here.
+                return null;
         }
     };
 
-    const showTransformer = selected && editable && !isCapturing && !isLineLike && !(isText && editing);
+    const showTransformer = selected && editable && !isCapturing && !isLineLike;
     const showAnchors = selected && editable && !isCapturing && isLineLike;
 
     return (
@@ -482,7 +351,7 @@ const EditorAnnotationInner = ({
 
 // Skip re-render when only callback identities change. Comparing data props only
 // keeps re-renders tied to genuine annotation/selection/editing changes.
-export const EditorAnnotation = memo(EditorAnnotationInner, (prev, next) => {
+const EditorShapeAnnotation = memo(EditorAnnotationInner, (prev, next) => {
     return (
         prev.annotation === next.annotation &&
         prev.selected === next.selected &&
@@ -490,3 +359,21 @@ export const EditorAnnotation = memo(EditorAnnotationInner, (prev, next) => {
         prev.editing === next.editing
     );
 });
+
+export const EditorAnnotation = (props: EditorAnnotationProps) => {
+    if (props.annotation.type === "text") {
+        return (
+            <EditorTextAnnotation
+                annotation={props.annotation}
+                selected={props.selected}
+                editable={props.editable}
+                editing={props.editing ?? false}
+                onSelect={props.onSelect}
+                onChange={props.onChange}
+                onDragStateChange={props.onDragStateChange}
+                onRequestEdit={props.onRequestEdit}
+            />
+        );
+    }
+    return <EditorShapeAnnotation {...props} />;
+};
