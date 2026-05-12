@@ -52,11 +52,15 @@ export const TextEditingOverlay = ({
     const sessionEndedRef = useRef(false);
 
     // Focus + select on mount
+    const shouldSelectOnMount = useRef((annotation.text ?? "").length > 0);
     useEffect(() => {
         const raf = requestAnimationFrame(() => {
             const textarea = textareaRef.current;
-            if (textarea) {
-                textarea.focus();
+            if (!textarea) {
+                return;
+            }
+            textarea.focus();
+            if (shouldSelectOnMount.current) {
                 textarea.select();
             }
         });
