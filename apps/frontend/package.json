@@ -19,9 +19,9 @@
     "test:unit:watch": "vitest",
     "test:unit:coverage": "vitest run --coverage",
     "test:unit:ci": "vitest run --reporter=default --reporter=junit --outputFile.junit=./junit.xml --coverage",
-    "test:e2e": "playwright test",
-    "test:e2e:headed": "playwright test --headed",
-    "test:e2e:ui": "playwright test --ui"
+    "playwright:init": "playwright install",
+    "playwright": "playwright test",
+    "playwright:ui": "playwright test --ui"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
