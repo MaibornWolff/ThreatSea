@@ -51,7 +51,8 @@ describe("ProjectCard", () => {
         });
 
         it("renders the creation date in ISO format", () => {
-            setup({ createdAt: new Date("2024-06-15") });
+            // Use an ISO string cast to Date to keep the Redux store serializable.
+            setup({ createdAt: "2024-06-15" as unknown as Date });
             expect(screen.getByText("2024-06-15")).toBeInTheDocument();
         });
     });

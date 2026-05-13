@@ -63,12 +63,17 @@ describe("IconSelector", () => {
 
     describe("icon selection", () => {
         it("calls onChange with the icon name when an icon button is clicked", async () => {
+            // The component is uncontrolled here (no value prop). After the icon
+            // button is clicked, MUI Select may warn about an out-of-range value
+            // because the MenuItem elements are only rendered while the dropdown
+            // is open — this is a known limitation of the component's design and
+            // not a real bug. We verify onChange was called with the correct name.
             const { onChange, user } = setup();
 
             await user.click(screen.getByRole("combobox"));
 
             const listbox = screen.getByRole("listbox");
-            // Click the first icon button inside the grid
+            // Click the first icon button inside the grid (Wifi)
             const iconButtons = within(listbox).getAllByRole("button");
             await user.click(iconButtons[0]!);
 

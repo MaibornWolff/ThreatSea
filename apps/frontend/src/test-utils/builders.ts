@@ -24,8 +24,10 @@ export const createAsset = (overrides: Partial<Asset> = {}): Asset => ({
     integrityJustification: "",
     availabilityJustification: "",
     projectId: 1,
-    createdAt: new Date("2025-01-01"),
-    updatedAt: new Date("2025-01-01"),
+    // Use ISO strings cast to Date so the values remain JSON-serializable when
+    // placed into the Redux store (Date objects trigger the serializable check).
+    createdAt: "2025-01-01" as unknown as Date,
+    updatedAt: "2025-01-01" as unknown as Date,
     ...overrides,
 });
 
@@ -78,8 +80,10 @@ export const createProject = (overrides: Partial<ExtendedProject> = {}): Extende
     confidentialityLevel: CONFIDENTIALITY_LEVELS.INTERNAL,
     lineOfToleranceGreen: 3,
     lineOfToleranceRed: 6,
-    createdAt: new Date("2025-01-01"),
-    updatedAt: new Date("2025-01-01"),
+    // Use ISO strings cast to Date so the values remain JSON-serializable when
+    // placed into the Redux store (Date objects trigger the serializable check).
+    createdAt: "2025-01-01" as unknown as Date,
+    updatedAt: "2025-01-01" as unknown as Date,
     role: USER_ROLES.EDITOR,
     image: null,
     ...overrides,
