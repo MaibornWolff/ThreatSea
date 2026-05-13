@@ -1,9 +1,10 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ListBoxToolbar } from "./list-box-toolbar.component";
 import type { ListBoxToolbarProps } from "./list-box-toolbar.component";
 import { USER_ROLES } from "../../api/types/user-roles.types";
 import type { SortDirection } from "#application/actions/list.actions.ts";
+import { renderWithProviders } from "../../test-utils/render-with-providers";
 
 // ---------------------------------------------------------------------------
 // Default props factory – keeps individual tests focused on the one thing they
@@ -33,7 +34,7 @@ function buildProps(overrides: Partial<ListBoxToolbarProps> = {}) {
 // Helpers
 // ---------------------------------------------------------------------------
 function renderToolbar(overrides: Partial<ListBoxToolbarProps> = {}) {
-    return render(<ListBoxToolbar {...buildProps(overrides)} />);
+    return renderWithProviders(<ListBoxToolbar {...buildProps(overrides)} />);
 }
 
 // ---------------------------------------------------------------------------

@@ -1,10 +1,11 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { Table, TableBody, TableRow } from "@mui/material";
 import CustomTableCell from "./table-cell.component";
+import { renderWithProviders } from "../../test-utils/render-with-providers";
 
 // MUI TableCell must be rendered inside a Table > TableBody > TableRow
 const renderInTable = (ui: React.ReactNode) =>
-    render(
+    renderWithProviders(
         <Table>
             <TableBody>
                 <TableRow>{ui}</TableRow>

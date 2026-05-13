@@ -1,6 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ToggleButtonConfig } from "./toggle-buttons.component";
+import { renderWithProviders } from "../../test-utils/render-with-providers";
 
 // Mock ToggleButtons to isolate MatrixFilterToggleButtonGroup's own behaviour
 vi.mock("./toggle-buttons.component", () => ({
@@ -33,25 +34,25 @@ const items: ToggleButtonConfig[] = [
 
 describe("MatrixFilterToggleButtonGroup", () => {
     it("should render the ToggleButtons component", () => {
-        render(<MatrixFilterToggleButtonGroup items={items} />);
+        renderWithProviders(<MatrixFilterToggleButtonGroup items={items} />);
         expect(screen.getByTestId("toggle-buttons")).toBeInTheDocument();
     });
 
     it("should pass all items to ToggleButtons as buttons", () => {
-        render(<MatrixFilterToggleButtonGroup items={items} />);
+        renderWithProviders(<MatrixFilterToggleButtonGroup items={items} />);
         expect(screen.getByText("low")).toBeInTheDocument();
         expect(screen.getByText("medium")).toBeInTheDocument();
         expect(screen.getByText("high")).toBeInTheDocument();
     });
 
     it("should forward the current value to ToggleButtons", () => {
-        render(<MatrixFilterToggleButtonGroup items={items} value="medium" />);
+        renderWithProviders(<MatrixFilterToggleButtonGroup items={items} value="medium" />);
         expect(screen.getByTestId("toggle-buttons")).toHaveAttribute("data-value", "medium");
     });
 
     it("should call onChange when a toggle button is clicked", async () => {
         const handleChange = vi.fn();
-        render(<MatrixFilterToggleButtonGroup items={items} onChange={handleChange} />);
+        renderWithProviders(<MatrixFilterToggleButtonGroup items={items} onChange={handleChange} />);
 
         await userEvent.click(screen.getByText("high"));
 

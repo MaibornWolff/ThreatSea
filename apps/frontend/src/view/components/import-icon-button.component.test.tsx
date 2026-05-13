@@ -1,15 +1,16 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ImportIconButton } from "./import-icon-button.component";
+import { renderWithProviders } from "../../test-utils/render-with-providers";
 
 describe("ImportIconButton", () => {
     it("should render a button", () => {
-        render(<ImportIconButton id="import-btn" tooltipTitle="Import data" />);
+        renderWithProviders(<ImportIconButton id="import-btn" tooltipTitle="Import data" />);
         expect(screen.getByRole("button")).toBeInTheDocument();
     });
 
     it("should render a hidden file input with the given id", () => {
-        render(<ImportIconButton id="my-import" tooltipTitle="Import" />);
+        renderWithProviders(<ImportIconButton id="my-import" tooltipTitle="Import" />);
         const input = document.getElementById("my-import") as HTMLInputElement;
         expect(input).toBeInTheDocument();
         expect(input.type).toBe("file");
@@ -17,13 +18,13 @@ describe("ImportIconButton", () => {
     });
 
     it("should associate the label with the file input via id", () => {
-        render(<ImportIconButton id="upload-input" tooltipTitle="Upload" />);
+        renderWithProviders(<ImportIconButton id="upload-input" tooltipTitle="Upload" />);
         const label = screen.getByRole("button").closest("label");
         expect(label).toHaveAttribute("for", "upload-input");
     });
 
     it("should show a tooltip with the tooltipTitle on hover", async () => {
-        render(<ImportIconButton id="import-btn" tooltipTitle="Import threats" />);
+        renderWithProviders(<ImportIconButton id="import-btn" tooltipTitle="Import threats" />);
 
         await userEvent.hover(screen.getByRole("button"));
 
@@ -31,14 +32,14 @@ describe("ImportIconButton", () => {
     });
 
     it("should accept .csv and JSON files", () => {
-        render(<ImportIconButton id="import-btn" tooltipTitle="Import" />);
+        renderWithProviders(<ImportIconButton id="import-btn" tooltipTitle="Import" />);
         const input = document.getElementById("import-btn") as HTMLInputElement;
         expect(input.accept).toBe(".csv, application/JSON");
     });
 
     it("should call onChange when a file is selected", async () => {
         const handleChange = vi.fn();
-        render(<ImportIconButton id="import-btn" tooltipTitle="Import" onChange={handleChange} />);
+        renderWithProviders(<ImportIconButton id="import-btn" tooltipTitle="Import" onChange={handleChange} />);
 
         const file = new File(["content"], "data.json", { type: "application/json" });
         const input = document.getElementById("import-btn") as HTMLInputElement;

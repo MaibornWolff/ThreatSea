@@ -1,7 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Confirm } from "./confirm.component";
 import { mockUseConfirm } from "../../test-utils/mock-hooks";
+import { renderWithProviders } from "../../test-utils/render-with-providers";
 
 // useConfirm is a Redux-connected hook — mock it so we can control its output.
 const confirmSpy = mockUseConfirm();
@@ -18,7 +19,7 @@ function setupConfirm(overrides: Parameters<typeof mockUseConfirm>[0] = {}) {
         acceptText: "Delete",
         ...overrides,
     }));
-    render(<Confirm />);
+    renderWithProviders(<Confirm />);
 }
 
 describe("Confirm", () => {
@@ -34,7 +35,7 @@ describe("Confirm", () => {
                 cancelText: "Cancel",
                 acceptText: "OK",
             }));
-            render(<Confirm />);
+            renderWithProviders(<Confirm />);
 
             expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
         });

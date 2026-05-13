@@ -1,7 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { EditorSidebarAssetList, type EditorSidebarAssetListProps } from "./editor-sidebar-asset-list.component";
 import { createAsset } from "#test-utils/builders.ts";
+import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 
 const setup = (propsOverride: Partial<EditorSidebarAssetListProps> = {}) => {
     const props = {
@@ -14,7 +15,7 @@ const setup = (propsOverride: Partial<EditorSidebarAssetListProps> = {}) => {
         ...propsOverride,
     };
     const user = userEvent.setup();
-    render(<EditorSidebarAssetList {...props} />);
+    renderWithProviders(<EditorSidebarAssetList {...props} />);
     return { props, user };
 };
 

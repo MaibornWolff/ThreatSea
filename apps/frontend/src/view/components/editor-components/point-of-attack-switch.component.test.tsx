@@ -1,6 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { PointOfAttackSwitch, type PointOfAttackSwitchProps } from "./point-of-attack-switch.component";
+import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 
 const setup = (propsOverride: Partial<PointOfAttackSwitchProps> = {}) => {
     const props = {
@@ -13,7 +14,7 @@ const setup = (propsOverride: Partial<PointOfAttackSwitchProps> = {}) => {
         ...propsOverride,
     };
     const user = userEvent.setup();
-    render(<PointOfAttackSwitch {...props} />);
+    renderWithProviders(<PointOfAttackSwitch {...props} />);
     return { props, user };
 };
 

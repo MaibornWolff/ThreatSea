@@ -1,11 +1,12 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { IconButton } from "./icon-button.component";
 import { Star } from "@mui/icons-material";
+import { renderWithProviders } from "../../test-utils/render-with-providers";
 
 describe("IconButton", () => {
     it("should render its children", () => {
-        render(
+        renderWithProviders(
             <IconButton>
                 <Star data-testid="star-icon" />
             </IconButton>
@@ -14,7 +15,7 @@ describe("IconButton", () => {
     });
 
     it("should render without a tooltip when no title is provided", () => {
-        render(
+        renderWithProviders(
             <IconButton>
                 <Star />
             </IconButton>
@@ -25,7 +26,7 @@ describe("IconButton", () => {
     });
 
     it("should wrap the button in a Tooltip when a title is provided", async () => {
-        render(
+        renderWithProviders(
             <IconButton title="Delete item">
                 <Star />
             </IconButton>
@@ -38,7 +39,7 @@ describe("IconButton", () => {
 
     it("should call onClick when clicked", async () => {
         const handleClick = vi.fn();
-        render(
+        renderWithProviders(
             <IconButton onClick={handleClick}>
                 <Star />
             </IconButton>
@@ -50,7 +51,7 @@ describe("IconButton", () => {
     });
 
     it("should be disabled when the disabled prop is set", () => {
-        render(
+        renderWithProviders(
             <IconButton disabled>
                 <Star />
             </IconButton>
@@ -60,7 +61,7 @@ describe("IconButton", () => {
 
     it("should not call onClick when disabled", async () => {
         const handleClick = vi.fn();
-        render(
+        renderWithProviders(
             <IconButton disabled onClick={handleClick}>
                 <Star />
             </IconButton>

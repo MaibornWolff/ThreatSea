@@ -1,5 +1,6 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
+import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { POA_COLORS } from "../../colors/pointsOfAttack.colors";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { createSystemComponent } from "#test-utils/builders.ts";
@@ -13,7 +14,7 @@ vi.mock("react-konva", () => ({
 
 describe("ConnectionPreview", () => {
     it("renders with blue stroke when component is not USERS type", () => {
-        render(
+        renderWithProviders(
             <ConnectionPreview
                 component={createSystemComponent({ type: STANDARD_COMPONENT_TYPES.SERVER })}
                 newConnectionMousePosition={{ x: 300, y: 300 }}
@@ -25,7 +26,7 @@ describe("ConnectionPreview", () => {
     });
 
     it("renders with pink stroke when component type is USERS", () => {
-        render(
+        renderWithProviders(
             <ConnectionPreview
                 component={createSystemComponent({ type: STANDARD_COMPONENT_TYPES.USERS })}
                 newConnectionMousePosition={{ x: 300, y: 300 }}
@@ -37,7 +38,7 @@ describe("ConnectionPreview", () => {
     });
 
     it("renders with pink stroke when draggedComponent type is USERS", () => {
-        render(
+        renderWithProviders(
             <ConnectionPreview
                 component={createSystemComponent({ type: STANDARD_COMPONENT_TYPES.SERVER })}
                 draggedComponent={createSystemComponent({
@@ -57,7 +58,7 @@ describe("ConnectionPreview", () => {
         const component = createSystemComponent({ x: 0, y: 0, width: 100, height: 100 });
         const draggedComponent = createSystemComponent({ id: "comp-2", x: 200, y: 0, width: 100, height: 100 });
 
-        render(<ConnectionPreview component={component} draggedComponent={draggedComponent} />);
+        renderWithProviders(<ConnectionPreview component={component} draggedComponent={draggedComponent} />);
 
         const line = screen.getByTestId("konva-line");
         const points: number[] = JSON.parse(line.dataset["points"]!);
@@ -76,7 +77,7 @@ describe("ConnectionPreview", () => {
         const component = createSystemComponent({ x: 0, y: 0, width: 100, height: 100 });
         const mousePosition = { x: 400, y: 300 };
 
-        render(<ConnectionPreview component={component} newConnectionMousePosition={mousePosition} />);
+        renderWithProviders(<ConnectionPreview component={component} newConnectionMousePosition={mousePosition} />);
 
         const line = screen.getByTestId("konva-line");
         const points: number[] = JSON.parse(line.dataset["points"]!);

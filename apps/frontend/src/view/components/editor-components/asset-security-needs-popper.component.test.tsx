@@ -1,12 +1,13 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { AssetSecurityNeedsPopper } from "./asset-security-needs-popper.component";
 import { createAsset } from "#test-utils/builders.ts";
+import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 
 describe("AssetSecurityNeedsPopper", () => {
     it("renders nothing visible when anchorEl is null", () => {
         const asset = createAsset({ confidentiality: 4, integrity: 3, availability: 2 });
 
-        render(<AssetSecurityNeedsPopper anchorEl={null} asset={asset} />);
+        renderWithProviders(<AssetSecurityNeedsPopper anchorEl={null} asset={asset} />);
 
         expect(screen.queryByText(/^\(C \d+ \/ I \d+ \/ A \d+\)$/)).not.toBeInTheDocument();
     });
@@ -16,7 +17,7 @@ describe("AssetSecurityNeedsPopper", () => {
         document.body.appendChild(anchor);
         const asset = createAsset({ confidentiality: 4, integrity: 3, availability: 2 });
 
-        render(<AssetSecurityNeedsPopper anchorEl={anchor} asset={asset} />);
+        renderWithProviders(<AssetSecurityNeedsPopper anchorEl={anchor} asset={asset} />);
 
         expect(screen.getByText("(C 4 / I 3 / A 2)")).toBeInTheDocument();
     });
@@ -26,7 +27,7 @@ describe("AssetSecurityNeedsPopper", () => {
         document.body.appendChild(anchor);
         const asset = createAsset({ confidentiality: 0, integrity: 5, availability: 0 });
 
-        render(<AssetSecurityNeedsPopper anchorEl={anchor} asset={asset} />);
+        renderWithProviders(<AssetSecurityNeedsPopper anchorEl={anchor} asset={asset} />);
 
         expect(screen.getByText("(C 0 / I 5 / A 0)")).toBeInTheDocument();
     });
@@ -35,7 +36,7 @@ describe("AssetSecurityNeedsPopper", () => {
         const anchor = document.createElement("span");
         document.body.appendChild(anchor);
 
-        render(<AssetSecurityNeedsPopper anchorEl={anchor} asset={null} />);
+        renderWithProviders(<AssetSecurityNeedsPopper anchorEl={anchor} asset={null} />);
 
         expect(screen.queryByText(/^\(C \d+ \/ I \d+ \/ A \d+\)$/)).not.toBeInTheDocument();
     });

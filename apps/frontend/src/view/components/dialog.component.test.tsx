@@ -1,26 +1,27 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Dialog } from "./dialog.component";
+import { renderWithProviders } from "../../test-utils/render-with-providers";
 
 describe("Dialog", () => {
     it("should render its children when open", () => {
-        render(<Dialog open={true}>Dialog content</Dialog>);
+        renderWithProviders(<Dialog open={true}>Dialog content</Dialog>);
         expect(screen.getByText("Dialog content")).toBeInTheDocument();
     });
 
     it("should not render content in the document when closed", () => {
         // MUI removes the dialog from the DOM entirely when open=false (keepMounted is not set)
-        render(<Dialog open={false}>Hidden content</Dialog>);
+        renderWithProviders(<Dialog open={false}>Hidden content</Dialog>);
         expect(screen.queryByText("Hidden content")).not.toBeInTheDocument();
     });
 
     it("should render a dialog role element when open", () => {
-        render(<Dialog open={true}>Content</Dialog>);
+        renderWithProviders(<Dialog open={true}>Content</Dialog>);
         expect(screen.getByRole("dialog")).toBeInTheDocument();
     });
 
     it("should render React node children", () => {
-        render(
+        renderWithProviders(
             <Dialog open={true}>
                 <span data-testid="inner-node">Nested</span>
             </Dialog>
@@ -30,7 +31,7 @@ describe("Dialog", () => {
 
     it("should call onClose when the Escape key is pressed", async () => {
         const handleClose = vi.fn();
-        render(
+        renderWithProviders(
             <Dialog open={true} onClose={handleClose}>
                 Content
             </Dialog>
@@ -42,7 +43,7 @@ describe("Dialog", () => {
     });
 
     it("should forward additional props to the underlying dialog", () => {
-        render(
+        renderWithProviders(
             <Dialog open={true} aria-describedby="dialog-desc">
                 <span id="dialog-desc">Description</span>
             </Dialog>

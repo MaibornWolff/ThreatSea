@@ -1,6 +1,7 @@
-import { render, screen, within } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { IconSelector } from "./icon-selector.component";
+import { renderWithProviders } from "../../test-utils/render-with-providers";
 
 // The preselected icons list contains 25 entries. We only need to know a few
 // by name to drive the tests.
@@ -10,7 +11,7 @@ const PRESELECTED_SECOND = "WifiTethering";
 const setup = (props: Partial<React.ComponentProps<typeof IconSelector>> = {}) => {
     const onChange = vi.fn();
     const user = userEvent.setup();
-    render(<IconSelector label="Icon" onChange={onChange} {...props} />);
+    renderWithProviders(<IconSelector label="Icon" onChange={onChange} {...props} />);
     return { onChange, user };
 };
 

@@ -1,21 +1,22 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ExportIconButton } from "./export-icon-button.component";
+import { renderWithProviders } from "../../test-utils/render-with-providers";
 
 describe("ExportIconButton", () => {
     it("should render a button", () => {
-        render(<ExportIconButton />);
+        renderWithProviders(<ExportIconButton />);
         expect(screen.getByRole("button")).toBeInTheDocument();
     });
 
     it("should render the FileDownload icon", () => {
-        render(<ExportIconButton />);
+        renderWithProviders(<ExportIconButton />);
         // MUI renders the icon as an SVG inside the button
         expect(screen.getByRole("button").querySelector("svg")).toBeInTheDocument();
     });
 
     it("should show a tooltip when a title is provided", async () => {
-        render(<ExportIconButton title="Export data" />);
+        renderWithProviders(<ExportIconButton title="Export data" />);
 
         await userEvent.hover(screen.getByRole("button"));
 
@@ -24,7 +25,7 @@ describe("ExportIconButton", () => {
 
     it("should call onClick when clicked", async () => {
         const handleClick = vi.fn();
-        render(<ExportIconButton onClick={handleClick} />);
+        renderWithProviders(<ExportIconButton onClick={handleClick} />);
 
         await userEvent.click(screen.getByRole("button"));
 
@@ -32,7 +33,7 @@ describe("ExportIconButton", () => {
     });
 
     it("should be disabled when the disabled prop is set", () => {
-        render(<ExportIconButton disabled />);
+        renderWithProviders(<ExportIconButton disabled />);
         expect(screen.getByRole("button")).toBeDisabled();
     });
 });

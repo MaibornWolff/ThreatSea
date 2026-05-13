@@ -1,5 +1,6 @@
-import { render, screen, act } from "@testing-library/react";
+import { screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { renderWithProviders } from "../../test-utils/render-with-providers";
 import { useState } from "react";
 
 // ── Mocks ────────────────────────────────────────────────────────────────────
@@ -30,7 +31,7 @@ vi.mock("../../application/hooks/use-local-storage.hook", () => ({
 import { LanguagePicker } from "./language-picker.component";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-const renderLanguagePicker = () => render(<LanguagePicker />);
+const renderLanguagePicker = () => renderWithProviders(<LanguagePicker />);
 
 beforeEach(() => {
     initialLanguage = "en";

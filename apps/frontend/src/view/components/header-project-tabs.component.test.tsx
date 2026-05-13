@@ -1,7 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HeaderProjectTabs } from "./header-project-tabs.component";
 import type { ProjectTabs } from "../../application/hooks/use-project-tabs.hook";
+import { renderWithProviders } from "../../test-utils/render-with-providers";
 
 function buildProjectTabs(overrides: Partial<ProjectTabs> = {}): ProjectTabs {
     return {
@@ -18,12 +19,12 @@ function buildProjectTabs(overrides: Partial<ProjectTabs> = {}): ProjectTabs {
 
 describe("HeaderProjectTabs", () => {
     it("renders nothing when showProjectTabs is false", () => {
-        render(<HeaderProjectTabs projectTabs={buildProjectTabs({ showProjectTabs: false })} />);
+        renderWithProviders(<HeaderProjectTabs projectTabs={buildProjectTabs({ showProjectTabs: false })} />);
         expect(screen.queryByRole("button")).not.toBeInTheDocument();
     });
 
     it("renders nothing when there is only one button (single-tab is handled by HeaderLevelOneNav)", () => {
-        render(
+        renderWithProviders(
             <HeaderProjectTabs
                 projectTabs={buildProjectTabs({
                     finalButtons: [{ value: "/projects/1/system", text: "System" }],
@@ -34,20 +35,20 @@ describe("HeaderProjectTabs", () => {
     });
 
     it("renders a button for each tab when showProjectTabs is true and there are multiple tabs", () => {
-        render(<HeaderProjectTabs projectTabs={buildProjectTabs()} />);
+        renderWithProviders(<HeaderProjectTabs projectTabs={buildProjectTabs()} />);
         expect(screen.getByText("System")).toBeInTheDocument();
         expect(screen.getByText("Threats")).toBeInTheDocument();
     });
 
     it("marks the active tab as selected", () => {
-        render(<HeaderProjectTabs projectTabs={buildProjectTabs({ pathname: "/projects/1/threats" })} />);
+        renderWithProviders(<HeaderProjectTabs projectTabs={buildProjectTabs({ pathname: "/projects/1/threats" })} />);
         const threatsBtn = screen.getByText("Threats").closest("button");
         expect(threatsBtn).toHaveAttribute("aria-pressed", "true");
     });
 
     it("calls finalOnChangePath when a tab is clicked", async () => {
         const finalOnChangePath = vi.fn();
-        render(<HeaderProjectTabs projectTabs={buildProjectTabs({ finalOnChangePath })} />);
+        renderWithProviders(<HeaderProjectTabs projectTabs={buildProjectTabs({ finalOnChangePath })} />);
 
         await userEvent.click(screen.getByText("Threats"));
 

@@ -1,6 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Tooltip } from "./tooltip.component";
+import { renderWithProviders } from "../../test-utils/render-with-providers";
 
 // MUI's styled Tooltip clones the child element and sets aria-label on the
 // clone equal to the tooltip title. This means the button's accessible name
@@ -9,7 +10,7 @@ import { Tooltip } from "./tooltip.component";
 
 describe("Tooltip", () => {
     it("should render its children", () => {
-        render(
+        renderWithProviders(
             <Tooltip title="Hint text">
                 <button>Hover me</button>
             </Tooltip>
@@ -19,7 +20,7 @@ describe("Tooltip", () => {
     });
 
     it("should not show a tooltip before hovering", () => {
-        render(
+        renderWithProviders(
             <Tooltip title="Helpful hint">
                 <button>Target</button>
             </Tooltip>
@@ -30,7 +31,7 @@ describe("Tooltip", () => {
     });
 
     it("should show the tooltip text on hover", async () => {
-        render(
+        renderWithProviders(
             <Tooltip title="Helpful hint">
                 <button>Target</button>
             </Tooltip>
@@ -43,7 +44,7 @@ describe("Tooltip", () => {
     });
 
     it("should not show a tooltip when title is empty", async () => {
-        render(
+        renderWithProviders(
             <Tooltip title="">
                 <button>No tip</button>
             </Tooltip>

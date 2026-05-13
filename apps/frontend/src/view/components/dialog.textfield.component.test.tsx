@@ -1,26 +1,27 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { DialogTextField } from "./dialog.textfield.component";
+import { renderWithProviders } from "../../test-utils/render-with-providers";
 
 describe("DialogTextField", () => {
     it("should render a text input", () => {
-        render(<DialogTextField />);
+        renderWithProviders(<DialogTextField />);
         expect(screen.getByRole("textbox")).toBeInTheDocument();
     });
 
     it("should render with a label", () => {
-        render(<DialogTextField label="Project name" />);
+        renderWithProviders(<DialogTextField label="Project name" />);
         expect(screen.getByLabelText("Project name")).toBeInTheDocument();
     });
 
     it("should render with a placeholder", () => {
-        render(<DialogTextField placeholder="Enter name…" />);
+        renderWithProviders(<DialogTextField placeholder="Enter name…" />);
         expect(screen.getByPlaceholderText("Enter name…")).toBeInTheDocument();
     });
 
     it("should call onChange when the user types", async () => {
         const handleChange = vi.fn();
-        render(<DialogTextField onChange={handleChange} />);
+        renderWithProviders(<DialogTextField onChange={handleChange} />);
 
         await userEvent.type(screen.getByRole("textbox"), "hello");
 
@@ -28,19 +29,19 @@ describe("DialogTextField", () => {
     });
 
     it("should render a multiline textarea when multiline is set", () => {
-        render(<DialogTextField multiline rows={4} />);
+        renderWithProviders(<DialogTextField multiline rows={4} />);
         expect(screen.getByRole("textbox")).toBeInTheDocument();
         // MUI renders a <textarea> for multiline
         expect(document.querySelector("textarea")).toBeInTheDocument();
     });
 
     it("should display a helper text when provided", () => {
-        render(<DialogTextField helperText="This field is required" />);
+        renderWithProviders(<DialogTextField helperText="This field is required" />);
         expect(screen.getByText("This field is required")).toBeInTheDocument();
     });
 
     it("should render as disabled when the disabled prop is set", () => {
-        render(<DialogTextField disabled />);
+        renderWithProviders(<DialogTextField disabled />);
         expect(screen.getByRole("textbox")).toBeDisabled();
     });
 });

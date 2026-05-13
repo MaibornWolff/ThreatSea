@@ -1,7 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ExtendedProject } from "../../api/types/project.types";
 import { createProject } from "../../test-utils/builders";
+import { renderWithProviders } from "../../test-utils/render-with-providers";
 
 // Mock ProjectCard to avoid pulling in useNavigate / router context.
 // ProjectsGridComponent is responsible for layout and delegation – not card internals.
@@ -27,7 +28,7 @@ import { ProjectsGridComponent } from "./projects-grid.component";
 
 describe("ProjectsGridComponent", () => {
     it("should render the grid container", () => {
-        render(
+        renderWithProviders(
             <ProjectsGridComponent
                 projects={[]}
                 columnCount={2}
@@ -42,7 +43,7 @@ describe("ProjectsGridComponent", () => {
     it("should render a card for each project", () => {
         const projects = [createProject({ id: 1, name: "Alpha" }), createProject({ id: 2, name: "Beta" })];
 
-        render(
+        renderWithProviders(
             <ProjectsGridComponent
                 projects={projects}
                 columnCount={2}
@@ -58,7 +59,7 @@ describe("ProjectsGridComponent", () => {
     });
 
     it("should render nothing when the projects list is empty", () => {
-        render(
+        renderWithProviders(
             <ProjectsGridComponent
                 projects={[]}
                 columnCount={2}
@@ -75,7 +76,7 @@ describe("ProjectsGridComponent", () => {
         const handleDelete = vi.fn();
         const project = createProject({ id: 42, name: "Delete Me" });
 
-        render(
+        renderWithProviders(
             <ProjectsGridComponent
                 projects={[project]}
                 columnCount={1}
@@ -94,7 +95,7 @@ describe("ProjectsGridComponent", () => {
         const handleEdit = vi.fn();
         const project = createProject({ id: 7, name: "Edit Me" });
 
-        render(
+        renderWithProviders(
             <ProjectsGridComponent
                 projects={[project]}
                 columnCount={1}
