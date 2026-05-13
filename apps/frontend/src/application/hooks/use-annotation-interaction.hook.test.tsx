@@ -39,7 +39,7 @@ const renderInteractionHook = (params: {
     const hook = renderHook(
         () =>
             useAnnotationInteraction({
-                annotation: params.annotation ?? createAnnotation(),
+                annotation: params.annotation ?? createAnnotation({ type: "rect" }),
                 selected: params.selected ?? false,
                 editable: params.editable ?? true,
                 shapeRef: params.shapeRef ?? createRef<KonvaNode | null>(),

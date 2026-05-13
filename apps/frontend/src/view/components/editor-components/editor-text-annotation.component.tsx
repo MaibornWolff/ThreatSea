@@ -5,7 +5,8 @@ import type { Rect as KonvaRectNode } from "konva/lib/shapes/Rect";
 import type { Text as KonvaTextNode } from "konva/lib/shapes/Text";
 import type { Transformer as KonvaTransformer } from "konva/lib/shapes/Transformer";
 import { useAnnotationInteraction } from "#application/hooks/use-annotation-interaction.hook.ts";
-import { DEFAULT_TEXT_FONT_SIZE, type AnnotationChanges, type TextAnnotation } from "#api/types/system.types.ts";
+import { DEFAULT_TEXT_FONT_SIZE } from "#api/types/system.types.ts";
+import type { AnnotationChanges, TextAnnotation } from "#api/types/system.types.ts";
 
 const MIN_DIMENSION = 5;
 const TEXT_PADDING = 4;
@@ -78,7 +79,7 @@ const EditorTextAnnotationInner = ({
     const handleDragEnd = (event: KonvaEventObject<DragEvent>): void => {
         setStageCursor(event, "default");
         onSelect(annotation.id, { openSidebar: false });
-        onChange(annotation.id, { x: event.target.x(), y: event.target.y() });
+        onChange(annotation.id, { type: "text", x: event.target.x(), y: event.target.y() });
         onDragStateChange?.(false);
     };
 
@@ -106,16 +107,16 @@ const EditorTextAnnotationInner = ({
         node.scaleX(1);
         node.scaleY(1);
         const rect = textRectRef.current;
-        const changes: Partial<TextAnnotation> = {
+        const dimensions = rect
+            ? { width: Math.max(MIN_DIMENSION, rect.width()), height: Math.max(MIN_DIMENSION, rect.height()) }
+            : {};
+        onChange(annotation.id, {
+            type: "text",
             x: node.x(),
             y: node.y(),
             rotation: node.rotation(),
-        };
-        if (rect) {
-            changes.width = Math.max(MIN_DIMENSION, rect.width());
-            changes.height = Math.max(MIN_DIMENSION, rect.height());
-        }
-        onChange(annotation.id, changes);
+            ...dimensions,
+        });
     };
 
     const showTransformer = selected && editable && !isCapturing && !editing;

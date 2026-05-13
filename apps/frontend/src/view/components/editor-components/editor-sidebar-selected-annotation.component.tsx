@@ -99,7 +99,7 @@ export const EditorSidebarSelectedAnnotation = ({
                         <IconButton
                             size="small"
                             disabled={!isEditor}
-                            onClick={() => onChange({ bold: !selectedAnnotation.bold })}
+                            onClick={() => onChange({ type: "text", bold: !selectedAnnotation.bold })}
                             aria-label={t("sidebar.annotation.bold")}
                             aria-pressed={!!selectedAnnotation.bold}
                             sx={formatToggleSx(!!selectedAnnotation.bold)}
@@ -109,7 +109,7 @@ export const EditorSidebarSelectedAnnotation = ({
                         <IconButton
                             size="small"
                             disabled={!isEditor}
-                            onClick={() => onChange({ italic: !selectedAnnotation.italic })}
+                            onClick={() => onChange({ type: "text", italic: !selectedAnnotation.italic })}
                             aria-label={t("sidebar.annotation.italic")}
                             aria-pressed={!!selectedAnnotation.italic}
                             sx={formatToggleSx(!!selectedAnnotation.italic)}
@@ -119,7 +119,7 @@ export const EditorSidebarSelectedAnnotation = ({
                         <IconButton
                             size="small"
                             disabled={!isEditor}
-                            onClick={() => onChange({ underline: !selectedAnnotation.underline })}
+                            onClick={() => onChange({ type: "text", underline: !selectedAnnotation.underline })}
                             aria-label={t("sidebar.annotation.underline")}
                             aria-pressed={!!selectedAnnotation.underline}
                             sx={formatToggleSx(!!selectedAnnotation.underline)}
@@ -136,7 +136,7 @@ export const EditorSidebarSelectedAnnotation = ({
                             <Select
                                 value={fontSize}
                                 disabled={!isEditor}
-                                onChange={(event) => onChange({ fontSize: Number(event.target.value) })}
+                                onChange={(event) => onChange({ type: "text", fontSize: Number(event.target.value) })}
                                 inputProps={{ "aria-label": t("sidebar.annotation.fontSize") }}
                             >
                                 {FONT_SIZE_CHOICES.map((size) => (

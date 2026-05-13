@@ -11,6 +11,7 @@ import type { SystemConnectionPoint } from "#application/adapters/system-connect
 import type { Asset } from "#api/types/asset.types.ts";
 import type {
     Annotation,
+    AnnotationChanges,
     AugmentedSystemComponent,
     ConnectionEndpointWithComponent,
     SystemConnection,
@@ -60,7 +61,7 @@ export interface EditorSidebarProps {
     handleInterfaceBreadcrumbClick: () => void;
     selectedAnnotation: Annotation | undefined;
     handleAnnotationColorChange: (stroke: string) => void;
-    handleAnnotationChange: (changes: Partial<Annotation>) => void;
+    handleAnnotationChange: (changes: AnnotationChanges) => void;
     handleDeleteAnnotation: () => void;
 }
 

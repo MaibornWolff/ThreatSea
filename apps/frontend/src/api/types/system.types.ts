@@ -93,12 +93,12 @@ export type AnnotationInput =
     | Omit<TextAnnotation, "id" | "projectId">;
 
 export type AnnotationChanges =
-    | Partial<RectAnnotation>
-    | Partial<CircleAnnotation>
-    | Partial<LineAnnotation>
-    | Partial<ArrowAnnotation>
-    | Partial<FreehandAnnotation>
-    | Partial<TextAnnotation>;
+    | ({ type: "rect" } & Partial<Omit<RectAnnotation, "type" | "id" | "projectId">>)
+    | ({ type: "circle" } & Partial<Omit<CircleAnnotation, "type" | "id" | "projectId">>)
+    | ({ type: "line" } & Partial<Omit<LineAnnotation, "type" | "id" | "projectId">>)
+    | ({ type: "arrow" } & Partial<Omit<ArrowAnnotation, "type" | "id" | "projectId">>)
+    | ({ type: "freehand" } & Partial<Omit<FreehandAnnotation, "type" | "id" | "projectId">>)
+    | ({ type: "text" } & Partial<Omit<TextAnnotation, "type" | "id" | "projectId">>);
 
 export interface Connection {
     id: string;

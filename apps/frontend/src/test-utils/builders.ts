@@ -107,10 +107,9 @@ const ANNOTATION_VARIANT_DEFAULTS: Record<AnnotationType, Record<string, unknown
 // `Extract<Annotation, { type: T }>` picks the variant whose discriminant
 // matches T (e.g. T = "text" → TextAnnotation). Lets the builder return the
 // specific variant the caller asked for instead of the wide Annotation union.
-export function createAnnotation<T extends AnnotationType = "rect">(
-    overrides: Partial<Extract<Annotation, { type: T }>> & { type?: T } = {}
+export function createAnnotation<T extends AnnotationType>(
+    overrides: Partial<Extract<Annotation, { type: T }>> & { type: T }
 ): Extract<Annotation, { type: T }> {
-    const type = (overrides.type ?? "rect") as T;
     return {
         id: "ann-1",
         projectId: 1,
@@ -118,9 +117,8 @@ export function createAnnotation<T extends AnnotationType = "rect">(
         y: 0,
         stroke: "#5786ff",
         strokeWidth: 3,
-        ...ANNOTATION_VARIANT_DEFAULTS[type],
+        ...ANNOTATION_VARIANT_DEFAULTS[overrides.type],
         ...overrides,
-        type,
     } as unknown as Extract<Annotation, { type: T }>;
 }
 

@@ -87,7 +87,10 @@ const EditorAnnotationInner = ({
         (idx: 0 | 1) =>
         (event: KonvaEventObject<DragEvent>): void => {
             const next = computeNextPoints(idx, event.target);
-            onChange(annotation.id, { points: next });
+            if (annotation.type !== "line" && annotation.type !== "arrow") {
+                return;
+            }
+            onChange(annotation.id, { type: annotation.type, points: next });
             onDragStateChange?.(false);
         };
 
@@ -112,7 +115,7 @@ const EditorAnnotationInner = ({
         }
 
         onSelect(annotation.id, { openSidebar: false });
-        onChange(annotation.id, { x: event.target.x(), y: event.target.y() });
+        onChange(annotation.id, { type: annotation.type, x: event.target.x(), y: event.target.y() });
         onDragStateChange?.(false);
     };
 
@@ -130,6 +133,7 @@ const EditorAnnotationInner = ({
 
         if (annotation.type === "rect") {
             onChange(annotation.id, {
+                type: "rect",
                 ...base,
                 width: Math.max(MIN_DIMENSION, annotation.width * scaleX),
                 height: Math.max(MIN_DIMENSION, annotation.height * scaleY),
@@ -138,6 +142,7 @@ const EditorAnnotationInner = ({
         }
         if (annotation.type === "circle") {
             onChange(annotation.id, {
+                type: "circle",
                 ...base,
                 radius: Math.max(MIN_DIMENSION, annotation.radius * scaleX),
             });
@@ -147,11 +152,10 @@ const EditorAnnotationInner = ({
             // Point-based shapes scale every coordinate by axis. Same path for
             // freehand because its geometry is just a longer points array.
             const scaledPoints = annotation.points.map((coord, idx) => coord * (idx % 2 === 0 ? scaleX : scaleY));
-            onChange(annotation.id, { ...base, points: scaledPoints });
+            onChange(annotation.id, { type: annotation.type, ...base, points: scaledPoints });
             return;
         }
-        // text is handled by EditorTextAnnotation — this branch is unreachable.
-        onChange(annotation.id, base);
+        onChange(annotation.id, { type: "text", ...base });
     };
 
     // Empty/transparent fill must NOT capture pointer events when unselected

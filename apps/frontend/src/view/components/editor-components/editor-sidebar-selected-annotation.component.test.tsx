@@ -10,7 +10,7 @@ describe("EditorSidebarSelectedAnnotation", () => {
     it("renders the sidebar title with the shape type and the stroke label", () => {
         renderWithProviders(
             <EditorSidebarSelectedAnnotation
-                selectedAnnotation={createAnnotation()}
+                selectedAnnotation={createAnnotation({ type: "rect" })}
                 userRole={USER_ROLES.EDITOR}
                 onColorChange={vi.fn()}
                 onChange={vi.fn()}
@@ -48,7 +48,7 @@ describe("EditorSidebarSelectedAnnotation", () => {
         const onDelete = vi.fn();
         renderWithProviders(
             <EditorSidebarSelectedAnnotation
-                selectedAnnotation={createAnnotation()}
+                selectedAnnotation={createAnnotation({ type: "rect" })}
                 userRole={USER_ROLES.EDITOR}
                 onColorChange={vi.fn()}
                 onChange={vi.fn()}
@@ -65,7 +65,7 @@ describe("EditorSidebarSelectedAnnotation", () => {
     it("hides the delete button for viewers", () => {
         renderWithProviders(
             <EditorSidebarSelectedAnnotation
-                selectedAnnotation={createAnnotation()}
+                selectedAnnotation={createAnnotation({ type: "rect" })}
                 userRole={USER_ROLES.VIEWER}
                 onColorChange={vi.fn()}
                 onChange={vi.fn()}
@@ -81,7 +81,7 @@ describe("EditorSidebarSelectedAnnotation", () => {
         const onColorChange = vi.fn();
         renderWithProviders(
             <EditorSidebarSelectedAnnotation
-                selectedAnnotation={createAnnotation({ stroke: "#000000" })}
+                selectedAnnotation={createAnnotation({ type: "rect", stroke: "#000000" })}
                 userRole={USER_ROLES.EDITOR}
                 onColorChange={onColorChange}
                 onChange={vi.fn()}
@@ -97,7 +97,7 @@ describe("EditorSidebarSelectedAnnotation", () => {
     it("renders the picker as disabled for viewers", () => {
         renderWithProviders(
             <EditorSidebarSelectedAnnotation
-                selectedAnnotation={createAnnotation()}
+                selectedAnnotation={createAnnotation({ type: "rect" })}
                 userRole={USER_ROLES.VIEWER}
                 onColorChange={vi.fn()}
                 onChange={vi.fn()}
@@ -111,7 +111,7 @@ describe("EditorSidebarSelectedAnnotation", () => {
     it("seeds the color picker with the annotation's stroke", () => {
         const { container } = renderWithProviders(
             <EditorSidebarSelectedAnnotation
-                selectedAnnotation={createAnnotation({ stroke: "#abcdef" })}
+                selectedAnnotation={createAnnotation({ type: "rect", stroke: "#abcdef" })}
                 userRole={USER_ROLES.EDITOR}
                 onColorChange={vi.fn()}
                 onChange={vi.fn()}
@@ -173,7 +173,7 @@ describe("EditorSidebarSelectedAnnotation", () => {
 
             await user.click(screen.getByRole("button", { name: "Bold" }));
 
-            expect(onChange).toHaveBeenCalledWith({ bold: true });
+            expect(onChange).toHaveBeenCalledWith({ type: "text", bold: true });
         });
 
         it("dispatches the inverse italic flag when Italic is clicked", async () => {
@@ -191,7 +191,7 @@ describe("EditorSidebarSelectedAnnotation", () => {
 
             await user.click(screen.getByRole("button", { name: "Italic" }));
 
-            expect(onChange).toHaveBeenCalledWith({ italic: false });
+            expect(onChange).toHaveBeenCalledWith({ type: "text", italic: false });
         });
 
         it("dispatches the inverse underline flag when Underline is clicked", async () => {
@@ -209,7 +209,7 @@ describe("EditorSidebarSelectedAnnotation", () => {
 
             await user.click(screen.getByRole("button", { name: "Underline" }));
 
-            expect(onChange).toHaveBeenCalledWith({ underline: true });
+            expect(onChange).toHaveBeenCalledWith({ type: "text", underline: true });
         });
 
         it("renders a black color preset chip for text annotations", () => {

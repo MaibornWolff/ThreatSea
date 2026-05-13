@@ -44,7 +44,7 @@ import type { Stage as KonvaStage } from "konva/lib/Stage";
 import type { Layer as KonvaLayer } from "konva/lib/Layer";
 import type { Asset } from "#api/types/asset.types.ts";
 import type {
-    Annotation,
+    AnnotationChanges,
     AnnotationType,
     AugmentedSystemComponent,
     ConnectionEndpointWithComponent,
@@ -272,7 +272,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
             if (!text.trim()) {
                 removeAnnotation(editingAnnotationId);
             } else if (editingAnnotation?.type === "text" && editingAnnotation.text !== text) {
-                updateAnnotation(editingAnnotationId, { text });
+                updateAnnotation(editingAnnotationId, { type: "text", text });
             }
             setEditingAnnotationId(null);
         },
@@ -489,12 +489,12 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     };
 
     const handleAnnotationColorChange = (stroke: string): void => {
-        if (selectedAnnotationId) {
-            updateAnnotation(selectedAnnotationId, { stroke });
+        if (selectedAnnotationId && selectedAnnotation) {
+            updateAnnotation(selectedAnnotationId, { type: selectedAnnotation.type, stroke });
         }
     };
 
-    const handleAnnotationChange = (changes: Partial<Annotation>): void => {
+    const handleAnnotationChange = (changes: AnnotationChanges): void => {
         if (selectedAnnotationId) {
             updateAnnotation(selectedAnnotationId, changes);
         }
