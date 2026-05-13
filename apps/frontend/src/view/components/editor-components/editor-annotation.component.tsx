@@ -4,7 +4,7 @@ import type { KonvaEventObject, Node as KonvaNode } from "konva/lib/Node";
 import type { Line as KonvaLineNode } from "konva/lib/shapes/Line";
 import type { Transformer as KonvaTransformer } from "konva/lib/shapes/Transformer";
 import { useAnnotationInteraction } from "#application/hooks/use-annotation-interaction.hook.ts";
-import type { Annotation } from "#api/types/system.types.ts";
+import type { Annotation, AnnotationChanges } from "#api/types/system.types.ts";
 import { EditorTextAnnotation } from "./editor-text-annotation.component";
 
 interface EditorAnnotationProps {
@@ -13,7 +13,7 @@ interface EditorAnnotationProps {
     editable: boolean;
     editing?: boolean;
     onSelect: (id: string, options?: { openSidebar?: boolean }) => void;
-    onChange: (id: string, changes: Partial<Annotation>) => void;
+    onChange: (id: string, changes: AnnotationChanges) => void;
     onDragStateChange?: (isDragging: boolean) => void;
     onRequestEdit?: (id: string) => void;
 }
@@ -57,10 +57,10 @@ const EditorAnnotationInner = ({
     };
 
     const isLineLike = annotation.type === "line" || annotation.type === "arrow";
-    const points = annotation.points ?? [0, 0, 0, 0];
+    const points: number[] = isLineLike ? annotation.points : [0, 0, 0, 0];
 
     const computeNextPoints = (idx: 0 | 1, target: KonvaNode): number[] => {
-        const next = [...(annotation.points ?? [0, 0, 0, 0])];
+        const next = [...points];
         next[idx * 2] = target.x() - annotation.x;
         next[idx * 2 + 1] = target.y() - annotation.y;
         return next;
@@ -126,25 +126,32 @@ const EditorAnnotationInner = ({
         node.scaleX(1);
         node.scaleY(1);
 
-        const changes: Partial<Annotation> = {
-            x: node.x(),
-            y: node.y(),
-            rotation: node.rotation(),
-        };
+        const base = { x: node.x(), y: node.y(), rotation: node.rotation() };
 
         if (annotation.type === "rect") {
-            changes.width = Math.max(MIN_DIMENSION, (annotation.width ?? 0) * scaleX);
-            changes.height = Math.max(MIN_DIMENSION, (annotation.height ?? 0) * scaleY);
-        } else if (annotation.type === "circle") {
-            changes.radius = Math.max(MIN_DIMENSION, (annotation.radius ?? 0) * scaleX);
-        } else if (annotation.type === "line" || annotation.type === "arrow" || annotation.type === "freehand") {
+            onChange(annotation.id, {
+                ...base,
+                width: Math.max(MIN_DIMENSION, annotation.width * scaleX),
+                height: Math.max(MIN_DIMENSION, annotation.height * scaleY),
+            });
+            return;
+        }
+        if (annotation.type === "circle") {
+            onChange(annotation.id, {
+                ...base,
+                radius: Math.max(MIN_DIMENSION, annotation.radius * scaleX),
+            });
+            return;
+        }
+        if (annotation.type === "line" || annotation.type === "arrow" || annotation.type === "freehand") {
             // Point-based shapes scale every coordinate by axis. Same path for
             // freehand because its geometry is just a longer points array.
-            const oldPoints = annotation.points ?? [];
-            changes.points = oldPoints.map((coord, idx) => coord * (idx % 2 === 0 ? scaleX : scaleY));
+            const scaledPoints = annotation.points.map((coord, idx) => coord * (idx % 2 === 0 ? scaleX : scaleY));
+            onChange(annotation.id, { ...base, points: scaledPoints });
+            return;
         }
-
-        onChange(annotation.id, changes);
+        // text is handled by EditorTextAnnotation — this branch is unreachable.
+        onChange(annotation.id, base);
     };
 
     // Empty/transparent fill must NOT capture pointer events when unselected

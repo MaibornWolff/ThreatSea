@@ -4,17 +4,31 @@ import { Box } from "@mui/system";
 import { useTranslation } from "react-i18next";
 import { checkUserRole, USER_ROLES } from "../../../api/types/user-roles.types";
 import { EditorColorPicker } from "./editor-color-picker.component";
-import { ANNOTATION_TYPE_LABEL_KEYS, DEFAULT_TEXT_FONT_SIZE, type Annotation } from "#api/types/system.types.ts";
+import {
+    DEFAULT_TEXT_FONT_SIZE,
+    type Annotation,
+    type AnnotationChanges,
+    type AnnotationType,
+} from "#api/types/system.types.ts";
 
 interface EditorSidebarSelectedAnnotationProps {
     selectedAnnotation: Annotation;
     userRole: USER_ROLES | undefined;
     onColorChange: (stroke: string) => void;
-    onChange: (changes: Partial<Annotation>) => void;
+    onChange: (changes: AnnotationChanges) => void;
     onDelete: () => void;
 }
 
 const FONT_SIZE_CHOICES = [12, 14, 16, 18, 24, 32, 48];
+
+const ANNOTATION_TYPE_LABEL_KEYS: Record<AnnotationType, string> = {
+    rect: "canvas.annotation.rectangle",
+    circle: "canvas.annotation.circle",
+    line: "canvas.annotation.line",
+    arrow: "canvas.annotation.arrow",
+    freehand: "canvas.annotation.freehand",
+    text: "canvas.annotation.text",
+};
 
 export const EditorSidebarSelectedAnnotation = ({
     selectedAnnotation,
@@ -26,7 +40,10 @@ export const EditorSidebarSelectedAnnotation = ({
     const { t } = useTranslation("editorPage");
     const isEditor = checkUserRole(userRole, USER_ROLES.EDITOR);
     const isText = selectedAnnotation.type === "text";
-    const fontSize = selectedAnnotation.fontSize ?? DEFAULT_TEXT_FONT_SIZE;
+    const fontSize =
+        selectedAnnotation.type === "text"
+            ? (selectedAnnotation.fontSize ?? DEFAULT_TEXT_FONT_SIZE)
+            : DEFAULT_TEXT_FONT_SIZE;
 
     const formatToggleSx = (active: boolean) => ({
         color: active ? "primary.main" : "text.secondary",
@@ -73,7 +90,7 @@ export const EditorSidebarSelectedAnnotation = ({
                 />
             </Box>
 
-            {isText && (
+            {selectedAnnotation.type === "text" && (
                 <>
                     <Box sx={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "12px" }}>
                         <Typography sx={{ fontSize: "0.8rem", minWidth: "70px" }}>

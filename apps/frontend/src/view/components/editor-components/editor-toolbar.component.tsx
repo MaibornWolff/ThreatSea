@@ -13,7 +13,16 @@ import { Box, IconButton, Popover, Tooltip } from "@mui/material";
 import { useRef, useState, type ComponentType } from "react";
 import { useTranslation } from "react-i18next";
 import { EditorColorPicker } from "./editor-color-picker.component";
-import { ANNOTATION_TYPE_LABEL_KEYS, type AnnotationType } from "#api/types/system.types.ts";
+import type { AnnotationType } from "#api/types/system.types.ts";
+
+const ANNOTATION_TYPE_LABEL_KEYS: Record<AnnotationType, string> = {
+    rect: "canvas.annotation.rectangle",
+    circle: "canvas.annotation.circle",
+    line: "canvas.annotation.line",
+    arrow: "canvas.annotation.arrow",
+    freehand: "canvas.annotation.freehand",
+    text: "canvas.annotation.text",
+};
 
 export interface EditorToolbarProps {
     onCenterEditor: () => void;

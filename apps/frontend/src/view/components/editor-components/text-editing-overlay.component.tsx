@@ -11,10 +11,11 @@
 import { useEffect, useRef, useState, type CSSProperties, type FocusEvent, type KeyboardEvent } from "react";
 import { createPortal } from "react-dom";
 import type { Stage as KonvaStage } from "konva/lib/Stage";
-import { DEFAULT_TEXT_FONT_SIZE, TEXT_FONT_FAMILY, type Annotation, type Coordinate } from "#api/types/system.types.ts";
+import { DEFAULT_TEXT_FONT_SIZE, type Coordinate, type TextAnnotation } from "#api/types/system.types.ts";
 
 const TEXT_PADDING = 4;
 const OVERLAY_Z_INDEX = 1000;
+const TEXT_FONT_FAMILY = "Poppins, Roboto, sans-serif";
 
 // True when a click/focus lands somewhere we don't want to treat as "outside"
 // the text edit — i.e. chrome that exists to style the annotation.
@@ -29,7 +30,7 @@ const isProtectedTarget = (target: Element): boolean => {
 };
 
 interface TextEditingOverlayProps {
-    annotation: Annotation;
+    annotation: TextAnnotation;
     stageRef: React.RefObject<KonvaStage | null>;
     layerPosition: Coordinate;
     stageScale: number;
@@ -48,11 +49,11 @@ export const TextEditingOverlay = ({
     onCancel,
 }: TextEditingOverlayProps) => {
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-    const [value, setValue] = useState<string>(annotation.text ?? "");
+    const [value, setValue] = useState<string>(annotation.text);
     const sessionEndedRef = useRef(false);
 
     // Focus + select on mount
-    const shouldSelectOnMount = useRef((annotation.text ?? "").length > 0);
+    const shouldSelectOnMount = useRef(annotation.text.length > 0);
     useEffect(() => {
         const raf = requestAnimationFrame(() => {
             const textarea = textareaRef.current;
@@ -123,8 +124,8 @@ export const TextEditingOverlay = ({
     const stageY = stagePosition.y + (layerPosition.y + annotation.y) * stageScale;
     const screenX = containerRect.left + stageX;
     const screenY = containerRect.top + stageY;
-    const width = (annotation.width ?? 0) * stageScale;
-    const height = (annotation.height ?? 0) * stageScale;
+    const width = annotation.width * stageScale;
+    const height = annotation.height * stageScale;
     const fontSize = (annotation.fontSize ?? DEFAULT_TEXT_FONT_SIZE) * stageScale;
 
     const style: CSSProperties = {

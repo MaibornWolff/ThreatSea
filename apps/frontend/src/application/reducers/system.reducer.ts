@@ -274,8 +274,11 @@ const systemReducer = createReducer(defaultState, (builder) => {
     });
 
     builder.addCase(SystemActions.setAnnotations, (state, action) => {
+        // Load-path setter (dispatched from the `getSystem` success middleware).
+        // Hydrating from the backend is not a user change, so we leave
+        // `hasChanged` alone — otherwise opening a project would immediately
+        // mark it dirty and trigger an unnecessary autosave round-trip.
         systemAnnotationsAdapter.upsertMany(state.annotations, action);
-        state.hasChanged = true;
     });
 
     builder.addCase(SystemActions.setDefaultAnnotationColor, (state, action) => {

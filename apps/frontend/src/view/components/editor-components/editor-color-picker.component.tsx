@@ -1,8 +1,8 @@
 import { IconButton, Tooltip } from "@mui/material";
 import { Box } from "@mui/system";
 import { useTranslation } from "react-i18next";
-import { DEFAULT_ANNOTATION_COLOR } from "#api/types/system.types.ts";
 import { POA_COLORS } from "../../colors/pointsOfAttack.colors";
+import { DEFAULT_ANNOTATION_COLOR } from "../../colors/annotation.colors";
 
 const POA_PALETTE = Object.entries(POA_COLORS)
     .map(([poaType, palette]) => ({ poaType, color: palette.normal }))

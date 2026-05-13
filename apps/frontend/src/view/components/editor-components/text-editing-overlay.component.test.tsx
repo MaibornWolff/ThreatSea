@@ -17,7 +17,7 @@ const buildStageRef = (left = 100, top = 50): RefObject<KonvaStage | null> => {
 };
 
 const defaultProps = () => ({
-    annotation: createAnnotation(),
+    annotation: createAnnotation({ type: "text" }),
     stageRef: buildStageRef(),
     layerPosition: { x: 0, y: 0 },
     stageScale: 1,
@@ -51,7 +51,7 @@ describe("TextEditingOverlay", () => {
         it("seeds the textarea with the annotation's existing text", () => {
             const props = defaultProps();
             const { rerender: _rerender } = render(
-                <TextEditingOverlay {...props} annotation={createAnnotation({ text: "hello world" })} />
+                <TextEditingOverlay {...props} annotation={createAnnotation({ type: "text", text: "hello world" })} />
             );
 
             const textarea = screen.getByLabelText("Edit annotation text") as HTMLTextAreaElement;
@@ -60,6 +60,7 @@ describe("TextEditingOverlay", () => {
 
         it("style reflects bold / italic / underline / stroke / fontSize from the annotation", () => {
             const annotation = createAnnotation({
+                type: "text",
                 bold: true,
                 italic: true,
                 underline: true,
@@ -77,7 +78,7 @@ describe("TextEditingOverlay", () => {
         });
 
         it("style falls back to normal / none when bold, italic and underline are unset", () => {
-            const annotation = createAnnotation({ bold: false, italic: false, underline: false });
+            const annotation = createAnnotation({ type: "text", bold: false, italic: false, underline: false });
             render(<TextEditingOverlay {...defaultProps()} annotation={annotation} />);
 
             const textarea = screen.getByLabelText("Edit annotation text") as HTMLTextAreaElement;
@@ -87,7 +88,7 @@ describe("TextEditingOverlay", () => {
         });
 
         it("positions the textarea using container rect + layer/stage offsets × stageScale", () => {
-            const annotation = createAnnotation({ x: 10, y: 20, width: 100, height: 50 });
+            const annotation = createAnnotation({ type: "text", x: 10, y: 20, width: 100, height: 50 });
             render(
                 <TextEditingOverlay
                     {...defaultProps()}
@@ -189,7 +190,7 @@ describe("TextEditingOverlay", () => {
                 <div>
                     <TextEditingOverlay
                         {...defaultProps()}
-                        annotation={createAnnotation({ text: "typed" })}
+                        annotation={createAnnotation({ type: "text", text: "typed" })}
                         onCommit={onCommit}
                     />
                     <button>elsewhere</button>

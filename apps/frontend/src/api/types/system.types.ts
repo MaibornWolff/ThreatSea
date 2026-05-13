@@ -1,5 +1,4 @@
 import type { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
-import { POA_COLORS } from "../../view/colors/pointsOfAttack.colors";
 import type { POINTS_OF_ATTACK } from "./points-of-attack.types";
 
 export interface UpdateSystemRequest {
@@ -20,46 +19,86 @@ export interface SystemData {
     components: Component[];
     pointsOfAttack: PointOfAttack[];
     connectionPoints: ConnectionPoint[];
-    annotations: Annotation[];
+    annotations?: Annotation[];
     defaultAnnotationColor?: string | null;
     lastAutoSaveDate: string;
 }
 
 export type AnnotationType = "rect" | "circle" | "line" | "arrow" | "freehand" | "text";
 
-export const DEFAULT_ANNOTATION_COLOR = POA_COLORS.COMMUNICATION_INFRASTRUCTURE.normal;
 export const DEFAULT_TEXT_FONT_SIZE = 16;
-export const TEXT_FONT_FAMILY = "Poppins, Roboto, sans-serif";
 
-export const ANNOTATION_TYPE_LABEL_KEYS: Record<AnnotationType, string> = {
-    rect: "canvas.annotation.rectangle",
-    circle: "canvas.annotation.circle",
-    line: "canvas.annotation.line",
-    arrow: "canvas.annotation.arrow",
-    freehand: "canvas.annotation.freehand",
-    text: "canvas.annotation.text",
-};
-
-export interface Annotation {
+interface BaseAnnotation {
     id: string;
-    type: AnnotationType;
     projectId: number;
     x: number;
     y: number;
-    width?: number;
-    height?: number;
-    radius?: number;
-    points?: number[];
     rotation?: number;
     stroke: string;
     strokeWidth: number;
     fill?: string;
-    text?: string;
+}
+
+export interface RectAnnotation extends BaseAnnotation {
+    type: "rect";
+    width: number;
+    height: number;
+}
+
+export interface CircleAnnotation extends BaseAnnotation {
+    type: "circle";
+    radius: number;
+}
+
+export interface LineAnnotation extends BaseAnnotation {
+    type: "line";
+    points: number[];
+}
+
+export interface ArrowAnnotation extends BaseAnnotation {
+    type: "arrow";
+    points: number[];
+}
+
+export interface FreehandAnnotation extends BaseAnnotation {
+    type: "freehand";
+    points: number[];
+}
+
+export interface TextAnnotation extends BaseAnnotation {
+    type: "text";
+    width: number;
+    height: number;
+    text: string;
     fontSize?: number;
     bold?: boolean;
     italic?: boolean;
     underline?: boolean;
 }
+
+export type Annotation =
+    | RectAnnotation
+    | CircleAnnotation
+    | LineAnnotation
+    | ArrowAnnotation
+    | FreehandAnnotation
+    | TextAnnotation;
+
+export type AnnotationInput =
+    | Omit<RectAnnotation, "id" | "projectId">
+    | Omit<CircleAnnotation, "id" | "projectId">
+    | Omit<LineAnnotation, "id" | "projectId">
+    | Omit<ArrowAnnotation, "id" | "projectId">
+    | Omit<FreehandAnnotation, "id" | "projectId">
+    | Omit<TextAnnotation, "id" | "projectId">;
+
+export type AnnotationChanges =
+    | Partial<RectAnnotation>
+    | Partial<CircleAnnotation>
+    | Partial<LineAnnotation>
+    | Partial<ArrowAnnotation>
+    | Partial<FreehandAnnotation>
+    | Partial<TextAnnotation>;
 
 export interface Connection {
     id: string;

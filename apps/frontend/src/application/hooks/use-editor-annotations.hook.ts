@@ -5,7 +5,7 @@ import { SystemActions } from "../actions/system.actions";
 import { editorSelectors } from "../selectors/editor.selectors";
 import { systemSelectors } from "../selectors/system.selectors";
 import { useAppDispatch, useAppSelector } from "./use-app-redux.hook";
-import type { Annotation, AnnotationType } from "#api/types/system.types.ts";
+import type { AnnotationChanges, AnnotationInput, AnnotationType } from "#api/types/system.types.ts";
 
 export const useEditorAnnotations = ({ projectId }: { projectId: number }) => {
     const dispatch = useAppDispatch();
@@ -15,14 +15,15 @@ export const useEditorAnnotations = ({ projectId }: { projectId: number }) => {
     const selectedAnnotation = useAppSelector((state) => systemSelectors.selectAnnotation(state, selectedAnnotationId));
     const annotationTool = useAppSelector(editorSelectors.selectAnnotationTool);
 
-    const createAnnotation = (annotation: Omit<Annotation, "id" | "projectId">): string => {
+    const createAnnotation = (annotation: AnnotationInput): string => {
         const id = nanoid();
-        dispatch(SystemActions.createAnnotation({ id, projectId, ...annotation }));
+
+        dispatch(SystemActions.createAnnotation({ ...annotation, id, projectId }));
         return id;
     };
 
     const updateAnnotation = useCallback(
-        (id: string, changes: Partial<Annotation>): void => {
+        (id: string, changes: AnnotationChanges): void => {
             dispatch(SystemActions.setAnnotation({ id, changes }));
         },
         [dispatch]

@@ -152,11 +152,11 @@ describe("systemReducer", () => {
             expect(next.annotations.entities["ann-2"]).toBeDefined();
         });
 
-        it("marks the system as changed without blocking auto-save", () => {
+        it("does not mark the system as changed (load-path setter, not a user edit)", () => {
             const fresh = { ...getInitialState(), hasChanged: false, blockAutoSave: false };
             const next = systemReducer(fresh, SystemActions.setAnnotations([createAnnotation()]));
 
-            expect(next.hasChanged).toBe(true);
+            expect(next.hasChanged).toBe(false);
             expect(next.blockAutoSave).toBe(false);
         });
 

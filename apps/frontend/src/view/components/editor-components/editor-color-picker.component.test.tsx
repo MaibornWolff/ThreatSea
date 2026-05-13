@@ -1,7 +1,7 @@
 import { fireEvent, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { EditorColorPicker } from "./editor-color-picker.component";
-import { DEFAULT_ANNOTATION_COLOR } from "#api/types/system.types.ts";
+import { DEFAULT_ANNOTATION_COLOR } from "../../colors/annotation.colors";
 import { POA_COLORS } from "../../colors/pointsOfAttack.colors";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";

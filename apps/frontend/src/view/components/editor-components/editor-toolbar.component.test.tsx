@@ -2,7 +2,8 @@ import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { EditorToolbar, type EditorToolbarProps } from "./editor-toolbar.component";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
-import { DEFAULT_ANNOTATION_COLOR, type AnnotationType } from "#api/types/system.types.ts";
+import { DEFAULT_ANNOTATION_COLOR } from "../../colors/annotation.colors";
+import type { AnnotationType } from "#api/types/system.types.ts";
 
 const setup = (overrides: Partial<EditorToolbarProps> = {}) => {
     const props = {

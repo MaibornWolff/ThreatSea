@@ -5,18 +5,19 @@ import type { Rect as KonvaRectNode } from "konva/lib/shapes/Rect";
 import type { Text as KonvaTextNode } from "konva/lib/shapes/Text";
 import type { Transformer as KonvaTransformer } from "konva/lib/shapes/Transformer";
 import { useAnnotationInteraction } from "#application/hooks/use-annotation-interaction.hook.ts";
-import { DEFAULT_TEXT_FONT_SIZE, TEXT_FONT_FAMILY, type Annotation } from "#api/types/system.types.ts";
+import { DEFAULT_TEXT_FONT_SIZE, type AnnotationChanges, type TextAnnotation } from "#api/types/system.types.ts";
 
 const MIN_DIMENSION = 5;
 const TEXT_PADDING = 4;
+const TEXT_FONT_FAMILY = "Poppins, Roboto, sans-serif";
 
 interface EditorTextAnnotationProps {
-    annotation: Annotation;
+    annotation: TextAnnotation;
     selected: boolean;
     editable: boolean;
     editing: boolean;
     onSelect: (id: string, options?: { openSidebar?: boolean }) => void;
-    onChange: (id: string, changes: Partial<Annotation>) => void;
+    onChange: (id: string, changes: AnnotationChanges) => void;
     onDragStateChange: ((isDragging: boolean) => void) | undefined;
     onRequestEdit: ((id: string) => void) | undefined;
 }
@@ -105,7 +106,7 @@ const EditorTextAnnotationInner = ({
         node.scaleX(1);
         node.scaleY(1);
         const rect = textRectRef.current;
-        const changes: Partial<Annotation> = {
+        const changes: Partial<TextAnnotation> = {
             x: node.x(),
             y: node.y(),
             rotation: node.rotation(),

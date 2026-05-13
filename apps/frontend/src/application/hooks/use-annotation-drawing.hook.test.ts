@@ -3,7 +3,8 @@ import type { RefObject } from "react";
 import type { Stage as KonvaStage } from "konva/lib/Stage";
 import type { KonvaEventObject } from "konva/lib/Node";
 import { useAnnotationDrawing, ANNOTATION_STROKE_WIDTH } from "./use-annotation-drawing.hook";
-import { DEFAULT_ANNOTATION_COLOR } from "#api/types/system.types.ts";
+
+const TEST_DEFAULT_COLOR = "#5786ff";
 
 const makeStageRef = (pointer: { x: number; y: number } | null): RefObject<KonvaStage | null> =>
     ({
@@ -32,7 +33,7 @@ const setup = (overrides: Partial<Parameters<typeof useAnnotationDrawing>[0]> = 
             stageRef,
             layerPosition: { x: 0, y: 0 },
             isEditor: true,
-            annotationColor: DEFAULT_ANNOTATION_COLOR,
+            annotationColor: TEST_DEFAULT_COLOR,
             createAnnotation,
             ...overrides,
         })
@@ -263,7 +264,7 @@ describe("useAnnotationDrawing", () => {
                 y: 150,
                 width: 100,
                 height: 50,
-                stroke: DEFAULT_ANNOTATION_COLOR,
+                stroke: TEST_DEFAULT_COLOR,
                 strokeWidth: ANNOTATION_STROKE_WIDTH,
             });
         });
@@ -294,7 +295,7 @@ describe("useAnnotationDrawing", () => {
                 x: 150,
                 y: 120,
                 radius: 50,
-                stroke: DEFAULT_ANNOTATION_COLOR,
+                stroke: TEST_DEFAULT_COLOR,
                 strokeWidth: ANNOTATION_STROKE_WIDTH,
             });
         });
@@ -325,7 +326,7 @@ describe("useAnnotationDrawing", () => {
                 x: 0,
                 y: 0,
                 points: [50, 60, 200, 240],
-                stroke: DEFAULT_ANNOTATION_COLOR,
+                stroke: TEST_DEFAULT_COLOR,
                 strokeWidth: ANNOTATION_STROKE_WIDTH,
             });
         });
@@ -448,7 +449,7 @@ describe("useAnnotationDrawing", () => {
                 x: 0,
                 y: 0,
                 points: [50, 50, 70, 65, 100, 80],
-                stroke: DEFAULT_ANNOTATION_COLOR,
+                stroke: TEST_DEFAULT_COLOR,
                 strokeWidth: ANNOTATION_STROKE_WIDTH,
             });
         });

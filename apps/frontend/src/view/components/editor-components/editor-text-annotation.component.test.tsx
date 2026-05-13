@@ -3,13 +3,12 @@ import { EditorTextAnnotation } from "./editor-text-annotation.component";
 import { EditorActions } from "#application/actions/editor.actions.ts";
 import editorReducer from "#application/reducers/editor.reducer.ts";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
-import type { Annotation } from "#api/types/system.types.ts";
 import { createAnnotation } from "../../../test-utils/builders";
 
 const defaultEditorState = editorReducer(undefined, { type: "@@INIT" });
 
 const defaultProps = {
-    annotation: createAnnotation(),
+    annotation: createAnnotation({ type: "text" }),
     selected: false,
     editable: true,
     editing: false,
@@ -26,25 +25,6 @@ describe("EditorTextAnnotation", () => {
         const rect = screen.getByTestId("konva-rect");
         expect(rect).toHaveAttribute("data-width", "100");
         expect(rect).toHaveAttribute("data-height", "100");
-    });
-
-    it("falls back to zero dimensions when width/height are missing", () => {
-        const annotation: Annotation = {
-            id: "text-1",
-            type: "text",
-            projectId: 1,
-            x: 10,
-            y: 20,
-            stroke: "#222",
-            strokeWidth: 1,
-            text: "hello",
-        };
-
-        renderWithProviders(<EditorTextAnnotation {...defaultProps} annotation={annotation} />);
-
-        const rect = screen.getByTestId("konva-rect");
-        expect(rect).toHaveAttribute("data-width", "0");
-        expect(rect).toHaveAttribute("data-height", "0");
     });
 
     describe("Transformer visibility", () => {
@@ -91,7 +71,7 @@ describe("EditorTextAnnotation", () => {
 
     describe("memoization", () => {
         it("does not re-render when only callback identities change", () => {
-            const annotation = createAnnotation();
+            const annotation = createAnnotation({ type: "text" });
             const { rerender } = renderWithProviders(
                 <EditorTextAnnotation {...defaultProps} annotation={annotation} />
             );
@@ -113,11 +93,13 @@ describe("EditorTextAnnotation", () => {
         });
 
         it("re-renders when the annotation reference changes", () => {
-            const initial = createAnnotation({ width: 100 });
+            const initial = createAnnotation({ type: "text", width: 100 });
             const { rerender } = renderWithProviders(<EditorTextAnnotation {...defaultProps} annotation={initial} />);
             expect(screen.getByTestId("konva-rect")).toHaveAttribute("data-width", "100");
 
-            rerender(<EditorTextAnnotation {...defaultProps} annotation={createAnnotation({ width: 250 })} />);
+            rerender(
+                <EditorTextAnnotation {...defaultProps} annotation={createAnnotation({ type: "text", width: 250 })} />
+            );
 
             expect(screen.getByTestId("konva-rect")).toHaveAttribute("data-width", "250");
         });

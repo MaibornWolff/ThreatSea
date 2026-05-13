@@ -17,6 +17,7 @@ import { useAnnotationDrawing, ANNOTATION_STROKE_WIDTH } from "../../application
 import { useEditor, type EditorConnectionAnchor } from "../../application/hooks/use-editor.hook";
 import { useEditorAnnotations } from "../../application/hooks/use-editor-annotations.hook";
 import { useConfirm } from "../../application/hooks/use-confirm.hook";
+import { DEFAULT_ANNOTATION_COLOR } from "../colors/annotation.colors";
 import { AnnotationDrawingPreview } from "../components/editor-components/annotation-drawing-preview.component";
 import { ConnectionPreview } from "../components/editor-components/connection-preview.component";
 import { EditorAnnotation } from "../components/editor-components/editor-annotation.component";
@@ -228,7 +229,10 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
 
     const isEditor = checkUserRole(userRole, USER_ROLES.EDITOR);
 
-    const annotationColor = useAppSelector((state) => systemSelectors.selectDefaultAnnotationColor(state, projectId));
+    const storedAnnotationColor = useAppSelector((state) =>
+        systemSelectors.selectDefaultAnnotationColor(state, projectId)
+    );
+    const annotationColor = storedAnnotationColor ?? DEFAULT_ANNOTATION_COLOR;
     const setAnnotationColor = (color: string): void => {
         dispatch(SystemActions.setDefaultAnnotationColor({ projectId, color }));
     };
@@ -267,7 +271,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
             }
             if (!text.trim()) {
                 removeAnnotation(editingAnnotationId);
-            } else if (editingAnnotation && editingAnnotation.text !== text) {
+            } else if (editingAnnotation?.type === "text" && editingAnnotation.text !== text) {
                 updateAnnotation(editingAnnotationId, { text });
             }
             setEditingAnnotationId(null);
@@ -279,7 +283,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
             return;
         }
 
-        if (editingAnnotation && !editingAnnotation.text) {
+        if (editingAnnotation?.type === "text" && !editingAnnotation.text) {
             removeAnnotation(editingAnnotationId);
         }
         setEditingAnnotationId(null);

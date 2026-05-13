@@ -6,6 +6,7 @@ import { createAsyncThunk, createAction, type Update } from "@reduxjs/toolkit";
 import { SystemAPI } from "#api/system.api.ts";
 import type {
     Annotation,
+    AnnotationChanges,
     Component,
     Connection,
     ConnectionPoint,
@@ -237,7 +238,7 @@ export class SystemActions {
 
     static createAnnotation = createAction<Annotation>("[system] create annotation");
 
-    static setAnnotation = createAction<Update<Annotation, string>>("[system] set annotation");
+    static setAnnotation = createAction<{ id: string; changes: AnnotationChanges }>("[system] set annotation");
 
     static removeAnnotation = createAction<Pick<Annotation, "id">>("[system] remove annotation");
 
