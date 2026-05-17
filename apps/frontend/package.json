@@ -45,7 +45,7 @@
     "react-redux": "9.3.0",
     "react-router": "7.15.1",
     "react-router-dom": "7.15.1",
-    "reselect": "5.1.1",
+    "reselect": "5.2.0",
     "socket.io-client": "4.8.3",
     "use-image": "1.1.4",
     "web-vitals": "5.2.0"
