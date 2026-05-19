@@ -795,7 +795,7 @@ const PdfDocumentToolbar = ({ filename, ...props }: PdfDocumentToolbarProps) => 
                                     {...{ download: `${filename}.pdf` }}
                                     disabled={disabled}
                                     sx={{
-                                        marginRight: 0,
+                                        marginRight: 1,
                                     }}
                                 >
                                     {t("downloadBtn")}
