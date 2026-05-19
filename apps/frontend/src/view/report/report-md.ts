@@ -641,9 +641,10 @@ function threatsDetailSection(T: Translations, threats: ThreatReport[]): string 
                 const mRid = measure.reportId ?? String(measure.measureId);
                 const linkText = escapeLinkText(`${mRid} ${measure.name ?? ""}`);
                 const link = `[${linkText}](#${measureAnchorId(mRid)})`;
-                lines.push(`- ${link}`);
                 if (measure.description) {
-                    lines.push(`  *${escapeInline(measure.description)}*`);
+                    lines.push(`- ${link}<br>*${escapeInline(measure.description)}*`);
+                } else {
+                    lines.push(`- ${link}`);
                 }
             });
             lines.push("");
