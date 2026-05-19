@@ -142,6 +142,7 @@ export const CreatePage = <P extends object>(
                 >
                     <Box
                         component="header"
+                        data-edit-protected
                         sx={(theme) => ({
                             display: "grid",
                             alignItems: "center",
