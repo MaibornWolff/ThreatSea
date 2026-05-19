@@ -158,6 +158,74 @@ function buildTranslations(language: string): Translations {
 }
 
 // ---------------------------------------------------------------------------
+// Sanitization helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Strip line breaks from user content used in single-line contexts: headings,
+ * table cells, link text, and inline emphasis. A newline in a heading or table
+ * cell terminates the element and the remainder can introduce new structure
+ * (e.g. `\n# Injected heading`).
+ */
+function escapeInline(s: string): string {
+    return s.replace(/[\r\n]+/g, " ");
+}
+
+/**
+ * Escape pipe characters that would split a table cell, on top of stripping
+ * line breaks.
+ */
+function escapeCell(s: string): string {
+    return escapeInline(s).replace(/\|/g, "\\|");
+}
+
+/**
+ * Escape closing square brackets that would prematurely end link text and
+ * allow an attacker-controlled URL to follow, on top of stripping line breaks.
+ */
+function escapeLinkText(s: string): string {
+    return escapeInline(s).replace(/\]/g, "\\]");
+}
+
+/**
+ * Percent-encode parentheses in URLs. A bare `)` ends the `(url)` part of a
+ * Markdown link, so user-supplied URLs must have it encoded.
+ */
+function escapeUrl(url: string): string {
+    return url.replace(/\(/g, "%28").replace(/\)/g, "%29");
+}
+
+/**
+ * For multi-line block text (e.g. project/asset descriptions) preserve the
+ * original line breaks but escape leading `#` so lines cannot become ATX
+ * headings, which would alter the document outline.
+ *
+ * Single newlines are converted to Markdown hard line breaks (two trailing
+ * spaces + newline) so they render as `<br>` rather than being merged into
+ * the surrounding paragraph. Double newlines (paragraph breaks) are kept
+ * intact.
+ */
+function escapeBlock(s: string): string {
+    return (
+        s
+            .replace(/\r\n?/g, "\n")
+            // ATX headings: `# heading` AND bare `###` (no trailing space/content)
+            .replace(/^(#{1,6})(?=[ \t]|$)/gm, "\\$1")
+            // Setext heading underlines and thematic breaks:
+            // lines consisting solely of -, =, *, _ (plus optional spaces/tabs)
+            .replace(/^([-=*_])[-=*_ \t]*$/gm, "\\$&")
+            // Fenced code blocks: ``` or ~~~ at line start swallow all following
+            // content (including headings) until a matching closing fence
+            .replace(/^(`{3,}|~{3,})/gm, "\\$1")
+            // HTML blocks: CommonMark treats lines starting with < as raw HTML;
+            // \< is a valid backslash escape that renders as a literal <
+            .replace(/^</gm, "\\<")
+            // Hard line breaks: single \n → two trailing spaces + \n
+            .replace(/([^\n])\n(?!\n)/g, "$1  \n")
+    );
+}
+
+// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
@@ -166,7 +234,9 @@ function hr(): string {
 }
 
 function anchor(id: string): string {
-    return `<a id="${id}"></a>`;
+    // Strip characters that could break out of the HTML attribute value.
+    const safeId = id.replace(/["<>]/g, "");
+    return `<a id="${safeId}"></a>`;
 }
 
 function tocLink(label: string, id: string): string {
@@ -227,7 +297,7 @@ function coverSection(T: Translations, data: ProjectReport, date: string, system
     const confidentialityLabel = T.confidentialityLevels[project.confidentialityLevel] ?? project.confidentialityLevel;
 
     const lines: string[] = [];
-    lines.push(`# ${project.name}`);
+    lines.push(`# ${escapeInline(project.name)}`);
     lines.push("");
     lines.push("Cyber Security | MaibornWolff");
     lines.push("");
@@ -238,11 +308,11 @@ function coverSection(T: Translations, data: ProjectReport, date: string, system
     lines.push(`*${confidentialityLabel}*`);
     if (project.description) {
         lines.push("");
-        lines.push(project.description);
+        lines.push(escapeBlock(project.description));
     }
     if (!systemImageOnSeperatePage && systemImage) {
         lines.push("");
-        lines.push(`![${T.systemImage}](${systemImage})`);
+        lines.push(`![${T.systemImage}](${escapeUrl(systemImage)})`);
         lines.push("");
         lines.push(systemImageLegend(T));
     }
@@ -267,7 +337,7 @@ function systemImageSection(T: Translations, systemImage: string | null): string
     lines.push(`## ${anchor("chapter-systemImage")}${T.systemImage}`);
     lines.push("");
     if (systemImage) {
-        lines.push(`![${T.systemImage}](${systemImage})`);
+        lines.push(`![${T.systemImage}](${escapeUrl(systemImage)})`);
         lines.push("");
     }
     lines.push(systemImageLegend(T));
@@ -400,29 +470,39 @@ function assetsSection(T: Translations, assets: AssetWithReportId[]): string {
 
     assets.forEach((asset) => {
         const id = `asset-${asset.reportId}`;
-        lines.push(`### ${anchor(id)}${asset.reportId} ${asset.name}`);
+        lines.push(`### ${anchor(id)}${escapeInline(asset.reportId)} ${escapeInline(asset.name)}`);
         lines.push("");
-        lines.push(`*ID: ${asset.id}*`);
+        lines.push(`*ID: ${escapeInline(String(asset.id))}*`);
         lines.push("");
         lines.push(`| ${T.confidentiality} | ${T.integrity} | ${T.availability} |`);
         lines.push(`|---|---|---|`);
-        lines.push(`| ${asset.confidentiality} | ${asset.integrity} | ${asset.availability} |`);
+        lines.push(
+            `| ${escapeCell(String(asset.confidentiality))} | ${escapeCell(String(asset.integrity))} | ${escapeCell(String(asset.availability))} |`
+        );
         lines.push("");
 
         if (asset.description) {
-            lines.push(`**${T.description}:** ${asset.description}`);
+            lines.push(`**${T.description}:**`);
+            lines.push("");
+            lines.push(escapeBlock(asset.description));
             lines.push("");
         }
         if (asset.confidentialityJustification) {
-            lines.push(`**${T.confidentialityJustification}:** ${asset.confidentialityJustification}`);
+            lines.push(`**${T.confidentialityJustification}:**`);
+            lines.push("");
+            lines.push(escapeBlock(asset.confidentialityJustification));
             lines.push("");
         }
         if (asset.integrityJustification) {
-            lines.push(`**${T.integrityJustification}:** ${asset.integrityJustification}`);
+            lines.push(`**${T.integrityJustification}:**`);
+            lines.push("");
+            lines.push(escapeBlock(asset.integrityJustification));
             lines.push("");
         }
         if (asset.availabilityJustification) {
-            lines.push(`**${T.availabilityJustification}:** ${asset.availabilityJustification}`);
+            lines.push(`**${T.availabilityJustification}:**`);
+            lines.push("");
+            lines.push(escapeBlock(asset.availabilityJustification));
             lines.push("");
         }
     });
@@ -436,11 +516,11 @@ function measuresSection(T: Translations, measures: ReportMeasure[]): string {
     lines.push("");
 
     measures.forEach((measure) => {
-        const rid = measure.reportId ?? String(measure.id);
+        const rid = escapeInline(measure.reportId ?? String(measure.id));
         const id = `measure-${rid}`;
-        lines.push(`### ${anchor(id)}${rid} ${measure.name}`);
+        lines.push(`### ${anchor(id)}${rid} ${escapeInline(measure.name)}`);
         lines.push("");
-        lines.push(`*ID: ${measure.id}*`);
+        lines.push(`*ID: ${escapeInline(String(measure.id))}*`);
         lines.push("");
 
         const scheduledAtDate =
@@ -451,7 +531,9 @@ function measuresSection(T: Translations, measures: ReportMeasure[]): string {
         lines.push("");
 
         if (measure.description && measure.description.length > 0) {
-            lines.push(`**${T.description}:** ${measure.description}`);
+            lines.push(`**${T.description}:**`);
+            lines.push("");
+            lines.push(escapeBlock(measure.description));
             lines.push("");
         }
 
@@ -460,7 +542,8 @@ function measuresSection(T: Translations, measures: ReportMeasure[]): string {
             lines.push("");
             measure.threats.forEach((threat) => {
                 const threatRid = threat.reportId ?? String(threat.id);
-                const link = `[${threat.id} ${threat.name ?? ""}](#${threatAnchorId(threatRid)})`;
+                const linkText = escapeLinkText(`${threat.id} ${threat.name ?? ""}`);
+                const link = `[${linkText}](#${threatAnchorId(threatRid)})`;
                 lines.push(`- ${link}`);
             });
             lines.push("");
@@ -478,9 +561,9 @@ function threatsListSection(T: Translations, threats: ThreatReport[]): string {
     lines.push(`| ID | ${T.name} | ${T.component} |`);
     lines.push(`|----|---------|-----------|`);
     threats.forEach((threat) => {
-        const link = `[${threat.name}](#${threatAnchorId(threat.reportId)})`;
-        const component = threat.componentName ?? "";
-        lines.push(`| ${threat.id} | ${link} | ${component} |`);
+        const link = `[${escapeLinkText(threat.name)}](#${threatAnchorId(threat.reportId)})`;
+        const component = escapeCell(threat.componentName ?? "");
+        lines.push(`| ${escapeCell(String(threat.id))} | ${link} | ${component} |`);
     });
     lines.push("");
 
@@ -504,9 +587,9 @@ function threatsDetailSection(T: Translations, threats: ThreatReport[]): string 
             .filter(Boolean)
             .join(", ");
 
-        lines.push(`### ${anchor(id)}${threat.reportId} ${threat.name}`);
+        lines.push(`### ${anchor(id)}${escapeInline(threat.reportId)} ${escapeInline(threat.name)}`);
         lines.push("");
-        lines.push(`*ID: ${threat.id}*`);
+        lines.push(`*ID: ${escapeInline(String(threat.id))}*`);
         lines.push("");
 
         if (affectedGoals) {
@@ -517,11 +600,15 @@ function threatsDetailSection(T: Translations, threats: ThreatReport[]): string 
         // Risk table
         lines.push(`| | ${T.probability} | ${T.damage} | ${T.risk} |`);
         lines.push(`|---|---|---|---|`);
-        lines.push(`| ${T.gross} | ${threat.probability} | ${threat.damage} | ${threat.risk} |`);
-        lines.push(`| ${T.net} | ${threat.netProbability} | ${threat.netDamage} | ${threat.netRisk} |`);
+        lines.push(
+            `| ${T.gross} | ${escapeCell(String(threat.probability))} | ${escapeCell(String(threat.damage))} | ${escapeCell(String(threat.risk))} |`
+        );
+        lines.push(
+            `| ${T.net} | ${escapeCell(String(threat.netProbability))} | ${escapeCell(String(threat.netDamage))} | ${escapeCell(String(threat.netRisk))} |`
+        );
         lines.push("");
 
-        lines.push(`**${T.component}:** ${threat.componentName ?? "–"}`);
+        lines.push(`**${T.component}:** ${escapeInline(threat.componentName ?? "–")}`);
         lines.push("");
         lines.push(`**${T.attackersHeader}:** ${attackerName}`);
         lines.push("");
@@ -529,7 +616,9 @@ function threatsDetailSection(T: Translations, threats: ThreatReport[]): string 
         lines.push("");
 
         if (threat.description) {
-            lines.push(`**${T.description}:** ${threat.description}`);
+            lines.push(`**${T.description}:**`);
+            lines.push("");
+            lines.push(escapeBlock(threat.description));
             lines.push("");
         }
 
@@ -538,7 +627,8 @@ function threatsDetailSection(T: Translations, threats: ThreatReport[]): string 
             lines.push("");
             threat.assets.forEach((asset) => {
                 const assetRid = asset.reportId ?? String(asset.id);
-                const link = `[${assetRid} ${asset.name ?? ""}](#${assetAnchorId(assetRid)})`;
+                const linkText = escapeLinkText(`${assetRid} ${asset.name ?? ""}`);
+                const link = `[${linkText}](#${assetAnchorId(assetRid)})`;
                 lines.push(`- ${link}`);
             });
             lines.push("");
@@ -549,10 +639,11 @@ function threatsDetailSection(T: Translations, threats: ThreatReport[]): string 
             lines.push("");
             threat.measures.forEach((measure) => {
                 const mRid = measure.reportId ?? String(measure.measureId);
-                const link = `[${mRid} ${measure.name ?? ""}](#${measureAnchorId(mRid)})`;
+                const linkText = escapeLinkText(`${mRid} ${measure.name ?? ""}`);
+                const link = `[${linkText}](#${measureAnchorId(mRid)})`;
                 lines.push(`- ${link}`);
                 if (measure.description) {
-                    lines.push(`  *${measure.description}*`);
+                    lines.push(`  *${escapeInline(measure.description)}*`);
                 }
             });
             lines.push("");
