@@ -1,5 +1,5 @@
 import AddMemberDialog from "../dialogs/add-member.dialog";
-import { useLocation, useNavigate, useParams, type Location } from "react-router-dom";
+import { Navigate, useLocation, useParams, type Location } from "react-router-dom";
 import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import type { Member } from "#api/types/members.types.ts";
 import type { USER_ROLES } from "#api/types/user-roles.types.ts";
@@ -26,7 +26,6 @@ interface MemberDialogLocationState {
  * @return {Component}
  */
 const MemberDialogPage = () => {
-    const navigate = useNavigate();
     const params = useParams<{ projectId?: string; catalogId?: string }>();
     const location = useLocation() as Location<MemberDialogLocationState | undefined>;
     const derivedProjectCatalogId = params.projectId ?? params.catalogId ?? "0";
@@ -54,11 +53,7 @@ const MemberDialogPage = () => {
             />
         );
     } else {
-        navigate(`/${memberPath}/${projectCatalogId}/members`, {
-            replace: true,
-        });
-
-        return null;
+        return <Navigate to={`/${memberPath}/${projectCatalogId}/members`} replace />;
     }
 };
 

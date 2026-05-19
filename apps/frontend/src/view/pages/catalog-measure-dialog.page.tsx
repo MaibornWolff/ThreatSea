@@ -3,7 +3,7 @@
  *     measure dialog page.
  */
 
-import { useParams, useNavigate, useLocation, type Location } from "react-router-dom";
+import { useParams, useLocation, Navigate, type Location } from "react-router-dom";
 import type { CatalogMeasure } from "#api/types/catalog-measure.types.ts";
 import CatalogMeasureDialog from "../dialogs/catalog-measure.dialog";
 
@@ -17,7 +17,6 @@ interface CatalogMeasureDialogLocationState {
  * @returns Catalogue measure dialog page.
  */
 const CatalogMeasureDialogPage = () => {
-    const navigate = useNavigate();
     const { catalogId: catalogIdParam = "0" } = useParams<{ catalogId?: string }>();
     const catalogId = Number.parseInt(catalogIdParam, 10);
     const { state } = useLocation() as Location<CatalogMeasureDialogLocationState | undefined>;
@@ -27,9 +26,7 @@ const CatalogMeasureDialogPage = () => {
 
         return <CatalogMeasureDialog open={true} isNew={isNew} catalogMeasure={catalogMeasure} catalogId={catalogId} />;
     } else {
-        navigate(`/catalogs/${catalogIdParam}`, { replace: true });
-
-        return null;
+        return <Navigate to={`/catalogs/${catalogIdParam}`} replace />;
     }
 };
 

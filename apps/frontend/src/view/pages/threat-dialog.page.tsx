@@ -1,4 +1,4 @@
-import { useLocation, useNavigate, useParams, type Location } from "react-router-dom";
+import { Navigate, useLocation, useParams, type Location } from "react-router-dom";
 import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import AddThreatDialog from "../dialogs/add-threat.dialog";
@@ -15,7 +15,6 @@ interface ThreatDialogLocationState {
  * @return {JSX.Element}
  */
 const ThreatDialogPage = () => {
-    const navigate = useNavigate();
     const { projectId = "" } = useParams<{ projectId?: string }>();
     const userRole = useAppSelector((state) => state.projects.current?.role);
     const { state } = useLocation() as Location<ThreatDialogLocationState | undefined>;
@@ -25,8 +24,7 @@ const ThreatDialogPage = () => {
     if (threat && project) {
         return <AddThreatDialog open={true} threat={threat} project={project} userRole={userRole} />;
     } else {
-        navigate(`/projects/${projectId}/threats`, { replace: true });
-        return null;
+        return <Navigate to={`/projects/${projectId}/threats`} replace />;
     }
 };
 

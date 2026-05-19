@@ -1,4 +1,4 @@
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useLocation, Navigate } from "react-router-dom";
 import type { Location } from "react-router-dom";
 import type { Project } from "#api/types/project.types.ts";
 import type { Measure } from "#api/types/measure.types.ts";
@@ -19,7 +19,6 @@ interface MeasureImpactByThreatDialogLocationState {
 }
 
 export const MeasureImpactByThreatDialogPage = () => {
-    const navigate = useNavigate();
     const { projectId = "" } = useParams<{ projectId: string }>();
     const { state } = useLocation() as Location<MeasureImpactByThreatDialogLocationState | undefined>;
 
@@ -35,8 +34,6 @@ export const MeasureImpactByThreatDialogPage = () => {
             />
         );
     } else {
-        navigate(`/projects/${projectId}/measures`, { replace: true });
-
-        return null;
+        return <Navigate to={`/projects/${projectId}/measures`} replace />;
     }
 };

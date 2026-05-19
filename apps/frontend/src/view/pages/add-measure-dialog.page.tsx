@@ -1,4 +1,4 @@
-import { useParams, useNavigate, useLocation, type Location } from "react-router-dom";
+import { useParams, useLocation, Navigate, type Location } from "react-router-dom";
 import type { Measure } from "#api/types/measure.types.ts";
 import type { Project } from "#api/types/project.types.ts";
 import AddMeasureDialog from "../dialogs/add-measure.dialog";
@@ -16,7 +16,6 @@ interface AddMeasureDialogLocationState {
  * @return {JSX.Element}
  */
 const AddMeasureDialogPage = () => {
-    const navigate = useNavigate();
     const { projectId = "" } = useParams<{ projectId?: string }>();
     const { state } = useLocation() as Location<AddMeasureDialogLocationState | undefined>;
 
@@ -25,9 +24,7 @@ const AddMeasureDialogPage = () => {
 
         return <AddMeasureDialog project={project} measure={measure} open={true} />;
     } else {
-        navigate(`/projects/${projectId}/risk`, { replace: true });
-
-        return null;
+        return <Navigate to={`/projects/${projectId}/risk`} replace />;
     }
 };
 

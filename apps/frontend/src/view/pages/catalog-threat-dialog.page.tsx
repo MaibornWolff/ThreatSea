@@ -3,7 +3,7 @@
  *     threat dialog page.
  */
 
-import { useParams, useNavigate, useLocation, type Location } from "react-router-dom";
+import { useParams, useLocation, Navigate, type Location } from "react-router-dom";
 import type { CatalogThreat } from "#api/types/catalog-threat.types.ts";
 import CatalogThreatDialog from "../dialogs/catalog-threat.dialog";
 
@@ -18,7 +18,6 @@ interface CatalogThreatDialogLocationState {
  * @returns Catalogue threat dialog page.
  */
 const CatalogThreatDialogPage = () => {
-    const navigate = useNavigate();
     const { catalogId } = useParams<{ catalogId?: string }>();
     const { state } = useLocation() as Location<CatalogThreatDialogLocationState | undefined>;
     if (state) {
@@ -26,9 +25,7 @@ const CatalogThreatDialogPage = () => {
 
         return <CatalogThreatDialog open={true} isNew={isNew} catalogThreat={catalogThreat} />;
     } else {
-        navigate(`/catalogs/${catalogId ?? ""}`, { replace: true });
-
-        return null;
+        return <Navigate to={`/catalogs/${catalogId ?? ""}`} replace />;
     }
 };
 
