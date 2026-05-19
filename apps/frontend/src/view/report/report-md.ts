@@ -1,5 +1,7 @@
 import type { ProjectReport } from "#api/types/project.types.ts";
 import type { RiskMatrix, Milestone } from "#application/hooks/use-report.hook.ts";
+import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
+import { POA_COLORS } from "../colors/pointsOfAttack.colors";
 import i18next from "i18next";
 
 // ---------------------------------------------------------------------------
@@ -241,6 +243,21 @@ function coverSection(T: Translations, data: ProjectReport, date: string, system
     if (!systemImageOnSeperatePage && systemImage) {
         lines.push("");
         lines.push(`![${T.systemImage}](${systemImage})`);
+        lines.push("");
+        lines.push(systemImageLegend(T));
+    }
+    return lines.join("\n");
+}
+
+function systemImageLegend(T: Translations): string {
+    const lines: string[] = [];
+    lines.push(`| | ${T.pointsOfAttackHeader} |`);
+    lines.push(`|:---:|---|`);
+    for (const poa of Object.values(POINTS_OF_ATTACK)) {
+        const color = POA_COLORS[poa].normal;
+        const name = T.pointsOfAttacks[poa]?.name ?? poa;
+        const swatch = `<svg width="12" height="12" xmlns="http://www.w3.org/2000/svg"><rect width="12" height="12" fill="${color}" rx="2"/></svg>`;
+        lines.push(`| ${swatch} \`${color}\` | ${name} |`);
     }
     return lines.join("\n");
 }
@@ -251,7 +268,9 @@ function systemImageSection(T: Translations, systemImage: string | null): string
     lines.push("");
     if (systemImage) {
         lines.push(`![${T.systemImage}](${systemImage})`);
+        lines.push("");
     }
+    lines.push(systemImageLegend(T));
     return lines.join("\n");
 }
 
