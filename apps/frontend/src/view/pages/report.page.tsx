@@ -19,6 +19,7 @@ import { ToggleButtons } from "../components/toggle-buttons.component";
 import { CreatePage } from "../components/create-page.component";
 import { HeaderUtilityControls } from "../components/header-utility-controls.component";
 import { Report } from "../report/report";
+import { generateMarkdownReport } from "../report/report-md";
 import { ExportIconButton } from "../components/export-icon-button.component";
 import { withProject } from "../components/with-project.hoc";
 
@@ -711,6 +712,33 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
 
 const PdfDocumentToolbar = ({ filename, ...props }: PdfDocumentToolbarProps) => {
     const { t } = useTranslation("reportPage");
+
+    const handleDownloadMarkdown = () => {
+        const markdown = generateMarkdownReport({
+            data: props.data,
+            bruttoMatrix: props.bruttoMatrix,
+            nettoMatrix: props.nettoMatrix,
+            tillScheduledAt: props.tillScheduledAt,
+            showCoverPage: props.showCoverPage,
+            showTableOfContentsPage: props.showTableOfContentsPage,
+            showMethodExplanation: props.showMethodExplanation,
+            showScaleExplanation: props.showScaleExplanation,
+            showMatrixPage: props.showMatrixPage,
+            showAssetsPage: props.showAssetsPage,
+            showMeasuresPage: props.showMeasuresPage,
+            showThreatListPage: props.showThreatListPage,
+            showThreatsPage: props.showThreatsPage,
+            systemImageOnSeperatePage: props.systemImageOnSeperatePage,
+        });
+        const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${filename}.md`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
     return (
         <BlobProvider document={<Report {...props} />}>
             {({ url, loading, error }) => {
@@ -760,10 +788,18 @@ const PdfDocumentToolbar = ({ filename, ...props }: PdfDocumentToolbarProps) => 
                                     {...{ download: `${filename}.pdf` }}
                                     disabled={disabled}
                                     sx={{
-                                        marginRight: 0,
+                                        marginRight: 1,
                                     }}
                                 >
                                     {t("downloadBtn")}
+                                </Button>
+                                <Button
+                                    onClick={handleDownloadMarkdown}
+                                    sx={{
+                                        marginRight: 0,
+                                    }}
+                                >
+                                    {t("downloadMarkdownBtn")}
                                 </Button>
                             </>
                         )}

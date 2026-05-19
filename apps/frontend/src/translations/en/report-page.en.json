@@ -15,6 +15,7 @@
   "createBtn": "Create PDF Document",
   "openInBrowserBtn": "Open in Browser",
   "downloadBtn": "Download",
+  "downloadMarkdownBtn": "Download Markdown",
   "reportLoads": "Report gets created...",
   "pageSettings": "Page Settings",
   "riskMatrixSettings": "Risk Matrix for Milestones",

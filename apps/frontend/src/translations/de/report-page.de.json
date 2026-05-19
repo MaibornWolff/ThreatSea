@@ -15,6 +15,7 @@
   "createBtn": "Report erstellen",
   "openInBrowserBtn": "Im Browser öffnen",
   "downloadBtn": "Download",
+  "downloadMarkdownBtn": "Markdown herunterladen",
   "reportLoads": "Report wird erstellt...",
   "pageSettings": "Seiten Einstellungen",
   "riskMatrixSettings": "Risikomatrix Einstellungen",
