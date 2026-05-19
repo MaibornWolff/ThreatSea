@@ -80,20 +80,13 @@ describe("EditorToolbar", () => {
             expect(onSetAnnotationTool).toHaveBeenCalledWith("rect");
         });
 
-        it("renders the standalone Pencil button (outside the popover) and toggles 'freehand' on click", async () => {
-            const user = userEvent.setup();
-            const onSetAnnotationTool = vi.fn();
-            setup({ onSetAnnotationTool });
+        it("renders the standalone Pencil button (outside the popover)", () => {
+            setup();
 
-            const pencilButton = screen.getByRole("button", { name: "Pencil" });
-            expect(pencilButton).toBeInTheDocument();
-
-            await user.click(pencilButton);
-
-            expect(onSetAnnotationTool).toHaveBeenCalledWith("freehand");
+            expect(screen.getByRole("button", { name: "Pencil" })).toBeInTheDocument();
         });
 
-        it("renders the standalone Text button (outside the popover) and toggles 'text' on click", async () => {
+        it("renders the standalone Text button and toggles 'text' on click", async () => {
             const user = userEvent.setup();
             const onSetAnnotationTool = vi.fn();
             setup({ onSetAnnotationTool });
@@ -104,16 +97,6 @@ describe("EditorToolbar", () => {
             await user.click(textButton);
 
             expect(onSetAnnotationTool).toHaveBeenCalledWith("text");
-        });
-
-        it("clicking the active Pencil button toggles the tool back off", async () => {
-            const user = userEvent.setup();
-            const onSetAnnotationTool = vi.fn();
-            setup({ annotationTool: "freehand", onSetAnnotationTool });
-
-            await user.click(screen.getByRole("button", { name: "Pencil" }));
-
-            expect(onSetAnnotationTool).toHaveBeenCalledWith(null);
         });
 
         it("Pencil button reflects active state via aria-pressed", () => {
@@ -130,7 +113,7 @@ describe("EditorToolbar", () => {
             expect(screen.queryByRole("button", { name: "Text" })).not.toBeInTheDocument();
         });
 
-        it("calls onSetAnnotationTool with null when the active tool is clicked again (toggle off)", async () => {
+        it("calls onSetAnnotationTool with null when the active shape tool is clicked again (toggle off)", async () => {
             const user = userEvent.setup();
             const onSetAnnotationTool = vi.fn();
             setup({ annotationTool: "rect", onSetAnnotationTool });
@@ -166,19 +149,7 @@ describe("EditorToolbar", () => {
             }
         );
 
-        it("renders the standalone Color button when showAnnotationTools is true", () => {
-            setup({ showAnnotationTools: true });
-
-            expect(screen.getByRole("button", { name: "Pick color" })).toBeInTheDocument();
-        });
-
-        it("hides the Color button when showAnnotationTools is false", () => {
-            setup({ showAnnotationTools: false });
-
-            expect(screen.queryByRole("button", { name: "Pick color" })).not.toBeInTheDocument();
-        });
-
-        it("does not render the color picker inside the shapes popover", async () => {
+        it("does NOT render the color picker inside the shapes popover", async () => {
             const user = userEvent.setup();
             setup();
 
@@ -187,15 +158,71 @@ describe("EditorToolbar", () => {
             expect(screen.queryByRole("button", { name: DEFAULT_ANNOTATION_COLOR })).not.toBeInTheDocument();
         });
 
-        it("forwards a color preset click to onSetAnnotationColor via the top-level Color button", async () => {
+        it("closes the shapes popover when a shape tool is clicked", async () => {
+            const user = userEvent.setup();
+            setup();
+
+            await user.click(screen.getByRole("button", { name: "Shapes" }));
+            expect(screen.getByRole("button", { name: "Rectangle" })).toBeInTheDocument();
+
+            await user.click(screen.getByRole("button", { name: "Rectangle" }));
+
+            expect(screen.queryByRole("button", { name: "Rectangle" })).not.toBeInTheDocument();
+        });
+    });
+
+    describe("tool options popper", () => {
+        it("is hidden when no annotation tool is active", () => {
+            setup({ annotationTool: null });
+
+            expect(screen.queryByRole("button", { name: DEFAULT_ANNOTATION_COLOR })).not.toBeInTheDocument();
+        });
+
+        it.each(["rect", "circle", "line", "arrow", "freehand"] as const)(
+            "shows the color picker when %s is the active tool",
+            (tool) => {
+                setup({ annotationTool: tool });
+
+                expect(screen.getByRole("button", { name: DEFAULT_ANNOTATION_COLOR })).toBeInTheDocument();
+            }
+        );
+
+        it("does NOT show the color picker when text is the active tool (text uses its own default; recolor via sidebar)", () => {
+            setup({ annotationTool: "text" });
+
+            expect(screen.queryByRole("button", { name: DEFAULT_ANNOTATION_COLOR })).not.toBeInTheDocument();
+        });
+
+        it("forwards a color preset click to onSetAnnotationColor", async () => {
             const user = userEvent.setup();
             const onSetAnnotationColor = vi.fn();
-            setup({ annotationColor: "#000000", onSetAnnotationColor });
+            setup({ annotationTool: "freehand", annotationColor: "#000000", onSetAnnotationColor });
 
-            await user.click(screen.getByRole("button", { name: "Pick color" }));
             await user.click(screen.getByRole("button", { name: DEFAULT_ANNOTATION_COLOR }));
 
             expect(onSetAnnotationColor).toHaveBeenCalledWith(DEFAULT_ANNOTATION_COLOR);
+        });
+
+        it("hides the color picker while the shapes-list popover is open (shape-anchored case)", async () => {
+            const user = userEvent.setup();
+            setup({ annotationTool: "rect" });
+
+            expect(screen.getByRole("button", { name: DEFAULT_ANNOTATION_COLOR })).toBeInTheDocument();
+
+            await user.click(screen.getByRole("button", { name: "Shapes" }));
+
+            expect(screen.queryByRole("button", { name: DEFAULT_ANNOTATION_COLOR })).not.toBeInTheDocument();
+            expect(screen.getByRole("button", { name: "Rectangle" })).toBeInTheDocument();
+        });
+
+        it("deselects freehand when the active freehand button is clicked again", async () => {
+            const user = userEvent.setup();
+            const onSetAnnotationTool = vi.fn();
+            setup({ annotationTool: "freehand", onSetAnnotationTool });
+
+            await user.click(screen.getByRole("button", { name: "Pencil" }));
+
+            expect(onSetAnnotationTool).toHaveBeenCalledWith(null);
         });
     });
 });

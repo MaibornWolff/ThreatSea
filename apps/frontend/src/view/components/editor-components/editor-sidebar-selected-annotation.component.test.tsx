@@ -212,7 +212,7 @@ describe("EditorSidebarSelectedAnnotation", () => {
             expect(onChange).toHaveBeenCalledWith({ type: "text", underline: true });
         });
 
-        it("renders a black color preset chip for text annotations", () => {
+        it("renders a black color preset chip", () => {
             renderWithProviders(
                 <EditorSidebarSelectedAnnotation
                     selectedAnnotation={createAnnotation({ type: "text", stroke: "#abcdef" })}
@@ -226,26 +226,12 @@ describe("EditorSidebarSelectedAnnotation", () => {
             expect(screen.getByRole("button", { name: "#000000" })).toBeInTheDocument();
         });
 
-        it("does not render a black color preset chip for non-text annotations", () => {
-            renderWithProviders(
-                <EditorSidebarSelectedAnnotation
-                    selectedAnnotation={createAnnotation({ type: "rect" })}
-                    userRole={USER_ROLES.EDITOR}
-                    onColorChange={vi.fn()}
-                    onChange={vi.fn()}
-                    onDelete={vi.fn()}
-                />
-            );
-
-            expect(screen.queryByRole("button", { name: "#000000" })).not.toBeInTheDocument();
-        });
-
         it("forwards the black preset click to onColorChange", async () => {
             const user = userEvent.setup();
             const onColorChange = vi.fn();
             renderWithProviders(
                 <EditorSidebarSelectedAnnotation
-                    selectedAnnotation={createAnnotation({ type: "text", stroke: "#abcdef" })}
+                    selectedAnnotation={createAnnotation({ type: "rect", stroke: "#abcdef" })}
                     userRole={USER_ROLES.EDITOR}
                     onColorChange={onColorChange}
                     onChange={vi.fn()}

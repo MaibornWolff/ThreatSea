@@ -145,6 +145,16 @@ describe("TextEditingOverlay", () => {
             expect(onCommit).toHaveBeenCalledWith("typed");
         });
 
+        it("does NOT commit when blur has no relatedTarget (focus shifted to body)", () => {
+            const onCommit = vi.fn();
+            render(<TextEditingOverlay {...defaultProps()} onCommit={onCommit} />);
+
+            const textarea = screen.getByLabelText("Edit annotation text") as HTMLTextAreaElement;
+            fireEvent.blur(textarea, { relatedTarget: null });
+
+            expect(onCommit).not.toHaveBeenCalled();
+        });
+
         it("does NOT commit when focus moves to a [data-edit-protected] target", () => {
             const onCommit = vi.fn();
             render(
