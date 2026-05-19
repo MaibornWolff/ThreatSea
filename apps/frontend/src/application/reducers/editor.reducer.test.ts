@@ -1,5 +1,6 @@
 import editorReducer from "./editor.reducer";
 import { EditorActions } from "../actions/editor.actions";
+import { SystemActions } from "../actions/system.actions";
 
 const getInitialState = () => editorReducer(undefined, { type: "@@INIT" });
 
@@ -83,6 +84,20 @@ describe("editorReducer", () => {
             const seeded = editorReducer(getInitialState(), EditorActions.setAnnotationTool("line"));
             const next = editorReducer(seeded, EditorActions.setAnnotationTool("arrow"));
             expect(next.annotationTool).toBe("arrow");
+        });
+    });
+
+    describe("setLoadedProjectId", () => {
+        it("clears the active annotation tool", () => {
+            const seeded = editorReducer(getInitialState(), EditorActions.setAnnotationTool("rect"));
+            const next = editorReducer(seeded, SystemActions.setLoadedProjectId(7));
+            expect(next.annotationTool).toBeNull();
+        });
+
+        it("clears the selected annotation so a stale id from the previous project cannot leak", () => {
+            const seeded = editorReducer(getInitialState(), EditorActions.selectAnnotation("ann-from-project-a"));
+            const next = editorReducer(seeded, SystemActions.setLoadedProjectId(7));
+            expect(next.selectedAnnotation).toBeNull();
         });
     });
 });

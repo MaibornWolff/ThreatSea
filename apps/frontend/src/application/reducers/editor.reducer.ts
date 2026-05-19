@@ -304,6 +304,7 @@ const editorReducer = createReducer(defaultState, (builder) => {
 
     builder.addCase(SystemActions.setLoadedProjectId, (state) => {
         state.annotationTool = null;
+        state.selectedAnnotation = null;
     });
 });
 
