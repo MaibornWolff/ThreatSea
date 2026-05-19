@@ -15,6 +15,7 @@
     "type-check": "tsc --noEmit",
     "lint": "oxlint .",
     "lint:fix": "oxlint --fix .",
+    "test": "vitest run",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
     "test:unit:coverage": "vitest run --coverage",
