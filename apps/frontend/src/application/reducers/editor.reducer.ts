@@ -2,6 +2,7 @@ import { createReducer } from "@reduxjs/toolkit";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
 import { EditorActions } from "../actions/editor.actions";
+import { SystemActions } from "../actions/system.actions";
 import { editorMousePointersAdapter } from "../adapters/editor-mouse-pointers.adapter";
 import { editorComponentConnectionLinesAdapter } from "../adapters/editor-component-connection-lines.adapter";
 import { editorComponentTypeAdapter, type EditorComponentType } from "../adapters/editor-component-type.adapter";
@@ -299,6 +300,10 @@ const editorReducer = createReducer(defaultState, (builder) => {
 
     builder.addCase(EditorActions.setAnnotationTool, (state, action) => {
         state.annotationTool = action.payload;
+    });
+
+    builder.addCase(SystemActions.setLoadedProjectId, (state) => {
+        state.annotationTool = null;
     });
 });
 

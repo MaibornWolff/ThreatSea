@@ -15,6 +15,7 @@ interface EditorSidebarSelectedAnnotationProps {
     selectedAnnotation: Annotation;
     userRole: USER_ROLES | undefined;
     onColorChange: (stroke: string) => void;
+    onColorPreview?: ((stroke: string) => void) | undefined;
     onChange: (changes: AnnotationChanges) => void;
     onDelete: () => void;
 }
@@ -34,12 +35,12 @@ export const EditorSidebarSelectedAnnotation = ({
     selectedAnnotation,
     userRole,
     onColorChange,
+    onColorPreview,
     onChange,
     onDelete,
 }: EditorSidebarSelectedAnnotationProps) => {
     const { t } = useTranslation("editorPage");
     const isEditor = checkUserRole(userRole, USER_ROLES.EDITOR);
-    const isText = selectedAnnotation.type === "text";
     const fontSize =
         selectedAnnotation.type === "text"
             ? (selectedAnnotation.fontSize ?? DEFAULT_TEXT_FONT_SIZE)
@@ -85,8 +86,8 @@ export const EditorSidebarSelectedAnnotation = ({
                 <EditorColorPicker
                     color={selectedAnnotation.stroke}
                     onChange={onColorChange}
+                    onPreview={onColorPreview}
                     disabled={!isEditor}
-                    includeBlackPreset={isText}
                 />
             </Box>
 

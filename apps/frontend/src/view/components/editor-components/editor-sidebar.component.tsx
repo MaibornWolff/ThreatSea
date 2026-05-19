@@ -61,6 +61,7 @@ export interface EditorSidebarProps {
     handleInterfaceBreadcrumbClick: () => void;
     selectedAnnotation: Annotation | undefined;
     handleAnnotationColorChange: (stroke: string) => void;
+    handleAnnotationColorPreview?: ((stroke: string) => void) | undefined;
     handleAnnotationChange: (changes: AnnotationChanges) => void;
     handleDeleteAnnotation: () => void;
 }
@@ -99,6 +100,7 @@ export const EditorSidebar = ({
     handleInterfaceBreadcrumbClick,
     selectedAnnotation,
     handleAnnotationColorChange,
+    handleAnnotationColorPreview,
     handleAnnotationChange,
     handleDeleteAnnotation,
 }: EditorSidebarProps) => {
@@ -212,6 +214,7 @@ export const EditorSidebar = ({
                         selectedAnnotation={selectedAnnotation}
                         userRole={userRole}
                         onColorChange={handleAnnotationColorChange}
+                        onColorPreview={handleAnnotationColorPreview}
                         onChange={handleAnnotationChange}
                         onDelete={handleDeleteAnnotation}
                     />

@@ -155,7 +155,10 @@ export const TextEditingOverlay = ({
     // Blur commits — except when focus moves to edit-protected
     const handleBlur = (event: FocusEvent<HTMLTextAreaElement>): void => {
         const next = event.relatedTarget;
-        if (next instanceof Element && isProtectedTarget(next)) {
+        if (!(next instanceof Element)) {
+            return;
+        }
+        if (isProtectedTarget(next)) {
             return;
         }
         commit();

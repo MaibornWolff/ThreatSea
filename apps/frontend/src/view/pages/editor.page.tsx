@@ -20,7 +20,10 @@ import { useConfirm } from "../../application/hooks/use-confirm.hook";
 import { DEFAULT_ANNOTATION_COLOR } from "../colors/annotation.colors";
 import { AnnotationDrawingPreview } from "../components/editor-components/annotation-drawing-preview.component";
 import { ConnectionPreview } from "../components/editor-components/connection-preview.component";
-import { EditorAnnotation } from "../components/editor-components/editor-annotation.component";
+import {
+    AnnotationsCanvasLayer,
+    type AnnotationsCanvasLayerHandle,
+} from "../components/editor-components/annotations-canvas-layer.component";
 import { TextEditingOverlay } from "../components/editor-components/text-editing-overlay.component";
 import { EditorSidebar } from "../components/editor-components/editor-sidebar.component";
 import { EditorStage, MAX_STAGE_SCALE, MIN_STAGE_SCALE } from "../components/editor-components/editor-stage.component";
@@ -256,6 +259,8 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         };
     }, [annotationTool]);
 
+    const effectiveAnnotationTool = loadedProjectId === projectId ? annotationTool : null;
+
     const [editingAnnotationId, setEditingAnnotationId] = useState<string | null>(null);
     const editingAnnotation = editingAnnotationId
         ? (annotations.find((annotation) => annotation.id === editingAnnotationId) ?? null)
@@ -488,9 +493,24 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         }
     };
 
+    const annotationsLayerRef = useRef<AnnotationsCanvasLayerHandle>(null);
+    const lastSelectedAnnotationRef = useRef<typeof selectedAnnotation>(undefined);
+
+    useEffect(() => {
+        if (selectedAnnotation) {
+            lastSelectedAnnotationRef.current = selectedAnnotation;
+        }
+    }, [selectedAnnotation]);
+
+    const handleAnnotationColorPreview = (stroke: string): void => {
+        annotationsLayerRef.current?.setPreviewColor(stroke);
+    };
+
     const handleAnnotationColorChange = (stroke: string): void => {
-        if (selectedAnnotationId && selectedAnnotation) {
-            updateAnnotation(selectedAnnotationId, { type: selectedAnnotation.type, stroke });
+        annotationsLayerRef.current?.setPreviewColor(null);
+        const target = selectedAnnotation ?? lastSelectedAnnotationRef.current;
+        if (target) {
+            updateAnnotation(target.id, { type: target.type, stroke });
         }
     };
 
@@ -689,25 +709,22 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         if (evt.button === 0 && drawingPreview) {
             const toolBeforeCommit = annotationTool;
             const newId = commitDrawing(annotationTool);
-            if (toolBeforeCommit !== "freehand") {
+            if (toolBeforeCommit === "text") {
                 setAnnotationTool(null);
             }
             if (newId) {
-                // Skip auto-select for freehand: pencil mode is for drawing,
-                // not selecting. Selecting attaches Konva's Transformer whose
-                // anchor mouseleave wipes our tool cursor.
-                if (toolBeforeCommit !== "freehand") {
+                // Only text auto-selects (to enter edit mode). For shape and freehand tools, auto-selecting
+                // would attach Konva's Transformer whose anchor mouseleave wipes our tool cursor.
+                if (toolBeforeCommit === "text") {
                     selectAnnotation(newId);
                     showSideBar();
+                    setEditingAnnotationId(newId);
                 }
                 deselectComponent();
                 deselectConnection();
                 deselectPointOfAttack();
                 deselectConnectionPoint();
                 deselectConnector();
-                if (toolBeforeCommit === "text") {
-                    setEditingAnnotationId(newId);
-                }
             }
             return;
         }
@@ -1390,19 +1407,17 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                     />
                                 );
                             })}
-                            {annotations.map((annotation) => (
-                                <EditorAnnotation
-                                    key={annotation.id}
-                                    annotation={annotation}
-                                    selected={annotation.id === selectedAnnotationId}
-                                    editable={isEditor}
-                                    editing={annotation.id === editingAnnotationId}
-                                    onSelect={handleSelectAnnotation}
-                                    onChange={updateAnnotation}
-                                    onDragStateChange={handleAnnotationDragStateChange}
-                                    onRequestEdit={handleRequestEdit}
-                                />
-                            ))}
+                            <AnnotationsCanvasLayer
+                                ref={annotationsLayerRef}
+                                annotations={annotations}
+                                selectedAnnotationId={selectedAnnotationId}
+                                editingAnnotationId={editingAnnotationId}
+                                editable={isEditor}
+                                onSelect={handleSelectAnnotation}
+                                onChange={updateAnnotation}
+                                onDragStateChange={handleAnnotationDragStateChange}
+                                onRequestEdit={handleRequestEdit}
+                            />
                             <AnnotationDrawingPreview
                                 drawingPreview={drawingPreview}
                                 annotationTool={annotationTool}
@@ -1440,7 +1455,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                         onCenterEditor={handleCenterEditor}
                         onDownloadSystemView={handleDownloadSystemView}
                         showAnnotationTools={isEditor}
-                        annotationTool={annotationTool}
+                        annotationTool={effectiveAnnotationTool}
                         onSetAnnotationTool={handleSetAnnotationTool}
                         annotationColor={annotationColor}
                         onSetAnnotationColor={setAnnotationColor}
@@ -1494,6 +1509,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                     handleInterfaceBreadcrumbClick={handleInterfaceBreadcrumbClick}
                     selectedAnnotation={selectedAnnotation}
                     handleAnnotationColorChange={handleAnnotationColorChange}
+                    handleAnnotationColorPreview={handleAnnotationColorPreview}
                     handleAnnotationChange={handleAnnotationChange}
                     handleDeleteAnnotation={handleDeleteAnnotation}
                 />

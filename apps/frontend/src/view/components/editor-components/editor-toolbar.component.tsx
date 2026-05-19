@@ -9,8 +9,8 @@ import {
     TextFields,
     TrendingFlat,
 } from "@mui/icons-material";
-import { Box, IconButton, Popover, Tooltip } from "@mui/material";
-import { useRef, useState, type ComponentType } from "react";
+import { Box, IconButton, Paper, Popover, Popper, Tooltip } from "@mui/material";
+import { useState, type ComponentType } from "react";
 import { useTranslation } from "react-i18next";
 import { EditorColorPicker } from "./editor-color-picker.component";
 import type { AnnotationType } from "#api/types/system.types.ts";
@@ -66,6 +66,15 @@ const ANNOTATION_TOOLS: { tool: AnnotationType; Icon: ComponentType<{ sx?: objec
     { tool: "arrow", Icon: TrendingFlat },
 ];
 
+const popoverPaperSx = {
+    marginLeft: "8px",
+    borderRadius: "12px",
+    padding: "6px",
+    display: "flex",
+    alignItems: "center",
+    gap: "4px",
+};
+
 export const EditorToolbar = ({
     onCenterEditor,
     onDownloadSystemView,
@@ -76,10 +85,9 @@ export const EditorToolbar = ({
     onSetAnnotationColor,
 }: EditorToolbarProps) => {
     const { t } = useTranslation("editorPage");
-    const shapesButtonRef = useRef<HTMLButtonElement | null>(null);
-    const colorButtonRef = useRef<HTMLButtonElement | null>(null);
+    const [shapesButton, setShapesButton] = useState<HTMLButtonElement | null>(null);
+    const [freehandButton, setFreehandButton] = useState<HTMLButtonElement | null>(null);
     const [shapesOpen, setShapesOpen] = useState(false);
-    const [colorOpen, setColorOpen] = useState(false);
 
     const toggleTool = (tool: AnnotationType): void => {
         onSetAnnotationTool(annotationTool === tool ? null : tool);
@@ -88,6 +96,16 @@ export const EditorToolbar = ({
 
     // Pencil and text are standalone now.
     const isShapesActive = ANNOTATION_TOOLS.some(({ tool }) => tool === annotationTool);
+
+    const toolOptionsAnchor = (() => {
+        if (!annotationTool || annotationTool === "text") {
+            return null;
+        }
+        if (annotationTool === "freehand") {
+            return freehandButton;
+        }
+        return shapesButton;
+    })();
 
     return (
         <>
@@ -114,7 +132,7 @@ export const EditorToolbar = ({
                     <Box sx={{ ...buttonContainerSx, top: 120 }}>
                         <Tooltip title={t("canvas.annotation.shapes")}>
                             <IconButton
-                                ref={shapesButtonRef}
+                                ref={setShapesButton}
                                 onClick={() => setShapesOpen((open) => !open)}
                                 aria-label={t("canvas.annotation.shapes")}
                                 aria-pressed={isShapesActive}
@@ -126,22 +144,11 @@ export const EditorToolbar = ({
                     </Box>
                     <Popover
                         open={shapesOpen}
-                        anchorEl={shapesButtonRef.current}
+                        anchorEl={shapesButton}
                         onClose={() => setShapesOpen(false)}
                         anchorOrigin={{ vertical: "center", horizontal: "right" }}
                         transformOrigin={{ vertical: "center", horizontal: "left" }}
-                        slotProps={{
-                            paper: {
-                                sx: {
-                                    marginLeft: "8px",
-                                    borderRadius: "12px",
-                                    padding: "6px",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "4px",
-                                },
-                            },
-                        }}
+                        slotProps={{ paper: { sx: popoverPaperSx } }}
                     >
                         {ANNOTATION_TOOLS.map(({ tool, Icon }) => {
                             const isActive = annotationTool === tool;
@@ -163,6 +170,7 @@ export const EditorToolbar = ({
                     <Box sx={{ ...buttonContainerSx, top: 180 }}>
                         <Tooltip title={t("canvas.annotation.freehand")}>
                             <IconButton
+                                ref={setFreehandButton}
                                 onClick={() => onSetAnnotationTool(annotationTool === "freehand" ? null : "freehand")}
                                 aria-label={t("canvas.annotation.freehand")}
                                 aria-pressed={annotationTool === "freehand"}
@@ -184,48 +192,16 @@ export const EditorToolbar = ({
                             </IconButton>
                         </Tooltip>
                     </Box>
-                    <Box sx={{ ...buttonContainerSx, top: 300 }}>
-                        <Tooltip title={t("canvas.annotation.color")}>
-                            <IconButton
-                                ref={colorButtonRef}
-                                onClick={() => setColorOpen((open) => !open)}
-                                aria-label={t("canvas.annotation.color")}
-                                sx={iconButtonSx}
-                            >
-                                <Box
-                                    sx={{
-                                        width: "24px",
-                                        height: "24px",
-                                        borderRadius: "50%",
-                                        backgroundColor: annotationColor,
-                                        border: "2px solid #ffffff",
-                                        boxShadow: "0 0 0 1px rgba(35, 60, 87, 0.6)",
-                                    }}
-                                />
-                            </IconButton>
-                        </Tooltip>
-                    </Box>
-                    <Popover
-                        open={colorOpen}
-                        anchorEl={colorButtonRef.current}
-                        onClose={() => setColorOpen(false)}
-                        anchorOrigin={{ vertical: "center", horizontal: "right" }}
-                        transformOrigin={{ vertical: "center", horizontal: "left" }}
-                        slotProps={{
-                            paper: {
-                                sx: {
-                                    marginLeft: "8px",
-                                    borderRadius: "12px",
-                                    padding: "6px",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "4px",
-                                },
-                            },
-                        }}
+                    <Popper
+                        open={toolOptionsAnchor !== null && !(shapesOpen && toolOptionsAnchor === shapesButton)}
+                        anchorEl={toolOptionsAnchor}
+                        placement="right"
+                        sx={{ zIndex: 1300 }}
                     >
-                        <EditorColorPicker color={annotationColor} onChange={onSetAnnotationColor} />
-                    </Popover>
+                        <Paper sx={popoverPaperSx}>
+                            <EditorColorPicker color={annotationColor} onChange={onSetAnnotationColor} stacked />
+                        </Paper>
+                    </Popper>
                 </>
             )}
         </>
