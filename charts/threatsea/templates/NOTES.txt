@@ -1,0 +1,38 @@
+🌊 ThreatSea has been deployed!
+
+{{- if eq .Values.config.authMethod "" }}
+WARNING: image.tag was not provided, so version 1.0.0 has been deployed. Please make sure this was intentional.
+{{- end }}
+
+{{- if .Values.ingress.enabled }}
+Access ThreatSea via:
+{{- range .Values.ingress.hosts }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ .host }}
+{{- end }}
+
+{{- else if .Values.gateway.enabled }}
+Access ThreatSea via Gateway:
+  https://{{ .Values.gateway.hostname }}
+
+{{- else }}
+ThreatSea is not exposed externally. To access it locally, run:
+
+  kubectl port-forward svc/{{ include "threatsea.fullname" . }} 8080:{{ .Values.service.port }} -n {{ .Release.Namespace }}
+
+Then open: http://localhost:8080
+{{- end }}
+
+{{- if eq .Values.config.authMethod "local" }}
+
+⚠  Auth method is set to "local". Make sure this is intentional for your environment.
+{{- end }}
+
+{{- if eq .Values.config.cookies.secureOption "disabled" }}
+
+⚠  Secure cookies are DISABLED. Only acceptable in non-HTTPS development environments.
+{{- end }}
+
+{{- if not .Values.postgresql.enabled }}
+
+ℹ  Using external PostgreSQL at: {{ .Values.database.host }}
+{{- end }}

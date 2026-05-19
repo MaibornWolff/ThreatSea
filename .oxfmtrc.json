@@ -18,6 +18,7 @@
     ".turbo",
     ".vite",
     "build",
-    "dist"
+    "dist",
+    "charts"
   ]
 }
