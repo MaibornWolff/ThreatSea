@@ -12,7 +12,7 @@
   "fromScheduledAt": "Von",
   "tillScheduledAt": "Bis",
   "systemImageOnSeperatePage": "Systembild auf eigene Seite",
-  "createBtn": "Report erstellen",
+  "createBtn": "PDF-Report erstellen",
   "openInBrowserBtn": "Im Browser öffnen",
   "downloadBtn": "Download",
   "downloadMarkdownBtn": "Markdown herunterladen",

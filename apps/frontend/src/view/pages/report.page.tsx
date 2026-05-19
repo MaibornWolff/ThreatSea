@@ -230,6 +230,36 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
         fullExportAsExcel(project, data);
     };
 
+    const handleDownloadMarkdown = () => {
+        if (!data) {
+            return;
+        }
+        const markdown = generateMarkdownReport({
+            data: { ...data, milestones, threats: threats ?? [], measures: measures ?? [] },
+            bruttoMatrix,
+            nettoMatrix,
+            tillScheduledAt,
+            showCoverPage,
+            showTableOfContentsPage,
+            showMethodExplanation,
+            showScaleExplanation,
+            showMatrixPage,
+            showAssetsPage,
+            showMeasuresPage,
+            showThreatListPage,
+            showThreatsPage,
+            systemImageOnSeperatePage,
+            language: reportLanguage,
+        });
+        const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${filename}.md`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
     useEffect(() => {
         setIsChanged(true);
     }, [setIsChanged, language]);
@@ -670,9 +700,12 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
                             }}
                         >
                             {isChanged ? (
-                                <Box sx={{ marginTop: 2 }}>
-                                    <Button sx={{ marginRight: 0 }} onClick={onClickRefresh}>
+                                <Box sx={{ marginTop: 2, display: "flex", alignItems: "center" }}>
+                                    <Button sx={{ marginRight: 1 }} onClick={onClickRefresh}>
                                         {t("createBtn")}
+                                    </Button>
+                                    <Button sx={{ marginRight: 0 }} onClick={handleDownloadMarkdown}>
+                                        {t("downloadMarkdownBtn")}
                                     </Button>
                                 </Box>
                             ) : (
@@ -712,33 +745,6 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
 
 const PdfDocumentToolbar = ({ filename, ...props }: PdfDocumentToolbarProps) => {
     const { t } = useTranslation("reportPage");
-
-    const handleDownloadMarkdown = () => {
-        const markdown = generateMarkdownReport({
-            data: props.data,
-            bruttoMatrix: props.bruttoMatrix,
-            nettoMatrix: props.nettoMatrix,
-            tillScheduledAt: props.tillScheduledAt,
-            showCoverPage: props.showCoverPage,
-            showTableOfContentsPage: props.showTableOfContentsPage,
-            showMethodExplanation: props.showMethodExplanation,
-            showScaleExplanation: props.showScaleExplanation,
-            showMatrixPage: props.showMatrixPage,
-            showAssetsPage: props.showAssetsPage,
-            showMeasuresPage: props.showMeasuresPage,
-            showThreatListPage: props.showThreatListPage,
-            showThreatsPage: props.showThreatsPage,
-            systemImageOnSeperatePage: props.systemImageOnSeperatePage,
-            language: props.language,
-        });
-        const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${filename}.md`;
-        a.click();
-        URL.revokeObjectURL(url);
-    };
 
     return (
         <BlobProvider document={<Report {...props} />}>
@@ -789,18 +795,10 @@ const PdfDocumentToolbar = ({ filename, ...props }: PdfDocumentToolbarProps) => 
                                     {...{ download: `${filename}.pdf` }}
                                     disabled={disabled}
                                     sx={{
-                                        marginRight: 1,
-                                    }}
-                                >
-                                    {t("downloadBtn")}
-                                </Button>
-                                <Button
-                                    onClick={handleDownloadMarkdown}
-                                    sx={{
                                         marginRight: 0,
                                     }}
                                 >
-                                    {t("downloadMarkdownBtn")}
+                                    {t("downloadBtn")}
                                 </Button>
                             </>
                         )}
