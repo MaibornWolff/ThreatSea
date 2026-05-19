@@ -1,5 +1,6 @@
 import type { ProjectReport } from "#api/types/project.types.ts";
 import type { RiskMatrix, Milestone } from "#application/hooks/use-report.hook.ts";
+import i18next from "i18next";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -28,156 +29,131 @@ export interface MarkdownReportOptions {
     showThreatListPage?: boolean;
     showThreatsPage?: boolean;
     systemImageOnSeperatePage?: boolean;
+    language?: string;
 }
 
 // ---------------------------------------------------------------------------
-// Static translations (English)
-// The report i18n namespace is partially incomplete; we embed strings here
-// so the markdown generator has no runtime i18n dependency.
+// Translations
 // ---------------------------------------------------------------------------
 
-const T = {
-    coverPage: "Cover Page",
-    tableOfContents: "Table of Contents",
-    chapter: "Chapter",
-    pagenumber: "Page",
-    method: "The 4x6 Methodology",
-    explanationIdea:
-        "The 4x6 methodology is based on a matrix that specifies every conceivable threat from the four classes of attackers for any IT system abstracted to six classes of attack points.",
-    explanationApplication:
-        "The matrix is initially independent of specific attack techniques or attack targets. In the course of a threat analysis, this abstracted matrix is applied to a specific system architecture that was abstracted according to the above specification. From this, concrete attack scenarios are immediately developed in a manageable but nevertheless complete view.",
-    attackersHeader: "Attackers",
-    pointsOfAttackHeader: "Points Of Attack",
-    explanationScale: "Explanation of Probability and Damage Scale",
-    probability: "Probability",
-    damage: "Damage",
-    risk: "Risk",
-    riskMatrices: "Risk Matrices",
-    before: "Before",
-    after: "After",
-    gross: "gross",
-    net: "net",
-    systemImage: "System Image",
-    assets: "Assets",
-    measures: "Measures",
-    riskList: "List of Threats",
-    threats: "Threats",
-    name: "Name",
-    component: "Component",
-    description: "Description",
-    confidentiality: "Confidentiality",
-    integrity: "Integrity",
-    availability: "Availability",
-    confidentialityJustification: "Confidentiality Justification",
-    integrityJustification: "Integrity Justification",
-    availabilityJustification: "Availability Justification",
-    attacker: "Attacker",
-    pointOfAttack: "Point of Attack",
+interface Translations {
+    coverPage: string;
+    tableOfContents: string;
+    chapter: string;
+    pagenumber: string;
+    method: string;
+    explanationIdea: string;
+    explanationApplication: string;
+    attackersHeader: string;
+    pointsOfAttackHeader: string;
+    explanationScale: string;
+    probability: string;
+    damage: string;
+    risk: string;
+    riskMatrices: string;
+    before: string;
+    after: string;
+    gross: string;
+    net: string;
+    systemImage: string;
+    assets: string;
+    measures: string;
+    riskList: string;
+    threats: string;
+    name: string;
+    component: string;
+    description: string;
+    confidentiality: string;
+    integrity: string;
+    availability: string;
+    confidentialityJustification: string;
+    integrityJustification: string;
+    availabilityJustification: string;
+    attacker: string;
+    pointOfAttack: string;
+    confidentialityLevels: Record<string, string>;
+    attackers: Record<string, { name: string; description: string }>;
+    pointsOfAttacks: Record<string, { name: string; description: string }>;
+    probabilities: { name: string; description: string }[];
+    cellNames: Record<string, Record<string, string>>;
+    damages: { name: string; description: string }[];
+}
 
-    confidentialityLevels: {
-        PUBLIC: "Public",
-        INTERNAL: "Internal",
-        CONFIDENTIAL: "Confidential",
-        SECRET: "Secret",
-    } as Record<string, string>,
+function buildTranslations(language: string): Translations {
+    const t = i18next.getFixedT(language, "report");
 
-    attackers: {
-        UNAUTHORISED_PARTIES: {
-            name: "Unauthorised Parties",
-            description: "Entities with no tie to and especially no authorisation on the system under consideration",
-        },
-        SYSTEM_USERS: {
-            name: "System Users",
-            description:
-                "Users being authorised to share use of resources with the application under consideration but not having authorisation on the application itself",
-        },
-        APPLICATION_USERS: {
-            name: "Application Users",
-            description: "Users being authorised to work with the application under consideration",
-        },
-        ADMINISTRATORS: {
-            name: "(Technical) Administrators",
-            description: "Users with elevated privileges who manage the infrastructure used by the application",
-        },
-    } as Record<string, { name: string; description: string }>,
+    const poaKeys = [
+        "DATA_STORAGE_INFRASTRUCTURE",
+        "PROCESSING_INFRASTRUCTURE",
+        "COMMUNICATION_INFRASTRUCTURE",
+        "COMMUNICATION_INTERFACES",
+        "USER_INTERFACE",
+        "USER_BEHAVIOUR",
+    ];
+    const attackerKeys = ["UNAUTHORISED_PARTIES", "SYSTEM_USERS", "APPLICATION_USERS", "ADMINISTRATORS"];
 
-    pointsOfAttacks: {
-        USER_INTERFACE: {
-            name: "User Interface",
-            description:
-                "the places and programmes, where and by which users interact with the system, usually via screen and input device, e.g. a browser on a PC",
-        },
-        PROCESSING_INFRASTRUCTURE: {
-            name: "Processing Infrastructure",
-            description:
-                "places of program execution – in principle everything which has a processor and its programming is not absolutely fixed, e.g. including database servers, where queries are processed",
-        },
-        DATA_STORAGE_INFRASTRUCTURE: {
-            name: "Data Storage Infrastructure",
-            description: "places where data is stored durably – hard disks, non-volatile semiconductor memory, …",
-        },
-        COMMUNICATION_INFRASTRUCTURE: {
-            name: "Communication Infrastructure",
-            description: "physical transport of data via cable or wireless",
-        },
-        COMMUNICATION_INTERFACES: {
-            name: "Communication Interfaces",
-            description:
-                "the connection to the means of communication on all OSI layers: network interfaces, wireless antenna, TCP Ports, APIs, …",
-        },
-        USER_BEHAVIOUR: {
-            name: "User Behaviour",
-            description: "The behaviour of a user (human)",
-        },
-    } as Record<string, { name: string; description: string }>,
+    const cellNames: Record<string, Record<string, string>> = {};
+    for (const poa of poaKeys) {
+        cellNames[poa] = {};
+        for (const attacker of attackerKeys) {
+            const key = `${poa}.${attacker}.name`;
+            const val = t(key);
+            if (val !== key) {
+                cellNames[poa]![attacker] = val;
+            }
+        }
+    }
 
-    probabilities: [
-        { name: "Very Unlikely", description: "The event is extremely rare and almost never expected to occur." },
-        { name: "Unlikely", description: "The event is unusual and occurs only in exceptional circumstances." },
-        { name: "Possible", description: "The event may occur under certain conditions." },
-        { name: "Likely", description: "The event is expected to occur in many circumstances." },
-        { name: "Very Likely", description: "The event is almost certain to occur." },
-    ],
-
-    // Valid cells of the 4x6 matrix keyed as cellNames[pointOfAttack][attacker]
-    cellNames: {
-        DATA_STORAGE_INFRASTRUCTURE: {
-            UNAUTHORISED_PARTIES: "Physical data storage access",
-            SYSTEM_USERS: "Internal breach on data storage",
-            ADMINISTRATORS: "Privilege abuse on data storage",
-        },
-        PROCESSING_INFRASTRUCTURE: {
-            UNAUTHORISED_PARTIES: "Physical attack on processing",
-            SYSTEM_USERS: "Internal breach during processing",
-            ADMINISTRATORS: "Privilege abuse on processing",
-        },
-        COMMUNICATION_INFRASTRUCTURE: {
-            UNAUTHORISED_PARTIES: "Physical attack on transmission",
-            SYSTEM_USERS: "Internal breach on transmission",
-            ADMINISTRATORS: "Privilege abuse on transmission",
-        },
-        COMMUNICATION_INTERFACES: {
-            UNAUTHORISED_PARTIES: "Physical interface attack",
-            SYSTEM_USERS: "Breach via interface access",
-            APPLICATION_USERS: "Detrimental interface usage",
-        },
-        USER_INTERFACE: {
-            UNAUTHORISED_PARTIES: "Physical UI access",
-            APPLICATION_USERS: "Detrimental UI usage",
-        },
-        USER_BEHAVIOUR: {
-            UNAUTHORISED_PARTIES: "Deception",
-        },
-    } as Record<string, Record<string, string>>,
-
-    damages: [
-        { name: "Negligible", description: "Minimal impact; operations continue essentially unaffected." },
-        { name: "Minor", description: "Limited impact; some disruption but quickly recoverable." },
-        { name: "Moderate", description: "Significant impact; noticeable disruption or data exposure." },
-        { name: "Major", description: "Severe impact; major disruption, large data breach, or financial loss." },
-        { name: "Critical", description: "Catastrophic impact; organisation-wide damage or irreversible harm." },
-    ],
-};
+    return {
+        coverPage: t("coverPage"),
+        tableOfContents: t("tableOfContents"),
+        chapter: t("chapter"),
+        pagenumber: t("pagenumber"),
+        method: t("method"),
+        explanationIdea: t("explanationIdea"),
+        explanationApplication: t("explanationApplication"),
+        attackersHeader: t("attackersHeader"),
+        pointsOfAttackHeader: t("pointsOfAttackHeader"),
+        explanationScale: t("explanationScale"),
+        probability: t("probability"),
+        damage: t("damage"),
+        risk: t("risk"),
+        riskMatrices: t("riskMatrices"),
+        before: t("before"),
+        after: t("after"),
+        gross: t("gross"),
+        net: t("net"),
+        systemImage: t("systemImage"),
+        assets: t("assets"),
+        measures: t("measures"),
+        riskList: t("riskList"),
+        threats: t("threats"),
+        name: t("name"),
+        component: t("component"),
+        description: t("description"),
+        confidentiality: t("confidentiality"),
+        integrity: t("integrity"),
+        availability: t("availability"),
+        confidentialityJustification: t("confidentialityJustification"),
+        integrityJustification: t("integrityJustification"),
+        availabilityJustification: t("availabilityJustification"),
+        attacker: t("attacker"),
+        pointOfAttack: t("pointOfAttack"),
+        confidentialityLevels: t("confidentialityLevels", { returnObjects: true }) as Record<string, string>,
+        attackers: t("attackers", { returnObjects: true }) as Record<string, { name: string; description: string }>,
+        pointsOfAttacks: t("pointsOfAttacks", { returnObjects: true }) as Record<
+            string,
+            { name: string; description: string }
+        >,
+        probabilities: Object.values(
+            t("probabilities", { returnObjects: true }) as Record<string, { name: string; description: string }>
+        ),
+        cellNames,
+        damages: Object.values(
+            t("damages", { returnObjects: true }) as Record<string, { name: string; description: string }>
+        ),
+    };
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -219,7 +195,9 @@ function renderMatrix(matrix: RiskMatrix, title: string): string {
 
     for (let y = 0; y < matrix.length; y++) {
         const row = matrix[y];
-        if (!row) continue;
+        if (!row) {
+            continue;
+        }
         const prob = 5 - y; // probability label (5 at top, 1 at bottom)
         const cells = row
             .map((cell) => {
@@ -242,7 +220,7 @@ function renderMatrix(matrix: RiskMatrix, title: string): string {
 // Section generators
 // ---------------------------------------------------------------------------
 
-function coverSection(data: ProjectReport, date: string, systemImageOnSeperatePage: boolean): string {
+function coverSection(T: Translations, data: ProjectReport, date: string, systemImageOnSeperatePage: boolean): string {
     const { project, systemImage } = data;
     const confidentialityLabel = T.confidentialityLevels[project.confidentialityLevel] ?? project.confidentialityLevel;
 
@@ -267,7 +245,7 @@ function coverSection(data: ProjectReport, date: string, systemImageOnSeperatePa
     return lines.join("\n");
 }
 
-function systemImageSection(systemImage: string | null): string {
+function systemImageSection(T: Translations, systemImage: string | null): string {
     const lines: string[] = [];
     lines.push(`## ${anchor("chapter-systemImage")}${T.systemImage}`);
     lines.push("");
@@ -277,7 +255,7 @@ function systemImageSection(systemImage: string | null): string {
     return lines.join("\n");
 }
 
-function tableOfContentsSection(chapters: { label: string; id: string }[]): string {
+function tableOfContentsSection(T: Translations, chapters: { label: string; id: string }[]): string {
     const lines: string[] = [];
     lines.push(`## ${T.tableOfContents}`);
     lines.push("");
@@ -287,7 +265,7 @@ function tableOfContentsSection(chapters: { label: string; id: string }[]): stri
     return lines.join("\n");
 }
 
-function methodExplanationSection(): string {
+function methodExplanationSection(T: Translations): string {
     const lines: string[] = [];
     lines.push(`## ${anchor("chapter-methodExplanation")}${T.method}`);
     lines.push("");
@@ -330,7 +308,7 @@ function methodExplanationSection(): string {
     return lines.join("\n");
 }
 
-function scaleExplanationSection(): string {
+function scaleExplanationSection(T: Translations): string {
     const lines: string[] = [];
     lines.push(`## ${anchor("chapter-explanationScale")}${T.explanationScale}`);
     lines.push("");
@@ -357,6 +335,7 @@ function scaleExplanationSection(): string {
 }
 
 function matrixSection(
+    T: Translations,
     bruttoMatrix: RiskMatrix | null | undefined,
     nettoMatrix: RiskMatrix | null | undefined,
     tillScheduledAt: string | null | undefined,
@@ -395,9 +374,9 @@ function matrixSection(
     return lines.join("\n");
 }
 
-function assetsSection(assets: AssetWithReportId[]): string {
+function assetsSection(T: Translations, assets: AssetWithReportId[]): string {
     const lines: string[] = [];
-    lines.push(`## ${anchor("chapter-assetsDetails")}Assets`);
+    lines.push(`## ${anchor("chapter-assetsDetails")}${T.assets}`);
     lines.push("");
 
     assets.forEach((asset) => {
@@ -432,7 +411,7 @@ function assetsSection(assets: AssetWithReportId[]): string {
     return lines.join("\n");
 }
 
-function measuresSection(measures: ReportMeasure[]): string {
+function measuresSection(T: Translations, measures: ReportMeasure[]): string {
     const lines: string[] = [];
     lines.push(`## ${anchor("chapter-measuresDetails")}${T.measures}`);
     lines.push("");
@@ -472,7 +451,7 @@ function measuresSection(measures: ReportMeasure[]): string {
     return lines.join("\n");
 }
 
-function threatsListSection(threats: ThreatReport[]): string {
+function threatsListSection(T: Translations, threats: ThreatReport[]): string {
     const lines: string[] = [];
     lines.push(`## ${anchor("chapter-riskList")}${T.riskList}`);
     lines.push("");
@@ -489,7 +468,7 @@ function threatsListSection(threats: ThreatReport[]): string {
     return lines.join("\n");
 }
 
-function threatsDetailSection(threats: ThreatReport[]): string {
+function threatsDetailSection(T: Translations, threats: ThreatReport[]): string {
     const lines: string[] = [];
     lines.push(`## ${anchor("chapter-riskDetails")}${T.threats}`);
     lines.push("");
@@ -536,7 +515,7 @@ function threatsDetailSection(threats: ThreatReport[]): string {
         }
 
         if (threat.assets && threat.assets.length > 0) {
-            lines.push(`**Assets:**`);
+            lines.push(`**${T.assets}:**`);
             lines.push("");
             threat.assets.forEach((asset) => {
                 const assetRid = asset.reportId ?? String(asset.id);
@@ -585,61 +564,80 @@ export function generateMarkdownReport(options: MarkdownReportOptions): string {
         showThreatListPage = true,
         showThreatsPage = true,
         systemImageOnSeperatePage = false,
+        language = "en",
     } = options;
+
+    const T = buildTranslations(language);
 
     const hasSystemImage = Boolean(data.systemImage);
 
     // Build chapter list for table of contents
     const chapters: { label: string; id: string }[] = [];
-    if (showMethodExplanation) chapters.push({ label: T.method, id: "chapter-methodExplanation" });
-    if (showScaleExplanation) chapters.push({ label: T.explanationScale, id: "chapter-explanationScale" });
-    if (systemImageOnSeperatePage && hasSystemImage) chapters.push({ label: T.systemImage, id: "chapter-systemImage" });
-    if (showMatrixPage) chapters.push({ label: T.riskMatrices, id: "chapter-matrix" });
-    if (showAssetsPage) chapters.push({ label: T.assets, id: "chapter-assetsDetails" });
-    if (showMeasuresPage) chapters.push({ label: T.measures, id: "chapter-measuresDetails" });
-    if (showThreatListPage) chapters.push({ label: T.riskList, id: "chapter-riskList" });
-    if (showThreatsPage) chapters.push({ label: T.threats, id: "chapter-riskDetails" });
+    if (showMethodExplanation) {
+        chapters.push({ label: T.method, id: "chapter-methodExplanation" });
+    }
+    if (showScaleExplanation) {
+        chapters.push({ label: T.explanationScale, id: "chapter-explanationScale" });
+    }
+    if (systemImageOnSeperatePage && hasSystemImage) {
+        chapters.push({ label: T.systemImage, id: "chapter-systemImage" });
+    }
+    if (showMatrixPage) {
+        chapters.push({ label: T.riskMatrices, id: "chapter-matrix" });
+    }
+    if (showAssetsPage) {
+        chapters.push({ label: T.assets, id: "chapter-assetsDetails" });
+    }
+    if (showMeasuresPage) {
+        chapters.push({ label: T.measures, id: "chapter-measuresDetails" });
+    }
+    if (showThreatListPage) {
+        chapters.push({ label: T.riskList, id: "chapter-riskList" });
+    }
+    if (showThreatsPage) {
+        chapters.push({ label: T.threats, id: "chapter-riskDetails" });
+    }
 
     const sections: string[] = [];
 
     if (showCoverPage) {
-        sections.push(coverSection(data, date, systemImageOnSeperatePage));
+        sections.push(coverSection(T, data, date, systemImageOnSeperatePage));
     }
 
     if (showTableOfContentsPage && chapters.length > 0) {
-        sections.push(tableOfContentsSection(chapters));
+        sections.push(tableOfContentsSection(T, chapters));
     }
 
     if (showMethodExplanation) {
-        sections.push(methodExplanationSection());
+        sections.push(methodExplanationSection(T));
     }
 
     if (showScaleExplanation) {
-        sections.push(scaleExplanationSection());
+        sections.push(scaleExplanationSection(T));
     }
 
     if (systemImageOnSeperatePage && data.systemImage) {
-        sections.push(systemImageSection(data.systemImage));
+        sections.push(systemImageSection(T, data.systemImage));
     }
 
     if (showMatrixPage) {
-        sections.push(matrixSection(bruttoMatrix, nettoMatrix, tillScheduledAt, data.milestones));
+        sections.push(matrixSection(T, bruttoMatrix, nettoMatrix, tillScheduledAt, data.milestones));
     }
 
     if (showAssetsPage && data.assets.length > 0) {
-        sections.push(assetsSection(data.assets));
+        sections.push(assetsSection(T, data.assets));
     }
 
     if (showMeasuresPage && data.measures.length > 0) {
-        sections.push(measuresSection(data.measures as ReportMeasure[]));
+        sections.push(measuresSection(T, data.measures as ReportMeasure[]));
     }
 
     if (showThreatListPage && data.threats.length > 0) {
-        sections.push(threatsListSection(data.threats));
+        sections.push(threatsListSection(T, data.threats));
     }
 
     if (showThreatsPage && data.threats.length > 0) {
-        sections.push(threatsDetailSection(data.threats));
+        sections.push(threatsDetailSection(T, data.threats));
     }
 
     return sections.join(`\n${hr()}\n`);

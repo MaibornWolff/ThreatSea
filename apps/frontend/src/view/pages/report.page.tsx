@@ -729,6 +729,7 @@ const PdfDocumentToolbar = ({ filename, ...props }: PdfDocumentToolbarProps) => 
             showThreatListPage: props.showThreatListPage,
             showThreatsPage: props.showThreatsPage,
             systemImageOnSeperatePage: props.systemImageOnSeperatePage,
+            language: props.language,
         });
         const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
         const url = URL.createObjectURL(blob);
