@@ -1,6 +1,7 @@
 import "#utils/translations.ts"; // initialises i18next with all namespaces as a side effect
 import { generateMarkdownReport, type MarkdownReportOptions } from "#view/report/report-md.ts";
 import type { ProjectReport } from "#api/types/project.types.ts";
+import type { RiskMatrix } from "#application/hooks/use-report.hook.ts";
 import fixtureData from "./testData/project-report.fixture.json";
 
 const report = fixtureData as unknown as ProjectReport & { milestones: null };
@@ -128,5 +129,104 @@ describe("generateMarkdownReport – line break preservation", () => {
             data: { ...report, project: { ...report.project, description: "Para one\n\nPara two" } },
         });
         expect(md).toContain("Para one\n\nPara two");
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Matrix rendering
+// ---------------------------------------------------------------------------
+
+// 5×5 matrix: outer index 0 = P5 (highest), inner index 0 = D1 (lowest)
+const TEST_MATRIX: RiskMatrix = [
+    // P5
+    [{ color: "red", amount: 2 }, { color: "red" }, { color: "red" }, { color: "red" }, { color: "red" }],
+    // P4
+    [{ color: "yellow", amount: 1 }, { color: "red" }, { color: "red" }, { color: "red" }, { color: "red" }],
+    // P3
+    [{ color: "green" }, { color: "yellow" }, { color: "yellow" }, { color: "red" }, { color: "red" }],
+    // P2
+    [{ color: "green" }, { color: "green" }, { color: "yellow" }, { color: "yellow" }, { color: "red" }],
+    // P1
+    [{ color: "green" }, { color: "green" }, { color: "green" }, { color: "yellow" }, { color: "yellow" }],
+];
+
+describe("generateMarkdownReport – matrix rendering", () => {
+    const matrixOptions: MarkdownReportOptions = {
+        ...BASE_OPTIONS,
+        language: "en",
+        bruttoMatrix: TEST_MATRIX,
+    };
+
+    it("renders the matrix table header row", () => {
+        const md = generateMarkdownReport(matrixOptions);
+        expect(md).toContain("| P \\ D | D1 | D2 | D3 | D4 | D5 |");
+    });
+
+    it("renders probability row labels P5 through P1", () => {
+        const md = generateMarkdownReport(matrixOptions);
+        for (const label of ["P5", "P4", "P3", "P2", "P1"]) {
+            expect(md).toContain(`| ${label} |`);
+        }
+    });
+
+    it("renders cell colors as G/Y/R abbreviations", () => {
+        const md = generateMarkdownReport(matrixOptions);
+        // P5 D1: red with count 2
+        expect(md).toContain("R:2");
+        // P4 D1: yellow with count 1
+        expect(md).toContain("Y:1");
+        // P1 starts with three green cells without counts
+        expect(md).toContain("| P1 | G | G | G |");
+    });
+
+    it("renders the axis legend explaining P and D", () => {
+        const md = generateMarkdownReport(matrixOptions);
+        expect(md).toContain("P = Probability");
+        expect(md).toContain("D = Damage");
+    });
+
+    it("renders the color legend explaining G/Y/R", () => {
+        const md = generateMarkdownReport(matrixOptions);
+        expect(md).toContain("G = green (low risk)");
+        expect(md).toContain("Y = yellow (medium risk)");
+        expect(md).toContain("R = red (high risk)");
+    });
+
+    it("renders axis and color legends in German", () => {
+        const md = generateMarkdownReport({ ...matrixOptions, language: "de" });
+        expect(md).toContain("P = Wahrscheinlichkeit");
+        expect(md).toContain("D = Schaden");
+        expect(md).toContain("G = grün (geringes Risiko)");
+    });
+
+    it("renders the brutto matrix with 'Before' title", () => {
+        const md = generateMarkdownReport(matrixOptions);
+        expect(md).toContain("**Before**");
+    });
+
+    it("renders the netto matrix with 'After' title", () => {
+        const md = generateMarkdownReport({ ...matrixOptions, bruttoMatrix: undefined, nettoMatrix: TEST_MATRIX });
+        expect(md).toContain("**After**");
+        expect(md).toContain("| P \\ D | D1 | D2 | D3 | D4 | D5 |");
+    });
+
+    it("omits the matrix section when showMatrixPage is false", () => {
+        const md = generateMarkdownReport({ ...matrixOptions, showMatrixPage: false });
+        expect(md).not.toContain("chapter-matrix");
+        expect(md).not.toContain("| P \\ D |");
+    });
+
+    it("renders a milestone matrix with the milestone date as title", () => {
+        const milestone = {
+            scheduledAt: new Date("2025-06-01"),
+            matrix: TEST_MATRIX,
+            barGraph: null,
+            active: true,
+        };
+        const md = generateMarkdownReport({
+            ...matrixOptions,
+            data: { ...report, milestones: [milestone] },
+        });
+        expect(md).toContain("**2025-06-01**");
     });
 });
