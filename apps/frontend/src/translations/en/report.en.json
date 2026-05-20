@@ -15,6 +15,8 @@
   "after": "After",
   "gross": "gross",
   "net": "net",
+  "matrixLegend": "G = green (low risk), Y = yellow (medium risk), R = red (high risk). Count shown when threats present.",
+  "matrixAxisLegend": "P = Probability (1 = low, 5 = high), D = Damage (1 = low, 5 = high)",
 
   "explanationIdea": "The 4x6 methodology is based on a matrix that specifies every conceivable threat from the four classes of attackers for any IT system abstracted to six classes of attack points.",
   "explanationApplication": "The matrix is initially independent of specific attack techniques or attack targets. In the course of a threat analysis, this abstracted matrix is applied to a specific system architecture that was abstracted according to the above specification. From this, concrete attack scenarios are immediately developed in a manageable but nevertheless complete view.",
