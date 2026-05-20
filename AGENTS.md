@@ -16,7 +16,7 @@ Monorepo composed of a React frontend (the threat-model editor) and an Express b
 
 ## Repository Layout
 
-```
+```text
 apps/
   frontend/           React 19 + TypeScript app (Vite, react-konva canvas editor)
   backend/            Express 5 + TypeScript API (Drizzle ORM, PostgreSQL, socket.io)
@@ -27,7 +27,7 @@ gh-pages/             Published documentation sources (rendered via mkdocs; see 
 
 ### Frontend structure (`apps/frontend/src/`)
 
-```
+```text
 api/             One file per backend resource (*.api.ts)
 application/     Redux Toolkit state
   actions/         Action creators / async thunks
