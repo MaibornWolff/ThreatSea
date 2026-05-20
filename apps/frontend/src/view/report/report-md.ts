@@ -182,7 +182,7 @@ function escapeCell(s: string): string {
  * allow an attacker-controlled URL to follow, on top of stripping line breaks.
  */
 function escapeLinkText(s: string): string {
-    return escapeInline(s).replace(/\]/g, "\\]");
+    return escapeInline(s).replace(/\\/g, "\\\\").replace(/\]/g, "\\]");
 }
 
 /**
