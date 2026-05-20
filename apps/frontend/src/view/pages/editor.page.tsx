@@ -542,6 +542,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     };
 
     const handleSelectAnchor = (e: MouseEvent | KonvaEventObject<MouseEvent>, data: ConnectorSelection): void => {
+        if (annotationTool !== null) {
+            return;
+        }
         const event = "evt" in e ? e.evt : e;
         if (data.communicationInterfaceType) {
             event.preventDefault();
@@ -880,6 +883,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     };
 
     const handleOnConnectionPointClicked = ({ evt }: KonvaEventObject<MouseEvent>, connectionPointId: string): void => {
+        if (annotationTool !== null) {
+            return;
+        }
         evt.preventDefault();
 
         if (evt.button === 0) {
@@ -896,6 +902,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         pointOfAttackId: string,
         componentId?: string
     ): void => {
+        if (annotationTool !== null) {
+            return;
+        }
         evt.preventDefault();
 
         if (evt.button === 0) {
@@ -1098,6 +1107,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     };
 
     const toggleCommunicationInterfacesMenu = (component: AugmentedSystemComponent): void => {
+        if (annotationTool !== null) {
+            return;
+        }
         setCommunicationMenuComponent(component);
         setCommunicationMenuOpen((prevState) => !prevState);
     };

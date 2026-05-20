@@ -144,6 +144,9 @@ const SystemComponentConnectionInner = ({
     }
 
     const handleClick = (event: KonvaEventObject<MouseEvent>) => {
+        if (annotationTool !== null) {
+            return;
+        }
         onClick(event, id);
     };
 
@@ -168,6 +171,9 @@ const SystemComponentConnectionInner = ({
     };
 
     const handleLinePointOfAttackClicked = (event: KonvaEventObject<MouseEvent>) => {
+        if (annotationTool !== null) {
+            return;
+        }
         if (pointsOfAttack[2]) {
             onPointOfAttackClicked(event, pointsOfAttack[2].id);
         }

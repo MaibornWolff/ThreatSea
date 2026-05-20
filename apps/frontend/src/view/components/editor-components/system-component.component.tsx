@@ -408,10 +408,15 @@ const ConnectorGroup = ({
         return isPrimaryComponent ? Boolean(hover) && shouldDisplayConnectors : shouldDisplayConnectors;
     }, [hover, shouldDisplayConnectors, isPrimaryComponent, isDrawing, sourceType, componentType]);
 
+    const annotationToolForAnchor = useAppSelector(editorSelectors.selectAnnotationTool);
+
     const handleSelectAnchor: (event: KonvaEventObject<MouseEvent>, anchor: AnchorOrientation) => void = (
         event,
         anchor
     ) => {
+        if (annotationToolForAnchor !== null) {
+            return;
+        }
         if (isPrimaryComponent) {
             setDrawingState({ isDrawing: true, sourceType: "connector" });
         }
