@@ -446,6 +446,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     };
 
     const handleSelectComponent = ({ evt }: KonvaEventObject<MouseEvent>, componentId: string): void => {
+        if (annotationTool !== null) {
+            return;
+        }
         if (!evt.defaultPrevented && evt.button === 0) {
             evt.preventDefault();
 
@@ -465,6 +468,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     };
 
     const handleSelectConnection = ({ evt }: KonvaEventObject<MouseEvent>, id: string): void => {
+        if (annotationTool !== null) {
+            return;
+        }
         if (!evt.defaultPrevented && evt.button === 0) {
             evt.preventDefault();
 
@@ -709,11 +715,11 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         if (evt.button === 0 && drawingPreview) {
             const toolBeforeCommit = annotationTool;
             const newId = commitDrawing(annotationTool);
-            if (toolBeforeCommit === "text") {
-                setAnnotationTool(null);
-            }
             if (newId) {
-                // Only text auto-selects (to enter edit mode). For shape and freehand tools, auto-selecting
+                if (toolBeforeCommit && toolBeforeCommit !== "freehand") {
+                    setAnnotationTool(null);
+                }
+                // Only text auto-selects (to enter edit mode). For freehand, auto-selecting
                 // would attach Konva's Transformer whose anchor mouseleave wipes our tool cursor.
                 if (toolBeforeCommit === "text") {
                     selectAnnotation(newId);

@@ -193,7 +193,7 @@ export const EditorToolbar = ({
                         </Tooltip>
                     </Box>
                     <Popper
-                        open={toolOptionsAnchor !== null && !(shapesOpen && toolOptionsAnchor === shapesButton)}
+                        open={toolOptionsAnchor !== null && !shapesOpen}
                         anchorEl={toolOptionsAnchor}
                         placement="right"
                         sx={{ zIndex: 1300 }}

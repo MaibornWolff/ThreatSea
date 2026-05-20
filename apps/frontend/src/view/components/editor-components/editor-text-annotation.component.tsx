@@ -42,14 +42,15 @@ const EditorTextAnnotationInner = ({
         shapeRef.current = node;
     };
 
-    const { isCapturing, setStageCursor, handleClick, handleMouseEnter, handleMouseLeave } = useAnnotationInteraction({
-        annotation,
-        selected,
-        editable,
-        shapeRef,
-        transformerRef,
-        onSelect,
-    });
+    const { isCapturing, isDrawing, setStageCursor, handleClick, handleMouseEnter, handleMouseLeave } =
+        useAnnotationInteraction({
+            annotation,
+            selected,
+            editable,
+            shapeRef,
+            transformerRef,
+            onSelect,
+        });
 
     const textFontStyle = (() => {
         const parts: string[] = [];
@@ -130,7 +131,7 @@ const EditorTextAnnotationInner = ({
                 rotation={annotation.rotation ?? 0}
                 visible={!editing}
                 listening={editable}
-                draggable={editable}
+                draggable={editable && !isDrawing}
                 onClick={handleClick}
                 onDblClick={handleDblClick}
                 onDblTap={handleDblClick}

@@ -225,7 +225,7 @@ export const SystemComponent = ({
               onMouseOver: handleMouseEnter,
               onMouseOut: handleMouseOut,
               hover: visualHover,
-              draggable: true,
+              draggable: annotationTool === null,
           }
         : {
               onMouseOver: null,

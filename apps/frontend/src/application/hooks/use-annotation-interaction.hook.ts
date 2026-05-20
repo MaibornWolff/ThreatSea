@@ -54,6 +54,9 @@ export const useAnnotationInteraction = ({
         if (event.evt.button !== 0) {
             return;
         }
+        if (annotationTool !== null) {
+            return;
+        }
         event.cancelBubble = true;
         event.evt.preventDefault();
         onSelect(annotation.id);
@@ -77,6 +80,7 @@ export const useAnnotationInteraction = ({
 
     return {
         isCapturing,
+        isDrawing: annotationTool !== null,
         setStageCursor,
         handleClick,
         handleMouseEnter,

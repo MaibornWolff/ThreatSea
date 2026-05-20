@@ -37,14 +37,15 @@ const EditorAnnotationInner = ({
     const anchor0Ref = useRef<KonvaNode | null>(null);
     const anchor1Ref = useRef<KonvaNode | null>(null);
 
-    const { isCapturing, setStageCursor, handleClick, handleMouseEnter, handleMouseLeave } = useAnnotationInteraction({
-        annotation,
-        selected,
-        editable,
-        shapeRef,
-        transformerRef,
-        onSelect,
-    });
+    const { isCapturing, isDrawing, setStageCursor, handleClick, handleMouseEnter, handleMouseLeave } =
+        useAnnotationInteraction({
+            annotation,
+            selected,
+            editable,
+            shapeRef,
+            transformerRef,
+            onSelect,
+        });
 
     const setShapeRef = (node: KonvaNode | null): void => {
         shapeRef.current = node;
@@ -180,7 +181,7 @@ const EditorAnnotationInner = ({
                         fill={annotation.fill ?? "transparent"}
                         fillEnabled={fillEnabled}
                         listening={editable}
-                        draggable={editable}
+                        draggable={editable && !isDrawing}
                         onClick={handleClick}
                         onMouseEnter={handleMouseEnter}
                         onMouseLeave={handleMouseLeave}
@@ -203,7 +204,7 @@ const EditorAnnotationInner = ({
                         fill={annotation.fill ?? "transparent"}
                         fillEnabled={fillEnabled}
                         listening={editable}
-                        draggable={editable}
+                        draggable={editable && !isDrawing}
                         onClick={handleClick}
                         onMouseEnter={handleMouseEnter}
                         onMouseLeave={handleMouseLeave}
@@ -224,7 +225,7 @@ const EditorAnnotationInner = ({
                         stroke={annotation.stroke}
                         strokeWidth={annotation.strokeWidth}
                         listening={editable}
-                        draggable={editable}
+                        draggable={editable && !isDrawing}
                         onClick={handleClick}
                         onMouseEnter={handleMouseEnter}
                         onMouseLeave={handleMouseLeave}
@@ -248,7 +249,7 @@ const EditorAnnotationInner = ({
                         pointerLength={10}
                         pointerWidth={10}
                         listening={editable}
-                        draggable={editable}
+                        draggable={editable && !isDrawing}
                         onClick={handleClick}
                         onMouseEnter={handleMouseEnter}
                         onMouseLeave={handleMouseLeave}
@@ -272,7 +273,7 @@ const EditorAnnotationInner = ({
                         lineCap="round"
                         lineJoin="round"
                         listening={editable}
-                        draggable={editable}
+                        draggable={editable && !isDrawing}
                         onClick={handleClick}
                         onMouseEnter={handleMouseEnter}
                         onMouseLeave={handleMouseLeave}
