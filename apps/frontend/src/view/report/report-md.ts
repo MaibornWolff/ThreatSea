@@ -1,6 +1,7 @@
 import type { ProjectReport } from "#api/types/project.types.ts";
 import type { RiskMatrix, Milestone } from "#application/hooks/use-report.hook.ts";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
+import { ATTACKERS } from "#api/types/attackers.types.ts";
 import { POA_COLORS } from "../colors/pointsOfAttack.colors";
 import i18next from "i18next";
 
@@ -16,22 +17,22 @@ type ReportMeasure = Omit<ProjectReport["measures"][number], "scheduledAt"> & {
 type AssetWithReportId = ProjectReport["assets"][number];
 
 export interface MarkdownReportOptions {
-    data: ProjectReport & { milestones?: Milestone[] | null };
-    bruttoMatrix?: RiskMatrix | null;
-    nettoMatrix?: RiskMatrix | null;
-    date?: string;
-    tillScheduledAt?: string | null;
-    showCoverPage?: boolean;
-    showTableOfContentsPage?: boolean;
-    showMethodExplanation?: boolean;
-    showScaleExplanation?: boolean;
-    showMatrixPage?: boolean;
-    showAssetsPage?: boolean;
-    showMeasuresPage?: boolean;
-    showThreatListPage?: boolean;
-    showThreatsPage?: boolean;
-    systemImageOnSeperatePage?: boolean;
-    language?: string;
+    data: ProjectReport & { milestones?: Milestone[] | null | undefined };
+    bruttoMatrix?: RiskMatrix | null | undefined;
+    nettoMatrix?: RiskMatrix | null | undefined;
+    date?: string | undefined;
+    tillScheduledAt?: string | null | undefined;
+    showCoverPage?: boolean | undefined;
+    showTableOfContentsPage?: boolean | undefined;
+    showMethodExplanation?: boolean | undefined;
+    showScaleExplanation?: boolean | undefined;
+    showMatrixPage?: boolean | undefined;
+    showAssetsPage?: boolean | undefined;
+    showMeasuresPage?: boolean | undefined;
+    showThreatListPage?: boolean | undefined;
+    showThreatsPage?: boolean | undefined;
+    systemImageOnSeperatePage?: boolean | undefined;
+    language?: string | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -84,15 +85,8 @@ interface Translations {
 function buildTranslations(language: string): Translations {
     const t = i18next.getFixedT(language, "report");
 
-    const poaKeys = [
-        "DATA_STORAGE_INFRASTRUCTURE",
-        "PROCESSING_INFRASTRUCTURE",
-        "COMMUNICATION_INFRASTRUCTURE",
-        "COMMUNICATION_INTERFACES",
-        "USER_INTERFACE",
-        "USER_BEHAVIOUR",
-    ];
-    const attackerKeys = ["UNAUTHORISED_PARTIES", "SYSTEM_USERS", "APPLICATION_USERS", "ADMINISTRATORS"];
+    const poaKeys = Object.values(POINTS_OF_ATTACK);
+    const attackerKeys = Object.values(ATTACKERS);
 
     const cellNames: Record<string, Record<string, string>> = {};
     for (const poa of poaKeys) {

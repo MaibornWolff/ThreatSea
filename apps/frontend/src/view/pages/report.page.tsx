@@ -19,7 +19,7 @@ import { ToggleButtons } from "../components/toggle-buttons.component";
 import { CreatePage } from "../components/create-page.component";
 import { HeaderUtilityControls } from "../components/header-utility-controls.component";
 import { Report } from "../report/report";
-import { generateMarkdownReport } from "../report/report-md";
+import { downloadMarkdownReport } from "../report/download-markdown-report";
 import { ExportIconButton } from "../components/export-icon-button.component";
 import { withProject } from "../components/with-project.hoc";
 
@@ -55,6 +55,7 @@ interface PdfDocumentToolbarProps {
     data: ReportToolbarData;
     bruttoMatrix: ReportHookReturn["bruttoMatrix"];
     nettoMatrix: ReportHookReturn["nettoMatrix"];
+    onDownloadMarkdown: () => void;
 }
 
 const ReportPageBody = ({ project }: ReportPageBodyProps) => {
@@ -231,11 +232,12 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
     };
 
     const handleDownloadMarkdown = () => {
-        if (!data) {
-            return;
-        }
-        const markdown = generateMarkdownReport({
-            data: { ...data, milestones, threats: threats ?? [], measures: measures ?? [] },
+        downloadMarkdownReport({
+            data,
+            filename,
+            milestones,
+            threats,
+            measures,
             bruttoMatrix,
             nettoMatrix,
             tillScheduledAt,
@@ -251,13 +253,6 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
             systemImageOnSeperatePage,
             language: reportLanguage,
         });
-        const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${filename}.md`;
-        a.click();
-        URL.revokeObjectURL(url);
     };
 
     useEffect(() => {
@@ -733,6 +728,7 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
                                     }}
                                     bruttoMatrix={bruttoMatrix}
                                     nettoMatrix={nettoMatrix}
+                                    onDownloadMarkdown={handleDownloadMarkdown}
                                 />
                             )}
                         </Box>
@@ -743,7 +739,7 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
     );
 };
 
-const PdfDocumentToolbar = ({ filename, ...props }: PdfDocumentToolbarProps) => {
+const PdfDocumentToolbar = ({ filename, onDownloadMarkdown, ...props }: PdfDocumentToolbarProps) => {
     const { t } = useTranslation("reportPage");
 
     return (
@@ -802,6 +798,7 @@ const PdfDocumentToolbar = ({ filename, ...props }: PdfDocumentToolbarProps) => 
                                 </Button>
                             </>
                         )}
+                        <Button onClick={onDownloadMarkdown}>{t("downloadMarkdownBtn")}</Button>
                     </Box>
                 );
             }}
