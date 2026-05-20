@@ -144,11 +144,11 @@ function buildTranslations(language: string): Translations {
             { name: string; description: string }
         >,
         probabilities: Object.values(
-            t("probabilities", { returnObjects: true }) as Record<string, { name: string; description: string }>,
+            t("probabilities", { returnObjects: true }) as Record<string, { name: string; description: string }>
         ),
         cellNames,
         damages: Object.values(
-            t("damages", { returnObjects: true }) as Record<string, { name: string; description: string }>,
+            t("damages", { returnObjects: true }) as Record<string, { name: string; description: string }>
         ),
         matrixLegend: t("matrixLegend"),
         matrixAxisLegend: t("matrixAxisLegend"),
@@ -425,7 +425,7 @@ function matrixSection(
     bruttoMatrix: RiskMatrix | null | undefined,
     nettoMatrix: RiskMatrix | null | undefined,
     tillScheduledAt: string | null | undefined,
-    milestones: Milestone[] | null | undefined,
+    milestones: Milestone[] | null | undefined
 ): string {
     const lines: string[] = [];
     lines.push(`## ${anchor("chapter-matrix")}${T.riskMatrices}`);
@@ -474,7 +474,7 @@ function assetsSection(T: Translations, assets: AssetWithReportId[]): string {
         lines.push(`| ${T.confidentiality} | ${T.integrity} | ${T.availability} |`);
         lines.push(`|---|---|---|`);
         lines.push(
-            `| ${escapeCell(String(asset.confidentiality))} | ${escapeCell(String(asset.integrity))} | ${escapeCell(String(asset.availability))} |`,
+            `| ${escapeCell(String(asset.confidentiality))} | ${escapeCell(String(asset.integrity))} | ${escapeCell(String(asset.availability))} |`
         );
         lines.push("");
 
@@ -598,10 +598,10 @@ function threatsDetailSection(T: Translations, threats: ThreatReport[]): string 
         lines.push(`| | ${T.probability} | ${T.damage} | ${T.risk} |`);
         lines.push(`|---|---|---|---|`);
         lines.push(
-            `| ${T.gross} | ${escapeCell(String(threat.probability))} | ${escapeCell(String(threat.damage))} | ${escapeCell(String(threat.risk))} |`,
+            `| ${T.gross} | ${escapeCell(String(threat.probability))} | ${escapeCell(String(threat.damage))} | ${escapeCell(String(threat.risk))} |`
         );
         lines.push(
-            `| ${T.net} | ${escapeCell(String(threat.netProbability))} | ${escapeCell(String(threat.netDamage))} | ${escapeCell(String(threat.netRisk))} |`,
+            `| ${T.net} | ${escapeCell(String(threat.netProbability))} | ${escapeCell(String(threat.netDamage))} | ${escapeCell(String(threat.netRisk))} |`
         );
         lines.push("");
 
