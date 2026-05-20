@@ -22,7 +22,7 @@ apps/
   backend/            Express 5 + TypeScript API (Drizzle ORM, PostgreSQL, socket.io)
 packages/
   typescript-config/  Shared tsconfig presets
-docs/                 Project documentation (rendered via mkdocs)
+gh-pages/             Published documentation sources (rendered via mkdocs; see mkdocs.yml)
 ```
 
 ### Frontend structure (`apps/frontend/src/`)
@@ -60,7 +60,7 @@ Express routers, Drizzle schema/migrations under `apps/backend/drizzle/`, openid
 | Area            | Tooling                                                                                                  |
 | --------------- | -------------------------------------------------------------------------------------------------------- |
 | Package manager | pnpm workspaces + Turborepo                                                                              |
-| Frontend        | React 19, TypeScript, Vite 8, MUI v6, Redux Toolkit, react-konva, react-hook-form, i18next, react-router |
+| Frontend        | React 19, TypeScript, Vite 8, MUI v9, Redux Toolkit, react-konva, react-hook-form, i18next, react-router |
 | Backend         | Express 5, TypeScript, Drizzle ORM, PostgreSQL (`pg`), openid-client, socket.io                          |
 | Lint / Format   | oxlint, oxfmt                                                                                            |
 | Tests           | Vitest (unit), Playwright (E2E, frontend only)                                                           |
@@ -105,10 +105,10 @@ Before opening a PR, run at minimum: `pnpm lint`, `pnpm format:check`, `pnpm typ
 
 - **Match nearby code.** Before writing new code, read 1–2 similar files in the same directory and follow their patterns (naming, file structure, imports, styling approach). Convention consistency outweighs personal preference. If a local convention clearly conflicts with widely accepted community best practice, flag it explicitly (what the repo does, what the community recommends, why it matters) rather than silently following.
 - **TypeScript everywhere.** No new `.js` source files in `apps/`.
-- **Frontend styling.** MUI v6 with the `sx` prop; no CSS-in-JS files unless extending a theme.
+- **Frontend styling.** MUI v9 with the `sx` prop; no CSS-in-JS files unless extending a theme.
 - **State.** Redux Toolkit, but **not** the `createSlice` pattern. Reducers live in `application/reducers/*.reducer.ts` and use `createReducer`. Actions live separately in `application/actions/*.actions.ts` as static class members composed of `createAction` + `createAsyncThunk`. Selectors are memoized via `reselect` in `application/selectors/`. RTK Query is **not** used. When extending state, follow this split — do not introduce slices.
 - **i18n.** All user-facing strings use `useTranslation` / `t("…")` keys. Every new key must exist in both `translations/en/` and `translations/de/`.
-- **File naming.** Frontend components follow `<name>.component.tsx`, tests `<name>.component.test.tsx`, hooks `use-<name>.hook.ts`, slices `<name>.reducer.ts`, selectors `<name>.selectors.ts`, actions `<name>.actions.ts`, API clients `<name>.api.ts`.
+- **File naming (target convention).** Frontend components follow `<name>.component.tsx`, tests `<name>.component.test.tsx`, hooks `use-<name>.hook.ts`, reducers `<name>.reducer.ts`, selectors `<name>.selectors.ts`, actions `<name>.actions.ts`, API clients `<name>.api.ts`.
 - **Imports.** Both workspaces alias `#*` to `./src/*` via `package.json#imports` — prefer this over deep relative paths.
 - **Comments.** Default to none. Identifiers should be self-explanatory. Add a one-line comment only when the _why_ is non-obvious (a workaround, an invariant, a subtle constraint). Do not narrate _what_ the code does.
 - **Scope discipline.** Don't refactor unrelated code, don't add error handling for impossible cases, don't introduce abstractions for hypothetical future requirements. Three similar lines beat a premature abstraction.
