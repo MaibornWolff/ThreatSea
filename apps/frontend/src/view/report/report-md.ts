@@ -174,7 +174,7 @@ function escapeInline(s: string): string {
  * line breaks.
  */
 function escapeCell(s: string): string {
-    return escapeInline(s).replace(/\|/g, "\\|");
+    return escapeInline(s).replace(/\\/g, "\\\\").replace(/\|/g, "\\|");
 }
 
 /**
