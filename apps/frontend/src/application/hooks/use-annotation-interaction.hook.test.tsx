@@ -84,6 +84,22 @@ describe("useAnnotationInteraction", () => {
             expect(event.cancelBubble).toBe(true);
             expect(event.evt.preventDefault).toHaveBeenCalled();
         });
+
+        it("does not select or stop bubbling while a drawing tool is active", () => {
+            const { hook, store, onSelect } = renderInteractionHook({});
+            act(() => {
+                store.dispatch(EditorActions.setAnnotationTool("rect"));
+            });
+            const event = buildEvent({ button: 0 });
+
+            act(() => {
+                hook.result.current.handleClick(event);
+            });
+
+            expect(onSelect).not.toHaveBeenCalled();
+            expect(event.cancelBubble).toBe(false);
+            expect(event.evt.preventDefault).not.toHaveBeenCalled();
+        });
     });
 
     describe("handleMouseEnter / handleMouseLeave", () => {

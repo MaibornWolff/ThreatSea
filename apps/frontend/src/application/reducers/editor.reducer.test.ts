@@ -1,6 +1,8 @@
 import editorReducer from "./editor.reducer";
 import { EditorActions } from "../actions/editor.actions";
 import { SystemActions } from "../actions/system.actions";
+import { AnchorOrientation } from "#api/types/system.types.ts";
+import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
 
 const getInitialState = () => editorReducer(undefined, { type: "@@INIT" });
 
@@ -98,6 +100,33 @@ describe("editorReducer", () => {
             const seeded = editorReducer(getInitialState(), EditorActions.selectAnnotation("ann-from-project-a"));
             const next = editorReducer(seeded, SystemActions.setLoadedProjectId(7));
             expect(next.selectedAnnotation).toBeNull();
+        });
+    });
+
+    describe("select actions exit drawing mode", () => {
+        const selectActions = [
+            ["selectComponent", EditorActions.selectComponent("component-1")],
+            ["selectConnection", EditorActions.selectConnection("connection-1")],
+            ["selectPointOfAttack", EditorActions.selectPointOfAttack("poa-1")],
+            ["selectConnectionPoint", EditorActions.selectConnectionPoint("cp-1")],
+            [
+                "setConnection",
+                EditorActions.setConnection({
+                    from: { id: "component-1", anchor: AnchorOrientation.top, type: STANDARD_COMPONENT_TYPES.CLIENT },
+                }),
+            ],
+            ["selectAnnotation", EditorActions.selectAnnotation("ann-1")],
+        ] as const;
+
+        it.each(selectActions)("%s clears the active annotation tool", (_name, action) => {
+            const seeded = editorReducer(getInitialState(), EditorActions.setAnnotationTool("rect"));
+            const next = editorReducer(seeded, action);
+            expect(next.annotationTool).toBeNull();
+        });
+
+        it.each(selectActions)("%s leaves annotationTool null when no tool was active", (_name, action) => {
+            const next = editorReducer(getInitialState(), action);
+            expect(next.annotationTool).toBeNull();
         });
     });
 });

@@ -203,17 +203,20 @@ describe("EditorToolbar", () => {
             expect(onSetAnnotationColor).toHaveBeenCalledWith(DEFAULT_ANNOTATION_COLOR);
         });
 
-        it("hides the color picker while the shapes-list popover is open (shape-anchored case)", async () => {
-            const user = userEvent.setup();
-            setup({ annotationTool: "rect" });
+        it.each([["rect"], ["freehand"]] as const)(
+            "hides the color picker while the shapes-list popover is open (%s active)",
+            async (tool) => {
+                const user = userEvent.setup();
+                setup({ annotationTool: tool });
 
-            expect(screen.getByRole("button", { name: DEFAULT_ANNOTATION_COLOR })).toBeInTheDocument();
+                expect(screen.getByRole("button", { name: DEFAULT_ANNOTATION_COLOR })).toBeInTheDocument();
 
-            await user.click(screen.getByRole("button", { name: "Shapes" }));
+                await user.click(screen.getByRole("button", { name: "Shapes" }));
 
-            expect(screen.queryByRole("button", { name: DEFAULT_ANNOTATION_COLOR })).not.toBeInTheDocument();
-            expect(screen.getByRole("button", { name: "Rectangle" })).toBeInTheDocument();
-        });
+                expect(screen.queryByRole("button", { name: DEFAULT_ANNOTATION_COLOR })).not.toBeInTheDocument();
+                expect(screen.getByRole("button", { name: "Rectangle" })).toBeInTheDocument();
+            }
+        );
 
         it("deselects freehand when the active freehand button is clicked again", async () => {
             const user = userEvent.setup();
