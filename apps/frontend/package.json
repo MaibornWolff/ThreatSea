@@ -2,7 +2,7 @@
   "name": "threatsea_fe",
   "version": "0.1.0",
   "description": "",
-  "license": "ISC",
+  "license": "BSD-3-Clause",
   "author": "",
   "type": "module",
   "imports": {

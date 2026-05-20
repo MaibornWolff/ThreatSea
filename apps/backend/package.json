@@ -2,7 +2,7 @@
   "name": "threatsea_be",
   "version": "1.0.0",
   "description": "",
-  "license": "ISC",
+  "license": "BSD-3-Clause",
   "author": "",
   "type": "module",
   "main": "index.js",
