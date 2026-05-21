@@ -106,6 +106,18 @@ describe("generateMarkdownReport – injection prevention", () => {
         const md = generateMarkdownReport({ ...BASE_OPTIONS, language: "en", data: { ...report, threats: [threat] } });
         expect(md).toContain("Threat \\] Injection");
     });
+
+    it("escapes backslashes in threat names (link text context)", () => {
+        const threat = { ...report.threats[0]!, name: "Threat \\ Backslash" };
+        const md = generateMarkdownReport({ ...BASE_OPTIONS, language: "en", data: { ...report, threats: [threat] } });
+        expect(md).toContain("Threat \\\\ Backslash");
+    });
+
+    it("escapes backslashes in threat component names (table cell context)", () => {
+        const threat = { ...report.threats[0]!, componentName: "Server \\ Database" };
+        const md = generateMarkdownReport({ ...BASE_OPTIONS, language: "en", data: { ...report, threats: [threat] } });
+        expect(md).toContain("Server \\\\ Database");
+    });
 });
 
 // ---------------------------------------------------------------------------
