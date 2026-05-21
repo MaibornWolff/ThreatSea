@@ -45,7 +45,7 @@
   "pointsOfAttacks": {
     "USER_INTERFACE": {
       "name": "User Interface",
-      "description": "the places and programms, where and by which users interact with the system, usually via screen and input device, e.g. a browser on a PC"
+      "description": "the places and programs, where and by which users interact with the system, usually via screen and input device, e.g. a browser on a PC"
     },
     "PROCESSING_INFRASTRUCTURE": {
       "name": "Processing Infrastructure",
