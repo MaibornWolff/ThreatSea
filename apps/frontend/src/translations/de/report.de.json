@@ -58,7 +58,7 @@
     },
     "COMMUNICATION_INFRASTRUCTURE": {
       "name": "Kommunikationsinfrastruktur",
-      "description": "Orte der Programmausführung - im Prinzip alles, was einen Prozessor und keine absolut unveränderliche Programmierung hat, z.B. auch Datenbankserver, wo die Abfragen verarbeitet werden"
+      "description": "Physische Übertragung von Daten über Kabel oder Funk"
     },
     "COMMUNICATION_INTERFACES": {
       "name": "Kommunikationsschnittstelle",

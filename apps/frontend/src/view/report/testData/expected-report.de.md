@@ -52,7 +52,7 @@ Die 4x6 Methodik basiert auf einer Matrix, die für jedes IT-System, das auf sec
 - **Benutzerschnittstelle:** Orte und Programme, an und mit denen Benutzer mit dem System interagieren, meist per Bildschirm und Eingabegerät, z.B. Browser am PC
 - **Ausführungsinfrastruktur:** Orte der Programmausführung - im Prinzip alles, was einen Prozessor und keine absolut unveränderliche Programmierung hat, z.B. auch Datenbankserver, wo die Abfragen verarbeitet werden
 - **Datenablagestruktur:** Orte, wo Daten physisch dauerhaft abgelegt werden - Festplatten, persistente Halbleiterspeicher, etc.
-- **Kommunikationsinfrastruktur:** Orte der Programmausführung - im Prinzip alles, was einen Prozessor und keine absolut unveränderliche Programmierung hat, z.B. auch Datenbankserver, wo die Abfragen verarbeitet werden
+- **Kommunikationsinfrastruktur:** Physische Übertragung von Daten über Kabel oder Funk
 - **Kommunikationsschnittstelle:** Anschlüsse an die Kommunikationsverbindungen auf allen OSI-Schichten: Netzschnittstellen, Funkantennen, TCP-Ports, APIs ...
 - **Benutzerverhalten:** Das Verhalten eines Benutzers (Menschen)
 
