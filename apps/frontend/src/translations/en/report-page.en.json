@@ -13,7 +13,7 @@
   "tillScheduledAt": "Until",
   "systemImageOnSeperatePage": "System Image on separate page",
   "createBtn": "Create PDF Document",
-  "openInBrowserBtn": "Open in Browser",
+  "openInBrowserBtn": "Open PDF in Browser",
   "downloadPdfBtn": "Download PDF",
   "downloadMarkdownBtn": "Download Markdown",
   "reportLoads": "Report gets created...",

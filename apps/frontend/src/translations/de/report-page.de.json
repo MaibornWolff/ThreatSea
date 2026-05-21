@@ -13,7 +13,7 @@
   "tillScheduledAt": "Bis",
   "systemImageOnSeperatePage": "Systembild auf eigene Seite",
   "createBtn": "PDF-Report erstellen",
-  "openInBrowserBtn": "Im Browser öffnen",
+  "openInBrowserBtn": "PDF im Browser öffnen",
   "downloadPdfBtn": "PDF herunterladen",
   "downloadMarkdownBtn": "Markdown herunterladen",
   "reportLoads": "Report wird erstellt...",
