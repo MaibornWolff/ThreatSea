@@ -16,6 +16,8 @@
   "method": "Die 4x6 Methodik",
   "gross": "brutto",
   "net": "netto",
+  "matrixLegend": "G = grün (geringes Risiko), Y = gelb (mittleres Risiko), R = rot (hohes Risiko). Anzahl wird angezeigt, wenn Bedrohungen vorhanden sind.",
+  "matrixAxisLegend": "P = Wahrscheinlichkeit (1 = niedrig, 5 = hoch), D = Schaden (1 = niedrig, 5 = hoch)",
 
   "explanationIdea": "Die 4x6 Methodik basiert auf einer Matrix, die für jedes IT-System, das auf sechs Klassen von Angriffspunkten abstrahiert wird, für die vier Klassen von Angreifern jede erdenkliche Bedrohung wiedergibt.",
   "explanationApplication": "Die Matrix ist zunächst unabhängig von konkreten Angriffstechniken oder Angriffszielen. Im Laufe einer Bedrohungsanalyse wird diese abstrahierte Matrix auf eine konkrete Systemarchitektur, die gemäß der obigen Vorgabe abstrahiert wurde, angewendet. Daraus werden unmittelbar konkrete Angriffsszenarien in einer überschaubaren, aber dennoch vollständigen Sicht entwickelt.",
@@ -56,7 +58,7 @@
     },
     "COMMUNICATION_INFRASTRUCTURE": {
       "name": "Kommunikationsinfrastruktur",
-      "description": "Orte der Programmausführung - im Prinzip alles, was einen Prozessor und keine absolut unveränderliche Programmierung hat, z.B. auch Datenbankserver, wo die Abfragen verarbeitet werden"
+      "description": "Physische Übertragung von Daten über Kabel oder Funk"
     },
     "COMMUNICATION_INTERFACES": {
       "name": "Kommunikationsschnittstelle",
