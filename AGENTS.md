@@ -94,7 +94,7 @@ pnpm --filter threatsea_be db:generate    # generate a new Drizzle migration
 pnpm --filter threatsea_be db:migrate     # apply migrations
 
 # E2E (requires DB + backend running — see README)
-cd apps/frontend && pnpm playwright
+pnpm --filter threatsea_fe playwright
 ```
 
 Before opening a PR, run at minimum: `pnpm lint`, `pnpm format:check`, `pnpm type-check`, `pnpm test`.
