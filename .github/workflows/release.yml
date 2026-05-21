@@ -91,7 +91,7 @@ jobs:
       - name: Build and push for next branch (prerelease)
         if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'next'
         id: build-next
-        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7
         with:
           context: .
           file: ./Dockerfile
@@ -140,7 +140,7 @@ jobs:
       - name: Build and push for main branch
         if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'main'
         id: build-main
-        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7
         with:
           context: .
           file: ./Dockerfile
