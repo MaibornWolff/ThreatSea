@@ -49,7 +49,7 @@ The 4x6 methodology is based on a matrix that specifies every conceivable threat
 
 **Points Of Attack:**
 
-- **User Interface:** the places and programms, where and by which users interact with the system, usually via screen and input device, e.g. a browser on a PC
+- **User Interface:** the places and programs, where and by which users interact with the system, usually via screen and input device, e.g. a browser on a PC
 - **Processing Infrastructure:** places of program execution - in principle everything which has a processor and its programming is not absolutely fixed, e.g. including database servers, where queries are processed
 - **Data Storage Infrastructure:** places where data is stored durably - hard disks, non-volatile semiconductor memory, ...
 - **Communication Infrastructure:** physical transport of data via cable or wireless
