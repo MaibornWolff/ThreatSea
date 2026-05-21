@@ -14,7 +14,7 @@
   "systemImageOnSeperatePage": "Systembild auf eigene Seite",
   "createBtn": "PDF-Report erstellen",
   "openInBrowserBtn": "Im Browser öffnen",
-  "downloadBtn": "PDF herunterladen",
+  "downloadPdfBtn": "PDF herunterladen",
   "downloadMarkdownBtn": "Markdown herunterladen",
   "reportLoads": "Report wird erstellt...",
   "pageSettings": "Seiten Einstellungen",

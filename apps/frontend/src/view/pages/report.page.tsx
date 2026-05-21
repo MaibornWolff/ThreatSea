@@ -794,7 +794,7 @@ const PdfDocumentToolbar = ({ filename, onDownloadMarkdown, ...props }: PdfDocum
                                         marginRight: 1,
                                     }}
                                 >
-                                    {t("downloadBtn")}
+                                    {t("downloadPdfBtn")}
                                 </Button>
                             </>
                         )}
