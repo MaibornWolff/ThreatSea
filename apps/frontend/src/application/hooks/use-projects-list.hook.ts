@@ -53,14 +53,18 @@ export const useProjectsList = () => {
     }, [filteredItems, sortBy, sortDirection]);
 
     useEffect(() => {
-        socket.on("set_project", (data) => {
-            const project = JSON.parse(data);
-            dispatch(ProjectsActions.setProject(project));
-        });
-        socket.on("remove_project", (data) => {
-            const project = JSON.parse(data);
-            dispatch(ProjectsActions.removeProject(project));
-        });
+        const handleSet = (data: string) => {
+            dispatch(ProjectsActions.setProject(JSON.parse(data)));
+        };
+        const handleRemove = (data: string) => {
+            dispatch(ProjectsActions.removeProject(JSON.parse(data)));
+        };
+        socket.on("set_project", handleSet);
+        socket.on("remove_project", handleRemove);
+        return () => {
+            socket.off("set_project", handleSet);
+            socket.off("remove_project", handleRemove);
+        };
     }, [dispatch]);
 
     return {

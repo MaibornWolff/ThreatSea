@@ -81,14 +81,18 @@ export const useCatalogThreatsList = ({
     );
 
     useEffect(() => {
-        socket.on("set_catalog_threat", (data) => {
-            const catalogThreat = JSON.parse(data);
-            dispatch(CatalogThreatsActions.setCatalogThreat(catalogThreat));
-        });
-        socket.on("remove_catalog_threat", (data) => {
-            const catalogThreat = JSON.parse(data);
-            dispatch(CatalogThreatsActions.removeCatalogThreat(catalogThreat));
-        });
+        const handleSet = (data: string) => {
+            dispatch(CatalogThreatsActions.setCatalogThreat(JSON.parse(data)));
+        };
+        const handleRemove = (data: string) => {
+            dispatch(CatalogThreatsActions.removeCatalogThreat(JSON.parse(data)));
+        };
+        socket.on("set_catalog_threat", handleSet);
+        socket.on("remove_catalog_threat", handleRemove);
+        return () => {
+            socket.off("set_catalog_threat", handleSet);
+            socket.off("remove_catalog_threat", handleRemove);
+        };
     }, [dispatch]);
 
     return {
