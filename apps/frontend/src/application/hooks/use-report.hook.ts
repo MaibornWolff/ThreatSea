@@ -125,7 +125,7 @@ export const useReport = ({ projectId }: { projectId: number }) => {
     const [fromScheduledAt, setFromScheduledAt] = useState<string | null>(null);
     const [tillScheduledAt, setTillScheduledAt] = useState<string | null>(null);
     const [riskMatrixMeasures, setRiskMatrixMeasures] = useState<string[]>([]);
-    const [systemImageOnSeperatePage, setSystemImageOnSeperatePage] = useState<boolean>(false);
+    const [systemImageOnSeparatePage, setSystemImageOnSeparatePage] = useState<boolean>(false);
 
     const threats = data?.threats;
     const measures = data?.measures;
@@ -659,7 +659,7 @@ export const useReport = ({ projectId }: { projectId: number }) => {
         showMeasuresPage,
         showThreatListPage,
         showThreatsPage,
-        systemImageOnSeperatePage,
+        systemImageOnSeparatePage,
         reportLanguage,
         measures: filteredMeasures,
         threats: sortedThreats,
@@ -678,7 +678,7 @@ export const useReport = ({ projectId }: { projectId: number }) => {
         setShowMeasuresPage,
         setShowThreatListPage,
         setShowThreatsPage,
-        setSystemImageOnSeperatePage,
+        setSystemImageOnSeparatePage,
         setReportLanguage,
         fullExportAsExcel,
     };

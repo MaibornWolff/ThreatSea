@@ -31,7 +31,7 @@ export interface MarkdownReportOptions {
     showMeasuresPage?: boolean | undefined;
     showThreatListPage?: boolean | undefined;
     showThreatsPage?: boolean | undefined;
-    systemImageOnSeperatePage?: boolean | undefined;
+    systemImageOnSeparatePage?: boolean | undefined;
     language?: string | undefined;
 }
 
@@ -289,7 +289,7 @@ function renderMatrix(T: Translations, matrix: RiskMatrix, title: string): strin
 // Section generators
 // ---------------------------------------------------------------------------
 
-function coverSection(T: Translations, data: ProjectReport, date: string, systemImageOnSeperatePage: boolean): string {
+function coverSection(T: Translations, data: ProjectReport, date: string, systemImageOnSeparatePage: boolean): string {
     const { project, systemImage } = data;
     const confidentialityLabel = T.confidentialityLevels[project.confidentialityLevel] ?? project.confidentialityLevel;
 
@@ -307,7 +307,7 @@ function coverSection(T: Translations, data: ProjectReport, date: string, system
         lines.push("");
         lines.push(escapeBlock(project.description));
     }
-    if (!systemImageOnSeperatePage && systemImage) {
+    if (!systemImageOnSeparatePage && systemImage) {
         lines.push("");
         lines.push(`![${T.systemImage}](${escapeUrl(systemImage)})`);
         lines.push("");
@@ -671,7 +671,7 @@ export function generateMarkdownReport(options: MarkdownReportOptions): string {
         showMeasuresPage = true,
         showThreatListPage = true,
         showThreatsPage = true,
-        systemImageOnSeperatePage = false,
+        systemImageOnSeparatePage = false,
         language = "en",
     } = options;
 
@@ -687,7 +687,7 @@ export function generateMarkdownReport(options: MarkdownReportOptions): string {
     if (showScaleExplanation) {
         chapters.push({ label: T.explanationScale, id: "chapter-explanationScale" });
     }
-    if (systemImageOnSeperatePage && hasSystemImage) {
+    if (systemImageOnSeparatePage && hasSystemImage) {
         chapters.push({ label: T.systemImage, id: "chapter-systemImage" });
     }
     if (showMatrixPage) {
@@ -709,7 +709,7 @@ export function generateMarkdownReport(options: MarkdownReportOptions): string {
     const sections: string[] = [];
 
     if (showCoverPage) {
-        sections.push(coverSection(T, data, date, systemImageOnSeperatePage));
+        sections.push(coverSection(T, data, date, systemImageOnSeparatePage));
     }
 
     if (showTableOfContentsPage && chapters.length > 0) {
@@ -724,7 +724,7 @@ export function generateMarkdownReport(options: MarkdownReportOptions): string {
         sections.push(scaleExplanationSection(T));
     }
 
-    if (systemImageOnSeperatePage && data.systemImage) {
+    if (systemImageOnSeparatePage && data.systemImage) {
         sections.push(systemImageSection(T, data.systemImage));
     }
 
