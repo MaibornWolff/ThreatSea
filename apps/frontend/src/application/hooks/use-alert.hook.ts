@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { AlertActions } from "../actions/alert.actions";
 import { alertSelectors } from "../selectors/alert.selectors";
 import { useAppDispatch, useAppSelector } from "./use-app-redux.hook";
@@ -7,17 +8,23 @@ export const useAlert = () => {
 
     const { text, type, visible } = useAppSelector(alertSelectors.select);
 
-    const close = () => {
+    const close = useCallback(() => {
         dispatch(AlertActions.closeAlert());
-    };
+    }, [dispatch]);
 
-    const showErrorMessage = ({ message }: { message: string }) => {
-        dispatch(AlertActions.openErrorAlert({ text: message }));
-    };
+    const showErrorMessage = useCallback(
+        ({ message }: { message: string }) => {
+            dispatch(AlertActions.openErrorAlert({ text: message }));
+        },
+        [dispatch]
+    );
 
-    const showSuccessMessage = ({ message }: { message: string }) => {
-        dispatch(AlertActions.openSuccessAlert({ text: message }));
-    };
+    const showSuccessMessage = useCallback(
+        ({ message }: { message: string }) => {
+            dispatch(AlertActions.openSuccessAlert({ text: message }));
+        },
+        [dispatch]
+    );
 
     return {
         type,

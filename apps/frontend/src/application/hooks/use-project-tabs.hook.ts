@@ -1,4 +1,4 @@
-import { type SyntheticEvent } from "react";
+import { type SyntheticEvent, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
@@ -26,11 +26,30 @@ export const useProjectTabs = (): ProjectTabs => {
     const userCatalogRole = useAppSelector((state) => state.catalogs.current?.role);
     const userRole = userProjectRole ?? userCatalogRole;
 
+    const defaultOnChangePath = useCallback(
+        (_event: SyntheticEvent, path: string) => {
+            if (path != null) {
+                navigate(path);
+            }
+        },
+        [navigate]
+    );
+
+    const projectOnChangePath = useCallback(
+        (_event: SyntheticEvent, path: string) => {
+            if (path != null) {
+                const nextState = path === "/projects" ? null : state;
+                navigate(path, { state: nextState });
+            }
+        },
+        [navigate, state]
+    );
+
     if (!showUniversalHeaderNavigation) {
         return {
             showProjectTabs: false,
             finalButtons: [],
-            finalOnChangePath: () => undefined,
+            finalOnChangePath: defaultOnChangePath,
             pathname,
         };
     }
@@ -78,11 +97,7 @@ export const useProjectTabs = (): ProjectTabs => {
     }
 
     let finalButtons: ToggleButtonConfig[] = [];
-    let finalOnChangePath = (_event: SyntheticEvent, path: string) => {
-        if (path != null) {
-            navigate(path);
-        }
-    };
+    let finalOnChangePath = defaultOnChangePath;
 
     if (showProjectCatalogueInnerNavigation) {
         if (pathname.includes("/catalogs")) {
@@ -98,14 +113,7 @@ export const useProjectTabs = (): ProjectTabs => {
             }
         } else {
             finalButtons = defaultProjectButtons;
-
-            finalOnChangePath = (_event: SyntheticEvent, path: string) => {
-                if (path != null) {
-                    const nextState = path === "/projects" ? null : state;
-
-                    navigate(path, { state: nextState });
-                }
-            };
+            finalOnChangePath = projectOnChangePath;
         }
     }
 

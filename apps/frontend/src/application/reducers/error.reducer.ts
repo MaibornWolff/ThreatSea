@@ -21,11 +21,13 @@ export const errorDefaultState: ErrorState = {
 };
 
 export const errorReducer = createReducer(errorDefaultState, (builder) => {
-    builder.addCase(ErrorActions.setAPIError, (state, action) => {
-        return {
-            type: action.payload.name ?? "unknown",
-            message: action.payload.message ?? "",
-            errorChanged: !state.errorChanged,
-        };
-    });
+    builder
+        .addCase(ErrorActions.setAPIError, (state, action) => {
+            return {
+                type: action.payload.name ?? "unknown",
+                message: action.payload.message ?? "",
+                errorChanged: !state.errorChanged,
+            };
+        })
+        .addCase(ErrorActions.clearError, () => errorDefaultState);
 });

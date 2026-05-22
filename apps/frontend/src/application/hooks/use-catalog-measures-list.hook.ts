@@ -80,15 +80,18 @@ export const useCatalogMeasuresList = ({
     );
 
     useEffect(() => {
-        socket.on("set_catalog_measure", (data) => {
-            const catalogMeasure = JSON.parse(data);
-            dispatch(CatalogMeasuresActions.setCatalogMeasure(catalogMeasure));
-        });
-
-        socket.on("remove_catalog_measure", (data) => {
-            const catalogMeasure = JSON.parse(data);
-            dispatch(CatalogMeasuresActions.removeCatalogMeasure(catalogMeasure));
-        });
+        const handleSet = (data: string) => {
+            dispatch(CatalogMeasuresActions.setCatalogMeasure(JSON.parse(data)));
+        };
+        const handleRemove = (data: string) => {
+            dispatch(CatalogMeasuresActions.removeCatalogMeasure(JSON.parse(data)));
+        };
+        socket.on("set_catalog_measure", handleSet);
+        socket.on("remove_catalog_measure", handleRemove);
+        return () => {
+            socket.off("set_catalog_measure", handleSet);
+            socket.off("remove_catalog_measure", handleRemove);
+        };
     }, [dispatch]);
 
     return {

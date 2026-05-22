@@ -16,4 +16,6 @@ export class ErrorActions {
      * @returns Action function for setting an api error.
      */
     static setAPIError = createAction<SerializedError>("[error] api request failure");
+
+    static clearError = createAction<void>("[error] clear error");
 }
