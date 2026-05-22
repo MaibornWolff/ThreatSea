@@ -44,11 +44,11 @@ export const ComponentSelectedCircle = ({
     const visualHover = hover && !isCapturing;
 
     const onMouseEnter = (index: number) => {
-        setLineIndex(index); // Do not move this below setHover
-        setHover(true);
         if (annotationTool !== null) {
             return;
         }
+        setLineIndex(index);
+        setHover(true);
         if (stageRef && stageRef.current) {
             stageRef.current.content.style.cursor = "pointer";
         }

@@ -151,10 +151,10 @@ const SystemComponentConnectionInner = ({
     };
 
     const onMouseEnter = () => {
-        setHover(true);
         if (annotationTool !== null) {
             return;
         }
+        setHover(true);
         if (stageRef && stageRef.current) {
             stageRef.current.content.style.cursor = "pointer";
         }

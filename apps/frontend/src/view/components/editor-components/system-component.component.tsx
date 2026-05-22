@@ -165,6 +165,9 @@ export const SystemComponent = ({
     const nameLength = Math.max(width - 20, name.length * 6 + 35);
 
     const handleMouseEnter = () => {
+        if (annotationTool !== null) {
+            return;
+        }
         setHover(true);
     };
 
@@ -191,10 +194,10 @@ export const SystemComponent = ({
     };
 
     const handleSmallIconMouseEnter = () => {
-        setIsSmallIconHovered(true);
         if (annotationTool !== null) {
             return;
         }
+        setIsSmallIconHovered(true);
         if (stageRef && stageRef.current) {
             stageRef.current.content.style.cursor = "pointer";
         }

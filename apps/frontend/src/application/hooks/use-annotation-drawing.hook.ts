@@ -58,8 +58,8 @@ export const useAnnotationDrawing = ({
 
     /** Try to start a draw. Returns true if started — caller should return early. */
     const tryStartDrawing = (annotationTool: AnnotationType | null, event: KonvaEventObject<MouseEvent>): boolean => {
-        const { evt, target } = event;
-        if (!annotationTool || !isEditor || evt.button !== 0 || target.nodeType !== "Stage") {
+        const { evt } = event;
+        if (!annotationTool || !isEditor || evt.button !== 0) {
             return false;
         }
         const local = stageToLayerCoords();
