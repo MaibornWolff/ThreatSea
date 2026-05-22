@@ -12,6 +12,7 @@ interface EditorAnnotationProps {
     selected: boolean;
     editable: boolean;
     editing?: boolean;
+    stageScale: number;
     onSelect: (id: string, options?: { openSidebar?: boolean }) => void;
     onChange: (id: string, changes: AnnotationChanges) => void;
     onDragStateChange?: (isDragging: boolean) => void;
@@ -381,6 +382,7 @@ export const EditorAnnotation = (props: EditorAnnotationProps) => {
                 selected={props.selected}
                 editable={props.editable}
                 editing={props.editing ?? false}
+                stageScale={props.stageScale}
                 onSelect={props.onSelect}
                 onChange={props.onChange}
                 onDragStateChange={props.onDragStateChange}

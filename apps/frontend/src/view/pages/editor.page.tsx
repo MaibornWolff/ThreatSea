@@ -1444,6 +1444,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                 selectedAnnotationId={selectedAnnotationId}
                                 editingAnnotationId={editingAnnotationId}
                                 editable={isEditor}
+                                stageScale={stageScale}
                                 onSelect={handleSelectAnnotation}
                                 onChange={updateAnnotation}
                                 onDragStateChange={handleAnnotationDragStateChange}

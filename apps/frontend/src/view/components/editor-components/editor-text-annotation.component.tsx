@@ -1,6 +1,6 @@
 import { Fragment, memo, useRef, useState } from "react";
 import { Group, Rect, Text, Transformer } from "react-konva";
-import { Html } from "react-konva-utils";
+import { Html, type HtmlTransformAttrs } from "react-konva-utils";
 import type { KonvaEventObject, Node as KonvaNode } from "konva/lib/Node";
 import type { Rect as KonvaRectNode } from "konva/lib/shapes/Rect";
 import type { Text as KonvaTextNode } from "konva/lib/shapes/Text";
@@ -19,18 +19,27 @@ interface EditorTextAnnotationProps {
     selected: boolean;
     editable: boolean;
     editing: boolean;
+    stageScale: number;
     onSelect: (id: string, options?: { openSidebar?: boolean }) => void;
     onChange: (id: string, changes: AnnotationChanges) => void;
     onDragStateChange: ((isDragging: boolean) => void) | undefined;
     onRequestEdit: ((id: string) => void) | undefined;
     onExitEdit?: ((id: string) => void) | undefined;
 }
+const stripHtmlScale = (attrs: HtmlTransformAttrs): HtmlTransformAttrs => ({
+    ...attrs,
+    x: Math.round(attrs.x),
+    y: Math.round(attrs.y),
+    scaleX: 1,
+    scaleY: 1,
+});
 
 const EditorTextAnnotationInner = ({
     annotation,
     selected,
     editable,
     editing,
+    stageScale,
     onSelect,
     onChange,
     onDragStateChange,
@@ -197,15 +206,21 @@ const EditorTextAnnotationInner = ({
                     align="left"
                     verticalAlign="top"
                     padding={TEXT_PADDING}
+                    lineHeight={1.2}
                     wrap="word"
                     listening={false}
-                    visible={isCapturing}
+                    visible={!editing || isCapturing}
                 />
                 <Html
                     groupProps={{ x: 0, y: 0 }}
+                    transformFunc={stripHtmlScale}
                     // Outer wrapper passes clicks through to Konva when not editing;
-                    // becomes live only during edit so the contentEditable can type.
-                    divProps={{ style: { pointerEvents: editing ? "auto" : "none" } }}
+                    divProps={{
+                        style: {
+                            pointerEvents: editing ? "auto" : "none",
+                            opacity: editing ? 1 : 0,
+                        },
+                    }}
                 >
                     <div
                         ref={contentEditable.setRef}
@@ -216,20 +231,24 @@ const EditorTextAnnotationInner = ({
                         onKeyDown={contentEditable.onKeyDown}
                         spellCheck={false}
                         style={{
-                            width: `${annotation.width ?? 0}px`,
-                            height: `${annotation.height ?? 0}px`,
-                            fontSize: `${annotation.fontSize ?? DEFAULT_TEXT_FONT_SIZE}px`,
+                            width: `${(annotation.width ?? 0) * stageScale}px`,
+                            height: `${(annotation.height ?? 0) * stageScale}px`,
+                            fontSize: `${(annotation.fontSize ?? DEFAULT_TEXT_FONT_SIZE) * stageScale}px`,
                             fontFamily: TEXT_FONT_FAMILY,
                             fontStyle: annotation.italic ? "italic" : "normal",
                             fontWeight: annotation.bold ? "bold" : "normal",
                             textDecoration: annotation.underline ? "underline" : "none",
                             color: annotation.stroke,
-                            padding: `${TEXT_PADDING}px`,
+                            padding: `${TEXT_PADDING * stageScale}px`,
                             boxSizing: "border-box",
                             outline: "none",
                             whiteSpace: "pre-wrap",
                             wordBreak: "break-word",
                             lineHeight: 1.2,
+                            WebkitFontSmoothing: "antialiased",
+                            MozOsxFontSmoothing: "grayscale",
+                            transform: "translateZ(0)",
+                            willChange: editing ? "transform" : "auto",
                             cursor: editing ? "text" : "default",
                             userSelect: editing ? "text" : "none",
                             overflow: "hidden",
@@ -259,6 +278,7 @@ export const EditorTextAnnotation = memo(EditorTextAnnotationInner, (prev, next)
         prev.annotation === next.annotation &&
         prev.selected === next.selected &&
         prev.editable === next.editable &&
-        prev.editing === next.editing
+        prev.editing === next.editing &&
+        prev.stageScale === next.stageScale
     );
 });

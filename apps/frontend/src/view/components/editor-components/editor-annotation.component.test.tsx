@@ -10,6 +10,7 @@ const defaultProps = {
     selected: false,
     editable: true,
     editing: false,
+    stageScale: 1,
     onSelect: vi.fn(),
     onChange: vi.fn(),
     onDragStateChange: vi.fn(),

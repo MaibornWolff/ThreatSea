@@ -7,6 +7,7 @@ import { AnnotationsCanvasLayer, type AnnotationsCanvasLayerHandle } from "./ann
 const defaultProps = {
     editable: true,
     editingAnnotationId: null,
+    stageScale: 1,
     onSelect: vi.fn(),
     onChange: vi.fn(),
     onDragStateChange: vi.fn(),

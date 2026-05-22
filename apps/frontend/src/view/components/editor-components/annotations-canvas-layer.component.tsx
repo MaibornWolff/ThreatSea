@@ -12,6 +12,7 @@ interface AnnotationsCanvasLayerProps {
     selectedAnnotationId: string | null;
     editingAnnotationId: string | null;
     editable: boolean;
+    stageScale: number;
     onSelect: (id: string, options?: { openSidebar?: boolean }) => void;
     onChange: (id: string, changes: AnnotationChanges) => void;
     onDragStateChange: (dragging: boolean) => void;
@@ -25,6 +26,7 @@ export function AnnotationsCanvasLayer({
     selectedAnnotationId,
     editingAnnotationId,
     editable,
+    stageScale,
     onSelect,
     onChange,
     onDragStateChange,
@@ -49,6 +51,7 @@ export function AnnotationsCanvasLayer({
                         selected={annotation.id === selectedAnnotationId}
                         editable={editable}
                         editing={annotation.id === editingAnnotationId}
+                        stageScale={stageScale}
                         onSelect={onSelect}
                         onChange={onChange}
                         onDragStateChange={onDragStateChange}
