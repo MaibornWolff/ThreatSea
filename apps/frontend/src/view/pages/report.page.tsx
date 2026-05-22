@@ -50,7 +50,7 @@ interface PdfDocumentToolbarProps {
     showMeasuresPage: boolean;
     showThreatListPage: boolean;
     showThreatsPage: boolean;
-    systemImageOnSeperatePage: boolean;
+    systemImageOnSeparatePage: boolean;
     language: string;
     data: ReportToolbarData;
     bruttoMatrix: ReportHookReturn["bruttoMatrix"];
@@ -87,7 +87,7 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
         showMeasuresPage,
         showThreatListPage,
         showThreatsPage,
-        systemImageOnSeperatePage,
+        systemImageOnSeparatePage,
         reportLanguage,
         measures,
         threats,
@@ -106,7 +106,7 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
         setShowMeasuresPage,
         setShowThreatListPage,
         setShowThreatsPage,
-        setSystemImageOnSeperatePage,
+        setSystemImageOnSeparatePage,
         setReportLanguage,
         fullExportAsExcel,
     } = useReport({
@@ -181,8 +181,8 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
         setIsChanged(true);
     };
 
-    const onChangeSystemImageOnSeperatePage = (_event: ChangeEvent<HTMLInputElement>, value: boolean) => {
-        setSystemImageOnSeperatePage(value);
+    const onChangeSystemImageOnSeparatePage = (_event: ChangeEvent<HTMLInputElement>, value: boolean) => {
+        setSystemImageOnSeparatePage(value);
         setIsChanged(true);
     };
 
@@ -250,7 +250,7 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
             showMeasuresPage,
             showThreatListPage,
             showThreatsPage,
-            systemImageOnSeperatePage,
+            systemImageOnSeparatePage,
             language: reportLanguage,
         });
     };
@@ -416,13 +416,13 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
                                     <FormControlLabel
                                         control={
                                             <Switch
-                                                checked={systemImageOnSeperatePage}
-                                                onChange={onChangeSystemImageOnSeperatePage}
+                                                checked={systemImageOnSeparatePage}
+                                                onChange={onChangeSystemImageOnSeparatePage}
                                             />
                                         }
                                         label={
                                             <Typography sx={{ fontSize: "0.875rem" }}>
-                                                {t("systemImageOnSeperatePage")}
+                                                {t("systemImageOnSeparatePage")}
                                             </Typography>
                                         }
                                         labelPlacement="end"
@@ -718,7 +718,7 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
                                     showMeasuresPage={showMeasuresPage}
                                     showThreatListPage={showThreatListPage}
                                     showThreatsPage={showThreatsPage}
-                                    systemImageOnSeperatePage={systemImageOnSeperatePage}
+                                    systemImageOnSeparatePage={systemImageOnSeparatePage}
                                     language={reportLanguage}
                                     data={{
                                         ...data!,

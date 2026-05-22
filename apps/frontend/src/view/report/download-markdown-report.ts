@@ -25,7 +25,7 @@ interface MarkdownDownloadState {
     showMeasuresPage?: boolean;
     showThreatListPage?: boolean;
     showThreatsPage?: boolean;
-    systemImageOnSeperatePage?: boolean;
+    systemImageOnSeparatePage?: boolean;
     language?: string;
 }
 
@@ -51,7 +51,7 @@ export function downloadMarkdownReport({
     showMeasuresPage,
     showThreatListPage,
     showThreatsPage,
-    systemImageOnSeperatePage,
+    systemImageOnSeparatePage,
     language,
 }: MarkdownDownloadState): void {
     if (!data) {
@@ -71,7 +71,7 @@ export function downloadMarkdownReport({
         showMeasuresPage,
         showThreatListPage,
         showThreatsPage,
-        systemImageOnSeperatePage,
+        systemImageOnSeparatePage,
         language,
     });
     const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });

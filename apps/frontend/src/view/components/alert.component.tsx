@@ -35,7 +35,7 @@ export const Alert = (): JSX.Element | null => {
             showErrorMessageRef.current({ message: error.message });
             dispatch(ErrorActions.clearError());
         }
-    }, [dispatch, error]);
+    }, [dispatch, error, location, navigate]);
 
     if (!visible) {
         return null;

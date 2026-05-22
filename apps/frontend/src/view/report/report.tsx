@@ -65,7 +65,7 @@ interface ReportProps {
     showMeasuresPage?: boolean;
     showThreatListPage?: boolean;
     showThreatsPage?: boolean;
-    systemImageOnSeperatePage?: boolean;
+    systemImageOnSeparatePage?: boolean;
     bruttoMatrix: RiskMatrix | null;
     nettoMatrix: RiskMatrix | null;
     language?: string;
@@ -86,7 +86,7 @@ export const Report: FC<ReportProps> = ({
     showThreatListPage = true,
     showThreatsPage = true,
 
-    systemImageOnSeperatePage = false,
+    systemImageOnSeparatePage = false,
     bruttoMatrix,
     nettoMatrix,
     language = "en",
@@ -120,7 +120,7 @@ export const Report: FC<ReportProps> = ({
                 {showCoverPage && (
                     <CoverPage
                         indexCallback={addToIndex}
-                        systemImageOnSeperatePage={systemImageOnSeperatePage}
+                        systemImageOnSeparatePage={systemImageOnSeparatePage}
                         language={language}
                         logo={logo}
                         companyLogo={companyLogo}
@@ -149,7 +149,7 @@ export const Report: FC<ReportProps> = ({
                         {...data}
                     />
                 )}
-                {systemImageOnSeperatePage && (
+                {systemImageOnSeparatePage && (
                     <SystemImagePage indexCallback={addToIndex} language={language} date={date} {...data} />
                 )}
                 {showMatrixPage && (

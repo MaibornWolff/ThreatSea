@@ -8,9 +8,9 @@ import threatsFixture from "../fixtures/threats.json" with { type: "json" };
 
 type ExportedProject = typeof threatsFixture.project;
 let exportedProject: ExportedProject;
-let projectId: number;
-let catalogId: number;
-let projectName: string;
+let projectId: number | undefined;
+let catalogId: number | undefined;
+let projectName: string | undefined;
 
 test.beforeAll(() => {
     exportedProject = {
@@ -23,6 +23,10 @@ test.beforeAll(() => {
 });
 
 test.beforeEach(async ({ page, request, browserName }, { testId }) => {
+    projectId = undefined;
+    catalogId = undefined;
+    projectName = undefined;
+
     const pg = new EditorPage(page);
     await page.goto("/projects");
     const token = await pg.getCsrfToken();
@@ -34,9 +38,11 @@ test.beforeEach(async ({ page, request, browserName }, { testId }) => {
     await importProject(request, token, projectData);
     const projects = await getProjects(request, token);
     const project = projects.find((p) => p.name === projectName);
-    expect(project).toBeTruthy();
-    projectId = project!.id;
-    catalogId = project!.catalogId;
+    if (!project) {
+        throw new Error(`Project "${projectName}" not found after import`);
+    }
+    projectId = project.id;
+    catalogId = project.catalogId;
     await pg.goto(projectId);
 });
 
@@ -58,7 +64,8 @@ test.describe("Editor Page Tests", () => {
     test.describe("Component Sidebar Tests", () => {
         test("Performs case insensitive search", async ({ page }) => {
             const pg = new EditorPage(page);
-            await pg.clickCanvas(500, 340);
+            await pg.clickCanvas(505, 345);
+            await expect(pg.componentAssetSearchField).toBeVisible();
             await pg.componentAssetSearchField.fill("SAMPLE ASSET");
             await expect(pg.componentAssetSearchResults).toHaveCount(2);
             await expect(pg.componentAssetSearchResults.nth(0)).toContainText("Sample Asset 1");
@@ -67,21 +74,24 @@ test.describe("Editor Page Tests", () => {
 
         test("Performs substring search", async ({ page }) => {
             const pg = new EditorPage(page);
-            await pg.clickCanvas(500, 340);
+            await pg.clickCanvas(505, 345);
+            await expect(pg.componentAssetSearchField).toBeVisible();
             await pg.componentAssetSearchField.fill("Asset");
             await expect(pg.componentAssetSearchResults).toHaveCount(2);
         });
 
         test("Performs case insensitive and substring search together", async ({ page }) => {
             const pg = new EditorPage(page);
-            await pg.clickCanvas(500, 340);
+            await pg.clickCanvas(505, 345);
+            await expect(pg.componentAssetSearchField).toBeVisible();
             await pg.componentAssetSearchField.fill("aSSeT");
             await expect(pg.componentAssetSearchResults).toHaveCount(2);
         });
 
         test("Handles one search result gracefully", async ({ page }) => {
             const pg = new EditorPage(page);
-            await pg.clickCanvas(500, 340);
+            await pg.clickCanvas(505, 345);
+            await expect(pg.componentAssetSearchField).toBeVisible();
             await pg.componentAssetSearchField.fill("Sample Asset 1");
             await expect(pg.componentAssetSearchResults).toHaveCount(1);
             await expect(pg.componentAssetSearchResults.nth(0)).toContainText("Sample Asset 1");
@@ -89,7 +99,8 @@ test.describe("Editor Page Tests", () => {
 
         test("Handles empty search result gracefully", async ({ page }) => {
             const pg = new EditorPage(page);
-            await pg.clickCanvas(500, 340);
+            await pg.clickCanvas(505, 345);
+            await expect(pg.componentAssetSearchField).toBeVisible();
             await pg.componentAssetSearchField.fill("NonExistent");
             await expect(pg.componentAssetSearchResults).toHaveCount(0);
         });
@@ -98,35 +109,40 @@ test.describe("Editor Page Tests", () => {
     test.describe("Point Of Attack Sidebar Tests", () => {
         test("Performs case insensitive search", async ({ page }) => {
             const pg = new EditorPage(page);
-            await pg.clickCanvas(822, 340);
+            await pg.clickCanvas(822, 345);
+            await expect(pg.poaAssetSearchField).toBeVisible();
             await pg.poaAssetSearchField.fill("SAMPLE ASSET");
             await expect(pg.assetSearchResults).toHaveCount(2);
         });
 
         test("Performs substring search", async ({ page }) => {
             const pg = new EditorPage(page);
-            await pg.clickCanvas(822, 340);
+            await pg.clickCanvas(822, 345);
+            await expect(pg.poaAssetSearchField).toBeVisible();
             await pg.poaAssetSearchField.fill("Asset");
             await expect(pg.assetSearchResults).toHaveCount(2);
         });
 
         test("Performs case insensitive and substring search together", async ({ page }) => {
             const pg = new EditorPage(page);
-            await pg.clickCanvas(822, 340);
+            await pg.clickCanvas(822, 345);
+            await expect(pg.poaAssetSearchField).toBeVisible();
             await pg.poaAssetSearchField.fill("aSSeT");
             await expect(pg.assetSearchResults).toHaveCount(2);
         });
 
         test("Handles one search result gracefully", async ({ page }) => {
             const pg = new EditorPage(page);
-            await pg.clickCanvas(822, 340);
+            await pg.clickCanvas(822, 345);
+            await expect(pg.poaAssetSearchField).toBeVisible();
             await pg.poaAssetSearchField.fill("Sample Asset 1");
             await expect(pg.assetSearchResults).toHaveCount(1);
         });
 
         test("Handles empty search result gracefully", async ({ page }) => {
             const pg = new EditorPage(page);
-            await pg.clickCanvas(822, 340);
+            await pg.clickCanvas(822, 345);
+            await expect(pg.poaAssetSearchField).toBeVisible();
             await pg.poaAssetSearchField.fill("NonExistent");
             await expect(pg.assetSearchResults).toHaveCount(0);
         });
@@ -136,8 +152,10 @@ test.describe("Editor Page Tests", () => {
         test("Performs case insensitive search", async ({ page }) => {
             const pg = new EditorPage(page);
             await pg.addCommunication();
-            await pg.clickCanvas(885, 370);
+            await pg.clickCanvas(880, 375);
+            await expect(pg.communicationListItem).toBeVisible();
             await pg.communicationListItem.click();
+            await expect(pg.communicationAssetSearchField).toBeVisible();
             await pg.communicationAssetSearchField.fill("SAMPLE ASSET");
             await expect(pg.assetSearchResults).toHaveCount(2);
         });
@@ -145,8 +163,10 @@ test.describe("Editor Page Tests", () => {
         test("Performs substring search", async ({ page }) => {
             const pg = new EditorPage(page);
             await pg.addCommunication();
-            await pg.clickCanvas(885, 370);
+            await pg.clickCanvas(880, 375);
+            await expect(pg.communicationListItem).toBeVisible();
             await pg.communicationListItem.click();
+            await expect(pg.communicationAssetSearchField).toBeVisible();
             await pg.communicationAssetSearchField.fill("Asset");
             await expect(pg.assetSearchResults).toHaveCount(2);
         });
@@ -154,8 +174,10 @@ test.describe("Editor Page Tests", () => {
         test("Performs case insensitive and substring search together", async ({ page }) => {
             const pg = new EditorPage(page);
             await pg.addCommunication();
-            await pg.clickCanvas(885, 370);
+            await pg.clickCanvas(880, 375);
+            await expect(pg.communicationListItem).toBeVisible();
             await pg.communicationListItem.click();
+            await expect(pg.communicationAssetSearchField).toBeVisible();
             await pg.communicationAssetSearchField.fill("aSSeT");
             await expect(pg.assetSearchResults).toHaveCount(2);
         });
@@ -163,8 +185,10 @@ test.describe("Editor Page Tests", () => {
         test("Handles one search result gracefully", async ({ page }) => {
             const pg = new EditorPage(page);
             await pg.addCommunication();
-            await pg.clickCanvas(885, 370);
+            await pg.clickCanvas(880, 375);
+            await expect(pg.communicationListItem).toBeVisible();
             await pg.communicationListItem.click();
+            await expect(pg.communicationAssetSearchField).toBeVisible();
             await pg.communicationAssetSearchField.fill("Sample Asset 1");
             await expect(pg.assetSearchResults).toHaveCount(1);
         });
@@ -172,8 +196,10 @@ test.describe("Editor Page Tests", () => {
         test("Handles empty search result gracefully", async ({ page }) => {
             const pg = new EditorPage(page);
             await pg.addCommunication();
-            await pg.clickCanvas(885, 370);
+            await pg.clickCanvas(880, 375);
+            await expect(pg.communicationListItem).toBeVisible();
             await pg.communicationListItem.click();
+            await expect(pg.communicationAssetSearchField).toBeVisible();
             await pg.communicationAssetSearchField.fill("NonExistent");
             await expect(pg.assetSearchResults).toHaveCount(0);
         });
@@ -182,7 +208,8 @@ test.describe("Editor Page Tests", () => {
     test.describe("Asset Name Click Navigation Tests", () => {
         test("Clicking asset name in component sidebar opens edit dialog", async ({ page }) => {
             const pg = new EditorPage(page);
-            await pg.clickCanvas(845, 340);
+            await pg.clickCanvas(850, 345);
+            await expect(pg.componentAssetSearchResults.first()).toBeVisible();
             await pg.componentAssetSearchResults.first().click();
             await expect(page).toHaveURL(/\/system\/assets\/\d+\/edit/);
             await expect(pg.assetCreationModalNameInput).toBeVisible();
@@ -190,7 +217,8 @@ test.describe("Editor Page Tests", () => {
 
         test("Closing asset edit dialog returns to editor", async ({ page }) => {
             const pg = new EditorPage(page);
-            await pg.clickCanvas(845, 340);
+            await pg.clickCanvas(850, 345);
+            await expect(pg.componentAssetSearchResults.first()).toBeVisible();
             await pg.componentAssetSearchResults.first().click();
             await expect(page).toHaveURL(/\/system\/assets\/\d+\/edit/);
             await pg.cancelButton.click();
@@ -199,7 +227,8 @@ test.describe("Editor Page Tests", () => {
 
         test("Clicking asset name in POA sidebar opens edit dialog", async ({ page }) => {
             const pg = new EditorPage(page);
-            await pg.clickCanvas(845, 340);
+            await pg.clickCanvas(850, 345);
+            await expect(pg.componentAssetSearchContainer).toBeVisible();
             await pg.poaSwitchButton("USER_INTERFACE").click();
             await expect(pg.poaAssetSearchContainer).toBeVisible();
             await pg.assetSearchResults.first().click();
@@ -210,7 +239,8 @@ test.describe("Editor Page Tests", () => {
     test.describe("POA Navigation Tests", () => {
         test("Clicking POA label switches sidebar to POA view", async ({ page }) => {
             const pg = new EditorPage(page);
-            await pg.clickCanvas(845, 340);
+            await pg.clickCanvas(850, 345);
+            await expect(pg.componentAssetSearchContainer).toBeVisible();
             await pg.poaSwitchButton("USER_INTERFACE").click();
             await expect(pg.poaAssetSearchContainer).toBeVisible();
             await expect(pg.poaBreadcrumbComponent).toBeVisible();
@@ -219,7 +249,8 @@ test.describe("Editor Page Tests", () => {
 
         test("Clicking breadcrumb component name returns to component sidebar", async ({ page }) => {
             const pg = new EditorPage(page);
-            await pg.clickCanvas(845, 340);
+            await pg.clickCanvas(850, 345);
+            await expect(pg.componentAssetSearchContainer).toBeVisible();
             await pg.poaSwitchButton("USER_INTERFACE").click();
             await expect(pg.poaAssetSearchContainer).toBeVisible();
             await pg.poaBreadcrumbComponent.click();
@@ -231,7 +262,7 @@ test.describe("Editor Page Tests", () => {
     test.describe("Connected Component Navigation Tests", () => {
         test("Clicking connected component name switches sidebar to that component", async ({ page }) => {
             const pg = new EditorPage(page);
-            await pg.clickCanvas(845, 340);
+            await pg.clickCanvas(850, 345);
             await expect(pg.connectedComponentName().first()).toBeVisible();
             await pg.connectedComponentName().first().click();
             await expect(pg.connectedComponentName().first()).toContainText("Client");
