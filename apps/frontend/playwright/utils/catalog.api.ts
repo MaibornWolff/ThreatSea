@@ -11,7 +11,7 @@ export async function getCatalog(
     token: string,
     catalogId: number
 ): Promise<CatalogWithRole> {
-    return fetchApi(request, token, "GET", `/catalog/${catalogId}`);
+    return fetchApi(request, token, "GET", `/catalogs/${catalogId}`);
 }
 
 export async function createCatalog(

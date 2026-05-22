@@ -8,7 +8,11 @@ export abstract class BasePage {
     constructor(protected readonly page: Page) {}
 
     async getCsrfToken(): Promise<string> {
-        return (await this.page.evaluate(() => localStorage.getItem("csrfToken")))!;
+        const token = await this.page.evaluate(() => localStorage.getItem("csrfToken"));
+        if (!token) {
+            throw new Error("CSRF token not found in localStorage. Is the user logged in?");
+        }
+        return token;
     }
 
     async navigate(path: string): Promise<void> {

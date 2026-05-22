@@ -6,7 +6,8 @@ import type { ATTACKERS } from "#api/types/attackers.types.ts";
  * Builds a unique test identifier combining browser name and test ID.
  */
 export function buildTestId(browserName: string, testId: string): string {
-    return `${browserName}-${testId.slice(0, 16)}`;
+    const sanitizedTestId = testId.replace(/[^a-zA-Z0-9_-]/g, "_");
+    return `${browserName}-${sanitizedTestId}`;
 }
 
 /**

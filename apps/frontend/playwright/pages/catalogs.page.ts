@@ -51,21 +51,15 @@ export class CatalogsPage extends BasePage {
         return this.catalogListEntryNames.filter({ hasText: text });
     }
 
-    /** Returns the rename button for the entry row that matches the given name filter. */
-    renameCatalogButton(nameFilter: string): Locator {
-        return this.catalogEntryNameFilter(nameFilter)
-            .first()
-            .locator("..")
-            .locator("..")
-            .locator('[data-testid="catalogs-page_rename-catalog-button"]');
+    private catalogRow(nameFilter: string): Locator {
+        return this.catalogListEntries.filter({ hasText: nameFilter }).first();
     }
 
-    /** Returns the delete button for the entry row that matches the given name filter. */
+    renameCatalogButton(nameFilter: string): Locator {
+        return this.catalogRow(nameFilter).locator('[data-testid="catalogs-page_rename-catalog-button"]');
+    }
+
     deleteCatalogButton(nameFilter: string): Locator {
-        return this.catalogEntryNameFilter(nameFilter)
-            .first()
-            .locator("..")
-            .locator("..")
-            .locator('[data-testid="catalogs-page_catalogs-list-entry_delete-button"]');
+        return this.catalogRow(nameFilter).locator('[data-testid="catalogs-page_catalogs-list-entry_delete-button"]');
     }
 }

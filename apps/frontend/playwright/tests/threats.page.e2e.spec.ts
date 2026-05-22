@@ -39,16 +39,22 @@ test.beforeEach(async ({ page, request }) => {
     }
     await importProject(request, token, exportedProject);
     const projects = await getProjects(request, token);
-    projectId = projects.find((p) => p.name === exportedProject.project.name)!.id;
+    const project = projects.find((p) => p.name === exportedProject.project.name);
+    if (!project) {
+        throw new Error(`Project "${exportedProject.project.name}" not found after import`);
+    }
+    projectId = project.id;
     await pg.goto(projectId);
 });
 
 test.afterEach(async ({ page, request }) => {
     const token = await new ThreatsPage(page).getCsrfToken();
     const projects = await getProjects(request, token);
-    const project = projects.find((p) => p.name === exportedProject.project.name)!;
-    await deleteProject(request, token, project.id);
-    await safeDeleteCatalog(request, token, project.catalogId);
+    const project = projects.find((p) => p.name === exportedProject.project.name);
+    if (project) {
+        await deleteProject(request, token, project.id);
+        await safeDeleteCatalog(request, token, project.catalogId);
+    }
 });
 
 test.describe("Threats Page Tests", () => {

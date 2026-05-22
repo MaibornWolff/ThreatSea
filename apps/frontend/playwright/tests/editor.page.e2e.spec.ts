@@ -8,9 +8,9 @@ import threatsFixture from "../fixtures/threats.json" with { type: "json" };
 
 type ExportedProject = typeof threatsFixture.project;
 let exportedProject: ExportedProject;
-let projectId: number;
-let catalogId: number;
-let projectName: string;
+let projectId: number | undefined;
+let catalogId: number | undefined;
+let projectName: string | undefined;
 
 test.beforeAll(() => {
     exportedProject = {
@@ -23,6 +23,10 @@ test.beforeAll(() => {
 });
 
 test.beforeEach(async ({ page, request, browserName }, { testId }) => {
+    projectId = undefined;
+    catalogId = undefined;
+    projectName = undefined;
+
     const pg = new EditorPage(page);
     await page.goto("/projects");
     const token = await pg.getCsrfToken();
@@ -34,9 +38,11 @@ test.beforeEach(async ({ page, request, browserName }, { testId }) => {
     await importProject(request, token, projectData);
     const projects = await getProjects(request, token);
     const project = projects.find((p) => p.name === projectName);
-    expect(project).toBeTruthy();
-    projectId = project!.id;
-    catalogId = project!.catalogId;
+    if (!project) {
+        throw new Error(`Project "${projectName}" not found after import`);
+    }
+    projectId = project.id;
+    catalogId = project.catalogId;
     await pg.goto(projectId);
 });
 
