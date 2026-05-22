@@ -11,6 +11,7 @@ const defaultProps = {
     onChange: vi.fn(),
     onDragStateChange: vi.fn(),
     onRequestEdit: vi.fn(),
+    onExitEdit: vi.fn(),
 };
 
 describe("AnnotationsCanvasLayer", () => {

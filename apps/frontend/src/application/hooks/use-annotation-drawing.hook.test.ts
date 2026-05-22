@@ -85,7 +85,7 @@ describe("useAnnotationDrawing", () => {
             expect(result.current.drawingPreview).toBeNull();
         });
 
-        it("returns false when the click target is not the Stage", () => {
+        it("starts drawing even when the click target is a non-Stage node (e.g. on a component or existing annotation)", () => {
             const { result } = setup();
 
             let started: boolean | undefined;
@@ -93,8 +93,8 @@ describe("useAnnotationDrawing", () => {
                 started = result.current.tryStartDrawing("rect", makeStageEvent({ nodeType: "Shape" }));
             });
 
-            expect(started).toBe(false);
-            expect(result.current.drawingPreview).toBeNull();
+            expect(started).toBe(true);
+            expect(result.current.drawingPreview).not.toBeNull();
         });
 
         it("returns false when the stage has no pointer position", () => {

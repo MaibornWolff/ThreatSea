@@ -26,7 +26,7 @@ describe("EditorAnnotation", () => {
             // path does not. Presence of konva-group signals the text branch.
             expect(screen.getByTestId("konva-group")).toBeInTheDocument();
             expect(screen.getByTestId("konva-rect")).toBeInTheDocument();
-            expect(screen.getByTestId("konva-text")).toBeInTheDocument();
+            expect(screen.getByTestId("konva-html")).toBeInTheDocument();
         });
 
         it("routes non-text annotations through EditorShapeAnnotation (no Group wrapper)", () => {

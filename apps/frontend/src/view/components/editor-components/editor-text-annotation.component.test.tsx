@@ -28,44 +28,46 @@ describe("EditorTextAnnotation", () => {
     });
 
     describe("Transformer visibility", () => {
+        const isVisible = () => screen.getByTestId("konva-transformer").getAttribute("data-visible") === "true";
+
         it("shows the Transformer when selected, editable, not editing, and not capturing", () => {
             renderWithProviders(<EditorTextAnnotation {...defaultProps} selected editable />);
-            expect(screen.queryByTestId("konva-transformer")).toBeInTheDocument();
+            expect(isVisible()).toBe(true);
         });
 
         it("hides the Transformer when not selected", () => {
             renderWithProviders(<EditorTextAnnotation {...defaultProps} selected={false} editable />);
-            expect(screen.queryByTestId("konva-transformer")).not.toBeInTheDocument();
+            expect(isVisible()).toBe(false);
         });
 
         it("hides the Transformer when not editable", () => {
             renderWithProviders(<EditorTextAnnotation {...defaultProps} selected editable={false} />);
-            expect(screen.queryByTestId("konva-transformer")).not.toBeInTheDocument();
+            expect(isVisible()).toBe(false);
         });
 
-        it("hides the Transformer while the text is being edited", () => {
+        it("keeps the Transformer visible while the text is being edited so the user can resize while typing", () => {
             renderWithProviders(<EditorTextAnnotation {...defaultProps} selected editable editing />);
-            expect(screen.queryByTestId("konva-transformer")).not.toBeInTheDocument();
+            expect(isVisible()).toBe(true);
         });
 
         it("hides the Transformer while a screenshot is being captured", () => {
             renderWithProviders(<EditorTextAnnotation {...defaultProps} selected editable />, {
                 preloadedState: { editor: { ...defaultEditorState, isCapturing: true } },
             });
-            expect(screen.queryByTestId("konva-transformer")).not.toBeInTheDocument();
+            expect(isVisible()).toBe(false);
         });
 
         it("re-shows the Transformer when capturing flips back off", () => {
             const { store } = renderWithProviders(<EditorTextAnnotation {...defaultProps} selected editable />, {
                 preloadedState: { editor: { ...defaultEditorState, isCapturing: true } },
             });
-            expect(screen.queryByTestId("konva-transformer")).not.toBeInTheDocument();
+            expect(isVisible()).toBe(false);
 
             act(() => {
                 store.dispatch(EditorActions.setIsCapturing(false));
             });
 
-            expect(screen.queryByTestId("konva-transformer")).toBeInTheDocument();
+            expect(isVisible()).toBe(true);
         });
     });
 
