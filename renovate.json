@@ -9,12 +9,7 @@
   "lockFileMaintenance": {
     "enabled": true
   },
-  "packageRules": [
-    {
-      "matchDatasources": ["npm"],
-      "minimumReleaseAge": "72 hours"
-    }
-  ],
+  "minimumReleaseAge": "72 hours",
   "prCreation": "not-pending",
   "rebaseWhen": "behind-base-branch"
 }
