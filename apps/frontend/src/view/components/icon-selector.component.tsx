@@ -47,6 +47,10 @@ export const IconSelector = ({ value, onChange, label, error, helperText }: Icon
     const [selectedIcon, setSelectedIcon] = useState(value || "");
     const [open, setOpen] = useState(false);
 
+    useEffect(() => {
+        setSelectedIcon(value || "");
+    }, [value]);
+
     const setVisibleIconsEvent = useEffectEvent((icons: MuiIconKey[]) => {
         setVisibleIcons(icons);
     });
