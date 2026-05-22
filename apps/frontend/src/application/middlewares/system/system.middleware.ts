@@ -46,7 +46,9 @@ const handleSaveSystem: AppMiddleware =
                     connectionPoints: Object.values(connectionPoints.entities).filter(
                         (item) => item.projectId === projectId
                     ),
-                    annotations: Object.values(annotations.entities).filter((item) => item.projectId === projectId),
+                    annotations: Object.values(annotations.entities)
+                        .filter((item) => item.projectId === projectId)
+                        .filter((item) => item.type !== "text" || (item.text ?? "").trim().length > 0),
                     defaultAnnotationColor: defaultAnnotationColorByProject[projectId] ?? null,
                     lastAutoSaveDate,
                 },
