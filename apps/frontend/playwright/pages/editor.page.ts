@@ -66,13 +66,43 @@ export class EditorPage extends BasePage {
         await this.page.goto(`/projects/${projectId}/system`);
     }
 
-    async clickCanvas(x: number, y: number): Promise<void> {
+    private async waitForEditorReady(): Promise<void> {
         await this.page.waitForURL(/\/projects\/\d+\/system/);
         await this.canvas.waitFor({ state: "visible" });
-        await this.canvas.click({ position: { x, y } });
+        // Auto-centering runs in requestAnimationFrame after data loads;
+        // wait for it to settle before interacting with the canvas.
+        await this.page.waitForTimeout(500);
+    }
+
+    private async toCanvasPosition(konvaX: number, konvaY: number): Promise<{ x: number; y: number }> {
+        return this.page.evaluate(
+            ({ kx, ky }) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const stage = (globalThis as any).Konva?.stages?.[0];
+                if (!stage) {
+                    throw new Error("No Konva stage found");
+                }
+                const layer = stage.children?.[2];
+                if (!layer) {
+                    throw new Error("Expected Konva layer (stage.children[2]) not found");
+                }
+                return {
+                    x: (kx + layer.x()) * stage.scaleX() + stage.x(),
+                    y: (ky + layer.y()) * stage.scaleY() + stage.y(),
+                };
+            },
+            { kx: konvaX, ky: konvaY }
+        );
+    }
+
+    async clickCanvas(x: number, y: number): Promise<void> {
+        await this.waitForEditorReady();
+        const pos = await this.toCanvasPosition(x, y);
+        await this.canvas.click({ position: pos });
     }
 
     async rightClickCanvas(): Promise<void> {
+        await this.waitForEditorReady();
         await this.canvas.click({ button: "right" });
     }
 
@@ -89,8 +119,10 @@ export class EditorPage extends BasePage {
     }
 
     async addCommunication(): Promise<void> {
-        await this.clickCanvas(885, 370);
+        await this.clickCanvas(880, 375);
+        await this.createCommunicationButton.waitFor({ state: "visible" });
         await this.createCommunicationButton.click();
+        await this.communicationNameInput.waitFor({ state: "visible" });
         await this.communicationNameInput.fill("Sample Communication");
         await this.communicationIconButton.click();
         await this.wifiIcon().click();
