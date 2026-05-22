@@ -2,12 +2,19 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
   "baseBranches": ["next"],
-  "binarySource": "install",
   "dependencyDashboard": false,
   "dependencyDashboardApproval": false,
+  "internalChecksFilter": "strict",
   "labels": ["dependencies"],
   "lockFileMaintenance": {
     "enabled": true
   },
+  "packageRules": [
+    {
+      "matchDatasources": ["npm"],
+      "minimumReleaseAge": "72 hours"
+    }
+  ],
+  "prCreation": "not-pending",
   "rebaseWhen": "behind-base-branch"
 }
