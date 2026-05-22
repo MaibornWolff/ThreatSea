@@ -2,7 +2,7 @@
   "name": "threatsea_fe",
   "version": "0.1.0",
   "description": "",
-  "license": "ISC",
+  "license": "BSD-3-Clause",
   "author": "",
   "type": "module",
   "imports": {
@@ -15,6 +15,7 @@
     "type-check": "tsc --noEmit",
     "lint": "oxlint .",
     "lint:fix": "oxlint --fix .",
+    "test": "vitest run",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
     "test:unit:coverage": "vitest run --coverage",
