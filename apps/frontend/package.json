@@ -43,6 +43,7 @@
     "react-hook-form": "7.76.1",
     "react-i18next": "17.0.8",
     "react-konva": "19.2.4",
+    "react-konva-utils": "2.0.0",
     "react-redux": "9.3.0",
     "react-router": "7.15.1",
     "react-router-dom": "7.15.1",

@@ -16,6 +16,7 @@ interface AnnotationsCanvasLayerProps {
     onChange: (id: string, changes: AnnotationChanges) => void;
     onDragStateChange: (dragging: boolean) => void;
     onRequestEdit: (id: string) => void;
+    onExitEdit: (id: string) => void;
 }
 
 export function AnnotationsCanvasLayer({
@@ -28,6 +29,7 @@ export function AnnotationsCanvasLayer({
     onChange,
     onDragStateChange,
     onRequestEdit,
+    onExitEdit,
 }: AnnotationsCanvasLayerProps) {
     const [previewColor, setPreviewColor] = useState<string | null>(null);
 
@@ -51,6 +53,7 @@ export function AnnotationsCanvasLayer({
                         onChange={onChange}
                         onDragStateChange={onDragStateChange}
                         onRequestEdit={onRequestEdit}
+                        onExitEdit={onExitEdit}
                     />
                 );
             })}

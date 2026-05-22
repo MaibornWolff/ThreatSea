@@ -4,6 +4,7 @@ import { Box } from "@mui/system";
 import { useTranslation } from "react-i18next";
 import { checkUserRole, USER_ROLES } from "../../../api/types/user-roles.types";
 import { EditorColorPicker } from "./editor-color-picker.component";
+import { FONT_SIZE_CHOICES, formatToggleSx } from "./text-format-controls";
 import {
     DEFAULT_TEXT_FONT_SIZE,
     type Annotation,
@@ -19,8 +20,6 @@ interface EditorSidebarSelectedAnnotationProps {
     onChange: (changes: AnnotationChanges) => void;
     onDelete: () => void;
 }
-
-const FONT_SIZE_CHOICES = [12, 14, 16, 18, 24, 32, 48];
 
 const ANNOTATION_TYPE_LABEL_KEYS: Record<AnnotationType, string> = {
     rect: "canvas.annotation.rectangle",
@@ -45,11 +44,6 @@ export const EditorSidebarSelectedAnnotation = ({
         selectedAnnotation.type === "text"
             ? (selectedAnnotation.fontSize ?? DEFAULT_TEXT_FONT_SIZE)
             : DEFAULT_TEXT_FONT_SIZE;
-
-    const formatToggleSx = (active: boolean) => ({
-        color: active ? "primary.main" : "text.secondary",
-        backgroundColor: active ? "background.paperIntransparent" : "transparent",
-    });
 
     return (
         <Box>

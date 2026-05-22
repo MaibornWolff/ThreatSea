@@ -24,10 +24,10 @@ import {
     AnnotationsCanvasLayer,
     type AnnotationsCanvasLayerHandle,
 } from "../components/editor-components/annotations-canvas-layer.component";
-import { TextEditingOverlay } from "../components/editor-components/text-editing-overlay.component";
 import { EditorSidebar } from "../components/editor-components/editor-sidebar.component";
 import { EditorStage, MAX_STAGE_SCALE, MIN_STAGE_SCALE } from "../components/editor-components/editor-stage.component";
 import { EditorToolbar } from "../components/editor-components/editor-toolbar.component";
+import { TextEditingToolbarLayer } from "../components/editor-components/text-editing-toolbar-layer.component";
 import { Page } from "../components/page.component";
 import { SystemComponentConnection } from "../components/editor-components/system-component-connection.component";
 import { SystemComponent } from "../components/editor-components/system-component.component";
@@ -54,6 +54,7 @@ import type {
     Coordinate,
     SystemPointOfAttack,
     ConnectionPointMeta,
+    TextAnnotation,
 } from "#api/types/system.types.ts";
 import type { EditorComponentType } from "#application/adapters/editor-component-type.adapter.ts";
 import type { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
@@ -104,13 +105,12 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     const componentLayerRef = useRef<KonvaLayer | null>(null);
     const sidebarRef = useRef<HTMLDivElement | null>(null);
     const moveLayerRef = useRef(false);
-    // True while any annotation (line body or endpoint anchor) is being
-    // dragged. Used to suppress per-frame mousePointer dispatches that would
-    // otherwise re-render the editor page on every pointer move and make drag
-    // feel laggy. Collaborative cursors briefly stop tracking — acceptable.
+    // Ref for the hot mousemove path; state drives toolbar/transformer visibility.
     const isAnnotationDraggingRef = useRef(false);
+    const [isAnnotationDragging, setIsAnnotationDragging] = useState(false);
     const handleAnnotationDragStateChange = useCallback((isDragging: boolean): void => {
         isAnnotationDraggingRef.current = isDragging;
+        setIsAnnotationDragging(isDragging);
     }, []);
     const { openConfirm } = useConfirm();
     const { showErrorMessage } = useAlert();
@@ -269,30 +269,29 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         setEditingAnnotationId(id);
     }, []);
 
-    const handleEditCommit = useCallback(
-        (text: string): void => {
-            if (!editingAnnotationId) {
+    // Idempotent exit; discards the annotation if it was never typed in.
+    const handleExitEdit = useCallback(
+        (id: string): void => {
+            if (editingAnnotationId !== id) {
                 return;
             }
-            if (!text.trim()) {
-                removeAnnotation(editingAnnotationId);
-            } else if (editingAnnotation?.type === "text" && editingAnnotation.text !== text) {
-                updateAnnotation(editingAnnotationId, { type: "text", text });
+            const target = annotations.find((a) => a.id === id);
+            if (target?.type === "text" && (target.text ?? "").trim().length === 0) {
+                removeAnnotation(id);
             }
             setEditingAnnotationId(null);
         },
-        [editingAnnotationId, editingAnnotation, removeAnnotation, updateAnnotation]
+        [editingAnnotationId, annotations, removeAnnotation]
     );
-    const handleEditCancel = useCallback((): void => {
-        if (!editingAnnotationId) {
-            return;
-        }
 
-        if (editingAnnotation?.type === "text" && !editingAnnotation.text) {
-            removeAnnotation(editingAnnotationId);
+    // Effect-based exit-on-selection-change — handler-level guards can run with
+    // a stale editingAnnotationId because EditorTextAnnotation is memo'd on
+    // annotation/selected/editable/editing only.
+    useEffect(() => {
+        if (editingAnnotationId !== null && selectedAnnotationId !== editingAnnotationId) {
+            handleExitEdit(editingAnnotationId);
         }
-        setEditingAnnotationId(null);
-    }, [editingAnnotationId, editingAnnotation, removeAnnotation]);
+    }, [selectedAnnotationId, editingAnnotationId, handleExitEdit]);
 
     type ConnectorSelection = EditorConnectionAnchor & {
         communicationInterfaceType?: string | null;
@@ -484,15 +483,14 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     };
 
     const handleSelectAnnotation = (id: string, options?: { openSidebar?: boolean }): void => {
+        const annotation = annotations.find((a) => a.id === id);
         selectAnnotation(id);
         deselectComponent();
         deselectConnection();
         deselectPointOfAttack();
         deselectConnectionPoint();
         deselectConnector();
-        // Drag passes `openSidebar: false` — close any sidebar lingering from
-        // the previous selection so it doesn't show stale properties.
-        if (options?.openSidebar === false) {
+        if (options?.openSidebar === false || annotation?.type === "text") {
             closeSideBar();
         } else {
             showSideBar();
@@ -508,12 +506,21 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         }
     }, [selectedAnnotation]);
 
+    // Grace window for the dismissal mousedown some browsers fire on the
+    // underlying page when the native <input type="color"> closes.
+    const lastColorInteractionRef = useRef(0);
+    const bumpColorInteraction = (): void => {
+        lastColorInteractionRef.current = Date.now();
+    };
+
     const handleAnnotationColorPreview = (stroke: string): void => {
         annotationsLayerRef.current?.setPreviewColor(stroke);
+        bumpColorInteraction();
     };
 
     const handleAnnotationColorChange = (stroke: string): void => {
         annotationsLayerRef.current?.setPreviewColor(null);
+        bumpColorInteraction();
         const target = selectedAnnotation ?? lastSelectedAnnotationRef.current;
         if (target) {
             updateAnnotation(target.id, { type: target.type, stroke });
@@ -559,6 +566,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         if (communicationMenuOpen) {
             handleCloseCommunicationMenu();
             return;
+        }
+        if (editingAnnotation?.type === "text" && (editingAnnotation.text ?? "").trim().length === 0) {
+            removeAnnotation(editingAnnotation.id);
         }
         deselectComponent();
         closeSideBar();
@@ -610,6 +620,10 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         }
 
         if (evt.button === 0 && target.nodeType === "Stage") {
+            // Ignore the dismissal click that fires after the native color picker closes.
+            if (Date.now() - lastColorInteractionRef.current < 500) {
+                return;
+            }
             closeAndDeselectAll();
             event.cancelBubble = true;
             evt.preventDefault();
@@ -726,7 +740,6 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                 // would attach Konva's Transformer whose anchor mouseleave wipes our tool cursor.
                 if (toolBeforeCommit === "text") {
                     selectAnnotation(newId);
-                    showSideBar();
                     setEditingAnnotationId(newId);
                 }
                 deselectComponent();
@@ -1435,6 +1448,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                 onChange={updateAnnotation}
                                 onDragStateChange={handleAnnotationDragStateChange}
                                 onRequestEdit={handleRequestEdit}
+                                onExitEdit={handleExitEdit}
                             />
                             <AnnotationDrawingPreview
                                 drawingPreview={drawingPreview}
@@ -1467,6 +1481,24 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                 />
                             ))}
                         </Layer>
+                        {(editingAnnotation?.type === "text" || selectedAnnotation?.type === "text") && (
+                            <TextEditingToolbarLayer
+                                annotation={
+                                    editingAnnotation?.type === "text"
+                                        ? editingAnnotation
+                                        : (selectedAnnotation as TextAnnotation)
+                                }
+                                layerPosition={layerPosition}
+                                stagePosition={stagePosition}
+                                stageScale={stageScale}
+                                hidden={isAnnotationDragging}
+                                onChange={handleAnnotationChange}
+                                onColorChange={handleAnnotationColorChange}
+                                onColorPreview={handleAnnotationColorPreview}
+                                onColorOpen={bumpColorInteraction}
+                                onDelete={handleDeleteAnnotation}
+                            />
+                        )}
                     </EditorStage>
 
                     <EditorToolbar
@@ -1479,18 +1511,6 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                         onSetAnnotationColor={setAnnotationColor}
                     />
                 </Box>
-
-                {editingAnnotation?.type === "text" && (
-                    <TextEditingOverlay
-                        annotation={editingAnnotation}
-                        stageRef={stageRef}
-                        layerPosition={layerPosition}
-                        stageScale={stageScale}
-                        stagePosition={stagePosition}
-                        onCommit={handleEditCommit}
-                        onCancel={handleEditCancel}
-                    />
-                )}
 
                 <EditorSidebar
                     sidebarRef={sidebarRef}

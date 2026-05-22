@@ -75,5 +75,13 @@ export const konvaMock = () => ({
 
     Image: () => stub("konva-image"),
     Text: () => stub("konva-text"),
-    Transformer: () => stub("konva-transformer"),
+    Transformer: (props: AnyProps) =>
+        stub("konva-transformer", {
+            "data-visible": str(props["visible"] === false ? false : true),
+        }),
+});
+
+// jsdom has no real Konva runtime, so the portal collapses to a plain div.
+export const konvaUtilsMock = () => ({
+    Html: ({ children }: { children?: ReactNode }) => createElement("div", { "data-testid": "konva-html" }, children),
 });

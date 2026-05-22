@@ -16,6 +16,7 @@ interface EditorAnnotationProps {
     onChange: (id: string, changes: AnnotationChanges) => void;
     onDragStateChange?: (isDragging: boolean) => void;
     onRequestEdit?: (id: string) => void;
+    onExitEdit?: (id: string) => void;
 }
 
 const MIN_DIMENSION = 5;
@@ -384,6 +385,7 @@ export const EditorAnnotation = (props: EditorAnnotationProps) => {
                 onChange={props.onChange}
                 onDragStateChange={props.onDragStateChange}
                 onRequestEdit={props.onRequestEdit}
+                onExitEdit={props.onExitEdit}
             />
         );
     }

@@ -1,10 +1,14 @@
 import { Add } from "@mui/icons-material";
 import { IconButton, Tooltip, Box } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { DEFAULT_ANNOTATION_COLOR } from "../../colors/annotation.colors";
 import { POA_COLORS } from "../../colors/pointsOfAttack.colors";
+
+const keepFocusOnClick = (event: MouseEvent): void => {
+    event.preventDefault();
+};
 
 const PRESET_COLORS = [
     "#000000", // black
@@ -27,6 +31,7 @@ const ColorPresetChip = ({ presetColor, selectedColor, disabled, onClick, toolti
     const isCurrent = selectedColor.toLowerCase() === presetColor.toLowerCase();
     const button = (
         <IconButton
+            onMouseDown={keepFocusOnClick}
             onClick={() => onClick(presetColor)}
             disabled={disabled}
             sx={{ width: "20px", height: "20px", padding: 0 }}
@@ -60,6 +65,7 @@ interface EditorColorPickerProps {
     color: string;
     onChange: (color: string) => void;
     onPreview?: ((color: string) => void) | undefined;
+    onOpen?: (() => void) | undefined;
     disabled?: boolean;
     stacked?: boolean;
 }
@@ -68,6 +74,7 @@ export const EditorColorPicker = ({
     color,
     onChange,
     onPreview,
+    onOpen,
     disabled = false,
     stacked = false,
 }: EditorColorPickerProps) => {
@@ -172,7 +179,11 @@ export const EditorColorPicker = ({
                 {/* span wrapper keeps the Tooltip listenable when the IconButton is disabled */}
                 <Box component="span" sx={{ display: "inline-flex" }}>
                     <IconButton
-                        onClick={() => customColorInputRef.current?.click()}
+                        onMouseDown={keepFocusOnClick}
+                        onClick={() => {
+                            onOpen?.();
+                            customColorInputRef.current?.click();
+                        }}
                         disabled={disabled}
                         sx={{
                             width: "20px",

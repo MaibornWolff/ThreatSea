@@ -1,10 +1,12 @@
-import { Fragment, memo, useRef } from "react";
+import { Fragment, memo, useRef, useState } from "react";
 import { Group, Rect, Text, Transformer } from "react-konva";
+import { Html } from "react-konva-utils";
 import type { KonvaEventObject, Node as KonvaNode } from "konva/lib/Node";
 import type { Rect as KonvaRectNode } from "konva/lib/shapes/Rect";
 import type { Text as KonvaTextNode } from "konva/lib/shapes/Text";
 import type { Transformer as KonvaTransformer } from "konva/lib/shapes/Transformer";
 import { useAnnotationInteraction } from "#application/hooks/use-annotation-interaction.hook.ts";
+import { useContentEditableText } from "#application/hooks/use-content-editable-text.hook.ts";
 import { DEFAULT_TEXT_FONT_SIZE } from "#api/types/system.types.ts";
 import type { AnnotationChanges, TextAnnotation } from "#api/types/system.types.ts";
 
@@ -21,6 +23,7 @@ interface EditorTextAnnotationProps {
     onChange: (id: string, changes: AnnotationChanges) => void;
     onDragStateChange: ((isDragging: boolean) => void) | undefined;
     onRequestEdit: ((id: string) => void) | undefined;
+    onExitEdit?: ((id: string) => void) | undefined;
 }
 
 const EditorTextAnnotationInner = ({
@@ -32,6 +35,7 @@ const EditorTextAnnotationInner = ({
     onChange,
     onDragStateChange,
     onRequestEdit,
+    onExitEdit,
 }: EditorTextAnnotationProps) => {
     const shapeRef = useRef<KonvaNode | null>(null);
     const textRectRef = useRef<KonvaRectNode | null>(null);
@@ -42,15 +46,50 @@ const EditorTextAnnotationInner = ({
         shapeRef.current = node;
     };
 
-    const { isCapturing, isDrawing, setStageCursor, handleClick, handleMouseEnter, handleMouseLeave } =
-        useAnnotationInteraction({
-            annotation,
-            selected,
-            editable,
-            shapeRef,
-            transformerRef,
-            onSelect,
-        });
+    const [isDragging, setIsDragging] = useState(false);
+    const { isCapturing, isDrawing, setStageCursor, handleMouseEnter, handleMouseLeave } = useAnnotationInteraction({
+        annotation,
+        selected,
+        editable,
+        shapeRef,
+        transformerRef,
+        onSelect,
+    });
+
+    const contentEditable = useContentEditableText({
+        text: annotation.text ?? "",
+        editing,
+        onTextChange: (text) => onChange(annotation.id, { type: "text", text }),
+        onExit: () => onExitEdit?.(annotation.id),
+    });
+
+    // First click selects, second click on the same text enters edit mode.
+    const handleClick = (event: KonvaEventObject<MouseEvent>): void => {
+        if (event.evt.button !== 0) {
+            return;
+        }
+        if (isDrawing) {
+            return;
+        }
+        event.cancelBubble = true;
+        event.evt.preventDefault();
+        if (!selected) {
+            onSelect(annotation.id);
+            return;
+        }
+        if (!editing) {
+            onRequestEdit?.(annotation.id);
+        }
+    };
+
+    const handleDblClick = (event: KonvaEventObject<MouseEvent | TouchEvent>): void => {
+        if (!editable) {
+            return;
+        }
+        event.cancelBubble = true;
+        event.evt.preventDefault();
+        onRequestEdit?.(annotation.id);
+    };
 
     const textFontStyle = (() => {
         const parts: string[] = [];
@@ -63,42 +102,38 @@ const EditorTextAnnotationInner = ({
         return parts.length > 0 ? parts.join(" ") : "normal";
     })();
 
-    const handleDblClick = (event: KonvaEventObject<MouseEvent | TouchEvent>): void => {
-        if (!editable) {
-            return;
-        }
-        event.cancelBubble = true;
-        event.evt.preventDefault();
-        onRequestEdit?.(annotation.id);
-    };
-
     const handleDragStart = (event: KonvaEventObject<DragEvent>): void => {
         setStageCursor(event, "move");
+        setIsDragging(true);
         onDragStateChange?.(true);
     };
 
     const handleDragEnd = (event: KonvaEventObject<DragEvent>): void => {
         setStageCursor(event, "default");
+        setIsDragging(false);
         onSelect(annotation.id, { openSidebar: false });
         onChange(annotation.id, { type: "text", x: event.target.x(), y: event.target.y() });
         onDragStateChange?.(false);
     };
 
     const handleTransform = (event: KonvaEventObject<Event>): void => {
+        // Apply scale to width/height and reset to 1 so it doesn't accumulate.
         const node = event.target;
         const scaleX = node.scaleX();
         const scaleY = node.scaleY();
         const rect = textRectRef.current;
-        const text = textNodeRef.current;
-        if (!rect || !text) {
+        if (!rect) {
             return;
         }
         const newWidth = Math.max(MIN_DIMENSION, rect.width() * scaleX);
         const newHeight = Math.max(MIN_DIMENSION, rect.height() * scaleY);
         rect.width(newWidth);
         rect.height(newHeight);
-        text.width(newWidth);
-        text.height(newHeight);
+        const text = textNodeRef.current;
+        if (text) {
+            text.width(newWidth);
+            text.height(newHeight);
+        }
         node.scaleX(1);
         node.scaleY(1);
     };
@@ -120,7 +155,7 @@ const EditorTextAnnotationInner = ({
         });
     };
 
-    const showTransformer = selected && editable && !isCapturing && !editing;
+    const showTransformer = selected && editable && !isCapturing && !isDragging;
 
     return (
         <Fragment>
@@ -129,9 +164,8 @@ const EditorTextAnnotationInner = ({
                 x={annotation.x}
                 y={annotation.y}
                 rotation={annotation.rotation ?? 0}
-                visible={!editing}
                 listening={editable}
-                draggable={editable && !isDrawing}
+                draggable={editable && !isDrawing && !editing}
                 onClick={handleClick}
                 onDblClick={handleDblClick}
                 onDblTap={handleDblClick}
@@ -142,14 +176,13 @@ const EditorTextAnnotationInner = ({
                 onTransform={handleTransform}
                 onTransformEnd={handleTransformEnd}
             >
-                {/* Full-box hit target — Konva's <Text> hit-tests glyphs only, so clicks in empty space inside the box would miss. */}
                 <Rect
                     ref={textRectRef}
                     width={annotation.width ?? 0}
                     height={annotation.height ?? 0}
                     fill="rgba(0,0,0,0)"
                     fillEnabled
-                    listening
+                    listening={!editing}
                 />
                 <Text
                     ref={textNodeRef}
@@ -166,21 +199,57 @@ const EditorTextAnnotationInner = ({
                     padding={TEXT_PADDING}
                     wrap="word"
                     listening={false}
+                    visible={isCapturing}
                 />
+                <Html
+                    groupProps={{ x: 0, y: 0 }}
+                    // Outer wrapper passes clicks through to Konva when not editing;
+                    // becomes live only during edit so the contentEditable can type.
+                    divProps={{ style: { pointerEvents: editing ? "auto" : "none" } }}
+                >
+                    <div
+                        ref={contentEditable.setRef}
+                        contentEditable={editing}
+                        suppressContentEditableWarning
+                        onInput={contentEditable.onInput}
+                        onBlur={contentEditable.onBlur}
+                        onKeyDown={contentEditable.onKeyDown}
+                        spellCheck={false}
+                        style={{
+                            width: `${annotation.width ?? 0}px`,
+                            height: `${annotation.height ?? 0}px`,
+                            fontSize: `${annotation.fontSize ?? DEFAULT_TEXT_FONT_SIZE}px`,
+                            fontFamily: TEXT_FONT_FAMILY,
+                            fontStyle: annotation.italic ? "italic" : "normal",
+                            fontWeight: annotation.bold ? "bold" : "normal",
+                            textDecoration: annotation.underline ? "underline" : "none",
+                            color: annotation.stroke,
+                            padding: `${TEXT_PADDING}px`,
+                            boxSizing: "border-box",
+                            outline: "none",
+                            whiteSpace: "pre-wrap",
+                            wordBreak: "break-word",
+                            lineHeight: 1.2,
+                            cursor: editing ? "text" : "default",
+                            userSelect: editing ? "text" : "none",
+                            overflow: "hidden",
+                        }}
+                    />
+                </Html>
             </Group>
-            {showTransformer && (
-                <Transformer
-                    ref={transformerRef}
-                    flipEnabled={false}
-                    rotateEnabled={true}
-                    boundBoxFunc={(oldBox, newBox) => {
-                        if (Math.abs(newBox.width) < MIN_DIMENSION || Math.abs(newBox.height) < MIN_DIMENSION) {
-                            return oldBox;
-                        }
-                        return newBox;
-                    }}
-                />
-            )}
+            <Transformer
+                ref={transformerRef}
+                visible={showTransformer}
+                flipEnabled={false}
+                rotateEnabled={true}
+                rotateAnchorOffset={20}
+                boundBoxFunc={(oldBox, newBox) => {
+                    if (Math.abs(newBox.width) < MIN_DIMENSION || Math.abs(newBox.height) < MIN_DIMENSION) {
+                        return oldBox;
+                    }
+                    return newBox;
+                }}
+            />
         </Fragment>
     );
 };
