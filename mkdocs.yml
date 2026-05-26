@@ -9,5 +9,6 @@ nav:
   - Developer Setup: Developer Setup.md
 theme:
   name: material
+  font: false
   palette:
     - scheme: slate

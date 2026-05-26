@@ -165,6 +165,9 @@ importers:
       '@emotion/styled':
         specifier: 11.14.1
         version: 11.14.1(@emotion/react@11.14.0(@types/react@19.2.15)(react@19.2.6))(@types/react@19.2.15)(react@19.2.6)
+      '@fontsource/poppins':
+        specifier: 5.2.7
+        version: 5.2.7
       '@mui/icons-material':
         specifier: 9.0.1
         version: 9.0.1(@mui/material@9.0.1(@emotion/react@11.14.0(@types/react@19.2.15)(react@19.2.6))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.15)(react@19.2.6))(@types/react@19.2.15)(react@19.2.6))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@types/react@19.2.15)(react@19.2.6)
@@ -978,6 +981,9 @@ packages:
 
   '@fast-csv/parse@4.3.6':
     resolution: {integrity: sha512-uRsLYksqpbDmWaSmzvJcuApSEe38+6NQZBUsuAyMZKqHxH0g1wcJgsKUvN3WC8tewaqFjBMMGrkHmC+T7k8LvA==}
+
+  '@fontsource/poppins@5.2.7':
+    resolution: {integrity: sha512-6uQyPmseo4FgI97WIhA4yWRlNaoLk4vSDK/PyRwdqqZb5zAEuc+Kunt8JTMcsHYUEGYBtN15SNkMajMdqUSUmg==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -5545,6 +5551,8 @@ snapshots:
       lodash.isnil: 4.0.0
       lodash.isundefined: 3.0.1
       lodash.uniq: 4.5.0
+
+  '@fontsource/poppins@5.2.7': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
