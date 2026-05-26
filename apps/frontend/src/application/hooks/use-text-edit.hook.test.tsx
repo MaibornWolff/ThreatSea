@@ -1,5 +1,4 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import { useState } from "react";
 import { useTextEdit } from "./use-text-edit.hook";
 
 interface TestComponentProps {
@@ -9,21 +8,18 @@ interface TestComponentProps {
     onExit?: () => void;
 }
 
-const TestComponent = ({ initialText, editing, onTextChange, onExit = vi.fn() }: TestComponentProps) => {
-    const [text, setText] = useState(initialText);
-    const handleTextChange = (next: string): void => {
-        setText(next);
-        onTextChange?.(next);
-    };
+// textarea is uncontrolled (defaultValue), onChange pipes
+// keystrokes to the hook. Matches the official Konva docs pattern.
+const TestComponent = ({ initialText, editing, onTextChange = vi.fn(), onExit = vi.fn() }: TestComponentProps) => {
     const { ref, onChange, onBlur, onKeyDown } = useTextEdit({
         editing,
-        onTextChange: handleTextChange,
+        onTextChange,
         onExit,
     });
     return (
         <textarea
             ref={ref}
-            value={text}
+            defaultValue={initialText}
             readOnly={!editing}
             onChange={onChange}
             onBlur={onBlur}

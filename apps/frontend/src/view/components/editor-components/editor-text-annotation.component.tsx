@@ -223,7 +223,9 @@ const EditorTextAnnotationInner = ({
                 >
                     <textarea
                         ref={textEdit.ref}
-                        value={annotation.text ?? ""}
+                        // Uncontrolled: Re-applying value on every keystroke
+                        // would let the browser snap the caret to end
+                        defaultValue={annotation.text ?? ""}
                         readOnly={!editing}
                         onChange={textEdit.onChange}
                         onBlur={textEdit.onBlur}
