@@ -6,7 +6,7 @@ import type { Rect as KonvaRectNode } from "konva/lib/shapes/Rect";
 import type { Text as KonvaTextNode } from "konva/lib/shapes/Text";
 import type { Transformer as KonvaTransformer } from "konva/lib/shapes/Transformer";
 import { useAnnotationInteraction } from "#application/hooks/use-annotation-interaction.hook.ts";
-import { useContentEditableText } from "#application/hooks/use-content-editable-text.hook.ts";
+import { useTextEdit } from "#application/hooks/use-text-edit.hook.ts";
 import { DEFAULT_TEXT_FONT_SIZE } from "#api/types/system.types.ts";
 import type { AnnotationChanges, TextAnnotation } from "#api/types/system.types.ts";
 
@@ -65,8 +65,7 @@ const EditorTextAnnotationInner = ({
         onSelect,
     });
 
-    const contentEditable = useContentEditableText({
-        text: annotation.text ?? "",
+    const textEdit = useTextEdit({
         editing,
         onTextChange: (text) => onChange(annotation.id, { type: "text", text }),
         onExit: () => onExitEdit?.(annotation.id),
@@ -222,15 +221,17 @@ const EditorTextAnnotationInner = ({
                         },
                     }}
                 >
-                    <div
-                        ref={contentEditable.setRef}
-                        contentEditable={editing}
-                        suppressContentEditableWarning
-                        onInput={contentEditable.onInput}
-                        onBlur={contentEditable.onBlur}
-                        onKeyDown={contentEditable.onKeyDown}
+                    <textarea
+                        ref={textEdit.ref}
+                        value={annotation.text ?? ""}
+                        readOnly={!editing}
+                        onChange={textEdit.onChange}
+                        onBlur={textEdit.onBlur}
+                        onKeyDown={textEdit.onKeyDown}
                         spellCheck={false}
                         style={{
+                            display: "block",
+                            verticalAlign: "top",
                             width: `${(annotation.width ?? 0) * stageScale}px`,
                             height: `${(annotation.height ?? 0) * stageScale}px`,
                             fontSize: `${(annotation.fontSize ?? DEFAULT_TEXT_FONT_SIZE) * stageScale}px`,
@@ -240,10 +241,12 @@ const EditorTextAnnotationInner = ({
                             textDecoration: annotation.underline ? "underline" : "none",
                             color: annotation.stroke,
                             padding: `${TEXT_PADDING * stageScale}px`,
+                            margin: 0,
                             boxSizing: "border-box",
+                            border: "none",
                             outline: "none",
-                            whiteSpace: "pre-wrap",
-                            wordBreak: "break-word",
+                            background: "transparent",
+                            resize: "none",
                             lineHeight: 1.2,
                             WebkitFontSmoothing: "antialiased",
                             MozOsxFontSmoothing: "grayscale",
