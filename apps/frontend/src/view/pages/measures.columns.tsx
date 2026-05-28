@@ -103,7 +103,9 @@ export const createMeasuresColumns = ({
                 toggleFilterExpanded
             ),
         valueGetter: (value: Date | null | undefined) => {
-            if (!value) return tCommon("notScheduledYet");
+            if (!value) {
+                return tCommon("notScheduledYet");
+            }
             const date = value instanceof Date ? value : new Date(value);
             return date.toISOString().split("T")[0];
         },
