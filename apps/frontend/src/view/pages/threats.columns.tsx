@@ -1,5 +1,5 @@
 import { Check, Clear, ContentCopy, Delete, ExpandMore } from "@mui/icons-material";
-import { Box, TextField, Typography, IconButton as MuiIconButton, Collapse } from "@mui/material";
+import { Box, Collapse, IconButton as MuiIconButton, MenuItem, Select, TextField, Typography } from "@mui/material";
 import { type GridColDef, type GridRenderCellParams } from "@mui/x-data-grid";
 import type { TFunction } from "i18next";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
@@ -262,7 +262,7 @@ export const createThreatsColumns = ({
     {
         field: "probability",
         headerName: t("probability"),
-        width: 160,
+        width: 130,
         align: "center",
         headerAlign: "center",
         renderHeader: () => (
@@ -385,18 +385,48 @@ export const createThreatsColumns = ({
     {
         field: "doneEditing",
         headerName: t("edited"),
-        width: 150,
+        width: 180,
         align: "center",
         headerAlign: "center",
-        sortable: false,
-        filterable: false,
         renderHeader: () => (
             <Box sx={{ width: "100%" }}>
-                <Typography sx={{ fontWeight: "bold", fontSize: "0.875rem", textAlign: "center" }}>
-                    {t("edited")}
-                </Typography>
+                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 0.5 }}>
+                    <Typography sx={{ fontWeight: "bold", fontSize: "0.875rem", textAlign: "center" }}>
+                        {t("edited")}
+                    </Typography>
+                    <MuiIconButton
+                        size="small"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFilterExpanded("doneEditing");
+                        }}
+                        sx={{
+                            ml: 0.5,
+                            padding: 0.25,
+                            transform: expandedFilters["doneEditing"] ? "rotate(180deg)" : "rotate(0deg)",
+                            transition: "transform 0.2s",
+                        }}
+                    >
+                        <ExpandMore sx={{ fontSize: 18 }} />
+                    </MuiIconButton>
+                </Box>
+                <Collapse in={expandedFilters["doneEditing"] ?? false} timeout={200}>
+                    <Select
+                        size="small"
+                        value={columnFilters["doneEditing"] || ""}
+                        onChange={(e) => handleFilterChange("doneEditing", e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
+                        displayEmpty
+                        sx={{ width: "100%" }}
+                    >
+                        <MenuItem value="">{t("filterAll")}</MenuItem>
+                        <MenuItem value="edited">{t("edited")}</MenuItem>
+                        <MenuItem value="notEdited">{t("notEdited")}</MenuItem>
+                    </Select>
+                </Collapse>
             </Box>
         ),
+        valueGetter: (_value, row) => (row.doneEditing ? "edited" : "notEdited"),
         renderCell: (params: GridRenderCellParams<ThreatListItem>) => (
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
                 {params.row.doneEditing ? <Check sx={{ fontSize: 18 }} /> : <Clear sx={{ fontSize: 18 }} />}

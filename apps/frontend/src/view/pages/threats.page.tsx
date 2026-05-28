@@ -215,7 +215,7 @@ const ThreatsPageBody = ({ project }: { project: ExtendedProject }) => {
                 .filter(([_, value]) => value.trim() !== "")
                 .map(([field, value]) => ({
                     field,
-                    operator: "contains",
+                    operator: field === "doneEditing" ? "equals" : "contains",
                     value,
                 })),
         }),
