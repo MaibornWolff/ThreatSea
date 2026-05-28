@@ -85,7 +85,8 @@ export const createAssetsColumns = ({
     {
         field: "confidentiality",
         headerName: t("confidentiality"),
-        width: 160,
+        flex: 1,
+        minWidth: 160,
         align: "center",
         headerAlign: "center",
         type: "number",
@@ -102,7 +103,8 @@ export const createAssetsColumns = ({
     {
         field: "integrity",
         headerName: t("integrity"),
-        width: 160,
+        flex: 1,
+        minWidth: 160,
         align: "center",
         headerAlign: "center",
         type: "number",
@@ -119,7 +121,8 @@ export const createAssetsColumns = ({
     {
         field: "availability",
         headerName: t("availability"),
-        width: 160,
+        flex: 1,
+        minWidth: 160,
         align: "center",
         headerAlign: "center",
         type: "number",
@@ -136,7 +139,8 @@ export const createAssetsColumns = ({
     {
         field: "createdAt",
         headerName: t("creationDate"),
-        width: 180,
+        flex: 1,
+        minWidth: 180,
         align: "center",
         headerAlign: "center",
         renderHeader: () =>
