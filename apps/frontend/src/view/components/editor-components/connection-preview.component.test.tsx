@@ -5,12 +5,6 @@ import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { createSystemComponent } from "#test-utils/builders.ts";
 import { ConnectionPreview } from "./connection-preview.component";
 
-vi.mock("react-konva", () => ({
-    Line: (props: Record<string, unknown>) => (
-        <div data-testid="konva-line" data-stroke={props["stroke"]} data-points={JSON.stringify(props["points"])} />
-    ),
-}));
-
 describe("ConnectionPreview", () => {
     it("renders with blue stroke when component is not USERS type", () => {
         render(

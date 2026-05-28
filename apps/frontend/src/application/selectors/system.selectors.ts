@@ -1,11 +1,13 @@
 import { createSelector } from "@reduxjs/toolkit";
 import type { RootState } from "#application/store.ts";
 import type { SystemState } from "#application/reducers/system.reducer.ts";
+import { systemAnnotationsAdapter } from "../adapters/system-annotations.adapter";
 import { systemComponentsAdapter } from "../adapters/system-components.adapter";
 import { systemConnectionsAdapter } from "../adapters/system-connections.adapter";
 import { systemConnectionPointsAdapter, type SystemConnectionPoint } from "../adapters/system-connection-point.adapter";
 import { pointsOfAttackAdapter } from "../adapters/points-of-attack.adapter";
 import type {
+    Annotation,
     AugmentedSystemComponent,
     SystemComponent,
     SystemConnection,
@@ -24,6 +26,7 @@ const selectComponentId = (_state: RootState, componentId: string | null | undef
 const selectConnectionId = (_state: RootState, connectionId: string | null | undefined) => connectionId;
 const selectPointOfAttackId = (_state: RootState, pointOfAttackId: string | null | undefined) => pointOfAttackId;
 const selectConnectionPointId = (_state: RootState, connectionPointId: string | null | undefined) => connectionPointId;
+const selectAnnotationId = (_state: RootState, annotationId: string | null | undefined) => annotationId;
 
 const { selectAll: selectAllComponents, selectEntities: selectComponentEntities } =
     systemComponentsAdapter.getSelectors((state: RootState) => selectSystemState(state).components);
@@ -37,6 +40,9 @@ const { selectAll: selectAllPointsOfAttack } = pointsOfAttackAdapter.getSelector
 
 const { selectAll: selectAllConnectionPoints, selectEntities: selectConnectionPointEntities } =
     systemConnectionPointsAdapter.getSelectors((state: RootState) => selectSystemState(state).connectionPoints);
+
+const { selectAll: selectAllAnnotations, selectEntities: selectAnnotationEntities } =
+    systemAnnotationsAdapter.getSelectors((state: RootState) => selectSystemState(state).annotations);
 
 export const systemSelectors = {
     /**
@@ -229,6 +235,46 @@ export const systemSelectors = {
             }
 
             return pointsOfAttack.filter((pointOfAttack) => pointOfAttack.componentId === componentId);
+        }
+    ),
+
+    /**
+     * Gets all annotations of the current project.
+     * @returns The annotations as an array.
+     */
+    selectAnnotations: createSelector(
+        [selectAllAnnotations, selectProjectId],
+        (annotations, projectId): Annotation[] => {
+            if (projectId == null) {
+                return [];
+            }
+
+            return annotations.filter((annotation) => annotation.projectId === projectId);
+        }
+    ),
+
+    /**
+     * Gets the annotation with the specified id.
+     * @returns The annotation, or undefined if not found.
+     */
+    selectAnnotation: createSelector(
+        [selectAnnotationEntities, selectAnnotationId],
+        (annotationEntities, annotationId): Annotation | undefined => {
+            if (!annotationId) {
+                return undefined;
+            }
+
+            return annotationEntities[annotationId];
+        }
+    ),
+
+    selectDefaultAnnotationColor: createSelector(
+        [selectSystemState, selectProjectId],
+        (system, projectId): string | null => {
+            if (projectId == null) {
+                return null;
+            }
+            return system.defaultAnnotationColorByProject[projectId] ?? null;
         }
     ),
 };

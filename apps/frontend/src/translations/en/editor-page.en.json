@@ -6,7 +6,19 @@
     "riskBtn": "Risk"
   },
   "canvas": {
-    "exportSystemImage": "Export System Image"
+    "centerEditor": "Center editor",
+    "exportSystemImage": "Export System Image",
+    "annotation": {
+      "shapes": "Shapes",
+      "rectangle": "Rectangle",
+      "circle": "Circle",
+      "line": "Line",
+      "arrow": "Arrow",
+      "freehand": "Pencil",
+      "text": "Text",
+      "color": "Pick color",
+      "defaultColor": "Default color"
+    }
   },
   "connection": "Connection",
   "autoSave": {
@@ -35,6 +47,16 @@
     },
     "connected_components": {
       "title": "Connected Components"
+    },
+    "annotation": {
+      "title": "Annotation",
+      "stroke": "Color",
+      "delete": "Delete annotation",
+      "format": "Format",
+      "bold": "Bold",
+      "italic": "Italic",
+      "underline": "Underline",
+      "fontSize": "Font size"
     }
   },
   "contextMenu": {

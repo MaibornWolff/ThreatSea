@@ -2,13 +2,12 @@ import { type MockInstance } from "vitest";
 import { SystemActions } from "../../actions/system.actions";
 import { SystemAPI } from "#api/system.api.ts";
 import { createStore } from "../../store";
-import projectsReducer from "../../reducers/projects.reducer";
+import projectsReducer, { type ProjectsState } from "../../reducers/projects.reducer";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
-import { createProject } from "#test-utils/builders.ts";
 
 const buildProjectsState = (role: USER_ROLES) => {
     const base = projectsReducer(undefined, { type: "@@INIT" });
-    return { ...base, current: createProject({ role }) };
+    return { ...base, current: { role } as ProjectsState["current"] };
 };
 
 describe("system.middleware — handleSaveSystem", () => {
@@ -115,5 +114,83 @@ describe("system.middleware — getSystem awaits in-flight save", () => {
 
         settle(false);
         await vi.waitFor(() => expect(getSystemSpy).toHaveBeenCalled());
+    });
+});
+
+describe("system.middleware — getSystem hydrates the per-project default annotation color", () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    it("does not touch project A's saved color when project B (with no saved data) is loaded", async () => {
+        const store = createStore({ projects: buildProjectsState(USER_ROLES.EDITOR) });
+        // Simulate: user customized project A
+        store.dispatch(SystemActions.setDefaultAnnotationColor({ projectId: 1, color: "#ff00aa" }));
+        expect(store.getState().system.defaultAnnotationColorByProject).toEqual({ 1: "#ff00aa" });
+
+        // User opens project B — fresh project, backend has no system data yet
+        vi.spyOn(SystemAPI, "getSystem").mockResolvedValue({
+            id: 2,
+            projectId: 2,
+            data: null,
+            image: null,
+        });
+        store.dispatch(SystemActions.getSystem({ projectId: 2 }));
+
+        await vi.waitFor(() =>
+            expect(store.getState().system.defaultAnnotationColorByProject).toEqual({ 1: "#ff00aa" })
+        );
+    });
+
+    it("loads the saved color into the entry for the new project when one is present in the data", async () => {
+        const store = createStore({ projects: buildProjectsState(USER_ROLES.EDITOR) });
+        store.dispatch(SystemActions.setDefaultAnnotationColor({ projectId: 1, color: "#ff00aa" }));
+
+        vi.spyOn(SystemAPI, "getSystem").mockResolvedValue({
+            id: 3,
+            projectId: 3,
+            data: {
+                components: [],
+                connections: [],
+                connectionPoints: [],
+                pointsOfAttack: [],
+                annotations: [],
+                defaultAnnotationColor: "#00ff00",
+                lastAutoSaveDate: "",
+            },
+            image: null,
+        });
+        store.dispatch(SystemActions.getSystem({ projectId: 3 }));
+
+        await vi.waitFor(() =>
+            expect(store.getState().system.defaultAnnotationColorByProject).toEqual({
+                1: "#ff00aa",
+                3: "#00ff00",
+            })
+        );
+    });
+
+    it("leaves the entry unset when the loaded data has no defaultAnnotationColor field (legacy data)", async () => {
+        const store = createStore({ projects: buildProjectsState(USER_ROLES.EDITOR) });
+        store.dispatch(SystemActions.setDefaultAnnotationColor({ projectId: 1, color: "#ff00aa" }));
+
+        vi.spyOn(SystemAPI, "getSystem").mockResolvedValue({
+            id: 4,
+            projectId: 4,
+            data: {
+                components: [],
+                connections: [],
+                connectionPoints: [],
+                pointsOfAttack: [],
+                annotations: [],
+                lastAutoSaveDate: "",
+            },
+            image: null,
+        });
+        store.dispatch(SystemActions.getSystem({ projectId: 4 }));
+
+        await vi.waitFor(() =>
+            expect(store.getState().system.defaultAnnotationColorByProject).toEqual({ 1: "#ff00aa" })
+        );
     });
 });

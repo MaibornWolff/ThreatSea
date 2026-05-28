@@ -19,8 +19,86 @@ export interface SystemData {
     components: Component[];
     pointsOfAttack: PointOfAttack[];
     connectionPoints: ConnectionPoint[];
+    annotations?: Annotation[];
+    defaultAnnotationColor?: string | null;
     lastAutoSaveDate: string;
 }
+
+export type AnnotationType = "rect" | "circle" | "line" | "arrow" | "freehand" | "text";
+
+export const DEFAULT_TEXT_FONT_SIZE = 16;
+
+interface BaseAnnotation {
+    id: string;
+    projectId: number;
+    x: number;
+    y: number;
+    rotation?: number;
+    stroke: string;
+    strokeWidth: number;
+    fill?: string;
+}
+
+export interface RectAnnotation extends BaseAnnotation {
+    type: "rect";
+    width: number;
+    height: number;
+}
+
+export interface CircleAnnotation extends BaseAnnotation {
+    type: "circle";
+    radius: number;
+}
+
+export interface LineAnnotation extends BaseAnnotation {
+    type: "line";
+    points: number[];
+}
+
+export interface ArrowAnnotation extends BaseAnnotation {
+    type: "arrow";
+    points: number[];
+}
+
+export interface FreehandAnnotation extends BaseAnnotation {
+    type: "freehand";
+    points: number[];
+}
+
+export interface TextAnnotation extends BaseAnnotation {
+    type: "text";
+    width: number;
+    height: number;
+    text: string;
+    fontSize?: number;
+    bold?: boolean;
+    italic?: boolean;
+    underline?: boolean;
+}
+
+export type Annotation =
+    | RectAnnotation
+    | CircleAnnotation
+    | LineAnnotation
+    | ArrowAnnotation
+    | FreehandAnnotation
+    | TextAnnotation;
+
+export type AnnotationInput =
+    | Omit<RectAnnotation, "id" | "projectId">
+    | Omit<CircleAnnotation, "id" | "projectId">
+    | Omit<LineAnnotation, "id" | "projectId">
+    | Omit<ArrowAnnotation, "id" | "projectId">
+    | Omit<FreehandAnnotation, "id" | "projectId">
+    | Omit<TextAnnotation, "id" | "projectId">;
+
+export type AnnotationChanges =
+    | ({ type: "rect" } & Partial<Omit<RectAnnotation, "type" | "id" | "projectId">>)
+    | ({ type: "circle" } & Partial<Omit<CircleAnnotation, "type" | "id" | "projectId">>)
+    | ({ type: "line" } & Partial<Omit<LineAnnotation, "type" | "id" | "projectId">>)
+    | ({ type: "arrow" } & Partial<Omit<ArrowAnnotation, "type" | "id" | "projectId">>)
+    | ({ type: "freehand" } & Partial<Omit<FreehandAnnotation, "type" | "id" | "projectId">>)
+    | ({ type: "text" } & Partial<Omit<TextAnnotation, "type" | "id" | "projectId">>);
 
 export interface Connection {
     id: string;

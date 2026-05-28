@@ -21,6 +21,7 @@ import type { GroupConfig } from "konva/lib/Group";
 import { AnchorOrientation, type AugmentedSystemComponent, type SystemPointOfAttack } from "#api/types/system.types.ts";
 import type { EditorConnectionAnchor } from "#application/hooks/use-editor.hook.ts";
 import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
+import { editorSelectors } from "#application/selectors/editor.selectors.ts";
 
 const COLORS = {
     normal: "#ffffffAA",
@@ -164,6 +165,9 @@ export const SystemComponent = ({
     const nameLength = Math.max(width - 20, name.length * 6 + 35);
 
     const handleMouseEnter = () => {
+        if (annotationTool !== null) {
+            return;
+        }
         setHover(true);
     };
 
@@ -172,18 +176,27 @@ export const SystemComponent = ({
     };
 
     const handleMouseEnterImage = () => {
+        if (annotationTool !== null) {
+            return;
+        }
         if (stageRef && stageRef.current) {
             stageRef.current.content.style.cursor = "pointer";
         }
     };
 
     const handleMouseOutImage = () => {
+        if (annotationTool !== null) {
+            return;
+        }
         if (stageRef && stageRef.current) {
             stageRef.current.content.style.cursor = "default";
         }
     };
 
     const handleSmallIconMouseEnter = () => {
+        if (annotationTool !== null) {
+            return;
+        }
         setIsSmallIconHovered(true);
         if (stageRef && stageRef.current) {
             stageRef.current.content.style.cursor = "pointer";
@@ -192,6 +205,9 @@ export const SystemComponent = ({
 
     const handleSmallIconMouseLeave = () => {
         setIsSmallIconHovered(false);
+        if (annotationTool !== null) {
+            return;
+        }
         if (stageRef && stageRef.current) {
             stageRef.current.content.style.cursor = "default";
         }
@@ -199,6 +215,7 @@ export const SystemComponent = ({
 
     const [hover, setHover] = useState(false);
     const isCapturing = useAppSelector((state) => state.editor.isCapturing);
+    const annotationTool = useAppSelector(editorSelectors.selectAnnotationTool);
 
     // Hide selection / hover styling while a screenshot is being captured.
     const visualSelected = selected && !isCapturing;
@@ -211,7 +228,7 @@ export const SystemComponent = ({
               onMouseOver: handleMouseEnter,
               onMouseOut: handleMouseOut,
               hover: visualHover,
-              draggable: true,
+              draggable: annotationTool === null,
           }
         : {
               onMouseOver: null,
@@ -394,10 +411,15 @@ const ConnectorGroup = ({
         return isPrimaryComponent ? Boolean(hover) && shouldDisplayConnectors : shouldDisplayConnectors;
     }, [hover, shouldDisplayConnectors, isPrimaryComponent, isDrawing, sourceType, componentType]);
 
+    const annotationToolForAnchor = useAppSelector(editorSelectors.selectAnnotationTool);
+
     const handleSelectAnchor: (event: KonvaEventObject<MouseEvent>, anchor: AnchorOrientation) => void = (
         event,
         anchor
     ) => {
+        if (annotationToolForAnchor !== null) {
+            return;
+        }
         if (isPrimaryComponent) {
             setDrawingState({ isDrawing: true, sourceType: "connector" });
         }
@@ -487,8 +509,12 @@ const Connector = ({
 
     const [hover, setHover] = useState(false);
     const selected = selectedAnchor === anchor;
+    const annotationTool = useAppSelector(editorSelectors.selectAnnotationTool);
 
     const onMouseEnter = () => {
+        if (annotationTool !== null) {
+            return;
+        }
         setHover(true);
         if (stageRef.current) {
             stageRef.current.content.style.cursor = "pointer";
@@ -497,6 +523,9 @@ const Connector = ({
 
     const onMouseLeave = () => {
         setHover(false);
+        if (annotationTool !== null) {
+            return;
+        }
         if (stageRef.current) {
             stageRef.current.content.style.cursor = "default";
         }

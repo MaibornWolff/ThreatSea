@@ -15,8 +15,68 @@ export interface SystemData {
     components: Component[];
     pointsOfAttack: PointOfAttack[];
     connectionPoints: ConnectionPoint[];
+    annotations?: Annotation[];
+    defaultAnnotationColor?: string | null;
     lastAutoSaveDate: string;
 }
+
+export type AnnotationType = "rect" | "circle" | "line" | "arrow" | "freehand" | "text";
+
+interface BaseAnnotation {
+    id: string;
+    projectId: number;
+    x: number;
+    y: number;
+    rotation?: number;
+    stroke: string;
+    strokeWidth: number;
+    fill?: string;
+}
+
+export interface RectAnnotation extends BaseAnnotation {
+    type: "rect";
+    width: number;
+    height: number;
+}
+
+export interface CircleAnnotation extends BaseAnnotation {
+    type: "circle";
+    radius: number;
+}
+
+export interface LineAnnotation extends BaseAnnotation {
+    type: "line";
+    points: number[];
+}
+
+export interface ArrowAnnotation extends BaseAnnotation {
+    type: "arrow";
+    points: number[];
+}
+
+export interface FreehandAnnotation extends BaseAnnotation {
+    type: "freehand";
+    points: number[];
+}
+
+export interface TextAnnotation extends BaseAnnotation {
+    type: "text";
+    width: number;
+    height: number;
+    text: string;
+    fontSize?: number;
+    bold?: boolean;
+    italic?: boolean;
+    underline?: boolean;
+}
+
+export type Annotation =
+    | RectAnnotation
+    | CircleAnnotation
+    | LineAnnotation
+    | ArrowAnnotation
+    | FreehandAnnotation
+    | TextAnnotation;
 
 export interface Connection {
     id: string;

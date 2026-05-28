@@ -63,12 +63,6 @@ vi.mock("./component-dialog.page", () => ({
     default: () => <div data-testid="component-dialog-page" />,
 }));
 
-vi.mock("react-konva", () => ({
-    Group: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
-    Layer: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
-    Line: () => null,
-}));
-
 vi.mock("../components/editor-components/contexts/LineDrawingProvider", () => ({
     LineDrawingProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));

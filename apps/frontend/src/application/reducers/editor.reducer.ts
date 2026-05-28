@@ -2,6 +2,7 @@ import { createReducer } from "@reduxjs/toolkit";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
 import { EditorActions } from "../actions/editor.actions";
+import { SystemActions } from "../actions/system.actions";
 import { editorMousePointersAdapter } from "../adapters/editor-mouse-pointers.adapter";
 import { editorComponentConnectionLinesAdapter } from "../adapters/editor-component-connection-lines.adapter";
 import { editorComponentTypeAdapter, type EditorComponentType } from "../adapters/editor-component-type.adapter";
@@ -10,7 +11,7 @@ import databaseImg from "../../images/database.png";
 import desktopImg from "../../images/desktop.png";
 import userImg from "../../images/user.png";
 import communicationInfrastructureImg from "../../images/communication-infrastructure.png";
-import type { AnchorOrientation, Coordinate } from "#api/types/system.types.ts";
+import type { AnchorOrientation, AnnotationType, Coordinate } from "#api/types/system.types.ts";
 
 export type EditorEntityId = string | number;
 
@@ -55,6 +56,8 @@ export interface EditorState {
     componentTypes: ComponentTypesState;
     lastCenteredProjectId: number | null;
     isCapturing: boolean;
+    selectedAnnotation: string | null;
+    annotationTool: AnnotationType | null;
 }
 
 const standardComponentTypes: Record<STANDARD_COMPONENT_TYPES, EditorComponentType> = {
@@ -142,11 +145,14 @@ const defaultState: EditorState = {
     componentTypes: componentTypesInitialState,
     lastCenteredProjectId: null,
     isCapturing: false,
+    selectedAnnotation: null,
+    annotationTool: null,
 };
 
 const editorReducer = createReducer(defaultState, (builder) => {
     builder.addCase(EditorActions.selectComponent, (state, action) => {
         state.selectedComponent = action.payload;
+        state.annotationTool = null;
     });
 
     builder.addCase(EditorActions.deselectComponent, (state) => {
@@ -155,6 +161,7 @@ const editorReducer = createReducer(defaultState, (builder) => {
 
     builder.addCase(EditorActions.setConnection, (state, action) => {
         state.connection = action.payload;
+        state.annotationTool = null;
     });
 
     builder.addCase(EditorActions.resetConnection, (state) => {
@@ -163,6 +170,7 @@ const editorReducer = createReducer(defaultState, (builder) => {
 
     builder.addCase(EditorActions.selectConnection, (state, action) => {
         state.selectedConnection = action.payload;
+        state.annotationTool = null;
     });
 
     builder.addCase(EditorActions.deselectConnection, (state) => {
@@ -186,6 +194,7 @@ const editorReducer = createReducer(defaultState, (builder) => {
 
     builder.addCase(EditorActions.selectPointOfAttack, (state, action) => {
         state.selectedPointOfAttack = action.payload;
+        state.annotationTool = null;
     });
 
     builder.addCase(EditorActions.deselectPointOfAttack, (state) => {
@@ -194,6 +203,7 @@ const editorReducer = createReducer(defaultState, (builder) => {
 
     builder.addCase(EditorActions.selectConnectionPoint, (state, action) => {
         state.selectedConnectionPoint = action.payload;
+        state.annotationTool = null;
     });
 
     builder.addCase(EditorActions.deselectConnectionPoint, (state) => {
@@ -283,6 +293,24 @@ const editorReducer = createReducer(defaultState, (builder) => {
 
     builder.addCase(EditorActions.setIsCapturing, (state, action) => {
         state.isCapturing = action.payload;
+    });
+
+    builder.addCase(EditorActions.selectAnnotation, (state, action) => {
+        state.selectedAnnotation = action.payload;
+        state.annotationTool = null;
+    });
+
+    builder.addCase(EditorActions.deselectAnnotation, (state) => {
+        state.selectedAnnotation = null;
+    });
+
+    builder.addCase(EditorActions.setAnnotationTool, (state, action) => {
+        state.annotationTool = action.payload;
+    });
+
+    builder.addCase(SystemActions.setLoadedProjectId, (state) => {
+        state.annotationTool = null;
+        state.selectedAnnotation = null;
     });
 });
 
