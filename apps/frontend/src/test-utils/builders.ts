@@ -2,6 +2,8 @@ import type { Asset } from "#api/types/asset.types.ts";
 import type { ExtendedProject } from "#api/types/project.types.ts";
 import {
     AnchorOrientation,
+    type Annotation,
+    type AnnotationType,
     type AugmentedSystemComponent,
     type ConnectionAnchor,
     type SystemConnection,
@@ -92,6 +94,33 @@ export const createConnectionAnchor = (overrides: Partial<ConnectionAnchor> = {}
     component: undefined,
     ...overrides,
 });
+
+const ANNOTATION_VARIANT_DEFAULTS: Record<AnnotationType, Record<string, unknown>> = {
+    rect: { width: 100, height: 100 },
+    circle: { radius: 50 },
+    line: { points: [0, 0, 100, 100] },
+    arrow: { points: [0, 0, 100, 100] },
+    freehand: { points: [0, 0, 50, 50, 100, 100] },
+    text: { width: 100, height: 100, text: "" },
+};
+
+// `Extract<Annotation, { type: T }>` picks the variant whose discriminant
+// matches T (e.g. T = "text" → TextAnnotation). Lets the builder return the
+// specific variant the caller asked for instead of the wide Annotation union.
+export function createAnnotation<T extends AnnotationType>(
+    overrides: Partial<Extract<Annotation, { type: T }>> & { type: T }
+): Extract<Annotation, { type: T }> {
+    return {
+        id: "ann-1",
+        projectId: 1,
+        x: 0,
+        y: 0,
+        stroke: "#5786ff",
+        strokeWidth: 3,
+        ...ANNOTATION_VARIANT_DEFAULTS[overrides.type],
+        ...overrides,
+    } as unknown as Extract<Annotation, { type: T }>;
+}
 
 export const createConnection = (overrides: Partial<SystemConnection> = {}): SystemConnection => ({
     id: "conn-1",

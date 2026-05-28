@@ -16,8 +16,10 @@ import { Button } from "../components/button.component";
 import { DialogTextField } from "../components/dialog.textfield.component";
 import { Page } from "../components/page.component";
 import { ToggleButtons } from "../components/toggle-buttons.component";
-import { CreatePage, HeaderNavigation } from "../components/with-menu.component";
+import { CreatePage } from "../components/create-page.component";
+import { HeaderUtilityControls } from "../components/header-utility-controls.component";
 import { Report } from "../report/report";
+import { downloadMarkdownReport } from "../report/download-markdown-report";
 import { ExportIconButton } from "../components/export-icon-button.component";
 import { withProject } from "../components/with-project.hoc";
 
@@ -48,11 +50,12 @@ interface PdfDocumentToolbarProps {
     showMeasuresPage: boolean;
     showThreatListPage: boolean;
     showThreatsPage: boolean;
-    systemImageOnSeperatePage: boolean;
+    systemImageOnSeparatePage: boolean;
     language: string;
     data: ReportToolbarData;
     bruttoMatrix: ReportHookReturn["bruttoMatrix"];
     nettoMatrix: ReportHookReturn["nettoMatrix"];
+    onDownloadMarkdown: () => void;
 }
 
 const ReportPageBody = ({ project }: ReportPageBodyProps) => {
@@ -84,7 +87,7 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
         showMeasuresPage,
         showThreatListPage,
         showThreatsPage,
-        systemImageOnSeperatePage,
+        systemImageOnSeparatePage,
         reportLanguage,
         measures,
         threats,
@@ -103,7 +106,7 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
         setShowMeasuresPage,
         setShowThreatListPage,
         setShowThreatsPage,
-        setSystemImageOnSeperatePage,
+        setSystemImageOnSeparatePage,
         setReportLanguage,
         fullExportAsExcel,
     } = useReport({
@@ -178,8 +181,8 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
         setIsChanged(true);
     };
 
-    const onChangeSystemImageOnSeperatePage = (_event: ChangeEvent<HTMLInputElement>, value: boolean) => {
-        setSystemImageOnSeperatePage(value);
+    const onChangeSystemImageOnSeparatePage = (_event: ChangeEvent<HTMLInputElement>, value: boolean) => {
+        setSystemImageOnSeparatePage(value);
         setIsChanged(true);
     };
 
@@ -226,6 +229,30 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
 
     const handleExport = () => {
         fullExportAsExcel(project, data);
+    };
+
+    const handleDownloadMarkdown = () => {
+        downloadMarkdownReport({
+            data,
+            filename,
+            milestones,
+            threats,
+            measures,
+            bruttoMatrix,
+            nettoMatrix,
+            tillScheduledAt,
+            showCoverPage,
+            showTableOfContentsPage,
+            showMethodExplanation,
+            showScaleExplanation,
+            showMatrixPage,
+            showAssetsPage,
+            showMeasuresPage,
+            showThreatListPage,
+            showThreatsPage,
+            systemImageOnSeparatePage,
+            language: reportLanguage,
+        });
     };
 
     useEffect(() => {
@@ -389,13 +416,13 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
                                     <FormControlLabel
                                         control={
                                             <Switch
-                                                checked={systemImageOnSeperatePage}
-                                                onChange={onChangeSystemImageOnSeperatePage}
+                                                checked={systemImageOnSeparatePage}
+                                                onChange={onChangeSystemImageOnSeparatePage}
                                             />
                                         }
                                         label={
                                             <Typography sx={{ fontSize: "0.875rem" }}>
-                                                {t("systemImageOnSeperatePage")}
+                                                {t("systemImageOnSeparatePage")}
                                             </Typography>
                                         }
                                         labelPlacement="end"
@@ -668,9 +695,12 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
                             }}
                         >
                             {isChanged ? (
-                                <Box sx={{ marginTop: 2 }}>
-                                    <Button sx={{ marginRight: 0 }} onClick={onClickRefresh}>
+                                <Box sx={{ marginTop: 2, display: "flex", alignItems: "center" }}>
+                                    <Button sx={{ marginRight: 1 }} onClick={onClickRefresh}>
                                         {t("createBtn")}
+                                    </Button>
+                                    <Button sx={{ marginRight: 0 }} onClick={handleDownloadMarkdown}>
+                                        {t("downloadMarkdownBtn")}
                                     </Button>
                                 </Box>
                             ) : (
@@ -688,7 +718,7 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
                                     showMeasuresPage={showMeasuresPage}
                                     showThreatListPage={showThreatListPage}
                                     showThreatsPage={showThreatsPage}
-                                    systemImageOnSeperatePage={systemImageOnSeperatePage}
+                                    systemImageOnSeparatePage={systemImageOnSeparatePage}
                                     language={reportLanguage}
                                     data={{
                                         ...data!,
@@ -698,6 +728,7 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
                                     }}
                                     bruttoMatrix={bruttoMatrix}
                                     nettoMatrix={nettoMatrix}
+                                    onDownloadMarkdown={handleDownloadMarkdown}
                                 />
                             )}
                         </Box>
@@ -708,8 +739,9 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
     );
 };
 
-const PdfDocumentToolbar = ({ filename, ...props }: PdfDocumentToolbarProps) => {
+const PdfDocumentToolbar = ({ filename, onDownloadMarkdown, ...props }: PdfDocumentToolbarProps) => {
     const { t } = useTranslation("reportPage");
+
     return (
         <BlobProvider document={<Report {...props} />}>
             {({ url, loading, error }) => {
@@ -759,13 +791,14 @@ const PdfDocumentToolbar = ({ filename, ...props }: PdfDocumentToolbarProps) => 
                                     {...{ download: `${filename}.pdf` }}
                                     disabled={disabled}
                                     sx={{
-                                        marginRight: 0,
+                                        marginRight: 1,
                                     }}
                                 >
-                                    {t("downloadBtn")}
+                                    {t("downloadPdfBtn")}
                                 </Button>
                             </>
                         )}
+                        <Button onClick={onDownloadMarkdown}>{t("downloadMarkdownBtn")}</Button>
                     </Box>
                 );
             }}
@@ -773,4 +806,4 @@ const PdfDocumentToolbar = ({ filename, ...props }: PdfDocumentToolbarProps) => 
     );
 };
 
-export const ReportPage = CreatePage(HeaderNavigation, withProject(ReportPageBody));
+export const ReportPage = CreatePage(HeaderUtilityControls, withProject(ReportPageBody));

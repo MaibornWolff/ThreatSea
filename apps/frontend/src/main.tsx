@@ -1,3 +1,5 @@
+import { Buffer } from "buffer";
+import Konva from "konva";
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
@@ -5,6 +7,13 @@ import { App } from "./App";
 import { createStore } from "./application/store";
 import "./index.css";
 import { reportWebVitals } from "./reportWebVitals";
+
+// @react-pdf/renderer needs Node's Buffer global; Vite doesn't polyfill it.
+const globalWithBuffer = globalThis as typeof globalThis & { Buffer?: typeof Buffer };
+globalWithBuffer.Buffer ??= Buffer;
+
+// Cap canvas pixel ratio at 2 — beyond that the gain is invisible but fill cost grows quadratically (3× retina = 9× pixels).
+Konva.pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
 
 const store = createStore();
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);

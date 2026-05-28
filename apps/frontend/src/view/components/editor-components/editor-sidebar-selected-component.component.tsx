@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { AssetSecurityNeedsPopper } from "./asset-security-needs-popper.component";
 import { PointOfAttackSwitch } from "./point-of-attack-switch.component";
 import { POINTS_OF_ATTACK } from "../../../api/types/points-of-attack.types";
 import { POA_COLORS } from "../../colors/pointsOfAttack.colors";
@@ -7,9 +8,10 @@ import { TextField } from "../textfield.component";
 import { SearchField } from "../search-field.component";
 import { ToggleButtons } from "../toggle-buttons.component";
 import { checkUserRole, USER_ROLES } from "../../../api/types/user-roles.types";
-import { useState, useEffect, useEffectEvent } from "react";
+import { useState, useEffect, useEffectEvent, memo } from "react";
 import { Box, FormGroup, ListItemAvatar, Typography, IconButton, Avatar } from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
+import { useAssetHoverPopper } from "../../../application/hooks/useAssetHoverPopper";
 import { useDebounce } from "../../../hooks/useDebounce";
 import type { ChangeEvent, ElementType } from "react";
 import type { Asset } from "#api/types/asset.types.ts";
@@ -67,7 +69,7 @@ const getSortValueForPointOfAttack = (pointOfAttack: POINTS_OF_ATTACK) => {
     return -1;
 };
 
-export const EditorSidebarSelectedComponent = ({
+const EditorSidebarSelectedComponentInner = ({
     selectedComponent,
     handleDeleteComponent,
     handleOnNameChange,
@@ -94,6 +96,7 @@ export const EditorSidebarSelectedComponent = ({
     const [localDescription, setLocalDescription] = useState<string>("");
     const [interfaceNames, setInterfaceNames] = useState<Record<string, string>>({});
     const [editingInterfaceId, setEditingInterfaceId] = useState<string | null>(null);
+    const { anchorEl: assetAnchorEl, hoveredAsset, handleAssetHover, handleAssetLeave } = useAssetHoverPopper();
 
     const debouncedHandleNameChange = useDebounce(handleOnNameChange);
     const debouncedHandleDescriptionChange = useDebounce(handleOnDescriptionChange);
@@ -114,7 +117,9 @@ export const EditorSidebarSelectedComponent = ({
         if (selectedComponent) {
             setSelectedComponentValuesEvent(selectedComponent);
         }
-    }, [selectedComponent]);
+        // Depend on id only — selectedComponent reference can change on unrelated re-renders without the underlying component changing.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedComponent?.id]);
 
     const handleLocalNameChange = (event: ChangeEvent<HTMLInputElement>) => {
         setLocalName(event.target.value);
@@ -336,6 +341,7 @@ export const EditorSidebarSelectedComponent = ({
                         return (
                             <PointOfAttackSwitch
                                 key={i}
+                                ariaLabel={t(`pointsOfAttackList.${type}`)}
                                 label={
                                     <Typography
                                         component="span"
@@ -611,6 +617,8 @@ export const EditorSidebarSelectedComponent = ({
                             >
                                 <Typography
                                     onClick={() => handleAssetNameClick(asset)}
+                                    onMouseEnter={(event) => handleAssetHover(event, asset)}
+                                    onMouseLeave={handleAssetLeave}
                                     sx={{
                                         minWidth: "130px",
                                         maxWidth: "130px",
@@ -733,7 +741,9 @@ export const EditorSidebarSelectedComponent = ({
                             </Box>
                         );
                     })}
+                <AssetSecurityNeedsPopper anchorEl={assetAnchorEl} asset={hoveredAsset} />
             </Box>
+
             <Box
                 sx={{
                     display: "flex",
@@ -827,3 +837,22 @@ export const EditorSidebarSelectedComponent = ({
         </Box>
     );
 };
+
+// Custom comparator ignores handler refs (parent recreates them each render).
+// Skipping renders here is also load-bearing: MUI 9 FormControl has a dev-mode
+// loop where a non-memoized registerEffect ref triggers InputBase setState on
+// every parent render (FormControl.js:176).
+export const EditorSidebarSelectedComponent = memo(EditorSidebarSelectedComponentInner, (prev, next) => {
+    return (
+        prev.selectedComponent?.id === next.selectedComponent?.id &&
+        prev.selectedComponent?.name === next.selectedComponent?.name &&
+        prev.selectedComponent?.description === next.selectedComponent?.description &&
+        prev.selectedComponent?.communicationInterfaces === next.selectedComponent?.communicationInterfaces &&
+        prev.selectedComponent?.pointsOfAttack === next.selectedComponent?.pointsOfAttack &&
+        prev.assetSearchValue === next.assetSearchValue &&
+        prev.items === next.items &&
+        prev.pointsOfAttackOfSelectedComponent === next.pointsOfAttackOfSelectedComponent &&
+        prev.userRole === next.userRole &&
+        prev.connectedComponents === next.connectedComponents
+    );
+});

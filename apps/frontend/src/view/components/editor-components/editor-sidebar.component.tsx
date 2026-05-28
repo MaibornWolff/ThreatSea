@@ -1,4 +1,5 @@
 import { Box } from "@mui/system";
+import { EditorSidebarSelectedAnnotation } from "./editor-sidebar-selected-annotation.component";
 import { EditorSidebarSelectedComponent } from "./editor-sidebar-selected-component.component";
 import { EditorSidebarSelectedCommunicationInterface } from "./editor-sidebar-selected-communication-interface.component";
 import { EditorSidebarSelectedConnection } from "./editor-sidebar-selected-connection.component";
@@ -9,6 +10,8 @@ import { USER_ROLES } from "../../../api/types/user-roles.types";
 import type { SystemConnectionPoint } from "#application/adapters/system-connection-point.adapter.ts";
 import type { Asset } from "#api/types/asset.types.ts";
 import type {
+    Annotation,
+    AnnotationChanges,
     AugmentedSystemComponent,
     ConnectionEndpointWithComponent,
     SystemConnection,
@@ -56,6 +59,11 @@ export interface EditorSidebarProps {
     handleSelectConnectedComponent: (componentId: string, communicationInterfaceId?: string | null) => void;
     handleComponentBreadcrumbClick: () => void;
     handleInterfaceBreadcrumbClick: () => void;
+    selectedAnnotation: Annotation | undefined;
+    handleAnnotationColorChange: (stroke: string) => void;
+    handleAnnotationColorPreview?: ((stroke: string) => void) | undefined;
+    handleAnnotationChange: (changes: AnnotationChanges) => void;
+    handleDeleteAnnotation: () => void;
 }
 
 export const EditorSidebar = ({
@@ -90,6 +98,11 @@ export const EditorSidebar = ({
     handleSelectConnectedComponent,
     handleComponentBreadcrumbClick,
     handleInterfaceBreadcrumbClick,
+    selectedAnnotation,
+    handleAnnotationColorChange,
+    handleAnnotationColorPreview,
+    handleAnnotationChange,
+    handleDeleteAnnotation,
 }: EditorSidebarProps) => {
     return (
         <Box
@@ -107,6 +120,7 @@ export const EditorSidebar = ({
                 overflow: "hidden",
             }}
             ref={sidebarRef}
+            data-edit-protected
         >
             <Box
                 sx={{
@@ -194,6 +208,17 @@ export const EditorSidebar = ({
                             handleComponentBreadcrumbClick={handleComponentBreadcrumbClick}
                         />
                     )}
+
+                {selectedAnnotation && (
+                    <EditorSidebarSelectedAnnotation
+                        selectedAnnotation={selectedAnnotation}
+                        userRole={userRole}
+                        onColorChange={handleAnnotationColorChange}
+                        onColorPreview={handleAnnotationColorPreview}
+                        onChange={handleAnnotationChange}
+                        onDelete={handleDeleteAnnotation}
+                    />
+                )}
             </Box>
         </Box>
     );

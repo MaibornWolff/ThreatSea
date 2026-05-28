@@ -1,6 +1,7 @@
 import { Add, ArrowDownward, ArrowUpward } from "@mui/icons-material";
-import { LinearProgress } from "@mui/material";
+import { LinearProgress, useMediaQuery } from "@mui/material";
 import { Box } from "@mui/system";
+import { useTheme } from "@mui/material/styles";
 import { useLayoutEffect, type ChangeEvent, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
@@ -13,7 +14,8 @@ import { Page } from "../components/page.component";
 import { ProjectsGridComponent } from "../components/projects-grid.component";
 import { SearchField } from "../components/search-field.component";
 import { ToggleButtons } from "../components/toggle-buttons.component";
-import { CreatePage, HeaderNavigation } from "../components/with-menu.component";
+import { CreatePage } from "../components/create-page.component";
+import { HeaderUtilityControls } from "../components/header-utility-controls.component";
 import ProjectDialogPage from "./project-dialog.page";
 import { ImportIconButton } from "../components/import-icon-button.component";
 import { ProjectsActions } from "../../application/actions/projects.actions";
@@ -30,7 +32,7 @@ import { IconButton } from "#view/components/icon-button.component.tsx";
  * @category Pages
  * @return {JSX.Element}
  */
-export const ProjectsPage = CreatePage(HeaderNavigation, () => {
+export const ProjectsPage = CreatePage(HeaderUtilityControls, () => {
     const navigate = useNavigate();
     const { t } = useTranslation("projectsPage");
     const { setSortDirection, setSearchValue, setSortBy, deleteProject, sortDirection, sortBy, isPending, projects } =
@@ -41,6 +43,12 @@ export const ProjectsPage = CreatePage(HeaderNavigation, () => {
     const dispatch = useAppDispatch();
 
     const { openConfirm } = useConfirm<ExtendedProject>();
+
+    const theme = useTheme();
+    const isWide = useMediaQuery(theme.breakpoints.up("lg"));
+    const isMedium = useMediaQuery(theme.breakpoints.up("sm"));
+
+    const projectsColumnCount = 1 + Number(isMedium) + Number(isWide);
 
     /**
      * Layout effect to change the header bar
@@ -105,15 +113,22 @@ export const ProjectsPage = CreatePage(HeaderNavigation, () => {
 
             event.currentTarget.value = "";
 
-            if (!file) throw new Error("file not found");
+            if (!file) {
+                throw new Error("file not found");
+            }
 
             const fileReader = new FileReader();
             fileReader.readAsText(file, "UTF-8");
-            fileReader.onload = (loadEvent: ProgressEvent<FileReader>) => {
+            fileReader.onload = async (loadEvent: ProgressEvent<FileReader>) => {
                 const content = loadEvent.target?.result;
-                if (typeof content === "string") {
-                    dispatch(ProjectsActions.importProjectFromJson(JSON.parse(content)));
+                if (typeof content !== "string") {
+                    return;
+                }
+                try {
+                    await dispatch(ProjectsActions.importProjectFromJson(JSON.parse(content))).unwrap();
                     loadProjects();
+                } catch (error) {
+                    console.log(error);
                 }
             };
         } catch (error) {
@@ -202,7 +217,7 @@ export const ProjectsPage = CreatePage(HeaderNavigation, () => {
 
                 <ProjectsGridComponent
                     projects={projects}
-                    columnCount={3}
+                    columnCount={projectsColumnCount}
                     onClickDeleteProject={onClickDeleteProject}
                     onClickEditProject={onClickEditProject}
                 />

@@ -3,34 +3,36 @@
  *     page.
  */
 
-import { CenterFocusWeak, Download } from "@mui/icons-material";
-import { Box, IconButton, LinearProgress, Tooltip } from "@mui/material";
-import {
-    memo,
-    useCallback,
-    useEffect,
-    useEffectEvent,
-    useLayoutEffect,
-    useMemo,
-    useRef,
-    useState,
-    type ChangeEvent,
-} from "react";
+import { Box, LinearProgress } from "@mui/material";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Group, Layer, Line } from "react-konva";
 import { Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
+import { EditorActions } from "../../application/actions/editor.actions";
 import { NavigationActions } from "../../application/actions/navigation.actions";
 import { useAssets } from "../../application/hooks/use-assets.hook";
+import { useAutoSavePreview } from "../../application/hooks/use-auto-save-preview.hook";
+import { useAnnotationDrawing, ANNOTATION_STROKE_WIDTH } from "../../application/hooks/use-annotation-drawing.hook";
 import { useEditor, type EditorConnectionAnchor } from "../../application/hooks/use-editor.hook";
+import { useEditorAnnotations } from "../../application/hooks/use-editor-annotations.hook";
 import { useConfirm } from "../../application/hooks/use-confirm.hook";
+import { DEFAULT_ANNOTATION_COLOR } from "../colors/annotation.colors";
+import { AnnotationDrawingPreview } from "../components/editor-components/annotation-drawing-preview.component";
 import { ConnectionPreview } from "../components/editor-components/connection-preview.component";
+import {
+    AnnotationsCanvasLayer,
+    type AnnotationsCanvasLayerHandle,
+} from "../components/editor-components/annotations-canvas-layer.component";
 import { EditorSidebar } from "../components/editor-components/editor-sidebar.component";
-import { EditorStage } from "../components/editor-components/editor-stage.component";
+import { EditorStage, MAX_STAGE_SCALE, MIN_STAGE_SCALE } from "../components/editor-components/editor-stage.component";
+import { EditorToolbar } from "../components/editor-components/editor-toolbar.component";
+import { TextEditingToolbarLayer } from "../components/editor-components/text-editing-toolbar-layer.component";
 import { Page } from "../components/page.component";
 import { SystemComponentConnection } from "../components/editor-components/system-component-connection.component";
 import { SystemComponent } from "../components/editor-components/system-component.component";
-import { CreatePage, HeaderNavigation } from "../components/with-menu.component";
+import { CreatePage } from "../components/create-page.component";
+import { HeaderUtilityControls } from "../components/header-utility-controls.component";
 import AssetDialogPage from "./asset-dialog.page";
 import ComponentDialogPage from "./component-dialog.page";
 import { CommunicationContextMenu } from "../components/editor-components/editor-communication-interface-context-menu.component";
@@ -38,20 +40,24 @@ import { useAlert } from "../../application/hooks/use-alert.hook";
 import CommunicationInterfaceDialog from "../dialogs/add-communication-interface.dialog";
 import { LineDrawingProvider } from "../components/editor-components/contexts/LineDrawingProvider";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
+import { SystemActions } from "#application/actions/system.actions.ts";
+import { systemSelectors } from "#application/selectors/system.selectors.ts";
 import type { KonvaEventObject } from "konva/lib/Node";
 import type { Stage as KonvaStage } from "konva/lib/Stage";
 import type { Layer as KonvaLayer } from "konva/lib/Layer";
 import type { Asset } from "#api/types/asset.types.ts";
 import type {
+    AnnotationChanges,
+    AnnotationType,
     AugmentedSystemComponent,
     ConnectionEndpointWithComponent,
     Coordinate,
     SystemPointOfAttack,
+    ConnectionPointMeta,
+    TextAnnotation,
 } from "#api/types/system.types.ts";
 import type { EditorComponentType } from "#application/adapters/editor-component-type.adapter.ts";
-import type { ConnectionPointMeta } from "#api/types/system.types.ts";
 import type { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
-import { useDebounce } from "#hooks/useDebounce.ts";
 
 // Move these outside the component to avoid recreating on each render
 const GRID_CONFIG = {
@@ -67,17 +73,25 @@ const GRID_CONFIG = {
 // Memoize line array creation
 const createLineArray = (): number[] => new Array(400).fill(0);
 
+// True when a keyboard event originated from a focused text input — used by
+// the global key handler to skip canvas deletes while the user is typing.
+const isEditableEventTarget = (target: EventTarget | null): boolean => {
+    if (!(target instanceof HTMLElement)) {
+        return false;
+    }
+    if (target.isContentEditable) {
+        return true;
+    }
+    const tag = target.tagName;
+    return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
+};
+
 interface HelpLines {
     x: number;
     y: number;
     x2: number;
     y2: number;
 }
-
-// Add variable for save timeout handle
-let saveTimeoutHandle: ReturnType<typeof setTimeout> | undefined;
-let lastLayerScreenshot: string | undefined;
-let moveLayer = false;
 
 interface EditorPageBodyProps {
     updateAutoSaveOnClick?: (handler: (() => void) | undefined) => void;
@@ -90,11 +104,18 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     const [newConnectionMousePosition, setNewConnectionMousePosition] = useState<Coordinate | null>(null);
     const componentLayerRef = useRef<KonvaLayer | null>(null);
     const sidebarRef = useRef<HTMLDivElement | null>(null);
+    const moveLayerRef = useRef(false);
+    // Ref for the hot mousemove path; state drives toolbar/transformer visibility.
+    const isAnnotationDraggingRef = useRef(false);
+    const [isAnnotationDragging, setIsAnnotationDragging] = useState(false);
+    const handleAnnotationDragStateChange = useCallback((isDragging: boolean): void => {
+        isAnnotationDraggingRef.current = isDragging;
+        setIsAnnotationDragging(isDragging);
+    }, []);
     const { openConfirm } = useConfirm();
     const { showErrorMessage } = useAlert();
     const location = useLocation();
     const navigate = useNavigate();
-    const shouldCenter = location.state?.shouldCenter;
     const {
         autoSaveBlocked,
         moveComponent,
@@ -167,8 +188,6 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         projectId,
         showErrorMessage,
     });
-    const setLayerPositionEvent = useEffectEvent(setLayerPosition);
-    const setStageScaleEvent = useEffectEvent(setStageScale);
     const { t } = useTranslation("editorPage");
 
     const { loadAssets, items } = useAssets({
@@ -180,6 +199,99 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     const userRole = useAppSelector((state) => state.projects.current?.role);
     const stageScale = useAppSelector((state) => state.editor.stageScale);
     const stagePosition = useAppSelector((state) => state.editor.stagePosition);
+    const lastCenteredProjectId = useAppSelector((state) => state.editor.lastCenteredProjectId);
+    const loadedProjectId = useAppSelector((state) => state.system.loadedProjectId);
+
+    const { downloadSystemView } = useAutoSavePreview({
+        componentLayerRef,
+        updateAutoSaveOnClick,
+        saveCurrentSystem,
+        autoSaveBlocked,
+        setAutoSaveStatus,
+        userRole,
+        systemPending,
+        initialized,
+        isAnyComponentInUse,
+        autoSaveStatus,
+        blockAutoSave,
+        makeScreenshot,
+    });
+
+    const {
+        annotations,
+        selectedAnnotation,
+        selectedAnnotationId,
+        annotationTool,
+        createAnnotation,
+        updateAnnotation,
+        removeAnnotation,
+        selectAnnotation,
+        deselectAnnotation,
+        setAnnotationTool,
+    } = useEditorAnnotations({ projectId });
+
+    const isEditor = checkUserRole(userRole, USER_ROLES.EDITOR);
+
+    const storedAnnotationColor = useAppSelector((state) =>
+        systemSelectors.selectDefaultAnnotationColor(state, projectId)
+    );
+    const annotationColor = storedAnnotationColor ?? DEFAULT_ANNOTATION_COLOR;
+    const setAnnotationColor = (color: string): void => {
+        dispatch(SystemActions.setDefaultAnnotationColor({ projectId, color }));
+    };
+
+    const { drawingPreview, cancelDrawing, tryStartDrawing, updateDrawingPreview, commitDrawing } =
+        useAnnotationDrawing({ stageRef, layerPosition, isEditor, annotationColor, createAnnotation });
+
+    useEffect(() => {
+        const stage = stageRef.current;
+        if (!stage?.content) {
+            return;
+        }
+        if (annotationTool === null) {
+            return;
+        }
+        stage.content.style.cursor = annotationTool === "text" ? "text" : "crosshair";
+        return () => {
+            if (stage.content) {
+                stage.content.style.cursor = "default";
+            }
+        };
+    }, [annotationTool]);
+
+    const effectiveAnnotationTool = loadedProjectId === projectId ? annotationTool : null;
+
+    const [editingAnnotationId, setEditingAnnotationId] = useState<string | null>(null);
+    const editingAnnotation = editingAnnotationId
+        ? (annotations.find((annotation) => annotation.id === editingAnnotationId) ?? null)
+        : null;
+    const handleRequestEdit = useCallback((id: string) => {
+        setEditingAnnotationId(id);
+    }, []);
+
+    // Idempotent exit; discards the annotation if it was never typed in.
+    const handleExitEdit = useCallback(
+        (id: string): void => {
+            if (editingAnnotationId !== id) {
+                return;
+            }
+            const target = annotations.find((a) => a.id === id);
+            if (target?.type === "text" && (target.text ?? "").trim().length === 0) {
+                removeAnnotation(id);
+            }
+            setEditingAnnotationId(null);
+        },
+        [editingAnnotationId, annotations, removeAnnotation]
+    );
+
+    // Effect-based exit-on-selection-change — handler-level guards can run with
+    // a stale editingAnnotationId because EditorTextAnnotation is memo'd on
+    // annotation/selected/editable/editing only.
+    useEffect(() => {
+        if (editingAnnotationId !== null && selectedAnnotationId !== editingAnnotationId) {
+            handleExitEdit(editingAnnotationId);
+        }
+    }, [selectedAnnotationId, editingAnnotationId, handleExitEdit]);
 
     type ConnectorSelection = EditorConnectionAnchor & {
         communicationInterfaceType?: string | null;
@@ -196,7 +308,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     const currentHelpLinesRef = useRef<HelpLines | null>(null);
 
     const newConnectionPreviewComponent = useMemo(() => {
-        if (!newConnection) return undefined;
+        if (!newConnection) {
+            return undefined;
+        }
         return components.filter((component) => component.id === newConnection.from.id)[0];
     }, [components, newConnection]);
 
@@ -215,140 +329,28 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         );
     }, [dispatch]);
 
-    /**
-     * Resets the current layer position and scale when open a project
-     * and the editor view is rendered.
-     */
+    // Fit-to-view on first mount per project. Waits for the new project's data
+    // to land before measuring; skips on tab switch to preserve user's pan.
     useEffect(() => {
-        if (stageRef?.current && shouldCenter) {
-            stageRef.current.scale({ x: 1, y: 1 });
-            setLayerPositionEvent(0, 0);
-            setStageScaleEvent(1, { x: 0, y: 0 });
-            navigate(location.pathname, { replace: true, state: {} });
+        if (loadedProjectId !== projectId) {
+            return;
         }
-    }, [shouldCenter, navigate, location.pathname]);
-
-    useEffect(() => {
-        if (blockAutoSave) {
-            resetSaveTimeout();
+        if (lastCenteredProjectId === projectId) {
+            return;
         }
-    }, [blockAutoSave]);
 
-    //run if unmounted
-    useEffect(() => {
-        return () => {
-            if (saveTimeoutHandle) {
-                clearTimeout(saveTimeoutHandle);
-                saveTimeoutHandle = undefined;
+        const raf = requestAnimationFrame(() => {
+            if (!stageRef.current || !componentLayerRef.current) {
+                return;
             }
-
-            saveEvent(true);
-        };
-    }, []);
-
-    useEffect(() => {
-        updateScreenshotEvent();
-    }, [makeScreenshot]);
-
-    const updateScreenshot = useDebounce((): void => {
-        if (componentLayerRef?.current) {
-            const componentsOfProject = components.filter((component) => component.projectId === projectId);
-            let minX = componentsOfProject.length === 0 ? 0 : 9999;
-            let minY = componentsOfProject.length === 0 ? 0 : 9999;
-            let maxX = componentsOfProject.length === 0 ? 0 : -9999;
-            let maxY = componentsOfProject.length === 0 ? 0 : -9999;
-
-            componentsOfProject.map((component) => {
-                minX = Math.min(component.x, minX);
-                minY = Math.min(component.y, minY);
-                maxX = Math.max(component.x + component.width, maxX);
-                maxY = Math.max(component.y + component.height, maxY);
-            });
-
-            const offsetX = 400;
-
-            const diffX = Math.abs(maxX - minX);
-            const diffY = Math.abs(maxY - minY);
-            const factor = diffX / diffY;
-
-            const width = (factor < 2.25 ? diffY * 2.25 : diffX) + offsetX;
-            const height = Math.abs(maxY - minY) + offsetX;
-
-            let posX = minX - offsetX / 2;
-            let posY = minY - offsetX / 2;
-
-            let stageScaleX = 1;
-            let stageScaleY = 1;
-
-            posX += layerPosition.x;
-            posY += layerPosition.y;
-
-            if (stageRef?.current) {
-                const stage = stageRef.current;
-
-                posX *= stage.scale().x;
-                posY *= stage.scale().y;
-
-                posX += stage.x();
-                posY += stage.y();
-
-                stageScaleX = stage.scale().x;
-                stageScaleY = stage.scale().y;
+            handleCenterEditorRef.current();
+            dispatch(EditorActions.setLastCenteredProjectId(projectId));
+            if (location.state) {
+                navigate(location.pathname, { replace: true, state: {} });
             }
-
-            const result = componentLayerRef.current.toDataURL({
-                x: posX,
-                y: posY,
-                width: width * stageScaleX,
-                height: height * stageScaleY,
-            });
-
-            if (result !== "data:,") {
-                lastLayerScreenshot = result;
-            }
-        }
-    }, 100);
-
-    const updateScreenshotEvent = useEffectEvent(updateScreenshot);
-
-    const save = (forceSave = false): void => {
-        if (shouldSave(forceSave)) {
-            if (componentLayerRef?.current || lastLayerScreenshot) {
-                saveCurrentSystem({ image: lastLayerScreenshot ?? null });
-            }
-        }
-    };
-
-    const saveEvent = useEffectEvent(save);
-
-    function shouldSave(forceSave?: boolean): boolean {
-        // User with Viewer role should not trigger autosave
-        if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
-            return (
-                (!systemPending && initialized && !isAnyComponentInUse && autoSaveStatus !== "saving") ||
-                forceSave === true
-            );
-        } else {
-            return false;
-        }
-    }
-
-    useEffect(() => {
-        setAutoSaveStatus("saving");
-        updateAutoSaveOnClick?.(() => saveEvent(true));
-        return () => {
-            updateAutoSaveOnClick?.(undefined);
-        };
-        // oxlint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    const resetSaveTimeout = useEffectEvent((): void => {
-        if (saveTimeoutHandle) {
-            clearTimeout(saveTimeoutHandle);
-        }
-        saveTimeoutHandle = setTimeout(save, 1000);
-        autoSaveBlocked();
-    });
+        });
+        return () => cancelAnimationFrame(raf);
+    }, [loadedProjectId, projectId, lastCenteredProjectId, dispatch, navigate, location.pathname, location.state]);
 
     const handleComponentDragStart = (_event: KonvaEventObject<DragEvent>, componentId: string): void => {
         addInUseComponent(componentId);
@@ -389,10 +391,13 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         updateConnectionsOfComponent();
         deselectComponent();
 
-        setMousePointers({
-            x: event.evt.x,
-            y: event.evt.y,
-        });
+        // event.evt is undefined when Konva fires dragend programmatically during unmount.
+        if (event.evt) {
+            setMousePointers({
+                x: event.evt.x,
+                y: event.evt.y,
+            });
+        }
 
         const theConnectionsOfTheComponent = connections.filter(
             (connection) => connection.from.id === componentId || connection.to.id === componentId
@@ -411,40 +416,38 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         });
     };
 
-    const handleComponentDragMove = useCallback(
-        (event: KonvaEventObject<DragEvent>, componentId: string) => {
-            moveLayer = false;
+    const handleComponentDragMove = (event: KonvaEventObject<DragEvent>, componentId: string): void => {
+        moveLayerRef.current = false;
 
-            const gridPositionX = Math.floor(event.target.position().x / GRID_CONFIG.gridSizeX);
-            const gridPositionY = Math.floor(event.target.position().y / GRID_CONFIG.gridSizeY);
+        const gridPositionX = Math.floor(event.target.position().x / GRID_CONFIG.gridSizeX);
+        const gridPositionY = Math.floor(event.target.position().y / GRID_CONFIG.gridSizeY);
 
-            const newx = gridPositionX * GRID_CONFIG.gridSizeX;
-            const newy = gridPositionY * GRID_CONFIG.gridSizeY;
+        const newx = gridPositionX * GRID_CONFIG.gridSizeX;
+        const newy = gridPositionY * GRID_CONFIG.gridSizeY;
 
-            event.target.setPosition({ x: newx, y: newy });
+        event.target.setPosition({ x: newx, y: newy });
 
-            // Update ref directly instead of using state
-            currentHelpLinesRef.current = {
-                x: newx + 9 + layerPosition.x,
-                x2: newx + 71 + layerPosition.x,
-                y: newy + 9 + layerPosition.y,
-                y2: newy + 71 + layerPosition.y,
-            };
+        currentHelpLinesRef.current = {
+            x: newx + 9 + layerPosition.x,
+            x2: newx + 71 + layerPosition.x,
+            y: newy + 9 + layerPosition.y,
+            y2: newy + 71 + layerPosition.y,
+        };
 
-            setShowHelpLines(true);
-            moveComponent({
-                id: componentId,
-                x: newx,
-                y: newy,
-                gridX: gridPositionX,
-                gridY: gridPositionY,
-            });
-        },
-        // oxlint-disable-next-line react-hooks/exhaustive-deps
-        [layerPosition, moveComponent]
-    );
+        setShowHelpLines(true);
+        moveComponent({
+            id: componentId,
+            x: newx,
+            y: newy,
+            gridX: gridPositionX,
+            gridY: gridPositionY,
+        });
+    };
 
     const handleSelectComponent = ({ evt }: KonvaEventObject<MouseEvent>, componentId: string): void => {
+        if (annotationTool !== null) {
+            return;
+        }
         if (!evt.defaultPrevented && evt.button === 0) {
             evt.preventDefault();
 
@@ -458,11 +461,15 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
             deselectConnection();
             deselectPointOfAttack();
             deselectConnectionPoint();
+            deselectAnnotation();
             showSideBar();
         }
     };
 
     const handleSelectConnection = ({ evt }: KonvaEventObject<MouseEvent>, id: string): void => {
+        if (annotationTool !== null) {
+            return;
+        }
         if (!evt.defaultPrevented && evt.button === 0) {
             evt.preventDefault();
 
@@ -470,11 +477,81 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
             selectConnection(id);
             deselectComponent();
             deselectConnectionPoint();
+            deselectAnnotation();
             showSideBar();
         }
     };
 
+    const handleSelectAnnotation = (id: string, options?: { openSidebar?: boolean }): void => {
+        const annotation = annotations.find((a) => a.id === id);
+        selectAnnotation(id);
+        deselectComponent();
+        deselectConnection();
+        deselectPointOfAttack();
+        deselectConnectionPoint();
+        deselectConnector();
+        if (options?.openSidebar === false || annotation?.type === "text") {
+            closeSideBar();
+        } else {
+            showSideBar();
+        }
+    };
+
+    const annotationsLayerRef = useRef<AnnotationsCanvasLayerHandle>(null);
+    const lastSelectedAnnotationRef = useRef<typeof selectedAnnotation>(undefined);
+
+    useEffect(() => {
+        if (selectedAnnotation) {
+            lastSelectedAnnotationRef.current = selectedAnnotation;
+        }
+    }, [selectedAnnotation]);
+
+    // Grace window for the dismissal mousedown some browsers fire on the
+    // underlying page when the native <input type="color"> closes.
+    const lastColorInteractionRef = useRef(0);
+    const bumpColorInteraction = (): void => {
+        lastColorInteractionRef.current = Date.now();
+    };
+
+    const handleAnnotationColorPreview = (stroke: string): void => {
+        annotationsLayerRef.current?.setPreviewColor(stroke);
+        bumpColorInteraction();
+    };
+
+    const handleAnnotationColorChange = (stroke: string): void => {
+        annotationsLayerRef.current?.setPreviewColor(null);
+        bumpColorInteraction();
+        const target = selectedAnnotation ?? lastSelectedAnnotationRef.current;
+        if (target) {
+            updateAnnotation(target.id, { type: target.type, stroke });
+        }
+    };
+
+    const handleAnnotationChange = (changes: AnnotationChanges): void => {
+        if (selectedAnnotationId) {
+            updateAnnotation(selectedAnnotationId, changes);
+        }
+    };
+
+    const handleSetAnnotationTool = (tool: AnnotationType | null): void => {
+        if (tool !== null) {
+            closeAndDeselectAll();
+        }
+        setAnnotationTool(tool);
+    };
+
+    const handleDeleteAnnotation = (): void => {
+        if (selectedAnnotationId) {
+            removeAnnotation();
+            closeSideBar();
+            setEditingAnnotationId(null);
+        }
+    };
+
     const handleSelectAnchor = (e: MouseEvent | KonvaEventObject<MouseEvent>, data: ConnectorSelection): void => {
+        if (annotationTool !== null) {
+            return;
+        }
         const event = "evt" in e ? e.evt : e;
         if (data.communicationInterfaceType) {
             event.preventDefault();
@@ -490,12 +567,17 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
             handleCloseCommunicationMenu();
             return;
         }
+        if (editingAnnotation?.type === "text" && (editingAnnotation.text ?? "").trim().length === 0) {
+            removeAnnotation(editingAnnotation.id);
+        }
         deselectComponent();
         closeSideBar();
         deselectConnection();
         deselectPointOfAttack();
         deselectConnectionPoint();
         deselectConnector();
+        deselectAnnotation();
+        setEditingAnnotationId(null);
     };
 
     const getConnectedComponents = useCallback(
@@ -512,6 +594,11 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         [connections]
     );
 
+    const connectedComponentsForSelected = useMemo(
+        () => getConnectedComponents(selectedComponentId),
+        [getConnectedComponents, selectedComponentId]
+    );
+
     const closeSideBar = () => {
         if (sidebarRef && sidebarRef.current) {
             sidebarRef.current.style.right = "-600px";
@@ -526,43 +613,115 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
 
     const handleMouseDown = (event: KonvaEventObject<MouseEvent>): void => {
         const { evt, target } = event;
+
+        // Annotation drawing intercepts the stage before pan/deselect.
+        if (!editingAnnotationId && tryStartDrawing(annotationTool, event)) {
+            return;
+        }
+
         if (evt.button === 0 && target.nodeType === "Stage") {
+            // Ignore the dismissal click that fires after the native color picker closes.
+            if (Date.now() - lastColorInteractionRef.current < 500) {
+                return;
+            }
             closeAndDeselectAll();
             event.cancelBubble = true;
             evt.preventDefault();
             evt.stopImmediatePropagation();
-            moveLayer = true;
+            moveLayerRef.current = true;
             if (stageRef.current?.content) {
                 stageRef.current.content.style.cursor = "move";
             }
         }
     };
 
-    const handleMouseMove = ({ evt }: KonvaEventObject<MouseEvent>): void => {
-        const { layerX: x, layerY: y } = evt;
-        setMousePointers({
-            x: x,
-            y: y,
-        });
+    // Throttle Stage mousemove dispatches to one per animation frame — raw events fire 100+/sec on fast mice and would over-render the store.
+    const pendingMouseMoveRef = useRef<{
+        layerX: number;
+        layerY: number;
+        movementX: number;
+        movementY: number;
+    } | null>(null);
+    const mouseMoveRafRef = useRef<number | null>(null);
+
+    const flushMouseMove = () => {
+        mouseMoveRafRef.current = null;
+        const pending = pendingMouseMoveRef.current;
+        if (!pending) {
+            return;
+        }
+        pendingMouseMoveRef.current = null;
+
+        const { layerX, layerY, movementX, movementY } = pending;
+
+        // Skip the collaborative-cursor dispatch while an annotation is being
+        // dragged — it would otherwise trigger a Redux update + page re-render
+        // on every pointer move, swamping the drag.
+        if (!isAnnotationDraggingRef.current) {
+            setMousePointers({ x: layerX, y: layerY });
+        }
+
+        if (updateDrawingPreview()) {
+            return;
+        }
 
         if (newConnection && stageRef.current) {
             setNewConnectionMousePosition({
-                x: (x - stageRef.current.x()) / stageRef.current.scaleX() - layerPosition.x,
-                y: (y - stageRef.current.y()) / stageRef.current.scaleY() - layerPosition.y,
+                x: (layerX - stageRef.current.x()) / stageRef.current.scaleX() - layerPosition.x,
+                y: (layerY - stageRef.current.y()) / stageRef.current.scaleY() - layerPosition.y,
             });
         } else if (newConnectionMousePosition) {
             setNewConnectionMousePosition(null);
         }
 
-        if (moveLayer && stageRef.current) {
+        if (moveLayerRef.current && stageRef.current) {
             setLayerPosition(
-                layerPosition.x + evt.movementX * (GRID_CONFIG.speed / stageRef.current.scaleX()),
-                layerPosition.y + evt.movementY * (GRID_CONFIG.speed / stageRef.current.scaleY())
+                layerPosition.x + movementX * (GRID_CONFIG.speed / stageRef.current.scaleX()),
+                layerPosition.y + movementY * (GRID_CONFIG.speed / stageRef.current.scaleY())
             );
         }
     };
 
+    // Plain ref — rAF callbacks run outside React's "inside an Effect" window,
+    // where useEffectEvent has undefined behavior in production builds.
+    const flushMouseMoveRef = useRef(flushMouseMove);
+    flushMouseMoveRef.current = flushMouseMove;
+
+    useEffect(() => {
+        return () => {
+            if (mouseMoveRafRef.current !== null) {
+                cancelAnimationFrame(mouseMoveRafRef.current);
+                mouseMoveRafRef.current = null;
+            }
+        };
+    }, []);
+
+    const handleMouseMove = ({ evt }: KonvaEventObject<MouseEvent>): void => {
+        const { layerX, layerY, movementX, movementY } = evt;
+
+        const prev = pendingMouseMoveRef.current;
+        pendingMouseMoveRef.current = {
+            layerX,
+            layerY,
+            movementX: (prev?.movementX ?? 0) + movementX,
+            movementY: (prev?.movementY ?? 0) + movementY,
+        };
+
+        if (mouseMoveRafRef.current === null) {
+            mouseMoveRafRef.current = requestAnimationFrame(flushMouseMove);
+        }
+    };
+
     const handleMouseOut = () => {
+        // If the user released the button outside the stage, handleMouseUp
+        // never fires — mirror its reset so re-entry doesn't resume panning.
+        if (moveLayerRef.current) {
+            moveLayerRef.current = false;
+            if (stageRef.current?.content) {
+                stageRef.current.content.style.cursor = "default";
+            }
+        }
+
         setMousePointers({
             x: -20000,
             y: -20000,
@@ -570,8 +729,30 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     };
 
     const handleMouseUp = ({ evt }: KonvaEventObject<MouseEvent>): void => {
-        if (evt.button === 0 && moveLayer) {
-            moveLayer = false;
+        if (evt.button === 0 && drawingPreview) {
+            const toolBeforeCommit = annotationTool;
+            const newId = commitDrawing(annotationTool);
+            if (newId) {
+                if (toolBeforeCommit && toolBeforeCommit !== "freehand") {
+                    setAnnotationTool(null);
+                }
+                // Only text auto-selects (to enter edit mode). For freehand, auto-selecting
+                // would attach Konva's Transformer whose anchor mouseleave wipes our tool cursor.
+                if (toolBeforeCommit === "text") {
+                    selectAnnotation(newId);
+                    setEditingAnnotationId(newId);
+                }
+                deselectComponent();
+                deselectConnection();
+                deselectPointOfAttack();
+                deselectConnectionPoint();
+                deselectConnector();
+            }
+            return;
+        }
+
+        if (evt.button === 0 && moveLayerRef.current) {
+            moveLayerRef.current = false;
             if (stageRef.current?.content) {
                 stageRef.current.content.style.cursor = "default";
             }
@@ -689,30 +870,42 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     };
 
     const handleOnNameChange = (evt: ChangeEvent<HTMLInputElement>): void => {
-        if (checkUserRole(userRole, USER_ROLES.EDITOR)) setSelectedComponentName(evt.target.value);
+        if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
+            setSelectedComponentName(evt.target.value);
+        }
     };
 
     const handleOnDescriptionChange = (evt: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
-        if (checkUserRole(userRole, USER_ROLES.EDITOR)) setSelectedComponentDescription(evt.target.value);
+        if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
+            setSelectedComponentDescription(evt.target.value);
+        }
     };
 
     const handleOnConnectionPointDescriptionChange = (
         evt: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
     ): void => {
-        if (checkUserRole(userRole, USER_ROLES.EDITOR)) setSelectedConnectionPointDescription(evt.target.value);
+        if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
+            setSelectedConnectionPointDescription(evt.target.value);
+        }
     };
 
     const handleConnectionNameChange = (evt: ChangeEvent<HTMLInputElement>): void => {
-        if (checkUserRole(userRole, USER_ROLES.EDITOR)) setSelectedConnectionName(evt.target.value);
+        if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
+            setSelectedConnectionName(evt.target.value);
+        }
     };
 
     const handleOnConnectionPointClicked = ({ evt }: KonvaEventObject<MouseEvent>, connectionPointId: string): void => {
+        if (annotationTool !== null) {
+            return;
+        }
         evt.preventDefault();
 
         if (evt.button === 0) {
             selectConnectionPoint(connectionPointId);
             deselectComponent();
             deselectConnection();
+            deselectAnnotation();
             showSideBar();
         }
     };
@@ -722,11 +915,15 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         pointOfAttackId: string,
         componentId?: string
     ): void => {
+        if (annotationTool !== null) {
+            return;
+        }
         evt.preventDefault();
 
         if (evt.button === 0) {
             setAssetSearchValue("");
             selectPointOfAttack(pointOfAttackId);
+            deselectAnnotation();
             if (componentId) {
                 deselectConnection();
                 deselectConnectionPoint();
@@ -832,14 +1029,28 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         }
     };
 
-    const handleKeyUp = ({ key }: KeyboardEvent): void => {
+    const handleKeyUp = (event: KeyboardEvent): void => {
+        const { key } = event;
         if (key === "Escape") {
+            if (annotationTool || drawingPreview) {
+                setAnnotationTool(null);
+                cancelDrawing();
+            }
             closeAndDeselectAll();
         }
 
-        if (key === "Delete") {
+        if (key === "Delete" || key === "Backspace") {
+            // Skip when the keystroke came from an editable field
+            if (isEditableEventTarget(event.target)) {
+                return;
+            }
             handleDeleteComponent();
             handleDeleteConnection();
+            if (selectedAnnotationId) {
+                removeAnnotation();
+                closeSideBar();
+                setEditingAnnotationId(null);
+            }
         }
     };
 
@@ -859,67 +1070,59 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         setStageScale(newScale, newPos);
     };
 
-    const handleDownloadSystemView = () => {
-        updateScreenshot();
-        const link = document.createElement("a");
-        link.href = lastLayerScreenshot ?? "";
-        link.download = "systemView.png";
-        link.click();
-    };
-
     const handleCenterEditor = () => {
-        let minX = 9999;
-        let minY = 9999;
-        let maxX = -9999;
-        let maxY = -9999;
-        const componentsOfProject = components.filter((component) => component.projectId === projectId);
+        if (!stageRef.current || !componentLayerRef.current) {
+            return;
+        }
+        const stage = stageRef.current;
+        const layer = componentLayerRef.current;
 
-        if (componentsOfProject.length === 0) {
+        const rect = layer.getClientRect({ relativeTo: layer });
+
+        if (rect.width <= 0 || rect.height <= 0) {
             setLayerPosition(0, 0);
+            setStageScale(1, { x: 0, y: 0 });
             return;
         }
 
-        componentsOfProject.map((component) => {
-            minX = Math.min(component.x, minX);
-            minY = Math.min(component.y, minY);
-            maxX = Math.max(component.x + component.width, maxX);
-            maxY = Math.max(component.y + component.height, maxY);
+        // Same 5% padding as captureScreenshot in use-auto-save-preview.hook.
+        const paddingRatio = 0.05;
+        const paddedWidth = rect.width * (1 + paddingRatio * 2);
+        const paddedHeight = rect.height * (1 + paddingRatio * 2);
+
+        // Fit-to-view scale, clamped to the editor's existing zoom bounds.
+        const fitScale = Math.min(stage.width() / paddedWidth, stage.height() / paddedHeight);
+        const newScale = Math.min(MAX_STAGE_SCALE, Math.max(MIN_STAGE_SCALE, fitScale));
+        stage.scale({ x: newScale, y: newScale });
+
+        // Solve for layerPosition that puts the bbox center at the viewport center.
+        // screen = (layerLocal + layerPosition) * newScale + stage.{x,y}
+        const bboxCenterX = rect.x + rect.width / 2;
+        const bboxCenterY = rect.y + rect.height / 2;
+        const layerX = (stage.width() / 2 - stage.x()) / newScale - bboxCenterX;
+        const layerY = (stage.height() / 2 - stage.y()) / newScale - bboxCenterY;
+
+        setLayerPosition(layerX, layerY);
+        // Persist scale to Redux too; otherwise it resets on remount.
+        setStageScale(newScale, { x: stage.x(), y: stage.y() });
+    };
+
+    // Plain ref — the rAF callback runs outside React's "inside an Effect"
+    // window, where useEffectEvent has undefined behavior in production builds.
+    const handleCenterEditorRef = useRef(handleCenterEditor);
+    handleCenterEditorRef.current = handleCenterEditor;
+
+    const handleDownloadSystemView = (): void => {
+        // Silent on failure today; if needed, surface a toast via showErrorMessage here.
+        downloadSystemView().catch((err) => {
+            console.error("Failed to export system view", err);
         });
-
-        if (stageRef?.current) {
-            const stage = stageRef.current;
-            const diffX = Math.abs(maxX - minX);
-            const diffY = Math.abs(maxY - minY);
-
-            if (diffX > stage.width() / stage.scale().x) {
-                let newScale = (stage.width() - 100) / diffX;
-                newScale = Math.min(5, Math.max(newScale, 0.5));
-                stage.scale({ x: newScale, y: newScale });
-            }
-
-            if (diffY > stage.height() / stage.scale().y) {
-                let newScale = (stage.height() - 100) / diffY;
-                newScale = Math.min(5, Math.max(newScale, 0.5));
-                stage.scale({ x: newScale, y: newScale });
-            }
-
-            let layerX = minX;
-            let layerY = minY;
-
-            layerX += stage.x() / stage.scale().x;
-            layerY += stage.y() / stage.scale().y;
-
-            layerX -= stage.width() / 2 / stage.scale().x;
-            layerY -= stage.height() / 2 / stage.scale().x;
-
-            layerX += diffX / 2;
-            layerY += diffY / 2;
-
-            setLayerPosition(-layerX, -layerY);
-        }
     };
 
     const toggleCommunicationInterfacesMenu = (component: AugmentedSystemComponent): void => {
+        if (annotationTool !== null) {
+            return;
+        }
         setCommunicationMenuComponent(component);
         setCommunicationMenuOpen((prevState) => !prevState);
     };
@@ -983,7 +1186,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     };
 
     const handleCreateNewCommunicationInterface = ({ name, icon }: { name: string; icon: string }): void => {
-        if (!communicationMenuComponent) return;
+        if (!communicationMenuComponent) {
+            return;
+        }
         addCommunicationInterface(communicationMenuComponent.id, name, icon);
         setIsCommunicationInterfaceDialogOpen(false);
     };
@@ -1066,7 +1271,8 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                         position={stagePosition}
                         userRole={userRole}
                     >
-                        <Layer>
+                        {/* Static helper grid — listening=false skips Konva hit-testing for these shapes on every pointer event. */}
+                        <Layer listening={false}>
                             {lineArray.map((_item, index) => (
                                 <Line
                                     key={index}
@@ -1184,7 +1390,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                 const draggedComponent = components.filter(
                                     (component) => component.id === line.draggedComponentInfo.id
                                 )[0];
-                                if (!otherComponent || !draggedComponent) return null;
+                                if (!otherComponent || !draggedComponent) {
+                                    return null;
+                                }
 
                                 return (
                                     <ConnectionPreview
@@ -1208,7 +1416,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                 const toComponent = components.filter(
                                     (component) => component.id === connection.to.id
                                 )[0];
-                                if (!fromComponent || !toComponent) return null;
+                                if (!fromComponent || !toComponent) {
+                                    return null;
+                                }
 
                                 return (
                                     <SystemComponentConnection
@@ -1228,6 +1438,25 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                     />
                                 );
                             })}
+                            <AnnotationsCanvasLayer
+                                ref={annotationsLayerRef}
+                                annotations={annotations}
+                                selectedAnnotationId={selectedAnnotationId}
+                                editingAnnotationId={editingAnnotationId}
+                                editable={isEditor}
+                                stageScale={stageScale}
+                                onSelect={handleSelectAnnotation}
+                                onChange={updateAnnotation}
+                                onDragStateChange={handleAnnotationDragStateChange}
+                                onRequestEdit={handleRequestEdit}
+                                onExitEdit={handleExitEdit}
+                            />
+                            <AnnotationDrawingPreview
+                                drawingPreview={drawingPreview}
+                                annotationTool={annotationTool}
+                                color={annotationColor}
+                                strokeWidth={ANNOTATION_STROKE_WIDTH}
+                            />
                             {components.map((component, i) => (
                                 <SystemComponent
                                     key={i}
@@ -1253,65 +1482,42 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                 />
                             ))}
                         </Layer>
+                        {(editingAnnotation?.type === "text" || selectedAnnotation?.type === "text") && (
+                            <TextEditingToolbarLayer
+                                annotation={
+                                    editingAnnotation?.type === "text"
+                                        ? editingAnnotation
+                                        : (selectedAnnotation as TextAnnotation)
+                                }
+                                layerPosition={layerPosition}
+                                stagePosition={stagePosition}
+                                stageScale={stageScale}
+                                hidden={isAnnotationDragging}
+                                onChange={handleAnnotationChange}
+                                onColorChange={handleAnnotationColorChange}
+                                onColorPreview={handleAnnotationColorPreview}
+                                onColorOpen={bumpColorInteraction}
+                                onDelete={handleDeleteAnnotation}
+                            />
+                        )}
                     </EditorStage>
 
-                    <Box
-                        sx={{
-                            position: "absolute",
-                            top: 8,
-                            left: 8,
-                            width: "38px",
-                            marginLeft: "auto",
-                            marginRight: "auto",
-                        }}
-                    >
-                        <IconButton
-                            onClick={handleCenterEditor}
-                            sx={{
-                                backgroundColor: "background.paperIntransparent",
-                                "&:hover": {
-                                    backgroundColor: "rgba(149, 163, 181, 0.7)",
-                                },
-                            }}
-                        >
-                            <CenterFocusWeak sx={{ fontSize: 30, color: "primary.main" }} />
-                        </IconButton>
-                    </Box>
-                    <Box
-                        sx={{
-                            position: "absolute",
-                            top: 60,
-                            left: 8,
-                            width: "38px",
-                            marginLeft: "auto",
-                            marginRight: "auto",
-                        }}
-                    >
-                        <Tooltip title={t("canvas.exportSystemImage")}>
-                            <IconButton
-                                onClick={handleDownloadSystemView}
-                                sx={{
-                                    backgroundColor: "background.paperIntransparent",
-                                    "&:hover": {
-                                        backgroundColor: "rgba(149, 163, 181, 0.7)",
-                                    },
-                                }}
-                            >
-                                <Download
-                                    sx={{
-                                        fontSize: 30,
-                                        color: "primary.main",
-                                    }}
-                                />
-                            </IconButton>
-                        </Tooltip>
-                    </Box>
+                    <EditorToolbar
+                        onCenterEditor={handleCenterEditor}
+                        onDownloadSystemView={handleDownloadSystemView}
+                        showAnnotationTools={isEditor}
+                        annotationTool={effectiveAnnotationTool}
+                        onSetAnnotationTool={handleSetAnnotationTool}
+                        annotationColor={annotationColor}
+                        onSetAnnotationColor={setAnnotationColor}
+                    />
                 </Box>
 
                 <EditorSidebar
                     sidebarRef={sidebarRef}
-                    selectedComponent={selectedComponent}
-                    selectedComponentId={selectedComponentId}
+                    // Drop selected component from sidebar during drag — avoids the MUI 9 FormControl/InputBase setAdornedStart re-render loop on the high-frequency drag path.
+                    selectedComponent={isAnyComponentInUse ? undefined : selectedComponent}
+                    selectedComponentId={isAnyComponentInUse ? null : selectedComponentId}
                     selectedPointOfAttack={selectedPointOfAttack}
                     handleDeleteComponent={handleDeleteComponent}
                     handleOnNameChange={handleOnNameChange}
@@ -1330,7 +1536,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                     selectedConnectionPoint={selectedConnectionPoint}
                     userRole={userRole}
                     handleOnDescriptionChange={handleOnDescriptionChange}
-                    connectedComponents={getConnectedComponents(selectedComponentId)}
+                    connectedComponents={connectedComponentsForSelected}
                     handleDeleteConnectionBetweenComponents={handleDeleteConnectionBetweenComponents}
                     handleOnConnectionPointDescriptionChange={handleOnConnectionPointDescriptionChange}
                     handleChangeCommunicationInterfaceName={handleChangeCommunicationInterfaceName}
@@ -1340,6 +1546,11 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                     handleSelectConnectedComponent={handleSelectConnectedComponent}
                     handleComponentBreadcrumbClick={handleComponentBreadcrumbClick}
                     handleInterfaceBreadcrumbClick={handleInterfaceBreadcrumbClick}
+                    selectedAnnotation={selectedAnnotation}
+                    handleAnnotationColorChange={handleAnnotationColorChange}
+                    handleAnnotationColorPreview={handleAnnotationColorPreview}
+                    handleAnnotationChange={handleAnnotationChange}
+                    handleDeleteAnnotation={handleDeleteAnnotation}
                 />
 
                 <Routes>
@@ -1373,5 +1584,5 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     );
 };
 
-export const EditorPage = memo(CreatePage(HeaderNavigation, EditorPageBody, true));
+export const EditorPage = memo(CreatePage(HeaderUtilityControls, EditorPageBody, true));
 EditorPage.displayName = "EditorPage";

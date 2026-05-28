@@ -2,7 +2,7 @@
  * @module auth.service - Defines services for the authentication
  */
 
-import jwt from "jsonwebtoken";
+import { SignJWT } from "jose";
 import { JWT_AUDIENCE, JWT_ISSUER, JWT_SECRET } from "#config/config.js";
 import { db } from "#db/index.js";
 import { users } from "#db/schema.js";
@@ -78,18 +78,19 @@ export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promis
         throw new Error("Failed to retrieve user from database");
     }
 
-    const threatseaAccessToken = jwt.sign(
-        {
-            userId: user.id,
-            oidcId: userObject.sub,
-            email: email,
-            firstname: firstName,
-            lastname: lastName,
-            displayName: displayName,
-        },
-        JWT_SECRET,
-        { expiresIn: "7d", issuer: JWT_ISSUER, audience: JWT_AUDIENCE }
-    );
+    const threatseaAccessToken = await new SignJWT({
+        userId: user.id,
+        oidcId: userObject.sub,
+        email: email,
+        firstname: firstName,
+        lastname: lastName,
+        displayName: displayName,
+    })
+        .setProtectedHeader({ alg: "HS256" })
+        .setExpirationTime("7d")
+        .setIssuer(JWT_ISSUER)
+        .setAudience(JWT_AUDIENCE)
+        .sign(JWT_SECRET);
 
     return threatseaAccessToken;
 }

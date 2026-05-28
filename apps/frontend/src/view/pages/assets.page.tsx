@@ -17,7 +17,8 @@ import { NavigationActions } from "../../application/actions/navigation.actions"
 import { useAssetsList } from "../../application/hooks/use-assets-list.hook";
 import { IconButton } from "../components/icon-button.component";
 import { Page } from "../components/page.component";
-import { CreatePage, HeaderNavigation } from "../components/with-menu.component";
+import { CreatePage } from "../components/create-page.component";
+import { HeaderUtilityControls } from "../components/header-utility-controls.component";
 import { withProject } from "../components/with-project.hoc";
 import AssetDialogPage from "./asset-dialog.page";
 import { useConfirm } from "../../application/hooks/use-confirm.hook";
@@ -173,7 +174,12 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
         [t, userRole, columnFilters, handleFilterChange, expandedFilters, toggleFilterExpanded, handleDeleteAsset]
     );
 
-    const handleAssetsCount = (): string => (assets.length > 1 ? t("assetsFound") : t("assetFound"));
+    const handleAssetsCount = (): string => {
+        if (assets.length > 1) {
+            return t("assetsFound");
+        }
+        return t("assetFound");
+    };
 
     return (
         <Box sx={{ overflow: "hidden", height: "100%", boxSizing: "border-box" }}>
@@ -307,4 +313,4 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
     );
 };
 
-export const AssetsPage = CreatePage(HeaderNavigation, withProject(AssetsPageBody), true);
+export const AssetsPage = CreatePage(HeaderUtilityControls, withProject(AssetsPageBody), true);

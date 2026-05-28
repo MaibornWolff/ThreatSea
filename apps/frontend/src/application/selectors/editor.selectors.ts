@@ -157,4 +157,14 @@ export const editorSelectors = {
         [selectEditorState],
         (editor): ExtendedEditorState["autoSaveOnClick"] => editor.autoSaveOnClick
     ),
+
+    selectSelectedAnnotation: createSelector(
+        [selectEditorState],
+        (editor): ExtendedEditorState["selectedAnnotation"] => editor.selectedAnnotation
+    ),
+
+    selectAnnotationTool: createSelector(
+        [selectEditorState],
+        (editor): ExtendedEditorState["annotationTool"] => editor.annotationTool
+    ),
 };

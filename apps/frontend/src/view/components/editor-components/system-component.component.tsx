@@ -20,6 +20,8 @@ import type { Stage as KonvaStage } from "konva/lib/Stage";
 import type { GroupConfig } from "konva/lib/Group";
 import { AnchorOrientation, type AugmentedSystemComponent, type SystemPointOfAttack } from "#api/types/system.types.ts";
 import type { EditorConnectionAnchor } from "#application/hooks/use-editor.hook.ts";
+import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
+import { editorSelectors } from "#application/selectors/editor.selectors.ts";
 
 const COLORS = {
     normal: "#ffffffAA",
@@ -109,7 +111,9 @@ interface ConnectorProps {
 }
 
 const remapImagePath = (path: string | null | undefined): string | null | undefined => {
-    if (!path) return path;
+    if (!path) {
+        return path;
+    }
 
     const match = path.match(/\/([^/]+?)(?:\.[a-f0-9]+)?\.(?:png|webp|jpg|jpeg|svg)$/i);
     if (match) {
@@ -161,6 +165,9 @@ export const SystemComponent = ({
     const nameLength = Math.max(width - 20, name.length * 6 + 35);
 
     const handleMouseEnter = () => {
+        if (annotationTool !== null) {
+            return;
+        }
         setHover(true);
     };
 
@@ -169,18 +176,27 @@ export const SystemComponent = ({
     };
 
     const handleMouseEnterImage = () => {
+        if (annotationTool !== null) {
+            return;
+        }
         if (stageRef && stageRef.current) {
             stageRef.current.content.style.cursor = "pointer";
         }
     };
 
     const handleMouseOutImage = () => {
+        if (annotationTool !== null) {
+            return;
+        }
         if (stageRef && stageRef.current) {
             stageRef.current.content.style.cursor = "default";
         }
     };
 
     const handleSmallIconMouseEnter = () => {
+        if (annotationTool !== null) {
+            return;
+        }
         setIsSmallIconHovered(true);
         if (stageRef && stageRef.current) {
             stageRef.current.content.style.cursor = "pointer";
@@ -189,19 +205,30 @@ export const SystemComponent = ({
 
     const handleSmallIconMouseLeave = () => {
         setIsSmallIconHovered(false);
+        if (annotationTool !== null) {
+            return;
+        }
         if (stageRef && stageRef.current) {
             stageRef.current.content.style.cursor = "default";
         }
     };
 
     const [hover, setHover] = useState(false);
+    const isCapturing = useAppSelector((state) => state.editor.isCapturing);
+    const annotationTool = useAppSelector(editorSelectors.selectAnnotationTool);
+
+    // Hide selection / hover styling while a screenshot is being captured.
+    const visualSelected = selected && !isCapturing;
+    const visualHover = hover && !isCapturing;
+    const visualSelectedAnchor = isCapturing ? "" : selectedAnchor;
+    const visualSelectedPOA = isCapturing ? null : selectedPointOfAttackId;
 
     const interactConfig: InteractConfig = checkUserRole(userRole, USER_ROLES.EDITOR)
         ? {
               onMouseOver: handleMouseEnter,
               onMouseOut: handleMouseOut,
-              hover,
-              draggable: true,
+              hover: visualHover,
+              draggable: annotationTool === null,
           }
         : {
               onMouseOver: null,
@@ -226,8 +253,8 @@ export const SystemComponent = ({
             y={y}
             width={width}
             height={height}
-            selected={selected}
-            selectedAnchor={selectedAnchor}
+            selected={visualSelected}
+            selectedAnchor={visualSelectedAnchor}
             onSelectAnchor={handleSelectAnchor}
             onDragMove={onDragMove}
             onDragEnd={onDragEnd}
@@ -242,11 +269,11 @@ export const SystemComponent = ({
                     y={10}
                     width={width - 20}
                     height={height - 20}
-                    fill={hover ? COLORS.hover : selected ? COLORS.selected : COLORS.normal}
+                    fill={visualHover ? COLORS.hover : visualSelected ? COLORS.selected : COLORS.normal}
                     cornerRadius={150}
                     strokeWidth={2}
                 />
-                {!selected && (
+                {!visualSelected && (
                     <ComponentSelectedCircle
                         x={40}
                         y={40}
@@ -254,8 +281,8 @@ export const SystemComponent = ({
                         pointsOfAttack={filteredPointsOfAttack}
                         onPointOfAttackClicked={onPointOfAttackClicked}
                         onCommunicationInterfacesClicked={() => toggleCommunicationInterfacesMenu(component)}
-                        selectedPointOfAttackId={selectedPointOfAttackId}
-                        strokeWidth={hover ? 9 : 4}
+                        selectedPointOfAttackId={visualSelectedPOA}
+                        strokeWidth={visualHover ? 9 : 4}
                         component={component}
                         stageRef={stageRef}
                     />
@@ -267,7 +294,7 @@ export const SystemComponent = ({
                         y={40}
                         radius={(width - 20) / 2}
                         stroke={"#e5e8eb"}
-                        strokeWidth={hover || selected ? 9 : 4}
+                        strokeWidth={visualHover || visualSelected ? 9 : 4}
                     />
                 )}
 
@@ -283,7 +310,7 @@ export const SystemComponent = ({
                     onMouseOut={handleMouseOutImage}
                 />
 
-                {selected && (
+                {visualSelected && (
                     <ComponentSelectedCircle
                         radius={(width - 20) / 2}
                         x={40}
@@ -292,7 +319,7 @@ export const SystemComponent = ({
                         strokeWidth={9}
                         onPointOfAttackClicked={onPointOfAttackClicked}
                         onCommunicationInterfacesClicked={() => toggleCommunicationInterfacesMenu(component)}
-                        selectedPointOfAttackId={selectedPointOfAttackId}
+                        selectedPointOfAttackId={visualSelectedPOA}
                         component={component}
                         stageRef={stageRef}
                     />
@@ -384,10 +411,15 @@ const ConnectorGroup = ({
         return isPrimaryComponent ? Boolean(hover) && shouldDisplayConnectors : shouldDisplayConnectors;
     }, [hover, shouldDisplayConnectors, isPrimaryComponent, isDrawing, sourceType, componentType]);
 
+    const annotationToolForAnchor = useAppSelector(editorSelectors.selectAnnotationTool);
+
     const handleSelectAnchor: (event: KonvaEventObject<MouseEvent>, anchor: AnchorOrientation) => void = (
         event,
         anchor
     ) => {
+        if (annotationToolForAnchor !== null) {
+            return;
+        }
         if (isPrimaryComponent) {
             setDrawingState({ isDrawing: true, sourceType: "connector" });
         }
@@ -477,8 +509,12 @@ const Connector = ({
 
     const [hover, setHover] = useState(false);
     const selected = selectedAnchor === anchor;
+    const annotationTool = useAppSelector(editorSelectors.selectAnnotationTool);
 
     const onMouseEnter = () => {
+        if (annotationTool !== null) {
+            return;
+        }
         setHover(true);
         if (stageRef.current) {
             stageRef.current.content.style.cursor = "pointer";
@@ -487,6 +523,9 @@ const Connector = ({
 
     const onMouseLeave = () => {
         setHover(false);
+        if (annotationTool !== null) {
+            return;
+        }
         if (stageRef.current) {
             stageRef.current.content.style.cursor = "default";
         }

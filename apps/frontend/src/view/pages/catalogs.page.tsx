@@ -29,7 +29,8 @@ import { PageHeading } from "../components/page-heading.component";
 import { Page } from "../components/page.component";
 import { SearchField } from "../components/search-field.component";
 import { ToggleButtons } from "../components/toggle-buttons.component";
-import { CreatePage, HeaderNavigation } from "../components/with-menu.component";
+import { CreatePage } from "../components/create-page.component";
+import { HeaderUtilityControls } from "../components/header-utility-controls.component";
 import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
 import CatalogDialogPage from "./catalog-dialog.page";
 
@@ -342,4 +343,4 @@ const CatalogListItem = ({ catalog, onClick, onClickEdit, onClickDelete, ...prop
     );
 };
 
-export const CatalogsPage = CreatePage(HeaderNavigation, CatalogsPageBody);
+export const CatalogsPage = CreatePage(HeaderUtilityControls, CatalogsPageBody);

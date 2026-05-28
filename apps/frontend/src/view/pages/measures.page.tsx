@@ -13,7 +13,8 @@ import { useConfirm } from "../../application/hooks/use-confirm.hook";
 import { useMeasuresList } from "../../application/hooks/use-measures-list.hook";
 import { IconButton } from "../components/icon-button.component";
 import { Page } from "../components/page.component";
-import { CreatePage, HeaderNavigation } from "../components/with-menu.component";
+import { CreatePage } from "../components/create-page.component";
+import { HeaderUtilityControls } from "../components/header-utility-controls.component";
 import { withProject } from "../components/with-project.hoc";
 import MeasureDetailsDialogPage from "./measure-details-dialog.page";
 import { MeasureImpactByThreatDialogPage } from "./measure-impact-by-threat-dialog.page";
@@ -212,7 +213,12 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
         ]
     );
 
-    const handleMeasureCount = (): string => (measures.length > 1 ? t("measuresFound") : t("measureFound"));
+    const handleMeasureCount = (): string => {
+        if (measures.length > 1) {
+            return t("measuresFound");
+        }
+        return t("measureFound");
+    };
 
     return (
         <Box sx={{ overflow: "hidden", height: "100%", boxSizing: "border-box" }}>
@@ -348,4 +354,4 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
     );
 };
 
-export const MeasuresPage = CreatePage(HeaderNavigation, withProject(MeasuresPageBody), true);
+export const MeasuresPage = CreatePage(HeaderUtilityControls, withProject(MeasuresPageBody), true);

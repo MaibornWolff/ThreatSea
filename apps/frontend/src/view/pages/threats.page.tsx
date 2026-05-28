@@ -22,7 +22,8 @@ import { useConfirm } from "../../application/hooks/use-confirm.hook";
 import { useEditor } from "../../application/hooks/use-editor.hook";
 import { useThreatsList, type ThreatListItem } from "../../application/hooks/use-threats-list.hook";
 import { Page } from "../components/page.component";
-import { CreatePage, HeaderNavigation } from "../components/with-menu.component";
+import { CreatePage } from "../components/create-page.component";
+import { HeaderUtilityControls } from "../components/header-utility-controls.component";
 import ThreatDialogPage from "./threat-dialog.page";
 import { withProject } from "../components/with-project.hoc";
 import { createThreatsColumns } from "./threats.columns";
@@ -433,4 +434,4 @@ const ThreatsPageBody = ({ project }: { project: ExtendedProject }) => {
     );
 };
 
-export const ThreatsPage = CreatePage(HeaderNavigation, withProject(ThreatsPageBody), true);
+export const ThreatsPage = CreatePage(HeaderUtilityControls, withProject(ThreatsPageBody), true);

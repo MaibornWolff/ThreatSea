@@ -17,9 +17,12 @@ mockUseAlert();
 
 // --- Child component mocks (isolate page from canvas/sidebar internals) ---
 
-vi.mock("../components/with-menu.component", () => ({
+vi.mock("../components/create-page.component", () => ({
     CreatePage: (_Header: unknown, Body: unknown) => Body,
-    HeaderNavigation: () => null,
+}));
+
+vi.mock("../components/header-utility-controls.component", () => ({
+    HeaderUtilityControls: () => null,
 }));
 
 vi.mock("../components/editor-components/editor-sidebar.component", () => ({
@@ -58,12 +61,6 @@ vi.mock("./asset-dialog.page", () => ({
 
 vi.mock("./component-dialog.page", () => ({
     default: () => <div data-testid="component-dialog-page" />,
-}));
-
-vi.mock("react-konva", () => ({
-    Group: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
-    Layer: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
-    Line: () => null,
 }));
 
 vi.mock("../components/editor-components/contexts/LineDrawingProvider", () => ({

@@ -6,6 +6,7 @@ const setup = (propsOverride: Partial<PointOfAttackSwitchProps> = {}) => {
     const props = {
         color: "#ff0000",
         label: "Test Label",
+        ariaLabel: "Test Label",
         onLabelClick: vi.fn(),
         checked: false,
         onChange: vi.fn(),

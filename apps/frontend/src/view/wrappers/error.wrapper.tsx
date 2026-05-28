@@ -184,6 +184,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
                                 <Typography sx={{ fontSize: "0.75rem" }}>
                                     <Typography
+                                        component="span"
                                         sx={{
                                             fontWeight: "bold",
                                             display: "inline-block",

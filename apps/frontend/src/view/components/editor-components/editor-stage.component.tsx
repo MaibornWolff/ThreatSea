@@ -28,7 +28,9 @@ interface EditorStageProps {
     ref?: Ref<KonvaStage>;
 }
 
-const scaleBy = 1.025;
+const scaleBy = 1.1;
+export const MIN_STAGE_SCALE = 0.5;
+export const MAX_STAGE_SCALE = 20;
 
 export const EditorStage = ({
     children,
@@ -56,10 +58,14 @@ export const EditorStage = ({
         (event: KonvaEventObject<WheelEvent>) => {
             event.evt.preventDefault();
             const stage = stageRef.current;
-            if (!stage) return;
+            if (!stage) {
+                return;
+            }
 
             const pointer = stage.getPointerPosition();
-            if (!pointer) return;
+            if (!pointer) {
+                return;
+            }
 
             const oldScale = stage.scaleX();
 
@@ -69,7 +75,7 @@ export const EditorStage = ({
             };
 
             let newScale = event.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy;
-            newScale = Math.min(5, Math.max(newScale, 0.5));
+            newScale = Math.min(MAX_STAGE_SCALE, Math.max(newScale, MIN_STAGE_SCALE));
 
             stage.scale({ x: newScale, y: newScale });
 
@@ -88,10 +94,14 @@ export const EditorStage = ({
             event.evt.preventDefault();
             const stage = stageRef.current;
             const contextMenu = contextMenuRef.current;
-            if (!stage || !contextMenu) return;
+            if (!stage || !contextMenu) {
+                return;
+            }
 
             const pointer = stage.getPointerPosition();
-            if (!pointer) return;
+            if (!pointer) {
+                return;
+            }
 
             let { x, y } = pointer;
 
@@ -134,7 +144,9 @@ export const EditorStage = ({
     useEffect(() => {
         const box = boxRef.current;
         const stage = stageRef.current;
-        if (!box || !stage) return;
+        if (!box || !stage) {
+            return;
+        }
 
         const resizeObserver = new ResizeObserver(() => {
             stage.width(box.clientWidth);

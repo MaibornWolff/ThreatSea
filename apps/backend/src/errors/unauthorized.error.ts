@@ -1,5 +1,5 @@
 import { ErrorResponse, ServerError } from "#errors/server.error.js";
-import { JsonWebTokenError, NotBeforeError, TokenExpiredError } from "jsonwebtoken";
+import { errors } from "jose";
 
 export class UnauthorizedError extends ServerError {
     constructor(message = "Unauthorized", code: string | null = null) {
@@ -12,7 +12,7 @@ export class UnauthorizedError extends ServerError {
 }
 
 export class JWTError extends UnauthorizedError {
-    constructor(error: TokenExpiredError | JsonWebTokenError | NotBeforeError) {
+    constructor(error: errors.JOSEError) {
         super(error.message, "EJWTERROR");
     }
 

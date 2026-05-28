@@ -36,15 +36,19 @@ export const useMembersList = (projectCatalogId: number, memberPath: string, mem
         const sortField: MemberSortField = sortableMemberFields.includes(sortBy as MemberSortField)
             ? (sortBy as MemberSortField)
             : "name";
+        const direction = sortDirection === "asc" ? 1 : -1;
+        const getKey = (member: Member) => (sortField === "role" ? member.role : member[sortField].toLowerCase());
 
-        return filteredItems.sort((a, b) => {
-            if (sortDirection === "asc") {
-                if (sortField === "role") return a[sortField] < b[sortField] ? -1 : 1;
-                else return a[sortField].toLowerCase() < b[sortField].toLowerCase() ? -1 : 1;
-            } else {
-                if (sortField === "role") return a[sortField] > b[sortField] ? -1 : 1;
-                else return a[sortField].toLowerCase() > b[sortField].toLowerCase() ? -1 : 1;
+        return filteredItems.toSorted((a, b) => {
+            const aKey = getKey(a);
+            const bKey = getKey(b);
+            if (aKey < bKey) {
+                return -direction;
             }
+            if (aKey > bKey) {
+                return direction;
+            }
+            return 0;
         });
     }, [filteredItems, sortBy, sortDirection]);
 

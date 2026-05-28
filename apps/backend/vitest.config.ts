@@ -2,6 +2,8 @@ import "dotenv/config";
 import { defineConfig } from "vitest/config";
 import path from "path";
 
+process.env["DATABASE_NAME"] = "threatsea_test";
+
 export default defineConfig({
     test: {
         include: ["./tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],

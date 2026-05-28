@@ -1,6 +1,7 @@
 services:
   postgres:
-    image: postgres:18.3-alpine
+    image: postgres:18.4-alpine
+    container_name: threatsea-dev-db
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U threatsea -d threatsea"]
@@ -14,13 +15,14 @@ services:
     security_opt:
       - no-new-privileges:true
     volumes:
-      - threatsea_data:/var/lib/postgresql/data
+      - threatsea_data:/var/lib/postgresql
     ports:
       - "5432:5432"
     networks:
       - threatsea
 
   threatsea:
+    container_name: threatsea-dev
     restart: unless-stopped
     depends_on:
       postgres:

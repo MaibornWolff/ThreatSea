@@ -1,0 +1,165 @@
+{
+    "systemImage": null,
+    "milestones": null,
+    "project": {
+        "id": 1,
+        "catalogId": 1,
+        "name": "Sample Project",
+        "description": "This is the project description.\n\nIt spans multiple paragraphs.\nWith line breaks.",
+        "confidentialityLevel": "INTERNAL",
+        "lineOfToleranceGreen": 6,
+        "lineOfToleranceRed": 12,
+        "createdAt": "2024-01-01T00:00:00.000Z",
+        "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    "assets": [
+        {
+            "id": 1,
+            "name": "Customer Database",
+            "description": "Stores all customer PII data.",
+            "confidentiality": 4,
+            "integrity": 3,
+            "availability": 2,
+            "confidentialityJustification": "Contains names, addresses and payment data.",
+            "integrityJustification": "Data must be accurate for billing.",
+            "availabilityJustification": "Required during business hours.",
+            "projectId": 1,
+            "reportId": "A-01",
+            "createdAt": "2024-01-01T00:00:00.000Z",
+            "updatedAt": "2024-01-01T00:00:00.000Z"
+        },
+        {
+            "id": 2,
+            "name": "Authentication Service",
+            "description": "Manages user sessions and tokens.",
+            "confidentiality": 5,
+            "integrity": 5,
+            "availability": 4,
+            "confidentialityJustification": "Holds credentials and session secrets.",
+            "integrityJustification": "Tampered tokens grant unauthorised access.",
+            "availabilityJustification": "Login must always be reachable.",
+            "projectId": 1,
+            "reportId": "A-02",
+            "createdAt": "2024-01-01T00:00:00.000Z",
+            "updatedAt": "2024-01-01T00:00:00.000Z"
+        }
+    ],
+    "threats": [
+        {
+            "id": 1,
+            "pointOfAttackId": "poa-1",
+            "catalogThreatId": 1,
+            "name": "SQL Injection",
+            "description": "An attacker injects SQL commands via unvalidated input.\nThis can lead to data exfiltration or destruction.",
+            "pointOfAttack": "DATA_STORAGE_INFRASTRUCTURE",
+            "attacker": "UNAUTHORISED_PARTIES",
+            "probability": 3,
+            "confidentiality": true,
+            "integrity": true,
+            "availability": false,
+            "doneEditing": true,
+            "projectId": 1,
+            "componentName": "Database Server",
+            "componentType": null,
+            "interfaceName": null,
+            "damage": 4,
+            "risk": 12,
+            "netProbability": 2,
+            "netDamage": 4,
+            "netRisk": 8,
+            "reportId": "T-01",
+            "bruttoColor": "red",
+            "nettoColor": "yellow",
+            "assets": [
+                { "id": 1, "name": "Customer Database", "reportId": "A-01" }
+            ],
+            "measures": [
+                {
+                    "id": 1,
+                    "measureId": 1,
+                    "threatId": 1,
+                    "description": "Parameterised queries have been added to all database calls.",
+                    "setsOutOfScope": false,
+                    "impactsProbability": true,
+                    "impactsDamage": false,
+                    "probability": 2,
+                    "damage": null,
+                    "projectId": 1,
+                    "reportId": "M-01",
+                    "name": "Input Validation",
+                    "scheduledAt": "2024-06-01T00:00:00.000Z",
+                    "createdAt": "2024-01-01T00:00:00.000Z",
+                    "updatedAt": "2024-01-01T00:00:00.000Z"
+                }
+            ],
+            "createdAt": "2024-01-01T00:00:00.000Z",
+            "updatedAt": "2024-01-01T00:00:00.000Z"
+        },
+        {
+            "id": 2,
+            "pointOfAttackId": "poa-2",
+            "catalogThreatId": 2,
+            "name": "Brute Force Login",
+            "description": "Repeated login attempts to guess credentials.",
+            "pointOfAttack": "USER_INTERFACE",
+            "attacker": "UNAUTHORISED_PARTIES",
+            "probability": 4,
+            "confidentiality": true,
+            "integrity": false,
+            "availability": false,
+            "doneEditing": true,
+            "projectId": 1,
+            "componentName": "Login Form",
+            "componentType": null,
+            "interfaceName": null,
+            "damage": 3,
+            "risk": 12,
+            "netProbability": 2,
+            "netDamage": 3,
+            "netRisk": 6,
+            "reportId": "T-02",
+            "bruttoColor": "red",
+            "nettoColor": "green",
+            "assets": [
+                { "id": 2, "name": "Authentication Service", "reportId": "A-02" }
+            ],
+            "measures": [],
+            "createdAt": "2024-01-01T00:00:00.000Z",
+            "updatedAt": "2024-01-01T00:00:00.000Z"
+        }
+    ],
+    "measures": [
+        {
+            "id": 1,
+            "name": "Input Validation",
+            "description": "Use parameterised queries and input sanitisation to prevent injection attacks.",
+            "scheduledAt": "2024-06-01T00:00:00.000Z",
+            "projectId": 1,
+            "catalogMeasureId": null,
+            "reportId": "M-01",
+            "threats": [
+                { "id": 1, "reportId": "T-01", "name": "SQL Injection" }
+            ],
+            "createdAt": "2024-01-01T00:00:00.000Z",
+            "updatedAt": "2024-01-01T00:00:00.000Z"
+        }
+    ],
+    "measureImpacts": [
+        {
+            "id": 1,
+            "measureId": 1,
+            "threatId": 1,
+            "description": "Parameterised queries have been added to all database calls.",
+            "setsOutOfScope": false,
+            "impactsProbability": true,
+            "impactsDamage": false,
+            "probability": 2,
+            "damage": null,
+            "projectId": 1,
+            "measureReportId": "M-01",
+            "threatReportId": "T-01",
+            "createdAt": "2024-01-01T00:00:00.000Z",
+            "updatedAt": "2024-01-01T00:00:00.000Z"
+        }
+    ]
+}

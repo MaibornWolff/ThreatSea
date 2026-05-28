@@ -70,14 +70,18 @@ export const useThreats = ({ projectId }: { projectId: number }) => {
     };
 
     useEffect(() => {
-        socket.on("set_threat", (data) => {
-            const threat = JSON.parse(data);
-            dispatch(ThreatsActions.setThreat(threat));
-        });
-        socket.on("remove_threat", (data) => {
-            const threat = JSON.parse(data);
-            dispatch(ThreatsActions.removeThreat(threat));
-        });
+        const handleSet = (data: string) => {
+            dispatch(ThreatsActions.setThreat(JSON.parse(data)));
+        };
+        const handleRemove = (data: string) => {
+            dispatch(ThreatsActions.removeThreat(JSON.parse(data)));
+        };
+        socket.on("set_threat", handleSet);
+        socket.on("remove_threat", handleRemove);
+        return () => {
+            socket.off("set_threat", handleSet);
+            socket.off("remove_threat", handleRemove);
+        };
     }, [dispatch]);
 
     return {

@@ -2,6 +2,7 @@ import { createReducer } from "@reduxjs/toolkit";
 import { PointsOfAttackActions } from "../actions/points-of-attack.actions";
 import { SystemActions } from "../actions/system.actions";
 import { pointsOfAttackAdapter } from "../adapters/points-of-attack.adapter";
+import { systemAnnotationsAdapter } from "../adapters/system-annotations.adapter";
 import { systemComponentsAdapter } from "../adapters/system-components.adapter";
 import { systemConnectionPointsAdapter, type SystemConnectionPoint } from "../adapters/system-connection-point.adapter";
 import { systemConnectionsAdapter } from "../adapters/system-connections.adapter";
@@ -11,6 +12,7 @@ type ComponentsState = ReturnType<typeof systemComponentsAdapter.getInitialState
 type ConnectionsState = ReturnType<typeof systemConnectionsAdapter.getInitialState>;
 type ConnectionPointsState = ReturnType<typeof systemConnectionPointsAdapter.getInitialState>;
 type PointsOfAttackState = ReturnType<typeof pointsOfAttackAdapter.getInitialState>;
+type AnnotationsState = ReturnType<typeof systemAnnotationsAdapter.getInitialState>;
 
 export interface SystemState {
     id: number | null;
@@ -18,11 +20,14 @@ export interface SystemState {
     connections: ConnectionsState;
     connectionPoints: ConnectionPointsState;
     pointsOfAttack: PointsOfAttackState;
+    annotations: AnnotationsState;
+    defaultAnnotationColorByProject: Record<number, string>;
     isPending: boolean;
     initialized: boolean;
     hasChanged: boolean;
     blockAutoSave: boolean;
     refreshCounter: number;
+    loadedProjectId: number | null;
 }
 
 const defaultState: SystemState = {
@@ -31,11 +36,14 @@ const defaultState: SystemState = {
     connections: systemConnectionsAdapter.getInitialState(),
     connectionPoints: systemConnectionPointsAdapter.getInitialState(),
     pointsOfAttack: pointsOfAttackAdapter.getInitialState(),
+    annotations: systemAnnotationsAdapter.getInitialState(),
+    defaultAnnotationColorByProject: {},
     isPending: false,
     initialized: false,
     hasChanged: false,
     blockAutoSave: false,
     refreshCounter: 0,
+    loadedProjectId: null,
 };
 
 const systemReducer = createReducer(defaultState, (builder) => {
@@ -241,6 +249,51 @@ const systemReducer = createReducer(defaultState, (builder) => {
 
     builder.addCase(SystemActions.setInitialized, (state, action) => {
         state.initialized = action.payload;
+    });
+
+    builder.addCase(SystemActions.setLoadedProjectId, (state, action) => {
+        state.loadedProjectId = action.payload;
+    });
+
+    builder.addCase(SystemActions.createAnnotation, (state, action) => {
+        systemAnnotationsAdapter.addOne(state.annotations, action.payload);
+        state.hasChanged = true;
+        state.blockAutoSave = true;
+    });
+
+    builder.addCase(SystemActions.setAnnotation, (state, action) => {
+        systemAnnotationsAdapter.updateOne(state.annotations, action.payload);
+        state.hasChanged = true;
+        state.blockAutoSave = true;
+    });
+
+    builder.addCase(SystemActions.removeAnnotation, (state, action) => {
+        systemAnnotationsAdapter.removeOne(state.annotations, action.payload.id);
+        state.hasChanged = true;
+        state.blockAutoSave = true;
+    });
+
+    builder.addCase(SystemActions.setAnnotations, (state, action) => {
+        // Load-path setter (dispatched from the `getSystem` success middleware).
+        // Hydrating from the backend is not a user change, so we leave
+        // `hasChanged` alone — otherwise opening a project would immediately
+        // mark it dirty and trigger an unnecessary autosave round-trip.
+        systemAnnotationsAdapter.upsertMany(state.annotations, action);
+    });
+
+    builder.addCase(SystemActions.setDefaultAnnotationColor, (state, action) => {
+        state.defaultAnnotationColorByProject[action.payload.projectId] = action.payload.color;
+        state.hasChanged = true;
+        state.blockAutoSave = true;
+    });
+
+    builder.addCase(SystemActions.setDefaultAnnotationColorFromBackend, (state, action) => {
+        const { projectId, color } = action.payload;
+        if (color === null) {
+            delete state.defaultAnnotationColorByProject[projectId];
+        } else {
+            state.defaultAnnotationColorByProject[projectId] = color;
+        }
     });
 });
 

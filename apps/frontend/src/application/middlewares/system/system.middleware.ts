@@ -1,15 +1,13 @@
-import { batch } from "react-redux";
 import type { AppMiddleware } from "../types";
 import { checkUserRole, USER_ROLES } from "../../../api/types/user-roles.types";
 import { translationUtil } from "../../../utils/translations";
 import { AlertActions } from "../../actions/alert.actions";
 import { EditorActions } from "../../actions/editor.actions";
 import { PointsOfAttackActions } from "../../actions/points-of-attack.actions";
-import { SystemActions } from "../../actions/system.actions";
+import { SystemActions, trackInFlightSave } from "../../actions/system.actions";
 import { ProjectsActions } from "../../actions/projects.actions";
 import type { Connection, SystemComponent, SystemConnection, UpdateSystemRequest } from "#api/types/system.types.ts";
 import type { EditorState } from "#application/reducers/editor.reducer.ts";
-import type { AppDispatch } from "#application/store.types.ts";
 
 const handleSaveSystem: AppMiddleware =
     ({ dispatch, getState }) =>
@@ -23,11 +21,18 @@ const handleSaveSystem: AppMiddleware =
         ) {
             const { projectId, image } = action.payload;
             const { system, editor } = getState();
-            const { id, connections, components, pointsOfAttack, connectionPoints } = system;
+            const {
+                id,
+                connections,
+                components,
+                pointsOfAttack,
+                connectionPoints,
+                annotations,
+                defaultAnnotationColorByProject,
+            } = system;
             const { lastAutoSaveDate } = editor;
             const data: UpdateSystemRequest = {
                 projectId,
-                image,
                 data: {
                     connections: Object.values(connections.entities)
                         .filter((item) => item.projectId === projectId)
@@ -41,16 +46,26 @@ const handleSaveSystem: AppMiddleware =
                     connectionPoints: Object.values(connectionPoints.entities).filter(
                         (item) => item.projectId === projectId
                     ),
+                    annotations: Object.values(annotations.entities)
+                        .filter((item) => item.projectId === projectId)
+                        .filter((item) => item.type !== "text" || (item.text ?? "").trim().length > 0),
+                    defaultAnnotationColor: defaultAnnotationColorByProject[projectId] ?? null,
                     lastAutoSaveDate,
                 },
             };
+            // Omit `image` when missing so the backend keeps the existing one.
+            if (image !== undefined) {
+                data.image = image;
+            }
             // TODO: Is id legacy? Should this check be removed/altered? As far as I can see it is not needed.
             if (id) {
                 (data as UpdateSystemRequest & { id: number | null }).id = id;
             }
             dispatch(EditorActions.setAutoSaveStatus("saving"));
             dispatch(EditorActions.setAutoSaveText(""));
-            dispatch(SystemActions.updateSystem(data))
+            const dispatched = dispatch(SystemActions.updateSystem(data));
+            trackInFlightSave(dispatched);
+            dispatched
                 .unwrap()
                 .then((result) => {
                     if (!result) {
@@ -143,15 +158,6 @@ const compareConnections = (connection1: Connection, connection2: SystemConnecti
     );
 };
 
-let debounceScreenshotTimeoutTimer: ReturnType<typeof setTimeout>;
-export const debouncedMakeAScreenshot = (dispatch: AppDispatch) => {
-    clearTimeout(debounceScreenshotTimeoutTimer);
-
-    debounceScreenshotTimeoutTimer = setTimeout(() => {
-        dispatch(EditorActions.makeAScreenshot());
-    }, 500);
-};
-
 const handleUserDidSomething: AppMiddleware =
     ({ dispatch, getState }) =>
     (next) =>
@@ -168,6 +174,10 @@ const handleUserDidSomething: AppMiddleware =
             SystemActions.removeComponent.match(action) ||
             SystemActions.removeConnection.match(action) ||
             SystemActions.removeConnectionPoint.match(action) ||
+            SystemActions.createAnnotation.match(action) ||
+            SystemActions.setAnnotation.match(action) ||
+            SystemActions.removeAnnotation.match(action) ||
+            SystemActions.setDefaultAnnotationColor.match(action) ||
             PointsOfAttackActions.createPointOfAttack.match(action) ||
             PointsOfAttackActions.setPointOfAttack.match(action) ||
             PointsOfAttackActions.removePointOfAttack.match(action)
@@ -175,7 +185,7 @@ const handleUserDidSomething: AppMiddleware =
             const { editor } = getState();
             const { autoSaveStatus, lastAutoSaveDate } = editor;
 
-            debouncedMakeAScreenshot(dispatch);
+            dispatch(EditorActions.makeAScreenshot());
 
             if (autoSaveStatus !== "notUpToDate" && autoSaveStatus !== "saving") {
                 dispatch(EditorActions.setAutoSaveStatus("notUpToDate"));
@@ -197,51 +207,61 @@ const handleSuccessfulRequest: AppMiddleware =
     (action) => {
         next(action);
         if (SystemActions.getSystem.fulfilled.match(action)) {
-            batch(() => {
-                if (action.payload) {
-                    const { data, id } = action.payload;
+            if (action.payload) {
+                const { data, id } = action.payload;
 
-                    if (data) {
-                        const { components, connections, connectionPoints, pointsOfAttack, lastAutoSaveDate } = data;
-                        if (id) {
-                            dispatch(SystemActions.setSystemId(id));
-                        }
-                        if (components) {
-                            dispatch(SystemActions.setComponents(components));
-                        }
-                        if (connections) {
-                            dispatch(SystemActions.setConnections(connections));
-                        }
-                        if (connectionPoints) {
-                            dispatch(SystemActions.setConnectionPoints(connectionPoints));
-                        }
-                        if (pointsOfAttack) {
-                            dispatch(PointsOfAttackActions.setPointsOfAttack(pointsOfAttack));
-                        }
-                        if (lastAutoSaveDate) {
-                            dispatch(EditorActions.setLastAutoSaveDate(lastAutoSaveDate));
-                        } else {
-                            dispatch(EditorActions.setLastAutoSaveDate(""));
-                        }
+                if (data) {
+                    const { components, connections, connectionPoints, pointsOfAttack, annotations, lastAutoSaveDate } =
+                        data;
+                    if (id) {
+                        dispatch(SystemActions.setSystemId(id));
+                    }
+                    if (components) {
+                        dispatch(SystemActions.setComponents(components));
+                    }
+                    if (connections) {
+                        dispatch(SystemActions.setConnections(connections));
+                    }
+                    if (connectionPoints) {
+                        dispatch(SystemActions.setConnectionPoints(connectionPoints));
+                    }
+                    if (pointsOfAttack) {
+                        dispatch(PointsOfAttackActions.setPointsOfAttack(pointsOfAttack));
+                    }
+                    dispatch(SystemActions.setAnnotations(annotations ?? []));
+                    if (lastAutoSaveDate) {
+                        dispatch(EditorActions.setLastAutoSaveDate(lastAutoSaveDate));
+                    } else {
+                        dispatch(EditorActions.setLastAutoSaveDate(""));
                     }
                 } else {
                     dispatch(SystemActions.clearSystem());
+                    dispatch(EditorActions.setLastAutoSaveDate(""));
                 }
-
-                const { editor } = getState();
-                const { lastAutoSaveDate } = editor;
-
-                dispatch(SystemActions.setPendingState(false));
-                dispatch(SystemActions.setInitialized(true));
-                dispatch(EditorActions.setAutoSaveStatus("upToDate"));
                 dispatch(
-                    EditorActions.setAutoSaveText(
-                        translationUtil.t("editorPage:autoSave.upToDate", {
-                            date: lastAutoSaveDate,
-                        })
-                    )
+                    SystemActions.setDefaultAnnotationColorFromBackend({
+                        projectId: action.meta.arg.projectId,
+                        color: data?.defaultAnnotationColor ?? null,
+                    })
                 );
-            });
+            } else {
+                dispatch(SystemActions.clearSystem());
+            }
+
+            const { editor } = getState();
+            const { lastAutoSaveDate } = editor;
+
+            dispatch(SystemActions.setPendingState(false));
+            dispatch(SystemActions.setInitialized(true));
+            dispatch(SystemActions.setLoadedProjectId(action.meta.arg.projectId));
+            dispatch(EditorActions.setAutoSaveStatus("upToDate"));
+            dispatch(
+                EditorActions.setAutoSaveText(
+                    translationUtil.t("editorPage:autoSave.upToDate", {
+                        date: lastAutoSaveDate,
+                    })
+                )
+            );
         } else if (SystemActions.updateSystem.fulfilled.match(action)) {
             const { system, editor } = getState();
             // TODO: Bug? Should blockAutoSave come from SystemState instead?
@@ -278,28 +298,24 @@ const handleSuccessfulRequest: AppMiddleware =
             }
 
             if (equal) {
-                batch(() => {
-                    dispatch(EditorActions.setAutoSaveStatus("upToDate"));
-                    dispatch(
-                        EditorActions.setAutoSaveText(
-                            translationUtil.t("editorPage:autoSave.upToDate", {
-                                date: lastAutoSaveDate,
-                            })
-                        )
-                    );
-                });
+                dispatch(EditorActions.setAutoSaveStatus("upToDate"));
+                dispatch(
+                    EditorActions.setAutoSaveText(
+                        translationUtil.t("editorPage:autoSave.upToDate", {
+                            date: lastAutoSaveDate,
+                        })
+                    )
+                );
             } else {
-                batch(() => {
-                    dispatch(EditorActions.setAutoSaveStatus("notUpToDate"));
-                    dispatch(
-                        EditorActions.setAutoSaveText(
-                            translationUtil.t("editorPage:autoSave.notUpToDate", {
-                                date: lastAutoSaveDate,
-                            })
-                        )
-                    );
-                    dispatch(SystemActions.setAutoSavedBlocked(!blockAutoSave)); // Trigger another auto save
-                });
+                dispatch(EditorActions.setAutoSaveStatus("notUpToDate"));
+                dispatch(
+                    EditorActions.setAutoSaveText(
+                        translationUtil.t("editorPage:autoSave.notUpToDate", {
+                            date: lastAutoSaveDate,
+                        })
+                    )
+                );
+                dispatch(SystemActions.setAutoSavedBlocked(!blockAutoSave)); // Trigger another auto save
             }
         }
     };

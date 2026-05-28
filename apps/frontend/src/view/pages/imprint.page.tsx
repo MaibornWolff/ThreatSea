@@ -3,7 +3,8 @@ import { useLayoutEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { NavigationActions } from "../../application/actions/navigation.actions";
 import { Page } from "../components/page.component";
-import { CreatePage, HeaderNavigation } from "../components/with-menu.component";
+import { CreatePage } from "../components/create-page.component";
+import { HeaderUtilityControls } from "../components/header-utility-controls.component";
 import Markdown from "markdown-to-jsx";
 import { useGetMarkdownText } from "../wrappers/markdown.wrapper";
 import { useAppDispatch } from "#application/hooks/use-app-redux.hook.ts";
@@ -56,4 +57,4 @@ const ImprintPageBody = () => {
     );
 };
 
-export const ImprintPage = CreatePage(HeaderNavigation, ImprintPageBody);
+export const ImprintPage = CreatePage(HeaderUtilityControls, ImprintPageBody);

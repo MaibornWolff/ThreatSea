@@ -11,7 +11,7 @@ type PdfPageProps = Omit<ComponentProps<typeof PdfPage>, "children">;
 
 interface CoverPageProps extends ProjectReport, PdfPageProps {
     indexCallback: IndexCallback;
-    systemImageOnSeperatePage?: boolean;
+    systemImageOnSeparatePage?: boolean;
     logo: string | undefined;
     companyLogo: string | undefined;
     date: string;
@@ -20,7 +20,7 @@ interface CoverPageProps extends ProjectReport, PdfPageProps {
 
 export const CoverPage: FC<CoverPageProps> = ({
     indexCallback,
-    systemImageOnSeperatePage = false,
+    systemImageOnSeparatePage = false,
     systemImage,
     logo,
     companyLogo,
@@ -91,7 +91,7 @@ export const CoverPage: FC<CoverPageProps> = ({
                     {project?.description}
                 </Text>
             </View>
-            {!systemImageOnSeperatePage && (
+            {!systemImageOnSeparatePage && (
                 <View>
                     <SystemImage src={systemImage} style={{ marginTop: s6 }} />
                     <SystemImageLegend language={language} style={{ marginTop: s1 }} />

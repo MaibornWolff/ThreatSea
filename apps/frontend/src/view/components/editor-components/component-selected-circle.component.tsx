@@ -5,6 +5,8 @@ import { POINTS_OF_ATTACK } from "../../../api/types/points-of-attack.types";
 import type { Stage } from "konva/lib/Stage";
 import type { KonvaEventObject } from "konva/lib/Node";
 import type { SystemComponent, SystemPointOfAttack } from "#api/types/system.types.ts";
+import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
+import { editorSelectors } from "#application/selectors/editor.selectors.ts";
 
 interface ComponentSelectedCircleProps {
     radius: number;
@@ -37,21 +39,30 @@ export const ComponentSelectedCircle = ({
 }: ComponentSelectedCircleProps) => {
     const [hover, setHover] = useState(false);
     const [lineIndex, setLineIndex] = useState<number>(2);
+    const isCapturing = useAppSelector((state) => state.editor.isCapturing);
+    const annotationTool = useAppSelector(editorSelectors.selectAnnotationTool);
+    const visualHover = hover && !isCapturing;
 
     const onMouseEnter = (index: number) => {
+        if (annotationTool !== null) {
+            return;
+        }
+        setLineIndex(index);
+        setHover(true);
         if (stageRef && stageRef.current) {
             stageRef.current.content.style.cursor = "pointer";
         }
-        setLineIndex(index); // Do not move this below setHover
-        setHover(true);
     };
 
     const onMouseLeave = () => {
+        setLineIndex(-1);
+        setHover(false);
+        if (annotationTool !== null) {
+            return;
+        }
         if (stageRef && stageRef.current) {
             stageRef.current.content.style.cursor = "default";
         }
-        setLineIndex(-1);
-        setHover(false);
     };
 
     const arcs = useMemo(() => {
@@ -73,7 +84,7 @@ export const ComponentSelectedCircle = ({
                 startAngle,
                 endAngle,
                 stroke:
-                    hover && lineIndex === index
+                    visualHover && lineIndex === index
                         ? POA_COLORS[pointOfAttack.type].hover
                         : selected
                           ? POA_COLORS[pointOfAttack.type].selected
@@ -84,33 +95,31 @@ export const ComponentSelectedCircle = ({
         });
 
         return values;
-    }, [pointsOfAttack, hover, selectedPointOfAttackId, lineIndex]);
+    }, [pointsOfAttack, visualHover, selectedPointOfAttackId, lineIndex]);
 
     return (
-        <>
-            <Group x={x} y={y}>
-                {arcs.map((arc, arcIndex) => (
-                    <Arc
-                        key={arcIndex}
-                        x={0}
-                        y={0}
-                        innerRadius={radius - strokeWidth / 2}
-                        outerRadius={radius + strokeWidth / 2}
-                        angle={360 / pointsOfAttack.length}
-                        rotation={arc.startAngle}
-                        fill={arc.stroke}
-                        onClick={(e) => {
-                            if (arc.pointOfAttack.type === POINTS_OF_ATTACK.COMMUNICATION_INTERFACES) {
-                                onCommunicationInterfacesClicked(e, arc.pointOfAttack.id, component.id);
-                            } else {
-                                onPointOfAttackClicked(e, arc.pointOfAttack.id, component.id);
-                            }
-                        }}
-                        onMouseOver={() => onMouseEnter(arcIndex)}
-                        onMouseOut={() => onMouseLeave()}
-                    />
-                ))}
-            </Group>
-        </>
+        <Group x={x} y={y}>
+            {arcs.map((arc, arcIndex) => (
+                <Arc
+                    key={arcIndex}
+                    x={0}
+                    y={0}
+                    innerRadius={radius - strokeWidth / 2}
+                    outerRadius={radius + strokeWidth / 2}
+                    angle={360 / pointsOfAttack.length}
+                    rotation={arc.startAngle}
+                    fill={arc.stroke}
+                    onClick={(e) => {
+                        if (arc.pointOfAttack.type === POINTS_OF_ATTACK.COMMUNICATION_INTERFACES) {
+                            onCommunicationInterfacesClicked(e, arc.pointOfAttack.id, component.id);
+                        } else {
+                            onPointOfAttackClicked(e, arc.pointOfAttack.id, component.id);
+                        }
+                    }}
+                    onMouseOver={() => onMouseEnter(arcIndex)}
+                    onMouseOut={() => onMouseLeave()}
+                />
+            ))}
+        </Group>
     );
 };

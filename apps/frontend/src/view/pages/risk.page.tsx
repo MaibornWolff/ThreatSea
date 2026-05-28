@@ -34,7 +34,8 @@ import { MeasureTimeline } from "../components/measure-timeline.component";
 import { Page } from "../components/page.component";
 import { SearchField } from "../components/search-field.component";
 import { Tooltip } from "../components/tooltip.component";
-import { CreatePage, HeaderNavigation } from "../components/with-menu.component";
+import { CreatePage } from "../components/create-page.component";
+import { HeaderUtilityControls } from "../components/header-utility-controls.component";
 import { withProject } from "../components/with-project.hoc";
 import { MeasureImpactByMeasureDialogPage } from "./measure-impact-by-measure-dialog.page";
 import { useEditor } from "../../application/hooks/use-editor.hook";
@@ -964,4 +965,4 @@ const CustomTableCell = ({ sx, showBorder = false, children, ...props }: CustomT
     );
 };
 
-export const RiskPage = CreatePage(HeaderNavigation, withProject(RiskPageBody), true);
+export const RiskPage = CreatePage(HeaderUtilityControls, withProject(RiskPageBody), true);

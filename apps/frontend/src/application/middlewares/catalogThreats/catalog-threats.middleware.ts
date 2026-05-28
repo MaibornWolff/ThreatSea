@@ -2,7 +2,6 @@ import { isFulfilled, isRejected } from "@reduxjs/toolkit";
 import type { AppMiddleware } from "../types";
 import { AlertActions } from "../../actions/alert.actions";
 import { CatalogThreatsActions } from "../../actions/catalog-threats.actions";
-import { batch } from "react-redux";
 import { socket } from "../../../api/system-socket.api";
 
 const asyncThunks = [
@@ -33,17 +32,15 @@ const handleSuccessfulRequest: AppMiddleware =
                 );
             } else if (CatalogThreatsActions.importCatalogThreats.fulfilled.match(action)) {
                 const { payload } = action;
-                batch(() => {
-                    payload.forEach((item) => {
-                        dispatch(CatalogThreatsActions.setCatalogThreat(item));
-                        socket.emit("set_catalog_threat", JSON.stringify(item));
-                    });
-                    dispatch(
-                        AlertActions.openSuccessAlert({
-                            text: `${payload.length} Catalog Threats were successfully imported`,
-                        })
-                    );
+                payload.forEach((item) => {
+                    dispatch(CatalogThreatsActions.setCatalogThreat(item));
+                    socket.emit("set_catalog_threat", JSON.stringify(item));
                 });
+                dispatch(
+                    AlertActions.openSuccessAlert({
+                        text: `${payload.length} Catalog Threats were successfully imported`,
+                    })
+                );
             } else {
                 const { payload } = action;
                 dispatch(CatalogThreatsActions.setCatalogThreat(payload));

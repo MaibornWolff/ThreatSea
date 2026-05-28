@@ -50,14 +50,18 @@ export const useCatalogsList = () => {
     }, [filteredItems, sortBy, sortDirection]);
 
     useEffect(() => {
-        socket.on("set_catalog", (data) => {
-            const catalog = JSON.parse(data);
-            dispatch(CatalogsActions.setCatalog(catalog));
-        });
-        socket.on("remove_catalog", (data) => {
-            const catalog = JSON.parse(data);
-            dispatch(CatalogsActions.removeCatalog(catalog));
-        });
+        const handleSet = (data: string) => {
+            dispatch(CatalogsActions.setCatalog(JSON.parse(data)));
+        };
+        const handleRemove = (data: string) => {
+            dispatch(CatalogsActions.removeCatalog(JSON.parse(data)));
+        };
+        socket.on("set_catalog", handleSet);
+        socket.on("remove_catalog", handleRemove);
+        return () => {
+            socket.off("set_catalog", handleSet);
+            socket.off("remove_catalog", handleRemove);
+        };
     }, [dispatch]);
 
     return {

@@ -7,6 +7,8 @@ import type { Stage as KonvaStage } from "konva/lib/Stage";
 import { AnchorOrientation, type AugmentedSystemComponent, type ConnectionPointMeta } from "#api/types/system.types.ts";
 import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
 import type { AugmentedSystemConnection } from "#application/selectors/system.selectors.ts";
+import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
+import { editorSelectors } from "#application/selectors/editor.selectors.ts";
 
 const TURN_PENALTY = 200;
 
@@ -124,6 +126,10 @@ const SystemComponentConnectionInner = ({
 }: SystemComponentConnectionProps): JSX.Element | null => {
     let connectionPointsMeta = initialConnectionPointsMeta;
     const [hover, setHover] = useState<boolean>(false);
+    const isCapturing = useAppSelector((state) => state.editor.isCapturing);
+    const annotationTool = useAppSelector(editorSelectors.selectAnnotationTool);
+    const visualSelected = selected && !isCapturing;
+    const visualHover = hover && !isCapturing;
     let calculatedWaypoints = waypoints;
     let fromAnchor = from;
     let toAnchor = to;
@@ -138,24 +144,36 @@ const SystemComponentConnectionInner = ({
     }
 
     const handleClick = (event: KonvaEventObject<MouseEvent>) => {
+        if (annotationTool !== null) {
+            return;
+        }
         onClick(event, id);
     };
 
     const onMouseEnter = () => {
+        if (annotationTool !== null) {
+            return;
+        }
+        setHover(true);
         if (stageRef && stageRef.current) {
             stageRef.current.content.style.cursor = "pointer";
         }
-        setHover(true);
     };
 
     const onMouseLeave = () => {
+        setHover(false);
+        if (annotationTool !== null) {
+            return;
+        }
         if (stageRef && stageRef.current) {
             stageRef.current.content.style.cursor = "default";
         }
-        setHover(false);
     };
 
     const handleLinePointOfAttackClicked = (event: KonvaEventObject<MouseEvent>) => {
+        if (annotationTool !== null) {
+            return;
+        }
         if (pointsOfAttack[2]) {
             onPointOfAttackClicked(event, pointsOfAttack[2].id);
         }
@@ -170,8 +188,8 @@ const SystemComponentConnectionInner = ({
                     onMouseEnter={onMouseEnter}
                     onMouseLeave={onMouseLeave}
                     onPointOfAttackClicked={handleLinePointOfAttackClicked}
-                    selected={selected}
-                    hover={hover}
+                    selected={visualSelected}
+                    hover={visualHover}
                     colors={connectionColors}
                 />
             </Group>
@@ -285,8 +303,8 @@ const SystemComponentConnectionInner = ({
                         onMouseEnter={onMouseEnter}
                         onMouseLeave={onMouseLeave}
                         onPointOfAttackClicked={handleLinePointOfAttackClicked}
-                        selected={selected}
-                        hover={hover}
+                        selected={visualSelected}
+                        hover={visualHover}
                         colors={connectionColors}
                     />
                 </Group>
@@ -476,7 +494,9 @@ const createGridForAStar = (
         // Apply walk costs in bulk
         for (let y = bounds.minY; y < bounds.maxY; y++) {
             const row = grid[y];
-            if (!row) continue;
+            if (!row) {
+                continue;
+            }
 
             const relativeY = y - componentGridY;
 
@@ -492,7 +512,9 @@ const createGridForAStar = (
                 }
 
                 const cell = row[x];
-                if (!cell) continue;
+                if (!cell) {
+                    continue;
+                }
 
                 // Set walk cost
                 cell.walkCost = relativeY >= 5 && relativeY <= 22 && relativeX >= 5 && relativeY <= 17 ? 500 : 300;
@@ -502,15 +524,21 @@ const createGridForAStar = (
         // Set unwalkable areas more efficiently
         for (let y = 3; y < 9; y++) {
             const gridY = componentGridY + y;
-            if (gridY < 0 || gridY >= grid.length) continue;
+            if (gridY < 0 || gridY >= grid.length) {
+                continue;
+            }
 
             const row = grid[gridY];
             for (let x = 3; x < 9; x++) {
                 const gridX = componentGridX + x;
-                if (gridX < 0 || gridX >= (row?.length ?? 0)) continue;
+                if (gridX < 0 || gridX >= (row?.length ?? 0)) {
+                    continue;
+                }
 
                 const cell = row?.[gridX];
-                if (!cell) continue;
+                if (!cell) {
+                    continue;
+                }
 
                 cell.walkable = false;
                 cell.walkCost = 400000;
@@ -563,7 +591,9 @@ const findPathOptimized = (grid: GridNode[][], startNode: GridNode, targetNode: 
     const openList = new FastPriorityQueue<GridNode>((a, b) => {
         const aF = a.gCost + a.hCost;
         const bF = b.gCost + b.hCost;
-        if (aF === bF) return a.hCost < b.hCost;
+        if (aF === bF) {
+            return a.hCost < b.hCost;
+        }
         return aF < bF;
     });
 
@@ -582,7 +612,9 @@ const findPathOptimized = (grid: GridNode[][], startNode: GridNode, targetNode: 
         }
         const nodeKey = `${currentNode.gridX},${currentNode.gridY}`;
 
-        if (visited.has(nodeKey)) continue;
+        if (visited.has(nodeKey)) {
+            continue;
+        }
         visited.add(nodeKey);
 
         if (currentNode === targetNode) {
@@ -641,7 +673,9 @@ const findPathOptimized = (grid: GridNode[][], startNode: GridNode, targetNode: 
 
         for (const neighbor of neighbors) {
             const neighborKey = `${neighbor.gridX},${neighbor.gridY}`;
-            if (!neighbor.walkable || visited.has(neighborKey)) continue;
+            if (!neighbor.walkable || visited.has(neighborKey)) {
+                continue;
+            }
 
             const pathLength = Math.abs(targetNode.x - startNode.x) + Math.abs(targetNode.y - startNode.y);
             const turnPenaltyMultiplier = Math.max(1, 1000 / pathLength);
@@ -720,7 +754,9 @@ class FastPriorityQueue<T> {
     }
 
     poll(): T | undefined {
-        if (this.isEmpty()) return undefined;
+        if (this.isEmpty()) {
+            return undefined;
+        }
         const value = this.heap[0];
         const last = this.heap.pop();
         if (this.heap.length > 0 && last !== undefined) {

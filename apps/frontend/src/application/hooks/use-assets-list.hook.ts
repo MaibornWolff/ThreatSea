@@ -72,14 +72,18 @@ export const useAssetsList = ({ projectId }: { projectId: number }) => {
     }, [filteredItems, sortBy, sortDirection]);
 
     useEffect(() => {
-        socket.on("set_asset", (data) => {
-            const asset = JSON.parse(data);
-            dispatch(AssetsActions.setAsset(asset));
-        });
-        socket.on("remove_asset", (data) => {
-            const asset = JSON.parse(data);
-            dispatch(AssetsActions.removeAsset(asset));
-        });
+        const handleSet = (data: string) => {
+            dispatch(AssetsActions.setAsset(JSON.parse(data)));
+        };
+        const handleRemove = (data: string) => {
+            dispatch(AssetsActions.removeAsset(JSON.parse(data)));
+        };
+        socket.on("set_asset", handleSet);
+        socket.on("remove_asset", handleRemove);
+        return () => {
+            socket.off("set_asset", handleSet);
+            socket.off("remove_asset", handleRemove);
+        };
     }, [dispatch]);
 
     return {

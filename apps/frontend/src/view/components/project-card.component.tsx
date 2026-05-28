@@ -62,7 +62,7 @@ export const ProjectCard = ({ project, onClickEditProject, onClickDeleteProject,
 
     const onClickOpenEditor = () => {
         navigate(`/projects/${id}/system`, {
-            state: { project, shouldCenter: true },
+            state: { project },
         });
     };
 
@@ -237,9 +237,11 @@ export const ProjectCard = ({ project, onClickEditProject, onClickDeleteProject,
                     borderRadius: 5,
                     height: 200,
                     mb: 2,
+                    bgcolor: "background.paper",
                     backgroundImage: `url(${image})`,
                     backgroundPosition: "center",
-                    backgroundSize: "cover",
+                    backgroundSize: "contain",
+                    backgroundRepeat: "no-repeat",
                     "&:hover": {
                         cursor: "pointer",
                         bgcolor: "secondary.light",

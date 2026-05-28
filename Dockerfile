@@ -1,4 +1,4 @@
-FROM node:lts-alpine@sha256:d1b3b4da11eefd5941e7f0b9cf17783fc99d9c6fc34884a665f40a06dbdfc94f AS base
+FROM node:lts-alpine@sha256:2bdb65ed1dab192432bc31c95f94155ca5ad7fc1392fb7eb7526ab682fa5bf14 AS base
 
 ENV CI=true
 ENV PNPM_HOME="/pnpm"
@@ -54,17 +54,12 @@ WORKDIR /deployer
 RUN pnpm --filter "./${BACKEND_DIR}" deploy --legacy --prod /out
 
 
-# build production container
-FROM node:lts-alpine@sha256:d1b3b4da11eefd5941e7f0b9cf17783fc99d9c6fc34884a665f40a06dbdfc94f
-
-RUN apk --no-cache add dumb-init=1.2.5-r3
+# build production container with gcr.io/distroless/nodejs24-debian13:nonroot
+FROM gcr.io/distroless/nodejs24-debian13:nonroot@sha256:4c11c00f9d72bbe5d42fbcab421229b3c046d949f4e0a8e2d50e88a9b319a9e2
 
 WORKDIR /app
 
-RUN addgroup -S app && adduser -S -G app app
-
 ENV NODE_ENV=production
-USER app
 
 COPY --from=deploy_backend /out/node_modules /app/node_modules
 COPY --from=deploy_backend /out/dist /app/dist
@@ -76,6 +71,6 @@ COPY --from=build_frontend /builder/apps/frontend/build /app/public
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --retries=3 --start-period=30s --timeout=10s \
-    CMD [ "curl", "--fail", "http://127.0.0.1:8000/api/health" ]
+    CMD ["/nodejs/bin/node", "-e", "fetch('http://127.0.0.1:8000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
 
-CMD ["dumb-init", "node", "dist/src/index.js"]
+CMD ["dist/src/index.js"]

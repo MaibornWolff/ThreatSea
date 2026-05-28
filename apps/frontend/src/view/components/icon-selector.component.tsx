@@ -1,6 +1,5 @@
 import { createElement, useEffect, useEffectEvent, useState, type ReactNode } from "react";
 import { FormControl, FormHelperText, Grid, IconButton, InputLabel, MenuItem, Select, TextField } from "@mui/material";
-import type { SelectChangeEvent } from "@mui/material/Select";
 import * as MuiIcons from "@mui/icons-material";
 
 interface IconSelectorProps {
@@ -48,6 +47,10 @@ export const IconSelector = ({ value, onChange, label, error, helperText }: Icon
     const [selectedIcon, setSelectedIcon] = useState(value || "");
     const [open, setOpen] = useState(false);
 
+    useEffect(() => {
+        setSelectedIcon(value || "");
+    }, [value]);
+
     const setVisibleIconsEvent = useEffectEvent((icons: MuiIconKey[]) => {
         setVisibleIcons(icons);
     });
@@ -69,27 +72,39 @@ export const IconSelector = ({ value, onChange, label, error, helperText }: Icon
         onChange(iconName);
     };
 
+    const hasSelection = !!selectedIcon || open;
+
     return (
         <FormControl fullWidth error={!!error}>
-            <InputLabel>{label}</InputLabel>
+            <InputLabel shrink={hasSelection}>{label}</InputLabel>
             <Select
                 open={open}
                 onOpen={() => setOpen(true)}
                 onClose={() => setOpen(false)}
-                value={selectedIcon}
-                onChange={(e: SelectChangeEvent<string>) => handleIconChange(e.target.value)}
+                value=""
+                displayEmpty
+                notched={hasSelection}
                 label={label}
-                renderValue={(selected) => (
-                    <IconButton size="small" disableRipple>
-                        {(() => {
-                            const IconComponent = selected
-                                ? (MuiIcons[selected as MuiIconKey] as React.ElementType | undefined)
-                                : undefined;
-                            return IconComponent ? createElement(IconComponent) : null;
-                        })()}
-                    </IconButton>
-                )}
-                defaultValue=""
+                MenuProps={{
+                    slotProps: {
+                        paper: {
+                            sx: {
+                                bgcolor: "background.paperIntransparent",
+                            },
+                        },
+                    },
+                }}
+                renderValue={() => {
+                    if (!selectedIcon) {
+                        return null;
+                    }
+                    const IconComponent = MuiIcons[selectedIcon as MuiIconKey] as React.ElementType | undefined;
+                    return (
+                        <IconButton size="small" disableRipple>
+                            {IconComponent ? createElement(IconComponent) : null}
+                        </IconButton>
+                    );
+                }}
             >
                 <MenuItem>
                     <TextField

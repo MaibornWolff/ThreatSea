@@ -2,7 +2,6 @@ import { isFulfilled, isRejected } from "@reduxjs/toolkit";
 import type { AppMiddleware } from "../types";
 import { AlertActions } from "../../actions/alert.actions";
 import { CatalogMeasuresActions } from "../../actions/catalog-measures.actions";
-import { batch } from "react-redux";
 import { socket } from "../../../api/system-socket.api";
 
 const asyncThunks = [
@@ -33,17 +32,15 @@ const handleSuccessfulRequest: AppMiddleware =
                 );
             } else if (CatalogMeasuresActions.importCatalogMeasures.fulfilled.match(action)) {
                 const { payload } = action;
-                batch(() => {
-                    payload.forEach((item) => {
-                        dispatch(CatalogMeasuresActions.setCatalogMeasure(item));
-                        socket.emit("set_catalog_measure", JSON.stringify(item));
-                    });
-                    dispatch(
-                        AlertActions.openSuccessAlert({
-                            text: `${payload.length} Catalog Measures were successfully imported`,
-                        })
-                    );
+                payload.forEach((item) => {
+                    dispatch(CatalogMeasuresActions.setCatalogMeasure(item));
+                    socket.emit("set_catalog_measure", JSON.stringify(item));
                 });
+                dispatch(
+                    AlertActions.openSuccessAlert({
+                        text: `${payload.length} Catalog Measures were successfully imported`,
+                    })
+                );
             } else {
                 const { payload } = action;
                 dispatch(CatalogMeasuresActions.setCatalogMeasure(payload));

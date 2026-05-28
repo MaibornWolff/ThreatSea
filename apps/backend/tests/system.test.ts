@@ -25,6 +25,7 @@ const SYMBOL_IMAGE =
 const VALID_SYSTEM: { data: SystemData; image: string } = {
     data: {
         lastAutoSaveDate: "2025-09-01T12:00:00Z",
+        annotations: [],
         connections: [
             {
                 id: "qBgbUiBPagRf6FYA8LXR-",

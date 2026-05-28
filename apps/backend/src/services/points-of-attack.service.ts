@@ -28,7 +28,9 @@ export interface PointOfAttack {
  * @returns An array of objects with the asset data.
  */
 async function getAssets(assetIds: number[]): Promise<Asset[]> {
-    if (assetIds.length === 0) return [];
+    if (assetIds.length === 0) {
+        return [];
+    }
 
     return await getMultipleAssets(assetIds);
 }
@@ -43,9 +45,13 @@ async function getAssets(assetIds: number[]): Promise<Asset[]> {
 export async function getPointsOfAttack(projectId: number): Promise<PointOfAttack[]> {
     // Fetch system.
     const system = await findSystem(projectId);
-    if (!system) return [];
+    if (!system) {
+        return [];
+    }
     const { data } = system;
-    if (!data) return [];
+    if (!data) {
+        return [];
+    }
 
     // Destructure data.
     const { pointsOfAttack, components = [], connections = [], connectionPoints = [] } = data;

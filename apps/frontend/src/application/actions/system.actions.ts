@@ -5,15 +5,29 @@
 import { createAsyncThunk, createAction, type Update } from "@reduxjs/toolkit";
 import { SystemAPI } from "#api/system.api.ts";
 import type {
+    Annotation,
+    AnnotationChanges,
     Component,
     Connection,
     ConnectionPoint,
-    System,
     SystemComponent,
     SystemConnection,
     UpdateSystemRequest,
 } from "#api/types/system.types.ts";
 import type { SystemConnectionPoint } from "#application/adapters/system-connection-point.adapter.ts";
+
+// Lets getSystem wait for an in-flight save so a fast leave-and-return
+// doesn't race PUT vs GET and overwrite the unsaved edit with stale data.
+let inFlightSave: Promise<unknown> | undefined;
+
+export const trackInFlightSave = (promise: Promise<unknown>): void => {
+    inFlightSave = promise;
+    promise.finally(() => {
+        if (inFlightSave === promise) {
+            inFlightSave = undefined;
+        }
+    });
+};
 
 /**
  * Wrapper class that defines the actions functions
@@ -29,6 +43,9 @@ export class SystemActions {
      * @returns Action function for getting the system view.
      */
     static getSystem = createAsyncThunk("[system] get system", async (data: { projectId: number }) => {
+        if (inFlightSave) {
+            await inFlightSave.catch(() => undefined);
+        }
         return await SystemAPI.getSystem(data);
     });
 
@@ -52,7 +69,7 @@ export class SystemActions {
      * @param {string} type - Action type.
      * @returns Action function for saving the system view.
      */
-    static saveSystem = createAction<Pick<System, "projectId" | "image">>("[system] save system");
+    static saveSystem = createAction<{ projectId: number; image: string | null | undefined }>("[system] save system");
 
     /**
      * Action that sets a component in the system view when its dragged.
@@ -209,6 +226,8 @@ export class SystemActions {
      */
     static setInitialized = createAction<boolean>("[system] set initialized");
 
+    static setLoadedProjectId = createAction<number | null>("[system] set loaded project id");
+
     /**
      * Action that sets the connection points in the system view
      * @function setConnectionPoints
@@ -216,4 +235,20 @@ export class SystemActions {
      * @returns Action function for changing the connection points.
      */
     static setConnectionPoints = createAction<ConnectionPoint[]>("[system] set connection points");
+
+    static createAnnotation = createAction<Annotation>("[system] create annotation");
+
+    static setAnnotation = createAction<{ id: string; changes: AnnotationChanges }>("[system] set annotation");
+
+    static removeAnnotation = createAction<Pick<Annotation, "id">>("[system] remove annotation");
+
+    static setAnnotations = createAction<Annotation[]>("[system] set annotations");
+
+    static setDefaultAnnotationColor = createAction<{ projectId: number; color: string }>(
+        "[system] set default annotation color"
+    );
+
+    static setDefaultAnnotationColorFromBackend = createAction<{ projectId: number; color: string | null }>(
+        "[system] set default annotation color from backend"
+    );
 }

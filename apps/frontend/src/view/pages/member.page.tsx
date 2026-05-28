@@ -12,7 +12,8 @@ import { useMembersList } from "../../application/hooks/use-addedMember-list.hoo
 import { IconButton } from "../components/icon-button.component";
 import { MatrixFilterToggleButtonGroup } from "../components/matrix-filter-toggle-button-group.component";
 import { Page } from "../components/page.component";
-import { CreatePage, HeaderNavigation } from "../components/with-menu.component";
+import { CreatePage } from "../components/create-page.component";
+import { HeaderUtilityControls } from "../components/header-utility-controls.component";
 import MemberDialogPage from "./member-dialog.page";
 import { NavigationActions } from "../../application/actions/navigation.actions";
 import { AlertActions } from "../../application/actions/alert.actions";
@@ -95,8 +96,11 @@ const MemberPageBody = () => {
 
     useLayoutEffect(() => {
         if (isSelfRemoved) {
-            if (projectId) navigate("/projects");
-            else navigate("/catalogs");
+            if (projectId) {
+                navigate("/projects");
+            } else {
+                navigate("/catalogs");
+            }
 
             dispatch(MemberActions.resetIsSelfRemoved());
         }
@@ -300,7 +304,12 @@ const MemberPageBody = () => {
         ]
     );
 
-    const handleParticipantCount = (): string => (members.length > 1 ? t("participants") : t("participant"));
+    const handleParticipantCount = (): string => {
+        if (members.length > 1) {
+            return t("participants");
+        }
+        return t("participant");
+    };
 
     return (
         <Page
@@ -451,4 +460,4 @@ const MemberPageBody = () => {
     );
 };
 
-export const MemberPage = CreatePage(HeaderNavigation, MemberPageBody, true);
+export const MemberPage = CreatePage(HeaderUtilityControls, MemberPageBody, true);

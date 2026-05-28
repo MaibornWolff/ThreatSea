@@ -1,3 +1,11 @@
 packages:
   - "apps/*"
   - "packages/*"
+
+allowBuilds:
+  esbuild: false
+minimumReleaseAge: 4320 # time in minutes, equals 72 hours
+saveExact: true
+trustPolicy: no-downgrade
+trustPolicyExclude:
+  - "semver@6.3.1"
