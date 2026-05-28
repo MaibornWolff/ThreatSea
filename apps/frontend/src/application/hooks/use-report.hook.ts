@@ -1,10 +1,10 @@
 import type { ProjectReport } from "#api/types/project.types.ts";
 import type { SortDirection } from "#application/actions/list.actions.ts";
-import { exportAsExcelFile } from "../../utils/export";
+import { exportAsExcelFile } from "#utils/export.ts";
 import { useState, useMemo, useEffect, useEffectEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { ProjectsAPI } from "../../api/projects.api";
-import { calcRiskColour } from "../../utils/calcRisk";
+import { ProjectsAPI } from "#api/projects.api.ts";
+import { calcRiskColour } from "#utils/calcRisk.ts";
 import type { MatrixColorKey } from "#view/colors/matrix.ts";
 
 type ReportThreat = ProjectReport["threats"][number];

@@ -1,9 +1,9 @@
 import { isFulfilled, isRejected } from "@reduxjs/toolkit";
-import type { AppMiddleware } from "../types";
-import { socket } from "../../../api/system-socket.api";
-import { AlertActions } from "../../actions/alert.actions";
-import { AssetsActions } from "../../actions/assets.actions";
-import { EditorActions } from "../../actions/editor.actions";
+import type { AppMiddleware } from "#application/middlewares/types.ts";
+import { socket } from "#api/system-socket.api.ts";
+import { AlertActions } from "#application/actions/alert.actions.ts";
+import { AssetsActions } from "#application/actions/assets.actions.ts";
+import { EditorActions } from "#application/actions/editor.actions.ts";
 
 const asyncThunks = [AssetsActions.updateAsset, AssetsActions.createAsset, AssetsActions.deleteAsset] as const;
 

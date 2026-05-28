@@ -1,8 +1,8 @@
 import { isFulfilled, isRejected } from "@reduxjs/toolkit";
-import type { AppMiddleware } from "../types";
-import { AlertActions } from "../../actions/alert.actions";
-import { ThreatsActions } from "../../actions/threats.actions";
-import { socket } from "../../../api/system-socket.api";
+import type { AppMiddleware } from "#application/middlewares/types.ts";
+import { AlertActions } from "#application/actions/alert.actions.ts";
+import { ThreatsActions } from "#application/actions/threats.actions.ts";
+import { socket } from "#api/system-socket.api.ts";
 
 const asyncThunks = [
     ThreatsActions.updateThreat,

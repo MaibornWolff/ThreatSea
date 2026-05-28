@@ -1,15 +1,15 @@
-import type { AppMiddleware } from "../types";
-import { AssetsActions } from "../../actions/assets.actions";
-import { ProjectsActions } from "../../actions/projects.actions";
-import { DialogsActions } from "../../actions/dialogs.actions";
-import { CatalogsActions } from "../../actions/catalogs.actions";
-import { CatalogThreatsActions } from "../../actions/catalog-threats.actions";
-import { ThreatsActions } from "../../actions/threats.actions";
-import { CatalogMeasuresActions } from "../../actions/catalog-measures.actions";
-import { MeasuresActions } from "../../actions/measures.actions";
-import { MeasureImpactsActions } from "../../actions/measureImpacts.actions";
-import { EditorActions } from "../../actions/editor.actions";
-import { MemberActions } from "../../actions/members.actions";
+import type { AppMiddleware } from "#application/middlewares/types.ts";
+import { AssetsActions } from "#application/actions/assets.actions.ts";
+import { ProjectsActions } from "#application/actions/projects.actions.ts";
+import { DialogsActions } from "#application/actions/dialogs.actions.ts";
+import { CatalogsActions } from "#application/actions/catalogs.actions.ts";
+import { CatalogThreatsActions } from "#application/actions/catalog-threats.actions.ts";
+import { ThreatsActions } from "#application/actions/threats.actions.ts";
+import { CatalogMeasuresActions } from "#application/actions/catalog-measures.actions.ts";
+import { MeasuresActions } from "#application/actions/measures.actions.ts";
+import { MeasureImpactsActions } from "#application/actions/measureImpacts.actions.ts";
+import { EditorActions } from "#application/actions/editor.actions.ts";
+import { MemberActions } from "#application/actions/members.actions.ts";
 
 const handleConfirmDialog: AppMiddleware =
     ({ dispatch }) =>

@@ -1,7 +1,7 @@
 import { isFulfilled, isRejected } from "@reduxjs/toolkit";
-import type { AppMiddleware } from "../types";
-import { UserActions } from "../../actions/user.actions";
-import { AlertActions } from "../../actions/alert.actions";
+import type { AppMiddleware } from "#application/middlewares/types.ts";
+import { UserActions } from "#application/actions/user.actions.ts";
+import { AlertActions } from "#application/actions/alert.actions.ts";
 
 const asyncThunks = [UserActions.logOut, UserActions.getAuthStatus] as const;
 

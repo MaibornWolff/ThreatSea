@@ -1,10 +1,10 @@
 import { type ComponentProps, type FC } from "react";
 import { Page as PdfPage, View, Image } from "@react-pdf/renderer";
-import { SystemImage } from "../components/system-image.report.component";
-import { styles, s3, s6, s2, s1 } from "../report.style";
-import { Text } from "../components/text.report.component";
+import { SystemImage } from "#view/report/components/system-image.report.component.tsx";
+import { styles, s3, s6, s2, s1 } from "#view/report/report.style.ts";
+import { Text } from "#view/report/components/text.report.component.tsx";
 import { useTranslation } from "react-i18next";
-import { SystemImageLegend } from "../components/system-image-legend.report.compoent";
+import { SystemImageLegend } from "#view/report/components/system-image-legend.report.compoent.tsx";
 import type { IndexCallback, ProjectReport } from "#api/types/project.types.ts";
 
 type PdfPageProps = Omit<ComponentProps<typeof PdfPage>, "children">;

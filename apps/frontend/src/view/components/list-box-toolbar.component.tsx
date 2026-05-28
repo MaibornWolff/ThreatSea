@@ -1,12 +1,12 @@
 import { Box } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { Add, ArrowDownward, ArrowUpward } from "@mui/icons-material";
-import { SearchField } from "../components/search-field.component";
+import { SearchField } from "#view/components/search-field.component.tsx";
 import { ToggleButtons } from "./toggle-buttons.component";
 import { IconButton } from "./icon-button.component";
 import { ExportIconButton } from "./export-icon-button.component";
 import { ImportIconButton } from "./import-icon-button.component";
-import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
+import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import type { ChangeEvent } from "react";
 import type { SortDirection } from "#application/actions/list.actions.ts";
 

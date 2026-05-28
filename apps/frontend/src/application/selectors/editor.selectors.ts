@@ -4,9 +4,15 @@ import type { EditorState } from "#application/reducers/editor.reducer.ts";
 import {
     editorComponentConnectionLinesAdapter,
     type EditorComponentConnectionLine,
-} from "../adapters/editor-component-connection-lines.adapter";
-import { editorComponentTypeAdapter, type EditorComponentType } from "../adapters/editor-component-type.adapter";
-import { editorMousePointersAdapter, type EditorMousePointer } from "../adapters/editor-mouse-pointers.adapter";
+} from "#application/adapters/editor-component-connection-lines.adapter.ts";
+import {
+    editorComponentTypeAdapter,
+    type EditorComponentType,
+} from "#application/adapters/editor-component-type.adapter.ts";
+import {
+    editorMousePointersAdapter,
+    type EditorMousePointer,
+} from "#application/adapters/editor-mouse-pointers.adapter.ts";
 
 type ExtendedEditorState = EditorState & {
     startAnchor?: unknown;

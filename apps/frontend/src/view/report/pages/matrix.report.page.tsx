@@ -1,9 +1,9 @@
 import { View } from "@react-pdf/renderer";
-import { Page } from "../components/page.report.component";
-import { Text } from "../components/text.report.component";
+import { Page } from "#view/report/components/page.report.component.tsx";
+import { Text } from "#view/report/components/text.report.component.tsx";
 import { useTranslation } from "react-i18next";
-import { Matrix } from "../components/matrix.report.component";
-import { s1, s2, backgroundColor } from "../report.style";
+import { Matrix } from "#view/report/components/matrix.report.component.tsx";
+import { s1, s2, backgroundColor } from "#view/report/report.style.ts";
 import type { IndexCallback, ProjectReport } from "#api/types/project.types.ts";
 import type { Milestone, RiskMatrix } from "#application/hooks/use-report.hook.ts";
 

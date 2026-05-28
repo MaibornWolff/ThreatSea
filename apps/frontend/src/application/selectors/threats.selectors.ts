@@ -1,7 +1,7 @@
 import { createSelector } from "reselect";
 import type { RootState } from "#application/store.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
-import { threatAdapter } from "../adapters/threats.adapter";
+import { threatAdapter } from "#application/adapters/threats.adapter.ts";
 
 const selectThreatEntities = (state: RootState) => state.threats.entities;
 const selectProjectId = (_state: RootState, projectId: number) => projectId;

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Text } from "@react-pdf/renderer";
 import type { Style } from "@react-pdf/types";
-import { primaryColor, s1 } from "../report.style";
+import { primaryColor, s1 } from "#view/report/report.style.ts";
 
 interface ChipProps {
     color?: string;

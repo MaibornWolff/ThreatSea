@@ -1,5 +1,5 @@
 import { createReducer } from "@reduxjs/toolkit";
-import { ListActions, type SortDirection } from "../actions/list.actions";
+import { ListActions, type SortDirection } from "#application/actions/list.actions.ts";
 
 interface ListState {
     projects: {

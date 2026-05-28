@@ -1,7 +1,7 @@
 import { createReducer } from "@reduxjs/toolkit";
-import { CatalogMeasuresActions } from "../actions/catalog-measures.actions";
-import { catalogMeasuresAdapter } from "../adapters/catalog-measures.adapter";
-import { catalogThreatsAdapter } from "../adapters/catalog-threats.adapter";
+import { CatalogMeasuresActions } from "#application/actions/catalog-measures.actions.ts";
+import { catalogMeasuresAdapter } from "#application/adapters/catalog-measures.adapter.ts";
+import { catalogThreatsAdapter } from "#application/adapters/catalog-threats.adapter.ts";
 
 type CatalogMeasuresAdapterState = ReturnType<typeof catalogMeasuresAdapter.getInitialState>;
 

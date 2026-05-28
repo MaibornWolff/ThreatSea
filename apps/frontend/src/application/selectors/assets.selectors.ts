@@ -1,7 +1,7 @@
 import { createSelector } from "reselect";
 import type { RootState } from "#application/store.ts";
 import type { Asset } from "#api/types/asset.types.ts";
-import { assetsAdapter } from "../adapters/asset.adapter";
+import { assetsAdapter } from "#application/adapters/asset.adapter.ts";
 
 const selectAssetsEntities = (state: RootState) => state.assets.entities;
 const selectProjectId = (_state: RootState, projectId: number) => projectId;

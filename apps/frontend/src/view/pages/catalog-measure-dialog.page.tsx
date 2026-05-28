@@ -5,7 +5,7 @@
 
 import { useParams, useLocation, Navigate, type Location } from "react-router-dom";
 import type { CatalogMeasure } from "#api/types/catalog-measure.types.ts";
-import CatalogMeasureDialog from "../dialogs/catalog-measure.dialog";
+import CatalogMeasureDialog from "#view/dialogs/catalog-measure.dialog.tsx";
 
 interface CatalogMeasureDialogLocationState {
     catalogMeasure: Partial<CatalogMeasure> | undefined;

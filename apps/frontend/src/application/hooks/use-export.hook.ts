@@ -1,6 +1,6 @@
-import { exportAsJsonFile } from "../../utils/export";
+import { exportAsJsonFile } from "#utils/export.ts";
 import type { ExtendedProject } from "#api/types/project.types.ts";
-import { ProjectsActions } from "../actions/projects.actions.ts";
+import { ProjectsActions } from "#application/actions/projects.actions.ts";
 import { useAppDispatch } from "./use-app-redux.hook.ts";
 
 /**

@@ -1,6 +1,6 @@
 import editorReducer from "./editor.reducer";
-import { EditorActions } from "../actions/editor.actions";
-import { SystemActions } from "../actions/system.actions";
+import { EditorActions } from "#application/actions/editor.actions.ts";
+import { SystemActions } from "#application/actions/system.actions.ts";
 import { AnchorOrientation } from "#api/types/system.types.ts";
 import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
 

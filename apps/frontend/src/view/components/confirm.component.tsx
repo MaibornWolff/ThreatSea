@@ -1,8 +1,8 @@
 import { DialogActions, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import type { ComponentProps } from "react";
-import { useConfirm } from "../../application/hooks/use-confirm.hook";
-import { Button } from "../components/button.component";
+import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
+import { Button } from "#view/components/button.component.tsx";
 import { Dialog } from "./dialog.component";
 
 export const Confirm = () => {

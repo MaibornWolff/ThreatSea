@@ -10,9 +10,9 @@ import { Box } from "@mui/system";
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { useLocation, type Location } from "react-router-dom";
 import logo from "../../images/threatsealogo-dez.png";
-import { IconButton } from "../components/icon-button.component";
-import { Page } from "../components/page.component";
-import { translationUtil } from "../../utils/translations";
+import { IconButton } from "#view/components/icon-button.component.tsx";
+import { Page } from "#view/components/page.component.tsx";
+import { translationUtil } from "#utils/translations.ts";
 
 interface ErrorBoundaryProps {
     children?: ReactNode;

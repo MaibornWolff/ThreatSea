@@ -1,6 +1,6 @@
 import Box from "@mui/material/Box";
-import { useAppSelector } from "../../application/hooks/use-app-redux.hook";
-import ErrorBoundary from "../wrappers/error.wrapper";
+import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
+import ErrorBoundary from "#view/wrappers/error.wrapper.tsx";
 import { LanguagePicker } from "./language-picker.component";
 import UserPanel from "./user-panel.component";
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { AlertActions } from "../../application/actions/alert.actions";
-import { useAppDispatch } from "../../application/hooks/use-app-redux.hook";
+import { AlertActions } from "#application/actions/alert.actions.ts";
+import { useAppDispatch } from "#application/hooks/use-app-redux.hook.ts";
 
 interface UseGetMarkdownTextResult {
     markdownText: string;

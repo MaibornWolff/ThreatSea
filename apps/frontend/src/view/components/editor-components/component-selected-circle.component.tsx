@@ -1,7 +1,7 @@
 import { useMemo, useState, type RefObject } from "react";
 import { Group, Arc } from "react-konva";
-import { POA_COLORS } from "../../colors/pointsOfAttack.colors";
-import { POINTS_OF_ATTACK } from "../../../api/types/points-of-attack.types";
+import { POA_COLORS } from "#view/colors/pointsOfAttack.colors.ts";
+import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import type { Stage } from "konva/lib/Stage";
 import type { KonvaEventObject } from "konva/lib/Node";
 import type { SystemComponent, SystemPointOfAttack } from "#api/types/system.types.ts";

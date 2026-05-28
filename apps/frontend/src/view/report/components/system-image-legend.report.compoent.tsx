@@ -1,11 +1,11 @@
 import type { ComponentProps } from "react";
 import { View } from "@react-pdf/renderer";
 import type { Style } from "@react-pdf/types";
-import { POINTS_OF_ATTACK } from "../../../api/types/points-of-attack.types";
-import { POA_COLORS } from "../../colors/pointsOfAttack.colors";
+import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
+import { POA_COLORS } from "#view/colors/pointsOfAttack.colors.ts";
 import { useTranslation } from "react-i18next";
 import { Text } from "./text.report.component";
-import { s1 } from "../report.style";
+import { s1 } from "#view/report/report.style.ts";
 
 type ViewBaseProps = Omit<ComponentProps<typeof View>, "style">;
 
@@ -19,7 +19,7 @@ export const SystemImageLegend = ({ language, style, ...props }: SystemImageLege
     return (
         <View
             style={{
-                ...(style ?? {}),
+                ...style,
                 display: "flex",
                 flexWrap: "wrap",
                 flexDirection: "row",

@@ -3,11 +3,11 @@ import { Box, DialogActions, DialogTitle } from "@mui/material";
 import type { DialogProps } from "@mui/material/Dialog";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { useDialog } from "../../application/hooks/use-dialog.hook";
-import { Button } from "../components/button.component";
-import { Dialog } from "../components/dialog.component";
-import { NameTextField } from "../components/name-textfield.component";
-import { IconSelector } from "../components/icon-selector.component";
+import { useDialog } from "#application/hooks/use-dialog.hook.ts";
+import { Button } from "#view/components/button.component.tsx";
+import { Dialog } from "#view/components/dialog.component.tsx";
+import { NameTextField } from "#view/components/name-textfield.component.tsx";
+import { IconSelector } from "#view/components/icon-selector.component.tsx";
 import type { DialogValue } from "#application/reducers/dialogs.reducer.ts";
 import type { SystemCommunicationInterface } from "#api/types/system.types.ts";
 

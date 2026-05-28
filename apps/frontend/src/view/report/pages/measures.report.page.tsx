@@ -2,9 +2,9 @@ import { type ReactNode } from "react";
 import { Link, View } from "@react-pdf/renderer";
 import type { Style } from "@react-pdf/types";
 import { useTranslation } from "react-i18next";
-import { Page } from "../components/page.report.component";
-import { Text } from "../components/text.report.component";
-import { backgroundColor, s1 } from "../report.style";
+import { Page } from "#view/report/components/page.report.component.tsx";
+import { Text } from "#view/report/components/text.report.component.tsx";
+import { backgroundColor, s1 } from "#view/report/report.style.ts";
 import type { IndexCallback, ProjectReport } from "#api/types/project.types.ts";
 
 const LIST_BREAKPOINT = 30;

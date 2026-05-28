@@ -1,6 +1,6 @@
 import { createReducer } from "@reduxjs/toolkit";
-import { ThreatsActions } from "../actions/threats.actions";
-import { threatAdapter } from "../adapters/threats.adapter";
+import { ThreatsActions } from "#application/actions/threats.actions.ts";
+import { threatAdapter } from "#application/adapters/threats.adapter.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 
 type ThreatsAdapterState = ReturnType<typeof threatAdapter.getInitialState>;

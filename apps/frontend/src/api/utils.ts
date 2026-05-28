@@ -2,7 +2,7 @@
  * @module utils - Defines utility
  *     functions and variables for the api.
  */
-import { CsrfApi } from "#api/csrf.api.js";
+import { CsrfApi } from "#api/csrf.api.ts";
 
 export const API_URI = `${import.meta.env["VITE_API_URI"] ?? ""}/api`;
 

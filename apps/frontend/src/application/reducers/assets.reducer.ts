@@ -1,6 +1,6 @@
 import { createReducer } from "@reduxjs/toolkit";
-import { AssetsActions } from "../actions/assets.actions";
-import { assetsAdapter } from "../adapters/asset.adapter";
+import { AssetsActions } from "#application/actions/assets.actions.ts";
+import { assetsAdapter } from "#application/adapters/asset.adapter.ts";
 
 type AssetsAdapterState = ReturnType<typeof assetsAdapter.getInitialState>;
 
