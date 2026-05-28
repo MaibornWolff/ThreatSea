@@ -29,6 +29,7 @@
     "@mui/icons-material": "9.0.0",
     "@mui/material": "9.0.0",
     "@mui/system": "9.0.0",
+    "@mui/x-data-grid": "9.3.0",
     "@react-pdf/renderer": "4.5.1",
     "@reduxjs/toolkit": "2.11.2",
     "exceljs": "4.4.0",
