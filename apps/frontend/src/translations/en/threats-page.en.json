@@ -14,5 +14,7 @@
   "catalogMeasures": "Catalog Measures",
   "deleteMessage": "Do you really want to delete the threat '{{ threatName }}'?",
   "noThreatsFound": "No Threats found",
-  "heading": "Threats"
+  "heading": "Threats",
+  "customizeView": "Customize view",
+  "actions": "Actions"
 }
