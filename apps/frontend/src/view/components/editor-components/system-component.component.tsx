@@ -512,10 +512,10 @@ const Connector = ({
     const annotationTool = useAppSelector(editorSelectors.selectAnnotationTool);
 
     const onMouseEnter = () => {
-        setHover(true);
         if (annotationTool !== null) {
             return;
         }
+        setHover(true);
         if (stageRef.current) {
             stageRef.current.content.style.cursor = "pointer";
         }
