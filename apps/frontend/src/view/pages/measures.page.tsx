@@ -1,60 +1,60 @@
-import { Add, ContentCopyOutlined, Delete, Replay } from "@mui/icons-material";
-import { Box, LinearProgress, Table, TableBody, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
-import { useLayoutEffect } from "react";
-import type { ChangeEvent, SyntheticEvent } from "react";
+import { Add, Visibility } from "@mui/icons-material";
+import { Box, Button, Checkbox, FormControlLabel, LinearProgress, Menu, MenuItem, Typography } from "@mui/material";
+import { DataGrid, type GridColumnVisibilityModel, type GridFilterModel } from "@mui/x-data-grid";
+import { useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import type { ExtendedProject } from "#api/types/project.types.ts";
 import type { Measure } from "#api/types/measure.types.ts";
+import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
 import { NavigationActions } from "../../application/actions/navigation.actions";
 import { useConfirm } from "../../application/hooks/use-confirm.hook";
+import { useMeasuresList } from "../../application/hooks/use-measures-list.hook";
+import { IconButton } from "../components/icon-button.component";
 import { Page } from "../components/page.component";
 import { CreatePage, HeaderNavigation } from "../components/with-menu.component";
 import { withProject } from "../components/with-project.hoc";
 import MeasureDetailsDialogPage from "./measure-details-dialog.page";
-import { IconButton } from "../components/icon-button.component";
-import { CustomTableHeaderCell } from "../components/table-header.component";
-import CustomTableCell from "../components/table-cell.component";
-import { useMeasuresList } from "../../application/hooks/use-measures-list.hook";
-import { SearchField } from "../components/search-field.component";
 import { MeasureImpactByThreatDialogPage } from "./measure-impact-by-threat-dialog.page";
 import ThreatDialogPage from "./threat-dialog.page";
-import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
+import { createMeasuresColumns } from "./measures.columns";
 
 interface MeasuresPageBodyProps {
     project: ExtendedProject;
 }
 
-/**
- * on this page all measures are listed
- *
- * @component
- * @category Pages
- * @return {Component}
- */
 type MeasureDialogState = Omit<Partial<Measure>, "id" | "scheduledAt"> & {
     id?: number | undefined;
     scheduledAt?: Date | undefined;
     active?: boolean;
 };
 
+const NoRowsOverlay = ({ message }: { message: string }) => (
+    <Box
+        sx={{
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+        }}
+    >
+        <Typography sx={{ fontSize: "0.75rem", fontStyle: "italic" }}>{message}</Typography>
+    </Box>
+);
+
 const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
     const { t } = useTranslation("measuresPage");
+    const { t: tCommon } = useTranslation("common");
     const { openConfirm } = useConfirm<Measure>();
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const { projectId: projectIdParam = "0" } = useParams<{ projectId: string }>();
     const projectId = Number.parseInt(projectIdParam, 10);
-    const { setSortDirection, setSearchValue, setSortBy, deleteMeasure, sortDirection, sortBy, isPending, measures } =
-        useMeasuresList({ projectId });
+    const { deleteMeasure, isPending, measures } = useMeasuresList({ projectId });
 
     const userRole = useAppSelector((state) => state.projects.current?.role);
 
-    /**
-     * Layout effect to change the header bar
-     * to the current environment the user is at.
-     */
     useLayoutEffect(() => {
         dispatch(
             NavigationActions.setPageHeader({
@@ -66,42 +66,68 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
         );
     }, [dispatch]);
 
-    const onChangeSortBy = (_event: SyntheticEvent, newSortBy: string | null) => {
-        if (sortBy === newSortBy) {
-            const newSortDirection = sortDirection === "asc" ? "desc" : sortDirection === "desc" ? "asc" : null;
-            if (newSortDirection) {
-                setSortDirection(newSortDirection);
+    const SESSION_STORAGE_KEY = `measures-column-visibility-${projectId}`;
+
+    const getInitialColumnVisibility = (): GridColumnVisibilityModel => {
+        const stored = sessionStorage.getItem(SESSION_STORAGE_KEY);
+        if (stored) {
+            try {
+                return JSON.parse(stored);
+            } catch {
+                // Fall through to default
             }
-        } else if (newSortBy) {
-            setSortBy(newSortBy);
         }
+        return {
+            name: true,
+            scheduledAt: true,
+            actions: true,
+        };
     };
 
-    /**
-     * Changes the search filter of the list view.
-     * @event Box#onChange
-     * @param e - Event of the change.
-     */
-    const onChangeSearchValue = (event: ChangeEvent<HTMLInputElement>) => {
-        setSearchValue(event.target.value);
-    };
+    const [columnVisibility, setColumnVisibility] = useState<GridColumnVisibilityModel>(getInitialColumnVisibility);
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const open = Boolean(anchorEl);
 
-    const onClickDeleteMeasure = (event: React.MouseEvent<HTMLElement>, measure: Measure) => {
-        event.stopPropagation();
-        const isReset = measure.catalogMeasureId !== undefined && measure.catalogMeasureId != null;
-        openConfirm({
-            state: measure,
-            message:
-                isReset === true
-                    ? t("resetMeasureText", { measureName: measure.name })
-                    : t("deleteMeasureText", { measureName: measure.name }),
-            acceptText: isReset === true ? t("resetText") : t("deleteText"),
-            cancelText: t("cancelText"),
-            onAccept: (measure) => {
-                deleteMeasure(measure);
-            },
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
+    const handleClose = () => setAnchorEl(null);
+
+    const toggleColumnVisibility = (field: string) => {
+        setColumnVisibility((prev) => {
+            const newVisibility = { ...prev, [field]: !prev[field] };
+            sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(newVisibility));
+            return newVisibility;
         });
     };
+
+    const columnLabels: Record<string, string> = {
+        name: tCommon("name"),
+        scheduledAt: tCommon("scheduledAt"),
+        actions: t("actions"),
+    };
+
+    const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
+    const [expandedFilters, setExpandedFilters] = useState<Record<string, boolean>>({});
+
+    const handleFilterChange = useCallback((field: string, value: string) => {
+        setColumnFilters((prev) => ({ ...prev, [field]: value }));
+    }, []);
+
+    const toggleFilterExpanded = useCallback((field: string) => {
+        setExpandedFilters((prev) => ({ ...prev, [field]: !prev[field] }));
+    }, []);
+
+    const filterModel: GridFilterModel = useMemo(
+        () => ({
+            items: Object.entries(columnFilters)
+                .filter(([_, value]) => value.trim() !== "")
+                .map(([field, value]) => ({
+                    field,
+                    operator: "contains",
+                    value,
+                })),
+        }),
+        [columnFilters]
+    );
 
     const onClickAddMeasure = () => {
         const measureState: MeasureDialogState = {
@@ -109,63 +135,93 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
             projectId: project.id,
         };
         navigate(`/projects/${projectIdParam}/measures/edit`, {
-            state: {
-                measure: measureState,
-                project,
-            },
+            state: { measure: measureState, project },
         });
     };
 
-    const onClickEditMeasure = (event: React.MouseEvent<HTMLElement>, measure: Measure) => {
-        event.preventDefault();
-        const scheduledAt = new Date(
-            measure.scheduledAt.getTime() - measure.scheduledAt.getTimezoneOffset() * 60 * 1000
-        );
-        const measureState: MeasureDialogState = {
-            ...measure,
-            scheduledAt,
-        };
+    const onClickEditMeasure = (measure: Measure) => {
+        const scheduledAt = measure.scheduledAt
+            ? new Date(measure.scheduledAt.getTime() - measure.scheduledAt.getTimezoneOffset() * 60 * 1000)
+            : undefined;
+        const measureState: MeasureDialogState = { ...measure, scheduledAt };
         navigate(`/projects/${projectIdParam}/measures/edit`, {
-            state: {
-                project,
-                measure: measureState,
-            },
+            state: { project, measure: measureState },
         });
     };
 
-    const onClickDuplicateMeasure = (event: React.MouseEvent<HTMLElement>, measure: Measure) => {
-        event.stopPropagation();
-        const measureState: MeasureDialogState = {
-            ...measure,
-            active: false,
-            catalogMeasureId: null,
-            id: undefined,
-            name: t("duplicateName", { name: measure.name }),
-            scheduledAt: undefined,
-        };
-        navigate(`/projects/${projectIdParam}/measures/edit`, {
-            state: {
-                measure: measureState,
-                project,
-            },
-        });
-    };
+    const handleDuplicateMeasure = useCallback(
+        (measure: Measure) => {
+            const measureState: MeasureDialogState = {
+                ...measure,
+                active: false,
+                catalogMeasureId: null,
+                id: undefined,
+                name: tCommon("duplicateName", { name: measure.name }),
+                scheduledAt: undefined,
+            };
+            navigate(`/projects/${projectIdParam}/measures/edit`, {
+                state: { measure: measureState, project },
+            });
+        },
+        [navigate, projectIdParam, project, tCommon]
+    );
 
-    const handleMeasureCount = (): string => {
-        if (measures.length > 1) return t("measuresFound");
-        return t("measureFound");
-    };
+    const handleDeleteOrResetMeasure = useCallback(
+        (measure: Measure) => {
+            const isReset = measure.catalogMeasureId != null;
+            openConfirm({
+                state: measure,
+                message: isReset
+                    ? tCommon("resetMeasureText", { measureName: measure.name })
+                    : tCommon("deleteMeasureText", { measureName: measure.name }),
+                acceptText: isReset ? tCommon("resetText") : tCommon("deleteText"),
+                cancelText: tCommon("cancelText"),
+                onAccept: (measure) => {
+                    deleteMeasure(measure);
+                },
+            });
+        },
+        [openConfirm, tCommon, deleteMeasure]
+    );
+
+    const NoRowsOverlayWithMessage = useCallback(() => <NoRowsOverlay message={t("noMeasuresFound")} />, [t]);
+
+    const columns = useMemo(
+        () =>
+            createMeasuresColumns({
+                t,
+                tCommon,
+                userRole,
+                columnFilters,
+                handleFilterChange,
+                expandedFilters,
+                toggleFilterExpanded,
+                handleDuplicateMeasure,
+                handleDeleteOrResetMeasure,
+            }),
+        [
+            t,
+            tCommon,
+            userRole,
+            columnFilters,
+            handleFilterChange,
+            expandedFilters,
+            toggleFilterExpanded,
+            handleDuplicateMeasure,
+            handleDeleteOrResetMeasure,
+        ]
+    );
+
+    const handleMeasureCount = (): string => (measures.length > 1 ? t("measuresFound") : t("measureFound"));
 
     return (
         <Box sx={{ overflow: "hidden", height: "100%", boxSizing: "border-box" }}>
-            {
-                <LinearProgress
-                    sx={{
-                        visibility: isPending ? "visible" : "hidden",
-                        boxSizing: "border-box",
-                    }}
-                />
-            }
+            <LinearProgress
+                sx={{
+                    visibility: isPending ? "visible" : "hidden",
+                    boxSizing: "border-box",
+                }}
+            />
             <Page
                 sx={{
                     display: "flex",
@@ -198,14 +254,41 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                         }}
                     >
                         <Box sx={{ display: "flex", alignItems: "center" }}>
-                            <SearchField onChange={onChangeSearchValue} data-testid="SearchAsset" />
+                            <Button
+                                variant="outlined"
+                                startIcon={<Visibility />}
+                                onClick={handleClick}
+                                sx={{ textTransform: "none" }}
+                            >
+                                {t("customizeView")}
+                            </Button>
+                            <Menu
+                                anchorEl={anchorEl}
+                                open={open}
+                                onClose={handleClose}
+                                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                                transformOrigin={{ vertical: "top", horizontal: "left" }}
+                            >
+                                {Object.entries(columnLabels).map(([field, label]) => (
+                                    <MenuItem
+                                        key={field}
+                                        onClick={() => toggleColumnVisibility(field)}
+                                        sx={{ py: 0.5 }}
+                                    >
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox checked={columnVisibility[field] !== false} size="small" />
+                                            }
+                                            label={label}
+                                            sx={{ m: 0, width: "100%", pointerEvents: "none" }}
+                                        />
+                                    </MenuItem>
+                                ))}
+                            </Menu>
                             {checkUserRole(userRole, USER_ROLES.EDITOR) && (
                                 <IconButton
-                                    title={t("addMeasure")}
-                                    sx={{
-                                        ml: 1,
-                                        color: "text.primary",
-                                    }}
+                                    title={tCommon("addMeasure")}
+                                    sx={{ ml: 1, color: "text.primary" }}
                                     onClick={onClickAddMeasure}
                                     data-testid="measures-page_add-measure-button"
                                 >
@@ -213,238 +296,47 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                                 </IconButton>
                             )}
                         </Box>
-                        <Box
-                            sx={{
-                                display: "flex",
-                                alignItems: "center",
-                            }}
-                        >
-                            {measures.length > 0 && (
-                                <Box
-                                    sx={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                    }}
-                                >
-                                    <Typography
-                                        sx={{
-                                            mr: 0.5,
-                                            fontWeight: "bold",
-                                            color: "primary.text",
-                                        }}
-                                    >
-                                        {measures.length}
-                                    </Typography>
-                                    <Typography>{handleMeasureCount()}</Typography>
-                                </Box>
-                            )}
-                        </Box>
+                        {measures.length > 0 && (
+                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                                <Typography sx={{ mr: 0.5, fontWeight: "bold", color: "primary.text" }}>
+                                    {measures.length}
+                                </Typography>
+                                <Typography>{handleMeasureCount()}</Typography>
+                            </Box>
+                        )}
                     </Box>
 
-                    <Box
+                    <DataGrid
+                        rows={measures}
+                        columns={columns}
+                        loading={isPending}
+                        disableRowSelectionOnClick
+                        disableColumnFilter
+                        disableColumnMenu
+                        disableColumnSelector
+                        filterModel={filterModel}
+                        onCellClick={(params) => {
+                            if (params.field !== "actions") {
+                                onClickEditMeasure(params.row);
+                            }
+                        }}
+                        columnHeaderHeight={90}
+                        columnVisibilityModel={columnVisibility}
                         sx={{
                             borderRadius: 5,
                             boxShadow: 1,
-                            boxSizing: "border-box",
-                            overflowX: "hidden",
-                            height: "100%",
+                            "& .MuiDataGrid-row": { cursor: "pointer" },
+                            "& .MuiDataGrid-cell:focus": { outline: "none" },
+                            "& .MuiDataGrid-columnHeader:focus": { outline: "none" },
+                            "& .MuiDataGrid-columnHeader": { padding: "8px 16px" },
+                            "& .MuiDataGrid-cell": { cursor: "pointer" },
                         }}
-                    >
-                        <Box
-                            sx={{
-                                borderRadius: 5,
-                                height: "100%",
-                            }}
-                        >
-                            {/*Measure Table*/}
-                            <TableContainer
-                                sx={{
-                                    height: "100%",
-                                    overflowY: "auto",
-                                    position: "relative",
-                                    width: "100%",
-                                    "&::-webkit-scrollbar": {
-                                        width: 10,
-                                        height: 10,
-                                        borderRadius: 5,
-                                        overflow: "hidden",
-                                    },
-                                    "&::-webkit-scrollbar-corner": {
-                                        borderRadius: 5,
-                                    },
-                                }}
-                            >
-                                <Table stickyHeader>
-                                    <TableHead>
-                                        <TableRow>
-                                            <CustomTableHeaderCell
-                                                name="name"
-                                                sortBy={sortBy}
-                                                sortDirection={sortDirection}
-                                                onClick={onChangeSortBy}
-                                                data-testid="measures-page_sort-measures-by-name-button"
-                                            >
-                                                {t("name")}
-                                            </CustomTableHeaderCell>
-                                            <CustomTableHeaderCell
-                                                name="scheduledAt"
-                                                sortBy={sortBy}
-                                                sortDirection={sortDirection}
-                                                onClick={onChangeSortBy}
-                                                data-testid="measures-page_sort-measures-by-scheduled-at-button"
-                                            >
-                                                {t("scheduledAt")}
-                                            </CustomTableHeaderCell>
-                                            <CustomTableHeaderCell
-                                                showBorder={false}
-                                                sx={{
-                                                    width: "1%",
-                                                    borderRightColor: "#fff",
-                                                    padding: 0,
-                                                }}
-                                            ></CustomTableHeaderCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {isPending && (
-                                            <Typography
-                                                sx={{
-                                                    paddingTop: 2,
-                                                    paddingLeft: 2,
-                                                    fontSize: "0.75rem",
-                                                    fontStyle: "italic",
-                                                }}
-                                            >
-                                                {t("measuresLoading")}
-                                            </Typography>
-                                        )}
-                                        {measures.length === 0 && !isPending && (
-                                            <Typography
-                                                sx={{
-                                                    paddingTop: 2,
-                                                    paddingLeft: 2,
-                                                    fontSize: "0.75rem",
-                                                    fontStyle: "italic",
-                                                }}
-                                            >
-                                                {t("noMeasuresFound")}
-                                            </Typography>
-                                        )}
-                                        {!isPending &&
-                                            measures.map((measure, i) => {
-                                                const { name, scheduledAt } = measure;
-                                                return (
-                                                    <TableRow
-                                                        key={i}
-                                                        onClick={(e) => onClickEditMeasure(e, measure)}
-                                                        sx={{
-                                                            backgroundColor: "background.mainIntransparent",
-                                                            borderRadius: 5,
-                                                            marginBottom: 1,
-
-                                                            "&:last-child td, &:last-child th": { border: 0 },
-                                                            "&:hover": {
-                                                                cursor: "pointer",
-                                                                backgroundColor: "#fff !important",
-                                                            },
-                                                        }}
-                                                        hover
-                                                        data-testid="measures-page_measures-list-entry"
-                                                    >
-                                                        <CustomTableCell
-                                                            scope="row"
-                                                            showBorder={true}
-                                                            sx={{
-                                                                position: "relative",
-                                                                fontWeight: "bold",
-                                                                fontSize: "0.875rem",
-                                                                borderRightColor: "#fff",
-                                                            }}
-                                                            align={"left"}
-                                                            data-testid="measures-page_measures-list-entry_name"
-                                                        >
-                                                            {name}
-                                                        </CustomTableCell>
-                                                        <CustomTableCell
-                                                            showBorder={true}
-                                                            sx={{
-                                                                borderRightColor: "#fff",
-                                                            }}
-                                                            data-testid="measures-page_measures-list-entry_scheduled-at"
-                                                        >
-                                                            <Typography
-                                                                sx={{
-                                                                    fontSize: "0.875rem",
-                                                                }}
-                                                            >
-                                                                {scheduledAt
-                                                                    ? scheduledAt.toISOString().split("T")[0]
-                                                                    : t("notScheduledYet")}
-                                                            </Typography>
-                                                        </CustomTableCell>
-                                                        <CustomTableCell
-                                                            sx={{
-                                                                padding: 0,
-                                                            }}
-                                                        >
-                                                            {checkUserRole(userRole, USER_ROLES.EDITOR) && (
-                                                                <Box>
-                                                                    <IconButton
-                                                                        title={t("copy")}
-                                                                        onClick={(e) =>
-                                                                            onClickDuplicateMeasure(e, measure)
-                                                                        }
-                                                                        data-testid="measures-page_measures-list-entry_copy-button"
-                                                                    >
-                                                                        <ContentCopyOutlined
-                                                                            sx={{
-                                                                                fontSize: 18,
-                                                                            }}
-                                                                        />
-                                                                    </IconButton>
-                                                                    {measure.catalogMeasureId && (
-                                                                        <IconButton
-                                                                            disabled={!scheduledAt}
-                                                                            title={t("reset")}
-                                                                            onClick={(e) =>
-                                                                                onClickDeleteMeasure(e, measure)
-                                                                            }
-                                                                        >
-                                                                            <Replay
-                                                                                sx={{
-                                                                                    fontSize: 18,
-                                                                                }}
-                                                                            />
-                                                                        </IconButton>
-                                                                    )}
-                                                                    {!measure.catalogMeasureId && (
-                                                                        <IconButton
-                                                                            title={t("delete")}
-                                                                            hoverColor="error"
-                                                                            onClick={(e) =>
-                                                                                onClickDeleteMeasure(e, measure)
-                                                                            }
-                                                                            data-testid="measures-page_measures-list-entry_delete-button"
-                                                                        >
-                                                                            <Delete
-                                                                                sx={{
-                                                                                    fontSize: 18,
-                                                                                }}
-                                                                            />
-                                                                        </IconButton>
-                                                                    )}
-                                                                </Box>
-                                                            )}
-                                                        </CustomTableCell>
-                                                    </TableRow>
-                                                );
-                                            })}
-                                        <TableRow></TableRow>
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
-                        </Box>
-                    </Box>
+                        initialState={{
+                            pagination: { paginationModel: { pageSize: 25, page: 0 } },
+                        }}
+                        pageSizeOptions={[10, 25, 50, 100]}
+                        slots={{ noRowsOverlay: NoRowsOverlayWithMessage }}
+                    />
                 </Box>
                 <Routes>
                     <Route path="edit" element={<MeasureDetailsDialogPage />} />
