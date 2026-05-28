@@ -9,6 +9,8 @@
   "duplicateThreat": "Duplicate Threat",
   "deleteThreat": "Delete Threat",
   "edited": "Edited",
+  "notEdited": "Not Edited",
+  "filterAll": "All",
   "threatsLoading": "Loading threats...",
   "fullExport": "Export Assets, Threats and Measures",
   "catalogMeasures": "Catalog Measures",
