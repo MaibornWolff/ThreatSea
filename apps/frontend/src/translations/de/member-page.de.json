@@ -1,7 +1,11 @@
 {
   "participant": "Teilnehmer",
+  "participants": "Teilnehmer",
   "addMemberBtn": "Teilnehmer hinzufügen",
   "deleteMember": "Teilnehmer entfernen",
+  "customizeView": "Ansicht anpassen",
+  "actions": "Aktionen",
+  "noMembersFound": "Keine Teilnehmer gefunden",
   "userRoles": {
     "OWNER": "Besitz",
     "EDITOR": "Bearbeiten",
