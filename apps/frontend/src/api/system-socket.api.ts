@@ -1,8 +1,12 @@
 /**
- * @module system-socket.api - Defines
- *     the socket io connection.
+ * @module system-socket.api - Disables socket operations globally
  */
-import io from "socket.io-client";
-import { API_URI } from "#api/utils.ts";
 
-export const socket = io(API_URI);
+/*eslint no-empty-function: ["error", { "allow": ["functions"] }]*/
+export const socket = {
+    emit: {},
+    on: {},
+    volatile: {
+        emit: {},
+    },
+};
