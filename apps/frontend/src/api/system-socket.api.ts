@@ -2,11 +2,11 @@
  * @module system-socket.api - Disables socket operations globally
  */
 
-/*eslint no-empty-function: ["error", { "allow": ["functions"] }]*/
+/* eslint-disable no-empty-function */
 export const socket = {
-    emit: {},
-    on: {},
+    emit() {},
+    on: () => {},
     volatile: {
-        emit: {},
+        emit: () => {},
     },
 };
