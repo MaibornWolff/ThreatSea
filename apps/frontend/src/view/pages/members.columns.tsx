@@ -118,7 +118,9 @@ export const createMembersColumns = ({
             ),
         valueGetter: (value: USER_ROLES) => t(`userRoles.${value}`),
         renderCell: (params: GridRenderCellParams<Member, string>) => (
-            <Typography sx={{ fontSize: "0.875rem", fontWeight: "bold" }}>{params.value}</Typography>
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
+                <Typography sx={{ fontSize: "0.875rem", fontWeight: "bold" }}>{params.value}</Typography>
+            </Box>
         ),
     },
     ...(checkUserRole(userRole, USER_ROLES.OWNER)
@@ -137,7 +139,16 @@ export const createMembersColumns = ({
                       </Box>
                   ),
                   renderCell: (params: GridRenderCellParams<Member>) => (
-                      <Box sx={{ display: "flex", paddingRight: 2, paddingLeft: 2 }}>
+                      <Box
+                          sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "flex-end",
+                              height: "100%",
+                              paddingRight: 2,
+                              paddingLeft: 2,
+                          }}
+                      >
                           <IconButton
                               title={t("deleteMember")}
                               hoverColor="error"

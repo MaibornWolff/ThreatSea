@@ -173,7 +173,16 @@ export const createAssetsColumns = ({
                       </Box>
                   ),
                   renderCell: (params: GridRenderCellParams<Asset>) => (
-                      <Box sx={{ display: "flex", paddingRight: 2, paddingLeft: 2 }}>
+                      <Box
+                          sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "flex-end",
+                              height: "100%",
+                              paddingRight: 2,
+                              paddingLeft: 2,
+                          }}
+                      >
                           <IconButton
                               title={t("deleteAsset")}
                               hoverColor="error"

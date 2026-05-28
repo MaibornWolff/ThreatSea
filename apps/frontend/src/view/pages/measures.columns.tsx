@@ -128,7 +128,16 @@ export const createMeasuresColumns = ({
                       const isCatalogMeasure = measure.catalogMeasureId != null;
 
                       return (
-                          <Box sx={{ display: "flex", paddingRight: 2, paddingLeft: 2 }}>
+                          <Box
+                              sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "flex-end",
+                                  height: "100%",
+                                  paddingRight: 2,
+                                  paddingLeft: 2,
+                              }}
+                          >
                               <IconButton
                                   title={tCommon("copy")}
                                   data-testid="measures-page_measures-list-entry_copy-button"
