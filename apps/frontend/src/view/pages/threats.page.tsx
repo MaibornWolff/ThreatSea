@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { DataGrid, type GridFilterModel, type GridColumnVisibilityModel } from "@mui/x-data-grid";
 import { Visibility } from "@mui/icons-material";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
@@ -176,10 +176,16 @@ const ThreatsPageBody = () => {
         [openConfirm, t, deleteThreat]
     );
 
+    // Refresh threats only when the editor finishes a save — the backend
+    // can auto-generate threats from new points of attack during updateSystem
+    // and does not emit a socket event for them. Tracking the prior status
+    // avoids the mount-time refetch when the state is already "upToDate".
+    const prevAutoSaveStatusRef = useRef(autoSaveStatus);
     useEffect(() => {
-        if (autoSaveStatus === "upToDate") {
+        if (prevAutoSaveStatusRef.current === "saving" && autoSaveStatus === "upToDate") {
             loadThreats();
         }
+        prevAutoSaveStatusRef.current = autoSaveStatus;
     }, [autoSaveStatus, loadThreats]);
 
     const [assetAnchorEl, setAssetAnchorEl] = useState<HTMLElement | null>(null);
