@@ -1,4 +1,4 @@
-import writeXlsxFile, { getSheetData } from "write-excel-file/browser";
+import writeXlsxFile, { getSheetData, type Cell } from "write-excel-file/browser";
 import { hasOwnProperty } from "./helpers";
 
 interface TabHeader {
@@ -12,17 +12,24 @@ interface Tab {
     header: TabHeader[];
 }
 
+function inferCellValue(val: unknown): Cell {
+    if (typeof val === "number") {
+        return { value: val, type: Number };
+    }
+    if (typeof val === "boolean") {
+        return { value: val, type: Boolean };
+    }
+    if (typeof val === "string") {
+        return { value: val.replace(/\n/g, " "), type: String };
+    }
+    return { value: "", type: String };
+}
+
 export async function exportAsExcelFile(tabs: Tab[], name = "file.xlsx") {
     const sheets = tabs.map((tab) => {
         const columns = tab.header.map((head) => ({
             header: { value: head.label, type: String },
-            cell: (row: Record<string, unknown>) => {
-                const val = row[head.property];
-                if (typeof val === "string") {
-                    return { value: val.replace(/\n/g, " "), type: String };
-                }
-                return { value: val != null ? String(val) : "", type: String };
-            },
+            cell: (row: Record<string, unknown>) => inferCellValue(row[head.property]),
         }));
         return {
             data: getSheetData(tab.items as Record<string, unknown>[], columns),
