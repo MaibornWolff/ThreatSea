@@ -82,6 +82,16 @@ describe("useAutoSavePreview", () => {
         expect(saveCurrentSystem).not.toHaveBeenCalled();
     });
 
+    it("does not force-save on unmount before the system has been hydrated", () => {
+        const saveCurrentSystem = vi.fn();
+
+        const { unmount } = renderUseAutoSavePreview(buildArgs({ saveCurrentSystem, initialized: false }));
+
+        unmount();
+
+        expect(saveCurrentSystem).not.toHaveBeenCalled();
+    });
+
     it("schedules a save 1 second after blockAutoSave becomes true", () => {
         vi.useFakeTimers();
         const saveCurrentSystem = vi.fn();

@@ -125,14 +125,18 @@ export const useAutoSavePreview = ({
     }, [makeScreenshot]);
 
     function shouldSave(forceSave?: boolean): boolean {
-        if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
-            return (
-                (!systemPending && initialized && !isAnyComponentInUse && autoSaveStatus !== "saving") ||
-                forceSave === true
-            );
-        } else {
+        if (!checkUserRole(userRole, USER_ROLES.EDITOR)) {
             return false;
         }
+        // Never save before the system has been hydrated from the backend — otherwise
+        // a forced save (e.g. on unmount) writes an empty Redux state over the real data.
+        if (!initialized) {
+            return false;
+        }
+        if (forceSave === true) {
+            return true;
+        }
+        return !systemPending && !isAnyComponentInUse && autoSaveStatus !== "saving";
     }
 
     const save = (forceSave = false): void => {
