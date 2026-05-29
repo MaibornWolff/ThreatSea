@@ -15,13 +15,12 @@ import { memo, useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
-import type { ExtendedProject } from "#api/types/project.types.ts";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { useEditor } from "#application/hooks/use-editor.hook.ts";
 import { useLoadThreatsOnce } from "#application/hooks/use-load-threats-once.hook.ts";
 import { useThreatsList, type ThreatListItem } from "#application/hooks/use-threats-list.hook.ts";
-import { useAppDispatch } from "#application/hooks/use-app-redux.hook.ts";
+import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import { Page } from "#view/components/page.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
 import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
@@ -53,7 +52,7 @@ const NoRowsOverlay = ({ message }: { message: string }) => (
  * @component
  * @category Pages
  */
-const ThreatsPageBody = ({ project }: { project: ExtendedProject }) => {
+const ThreatsPageBody = () => {
     const { projectId: projectIdParam = "0" } = useParams<{ projectId?: string }>();
     const projectId = Number.parseInt(projectIdParam, 10);
     const { openConfirm } = useConfirm<ExtendedThreat>();
@@ -68,7 +67,7 @@ const ThreatsPageBody = ({ project }: { project: ExtendedProject }) => {
 
     const { autoSaveStatus } = useEditor({ projectId: projectId });
 
-    const userRole = project.role;
+    const userRole = useAppSelector((state) => state.projects.current?.role);
 
     const dispatch = useAppDispatch();
 
