@@ -1,6 +1,7 @@
 import type { ProjectReport } from "#api/types/project.types.ts";
 import type { SortDirection } from "#application/actions/list.actions.ts";
 import { exportAsExcelFile } from "#utils/export.ts";
+import { useAlert } from "#application/hooks/use-alert.hook.ts";
 import { useState, useMemo, useEffect, useEffectEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { ProjectsAPI } from "#api/projects.api.ts";
@@ -106,8 +107,10 @@ const calcRiskBarGraph = (matrix: RiskMatrix | null): RiskBarGraph | null => {
 
 export const useReport = ({ projectId }: { projectId: number }) => {
     const {
+        t,
         i18n: { language },
     } = useTranslation();
+    const { showErrorMessage } = useAlert();
     const [data, setData] = useState<ProjectReport | null>(null);
     const [isChanged, setIsChanged] = useState<boolean>(true);
     const [reportLanguage, setReportLanguage] = useState(language);
@@ -635,7 +638,10 @@ export const useReport = ({ projectId }: { projectId: number }) => {
                 },
             ],
             fileName
-        );
+        ).catch((error) => {
+            console.error("Excel export failed", error);
+            showErrorMessage({ message: t("errorMessages.excelExportFailed") });
+        });
     };
 
     return {

@@ -123,7 +123,8 @@
     "componentToUserInvalid": "Only clients, servers, or databases can connect to users",
     "componentToCommunicationInfraInvalid": "Clients, servers, and databases can only connect to communication infrastructure via communication interfaces",
     "communicationInfraToComponentInvalid": "Communication infrastructure can only connect to clients, servers, or databases via communication interfaces",
-    "invalidConnection": "Invalid connection"
+    "invalidConnection": "Invalid connection",
+    "excelExportFailed": "Excel export failed."
   },
 
   "pointsOfAttackList": {

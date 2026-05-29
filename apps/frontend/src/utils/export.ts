@@ -1,8 +1,4 @@
-/**
- * @module export - Defines the export/import
- *     for threats/measures/assets.
- */
-import Excel from "exceljs";
+import writeXlsxFile, { getSheetData, type Cell } from "write-excel-file/browser";
 import { hasOwnProperty } from "./helpers";
 
 interface TabHeader {
@@ -14,6 +10,34 @@ interface Tab {
     name: string;
     items: object[];
     header: TabHeader[];
+}
+
+function inferCellValue(val: unknown): Cell {
+    if (typeof val === "number") {
+        return { value: val, type: Number };
+    }
+    if (typeof val === "boolean") {
+        return { value: val, type: Boolean };
+    }
+    if (typeof val === "string") {
+        return { value: val.replace(/\n/g, " "), type: String };
+    }
+    return { value: "", type: String };
+}
+
+export async function exportAsExcelFile(tabs: Tab[], name = "file.xlsx") {
+    const sheets = tabs.map((tab) => {
+        const columns = tab.header.map((head) => ({
+            header: { value: head.label, type: String },
+            cell: (row: Record<string, unknown>) => inferCellValue(row[head.property]),
+        }));
+        return {
+            data: getSheetData(tab.items as Record<string, unknown>[], columns),
+            sheet: tab.name,
+        };
+    });
+
+    await writeXlsxFile(sheets).toFile(name);
 }
 
 /**
@@ -51,43 +75,6 @@ export function exportAsCsvFile(tabs: Tab[], name = "file.csv", delimiter = ";")
     link.click();
 
     URL.revokeObjectURL(url);
-}
-
-export function exportAsExcelFile(tabs: Tab[], name = "file.xlsx") {
-    const workbook = new Excel.Workbook();
-
-    tabs.forEach((tab) => {
-        const sheet = workbook.addWorksheet(tab.name);
-        sheet.columns = tab.header.map((head) => ({
-            header: head.label,
-            key: head.property,
-        }));
-
-        tab.items.forEach((item) => {
-            const updatedItem = Object.entries(item).reduce(
-                (acc: Record<string, number | string | boolean>, [key, value]) => {
-                    if (typeof value === "string") {
-                        acc[key] = value.replace(/\n/g, " ");
-                    } else {
-                        acc[key] = value;
-                    }
-                    return acc;
-                },
-                {}
-            );
-            sheet.addRow(updatedItem);
-        });
-    });
-
-    workbook.xlsx.writeBuffer().then((data) => {
-        const blob = new Blob([data], {
-            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        });
-        const link = document.createElement("a");
-        link.href = window.URL.createObjectURL(blob);
-        link.download = name;
-        link.click();
-    });
 }
 
 /**

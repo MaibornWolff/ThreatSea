@@ -34,7 +34,7 @@ export default defineConfig({
                         // Excel/Office libraries
                         {
                             name: "excel-vendor",
-                            test: /\/exceljs/,
+                            test: /\/write-excel-file/,
                         },
                         // Canvas/Drawing libraries
                         {
