@@ -87,7 +87,7 @@ describe("createThreatsColumns — column sizing (resize defaults)", () => {
         expect(byField["assets"]!.width).toBe(140);
         expect(byField["probability"]!.width).toBe(200);
         expect(byField["damage"]!.width).toBe(150);
-        expect(byField["risk"]!.width).toBe(120);
+        expect(byField["risk"]!.width).toBe(140);
     });
 
     it("keeps Probability wide enough that the filter chevron survives the DataGrid hover menu", () => {
@@ -97,6 +97,30 @@ describe("createThreatsColumns — column sizing (resize defaults)", () => {
         const { columns } = buildColumns();
         const probability = columns.find((c) => c.field === "probability")!;
         expect(probability.width ?? 0).toBeGreaterThanOrEqual(180);
+    });
+
+    it("keeps Point of Attack wide enough that the filter chevron survives the DataGrid hover menu", () => {
+        // Same hover-menu squeeze as Probability — but this column is flex,
+        // so the floor is set by minWidth rather than width.
+        const { columns } = buildColumns();
+        const pointOfAttack = columns.find((c) => c.field === "pointOfAttack")!;
+        expect(pointOfAttack.minWidth ?? 0).toBeGreaterThanOrEqual(180);
+    });
+
+    it("keeps Component wide enough that the filter chevron survives the DataGrid hover menu", () => {
+        // German "Komponente" + chevron + hover-menu overlay squeezed at the old
+        // 150px floor; flex column so we enforce via minWidth.
+        const { columns } = buildColumns();
+        const componentName = columns.find((c) => c.field === "componentName")!;
+        expect(componentName.minWidth ?? 0).toBeGreaterThanOrEqual(160);
+    });
+
+    it("keeps Risk wide enough that the filter chevron survives the DataGrid hover menu", () => {
+        // German "Risiko" + chevron + hover-menu overlay was clipping at 120px;
+        // fixed-width column so we enforce via width.
+        const { columns } = buildColumns();
+        const risk = columns.find((c) => c.field === "risk")!;
+        expect(risk.width ?? 0).toBeGreaterThanOrEqual(140);
     });
 
     it("widens the Edited column to fit the dropdown filter", () => {
