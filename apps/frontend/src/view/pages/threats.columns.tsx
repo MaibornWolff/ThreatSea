@@ -129,7 +129,7 @@ export const createThreatsColumns = ({
         field: "componentName",
         headerName: t("componentName"),
         flex: 1,
-        minWidth: 150,
+        minWidth: 170,
         align: "center",
         headerAlign: "center",
         renderHeader: () => (
@@ -177,7 +177,7 @@ export const createThreatsColumns = ({
         field: "pointOfAttack",
         headerName: t("pointOfAttack"),
         flex: 1,
-        minWidth: 150,
+        minWidth: 200,
         align: "center",
         headerAlign: "center",
         renderHeader: () => (
@@ -344,7 +344,7 @@ export const createThreatsColumns = ({
     {
         field: "risk",
         headerName: t("risk"),
-        width: 120,
+        width: 140,
         align: "center",
         headerAlign: "center",
         renderHeader: () => (
