@@ -262,7 +262,7 @@ export const createThreatsColumns = ({
     {
         field: "probability",
         headerName: t("probability"),
-        width: 170,
+        width: 200,
         align: "center",
         headerAlign: "center",
         renderHeader: () => (

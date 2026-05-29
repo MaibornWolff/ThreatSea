@@ -85,9 +85,18 @@ describe("createThreatsColumns — column sizing (resize defaults)", () => {
         const byField = Object.fromEntries(columns.map((c) => [c.field, c]));
 
         expect(byField["assets"]!.width).toBe(140);
-        expect(byField["probability"]!.width).toBe(130);
+        expect(byField["probability"]!.width).toBe(200);
         expect(byField["damage"]!.width).toBe(150);
         expect(byField["risk"]!.width).toBe(120);
+    });
+
+    it("keeps Probability wide enough that the filter chevron survives the DataGrid hover menu", () => {
+        // The header renders the label + a chevron button. On hover, MUI overlays
+        // its own column-menu icon on the right, eating ~30px. If the column is
+        // too narrow, the chevron gets squished and the filter becomes unusable.
+        const { columns } = buildColumns();
+        const probability = columns.find((c) => c.field === "probability")!;
+        expect(probability.width ?? 0).toBeGreaterThanOrEqual(180);
     });
 
     it("widens the Edited column to fit the dropdown filter", () => {
