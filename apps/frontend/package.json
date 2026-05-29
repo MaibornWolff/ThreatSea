@@ -34,7 +34,6 @@
     "@react-pdf/renderer": "4.5.1",
     "@reduxjs/toolkit": "2.12.0",
     "buffer": "6.0.3",
-    "exceljs": "4.4.0",
     "i18next": "26.2.0",
     "jwt-decode": "4.0.0",
     "konva": "10.3.0",
@@ -51,7 +50,8 @@
     "reselect": "5.2.0",
     "socket.io-client": "4.8.3",
     "use-image": "1.1.4",
-    "web-vitals": "5.2.0"
+    "web-vitals": "5.2.0",
+    "write-excel-file": "4.0.7"
   },
   "devDependencies": {
     "@playwright/test": "1.60.0",
