@@ -2,7 +2,7 @@ import { useEffect, type RefObject } from "react";
 import type { KonvaEventObject, Node as KonvaNode } from "konva/lib/Node";
 import type { Transformer as KonvaTransformer } from "konva/lib/shapes/Transformer";
 import { useAppSelector } from "./use-app-redux.hook";
-import { editorSelectors } from "../selectors/editor.selectors";
+import { editorSelectors } from "#application/selectors/editor.selectors.ts";
 import type { Annotation } from "#api/types/system.types.ts";
 
 interface UseAnnotationInteractionArgs {

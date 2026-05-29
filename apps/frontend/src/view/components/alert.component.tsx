@@ -3,11 +3,11 @@ import type { AlertColor } from "@mui/material/Alert";
 import { useEffect, useRef, type JSX } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { useAlert } from "../../application/hooks/use-alert.hook";
-import { useAppDispatch, useAppSelector } from "../../application/hooks/use-app-redux.hook";
-import { UserActions } from "../../application/actions/user.actions";
-import { ErrorActions } from "../../application/actions/error.actions";
-import { ERR_TYPE_API, ERR_TYPE_PROJECT_CATALOG_EXISTANCE } from "../../application/reducers/error.reducer";
+import { useAlert } from "#application/hooks/use-alert.hook.ts";
+import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
+import { UserActions } from "#application/actions/user.actions.ts";
+import { ErrorActions } from "#application/actions/error.actions.ts";
+import { ERR_TYPE_API, ERR_TYPE_PROJECT_CATALOG_EXISTANCE } from "#application/reducers/error.reducer.ts";
 
 export const Alert = (): JSX.Element | null => {
     const { text, type, visible, close, showErrorMessage } = useAlert();

@@ -1,6 +1,6 @@
 import { createReducer } from "@reduxjs/toolkit";
-import { CatalogThreatsActions } from "../actions/catalog-threats.actions";
-import { catalogThreatsAdapter } from "../adapters/catalog-threats.adapter";
+import { CatalogThreatsActions } from "#application/actions/catalog-threats.actions.ts";
+import { catalogThreatsAdapter } from "#application/adapters/catalog-threats.adapter.ts";
 
 type CatalogThreatsAdapterState = ReturnType<typeof catalogThreatsAdapter.getInitialState>;
 

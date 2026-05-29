@@ -18,17 +18,17 @@ import { ExpandLessRounded, ExpandMoreRounded, InfoOutlined } from "@mui/icons-m
 import { useForm, type SubmitErrorHandler } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
-import { useDialog } from "../../application/hooks/use-dialog.hook";
-import { Button } from "../components/button.component";
-import { Dialog } from "../components/dialog.component";
-import { DialogTextField } from "../components/dialog.textfield.component";
-import { NameTextField } from "../components/name-textfield.component";
-import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
+import { useDialog } from "#application/hooks/use-dialog.hook.ts";
+import { Button } from "#view/components/button.component.tsx";
+import { Dialog } from "#view/components/dialog.component.tsx";
+import { DialogTextField } from "#view/components/dialog.textfield.component.tsx";
+import { NameTextField } from "#view/components/name-textfield.component.tsx";
+import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import type { Asset } from "#api/types/asset.types.ts";
 import { useState } from "react";
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { MIN_CIA_VALUE, MAX_CIA_VALUE } from "./validation-constants";
-import { DescriptionTextField } from "#view/components/description-textfield.component.jsx";
+import { DescriptionTextField } from "#view/components/description-textfield.component.tsx";
 import { BigTextField } from "#view/components/big-textfield.component.tsx";
 import type { DialogValue } from "#application/reducers/dialogs.reducer.ts";
 

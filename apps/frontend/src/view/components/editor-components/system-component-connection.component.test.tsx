@@ -1,6 +1,6 @@
 import { screen } from "@testing-library/react";
 import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
-import { POA_COLORS } from "../../colors/pointsOfAttack.colors";
+import { POA_COLORS } from "#view/colors/pointsOfAttack.colors.ts";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { createSystemComponent, createConnectionAnchor } from "#test-utils/builders.ts";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";

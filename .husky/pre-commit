@@ -1,2 +1,2 @@
 pnpm type-check
-pnpm dlx lint-staged
+pnpm lint-staged

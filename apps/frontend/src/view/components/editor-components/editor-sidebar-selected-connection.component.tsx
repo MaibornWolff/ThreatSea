@@ -2,8 +2,8 @@ import { Delete } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
 import { Box } from "@mui/system";
 import type { ChangeEvent } from "react";
-import { checkUserRole, USER_ROLES } from "../../../api/types/user-roles.types";
-import { TextField } from "../textfield.component";
+import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
+import { TextField } from "#view/components/textfield.component.tsx";
 import type { SystemConnection } from "#api/types/system.types.ts";
 
 interface EditorSidebarSelectedConnectionProps {

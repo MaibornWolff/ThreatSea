@@ -1,4 +1,4 @@
-import AddMemberDialog from "../dialogs/add-member.dialog";
+import AddMemberDialog from "#view/dialogs/add-member.dialog.tsx";
 import { Navigate, useLocation, useParams, type Location } from "react-router-dom";
 import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import type { Member } from "#api/types/members.types.ts";

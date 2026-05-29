@@ -1,7 +1,7 @@
 import { createReducer } from "@reduxjs/toolkit";
 import type { USER_ROLES } from "#api/types/user-roles.types.ts";
-import { MemberActions } from "../actions/members.actions";
-import { addableMembersAdapter, addedMembersAdapter } from "../adapters/members.adapter";
+import { MemberActions } from "#application/actions/members.actions.ts";
+import { addableMembersAdapter, addedMembersAdapter } from "#application/adapters/members.adapter.ts";
 
 type AddedMembersState = ReturnType<typeof addedMembersAdapter.getInitialState>;
 type AddableMembersState = ReturnType<typeof addableMembersAdapter.getInitialState>;

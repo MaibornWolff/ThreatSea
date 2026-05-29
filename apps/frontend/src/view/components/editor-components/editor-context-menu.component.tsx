@@ -23,10 +23,10 @@ import { useParams } from "react-router-dom";
 import type { Stage } from "konva/lib/Stage";
 import type { ComponentType } from "#api/types/component-types.types.ts";
 import type { EditorComponentType } from "#application/adapters/editor-component-type.adapter.ts";
-import { EditorActions } from "../../../application/actions/editor.actions";
-import { useConfirm } from "../../../application/hooks/use-confirm.hook";
-import { useEditor } from "../../../application/hooks/use-editor.hook";
-import { editorSelectors } from "../../../application/selectors/editor.selectors";
+import { EditorActions } from "#application/actions/editor.actions.ts";
+import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
+import { useEditor } from "#application/hooks/use-editor.hook.ts";
+import { editorSelectors } from "#application/selectors/editor.selectors.ts";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 
 let opened = {

@@ -1,8 +1,8 @@
 import { systemSelectors } from "./system.selectors";
-import { systemAnnotationsAdapter } from "../adapters/system-annotations.adapter";
-import systemReducer from "../reducers/system.reducer";
+import { systemAnnotationsAdapter } from "#application/adapters/system-annotations.adapter.ts";
+import systemReducer from "#application/reducers/system.reducer.ts";
 import { createAnnotation } from "#test-utils/builders.ts";
-import type { RootState } from "../store.types";
+import type { RootState } from "#application/store.types.ts";
 import type { Annotation } from "#api/types/system.types.ts";
 
 const withAnnotations = (annotations: Annotation[]) => {

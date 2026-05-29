@@ -1,7 +1,7 @@
 import { Navigate, useLocation, useParams, type Location } from "react-router-dom";
 import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
-import AddThreatDialog from "../dialogs/add-threat.dialog";
+import AddThreatDialog from "#view/dialogs/add-threat.dialog.tsx";
 
 interface ThreatDialogLocationState {
     threat: ExtendedThreat | undefined;

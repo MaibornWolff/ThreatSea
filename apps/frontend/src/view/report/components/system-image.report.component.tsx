@@ -1,7 +1,7 @@
 import type { ComponentProps } from "react";
 import { View, Image } from "@react-pdf/renderer";
 import type { Style } from "@react-pdf/types";
-import { primaryColor } from "../report.style";
+import { primaryColor } from "#view/report/report.style.ts";
 
 type ViewBaseProps = Omit<ComponentProps<typeof View>, "style">;
 

@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
-import { MeasureImpactsActions } from "../actions/measureImpacts.actions";
-import { measureImpactsSelectors } from "../selectors/measureImpacts.selectors";
+import { MeasureImpactsActions } from "#application/actions/measureImpacts.actions.ts";
+import { measureImpactsSelectors } from "#application/selectors/measureImpacts.selectors.ts";
 import { useAppDispatch, useAppSelector } from "./use-app-redux.hook";
 
 export const useMeasureImpacts = ({ projectId }: { projectId: number }) => {

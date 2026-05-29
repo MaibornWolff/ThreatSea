@@ -1,6 +1,6 @@
 import { useCallback } from "react";
-import { MemberActions } from "../actions/members.actions.ts";
-import { addableMemberSelectors } from "../selectors/members.selectors.ts";
+import { MemberActions } from "#application/actions/members.actions.ts";
+import { addableMemberSelectors } from "#application/selectors/members.selectors.ts";
 import { useAppDispatch, useAppSelector } from "./use-app-redux.hook.ts";
 
 export const useAddableMembers = () => {

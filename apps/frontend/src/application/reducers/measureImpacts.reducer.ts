@@ -1,6 +1,6 @@
 import { createReducer } from "@reduxjs/toolkit";
-import { MeasureImpactsActions } from "../actions/measureImpacts.actions";
-import { measureImpactsAdapter } from "../adapters/measureImpactsAdapter";
+import { MeasureImpactsActions } from "#application/actions/measureImpacts.actions.ts";
+import { measureImpactsAdapter } from "#application/adapters/measureImpactsAdapter.ts";
 
 type MeasureImpactsAdapterState = ReturnType<typeof measureImpactsAdapter.getInitialState>;
 

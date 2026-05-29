@@ -1,11 +1,14 @@
 import { createReducer } from "@reduxjs/toolkit";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
-import { EditorActions } from "../actions/editor.actions";
-import { SystemActions } from "../actions/system.actions";
-import { editorMousePointersAdapter } from "../adapters/editor-mouse-pointers.adapter";
-import { editorComponentConnectionLinesAdapter } from "../adapters/editor-component-connection-lines.adapter";
-import { editorComponentTypeAdapter, type EditorComponentType } from "../adapters/editor-component-type.adapter";
+import { EditorActions } from "#application/actions/editor.actions.ts";
+import { SystemActions } from "#application/actions/system.actions.ts";
+import { editorMousePointersAdapter } from "#application/adapters/editor-mouse-pointers.adapter.ts";
+import { editorComponentConnectionLinesAdapter } from "#application/adapters/editor-component-connection-lines.adapter.ts";
+import {
+    editorComponentTypeAdapter,
+    type EditorComponentType,
+} from "#application/adapters/editor-component-type.adapter.ts";
 import serverImg from "../../images/server.png";
 import databaseImg from "../../images/database.png";
 import desktopImg from "../../images/desktop.png";

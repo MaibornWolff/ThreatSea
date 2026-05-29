@@ -16,16 +16,16 @@ import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import type { ExtendedProject } from "#api/types/project.types.ts";
+import { NavigationActions } from "#application/actions/navigation.actions.ts";
+import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
+import { useEditor } from "#application/hooks/use-editor.hook.ts";
+import { useThreatsList, type ThreatListItem } from "#application/hooks/use-threats-list.hook.ts";
 import { useAppDispatch } from "#application/hooks/use-app-redux.hook.ts";
-import { NavigationActions } from "../../application/actions/navigation.actions";
-import { useConfirm } from "../../application/hooks/use-confirm.hook";
-import { useEditor } from "../../application/hooks/use-editor.hook";
-import { useThreatsList, type ThreatListItem } from "../../application/hooks/use-threats-list.hook";
-import { Page } from "../components/page.component";
-import { CreatePage } from "../components/create-page.component";
-import { HeaderUtilityControls } from "../components/header-utility-controls.component";
+import { Page } from "#view/components/page.component.tsx";
+import { CreatePage } from "#view/components/create-page.component.tsx";
+import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
+import { withProject } from "#view/components/with-project.hoc.tsx";
 import ThreatDialogPage from "./threat-dialog.page";
-import { withProject } from "../components/with-project.hoc";
 import { createThreatsColumns } from "./threats.columns";
 
 /**

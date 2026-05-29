@@ -5,7 +5,7 @@
 
 import { useLocation, type Location } from "react-router-dom";
 import type { ComponentType } from "#api/types/component-types.types.ts";
-import ComponentDialog from "../dialogs/component.dialog";
+import ComponentDialog from "#view/dialogs/component.dialog.tsx";
 
 interface ComponentDialogLocationState {
     component: ComponentType | undefined;

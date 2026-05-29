@@ -3,8 +3,8 @@
  *     for the alert.
  */
 
-import type { AppMiddleware } from "../types";
-import { AlertActions } from "../../actions/alert.actions";
+import type { AppMiddleware } from "#application/middlewares/types.ts";
+import { AlertActions } from "#application/actions/alert.actions.ts";
 
 /**
  * Middleware function for redux success alert action.

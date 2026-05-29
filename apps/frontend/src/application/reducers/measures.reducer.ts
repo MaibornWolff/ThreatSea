@@ -1,6 +1,6 @@
 import { createReducer } from "@reduxjs/toolkit";
-import { MeasuresActions } from "../actions/measures.actions";
-import { measuresAdapter } from "../adapters/measures.adapter";
+import { MeasuresActions } from "#application/actions/measures.actions.ts";
+import { measuresAdapter } from "#application/adapters/measures.adapter.ts";
 
 type MeasuresAdapterState = ReturnType<typeof measuresAdapter.getInitialState>;
 

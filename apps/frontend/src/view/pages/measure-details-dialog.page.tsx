@@ -2,7 +2,7 @@ import { useParams, useLocation, Navigate } from "react-router-dom";
 import type { Location } from "react-router-dom";
 import type { Project } from "#api/types/project.types.ts";
 import type { Measure } from "#api/types/measure.types.ts";
-import MeasureDetailsDialog from "../dialogs/measure-details.dialog";
+import MeasureDetailsDialog from "#view/dialogs/measure-details.dialog.tsx";
 
 /**
  * on this page a measure can be created or edited

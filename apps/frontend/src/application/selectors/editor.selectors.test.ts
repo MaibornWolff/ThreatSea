@@ -1,7 +1,7 @@
 import { editorSelectors } from "./editor.selectors";
-import editorReducer from "../reducers/editor.reducer";
-import { EditorActions } from "../actions/editor.actions";
-import type { RootState } from "../store.types";
+import editorReducer from "#application/reducers/editor.reducer.ts";
+import { EditorActions } from "#application/actions/editor.actions.ts";
+import type { RootState } from "#application/store.types.ts";
 import type { AnnotationType } from "#api/types/system.types.ts";
 
 const withEditor = (mutate?: (editor: ReturnType<typeof editorReducer>) => ReturnType<typeof editorReducer>) => {

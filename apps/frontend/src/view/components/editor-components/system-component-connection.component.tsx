@@ -1,7 +1,7 @@
 import { Group, Line } from "react-konva";
 import { memo, useState, type JSX, type RefObject } from "react";
-import { POA_COLORS } from "../../colors/pointsOfAttack.colors";
-import { POINTS_OF_ATTACK } from "../../../api/types/points-of-attack.types";
+import { POA_COLORS } from "#view/colors/pointsOfAttack.colors.ts";
+import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import type { KonvaEventObject } from "konva/lib/Node";
 import type { Stage as KonvaStage } from "konva/lib/Stage";
 import { AnchorOrientation, type AugmentedSystemComponent, type ConnectionPointMeta } from "#api/types/system.types.ts";

@@ -9,7 +9,7 @@ import type { Measure } from "#api/types/measure.types.ts";
 import type { ExtendedProject } from "#api/types/project.types.ts";
 import type { SortDirection } from "#application/actions/list.actions.ts";
 import { CustomTableHeaderCell } from "./table-header.component";
-import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
+import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { IconButton } from "./icon-button.component";
 
 interface ThreatMeasuresTableSharedProps {

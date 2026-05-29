@@ -1,10 +1,10 @@
 import { useEffect, useEffectEvent, useRef, type RefObject } from "react";
 import type { Layer as KonvaLayer } from "konva/lib/Layer";
 import type { Image as KonvaImage } from "konva/lib/shapes/Image";
-import { EditorActions } from "../actions/editor.actions";
+import { EditorActions } from "#application/actions/editor.actions.ts";
 import { useAppDispatch } from "./use-app-redux.hook";
-import { useDebounce } from "../../hooks/useDebounce";
-import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
+import { useDebounce } from "#hooks/useDebounce.ts";
+import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 
 export interface UseAutoSavePreviewArgs {
     componentLayerRef: RefObject<KonvaLayer | null>;

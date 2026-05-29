@@ -4,9 +4,9 @@ import type { TextFieldProps } from "@mui/material/TextField";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { FieldError, FieldPath, FieldValues, Path, UseFormRegister } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { useAssets } from "../../application/hooks/use-assets.hook";
-import { useMeasures } from "../../application/hooks/use-measures.hook";
-import { editorSelectors } from "../../application/selectors/editor.selectors";
+import { useAssets } from "#application/hooks/use-assets.hook.ts";
+import { useMeasures } from "#application/hooks/use-measures.hook.ts";
+import { editorSelectors } from "#application/selectors/editor.selectors.ts";
 import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 
 type OwnId = number | string | null | undefined;

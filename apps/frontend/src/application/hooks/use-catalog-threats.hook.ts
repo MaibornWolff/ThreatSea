@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import type { CatalogThreat } from "#api/types/catalog-threat.types.ts";
-import { CatalogThreatsActions } from "../actions/catalog-threats.actions";
-import { catalogThreatsSelectors } from "../selectors/catalog-threats.selectors";
+import { CatalogThreatsActions } from "#application/actions/catalog-threats.actions.ts";
+import { catalogThreatsSelectors } from "#application/selectors/catalog-threats.selectors.ts";
 import { useAppDispatch, useAppSelector } from "./use-app-redux.hook";
 
 export const useCatalogThreats = ({ catalogId }: { catalogId: number }) => {

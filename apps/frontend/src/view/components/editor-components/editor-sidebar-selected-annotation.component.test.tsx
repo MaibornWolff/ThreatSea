@@ -4,7 +4,7 @@ import { EditorSidebarSelectedAnnotation } from "./editor-sidebar-selected-annot
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { createAnnotation } from "#test-utils/builders.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
-import { DEFAULT_ANNOTATION_COLOR } from "../../colors/annotation.colors";
+import { DEFAULT_ANNOTATION_COLOR } from "#view/colors/annotation.colors.ts";
 
 describe("EditorSidebarSelectedAnnotation", () => {
     it("renders the sidebar title with the shape type and the stroke label", () => {

@@ -5,7 +5,7 @@ import { createAsset, createProject } from "#test-utils/builders.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 import type { RootState } from "#application/store.ts";
 import AssetDialogPage from "./asset-dialog.page";
-import type { AddAssetDialogProps } from "../dialogs/add-asset.dialog";
+import type { AddAssetDialogProps } from "#view/dialogs/add-asset.dialog.tsx";
 
 vi.mock("../dialogs/add-asset.dialog", () => ({
     default: (props: AddAssetDialogProps) => (

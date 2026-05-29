@@ -1,9 +1,9 @@
 import type { FC } from "react";
-import { Page } from "../components/page.report.component";
-import { SystemImage } from "../components/system-image.report.component";
-import { SystemImageLegend } from "../components/system-image-legend.report.compoent";
-import { Text } from "../components/text.report.component";
-import { s1 } from "../report.style";
+import { Page } from "#view/report/components/page.report.component.tsx";
+import { SystemImage } from "#view/report/components/system-image.report.component.tsx";
+import { SystemImageLegend } from "#view/report/components/system-image-legend.report.compoent.tsx";
+import { Text } from "#view/report/components/text.report.component.tsx";
+import { s1 } from "#view/report/report.style.ts";
 import { useTranslation } from "react-i18next";
 import { View } from "@react-pdf/renderer";
 import type { IndexCallback, ProjectReport } from "#api/types/project.types.ts";

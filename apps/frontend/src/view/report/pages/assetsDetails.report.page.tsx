@@ -3,10 +3,10 @@ import { View } from "@react-pdf/renderer";
 import type { Style } from "@react-pdf/types";
 import type { Asset } from "#api/types/asset.types.ts";
 import type { IndexCallback, Project } from "#api/types/project.types.ts";
-import { backgroundColor, s1 } from "../report.style";
-import { Page } from "../components/page.report.component";
+import { backgroundColor, s1 } from "#view/report/report.style.ts";
+import { Page } from "#view/report/components/page.report.component.tsx";
 import { useTranslation } from "react-i18next";
-import { Text } from "../components/text.report.component";
+import { Text } from "#view/report/components/text.report.component.tsx";
 
 type AssetWithReportId = Asset & { reportId: string };
 

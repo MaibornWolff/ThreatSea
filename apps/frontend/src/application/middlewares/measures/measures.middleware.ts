@@ -1,8 +1,8 @@
 import { isFulfilled, isRejected } from "@reduxjs/toolkit";
-import type { AppMiddleware } from "../types";
-import { AlertActions } from "../../actions/alert.actions";
-import { MeasuresActions } from "../../actions/measures.actions";
-import { DialogsActions } from "../../actions/dialogs.actions";
+import type { AppMiddleware } from "#application/middlewares/types.ts";
+import { AlertActions } from "#application/actions/alert.actions.ts";
+import { MeasuresActions } from "#application/actions/measures.actions.ts";
+import { DialogsActions } from "#application/actions/dialogs.actions.ts";
 
 const asyncThunks = [
     MeasuresActions.updateMeasure,

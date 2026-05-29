@@ -1,8 +1,8 @@
 import { isFulfilled, isRejected } from "@reduxjs/toolkit";
-import type { AppMiddleware } from "../types";
-import { socket } from "../../../api/system-socket.api";
-import { AlertActions } from "../../actions/alert.actions";
-import { ProjectsActions } from "../../actions/projects.actions";
+import type { AppMiddleware } from "#application/middlewares/types.ts";
+import { socket } from "#api/system-socket.api.ts";
+import { AlertActions } from "#application/actions/alert.actions.ts";
+import { ProjectsActions } from "#application/actions/projects.actions.ts";
 
 const asyncThunks = [
     ProjectsActions.createProject,

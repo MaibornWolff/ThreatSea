@@ -1,11 +1,14 @@
 import { createReducer } from "@reduxjs/toolkit";
-import { PointsOfAttackActions } from "../actions/points-of-attack.actions";
-import { SystemActions } from "../actions/system.actions";
-import { pointsOfAttackAdapter } from "../adapters/points-of-attack.adapter";
-import { systemAnnotationsAdapter } from "../adapters/system-annotations.adapter";
-import { systemComponentsAdapter } from "../adapters/system-components.adapter";
-import { systemConnectionPointsAdapter, type SystemConnectionPoint } from "../adapters/system-connection-point.adapter";
-import { systemConnectionsAdapter } from "../adapters/system-connections.adapter";
+import { PointsOfAttackActions } from "#application/actions/points-of-attack.actions.ts";
+import { SystemActions } from "#application/actions/system.actions.ts";
+import { pointsOfAttackAdapter } from "#application/adapters/points-of-attack.adapter.ts";
+import { systemAnnotationsAdapter } from "#application/adapters/system-annotations.adapter.ts";
+import { systemComponentsAdapter } from "#application/adapters/system-components.adapter.ts";
+import {
+    systemConnectionPointsAdapter,
+    type SystemConnectionPoint,
+} from "#application/adapters/system-connection-point.adapter.ts";
+import { systemConnectionsAdapter } from "#application/adapters/system-connections.adapter.ts";
 import type { SystemConnection, SystemPointOfAttack } from "#api/types/system.types.ts";
 
 type ComponentsState = ReturnType<typeof systemComponentsAdapter.getInitialState>;

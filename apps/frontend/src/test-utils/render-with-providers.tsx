@@ -18,9 +18,9 @@ import type { RenderOptions, RenderResult } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { MemoryRouter, type InitialEntry } from "react-router-dom";
 import { I18nextProvider } from "react-i18next";
-import { createStore } from "../application/store";
-import type { RootState } from "../application/store";
-import { translationUtil } from "../utils/translations";
+import { createStore } from "#application/store.ts";
+import type { RootState } from "#application/store.ts";
+import { translationUtil } from "#utils/translations.ts";
 
 interface RenderWithProvidersOptions extends Omit<RenderOptions, "wrapper"> {
     /** Partial Redux state to pre-load into the store. */

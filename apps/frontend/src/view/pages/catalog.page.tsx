@@ -10,18 +10,18 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { Route, Routes, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
-import { ATTACKERS } from "../../api/types/attackers.types";
-import { POINTS_OF_ATTACK } from "../../api/types/points-of-attack.types";
-import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
-import { NavigationActions } from "../../application/actions/navigation.actions";
-import { CatalogMeasuresListBox } from "../components/catalog-measures-list-box.component";
-import { CatalogThreatsListBox } from "../components/catalog-threats-list-box.component";
-import { MatrixFilterToggleButtonGroup } from "../components/matrix-filter-toggle-button-group.component";
-import { Page } from "../components/page.component";
-import { CreatePage } from "../components/create-page.component";
-import { HeaderUtilityControls } from "../components/header-utility-controls.component";
-import CatalogMeasureDialogPage from "../pages/catalog-measure-dialog.page";
-import CatalogThreatDialogPage from "../pages/catalog-threat-dialog.page";
+import { ATTACKERS } from "#api/types/attackers.types.ts";
+import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
+import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
+import { NavigationActions } from "#application/actions/navigation.actions.ts";
+import { CatalogMeasuresListBox } from "#view/components/catalog-measures-list-box.component.tsx";
+import { CatalogThreatsListBox } from "#view/components/catalog-threats-list-box.component.tsx";
+import { MatrixFilterToggleButtonGroup } from "#view/components/matrix-filter-toggle-button-group.component.tsx";
+import { Page } from "#view/components/page.component.tsx";
+import { CreatePage } from "#view/components/create-page.component.tsx";
+import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
+import CatalogMeasureDialogPage from "#view/pages/catalog-measure-dialog.page.tsx";
+import CatalogThreatDialogPage from "#view/pages/catalog-threat-dialog.page.tsx";
 
 /**
  * Creates the page for editing a catalogue.

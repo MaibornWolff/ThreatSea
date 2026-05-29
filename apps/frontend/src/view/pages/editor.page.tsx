@@ -8,37 +8,41 @@ import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useStat
 import { useTranslation } from "react-i18next";
 import { Group, Layer, Line } from "react-konva";
 import { Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
-import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
-import { EditorActions } from "../../application/actions/editor.actions";
-import { NavigationActions } from "../../application/actions/navigation.actions";
-import { useAssets } from "../../application/hooks/use-assets.hook";
-import { useAutoSavePreview } from "../../application/hooks/use-auto-save-preview.hook";
-import { useAnnotationDrawing, ANNOTATION_STROKE_WIDTH } from "../../application/hooks/use-annotation-drawing.hook";
-import { useEditor, type EditorConnectionAnchor } from "../../application/hooks/use-editor.hook";
-import { useEditorAnnotations } from "../../application/hooks/use-editor-annotations.hook";
-import { useConfirm } from "../../application/hooks/use-confirm.hook";
-import { DEFAULT_ANNOTATION_COLOR } from "../colors/annotation.colors";
-import { AnnotationDrawingPreview } from "../components/editor-components/annotation-drawing-preview.component";
-import { ConnectionPreview } from "../components/editor-components/connection-preview.component";
+import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
+import { EditorActions } from "#application/actions/editor.actions.ts";
+import { NavigationActions } from "#application/actions/navigation.actions.ts";
+import { useAssets } from "#application/hooks/use-assets.hook.ts";
+import { useAutoSavePreview } from "#application/hooks/use-auto-save-preview.hook.ts";
+import { useAnnotationDrawing, ANNOTATION_STROKE_WIDTH } from "#application/hooks/use-annotation-drawing.hook.ts";
+import { useEditor, type EditorConnectionAnchor } from "#application/hooks/use-editor.hook.ts";
+import { useEditorAnnotations } from "#application/hooks/use-editor-annotations.hook.ts";
+import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
+import { DEFAULT_ANNOTATION_COLOR } from "#view/colors/annotation.colors.ts";
+import { AnnotationDrawingPreview } from "#view/components/editor-components/annotation-drawing-preview.component.tsx";
+import { ConnectionPreview } from "#view/components/editor-components/connection-preview.component.tsx";
 import {
     AnnotationsCanvasLayer,
     type AnnotationsCanvasLayerHandle,
-} from "../components/editor-components/annotations-canvas-layer.component";
-import { EditorSidebar } from "../components/editor-components/editor-sidebar.component";
-import { EditorStage, MAX_STAGE_SCALE, MIN_STAGE_SCALE } from "../components/editor-components/editor-stage.component";
-import { EditorToolbar } from "../components/editor-components/editor-toolbar.component";
-import { TextEditingToolbarLayer } from "../components/editor-components/text-editing-toolbar-layer.component";
-import { Page } from "../components/page.component";
-import { SystemComponentConnection } from "../components/editor-components/system-component-connection.component";
-import { SystemComponent } from "../components/editor-components/system-component.component";
-import { CreatePage } from "../components/create-page.component";
-import { HeaderUtilityControls } from "../components/header-utility-controls.component";
+} from "#view/components/editor-components/annotations-canvas-layer.component.tsx";
+import { EditorSidebar } from "#view/components/editor-components/editor-sidebar.component.tsx";
+import {
+    EditorStage,
+    MAX_STAGE_SCALE,
+    MIN_STAGE_SCALE,
+} from "#view/components/editor-components/editor-stage.component.tsx";
+import { EditorToolbar } from "#view/components/editor-components/editor-toolbar.component.tsx";
+import { TextEditingToolbarLayer } from "#view/components/editor-components/text-editing-toolbar-layer.component.tsx";
+import { Page } from "#view/components/page.component.tsx";
+import { SystemComponentConnection } from "#view/components/editor-components/system-component-connection.component.tsx";
+import { SystemComponent } from "#view/components/editor-components/system-component.component.tsx";
+import { CreatePage } from "#view/components/create-page.component.tsx";
+import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
 import AssetDialogPage from "./asset-dialog.page";
 import ComponentDialogPage from "./component-dialog.page";
-import { CommunicationContextMenu } from "../components/editor-components/editor-communication-interface-context-menu.component";
-import { useAlert } from "../../application/hooks/use-alert.hook";
-import CommunicationInterfaceDialog from "../dialogs/add-communication-interface.dialog";
-import { LineDrawingProvider } from "../components/editor-components/contexts/LineDrawingProvider";
+import { CommunicationContextMenu } from "#view/components/editor-components/editor-communication-interface-context-menu.component.tsx";
+import { useAlert } from "#application/hooks/use-alert.hook.ts";
+import CommunicationInterfaceDialog from "#view/dialogs/add-communication-interface.dialog.tsx";
+import { LineDrawingProvider } from "#view/components/editor-components/contexts/LineDrawingProvider.tsx";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import { SystemActions } from "#application/actions/system.actions.ts";
 import { systemSelectors } from "#application/selectors/system.selectors.ts";

@@ -3,8 +3,8 @@ import type { ComponentType } from "react";
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import type { ExtendedProject } from "#api/types/project.types.ts";
-import { ProjectsActions } from "../../application/actions/projects.actions";
-import { projectsSelectors } from "../../application/selectors/projects.selectors";
+import { ProjectsActions } from "#application/actions/projects.actions.ts";
+import { projectsSelectors } from "#application/selectors/projects.selectors.ts";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 
 interface InjectedProjectProp {

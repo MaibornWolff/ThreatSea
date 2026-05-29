@@ -1,11 +1,11 @@
-import type { AppMiddleware } from "../types";
-import { checkUserRole, USER_ROLES } from "../../../api/types/user-roles.types";
-import { translationUtil } from "../../../utils/translations";
-import { AlertActions } from "../../actions/alert.actions";
-import { EditorActions } from "../../actions/editor.actions";
-import { PointsOfAttackActions } from "../../actions/points-of-attack.actions";
-import { SystemActions, trackInFlightSave } from "../../actions/system.actions";
-import { ProjectsActions } from "../../actions/projects.actions";
+import type { AppMiddleware } from "#application/middlewares/types.ts";
+import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
+import { translationUtil } from "#utils/translations.ts";
+import { AlertActions } from "#application/actions/alert.actions.ts";
+import { EditorActions } from "#application/actions/editor.actions.ts";
+import { PointsOfAttackActions } from "#application/actions/points-of-attack.actions.ts";
+import { SystemActions, trackInFlightSave } from "#application/actions/system.actions.ts";
+import { ProjectsActions } from "#application/actions/projects.actions.ts";
 import type { Connection, SystemComponent, SystemConnection, UpdateSystemRequest } from "#api/types/system.types.ts";
 import type { EditorState } from "#application/reducers/editor.reducer.ts";
 

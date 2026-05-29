@@ -1,8 +1,8 @@
 import { Box } from "@mui/material";
 import { useCallback, useEffect, useImperativeHandle, useRef, type ReactNode, type Ref } from "react";
 import { Stage } from "react-konva";
-import { checkUserRole, USER_ROLES } from "../../../api/types/user-roles.types";
-import { EditorActions } from "../../../application/actions/editor.actions";
+import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
+import { EditorActions } from "#application/actions/editor.actions.ts";
 import { EditorContextMenu } from "./editor-context-menu.component";
 import type { KonvaEventObject } from "konva/lib/Node";
 import type { Stage as KonvaStage } from "konva/lib/Stage";

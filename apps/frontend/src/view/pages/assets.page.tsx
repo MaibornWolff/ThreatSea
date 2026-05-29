@@ -12,16 +12,16 @@ import { Route, Routes, useNavigate } from "react-router-dom";
 import type { ExtendedProject } from "#api/types/project.types.ts";
 import type { Asset } from "#api/types/asset.types.ts";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
-import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
-import { NavigationActions } from "../../application/actions/navigation.actions";
-import { useAssetsList } from "../../application/hooks/use-assets-list.hook";
-import { IconButton } from "../components/icon-button.component";
-import { Page } from "../components/page.component";
-import { CreatePage } from "../components/create-page.component";
-import { HeaderUtilityControls } from "../components/header-utility-controls.component";
-import { withProject } from "../components/with-project.hoc";
+import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
+import { NavigationActions } from "#application/actions/navigation.actions.ts";
+import { useAssetsList } from "#application/hooks/use-assets-list.hook.ts";
+import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
+import { IconButton } from "#view/components/icon-button.component.tsx";
+import { Page } from "#view/components/page.component.tsx";
+import { CreatePage } from "#view/components/create-page.component.tsx";
+import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
+import { withProject } from "#view/components/with-project.hoc.tsx";
 import AssetDialogPage from "./asset-dialog.page";
-import { useConfirm } from "../../application/hooks/use-confirm.hook";
 import { createAssetsColumns } from "./assets.columns";
 
 interface AssetsPageBodyProps {
