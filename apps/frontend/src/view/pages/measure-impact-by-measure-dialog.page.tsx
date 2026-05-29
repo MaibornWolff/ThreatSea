@@ -2,7 +2,7 @@ import { useParams, useLocation, Navigate } from "react-router-dom";
 import type { Location } from "react-router-dom";
 import type { Project } from "#api/types/project.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
-import MeasureImpactByMeasureDialog from "../dialogs/measureImpactByMeasure.dialog";
+import MeasureImpactByMeasureDialog from "#view/dialogs/measureImpactByMeasure.dialog.tsx";
 import type { ThreatWithMetrics } from "#application/hooks/use-matrix.hook.ts";
 
 /**

@@ -4,7 +4,7 @@
 
 import type { ReactNode } from "react";
 import { I18nextProvider } from "react-i18next";
-import { translationUtil } from "../../utils/translations";
+import { translationUtil } from "#utils/translations.ts";
 
 /**
  * Creates a translation component for children to apply

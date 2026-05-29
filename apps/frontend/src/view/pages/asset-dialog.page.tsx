@@ -8,7 +8,7 @@ import { Navigate, useLocation, useNavigate, useParams, type Location } from "re
 import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import { assetsSelectors } from "#application/selectors/assets.selectors.ts";
 import type { Asset } from "#api/types/asset.types.ts";
-import AddAssetDialog from "../dialogs/add-asset.dialog";
+import AddAssetDialog from "#view/dialogs/add-asset.dialog.tsx";
 
 interface AssetDialogLocationState {
     asset: Partial<Asset>;

@@ -1,9 +1,9 @@
 import { useCallback } from "react";
 import { nanoid } from "@reduxjs/toolkit";
-import { EditorActions } from "../actions/editor.actions";
-import { SystemActions } from "../actions/system.actions";
-import { editorSelectors } from "../selectors/editor.selectors";
-import { systemSelectors } from "../selectors/system.selectors";
+import { EditorActions } from "#application/actions/editor.actions.ts";
+import { SystemActions } from "#application/actions/system.actions.ts";
+import { editorSelectors } from "#application/selectors/editor.selectors.ts";
+import { systemSelectors } from "#application/selectors/system.selectors.ts";
 import { useAppDispatch, useAppSelector } from "./use-app-redux.hook";
 import type { AnnotationChanges, AnnotationInput, AnnotationType } from "#api/types/system.types.ts";
 

@@ -1,8 +1,8 @@
 import { createReducer } from "@reduxjs/toolkit";
 import type { ExtendedProject } from "#api/types/project.types.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
-import { ProjectsActions } from "../actions/projects.actions";
-import { projectsAdapter } from "../adapters/project.adapter";
+import { ProjectsActions } from "#application/actions/projects.actions.ts";
+import { projectsAdapter } from "#application/adapters/project.adapter.ts";
 
 type ProjectsAdapterState = ReturnType<typeof projectsAdapter.getInitialState>;
 

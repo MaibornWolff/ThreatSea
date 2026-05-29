@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import type { Catalog } from "#api/types/catalogs.types.ts";
-import { CatalogsActions } from "../actions/catalogs.actions";
-import { catalogsSelector } from "../selectors/catalogs.selector";
+import { CatalogsActions } from "#application/actions/catalogs.actions.ts";
+import { catalogsSelector } from "#application/selectors/catalogs.selector.ts";
 import { useAppDispatch, useAppSelector } from "./use-app-redux.hook";
 
 export const useCatalogs = () => {

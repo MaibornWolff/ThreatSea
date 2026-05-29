@@ -2,7 +2,7 @@ import type { ProjectReport } from "#api/types/project.types.ts";
 import type { RiskMatrix, Milestone } from "#application/hooks/use-report.hook.ts";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { ATTACKERS } from "#api/types/attackers.types.ts";
-import { POA_COLORS } from "../colors/pointsOfAttack.colors";
+import { POA_COLORS } from "#view/colors/pointsOfAttack.colors.ts";
 import i18next from "i18next";
 
 // ---------------------------------------------------------------------------

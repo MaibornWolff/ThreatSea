@@ -5,6 +5,8 @@ import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
 import { App } from "./App";
 import { createStore } from "./application/store";
+import "@fontsource/poppins/latin-400.css";
+import "@fontsource/poppins/latin-ext-400.css";
 import "./index.css";
 import { reportWebVitals } from "./reportWebVitals";
 

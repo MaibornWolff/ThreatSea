@@ -1,6 +1,6 @@
 import { useLocation, type Location } from "react-router-dom";
 import type { Project } from "#api/types/project.types.ts";
-import AddProjectDialog from "../dialogs/add-project.dialog";
+import AddProjectDialog from "#view/dialogs/add-project.dialog.tsx";
 
 interface ProjectDialogLocationState {
     project: Partial<Project> | undefined;

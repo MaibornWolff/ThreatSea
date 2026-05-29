@@ -1,6 +1,6 @@
 import { Box, Grid } from "@mui/material";
 import { ProjectCard } from "./project-card.component";
-import type { ExtendedProject } from "../../api/types/project.types";
+import type { ExtendedProject } from "#api/types/project.types.ts";
 
 interface ProjectsGridComponentProps {
     projects: ExtendedProject[];

@@ -1,5 +1,5 @@
 import { createReducer } from "@reduxjs/toolkit";
-import { DialogsActions } from "../actions/dialogs.actions";
+import { DialogsActions } from "#application/actions/dialogs.actions.ts";
 
 type DialogError = Record<string, unknown>;
 

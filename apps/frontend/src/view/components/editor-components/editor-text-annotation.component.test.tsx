@@ -3,7 +3,7 @@ import { EditorTextAnnotation } from "./editor-text-annotation.component";
 import { EditorActions } from "#application/actions/editor.actions.ts";
 import editorReducer from "#application/reducers/editor.reducer.ts";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
-import { createAnnotation } from "../../../test-utils/builders";
+import { createAnnotation } from "#test-utils/builders.ts";
 
 const defaultEditorState = editorReducer(undefined, { type: "@@INIT" });
 

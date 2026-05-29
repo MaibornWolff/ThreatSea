@@ -1,11 +1,14 @@
 import { createSelector } from "@reduxjs/toolkit";
 import type { RootState } from "#application/store.ts";
 import type { SystemState } from "#application/reducers/system.reducer.ts";
-import { systemAnnotationsAdapter } from "../adapters/system-annotations.adapter";
-import { systemComponentsAdapter } from "../adapters/system-components.adapter";
-import { systemConnectionsAdapter } from "../adapters/system-connections.adapter";
-import { systemConnectionPointsAdapter, type SystemConnectionPoint } from "../adapters/system-connection-point.adapter";
-import { pointsOfAttackAdapter } from "../adapters/points-of-attack.adapter";
+import { systemAnnotationsAdapter } from "#application/adapters/system-annotations.adapter.ts";
+import { systemComponentsAdapter } from "#application/adapters/system-components.adapter.ts";
+import { systemConnectionsAdapter } from "#application/adapters/system-connections.adapter.ts";
+import {
+    systemConnectionPointsAdapter,
+    type SystemConnectionPoint,
+} from "#application/adapters/system-connection-point.adapter.ts";
+import { pointsOfAttackAdapter } from "#application/adapters/points-of-attack.adapter.ts";
 import type {
     Annotation,
     AugmentedSystemComponent,

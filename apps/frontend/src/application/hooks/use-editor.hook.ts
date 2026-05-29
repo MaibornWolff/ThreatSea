@@ -16,12 +16,12 @@ import type {
     SystemPointOfAttack,
 } from "#api/types/system.types.ts";
 import type { EditorConnection, EditorEntityId } from "#application/reducers/editor.reducer.ts";
-import { POINTS_OF_ATTACK } from "../../api/types/points-of-attack.types";
-import { EditorActions } from "../actions/editor.actions";
-import { PointsOfAttackActions } from "../actions/points-of-attack.actions";
-import { SystemActions } from "../actions/system.actions";
-import { editorSelectors } from "../selectors/editor.selectors";
-import { systemSelectors } from "../selectors/system.selectors";
+import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
+import { EditorActions } from "#application/actions/editor.actions.ts";
+import { PointsOfAttackActions } from "#application/actions/points-of-attack.actions.ts";
+import { SystemActions } from "#application/actions/system.actions.ts";
+import { editorSelectors } from "#application/selectors/editor.selectors.ts";
+import { systemSelectors } from "#application/selectors/system.selectors.ts";
 import { useAppDispatch, useAppSelector } from "./use-app-redux.hook";
 import { useSystem } from "./use-system.hook";
 import type { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";

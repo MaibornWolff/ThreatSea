@@ -1,8 +1,8 @@
 import { isFulfilled, isRejected } from "@reduxjs/toolkit";
-import type { AppMiddleware } from "../types";
-import { AlertActions } from "../../actions/alert.actions";
-import { CatalogMeasuresActions } from "../../actions/catalog-measures.actions";
-import { socket } from "../../../api/system-socket.api";
+import type { AppMiddleware } from "#application/middlewares/types.ts";
+import { AlertActions } from "#application/actions/alert.actions.ts";
+import { CatalogMeasuresActions } from "#application/actions/catalog-measures.actions.ts";
+import { socket } from "#api/system-socket.api.ts";
 
 const asyncThunks = [
     CatalogMeasuresActions.createCatalogMeasure,

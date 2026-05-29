@@ -3,7 +3,7 @@ import { Line } from "react-konva";
 import type { Line as KonvaLine } from "konva/lib/shapes/Line";
 import type { Coordinate, SystemComponent } from "#api/types/system.types.ts";
 import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
-import { POA_COLORS } from "../../colors/pointsOfAttack.colors";
+import { POA_COLORS } from "#view/colors/pointsOfAttack.colors.ts";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 
 interface ConnectionPreviewProps {

@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import type { DialogValue } from "#application/reducers/dialogs.reducer.ts";
-import { DialogsActions } from "../actions/dialogs.actions";
-import { dialogsSelectors } from "../selectors/dialogs.selectors";
+import { DialogsActions } from "#application/actions/dialogs.actions.ts";
+import { dialogsSelectors } from "#application/selectors/dialogs.selectors.ts";
 import { useAppDispatch, useAppSelector } from "./use-app-redux.hook";
 
 interface DialogHookResult<TDialog extends DialogValue | null> {

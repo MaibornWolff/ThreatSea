@@ -20,8 +20,8 @@ import type {
 } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import type { User } from "#api/types/members.types.ts";
-import { useAddableMembersList } from "../../application/hooks/use-addableMember-list.hook";
-import { SearchField } from "../components/search-field.component";
+import { useAddableMembersList } from "#application/hooks/use-addableMember-list.hook.ts";
+import { SearchField } from "#view/components/search-field.component.tsx";
 
 type BaseAddableMemberFormValues = FieldValues & {
     id: number | undefined;

@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 import type { Measure } from "#api/types/measure.types.ts";
-import { socket } from "../../api/system-socket.api";
+import { socket } from "#api/system-socket.api.ts";
 import { useMeasures } from "./use-measures.hook";
 import { useList } from "./use-list.hooks";
 

@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
-import { calcRiskColour } from "../../utils/calcRisk";
+import { calcRiskColour } from "#utils/calcRisk.ts";
 import { useCatalogMeasures } from "./use-catalog-measures.hook.ts";
 import { useMeasureImpacts } from "./use-measureImpacts.hook.ts";
 import { useMeasures } from "./use-measures.hook.ts";
 import { useThreats } from "./use-threats.hook.ts";
 import { useAppSelector } from "./use-app-redux.hook.ts";
-import { projectsSelectors } from "../selectors/projects.selectors.ts";
+import { projectsSelectors } from "#application/selectors/projects.selectors.ts";
 import type { SortDirection } from "#application/actions/list.actions.ts";
 import type { MatrixColorKey } from "#view/colors/matrix.ts";
 

@@ -1,6 +1,6 @@
 import type { JSX, ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { useUser } from "../../application/hooks/use-user.hook";
+import { useUser } from "#application/hooks/use-user.hook.ts";
 
 interface RequireAuthProps {
     children: ReactNode;

@@ -1,5 +1,5 @@
 import { View } from "@react-pdf/renderer";
-import { backgroundColor, primaryColor, s1, s2 } from "../report.style";
+import { backgroundColor, primaryColor, s1, s2 } from "#view/report/report.style.ts";
 import { Text } from "./text.report.component";
 import { useTranslation } from "react-i18next";
 

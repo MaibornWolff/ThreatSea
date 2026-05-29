@@ -1,6 +1,6 @@
 import { useCallback } from "react";
-import { AlertActions } from "../actions/alert.actions";
-import { alertSelectors } from "../selectors/alert.selectors";
+import { AlertActions } from "#application/actions/alert.actions.ts";
+import { alertSelectors } from "#application/selectors/alert.selectors.ts";
 import { useAppDispatch, useAppSelector } from "./use-app-redux.hook";
 
 export const useAlert = () => {

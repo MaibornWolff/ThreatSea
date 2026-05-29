@@ -7,21 +7,21 @@ import { useTranslation } from "react-i18next";
 
 import type { ExtendedProject } from "#api/types/project.types.ts";
 import type { SortDirection } from "#application/actions/list.actions.ts";
-import { NavigationActions } from "../../application/actions/navigation.actions";
-import { useReport } from "../../application/hooks/use-report.hook";
-import { useAppDispatch } from "../../application/hooks/use-app-redux.hook";
+import { NavigationActions } from "#application/actions/navigation.actions.ts";
+import { useReport } from "#application/hooks/use-report.hook.ts";
+import { useAppDispatch } from "#application/hooks/use-app-redux.hook.ts";
 import logo from "../../images/logo_large.png";
 import companyLogo from "../../images/MaibornWolff_Logo.png";
-import { Button } from "../components/button.component";
-import { DialogTextField } from "../components/dialog.textfield.component";
-import { Page } from "../components/page.component";
-import { ToggleButtons } from "../components/toggle-buttons.component";
-import { CreatePage } from "../components/create-page.component";
-import { HeaderUtilityControls } from "../components/header-utility-controls.component";
-import { Report } from "../report/report";
-import { downloadMarkdownReport } from "../report/download-markdown-report";
-import { ExportIconButton } from "../components/export-icon-button.component";
-import { withProject } from "../components/with-project.hoc";
+import { Button } from "#view/components/button.component.tsx";
+import { DialogTextField } from "#view/components/dialog.textfield.component.tsx";
+import { Page } from "#view/components/page.component.tsx";
+import { ToggleButtons } from "#view/components/toggle-buttons.component.tsx";
+import { CreatePage } from "#view/components/create-page.component.tsx";
+import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
+import { Report } from "#view/report/report.tsx";
+import { downloadMarkdownReport } from "#view/report/download-markdown-report.ts";
+import { ExportIconButton } from "#view/components/export-icon-button.component.tsx";
+import { withProject } from "#view/components/with-project.hoc.tsx";
 
 interface ReportPageBodyProps {
     project: ExtendedProject;

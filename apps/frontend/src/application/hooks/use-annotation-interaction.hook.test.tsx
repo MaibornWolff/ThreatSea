@@ -4,10 +4,10 @@ import { createRef, type ReactNode, type RefObject } from "react";
 import type { KonvaEventObject, Node as KonvaNode } from "konva/lib/Node";
 import type { Transformer as KonvaTransformer } from "konva/lib/shapes/Transformer";
 import { useAnnotationInteraction } from "./use-annotation-interaction.hook";
-import { createStore } from "../store";
-import { EditorActions } from "../actions/editor.actions";
+import { createStore } from "#application/store.ts";
+import { EditorActions } from "#application/actions/editor.actions.ts";
 import type { Annotation } from "#api/types/system.types.ts";
-import { createAnnotation } from "../../test-utils/builders";
+import { createAnnotation } from "#test-utils/builders.ts";
 
 const buildStageContent = () => {
     const content = { style: { cursor: "default" } };

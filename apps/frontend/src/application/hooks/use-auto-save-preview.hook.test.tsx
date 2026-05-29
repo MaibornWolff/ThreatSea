@@ -3,8 +3,8 @@ import { Provider } from "react-redux";
 import type { ReactNode } from "react";
 import type { Layer as KonvaLayer } from "konva/lib/Layer";
 import { useAutoSavePreview, type UseAutoSavePreviewArgs } from "./use-auto-save-preview.hook";
-import { createStore } from "../store";
-import { EditorActions } from "../actions/editor.actions";
+import { createStore } from "#application/store.ts";
+import { EditorActions } from "#application/actions/editor.actions.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 
 const buildLayerMock = () => ({

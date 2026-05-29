@@ -1,6 +1,6 @@
 import { useCallback } from "react";
-import { AssetsActions } from "../actions/assets.actions";
-import { assetsSelectors } from "../selectors/assets.selectors";
+import { AssetsActions } from "#application/actions/assets.actions.ts";
+import { assetsSelectors } from "#application/selectors/assets.selectors.ts";
 import { useAppDispatch, useAppSelector } from "./use-app-redux.hook";
 import type { Asset } from "#api/types/asset.types.ts";
 

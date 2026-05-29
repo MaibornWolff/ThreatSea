@@ -1,7 +1,7 @@
 import { fireEvent, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { EditorColorPicker } from "./editor-color-picker.component";
-import { DEFAULT_ANNOTATION_COLOR } from "../../colors/annotation.colors";
+import { DEFAULT_ANNOTATION_COLOR } from "#view/colors/annotation.colors.ts";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 
 const PRESET_COLORS = ["#000000", "#e74c3c", "#3ec96a", DEFAULT_ANNOTATION_COLOR, "#ff68bd", "#f1d200"];

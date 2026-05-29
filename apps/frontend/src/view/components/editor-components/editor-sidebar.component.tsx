@@ -5,8 +5,8 @@ import { EditorSidebarSelectedCommunicationInterface } from "./editor-sidebar-se
 import { EditorSidebarSelectedConnection } from "./editor-sidebar-selected-connection.component";
 import { EditorSidebarSelectedPointOfAttack } from "./editor-sidebar-selected-point-of-attack.component";
 import { type RefObject, type ChangeEvent } from "react";
-import { POINTS_OF_ATTACK } from "../../../api/types/points-of-attack.types";
-import { USER_ROLES } from "../../../api/types/user-roles.types";
+import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
+import { USER_ROLES } from "#api/types/user-roles.types.ts";
 import type { SystemConnectionPoint } from "#application/adapters/system-connection-point.adapter.ts";
 import type { Asset } from "#api/types/asset.types.ts";
 import type {

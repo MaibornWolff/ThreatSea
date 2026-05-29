@@ -1,8 +1,8 @@
 import { assetsSelectors } from "./assets.selectors";
 import { createAsset } from "#test-utils/builders.ts";
-import { assetsAdapter } from "../adapters/asset.adapter";
-import type { RootState } from "../store.types";
-import type { Asset } from "../../api/types/asset.types";
+import { assetsAdapter } from "#application/adapters/asset.adapter.ts";
+import type { RootState } from "#application/store.types.ts";
+import type { Asset } from "#api/types/asset.types.ts";
 
 const withAssets = (assets: Asset[]) =>
     ({

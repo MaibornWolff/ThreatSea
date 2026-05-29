@@ -2,7 +2,7 @@ import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ListBoxToolbar } from "./list-box-toolbar.component";
 import type { ListBoxToolbarProps } from "./list-box-toolbar.component";
-import { USER_ROLES } from "../../api/types/user-roles.types";
+import { USER_ROLES } from "#api/types/user-roles.types.ts";
 import type { SortDirection } from "#application/actions/list.actions.ts";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 

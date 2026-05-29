@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import type { CatalogMeasure } from "#api/types/catalog-measure.types.ts";
-import { CatalogMeasuresActions } from "../actions/catalog-measures.actions";
-import { catalogMeasuresSelectors } from "../selectors/catalog-measures.selectors";
+import { CatalogMeasuresActions } from "#application/actions/catalog-measures.actions.ts";
+import { catalogMeasuresSelectors } from "#application/selectors/catalog-measures.selectors.ts";
 import { useAppDispatch, useAppSelector } from "./use-app-redux.hook";
 
 export const useCatalogMeasures = ({ catalogId }: { catalogId: number }) => {

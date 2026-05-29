@@ -1,8 +1,8 @@
 import { type MockInstance } from "vitest";
-import { SystemActions } from "../../actions/system.actions";
+import { SystemActions } from "#application/actions/system.actions.ts";
 import { SystemAPI } from "#api/system.api.ts";
-import { createStore } from "../../store";
-import projectsReducer, { type ProjectsState } from "../../reducers/projects.reducer";
+import { createStore } from "#application/store.ts";
+import projectsReducer, { type ProjectsState } from "#application/reducers/projects.reducer.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 
 const buildProjectsState = (role: USER_ROLES) => {

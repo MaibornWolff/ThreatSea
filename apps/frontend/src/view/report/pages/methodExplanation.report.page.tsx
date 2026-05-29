@@ -1,9 +1,9 @@
 import { View } from "@react-pdf/renderer";
-import { s1, s2 } from "../report.style";
-import { Page } from "../components/page.report.component";
+import { s1, s2 } from "#view/report/report.style.ts";
+import { Page } from "#view/report/components/page.report.component.tsx";
 import { useTranslation } from "react-i18next";
-import { Text } from "../components/text.report.component";
-import { ThreatMatrix } from "../components/threatMatrix.report.component";
+import { Text } from "#view/report/components/text.report.component.tsx";
+import { ThreatMatrix } from "#view/report/components/threatMatrix.report.component.tsx";
 import type { IndexCallback, ProjectReport } from "#api/types/project.types.ts";
 
 interface MethodExplanationPageProps {

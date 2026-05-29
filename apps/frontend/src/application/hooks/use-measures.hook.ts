@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from "react";
 import type { Measure } from "#api/types/measure.types.ts";
-import { MeasuresActions } from "../actions/measures.actions.ts";
-import { measuresSelectors } from "../selectors/measures.selectors.ts";
+import { MeasuresActions } from "#application/actions/measures.actions.ts";
+import { measuresSelectors } from "#application/selectors/measures.selectors.ts";
 import { useAppDispatch, useAppSelector } from "./use-app-redux.hook.ts";
 
 export const useMeasures = ({ projectId }: { projectId: number }) => {
