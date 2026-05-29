@@ -439,7 +439,7 @@ export const useReport = ({ projectId }: { projectId: number }) => {
             String(project.confidentialityLevel ?? "").toUpperCase() +
             "_export.xlsx";
 
-        exportAsExcelFile(
+        void exportAsExcelFile(
             [
                 {
                     items: assets,
