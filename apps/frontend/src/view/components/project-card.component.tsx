@@ -12,12 +12,12 @@ import {
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
-import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
+import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { Button } from "./button.component";
 import { IconButton } from "./icon-button.component";
 import { ExportIconButton } from "./export-icon-button.component";
-import { useProjectExport } from "../../application/hooks/use-export.hook";
-import type { ExtendedProject } from "../../api/types/project.types";
+import { useProjectExport } from "#application/hooks/use-export.hook.ts";
+import type { ExtendedProject } from "#api/types/project.types.ts";
 
 interface ProjectCardProps {
     project: ExtendedProject;

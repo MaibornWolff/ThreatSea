@@ -1,9 +1,9 @@
 import type { Style } from "@react-pdf/types";
 import { View } from "@react-pdf/renderer";
-import { MATRIX_COLOR } from "../../colors/matrix";
-import type { MatrixColorKey } from "../../colors/matrix";
+import { MATRIX_COLOR } from "#view/colors/matrix.ts";
+import type { MatrixColorKey } from "#view/colors/matrix.ts";
 import { Text } from "./text.report.component";
-import { largeFontSize, smallFontSize, backgroundColor, s1 } from "../report.style";
+import { largeFontSize, smallFontSize, backgroundColor, s1 } from "#view/report/report.style.ts";
 import { useTranslation } from "react-i18next";
 
 interface MatrixCell {

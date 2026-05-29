@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import { useTranslation } from "react-i18next";
-import { useAppSelector } from "../../application/hooks/use-app-redux.hook";
-import type { ProjectTabs } from "../../application/hooks/use-project-tabs.hook";
+import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
+import type { ProjectTabs } from "#application/hooks/use-project-tabs.hook.ts";
 import { ButtonNavigation } from "./header-button-navigation.component";
 
 interface HeaderLevelOneNavProps {

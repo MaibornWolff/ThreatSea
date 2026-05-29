@@ -1,8 +1,8 @@
 import { useCallback, useEffect } from "react";
 import type { ExtendedThreat, Threat } from "#api/types/threat.types.ts";
-import { socket } from "../../api/system-socket.api";
-import { ThreatsActions } from "../actions/threats.actions";
-import { threatsSelectors } from "../selectors/threats.selectors";
+import { socket } from "#api/system-socket.api.ts";
+import { ThreatsActions } from "#application/actions/threats.actions.ts";
+import { threatsSelectors } from "#application/selectors/threats.selectors.ts";
 import { useAppDispatch, useAppSelector } from "./use-app-redux.hook";
 
 export const useThreats = ({ projectId }: { projectId: number }) => {

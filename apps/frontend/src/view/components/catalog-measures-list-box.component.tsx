@@ -14,23 +14,23 @@ import {
 } from "@mui/material";
 import { Box } from "@mui/system";
 import { useTranslation } from "react-i18next";
-import { useConfirm } from "../../application/hooks/use-confirm.hook";
-import { exportAsCsvFile, importCsvFile } from "../../utils/export";
+import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
+import { exportAsCsvFile, importCsvFile } from "#utils/export.ts";
 import { ListBox } from "./list-box.component";
-import { POINTS_OF_ATTACK } from "../../api/types/points-of-attack.types";
-import { ATTACKERS } from "../../api/types/attackers.types";
-import { useAlert } from "../../application/hooks/use-alert.hook";
+import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
+import { ATTACKERS } from "#api/types/attackers.types.ts";
+import { useAlert } from "#application/hooks/use-alert.hook.ts";
 import { useNavigate } from "react-router";
-import { useCatalogMeasuresList } from "../../application/hooks/use-catalog-measures-list.hook";
+import { useCatalogMeasuresList } from "#application/hooks/use-catalog-measures-list.hook.ts";
 import { ListBoxHeader } from "./list-box-header.component";
 import { ListBoxToolbar } from "./list-box-toolbar.component";
 import { Delete } from "@mui/icons-material";
 import { useState } from "react";
-import { CatalogMeasuresActions } from "../../application/actions/catalog-measures.actions";
-import { useAppDispatch } from "../../application/hooks/use-app-redux.hook";
-import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
+import { CatalogMeasuresActions } from "#application/actions/catalog-measures.actions.ts";
+import { useAppDispatch } from "#application/hooks/use-app-redux.hook.ts";
+import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { IconButton } from "./icon-button.component";
-import type { CatalogMeasure, CreateCatalogMeasureRequest } from "../../api/types/catalog-measure.types";
+import type { CatalogMeasure, CreateCatalogMeasureRequest } from "#api/types/catalog-measure.types.ts";
 import type { SortDirection } from "#application/actions/list.actions.ts";
 
 interface CatalogMeasuresListBoxProps {

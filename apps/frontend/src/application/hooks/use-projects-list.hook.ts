@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import type { ExtendedProject } from "#api/types/project.types.ts";
-import { socket } from "../../api/system-socket.api";
-import { ProjectsActions } from "../actions/projects.actions";
+import { socket } from "#api/system-socket.api.ts";
+import { ProjectsActions } from "#application/actions/projects.actions.ts";
 import { useAppDispatch } from "./use-app-redux.hook";
 import { useList } from "./use-list.hooks";
 import { useProjects } from "./use-projects.hook";

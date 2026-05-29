@@ -1,7 +1,7 @@
 import { useState } from "react";
-import type { ListNamespace, SortDirection } from "../actions/list.actions.ts";
-import { ListActions } from "../actions/list.actions.ts";
-import { listSelectors } from "../selectors/list.selectors.ts";
+import type { ListNamespace, SortDirection } from "#application/actions/list.actions.ts";
+import { ListActions } from "#application/actions/list.actions.ts";
+import { listSelectors } from "#application/selectors/list.selectors.ts";
 import { useAppDispatch, useAppSelector } from "./use-app-redux.hook.ts";
 
 export const useList = (nameSpace: ListNamespace) => {

@@ -1,7 +1,7 @@
 import { useParams, useLocation, Navigate, type Location } from "react-router-dom";
 import type { Measure } from "#api/types/measure.types.ts";
 import type { Project } from "#api/types/project.types.ts";
-import AddMeasureDialog from "../dialogs/add-measure.dialog";
+import AddMeasureDialog from "#view/dialogs/add-measure.dialog.tsx";
 
 interface AddMeasureDialogLocationState {
     project: Project;

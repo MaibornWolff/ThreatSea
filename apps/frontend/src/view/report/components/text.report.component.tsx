@@ -1,7 +1,7 @@
 import { useMemo, type ReactNode, type ComponentProps } from "react";
 import { Text as PdfText } from "@react-pdf/renderer";
 import type { Style } from "@react-pdf/types";
-import { fontColor, headerFontSize, largeFontSize, smallFontSize } from "../report.style";
+import { fontColor, headerFontSize, largeFontSize, smallFontSize } from "#view/report/report.style.ts";
 
 type PdfTextBaseProps = ComponentProps<typeof PdfText>;
 type PdfTextOptionalStyle = Omit<PdfTextBaseProps, "style" | "children">;

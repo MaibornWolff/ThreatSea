@@ -17,7 +17,7 @@ import poppinsBold from "./font/Poppins_Bold_700.ttf";
 import poppinsExtraBold from "./font/Poppins_ExtraBold_800.ttf";
 import { AssetsDetailsPage } from "./pages/assetsDetails.report.page";
 import { MeasuresDetailsPage } from "./pages/measures.report.page";
-import { Translations } from "../wrappers/translations.wrapper";
+import { Translations } from "#view/wrappers/translations.wrapper.tsx";
 import type { Index, ProjectReport } from "#api/types/project.types.ts";
 import type { Milestone, RiskMatrix } from "#application/hooks/use-report.hook.ts";
 

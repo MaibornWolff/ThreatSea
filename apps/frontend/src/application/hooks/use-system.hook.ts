@@ -1,6 +1,6 @@
 import { useCallback } from "react";
-import { SystemActions } from "../actions/system.actions";
-import { systemSelectors } from "../selectors/system.selectors";
+import { SystemActions } from "#application/actions/system.actions.ts";
+import { systemSelectors } from "#application/selectors/system.selectors.ts";
 import { useAppDispatch, useAppSelector } from "./use-app-redux.hook";
 
 export const useSystem = ({ projectId }: { projectId: number }) => {

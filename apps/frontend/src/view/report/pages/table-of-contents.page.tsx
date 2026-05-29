@@ -1,8 +1,8 @@
 import { Link, View } from "@react-pdf/renderer";
 import { useTranslation } from "react-i18next";
-import { Page } from "../components/page.report.component";
-import { Text } from "../components/text.report.component";
-import { s1 } from "../report.style";
+import { Page } from "#view/report/components/page.report.component.tsx";
+import { Text } from "#view/report/components/text.report.component.tsx";
+import { s1 } from "#view/report/report.style.ts";
 import type { Index, IndexCallback, IndexEntry, ProjectReport } from "#api/types/project.types.ts";
 
 interface TableOfContentsPageProps {

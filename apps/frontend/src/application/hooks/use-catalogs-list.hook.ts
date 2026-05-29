@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import type { CatalogWithRole } from "#api/types/catalogs.types.ts";
-import { socket } from "../../api/system-socket.api";
-import { CatalogsActions } from "../actions/catalogs.actions";
+import { socket } from "#api/system-socket.api.ts";
+import { CatalogsActions } from "#application/actions/catalogs.actions.ts";
 import { useAppDispatch } from "./use-app-redux.hook";
 import { useCatalogs } from "./use-catalogs.hook";
 import { useList } from "./use-list.hooks";

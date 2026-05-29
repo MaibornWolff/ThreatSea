@@ -1,10 +1,10 @@
 import { styled } from "@mui/material/styles";
 import { Box, Slider, Typography } from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef, type SyntheticEvent } from "react";
-import { useAppSelector } from "../../application/hooks/use-app-redux.hook";
-import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
-import { calcRiskColourFromRisk } from "../../utils/calcRisk";
-import { MATRIX_COLOR } from "../colors/matrix";
+import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
+import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
+import { calcRiskColourFromRisk } from "#utils/calcRisk.ts";
+import { MATRIX_COLOR } from "#view/colors/matrix.ts";
 
 const LineOfToleranceSlider = styled(Slider)(() => ({
     height: 2,

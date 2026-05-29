@@ -1,5 +1,5 @@
 import systemReducer from "./system.reducer";
-import { SystemActions } from "../actions/system.actions";
+import { SystemActions } from "#application/actions/system.actions.ts";
 import { createAnnotation } from "#test-utils/builders.ts";
 
 const getInitialState = () => systemReducer(undefined, { type: "@@INIT" });

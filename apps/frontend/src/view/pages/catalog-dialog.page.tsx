@@ -5,7 +5,7 @@
 
 import { useLocation, type Location } from "react-router-dom";
 import type { Catalog } from "#api/types/catalogs.types.ts";
-import AddCatalogDialog from "../dialogs/add-catalog.dialog";
+import AddCatalogDialog from "#view/dialogs/add-catalog.dialog.tsx";
 
 interface CatalogDialogLocationState {
     catalog: Partial<Catalog>;

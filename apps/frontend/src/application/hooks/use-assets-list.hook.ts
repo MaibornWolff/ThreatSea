@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import type { Asset } from "#api/types/asset.types.ts";
-import { socket } from "../../api/system-socket.api";
-import { AssetsActions } from "../actions/assets.actions";
+import { socket } from "#api/system-socket.api.ts";
+import { AssetsActions } from "#application/actions/assets.actions.ts";
 import { useAppDispatch } from "./use-app-redux.hook";
 import { useAssets } from "./use-assets.hook";
 import { useList } from "./use-list.hooks";

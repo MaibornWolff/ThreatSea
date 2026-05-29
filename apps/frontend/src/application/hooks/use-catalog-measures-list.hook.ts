@@ -1,8 +1,8 @@
 import { useEffect, useMemo } from "react";
 import type { ATTACKERS } from "#api/types/attackers.types.ts";
 import type { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
-import { socket } from "../../api/system-socket.api";
-import { CatalogMeasuresActions } from "../actions/catalog-measures.actions";
+import { socket } from "#api/system-socket.api.ts";
+import { CatalogMeasuresActions } from "#application/actions/catalog-measures.actions.ts";
 import { useAppDispatch } from "./use-app-redux.hook";
 import { useCatalogMeasures } from "./use-catalog-measures.hook";
 import { useList } from "./use-list.hooks";

@@ -1,5 +1,5 @@
 import Box from "@mui/material/Box";
-import type { ProjectTabs } from "../../application/hooks/use-project-tabs.hook";
+import type { ProjectTabs } from "#application/hooks/use-project-tabs.hook.ts";
 import { ButtonNavigation } from "./header-button-navigation.component";
 
 interface HeaderProjectTabsProps {

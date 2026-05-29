@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { ExtendedProject } from "../../api/types/project.types";
-import { createProject } from "../../test-utils/builders";
+import type { ExtendedProject } from "#api/types/project.types.ts";
+import { createProject } from "#test-utils/builders.ts";
 
 // Mock ProjectCard to avoid pulling in useNavigate / router context.
 // ProjectsGridComponent is responsible for layout and delegation – not card internals.

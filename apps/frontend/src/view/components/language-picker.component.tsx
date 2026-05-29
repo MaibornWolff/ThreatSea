@@ -2,8 +2,8 @@ import { Box, Typography, Button } from "@mui/material";
 import LanguageIcon from "@mui/icons-material/Language";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useLocalStorage } from "../../application/hooks/use-local-storage.hook";
-import { getPreferredLanguage } from "../../utils/translations";
+import { useLocalStorage } from "#application/hooks/use-local-storage.hook.ts";
+import { getPreferredLanguage } from "#utils/translations.ts";
 
 const LANGUAGES = [
     {

@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import type { Project } from "#api/types/project.types.ts";
-import { ProjectsActions } from "../actions/projects.actions";
-import { projectsSelectors } from "../selectors/projects.selectors";
+import { ProjectsActions } from "#application/actions/projects.actions.ts";
+import { projectsSelectors } from "#application/selectors/projects.selectors.ts";
 import { useAppDispatch, useAppSelector } from "./use-app-redux.hook";
 
 export const useProjects = () => {

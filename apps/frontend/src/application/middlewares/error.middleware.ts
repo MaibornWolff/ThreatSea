@@ -1,18 +1,18 @@
 import { isRejected } from "@reduxjs/toolkit";
 import type { AppMiddleware } from "./types";
-import { AssetsActions } from "../actions/assets.actions";
-import { CatalogMeasuresActions } from "../actions/catalog-measures.actions";
-import { CatalogThreatsActions } from "../actions/catalog-threats.actions";
-import { CatalogsActions } from "../actions/catalogs.actions";
-import { ErrorActions } from "../actions/error.actions";
-import { MeasuresActions } from "../actions/measures.actions";
-import { MemberActions } from "../actions/members.actions";
-import { ProjectsActions } from "../actions/projects.actions";
-import { SystemActions } from "../actions/system.actions";
-import { ThreatsActions } from "../actions/threats.actions";
-import { roleHandlingHelper } from "../reducers/members.reducer";
-import { MeasureImpactsActions } from "../actions/measureImpacts.actions";
-import { UserActions } from "../actions/user.actions";
+import { AssetsActions } from "#application/actions/assets.actions.ts";
+import { CatalogMeasuresActions } from "#application/actions/catalog-measures.actions.ts";
+import { CatalogThreatsActions } from "#application/actions/catalog-threats.actions.ts";
+import { CatalogsActions } from "#application/actions/catalogs.actions.ts";
+import { ErrorActions } from "#application/actions/error.actions.ts";
+import { MeasuresActions } from "#application/actions/measures.actions.ts";
+import { MemberActions } from "#application/actions/members.actions.ts";
+import { ProjectsActions } from "#application/actions/projects.actions.ts";
+import { SystemActions } from "#application/actions/system.actions.ts";
+import { ThreatsActions } from "#application/actions/threats.actions.ts";
+import { roleHandlingHelper } from "#application/reducers/members.reducer.ts";
+import { MeasureImpactsActions } from "#application/actions/measureImpacts.actions.ts";
+import { UserActions } from "#application/actions/user.actions.ts";
 import { EditorActions } from "#application/actions/editor.actions.ts";
 
 const asyncThunks = [

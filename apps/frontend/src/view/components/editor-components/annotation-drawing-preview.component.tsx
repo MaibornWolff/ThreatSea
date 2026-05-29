@@ -1,5 +1,5 @@
 import { Arrow, Circle, Line, Rect } from "react-konva";
-import type { AnnotationDrawingState } from "../../../application/hooks/use-annotation-drawing.hook";
+import type { AnnotationDrawingState } from "#application/hooks/use-annotation-drawing.hook.ts";
 import type { AnnotationType } from "#api/types/system.types.ts";
 
 interface AnnotationDrawingPreviewProps {

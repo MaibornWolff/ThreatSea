@@ -1,6 +1,6 @@
 import { useCallback } from "react";
-import { MemberActions } from "../actions/members.actions";
-import { addedMemberSelectors } from "../selectors/members.selectors";
+import { MemberActions } from "#application/actions/members.actions.ts";
+import { addedMemberSelectors } from "#application/selectors/members.selectors.ts";
 import { useAppDispatch, useAppSelector } from "./use-app-redux.hook";
 
 type DeleteMemberArgs = Parameters<typeof MemberActions.deleteAddedMember>[0];

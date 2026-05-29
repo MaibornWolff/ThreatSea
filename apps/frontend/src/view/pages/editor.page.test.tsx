@@ -5,7 +5,7 @@ import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { createAsset } from "#test-utils/builders.ts";
 import { mockUseConfirm, mockUseAlert, mockUseEditor, mockUseAssets } from "#test-utils/mock-hooks.ts";
 import type { useEditor } from "#application/hooks/use-editor.hook.ts";
-import { EditorSidebar } from "../components/editor-components/editor-sidebar.component";
+import { EditorSidebar } from "#view/components/editor-components/editor-sidebar.component.tsx";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 
 // --- Hook spies (module-level, persist across tests) ---

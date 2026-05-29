@@ -2,7 +2,7 @@ import { Delete, FormatBold, FormatItalic, FormatUnderlined } from "@mui/icons-m
 import { FormControl, IconButton, MenuItem, Select, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { useTranslation } from "react-i18next";
-import { checkUserRole, USER_ROLES } from "../../../api/types/user-roles.types";
+import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { EditorColorPicker } from "./editor-color-picker.component";
 import { FONT_SIZE_CHOICES, formatToggleSx } from "./text-format-controls";
 import {

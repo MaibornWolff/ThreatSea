@@ -3,8 +3,8 @@ import { IconButton, Tooltip, Box } from "@mui/material";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
-import { DEFAULT_ANNOTATION_COLOR } from "../../colors/annotation.colors";
-import { POA_COLORS } from "../../colors/pointsOfAttack.colors";
+import { DEFAULT_ANNOTATION_COLOR } from "#view/colors/annotation.colors.ts";
+import { POA_COLORS } from "#view/colors/pointsOfAttack.colors.ts";
 
 const keepFocusOnClick = (event: MouseEvent): void => {
     event.preventDefault();

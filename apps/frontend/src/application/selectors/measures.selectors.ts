@@ -1,7 +1,7 @@
 import { createSelector } from "@reduxjs/toolkit";
 import type { RootState } from "#application/store.ts";
 import type { Measure } from "#api/types/measure.types.ts";
-import { measuresAdapter } from "../adapters/measures.adapter";
+import { measuresAdapter } from "#application/adapters/measures.adapter.ts";
 
 const selectMeasuresEntities = (state: RootState) => state.measures.entities;
 const selectProjectId = (_state: RootState, projectId: number) => projectId;

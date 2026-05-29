@@ -2,8 +2,8 @@ import { Box, Typography } from "@mui/material";
 import { useMemo } from "react";
 import type { JSX, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { MATRIX_COLOR } from "../colors/matrix";
-import type { MatrixColorKey } from "../colors/matrix";
+import { MATRIX_COLOR } from "#view/colors/matrix.ts";
+import type { MatrixColorKey } from "#view/colors/matrix.ts";
 import type { MatrixGrid, SelectedMatrixCell } from "#application/hooks/use-matrix.hook.ts";
 
 const damageAxis = [1, 2, 3, 4, 5];

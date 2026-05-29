@@ -5,7 +5,7 @@
 
 import { useParams, useLocation, Navigate, type Location } from "react-router-dom";
 import type { CatalogThreat } from "#api/types/catalog-threat.types.ts";
-import CatalogThreatDialog from "../dialogs/catalog-threat.dialog";
+import CatalogThreatDialog from "#view/dialogs/catalog-threat.dialog.tsx";
 
 interface CatalogThreatDialogLocationState {
     catalogThreat: Partial<CatalogThreat> | undefined;

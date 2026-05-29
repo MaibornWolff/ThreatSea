@@ -10,19 +10,19 @@ import { useEffect, useLayoutEffect, useState, type ChangeEvent, type SyntheticE
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
-import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
-import { NavigationActions } from "../../application/actions/navigation.actions";
-import { useConfirm } from "../../application/hooks/use-confirm.hook";
-import { useEditor } from "../../application/hooks/use-editor.hook";
-import { useThreatsList, type ThreatListItem } from "../../application/hooks/use-threats-list.hook";
-import { IconButton } from "../components/icon-button.component";
-import { Page } from "../components/page.component";
-import { SearchField } from "../components/search-field.component";
-import { CustomTableHeaderCell } from "../components/table-header.component";
-import { CreatePage } from "../components/create-page.component";
-import { HeaderUtilityControls } from "../components/header-utility-controls.component";
+import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
+import { NavigationActions } from "#application/actions/navigation.actions.ts";
+import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
+import { useEditor } from "#application/hooks/use-editor.hook.ts";
+import { useThreatsList, type ThreatListItem } from "#application/hooks/use-threats-list.hook.ts";
+import { IconButton } from "#view/components/icon-button.component.tsx";
+import { Page } from "#view/components/page.component.tsx";
+import { SearchField } from "#view/components/search-field.component.tsx";
+import { CustomTableHeaderCell } from "#view/components/table-header.component.tsx";
+import { CreatePage } from "#view/components/create-page.component.tsx";
+import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
 import ThreatDialogPage from "./threat-dialog.page";
-import { withProject } from "../components/with-project.hoc";
+import { withProject } from "#view/components/with-project.hoc.tsx";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 
 /**

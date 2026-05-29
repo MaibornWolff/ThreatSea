@@ -1,6 +1,6 @@
 import type { ConfirmAcceptColor, ConfirmMessage } from "#application/reducers/confirm.reducer.ts";
-import { ConfirmActions } from "../actions/confirm.actions";
-import { confirmSelectors } from "../selectors/confirm.selectors";
+import { ConfirmActions } from "#application/actions/confirm.actions.ts";
+import { confirmSelectors } from "#application/selectors/confirm.selectors.ts";
 import { useAppDispatch, useAppSelector } from "./use-app-redux.hook";
 
 interface OpenConfirmArgs<TState = unknown> {

@@ -1,4 +1,4 @@
-import { POINTS_OF_ATTACK } from "../../api/types/points-of-attack.types";
+import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 
 interface PointsOfAttackColors {
     normal: string;

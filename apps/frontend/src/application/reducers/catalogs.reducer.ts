@@ -1,8 +1,8 @@
 import { createReducer } from "@reduxjs/toolkit";
 import type { CatalogWithRole } from "#api/types/catalogs.types.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
-import { CatalogsActions } from "../actions/catalogs.actions";
-import { catalogsAdapter } from "../adapters/catalogs.adapter";
+import { CatalogsActions } from "#application/actions/catalogs.actions.ts";
+import { catalogsAdapter } from "#application/adapters/catalogs.adapter.ts";
 
 type CatalogsAdapterState = ReturnType<typeof catalogsAdapter.getInitialState>;
 

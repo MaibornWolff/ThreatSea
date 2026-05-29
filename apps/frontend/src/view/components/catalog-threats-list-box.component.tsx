@@ -10,22 +10,22 @@ import {
 import { Box } from "@mui/system";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
-import { useCatalogThreatsList } from "../../application/hooks/use-catalog-threats-list.hook";
-import { POINTS_OF_ATTACK } from "../../api/types/points-of-attack.types";
-import { ATTACKERS } from "../../api/types/attackers.types";
-import { useAlert } from "../../application/hooks/use-alert.hook";
-import { useConfirm } from "../../application/hooks/use-confirm.hook";
-import { exportAsCsvFile, importCsvFile } from "../../utils/export";
+import { useCatalogThreatsList } from "#application/hooks/use-catalog-threats-list.hook.ts";
+import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
+import { ATTACKERS } from "#api/types/attackers.types.ts";
+import { useAlert } from "#application/hooks/use-alert.hook.ts";
+import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
+import { exportAsCsvFile, importCsvFile } from "#utils/export.ts";
 import { ListBox } from "./list-box.component";
 import { ListBoxToolbar } from "./list-box-toolbar.component";
 import { ListBoxHeader } from "./list-box-header.component";
 import { useState } from "react";
 import { Delete } from "@mui/icons-material";
-import { CatalogThreatsActions } from "../../application/actions/catalog-threats.actions";
-import { useAppDispatch } from "../../application/hooks/use-app-redux.hook";
-import { checkUserRole, USER_ROLES } from "../../api/types/user-roles.types";
+import { CatalogThreatsActions } from "#application/actions/catalog-threats.actions.ts";
+import { useAppDispatch } from "#application/hooks/use-app-redux.hook.ts";
+import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { IconButton } from "./icon-button.component";
-import type { CatalogThreat, CreateCatalogThreatRequest } from "../../api/types/catalog-threat.types";
+import type { CatalogThreat, CreateCatalogThreatRequest } from "#api/types/catalog-threat.types.ts";
 import type { SortDirection } from "#application/actions/list.actions.ts";
 
 interface CatalogThreatsListBoxProps {
