@@ -5,6 +5,7 @@
 import { eq } from "drizzle-orm";
 import { db, TransactionType } from "#db/index.js";
 import { CatalogMeasure, catalogMeasures, CreateCatalogMeasure, UpdateCatalogMeasure } from "#db/schema.js";
+// oxlint-disable-next-line import/no-relative-parent-imports -- templates live outside src/; no alias defined
 import DefaultMeasuresMatrix from "../../templates/matrix/measures.matrix.json" with { type: "json" };
 import { POINTS_OF_ATTACK } from "#types/points-of-attack.types.js";
 import { ATTACKERS } from "#types/attackers.types.js";

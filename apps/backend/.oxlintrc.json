@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["typescript", "unicorn", "oxc"],
+  "plugins": ["typescript", "unicorn", "oxc", "import"],
   "categories": {
     "correctness": "off"
   },
@@ -18,10 +18,6 @@
     "coverage/*",
     "dist/*"
   ],
-  "options": {
-    "typeAware": true,
-    "typeCheck": true
-  },
   "rules": {
     "constructor-super": "error",
     "curly": ["error", "all"],
@@ -81,7 +77,8 @@
     "no-with": "error",
     "require-yield": "error",
     "use-isnan": "error",
-    "valid-typeof": "error"
+    "valid-typeof": "error",
+    "import/no-relative-parent-imports": "error"
   },
   "overrides": [
     {

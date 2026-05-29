@@ -5,6 +5,7 @@
 import { db, TransactionType } from "#db/index.js";
 import { CatalogThreat, catalogThreats, CreateCatalogThreat, UpdateCatalogThreat } from "#db/schema.js";
 import { eq } from "drizzle-orm";
+// oxlint-disable-next-line import/no-relative-parent-imports -- templates live outside src/; no alias defined
 import DefaultThreatMatrix from "../../templates/matrix/threats.matrix.json" with { type: "json" };
 import { POINTS_OF_ATTACK } from "#types/points-of-attack.types.js";
 import { ATTACKERS } from "#types/attackers.types.js";

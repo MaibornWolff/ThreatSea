@@ -9,7 +9,7 @@ import Typography from "@mui/material/Typography";
 import { Box } from "@mui/system";
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { useLocation, type Location } from "react-router-dom";
-import logo from "../../images/threatsealogo-dez.png";
+import logo from "#images/threatsealogo-dez.png";
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
 import { translationUtil } from "#utils/translations.ts";

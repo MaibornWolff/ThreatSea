@@ -13,7 +13,7 @@ import { ProjectsActions } from "#application/actions/projects.actions.ts";
 import { catalogsSelector } from "#application/selectors/catalogs.selector.ts";
 import { editorSelectors } from "#application/selectors/editor.selectors.ts";
 import { projectsSelectors } from "#application/selectors/projects.selectors.ts";
-import logo from "../../images/threatsealogo-dez.png";
+import logo from "#images/threatsealogo-dez.png";
 import ErrorBoundary from "#view/wrappers/error.wrapper.tsx";
 import { useProjectTabs } from "#application/hooks/use-project-tabs.hook.ts";
 import { HeaderLevelOneNav } from "./header-level-one-nav.component";

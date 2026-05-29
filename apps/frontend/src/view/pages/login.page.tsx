@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate, type Location } from "react-router-dom";
 import { LoginAPI } from "#api/login.api.ts";
 import { API_URI } from "#api/utils.ts";
-import openIDLogo from "../../images/openid-logo.svg";
+import openIDLogo from "#images/openid-logo.svg";
 import { ErrorActions } from "#application/actions/error.actions.ts";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { ERR_MESS_SERVER_INTERNAL, ERR_TYPE_INTERNAL } from "#application/reducers/error.reducer.ts";
