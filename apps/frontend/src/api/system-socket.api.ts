@@ -4,7 +4,7 @@
 
 /* eslint-disable no-empty-function */
 export const socket = {
-    emit() {},
+    emit: () => {},
     on: () => {},
     volatile: {
         emit: () => {},
