@@ -22,6 +22,7 @@ import { CustomTableHeaderCell } from "#view/components/table-header.component.t
 import { CreatePage } from "#view/components/create-page.component.tsx";
 import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
 import ThreatDialogPage from "./threat-dialog.page";
+import { MeasureImpactByMeasureDialogPage } from "./measure-impact-by-measure-dialog.page";
 import { withProject } from "#view/components/with-project.hoc.tsx";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 
@@ -522,6 +523,7 @@ const ThreatsPageBody = () => {
                 </Box>
                 <Routes>
                     <Route path="edit" element={<ThreatDialogPage />} />
+                    <Route path="measureImpacts/edit" element={<MeasureImpactByMeasureDialogPage />} />
                 </Routes>
             </Page>
         </Box>

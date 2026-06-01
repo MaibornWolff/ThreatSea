@@ -10,6 +10,7 @@ import { useAppSelector } from "./use-app-redux.hook.ts";
 import { projectsSelectors } from "#application/selectors/projects.selectors.ts";
 import type { SortDirection } from "#application/actions/list.actions.ts";
 import type { MatrixColorKey } from "#view/colors/matrix.ts";
+import { calcDamage } from "#utils/helpers.ts";
 
 export interface ThreatMeasure {
     measureId: number;
@@ -93,25 +94,12 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
         () =>
             threatsRaw
                 .map((item) => {
-                    const { confidentiality, integrity, availability, probability, assets } = item;
-                    const damage = assets.reduce((value, asset) => {
-                        if (confidentiality && value < asset.confidentiality) {
-                            value = asset.confidentiality;
-                        }
-                        if (integrity && value < asset.integrity) {
-                            value = asset.integrity;
-                        }
-                        if (availability && value < asset.availability) {
-                            value = asset.availability;
-                        }
-                        return value;
-                    }, 0); // default 0 if no protection goal is affected
-                    const risk = probability * damage;
+                    const damage = calcDamage(item);
+                    const risk = item.probability * damage;
                     return {
                         ...item,
                         risk,
                         damage,
-                        assets,
                     };
                 })
                 .map((threat) => {
