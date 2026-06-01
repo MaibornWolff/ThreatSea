@@ -9,11 +9,11 @@ import {
     editorComponentTypeAdapter,
     type EditorComponentType,
 } from "#application/adapters/editor-component-type.adapter.ts";
-import serverImg from "../../images/server.png";
-import databaseImg from "../../images/database.png";
-import desktopImg from "../../images/desktop.png";
-import userImg from "../../images/user.png";
-import communicationInfrastructureImg from "../../images/communication-infrastructure.png";
+import serverImg from "#images/server.png";
+import databaseImg from "#images/database.png";
+import desktopImg from "#images/desktop.png";
+import userImg from "#images/user.png";
+import communicationInfrastructureImg from "#images/communication-infrastructure.png";
 import type { AnchorOrientation, AnnotationType, Coordinate } from "#api/types/system.types.ts";
 
 export type EditorEntityId = string | number;

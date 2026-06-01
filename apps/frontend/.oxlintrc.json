@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["typescript", "unicorn", "oxc", "react"],
+  "plugins": ["typescript", "unicorn", "oxc", "react", "import"],
   "categories": {
     "correctness": "off"
   },
@@ -12,10 +12,6 @@
     "process": "readonly"
   },
   "ignorePatterns": ["build", "coverage", "dist", ".vite", "playwright-report"],
-  "options": {
-    "typeAware": true,
-    "typeCheck": true
-  },
   "rules": {
     "constructor-super": "error",
     "curly": ["error", "all"],
@@ -76,6 +72,7 @@
     "require-yield": "error",
     "use-isnan": "error",
     "valid-typeof": "error",
+    "import/no-relative-parent-imports": "error",
     "react/display-name": "error",
     "react/jsx-key": "error",
     "react/jsx-no-comment-textnodes": "error",
@@ -176,6 +173,12 @@
       "files": ["**/src/**/*.{ts,tsx}"],
       "env": {
         "es2024": true
+      }
+    },
+    {
+      "files": ["playwright/**"],
+      "rules": {
+        "import/no-relative-parent-imports": "off"
       }
     },
     {

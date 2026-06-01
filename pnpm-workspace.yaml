@@ -4,6 +4,9 @@ packages:
 
 allowBuilds:
   esbuild: false
+publicHoistPattern:
+  - "oxlint"
+  - "oxlint-tsgolint"
 minimumReleaseAge: 4320 # time in minutes, equals 72 hours
 saveExact: true
 trustPolicy: no-downgrade
