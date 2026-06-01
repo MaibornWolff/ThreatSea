@@ -9,10 +9,14 @@
   "duplicateThreat": "Duplicate Threat",
   "deleteThreat": "Delete Threat",
   "edited": "Edited",
+  "notEdited": "Not Edited",
+  "filterAll": "All",
   "threatsLoading": "Loading threats...",
   "fullExport": "Export Assets, Threats and Measures",
   "catalogMeasures": "Catalog Measures",
   "deleteMessage": "Do you really want to delete the threat '{{ threatName }}'?",
   "noThreatsFound": "No Threats found",
-  "heading": "Threats"
+  "heading": "Threats",
+  "customizeView": "Customize view",
+  "actions": "Actions"
 }

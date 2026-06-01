@@ -1,12 +1,7 @@
-import { Add, Delete } from "@mui/icons-material";
-import { Box, Tooltip, Typography } from "@mui/material";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import { useLayoutEffect, useMemo, useState, type ChangeEvent, type SyntheticEvent } from "react";
+import { Add, Visibility } from "@mui/icons-material";
+import { Box, Button, Checkbox, FormControlLabel, Menu, MenuItem, Tooltip, Typography } from "@mui/material";
+import { DataGrid, type GridColumnVisibilityModel, type GridFilterModel } from "@mui/x-data-grid";
+import { useCallback, useLayoutEffect, useMemo, useState, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import type { Member } from "#api/types/members.types.ts";
@@ -17,8 +12,6 @@ import { useMembersList } from "#application/hooks/use-addedMember-list.hook.ts"
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { MatrixFilterToggleButtonGroup } from "#view/components/matrix-filter-toggle-button-group.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
-import { SearchField } from "#view/components/search-field.component.tsx";
-import { CustomTableHeaderCell } from "#view/components/table-header.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
 import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
 import MemberDialogPage from "./member-dialog.page";
@@ -27,6 +20,7 @@ import { AlertActions } from "#application/actions/alert.actions.ts";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import type { NavigationState } from "#application/reducers/navigation.reducer.ts";
 import type { ConfirmAcceptColor } from "#application/reducers/confirm.reducer.ts";
+import { createMembersColumns } from "./members.columns";
 
 type MemberPath = "projects" | "catalogs";
 
@@ -38,11 +32,25 @@ interface DeleteMemberConfirmState {
     name: string;
 }
 
+const NoRowsOverlay = ({ message }: { message: string }) => (
+    <Box
+        sx={{
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+        }}
+    >
+        <Typography sx={{ fontSize: "0.75rem", fontStyle: "italic" }}>{message}</Typography>
+    </Box>
+);
+
 const MemberPageBody = () => {
     const dispatch = useAppDispatch();
     const { openConfirm } = useConfirm<DeleteMemberConfirmState>();
     const navigate = useNavigate();
     const { t } = useTranslation("memberPage");
+    const { t: tCommon } = useTranslation("common");
     const { projectId, catalogId } = useParams<{ projectId?: string; catalogId?: string }>();
     const [memberRole, setMemberRole] = useState<USER_ROLES | null>(null);
 
@@ -72,7 +80,6 @@ const MemberPageBody = () => {
     }, [isProject]);
     const userRole = isProject ? userProjectRole : userCatalogRole;
 
-    // viewer should not access this page
     if (
         (projectId && !checkUserRole(userProjectRole, USER_ROLES.EDITOR)) ||
         (catalogId && !checkUserRole(userCatalogRole, USER_ROLES.EDITOR))
@@ -85,8 +92,7 @@ const MemberPageBody = () => {
         navigate("/projects");
     }
 
-    const { setSortDirection, setSearchValue, setSortBy, sortDirection, sortBy, members, onConfirmDeleteMember } =
-        useMembersList(projectCatalogId, memberPath, memberRole);
+    const { members, onConfirmDeleteMember } = useMembersList(projectCatalogId, memberPath, memberRole);
 
     useLayoutEffect(() => {
         if (isSelfRemoved) {
@@ -104,11 +110,71 @@ const MemberPageBody = () => {
         dispatch(NavigationActions.setPageHeader(headerConfig));
     }, [dispatch, headerConfig]);
 
-    /**
-     * Opens the add member menu of the members page.
-     *
-     * @event IconButton#onClick
-     */
+    const SESSION_STORAGE_KEY = `members-column-visibility-${memberPath}-${projectCatalogId}`;
+
+    const getInitialColumnVisibility = (): GridColumnVisibilityModel => {
+        const stored = sessionStorage.getItem(SESSION_STORAGE_KEY);
+        if (stored) {
+            try {
+                return JSON.parse(stored);
+            } catch {
+                // Fall through to default
+            }
+        }
+        return {
+            name: true,
+            email: true,
+            role: true,
+            actions: true,
+        };
+    };
+
+    const [columnVisibility, setColumnVisibility] = useState<GridColumnVisibilityModel>(getInitialColumnVisibility);
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const open = Boolean(anchorEl);
+
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
+    const handleClose = () => setAnchorEl(null);
+
+    const toggleColumnVisibility = (field: string) => {
+        setColumnVisibility((prev) => {
+            const newVisibility = { ...prev, [field]: !prev[field] };
+            sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(newVisibility));
+            return newVisibility;
+        });
+    };
+
+    const columnLabels: Record<string, string> = {
+        name: tCommon("name"),
+        email: tCommon("email"),
+        role: tCommon("role"),
+        actions: t("actions"),
+    };
+
+    const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
+    const [expandedFilters, setExpandedFilters] = useState<Record<string, boolean>>({});
+
+    const handleFilterChange = useCallback((field: string, value: string) => {
+        setColumnFilters((prev) => ({ ...prev, [field]: value }));
+    }, []);
+
+    const toggleFilterExpanded = useCallback((field: string) => {
+        setExpandedFilters((prev) => ({ ...prev, [field]: !prev[field] }));
+    }, []);
+
+    const filterModel: GridFilterModel = useMemo(
+        () => ({
+            items: Object.entries(columnFilters)
+                .filter(([_, value]) => value.trim() !== "")
+                .map(([field, value]) => ({
+                    field,
+                    operator: "contains",
+                    value,
+                })),
+        }),
+        [columnFilters]
+    );
+
     const onClickAddMember = () => {
         navigate(`/${memberPath}/${projectCatalogId}/members/edit`, {
             state: {
@@ -122,122 +188,86 @@ const MemberPageBody = () => {
         });
     };
 
-    /**
-     * Changes the search filter of the list view.
-     * @event Box#onChange
-     * @param {SyntheticBaseEvent} e - Event of the change.
-     */
-    const onChangeSearchValue = (event: ChangeEvent<HTMLInputElement>) => {
-        setSearchValue(event.target.value);
-    };
-
-    /**
-     * Changes the attribute to sort the assets page by.
-     *
-     * @event CustomTableHeaderCell#onClick
-     * @param {SyntheticBaseEvent} e - Onclick event.
-     * @param {string} newSortBy - The new attribute to sortby.
-     */
-    const onClickChangeSortBy = (_event: SyntheticEvent, newSortBy: string | null) => {
-        // If the attribute is clicked again, the order is changed.
-        if (sortBy === newSortBy) {
-            const newSortDirection = sortDirection === "asc" ? "desc" : sortDirection === "desc" ? "asc" : null;
-            if (newSortDirection) {
-                setSortDirection(newSortDirection);
-            }
-        } else if (newSortBy) {
-            setSortBy(newSortBy);
-        }
-    };
-
-    /**
-     * Changes the role filter of members.
-     * @event MatrixFilterToggleButtonGroup#onChange
-     * @param {SyntheticBaseEvent} e - Event of the change.
-     */
     const handleChangeMemberRole = (_event: SyntheticEvent, value: USER_ROLES | null) => {
         setMemberRole(value);
     };
 
-    /**
-     * Checks if the user is not the only owner.
-     *
-     * @param {object} member - Data of the current member.
-     * @returns Indicator if the project/catalogue has another owner.
-     */
-    const checkIsOwnerNotAlone = (member: Member) =>
-        members.find((m) => m.id !== member.id && checkUserRole(m.role, USER_ROLES.OWNER));
+    const checkIsOwnerNotAlone = useCallback(
+        (member: Member) => members.find((m) => m.id !== member.id && checkUserRole(m.role, USER_ROLES.OWNER)),
+        [members]
+    );
 
-    /**
-     * Opens the confirmation dialog to delete the specified
-     * catalogue.
-     *
-     * @event CatalogListItem#onClickDelete
-     * @param {SyntheticBaseEvent} e - Onclick delete event.
-     * @param {object} catalog - Data of the catalogue.
-     */
-    const onClickDeleteMember = (event: React.MouseEvent<HTMLElement>, member: Member) => {
-        event.preventDefault();
+    const handleDeleteMember = useCallback(
+        (member: Member) => {
+            const message: { preHighlightText?: string; highlightedText?: string; afterHighlightText?: string } = {};
+            let acceptText: string | undefined;
+            let onAccept: ((state: DeleteMemberConfirmState) => void) | undefined;
+            let acceptColor: ConfirmAcceptColor | undefined;
+            let cancelText: string | null | undefined;
+            let ownUserId: number | undefined;
 
-        const message: { preHighlightText?: string; highlightedText?: string; afterHighlightText?: string } = {};
-        let acceptText: string | undefined;
-        let onAccept: ((state: DeleteMemberConfirmState) => void) | undefined;
-        let acceptColor: ConfirmAcceptColor | undefined;
-        let cancelText: string | null | undefined;
-        let ownUserId: number | undefined;
+            const isNotAloneOwner = checkIsOwnerNotAlone(member);
 
-        const isNotAloneOwner = checkIsOwnerNotAlone(member);
+            if (isNotAloneOwner) {
+                message.preHighlightText = "Member: ";
+                message.afterHighlightText = " will be removed, are you sure?";
 
-        if (isNotAloneOwner) {
-            message.preHighlightText = "Member: ";
-            message.afterHighlightText = " will be removed, are you sure?";
-
-            acceptText = "Delete";
-            onAccept = onConfirmDeleteMember;
-            acceptColor = "error";
-            cancelText = t("Cancel");
-            ownUserId = user.userId;
-        } else {
-            if (members.length > 1) {
-                message.preHighlightText = "You can't remove ";
-                message.afterHighlightText = ` because this user is the only owner left
-                    in the project. Declare a new owner first.`;
+                acceptText = "Delete";
+                onAccept = onConfirmDeleteMember;
+                acceptColor = "error";
+                cancelText = t("Cancel");
+                ownUserId = user.userId;
             } else {
-                message.preHighlightText = "Can't remove ";
-                message.afterHighlightText = ` because the project will be empty.
+                if (members.length > 1) {
+                    message.preHighlightText = "You can't remove ";
+                    message.afterHighlightText = ` because this user is the only owner left
+                    in the project. Declare a new owner first.`;
+                } else {
+                    message.preHighlightText = "Can't remove ";
+                    message.afterHighlightText = ` because the project will be empty.
                     Deletion of a project can be done under the projects page.`;
+                }
+                acceptText = "Ok";
+                acceptColor = "warning";
+                cancelText = null;
+                ownUserId = -1;
             }
-            acceptText = "Ok";
-            acceptColor = "warning";
-            cancelText = null;
-            ownUserId = -1;
-        }
-        message.highlightedText = `${member.name}`;
+            message.highlightedText = `${member.name}`;
 
-        openConfirm({
-            state: {
-                memberPath: memberPath,
-                projectCatalogId: projectCatalogId,
-                memberId: member.id,
-                ownUserId: ownUserId ?? -1,
-                name: member.name,
-            },
-            message: message,
-            acceptText: t(acceptText ?? "Ok"),
-            cancelText: cancelText ?? null,
-            onAccept: onAccept ?? null,
-            acceptColor: acceptColor ?? "error",
-        });
-    };
+            openConfirm({
+                state: {
+                    memberPath: memberPath,
+                    projectCatalogId: projectCatalogId,
+                    memberId: member.id,
+                    ownUserId: ownUserId ?? -1,
+                    name: member.name,
+                },
+                message: message,
+                acceptText: t(acceptText ?? "Ok"),
+                cancelText: cancelText ?? null,
+                onAccept: onAccept ?? null,
+                acceptColor: acceptColor ?? "error",
+            });
+        },
+        [
+            checkIsOwnerNotAlone,
+            members,
+            onConfirmDeleteMember,
+            openConfirm,
+            memberPath,
+            projectCatalogId,
+            user.userId,
+            t,
+        ]
+    );
 
-    const onClickEditMember = (event: React.MouseEvent<HTMLElement>, member: Member) => {
-        if (checkUserRole(userRole, USER_ROLES.OWNER) && !event.isDefaultPrevented()) {
-            event.preventDefault();
+    const onClickEditMember = (member: Member) => {
+        if (checkUserRole(userRole, USER_ROLES.OWNER)) {
             navigate(`/${memberPath}/${projectCatalogId}/members/edit`, {
                 state: {
                     memberPath,
                     projectCatalogId,
-                    member: member,
+                    member,
                     isNotAloneOwner: checkIsOwnerNotAlone(member),
                     isProject,
                     user,
@@ -247,6 +277,32 @@ const MemberPageBody = () => {
             });
         }
     };
+
+    const NoRowsOverlayWithMessage = useCallback(() => <NoRowsOverlay message={t("noMembersFound")} />, [t]);
+
+    const columns = useMemo(
+        () =>
+            createMembersColumns({
+                t,
+                tCommon,
+                userRole,
+                columnFilters,
+                handleFilterChange,
+                expandedFilters,
+                toggleFilterExpanded,
+                handleDeleteMember,
+            }),
+        [
+            t,
+            tCommon,
+            userRole,
+            columnFilters,
+            handleFilterChange,
+            expandedFilters,
+            toggleFilterExpanded,
+            handleDeleteMember,
+        ]
+    );
 
     const handleParticipantCount = (): string => {
         if (members.length > 1) {
@@ -264,9 +320,7 @@ const MemberPageBody = () => {
             }}
         >
             <MatrixFilterToggleButtonGroup
-                sx={{
-                    mb: 2,
-                }}
+                sx={{ mb: 2 }}
                 items={[
                     {
                         text: t("userRoles.OWNER"),
@@ -314,7 +368,31 @@ const MemberPageBody = () => {
                     }}
                 >
                     <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <SearchField data-testid="MemberSearch" onChange={onChangeSearchValue} />
+                        <Button
+                            variant="outlined"
+                            startIcon={<Visibility />}
+                            onClick={handleClick}
+                            sx={{ textTransform: "none" }}
+                        >
+                            {t("customizeView")}
+                        </Button>
+                        <Menu
+                            anchorEl={anchorEl}
+                            open={open}
+                            onClose={handleClose}
+                            anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                            transformOrigin={{ vertical: "top", horizontal: "left" }}
+                        >
+                            {Object.entries(columnLabels).map(([field, label]) => (
+                                <MenuItem key={field} onClick={() => toggleColumnVisibility(field)} sx={{ py: 0.5 }}>
+                                    <FormControlLabel
+                                        control={<Checkbox checked={columnVisibility[field] !== false} size="small" />}
+                                        label={label}
+                                        sx={{ m: 0, width: "100%", pointerEvents: "none" }}
+                                    />
+                                </MenuItem>
+                            ))}
+                        </Menu>
                         {checkUserRole(userRole, USER_ROLES.OWNER) && (
                             <IconButton
                                 onClick={onClickAddMember}
@@ -334,101 +412,44 @@ const MemberPageBody = () => {
                             </IconButton>
                         )}
                     </Box>
-                    {
-                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                            <Typography
-                                sx={{
-                                    mr: 0.5,
-                                    fontWeight: "bold",
-                                    color: "primary.text",
-                                }}
-                            >
-                                {members.length}
-                            </Typography>
-                            <Typography>{handleParticipantCount()}</Typography>
-                        </Box>
-                    }
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                        <Typography sx={{ mr: 0.5, fontWeight: "bold", color: "primary.text" }}>
+                            {members.length}
+                        </Typography>
+                        <Typography>{handleParticipantCount()}</Typography>
+                    </Box>
                 </Box>
-                <Box
+
+                <DataGrid
+                    rows={members}
+                    columns={columns}
+                    disableRowSelectionOnClick
+                    disableColumnFilter
+                    disableColumnMenu
+                    disableColumnSelector
+                    filterModel={filterModel}
+                    onCellClick={(params) => {
+                        if (params.field !== "actions") {
+                            onClickEditMember(params.row);
+                        }
+                    }}
+                    columnHeaderHeight={90}
+                    columnVisibilityModel={columnVisibility}
                     sx={{
                         borderRadius: 5,
                         boxShadow: 1,
-                        boxSizing: "border-box",
-                        overflowX: "hidden",
-                        height: "100%",
+                        "& .MuiDataGrid-row": { cursor: "pointer" },
+                        "& .MuiDataGrid-cell:focus": { outline: "none" },
+                        "& .MuiDataGrid-columnHeader:focus": { outline: "none" },
+                        "& .MuiDataGrid-columnHeader": { padding: "8px 16px" },
+                        "& .MuiDataGrid-cell": { cursor: "pointer" },
                     }}
-                >
-                    <Box
-                        sx={{
-                            borderRadius: 5,
-                            height: "100%",
-                        }}
-                    >
-                        <TableContainer
-                            sx={{
-                                height: "100%",
-                                overflowY: "auto",
-                                boxSizing: "border-box",
-                                position: "relative",
-                                width: "100%",
-                                "::-webkit-scrollbar-track": {
-                                    borderTopLeftRadius: 0,
-                                    borderBottomLeftRadius: 0,
-                                    borderBottomRightRadius: 500,
-                                    borderTopRightRadius: 500,
-                                },
-                            }}
-                        >
-                            <Table stickyHeader sx={{ minWidth: 650 }}>
-                                <TableHead>
-                                    <TableRow>
-                                        <CustomTableHeaderCell
-                                            name="name"
-                                            sortBy={sortBy}
-                                            sortDirection={sortDirection}
-                                            showBorder={true}
-                                            onClick={onClickChangeSortBy}
-                                            data-testid="MemberName"
-                                        >
-                                            {t("name")}
-                                        </CustomTableHeaderCell>
-                                        <CustomTableHeaderCell
-                                            name="email"
-                                            sortBy={sortBy}
-                                            sortDirection={sortDirection}
-                                            showBorder={true}
-                                            onClick={onClickChangeSortBy}
-                                            data-testid="MemberEmail"
-                                        >
-                                            {t("email")}
-                                        </CustomTableHeaderCell>
-                                        <CustomTableHeaderCell
-                                            name="role"
-                                            sortBy={sortBy}
-                                            sortDirection={sortDirection}
-                                            onClick={onClickChangeSortBy}
-                                            data-testid="MemberRole"
-                                        >
-                                            {t("role")}
-                                        </CustomTableHeaderCell>
-                                        <CustomTableHeaderCell></CustomTableHeaderCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody data-testid="MembersBody">
-                                    {members.map((member) => (
-                                        <MemberTableRow
-                                            key={member.id}
-                                            member={member}
-                                            onEdit={onClickEditMember}
-                                            onDelete={onClickDeleteMember}
-                                            userRole={userRole}
-                                        />
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    </Box>
-                </Box>
+                    initialState={{
+                        pagination: { paginationModel: { pageSize: 25, page: 0 } },
+                    }}
+                    pageSizeOptions={[10, 25, 50, 100]}
+                    slots={{ noRowsOverlay: NoRowsOverlayWithMessage }}
+                />
             </Box>
             {checkUserRole(userRole, USER_ROLES.OWNER) && (
                 <Routes>
@@ -436,102 +457,6 @@ const MemberPageBody = () => {
                 </Routes>
             )}
         </Page>
-    );
-};
-
-/**
- * Creates a row for a member.
- *
- * @param {object} member - The data of the member to show.
- * @param {function} onEdit - Function that handles the editing of a member.
- * @param {function} onDelete - Function that handles the deletion of a member.
- * @param {string} language - Language specification string.
- * @returns React component for creating a row for a member.
- */
-interface MemberTableRowProps {
-    member: Member;
-    onEdit: (event: React.MouseEvent<HTMLElement>, member: Member) => void;
-    onDelete: (event: React.MouseEvent<HTMLElement>, member: Member) => void;
-    userRole: USER_ROLES | undefined;
-}
-
-const MemberTableRow = ({ member, onEdit, onDelete, userRole }: MemberTableRowProps) => {
-    const { name, email, role } = member;
-    const { t } = useTranslation("memberPage");
-
-    // Setting up a config object for the tabel cells.
-    const tableCellsConfig = {
-        name: {
-            textdata: name,
-            sx: undefined,
-        },
-        email: {
-            textdata: email,
-            sx: undefined,
-        },
-        role: {
-            textdata: t(`userRoles.${role}`),
-            sx: {
-                fontWeight: "bold",
-            },
-        },
-    };
-
-    // Building up the textcells of this row.
-    const tableCells = Object.values(tableCellsConfig).map((cellConfig, idx) => {
-        return (
-            <TableCell
-                key={idx}
-                align="center"
-                sx={{
-                    fontSize: "0.875rem",
-                    ...cellConfig.sx,
-                }}
-            >
-                {cellConfig.textdata}
-            </TableCell>
-        );
-    });
-
-    return (
-        <TableRow
-            sx={{
-                backgroundColor: "background.mainIntransparent",
-                borderRadius: 5,
-                marginBottom: 1,
-
-                "&:last-child td, &:last-child th": { border: 0 },
-                "&:hover": {
-                    cursor: "pointer",
-                    backgroundColor: "#ffffff !important",
-                },
-            }}
-            onClick={(e) => onEdit(e, member)}
-            hover
-        >
-            {tableCells}
-            <TableCell
-                align="right"
-                sx={{
-                    padding: 0,
-                    paddingRight: 2,
-                    borderBottomColor: "#fff",
-                }}
-            >
-                {checkUserRole(userRole, USER_ROLES.OWNER) && (
-                    <IconButton
-                        title={t("deleteMember")}
-                        hoverColor="error"
-                        sx={{
-                            color: "text.primary",
-                        }}
-                        onClick={(e) => onDelete(e, member)}
-                    >
-                        <Delete sx={{ fontSize: 18 }} />
-                    </IconButton>
-                )}
-            </TableCell>
-        </TableRow>
     );
 };
 

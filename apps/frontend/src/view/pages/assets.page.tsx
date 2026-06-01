@@ -3,16 +3,10 @@
  *     page in the projects.
  */
 
-import { Add, Delete } from "@mui/icons-material";
-import { LinearProgress, Typography } from "@mui/material";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import { Box } from "@mui/system";
-import { useLayoutEffect, type ChangeEvent, type SyntheticEvent } from "react";
+import { Add, Visibility } from "@mui/icons-material";
+import { Box, Button, Checkbox, FormControlLabel, LinearProgress, Menu, MenuItem, Typography } from "@mui/material";
+import { DataGrid, type GridColumnVisibilityModel, type GridFilterModel } from "@mui/x-data-grid";
+import { useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import type { ExtendedProject } from "#api/types/project.types.ts";
@@ -21,58 +15,44 @@ import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { useAssetsList } from "#application/hooks/use-assets-list.hook.ts";
+import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
-import { SearchField } from "#view/components/search-field.component.tsx";
-import { CustomTableHeaderCell } from "#view/components/table-header.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
 import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
 import { withProject } from "#view/components/with-project.hoc.tsx";
 import AssetDialogPage from "./asset-dialog.page";
-import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
+import { createAssetsColumns } from "./assets.columns";
 
 interface AssetsPageBodyProps {
     project: ExtendedProject;
 }
 
-interface AssetTableRowProps {
-    asset: Asset;
-    onEdit: (event: React.MouseEvent<HTMLElement>, asset: Asset) => void;
-    onDelete: (event: React.MouseEvent<HTMLElement>, asset: Asset) => void;
-    language: string;
-    userRole: USER_ROLES | undefined;
-}
+const NoRowsOverlay = ({ message }: { message: string }) => (
+    <Box
+        sx={{
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+        }}
+    >
+        <Typography sx={{ fontSize: "0.75rem", fontStyle: "italic" }}>{message}</Typography>
+    </Box>
+);
 
-/**
- * Creates the asset page under a project.
- *
- * @param {object} history - History object.
- * @param {object} project - The current projects data.
- * @param {string} projectId - The id of the current project.
- * @returns Asset page to add, list assets and more.
- */
 const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
     const projectId = project.id;
     const dispatch = useAppDispatch();
-    const {
-        t,
-        i18n: { language },
-    } = useTranslation("assetsPage");
+    const { t } = useTranslation("assetsPage");
+    const { t: tCommon } = useTranslation("common");
 
-    const { setSortDirection, setSearchValue, setSortBy, deleteAsset, sortDirection, sortBy, isPending, assets } =
-        useAssetsList({
-            projectId,
-        });
+    const { deleteAsset, isPending, assets } = useAssetsList({ projectId });
 
     const userRole = useAppSelector((state) => state.projects.current?.role);
     const { openConfirm } = useConfirm<Asset>();
-
     const navigate = useNavigate();
 
-    /**
-     * Layout effect to change the header bar
-     * to the current environment the user is at.
-     */
     useLayoutEffect(() => {
         dispatch(
             NavigationActions.setPageHeader({
@@ -84,82 +64,115 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
         );
     }, [dispatch]);
 
-    /**
-     * Changes the search filter of the list view.
-     * @event Box#onChange
-     * @param {SyntheticBaseEvent} e - Event of the change.
-     */
-    const onChangeSearchValue = (event: ChangeEvent<HTMLInputElement>) => {
-        setSearchValue(event.target.value);
-    };
+    const SESSION_STORAGE_KEY = `assets-column-visibility-${projectId}`;
 
-    /**
-     * Changes the attribute to sort the assets page by.
-     *
-     * @event CustomTableHeaderCell#onClick
-     * @param {SyntheticBaseEvent} e - Onclick event.
-     * @param {string} newSortBy - The new attribute to sortby.
-     */
-    const onChangeSortBy = (_event: SyntheticEvent, newSortBy: string | null) => {
-        // If the attribute is clicked again, the order is changed.
-        if (sortBy === newSortBy) {
-            const newSortDirection = sortDirection === "asc" ? "desc" : sortDirection === "desc" ? "asc" : null;
-            if (newSortDirection) {
-                setSortDirection(newSortDirection);
+    const getInitialColumnVisibility = (): GridColumnVisibilityModel => {
+        const stored = sessionStorage.getItem(SESSION_STORAGE_KEY);
+        if (stored) {
+            try {
+                return JSON.parse(stored);
+            } catch {
+                // Fall through to default
             }
-        } else if (newSortBy) {
-            setSortBy(newSortBy);
         }
+        return {
+            name: true,
+            confidentiality: true,
+            integrity: true,
+            availability: true,
+            createdAt: true,
+            actions: true,
+        };
     };
 
-    /**
-     * Opens the add asset dialog.
-     * @event IconButton#onClick
-     */
-    const onClickAddAssets = () => {
-        navigate(`/projects/${projectId}/assets/edit`, {
-            state: { project },
+    const [columnVisibility, setColumnVisibility] = useState<GridColumnVisibilityModel>(getInitialColumnVisibility);
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const open = Boolean(anchorEl);
+
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
+    const handleClose = () => setAnchorEl(null);
+
+    const toggleColumnVisibility = (field: string) => {
+        setColumnVisibility((prev) => {
+            const newVisibility = { ...prev, [field]: !prev[field] };
+            sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(newVisibility));
+            return newVisibility;
         });
     };
 
-    /**
-     * Opens the dialog to edit an asset when it's clicked on.
-     *
-     * @event Tabelbody#onEdit
-     * @param {SyntheticBaseEvent} e - Onclick event.
-     * @param {object} asset - Data of the asset.
-     */
-    const onClickEditAsset = (event: React.MouseEvent<HTMLElement>, asset: Asset) => {
-        if (!event.isDefaultPrevented()) {
-            event.preventDefault();
-            navigate(`/projects/${projectId}/assets/edit`, {
-                state: {
-                    project,
-                    asset,
+    const columnLabels: Record<string, string> = {
+        name: tCommon("name"),
+        confidentiality: tCommon("confidentiality"),
+        integrity: tCommon("integrity"),
+        availability: tCommon("availability"),
+        createdAt: tCommon("creationDate"),
+        actions: t("actions"),
+    };
+
+    const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
+    const [expandedFilters, setExpandedFilters] = useState<Record<string, boolean>>({});
+
+    const handleFilterChange = useCallback((field: string, value: string) => {
+        setColumnFilters((prev) => ({ ...prev, [field]: value }));
+    }, []);
+
+    const toggleFilterExpanded = useCallback((field: string) => {
+        setExpandedFilters((prev) => ({ ...prev, [field]: !prev[field] }));
+    }, []);
+
+    const filterModel: GridFilterModel = useMemo(
+        () => ({
+            items: Object.entries(columnFilters)
+                .filter(([_, value]) => value.trim() !== "")
+                .map(([field, value]) => ({
+                    field,
+                    operator: "contains",
+                    value,
+                })),
+        }),
+        [columnFilters]
+    );
+
+    const onClickAddAssets = () => {
+        navigate(`/projects/${projectId}/assets/edit`, { state: { project } });
+    };
+
+    const onClickEditAsset = (asset: Asset) => {
+        navigate(`/projects/${projectId}/assets/edit`, {
+            state: { project, asset },
+        });
+    };
+
+    const handleDeleteAsset = useCallback(
+        (asset: Asset) => {
+            openConfirm({
+                state: asset,
+                message: t("assetDeleteMessage", { name: asset.name }),
+                cancelText: t("cancelBtn"),
+                acceptText: t("deleteBtn"),
+                onAccept: (asset) => {
+                    deleteAsset(asset);
                 },
             });
-        }
-    };
+        },
+        [openConfirm, t, deleteAsset]
+    );
 
-    /**
-     * Deletes an asset after confirm
-     * after confirm
-     * @event Tabelbody#onEdit
-     * @param {SyntheticBaseEvent} e - Event of the click.
-     * @param {object} asset - Data of the asset.
-     */
-    const onClickDeleteAsset = (event: React.MouseEvent<HTMLElement>, asset: Asset) => {
-        event.preventDefault();
-        openConfirm({
-            state: asset,
-            message: t("assetDeleteMessage", { name: asset.name }),
-            cancelText: t("cancelBtn"),
-            acceptText: t("deleteBtn"),
-            onAccept: (asset) => {
-                deleteAsset(asset);
-            },
-        });
-    };
+    const NoRowsOverlayWithMessage = useCallback(() => <NoRowsOverlay message={t("noAssetsFound")} />, [t]);
+
+    const columns = useMemo(
+        () =>
+            createAssetsColumns({
+                t,
+                userRole,
+                columnFilters,
+                handleFilterChange,
+                expandedFilters,
+                toggleFilterExpanded,
+                handleDeleteAsset,
+            }),
+        [t, userRole, columnFilters, handleFilterChange, expandedFilters, toggleFilterExpanded, handleDeleteAsset]
+    );
 
     const handleAssetsCount = (): string => {
         if (assets.length > 1) {
@@ -170,14 +183,12 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
 
     return (
         <Box sx={{ overflow: "hidden", height: "100%", boxSizing: "border-box" }}>
-            {
-                <LinearProgress
-                    sx={{
-                        visibility: isPending ? "visible" : "hidden",
-                        boxSizing: "border-box",
-                    }}
-                />
-            }
+            <LinearProgress
+                sx={{
+                    visibility: isPending ? "visible" : "hidden",
+                    boxSizing: "border-box",
+                }}
+            />
             <Page
                 sx={{
                     display: "flex",
@@ -210,14 +221,41 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
                         }}
                     >
                         <Box sx={{ display: "flex", alignItems: "center" }}>
-                            <SearchField onChange={onChangeSearchValue} data-testid="SearchAsset" />
+                            <Button
+                                variant="outlined"
+                                startIcon={<Visibility />}
+                                onClick={handleClick}
+                                sx={{ textTransform: "none" }}
+                            >
+                                {t("customizeView")}
+                            </Button>
+                            <Menu
+                                anchorEl={anchorEl}
+                                open={open}
+                                onClose={handleClose}
+                                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                                transformOrigin={{ vertical: "top", horizontal: "left" }}
+                            >
+                                {Object.entries(columnLabels).map(([field, label]) => (
+                                    <MenuItem
+                                        key={field}
+                                        onClick={() => toggleColumnVisibility(field)}
+                                        sx={{ py: 0.5 }}
+                                    >
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox checked={columnVisibility[field] !== false} size="small" />
+                                            }
+                                            label={label}
+                                            sx={{ m: 0, width: "100%", pointerEvents: "none" }}
+                                        />
+                                    </MenuItem>
+                                ))}
+                            </Menu>
                             {checkUserRole(userRole, USER_ROLES.EDITOR) && (
                                 <IconButton
                                     title={t("addAsset")}
-                                    sx={{
-                                        ml: 1,
-                                        color: "text.primary",
-                                    }}
+                                    sx={{ ml: 1, color: "text.primary" }}
                                     onClick={onClickAddAssets}
                                     data-testid="assets-page_add-asset-button"
                                 >
@@ -225,289 +263,53 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
                                 </IconButton>
                             )}
                         </Box>
-                        <Box
-                            sx={{
-                                display: "flex",
-                                alignItems: "center",
-                            }}
-                        >
-                            {assets.length > 0 && (
-                                <Box
-                                    sx={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                    }}
-                                >
-                                    <Typography
-                                        sx={{
-                                            mr: 0.5,
-                                            fontWeight: "bold",
-                                            color: "primary.text",
-                                        }}
-                                    >
-                                        {assets.length}
-                                    </Typography>
-                                    <Typography>{handleAssetsCount()}</Typography>
-                                </Box>
-                            )}
-                        </Box>
+                        {assets.length > 0 && (
+                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                                <Typography sx={{ mr: 0.5, fontWeight: "bold", color: "primary.text" }}>
+                                    {assets.length}
+                                </Typography>
+                                <Typography>{handleAssetsCount()}</Typography>
+                            </Box>
+                        )}
                     </Box>
 
-                    <Box
+                    <DataGrid
+                        rows={assets}
+                        columns={columns}
+                        loading={isPending}
+                        disableRowSelectionOnClick
+                        disableColumnFilter
+                        disableColumnMenu
+                        disableColumnSelector
+                        filterModel={filterModel}
+                        onCellClick={(params) => {
+                            if (params.field !== "actions") {
+                                onClickEditAsset(params.row);
+                            }
+                        }}
+                        columnHeaderHeight={90}
+                        columnVisibilityModel={columnVisibility}
                         sx={{
                             borderRadius: 5,
                             boxShadow: 1,
-                            boxSizing: "border-box",
-                            overflowX: "hidden",
-                            height: "100%",
+                            "& .MuiDataGrid-row": { cursor: "pointer" },
+                            "& .MuiDataGrid-cell:focus": { outline: "none" },
+                            "& .MuiDataGrid-columnHeader:focus": { outline: "none" },
+                            "& .MuiDataGrid-columnHeader": { padding: "8px 16px" },
+                            "& .MuiDataGrid-cell": { cursor: "pointer" },
                         }}
-                    >
-                        <Box
-                            sx={{
-                                borderRadius: 5,
-                                height: "100%",
-                            }}
-                        >
-                            <TableContainer
-                                sx={{
-                                    height: "100%",
-                                    overflowY: "auto",
-                                    boxSizing: "border-box",
-                                    width: "100%",
-                                    "::-webkit-scrollbar-track": {
-                                        borderTopLeftRadius: 0,
-                                        borderBottomLeftRadius: 0,
-                                        borderBottomRightRadius: 500,
-                                        borderTopRightRadius: 500,
-                                    },
-                                }}
-                            >
-                                <Table stickyHeader>
-                                    <TableHead>
-                                        <TableRow>
-                                            <CustomTableHeaderCell
-                                                name="name"
-                                                sortBy={sortBy}
-                                                sortDirection={sortDirection}
-                                                showBorder={false}
-                                                onClick={onChangeSortBy}
-                                                data-testid="assets-page_sort-assets-by-name-button"
-                                            >
-                                                {t("name")}
-                                            </CustomTableHeaderCell>
-
-                                            <CustomTableHeaderCell
-                                                name="confidentiality"
-                                                sortBy={sortBy}
-                                                sortDirection={sortDirection}
-                                                showBorder={false}
-                                                onClick={onChangeSortBy}
-                                                data-testid="assets-page_sort-assets-by-confidentiality-button"
-                                            >
-                                                {t("confidentiality")}
-                                            </CustomTableHeaderCell>
-
-                                            <CustomTableHeaderCell
-                                                name="integrity"
-                                                sortBy={sortBy}
-                                                sortDirection={sortDirection}
-                                                showBorder={false}
-                                                onClick={onChangeSortBy}
-                                                data-testid="assets-page_sort-assets-by-integrity-button"
-                                            >
-                                                {t("integrity")}
-                                            </CustomTableHeaderCell>
-
-                                            <CustomTableHeaderCell
-                                                name="availability"
-                                                sortBy={sortBy}
-                                                sortDirection={sortDirection}
-                                                showBorder={false}
-                                                onClick={onChangeSortBy}
-                                                data-testid="assets-page_sort-assets-by-availability-button"
-                                            >
-                                                {t("availability")}
-                                            </CustomTableHeaderCell>
-
-                                            <CustomTableHeaderCell
-                                                name="createdAt"
-                                                sortBy={sortBy}
-                                                sortDirection={sortDirection}
-                                                showBorder={false}
-                                                onClick={onChangeSortBy}
-                                                data-testid="assets-page_sort-assets-by-date-button"
-                                            >
-                                                {t("creationDate")}
-                                            </CustomTableHeaderCell>
-
-                                            <CustomTableHeaderCell></CustomTableHeaderCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {isPending && (
-                                            <Typography
-                                                sx={{
-                                                    paddingTop: 2,
-                                                    paddingLeft: 2,
-                                                    fontSize: "0.75rem",
-                                                    fontStyle: "italic",
-                                                }}
-                                            >
-                                                {t("assetsLoading")}
-                                            </Typography>
-                                        )}
-                                        {assets.length === 0 && !isPending && (
-                                            <Typography
-                                                sx={{
-                                                    paddingTop: 2,
-                                                    paddingLeft: 2,
-                                                    fontSize: "0.75rem",
-                                                    fontStyle: "italic",
-                                                }}
-                                            >
-                                                {t("noAssetsFound")}
-                                            </Typography>
-                                        )}
-                                        {!isPending &&
-                                            assets.map((asset, i) => {
-                                                return (
-                                                    <AssetTableRow
-                                                        key={i}
-                                                        language={language}
-                                                        asset={asset}
-                                                        onEdit={onClickEditAsset}
-                                                        onDelete={onClickDeleteAsset}
-                                                        userRole={userRole}
-                                                    />
-                                                );
-                                            })}
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
-                        </Box>
-                    </Box>
+                        initialState={{
+                            pagination: { paginationModel: { pageSize: 25, page: 0 } },
+                        }}
+                        pageSizeOptions={[10, 25, 50, 100]}
+                        slots={{ noRowsOverlay: NoRowsOverlayWithMessage }}
+                    />
                 </Box>
-                {
-                    <Routes>
-                        <Route path="edit" element={<AssetDialogPage />} />
-                    </Routes>
-                }
+                <Routes>
+                    <Route path="edit" element={<AssetDialogPage />} />
+                </Routes>
             </Page>
         </Box>
-    );
-};
-
-/**
- * Creates a row for the asset list view.
- *
- * @param {object} asset - The data of the asset.
- * @param {function} onEdit - Function that handles the editing of an asset.
- * @param {function} onDelete - Function that handles the deletion of an asset.
- * @param {string} language - Language specification string.
- * @param userRole - privilege of the Use in the Project
- * @returns React component for creating a row for an asset.
- */
-const AssetTableRow = ({ asset, onEdit, onDelete, language: _language, userRole }: AssetTableRowProps) => {
-    const { createdAt, name, confidentiality, integrity, availability } = asset;
-    const assetCreationDate = new Date(createdAt);
-
-    const { t } = useTranslation("assetsPage");
-    return (
-        <TableRow
-            sx={{
-                backgroundColor: "background.mainIntransparent",
-                borderRadius: 5,
-                marginBottom: 1,
-
-                "&:last-child td, &:last-child th": { border: 0 },
-                "&:hover": {
-                    cursor: "pointer",
-                    backgroundColor: "#ffffff !important",
-                },
-            }}
-            onClick={(e) => onEdit(e, asset)}
-            hover
-            data-testid="assets-page_assets-list-entry"
-        >
-            <TableCell
-                scope="row"
-                sx={{
-                    fontWeight: "bold",
-                    fontSize: "0.875rem",
-                    borderBottomColor: "#fff",
-                }}
-                data-testid="assets-page_assets-list-entry_name"
-            >
-                {name}
-            </TableCell>
-
-            <TableCell
-                align="center"
-                sx={{
-                    borderBottomColor: "#fff",
-                    fontSize: "0.875rem",
-                }}
-                data-testid="assets-page_assets-list-entry_confidentiality"
-            >
-                {confidentiality}
-            </TableCell>
-
-            <TableCell
-                align="center"
-                sx={{
-                    borderBottomColor: "#fff",
-                    fontSize: "0.875rem",
-                }}
-                data-testid="assets-page_assets-list-entry_integrity"
-            >
-                {integrity}
-            </TableCell>
-
-            <TableCell
-                align="center"
-                sx={{
-                    borderBottomColor: "#fff",
-                    fontSize: "0.875rem",
-                }}
-                data-testid="assets-page_assets-list-entry_availability"
-            >
-                {availability}
-            </TableCell>
-
-            <TableCell
-                align="center"
-                sx={{
-                    borderBottomColor: "#fff",
-                    fontSize: "0.875rem",
-                }}
-                data-testid="assets-page_assets-list-entry_date"
-            >
-                {assetCreationDate.toISOString().split("T")[0]}
-            </TableCell>
-            <TableCell
-                align="right"
-                data-testid="DeleteAsset"
-                sx={{
-                    padding: 0,
-                    paddingRight: 2,
-                    borderBottomColor: "#fff",
-                }}
-            >
-                {checkUserRole(userRole, USER_ROLES.EDITOR) && (
-                    <IconButton
-                        title={t("deleteAsset")}
-                        hoverColor="error"
-                        sx={{
-                            color: "text.primary",
-                        }}
-                        onClick={(e) => onDelete(e, asset)}
-                        data-testid="assets-page_assets-list-entry_delete-button"
-                    >
-                        <Delete sx={{ fontSize: 18 }} />
-                    </IconButton>
-                )}
-            </TableCell>
-        </TableRow>
     );
 };
 

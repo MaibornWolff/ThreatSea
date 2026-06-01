@@ -10,7 +10,15 @@ import {
     TableSortLabel,
     Typography,
 } from "@mui/material";
-import { useEffect, useLayoutEffect, useState, type ChangeEvent, type ReactNode, type SyntheticEvent } from "react";
+import {
+    useEffect,
+    useLayoutEffect,
+    useRef,
+    useState,
+    type ChangeEvent,
+    type ReactNode,
+    type SyntheticEvent,
+} from "react";
 
 import { useTranslation } from "react-i18next";
 import { Route } from "react-router";
@@ -255,10 +263,16 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
         }
     };
 
+    // Refresh threats only when the editor finishes a save — the backend
+    // can auto-generate threats from new points of attack during updateSystem
+    // and does not emit a socket event for them. Tracking the prior status
+    // avoids the mount-time refetch when the state is already "upToDate".
+    const prevAutoSaveStatusRef = useRef(autoSaveStatus);
     useEffect(() => {
-        if (autoSaveStatus === "upToDate") {
+        if (prevAutoSaveStatusRef.current === "saving" && autoSaveStatus === "upToDate") {
             loadThreats();
         }
+        prevAutoSaveStatusRef.current = autoSaveStatus;
     }, [autoSaveStatus, loadThreats]);
 
     return (

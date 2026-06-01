@@ -9,9 +9,13 @@
   "duplicateThreat": "Bedrohung duplizieren",
   "deleteThreat": "Bedrohung löschen",
   "edited": "Bearbeitet",
+  "notEdited": "Nicht bearbeitet",
+  "filterAll": "Alle",
   "threatsLoading": "Bedrohungen werden geladen...",
   "deleteMessage": "Wollen Sie die Bedrohung '{{ threatName }}' wirklich löschen?",
   "probability": "EW",
   "heading": "Bedrohungen",
-  "noThreatsFound": "Keine Bedrohungen gefunden"
+  "noThreatsFound": "Keine Bedrohungen gefunden",
+  "customizeView": "Ansicht anpassen",
+  "actions": "Aktionen"
 }
