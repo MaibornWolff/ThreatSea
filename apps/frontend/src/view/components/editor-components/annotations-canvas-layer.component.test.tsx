@@ -1,5 +1,5 @@
-import { act, createRef, type RefObject } from "react";
-import { screen } from "@testing-library/react";
+import { createRef, type RefObject } from "react";
+import { act, screen } from "@testing-library/react";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { createAnnotation } from "#test-utils/builders.ts";
 import { AnnotationsCanvasLayer, type AnnotationsCanvasLayerHandle } from "./annotations-canvas-layer.component";
