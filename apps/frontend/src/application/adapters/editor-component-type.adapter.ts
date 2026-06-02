@@ -11,7 +11,7 @@ export interface EditorComponentType {
     name: string;
     pointsOfAttack: POINTS_OF_ATTACK[];
     symbol: string | null;
-    standardIcon?: StandardIcon | null;
+    standardIcon: StandardIcon | null;
     isStandard?: boolean;
     projectId?: number | null;
     createdAt?: Date;

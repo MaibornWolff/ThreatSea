@@ -77,7 +77,7 @@
     "fileUnusable": "The selected file is unusable. It is either too big (> 100kB) or not an image.",
     "addComponent": "Add Component",
     "editComponent": "Edit Component",
-    "selectSymbol": "Upload",
+    "selectSymbol": "Select Symbol",
     "iconStandardLabel": "Standard icon",
     "iconCustomLabel": "Or upload your own",
     "iconRequired": "An icon is required",

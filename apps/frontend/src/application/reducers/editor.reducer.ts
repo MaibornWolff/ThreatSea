@@ -64,6 +64,7 @@ const standardComponentTypes: Record<STANDARD_COMPONENT_TYPES, EditorComponentTy
         id: STANDARD_COMPONENT_TYPES.USERS,
         name: "Users",
         symbol: STANDARD_ICON_IMAGES[STANDARD_COMPONENT_TYPES.USERS],
+        standardIcon: null,
         pointsOfAttack: [POINTS_OF_ATTACK.USER_BEHAVIOUR],
         isStandard: true,
         projectId: null,
@@ -72,6 +73,7 @@ const standardComponentTypes: Record<STANDARD_COMPONENT_TYPES, EditorComponentTy
         id: STANDARD_COMPONENT_TYPES.CLIENT,
         name: "Client",
         symbol: STANDARD_ICON_IMAGES[STANDARD_COMPONENT_TYPES.CLIENT],
+        standardIcon: null,
         pointsOfAttack: [
             POINTS_OF_ATTACK.USER_INTERFACE,
             POINTS_OF_ATTACK.DATA_STORAGE_INFRASTRUCTURE,
@@ -84,6 +86,7 @@ const standardComponentTypes: Record<STANDARD_COMPONENT_TYPES, EditorComponentTy
         id: STANDARD_COMPONENT_TYPES.SERVER,
         name: "Server",
         symbol: STANDARD_ICON_IMAGES[STANDARD_COMPONENT_TYPES.SERVER],
+        standardIcon: null,
         pointsOfAttack: [POINTS_OF_ATTACK.PROCESSING_INFRASTRUCTURE],
         isStandard: true,
         projectId: null,
@@ -92,6 +95,7 @@ const standardComponentTypes: Record<STANDARD_COMPONENT_TYPES, EditorComponentTy
         id: STANDARD_COMPONENT_TYPES.DATABASE,
         name: "Database",
         symbol: STANDARD_ICON_IMAGES[STANDARD_COMPONENT_TYPES.DATABASE],
+        standardIcon: null,
         pointsOfAttack: [POINTS_OF_ATTACK.DATA_STORAGE_INFRASTRUCTURE, POINTS_OF_ATTACK.PROCESSING_INFRASTRUCTURE],
         isStandard: true,
         projectId: null,
@@ -100,13 +104,14 @@ const standardComponentTypes: Record<STANDARD_COMPONENT_TYPES, EditorComponentTy
         id: STANDARD_COMPONENT_TYPES.COMMUNICATION_INFRASTRUCTURE,
         name: "Communication Infrastructure",
         symbol: STANDARD_ICON_IMAGES[STANDARD_COMPONENT_TYPES.COMMUNICATION_INFRASTRUCTURE],
+        standardIcon: null,
         pointsOfAttack: [POINTS_OF_ATTACK.COMMUNICATION_INFRASTRUCTURE],
         isStandard: true,
         projectId: null,
     },
 };
 
-const resolveStandardIcon = (componentType: EditorComponentType): EditorComponentType => {
+const resolveStandardIcon = <T extends Partial<EditorComponentType>>(componentType: T): T => {
     if (componentType.standardIcon != null && componentType.symbol == null) {
         return {
             ...componentType,
@@ -249,10 +254,9 @@ const editorReducer = createReducer(defaultState, (builder) => {
     });
 
     builder.addCase(EditorActions.setComponentType, (state, action) => {
-        const changes = action.payload.changes as EditorComponentType;
         editorComponentTypeAdapter.updateOne(state.componentTypes, {
             id: action.payload.id,
-            changes: resolveStandardIcon(changes),
+            changes: resolveStandardIcon(action.payload.changes),
         });
     });
 
