@@ -14,7 +14,7 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import { useLayoutEffect, type ChangeEvent, type SyntheticEvent } from "react";
+import { memo, useLayoutEffect, type ChangeEvent, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { Route, Routes } from "react-router-dom";
@@ -343,4 +343,5 @@ const CatalogListItem = ({ catalog, onClick, onClickEdit, onClickDelete, ...prop
     );
 };
 
-export const CatalogsPage = CreatePage(HeaderUtilityControls, CatalogsPageBody);
+export const CatalogsPage = memo(CreatePage(HeaderUtilityControls, CatalogsPageBody));
+CatalogsPage.displayName = "CatalogsPage";

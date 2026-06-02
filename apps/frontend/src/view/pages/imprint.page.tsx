@@ -1,5 +1,5 @@
 import { Box } from "@mui/system";
-import { useLayoutEffect } from "react";
+import { memo, useLayoutEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { Page } from "#view/components/page.component.tsx";
@@ -57,4 +57,5 @@ const ImprintPageBody = () => {
     );
 };
 
-export const ImprintPage = CreatePage(HeaderUtilityControls, ImprintPageBody);
+export const ImprintPage = memo(CreatePage(HeaderUtilityControls, ImprintPageBody));
+ImprintPage.displayName = "ImprintPage";

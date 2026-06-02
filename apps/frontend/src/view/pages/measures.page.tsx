@@ -1,6 +1,6 @@
 import { Add, ContentCopyOutlined, Delete, Replay } from "@mui/icons-material";
 import { Box, LinearProgress, Table, TableBody, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
-import { useLayoutEffect } from "react";
+import { memo, useLayoutEffect } from "react";
 import type { ChangeEvent, SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
@@ -459,4 +459,5 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
     );
 };
 
-export const MeasuresPage = CreatePage(HeaderUtilityControls, withProject(MeasuresPageBody), true);
+export const MeasuresPage = memo(CreatePage(HeaderUtilityControls, withProject(MeasuresPageBody), true));
+MeasuresPage.displayName = "MeasuresPage";

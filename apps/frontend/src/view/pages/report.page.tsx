@@ -2,7 +2,7 @@ import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
 import { Backdrop, FormControl, FormControlLabel, LinearProgress, Switch, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { BlobProvider } from "@react-pdf/renderer";
-import { useEffect, useLayoutEffect, type ChangeEvent, type SyntheticEvent } from "react";
+import { memo, useEffect, useLayoutEffect, type ChangeEvent, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 
 import type { ExtendedProject } from "#api/types/project.types.ts";
@@ -806,4 +806,5 @@ const PdfDocumentToolbar = ({ filename, onDownloadMarkdown, ...props }: PdfDocum
     );
 };
 
-export const ReportPage = CreatePage(HeaderUtilityControls, withProject(ReportPageBody));
+export const ReportPage = memo(CreatePage(HeaderUtilityControls, withProject(ReportPageBody)));
+ReportPage.displayName = "ReportPage";
