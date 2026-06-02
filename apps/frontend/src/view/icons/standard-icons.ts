@@ -1,9 +1,9 @@
 import { STANDARD_COMPONENT_TYPES, type StandardIcon } from "#api/types/standard-component.types.ts";
-import communicationInfrastructureImg from "#images/communication-infrastructure.png";
-import databaseImg from "#images/database.png";
-import desktopImg from "#images/desktop.png";
-import serverImg from "#images/server.png";
-import userImg from "#images/user.png";
+import communicationInfrastructureImg from "#images/communication-infrastructure.png?inline";
+import databaseImg from "#images/database.png?inline";
+import desktopImg from "#images/desktop.png?inline";
+import serverImg from "#images/server.png?inline";
+import userImg from "#images/user.png?inline";
 
 export const STANDARD_ICON_IMAGES: Record<STANDARD_COMPONENT_TYPES, string> = {
     [STANDARD_COMPONENT_TYPES.USERS]: userImg,

@@ -3,10 +3,10 @@
  *     for the system.
  */
 
-import serverImg from "#images/server.png";
-import databaseImg from "#images/database.png";
-import desktopImg from "#images/desktop.png";
-import userImg from "#images/user.png";
+import serverImg from "#images/server.png?inline";
+import databaseImg from "#images/database.png?inline";
+import desktopImg from "#images/desktop.png?inline";
+import userImg from "#images/user.png?inline";
 
 const SYSTEM_DATA = {
     components: [
