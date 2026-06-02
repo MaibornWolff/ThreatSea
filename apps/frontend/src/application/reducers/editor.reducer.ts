@@ -9,11 +9,7 @@ import {
     editorComponentTypeAdapter,
     type EditorComponentType,
 } from "#application/adapters/editor-component-type.adapter.ts";
-import serverImg from "#images/server.png";
-import databaseImg from "#images/database.png";
-import desktopImg from "#images/desktop.png";
-import userImg from "#images/user.png";
-import communicationInfrastructureImg from "#images/communication-infrastructure.png";
+import { STANDARD_ICON_IMAGES } from "#view/icons/standard-icons.ts";
 import type { AnchorOrientation, AnnotationType, Coordinate } from "#api/types/system.types.ts";
 
 export type EditorEntityId = string | number;
@@ -67,7 +63,7 @@ const standardComponentTypes: Record<STANDARD_COMPONENT_TYPES, EditorComponentTy
     [STANDARD_COMPONENT_TYPES.USERS]: {
         id: STANDARD_COMPONENT_TYPES.USERS,
         name: "Users",
-        symbol: userImg,
+        symbol: STANDARD_ICON_IMAGES[STANDARD_COMPONENT_TYPES.USERS],
         pointsOfAttack: [POINTS_OF_ATTACK.USER_BEHAVIOUR],
         isStandard: true,
         projectId: null,
@@ -75,7 +71,7 @@ const standardComponentTypes: Record<STANDARD_COMPONENT_TYPES, EditorComponentTy
     [STANDARD_COMPONENT_TYPES.CLIENT]: {
         id: STANDARD_COMPONENT_TYPES.CLIENT,
         name: "Client",
-        symbol: desktopImg,
+        symbol: STANDARD_ICON_IMAGES[STANDARD_COMPONENT_TYPES.CLIENT],
         pointsOfAttack: [
             POINTS_OF_ATTACK.USER_INTERFACE,
             POINTS_OF_ATTACK.DATA_STORAGE_INFRASTRUCTURE,
@@ -87,7 +83,7 @@ const standardComponentTypes: Record<STANDARD_COMPONENT_TYPES, EditorComponentTy
     [STANDARD_COMPONENT_TYPES.SERVER]: {
         id: STANDARD_COMPONENT_TYPES.SERVER,
         name: "Server",
-        symbol: serverImg,
+        symbol: STANDARD_ICON_IMAGES[STANDARD_COMPONENT_TYPES.SERVER],
         pointsOfAttack: [POINTS_OF_ATTACK.PROCESSING_INFRASTRUCTURE],
         isStandard: true,
         projectId: null,
@@ -95,7 +91,7 @@ const standardComponentTypes: Record<STANDARD_COMPONENT_TYPES, EditorComponentTy
     [STANDARD_COMPONENT_TYPES.DATABASE]: {
         id: STANDARD_COMPONENT_TYPES.DATABASE,
         name: "Database",
-        symbol: databaseImg,
+        symbol: STANDARD_ICON_IMAGES[STANDARD_COMPONENT_TYPES.DATABASE],
         pointsOfAttack: [POINTS_OF_ATTACK.DATA_STORAGE_INFRASTRUCTURE, POINTS_OF_ATTACK.PROCESSING_INFRASTRUCTURE],
         isStandard: true,
         projectId: null,
@@ -103,11 +99,21 @@ const standardComponentTypes: Record<STANDARD_COMPONENT_TYPES, EditorComponentTy
     [STANDARD_COMPONENT_TYPES.COMMUNICATION_INFRASTRUCTURE]: {
         id: STANDARD_COMPONENT_TYPES.COMMUNICATION_INFRASTRUCTURE,
         name: "Communication Infrastructure",
-        symbol: communicationInfrastructureImg,
+        symbol: STANDARD_ICON_IMAGES[STANDARD_COMPONENT_TYPES.COMMUNICATION_INFRASTRUCTURE],
         pointsOfAttack: [POINTS_OF_ATTACK.COMMUNICATION_INFRASTRUCTURE],
         isStandard: true,
         projectId: null,
     },
+};
+
+const resolveStandardIcon = (componentType: EditorComponentType): EditorComponentType => {
+    if (componentType.standardIcon != null && componentType.symbol == null) {
+        return {
+            ...componentType,
+            symbol: STANDARD_ICON_IMAGES[componentType.standardIcon],
+        };
+    }
+    return componentType;
 };
 
 const componentTypesInitialState = editorComponentTypeAdapter.getInitialState({
@@ -239,11 +245,15 @@ const editorReducer = createReducer(defaultState, (builder) => {
     });
 
     builder.addCase(EditorActions.addComponentType, (state, action) => {
-        editorComponentTypeAdapter.addOne(state.componentTypes, action.payload);
+        editorComponentTypeAdapter.addOne(state.componentTypes, resolveStandardIcon(action.payload));
     });
 
     builder.addCase(EditorActions.setComponentType, (state, action) => {
-        editorComponentTypeAdapter.updateOne(state.componentTypes, action.payload);
+        const changes = action.payload.changes as EditorComponentType;
+        editorComponentTypeAdapter.updateOne(state.componentTypes, {
+            id: action.payload.id,
+            changes: resolveStandardIcon(changes),
+        });
     });
 
     builder.addCase(EditorActions.removeComponentType, (state, action) => {
@@ -251,7 +261,7 @@ const editorReducer = createReducer(defaultState, (builder) => {
     });
 
     builder.addCase(EditorActions.getComponentTypes.fulfilled, (state, action) => {
-        editorComponentTypeAdapter.setMany(state.componentTypes, action.payload);
+        editorComponentTypeAdapter.setMany(state.componentTypes, action.payload.map(resolveStandardIcon));
     });
 
     builder.addCase(EditorActions.addComponentConnectionLine, (state, action) => {

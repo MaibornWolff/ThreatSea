@@ -3,6 +3,9 @@
  *     for files.
  */
 
+export const MAX_ICON_BYTES = 100_000;
+export const ACCEPTED_ICON_MIME_TYPES = "image/png,image/jpeg";
+
 /**
  * Converts the data of a given file to base64.
  *

@@ -10,9 +10,11 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { useParams } from "react-router-dom";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
+import type { StandardIcon } from "#api/types/standard-component.types.ts";
 import { POA_COLORS } from "#view/colors/pointsOfAttack.colors.ts";
+import { SELECTABLE_STANDARD_ICONS, STANDARD_ICON_IMAGES } from "#view/icons/standard-icons.ts";
 import { useDialog } from "#application/hooks/use-dialog.hook.ts";
-import { convertFileToBase64 } from "#utils/files.ts";
+import { ACCEPTED_ICON_MIME_TYPES, MAX_ICON_BYTES, convertFileToBase64 } from "#utils/files.ts";
 import { Button } from "#view/components/button.component.tsx";
 import { Dialog } from "#view/components/dialog.component.tsx";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
@@ -28,6 +30,7 @@ interface ComponentFormValues extends DialogValue {
     id: number | undefined;
     name: string;
     symbol: string | null;
+    standardIcon: StandardIcon | null;
     isProjectComponent: boolean;
     pointsOfAttackSelection: ComponentPointsOfAttackMap;
     pointsOfAttack?: POINTS_OF_ATTACK[];
@@ -61,6 +64,7 @@ const ComponentDialog = ({ component, ...props }: ComponentDialogProps) => {
     const projectId = projectIdParam ? parseInt(projectIdParam, 10) : NaN;
 
     const [noPOAError, setNoPOAError] = useState(false);
+    const [noIconError, setNoIconError] = useState(false);
 
     const getDefaultPointsOfAttackSelection = (selected: POINTS_OF_ATTACK[] = []): ComponentPointsOfAttackMap => {
         return COMPONENT_POINTS_OF_ATTACK.reduce((acc, pointOfAttack) => {
@@ -72,8 +76,8 @@ const ComponentDialog = ({ component, ...props }: ComponentDialogProps) => {
     const {
         register,
         handleSubmit,
-        getValues,
         setValue,
+        watch,
         control,
         formState: { errors },
     } = useForm<ComponentFormValues>({
@@ -81,17 +85,24 @@ const ComponentDialog = ({ component, ...props }: ComponentDialogProps) => {
             ? {
                   id: component.id,
                   name: component.name,
-                  symbol: component.symbol,
+                  symbol: component.standardIcon != null ? null : component.symbol,
+                  standardIcon: component.standardIcon ?? null,
                   isProjectComponent: !!component.projectId,
                   pointsOfAttackSelection: getDefaultPointsOfAttackSelection(component.pointsOfAttack ?? []),
               }
             : {
                   name: "",
                   symbol: null,
+                  standardIcon: null,
                   isProjectComponent: true,
                   pointsOfAttackSelection: getDefaultPointsOfAttackSelection(),
               },
     });
+
+    const selectedStandardIcon = watch("standardIcon");
+    const uploadedSymbol = watch("symbol");
+    const previewSymbol =
+        selectedStandardIcon != null ? STANDARD_ICON_IMAGES[selectedStandardIcon] : (uploadedSymbol ?? "");
 
     /**
      * Cancel a dialog and closes it.
@@ -116,6 +127,14 @@ const ComponentDialog = ({ component, ...props }: ComponentDialogProps) => {
         isProjectComponent: _isProjectComponent,
         ...data
     }: ComponentFormValues) => {
+        const hasIcon = data.standardIcon != null || (data.symbol != null && data.symbol !== "");
+        if (!hasIcon) {
+            setNoIconError(true);
+            return;
+        } else {
+            setNoIconError(false);
+        }
+
         if (!Object.values(pointsOfAttackSelection).some((el) => el === true)) {
             setNoPOAError(true);
             return;
@@ -125,6 +144,7 @@ const ComponentDialog = ({ component, ...props }: ComponentDialogProps) => {
 
         confirmDialog({
             ...data,
+            symbol: data.standardIcon != null ? null : data.symbol,
             projectId: projectId,
             pointsOfAttack: Object.keys(pointsOfAttackSelection).reduce<POINTS_OF_ATTACK[]>((arr, id) => {
                 const pointOfAttack = pointsOfAttackSelection[id as POINTS_OF_ATTACK];
@@ -149,7 +169,8 @@ const ComponentDialog = ({ component, ...props }: ComponentDialogProps) => {
         if (!file) {
             return;
         }
-        if (!file.type.startsWith("image/") || file.size > 100000) {
+        const isAcceptedType = ACCEPTED_ICON_MIME_TYPES.split(",").includes(file.type);
+        if (!isAcceptedType || file.size > MAX_ICON_BYTES) {
             openConfirm({
                 message: t("customComponent.fileUnusable"),
                 acceptText: "Okay",
@@ -161,6 +182,17 @@ const ComponentDialog = ({ component, ...props }: ComponentDialogProps) => {
         } else {
             const symbol = (await convertFileToBase64(file)) as string | undefined;
             setValue("symbol", symbol ?? "", { shouldValidate: true });
+            setValue("standardIcon", null);
+            setNoIconError(false);
+        }
+    };
+
+    const handleSelectStandardIcon = (icon: StandardIcon) => {
+        const next = selectedStandardIcon === icon ? null : icon;
+        setValue("standardIcon", next);
+        if (next != null) {
+            setValue("symbol", null);
+            setNoIconError(false);
         }
     };
 
@@ -170,8 +202,6 @@ const ComponentDialog = ({ component, ...props }: ComponentDialogProps) => {
     const closeDialog = () => {
         navigate(-1);
     };
-
-    const symbol = getValues("symbol") ?? "";
 
     return (
         <Dialog
@@ -211,22 +241,72 @@ const ComponentDialog = ({ component, ...props }: ComponentDialogProps) => {
                     sx={{
                         display: "flex",
                         alignItems: "center",
-                        justifyContent: "space-between",
-                        mb: 2,
+                        justifyContent: "center",
                         mt: 2,
+                        mb: 1,
                     }}
                 >
-                    <Avatar src={symbol} sx={{ width: 48, height: 48, p: 1 }} />
+                    <Avatar src={previewSymbol} sx={{ width: 48, height: 48, p: 1 }} />
+                </Box>
+
+                <Typography sx={{ fontSize: "0.75rem", fontWeight: "bold", mt: 1 }}>
+                    {t("customComponent.iconStandardLabel")}
+                </Typography>
+                <Box
+                    sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 1,
+                        mt: 1,
+                    }}
+                >
+                    {SELECTABLE_STANDARD_ICONS.map((icon) => {
+                        const isSelected = selectedStandardIcon === icon;
+                        return (
+                            <Avatar
+                                key={icon}
+                                src={STANDARD_ICON_IMAGES[icon]}
+                                onClick={() => handleSelectStandardIcon(icon)}
+                                sx={{
+                                    width: 40,
+                                    height: 40,
+                                    p: 0.75,
+                                    cursor: "pointer",
+                                    border: isSelected ? "2px solid" : "1px solid",
+                                    borderColor: isSelected ? "primary.main" : "divider",
+                                    backgroundColor: isSelected ? "primary.light" : "transparent",
+                                    "&:hover": {
+                                        borderColor: "primary.main",
+                                    },
+                                }}
+                            />
+                        );
+                    })}
+                </Box>
+
+                <Typography sx={{ fontSize: "0.75rem", fontWeight: "bold", mt: 2 }}>
+                    {t("customComponent.iconCustomLabel")}
+                </Typography>
+                <Box sx={{ display: "flex", justifyContent: "flex-start", mt: 1, mb: 2 }}>
                     <FileUploadButton
                         size="small"
                         inputProps={{
-                            accept: "image/png, image/gif, image/jpeg, image/webp, image/x-icon",
+                            accept: ACCEPTED_ICON_MIME_TYPES,
                             onChange: handleSelectSymbol,
+                            onClick: (event) => {
+                                (event.currentTarget as HTMLInputElement).value = "";
+                            },
                         }}
                     >
                         {t("customComponent.selectSymbol")}
                     </FileUploadButton>
                 </Box>
+                {noIconError && (
+                    <Typography variant="caption" color="error" sx={{ marginLeft: 1, mb: 1 }}>
+                        {t("customComponent.iconRequired")}
+                    </Typography>
+                )}
                 {/* <FormControlLabel
                     control={
                         <Controller
