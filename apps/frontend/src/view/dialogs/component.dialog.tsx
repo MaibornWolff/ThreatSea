@@ -3,7 +3,18 @@
  *     for the custom components.
  */
 
-import { Avatar, Box, DialogActions, DialogTitle, Divider, FormControlLabel, Switch, Typography } from "@mui/material";
+import { AddPhotoAlternate } from "@mui/icons-material";
+import {
+    Avatar,
+    Box,
+    DialogActions,
+    DialogTitle,
+    Divider,
+    FormControlLabel,
+    Switch,
+    Tooltip,
+    Typography,
+} from "@mui/material";
 import type { DialogProps } from "@mui/material/Dialog";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -18,7 +29,6 @@ import { ACCEPTED_ICON_MIME_TYPES, MAX_ICON_BYTES, convertFileToBase64 } from "#
 import { Button } from "#view/components/button.component.tsx";
 import { Dialog } from "#view/components/dialog.component.tsx";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
-import { FileUploadButton } from "#view/components/file-upload-button.component.tsx";
 import { NameTextField } from "#view/components/name-textfield.component.tsx";
 import { useState, type ChangeEvent } from "react";
 import type { ComponentType } from "#api/types/component-types.types.ts";
@@ -101,8 +111,22 @@ const ComponentDialog = ({ component, ...props }: ComponentDialogProps) => {
 
     const selectedStandardIcon = watch("standardIcon");
     const uploadedSymbol = watch("symbol");
-    const previewSymbol =
-        selectedStandardIcon != null ? STANDARD_ICON_IMAGES[selectedStandardIcon] : (uploadedSymbol ?? "");
+    const isCustomSelected = uploadedSymbol != null && uploadedSymbol !== "";
+
+    const iconTileSx = (selected: boolean) => ({
+        width: 48,
+        height: 48,
+        p: 1,
+        cursor: "pointer",
+        border: selected ? "2px solid" : "1px solid",
+        borderColor: selected ? "primary.main" : "divider",
+        backgroundColor: selected ? "primary.light" : "transparent",
+        color: "text.secondary",
+        transition: "border-color 120ms, background-color 120ms",
+        "&:hover": {
+            borderColor: "primary.main",
+        },
+    });
 
     /**
      * Cancel a dialog and closes it.
@@ -188,12 +212,12 @@ const ComponentDialog = ({ component, ...props }: ComponentDialogProps) => {
     };
 
     const handleSelectStandardIcon = (icon: StandardIcon) => {
-        const next = selectedStandardIcon === icon ? null : icon;
-        setValue("standardIcon", next);
-        if (next != null) {
-            setValue("symbol", null);
-            setNoIconError(false);
+        if (selectedStandardIcon === icon) {
+            return;
         }
+        setValue("standardIcon", icon);
+        setValue("symbol", null);
+        setNoIconError(false);
     };
 
     /**
@@ -237,28 +261,15 @@ const ComponentDialog = ({ component, ...props }: ComponentDialogProps) => {
                     projectId={projectId}
                 />
 
-                <Box
-                    sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        mt: 2,
-                        mb: 1,
-                    }}
-                >
-                    <Avatar src={previewSymbol} sx={{ width: 48, height: 48, p: 1 }} />
-                </Box>
-
-                <Typography sx={{ fontSize: "0.75rem", fontWeight: "bold", mt: 1 }}>
-                    {t("customComponent.iconStandardLabel")}
+                <Typography sx={{ fontSize: "0.875rem", fontWeight: "bold", mt: 2, mb: 1 }}>
+                    {t("customComponent.iconLabel")}
                 </Typography>
                 <Box
                     sx={{
                         display: "flex",
                         alignItems: "center",
-                        justifyContent: "space-between",
                         gap: 1,
-                        mt: 1,
+                        mb: 1,
                     }}
                 >
                     {SELECTABLE_STANDARD_ICONS.map((icon) => {
@@ -268,58 +279,38 @@ const ComponentDialog = ({ component, ...props }: ComponentDialogProps) => {
                                 key={icon}
                                 src={STANDARD_ICON_IMAGES[icon]}
                                 onClick={() => handleSelectStandardIcon(icon)}
-                                sx={{
-                                    width: 40,
-                                    height: 40,
-                                    p: 0.75,
-                                    cursor: "pointer",
-                                    border: isSelected ? "2px solid" : "1px solid",
-                                    borderColor: isSelected ? "primary.main" : "divider",
-                                    backgroundColor: isSelected ? "primary.light" : "transparent",
-                                    "&:hover": {
-                                        borderColor: "primary.main",
-                                    },
-                                }}
+                                sx={iconTileSx(isSelected)}
                             />
                         );
                     })}
+                    <Tooltip title={t("customComponent.iconUploadTooltip")}>
+                        <Box component="label" sx={{ display: "inline-flex" }}>
+                            <input
+                                type="file"
+                                hidden
+                                accept={ACCEPTED_ICON_MIME_TYPES}
+                                onChange={handleSelectSymbol}
+                                onClick={(event) => {
+                                    (event.currentTarget as HTMLInputElement).value = "";
+                                }}
+                            />
+                            <Avatar
+                                src={isCustomSelected ? (uploadedSymbol ?? undefined) : undefined}
+                                sx={iconTileSx(isCustomSelected)}
+                            >
+                                {!isCustomSelected && <AddPhotoAlternate fontSize="small" />}
+                            </Avatar>
+                        </Box>
+                    </Tooltip>
                 </Box>
-
-                <Typography sx={{ fontSize: "0.75rem", fontWeight: "bold", mt: 2 }}>
-                    {t("customComponent.iconCustomLabel")}
+                <Typography variant="caption" color="text.secondary" sx={{ mb: 2 }}>
+                    {t("customComponent.iconHint")}
                 </Typography>
-                <Box sx={{ display: "flex", justifyContent: "flex-start", mt: 1, mb: 2 }}>
-                    <FileUploadButton
-                        size="small"
-                        inputProps={{
-                            accept: ACCEPTED_ICON_MIME_TYPES,
-                            onChange: handleSelectSymbol,
-                            onClick: (event) => {
-                                (event.currentTarget as HTMLInputElement).value = "";
-                            },
-                        }}
-                    >
-                        {t("customComponent.selectSymbol")}
-                    </FileUploadButton>
-                </Box>
                 {noIconError && (
                     <Typography variant="caption" color="error" sx={{ marginLeft: 1, mb: 1 }}>
                         {t("customComponent.iconRequired")}
                     </Typography>
                 )}
-                {/* <FormControlLabel
-                    control={
-                        <Controller
-                            name="isProjectComponent"
-                            control={control}
-                            render={({ field }) => (
-                                <Switch {...field} checked={field?.value} />
-                            )}
-                        />
-                    }
-                    label={t("isProjectComponent")}
-                    labelPlacement="end"
-                /> */}
                 <Divider />
                 {COMPONENT_POINTS_OF_ATTACK.map((type, i) => {
                     return (
