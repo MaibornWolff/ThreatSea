@@ -23,7 +23,11 @@ import { useParams } from "react-router-dom";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import type { StandardIcon } from "#api/types/standard-component.types.ts";
 import { POA_COLORS } from "#view/colors/pointsOfAttack.colors.ts";
-import { SELECTABLE_STANDARD_ICONS, STANDARD_ICON_IMAGES } from "#view/icons/standard-icons.ts";
+import {
+    SELECTABLE_STANDARD_ICONS,
+    STANDARD_ICON_IMAGES,
+    STANDARD_ICON_LABEL_KEYS,
+} from "#view/icons/standard-icons.ts";
 import { useDialog } from "#application/hooks/use-dialog.hook.ts";
 import { ACCEPTED_ICON_MIME_TYPES, MAX_ICON_BYTES, convertFileToBase64 } from "#utils/files.ts";
 import { Button } from "#view/components/button.component.tsx";
@@ -274,10 +278,12 @@ const ComponentDialog = ({ component, ...props }: ComponentDialogProps) => {
                 >
                     {SELECTABLE_STANDARD_ICONS.map((icon) => {
                         const isSelected = selectedStandardIcon === icon;
+                        const iconLabel = t(`contextMenu.${STANDARD_ICON_LABEL_KEYS[icon]}`);
                         return (
                             <Avatar
                                 key={icon}
                                 src={STANDARD_ICON_IMAGES[icon]}
+                                alt={iconLabel}
                                 onClick={() => handleSelectStandardIcon(icon)}
                                 sx={iconTileSx(isSelected)}
                             />
@@ -296,6 +302,7 @@ const ComponentDialog = ({ component, ...props }: ComponentDialogProps) => {
                             />
                             <Avatar
                                 src={isCustomSelected ? (uploadedSymbol ?? undefined) : undefined}
+                                aria-label={t("customComponent.iconUploadTooltip")}
                                 sx={iconTileSx(isCustomSelected)}
                             >
                                 {!isCustomSelected && <AddPhotoAlternate fontSize="small" />}

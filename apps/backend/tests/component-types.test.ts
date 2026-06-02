@@ -13,6 +13,8 @@ import { LANGUAGES } from "#types/languages.type.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
 import { CreateProjectRequest } from "#types/project.types.js";
 import { CreateComponentTypeRequest } from "#types/component-type.types.js";
+import { STANDARD_ICONS } from "#types/standard-icons.types.js";
+import { MAX_SYMBOL_LENGTH } from "#middlewares/input-validations/validator-messages.js";
 
 const VALID_PROJECT: Omit<InstanceType<typeof CreateProjectRequest>, "catalogId"> = {
     name: "Project 1",
@@ -45,6 +47,29 @@ const COMPONENT_TYPE_WITHOUT_ICON: InstanceType<typeof CreateComponentTypeReques
     name: "Client2",
     pointsOfAttack: [POINTS_OF_ATTACK.USER_INTERFACE],
     symbol: null,
+    standardIcon: null,
+};
+
+const COMPONENT_TYPE_WITH_STANDARD_ICON: InstanceType<typeof CreateComponentTypeRequest> = {
+    name: "Client2",
+    pointsOfAttack: [POINTS_OF_ATTACK.USER_INTERFACE],
+    symbol: null,
+    standardIcon: STANDARD_ICONS.SERVER,
+};
+
+const COMPONENT_TYPE_WITH_BOTH_ICONS: InstanceType<typeof CreateComponentTypeRequest> = {
+    name: "Client2",
+    pointsOfAttack: [POINTS_OF_ATTACK.USER_INTERFACE],
+    symbol: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
+    standardIcon: STANDARD_ICONS.CLIENT,
+};
+
+// A base64 string just over MAX_SYMBOL_LENGTH so the @MaxLength validator fires.
+const OVERSIZED_BASE64 = "A".repeat(MAX_SYMBOL_LENGTH);
+const COMPONENT_TYPE_OVERSIZED_SYMBOL: InstanceType<typeof CreateComponentTypeRequest> = {
+    name: "Client2",
+    pointsOfAttack: [POINTS_OF_ATTACK.USER_INTERFACE],
+    symbol: `data:image/png;base64,${OVERSIZED_BASE64}`,
     standardIcon: null,
 };
 
@@ -127,6 +152,38 @@ describe("get or create component-types", () => {
         const res = await request(app)
             .post("/api/projects/" + projectId + "/componentTypes")
             .send(COMPONENT_TYPE_WITHOUT_ICON)
+            .set("Authorization", "Bearer fakeToken")
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(400);
+    });
+
+    it("should create a component-type with only standardIcon set", async () => {
+        const res = await request(app)
+            .post("/api/projects/" + projectId + "/componentTypes")
+            .send(COMPONENT_TYPE_WITH_STANDARD_ICON)
+            .set("Authorization", "Bearer fakeToken")
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.standardIcon).toBe(STANDARD_ICONS.SERVER);
+        expect(res.body.symbol).toBeNull();
+    });
+
+    it("should reject component-types with both symbol and standardIcon set", async () => {
+        const res = await request(app)
+            .post("/api/projects/" + projectId + "/componentTypes")
+            .send(COMPONENT_TYPE_WITH_BOTH_ICONS)
+            .set("Authorization", "Bearer fakeToken")
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(400);
+    });
+
+    it("should reject component-types with a symbol longer than MAX_SYMBOL_LENGTH", async () => {
+        const res = await request(app)
+            .post("/api/projects/" + projectId + "/componentTypes")
+            .send(COMPONENT_TYPE_OVERSIZED_SYMBOL)
             .set("Authorization", "Bearer fakeToken")
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
