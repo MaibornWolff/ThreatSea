@@ -4,6 +4,7 @@ import * as confirmHook from "#application/hooks/use-confirm.hook.ts";
 import * as alertHook from "#application/hooks/use-alert.hook.ts";
 import * as editorHook from "#application/hooks/use-editor.hook.ts";
 import * as assetsHook from "#application/hooks/use-assets.hook.ts";
+import * as threatMeasuresListHook from "#application/hooks/use-threat-measures-list.hook.ts";
 
 /**
  * @module mock-hooks - Reusable hook spies.
@@ -23,6 +24,7 @@ type UseConfirmResult = ReturnType<typeof confirmHook.useConfirm>;
 type UseAlertResult = ReturnType<typeof alertHook.useAlert>;
 type UseEditorResult = ReturnType<typeof editorHook.useEditor>;
 type UseAssetsResult = ReturnType<typeof assetsHook.useAssets>;
+type UseThreatMeasuresListResult = ReturnType<typeof threatMeasuresListHook.useThreatMeasuresList>;
 
 export const mockUseDialog = (config?: Partial<UseDialogResult>): MockInstance => {
     return vi.spyOn(dialogHook, "useDialog").mockImplementation(() => ({
@@ -148,6 +150,20 @@ export const mockUseAssets = (config?: Partial<UseAssetsResult>): MockInstance =
         isPending: false,
         loadAssets: vi.fn(),
         deleteAsset: vi.fn(),
+        ...config,
+    }));
+};
+
+export const mockUseThreatMeasuresList = (config?: Partial<UseThreatMeasuresListResult>): MockInstance => {
+    return vi.spyOn(threatMeasuresListHook, "useThreatMeasuresList").mockImplementation(() => ({
+        threatMeasures: [],
+        sortBy: "measureName",
+        sortDirection: "asc",
+        searchValue: "",
+        setSortBy: vi.fn(),
+        setSortDirection: vi.fn(),
+        setSearchValue: vi.fn(),
+        deleteMeasureImpact: vi.fn(),
         ...config,
     }));
 };

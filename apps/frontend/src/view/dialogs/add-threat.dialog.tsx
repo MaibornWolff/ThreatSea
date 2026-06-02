@@ -27,7 +27,7 @@ import {
     Typography,
     type DialogProps,
 } from "@mui/material";
-import { InfoOutlined } from "@mui/icons-material";
+import { Add, InfoOutlined } from "@mui/icons-material";
 import { useRef, useState, type ChangeEvent, type MouseEvent, type SyntheticEvent } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -49,6 +49,7 @@ import type { ExtendedProject } from "#api/types/project.types.ts";
 import type { ThreatMeasure } from "#application/hooks/use-threat-measures-list.hook.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
 import type { Measure } from "#api/types/measure.types.ts";
+import { calcDamage } from "#utils/helpers.ts";
 
 type ThreatTab = "MAIN" | "ASSETS" | "MEASURES";
 
@@ -202,6 +203,15 @@ const AddThreatDialog = ({ threat, project, userRole, ...props }: AddThreatDialo
         const { measureImpact } = measureThreat;
         const data = { ...measureImpact, projectId };
         deleteMeasureImpact(data);
+    };
+
+    const onClickApplyMeasure = () => {
+        navigate(`/projects/${projectId}/threats/measureImpacts/edit`, {
+            state: {
+                threat: { ...threat, damage: calcDamage(threat) },
+                project,
+            },
+        });
     };
 
     /**
@@ -603,6 +613,15 @@ const AddThreatDialog = ({ threat, project, userRole, ...props }: AddThreatDialo
                             <Box sx={{ display: "flex", alignItems: "center" }}>
                                 <SearchField onChange={onChangeSearchValue} data-testid="SearchAsset" />
                             </Box>
+                            {checkUserRole(userRole, USER_ROLES.EDITOR) && (
+                                <Button
+                                    endIcon={<Add />}
+                                    onClick={onClickApplyMeasure}
+                                    data-testid="ApplyMeasureFromThreat"
+                                >
+                                    {t("applyMeasure")}
+                                </Button>
+                            )}
                         </Box>
                         <ThreatMeasuresTable
                             threatMeasures={threatMeasures}

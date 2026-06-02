@@ -1,5 +1,6 @@
 import type { Asset } from "#api/types/asset.types.ts";
 import type { ExtendedProject } from "#api/types/project.types.ts";
+import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import {
     AnchorOrientation,
     type Annotation,
@@ -10,6 +11,7 @@ import {
     type SystemPointOfAttack,
 } from "#api/types/system.types.ts";
 import type { SystemConnectionPoint } from "#application/adapters/system-connection-point.adapter.ts";
+import { ATTACKERS } from "#api/types/attackers.types.ts";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
@@ -28,6 +30,29 @@ export const createAsset = (overrides: Partial<Asset> = {}): Asset => ({
     projectId: 1,
     createdAt: new Date("2025-01-01"),
     updatedAt: new Date("2025-01-01"),
+    ...overrides,
+});
+
+export const createThreat = (overrides: Partial<ExtendedThreat> = {}): ExtendedThreat => ({
+    id: 1,
+    pointOfAttackId: "poa-1",
+    catalogThreatId: 1,
+    name: "Test Threat",
+    description: "",
+    pointOfAttack: POINTS_OF_ATTACK.USER_INTERFACE,
+    attacker: ATTACKERS.UNAUTHORISED_PARTIES,
+    probability: 3,
+    confidentiality: true,
+    integrity: false,
+    availability: false,
+    doneEditing: false,
+    projectId: 1,
+    createdAt: new Date("2025-01-01"),
+    updatedAt: new Date("2025-01-01"),
+    componentName: "Test Component",
+    componentType: null,
+    interfaceName: null,
+    assets: [],
     ...overrides,
 });
 
