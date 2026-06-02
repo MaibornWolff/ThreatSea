@@ -10,7 +10,15 @@ import {
     TableSortLabel,
     Typography,
 } from "@mui/material";
-import { useEffect, useLayoutEffect, useState, type ChangeEvent, type ReactNode, type SyntheticEvent } from "react";
+import {
+    memo,
+    useEffect,
+    useLayoutEffect,
+    useState,
+    type ChangeEvent,
+    type ReactNode,
+    type SyntheticEvent,
+} from "react";
 
 import { useTranslation } from "react-i18next";
 import { Route } from "react-router";
@@ -965,4 +973,5 @@ const CustomTableCell = ({ sx, showBorder = false, children, ...props }: CustomT
     );
 };
 
-export const RiskPage = CreatePage(HeaderUtilityControls, withProject(RiskPageBody), true);
+export const RiskPage = memo(CreatePage(HeaderUtilityControls, withProject(RiskPageBody), true));
+RiskPage.displayName = "RiskPage";

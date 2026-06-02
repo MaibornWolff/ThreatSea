@@ -6,7 +6,7 @@ import TableCell, { type TableCellProps } from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { useEffect, useLayoutEffect, useState, type ChangeEvent, type SyntheticEvent } from "react";
+import { memo, useEffect, useLayoutEffect, useState, type ChangeEvent, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
@@ -553,4 +553,5 @@ const CustomTableCell = ({ sx, showBorder = false, children, ...props }: CustomT
     );
 };
 
-export const ThreatsPage = CreatePage(HeaderUtilityControls, withProject(ThreatsPageBody), true);
+export const ThreatsPage = memo(CreatePage(HeaderUtilityControls, withProject(ThreatsPageBody), true));
+ThreatsPage.displayName = "ThreatsPage";

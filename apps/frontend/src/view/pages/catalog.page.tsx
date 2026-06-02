@@ -5,7 +5,7 @@
 
 import { ChevronLeft } from "@mui/icons-material";
 import { Box, IconButton, Typography } from "@mui/material";
-import { useLayoutEffect, useState, type SyntheticEvent } from "react";
+import { memo, useLayoutEffect, useState, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { Route, Routes, useParams } from "react-router-dom";
@@ -230,4 +230,5 @@ const CatalogPageBody = () => {
     );
 };
 
-export const CatalogPage = CreatePage(HeaderUtilityControls, CatalogPageBody);
+export const CatalogPage = memo(CreatePage(HeaderUtilityControls, CatalogPageBody));
+CatalogPage.displayName = "CatalogPage";

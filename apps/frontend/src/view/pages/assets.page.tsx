@@ -12,7 +12,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { Box } from "@mui/system";
-import { useLayoutEffect, type ChangeEvent, type SyntheticEvent } from "react";
+import { memo, useLayoutEffect, type ChangeEvent, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import type { ExtendedProject } from "#api/types/project.types.ts";
@@ -511,4 +511,5 @@ const AssetTableRow = ({ asset, onEdit, onDelete, language: _language, userRole 
     );
 };
 
-export const AssetsPage = CreatePage(HeaderUtilityControls, withProject(AssetsPageBody), true);
+export const AssetsPage = memo(CreatePage(HeaderUtilityControls, withProject(AssetsPageBody), true));
+AssetsPage.displayName = "AssetsPage";

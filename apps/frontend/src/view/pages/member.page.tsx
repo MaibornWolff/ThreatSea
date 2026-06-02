@@ -6,7 +6,7 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { useLayoutEffect, useMemo, useState, type ChangeEvent, type SyntheticEvent } from "react";
+import { memo, useLayoutEffect, useMemo, useState, type ChangeEvent, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import type { Member } from "#api/types/members.types.ts";
@@ -535,4 +535,5 @@ const MemberTableRow = ({ member, onEdit, onDelete, userRole }: MemberTableRowPr
     );
 };
 
-export const MemberPage = CreatePage(HeaderUtilityControls, MemberPageBody, true);
+export const MemberPage = memo(CreatePage(HeaderUtilityControls, MemberPageBody, true));
+MemberPage.displayName = "MemberPage";

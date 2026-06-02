@@ -2,7 +2,7 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { useEffect, useLayoutEffect, useState, type ReactNode } from "react";
+import { memo, useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate, type Location } from "react-router-dom";
 import { LoginAPI } from "#api/login.api.ts";
@@ -135,4 +135,5 @@ const LoginPageBody = () => {
     );
 };
 
-export const LoginPage = CreatePage(HeaderUtilityControls, LoginPageBody);
+export const LoginPage = memo(CreatePage(HeaderUtilityControls, LoginPageBody));
+LoginPage.displayName = "LoginPage";

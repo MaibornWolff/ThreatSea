@@ -1,5 +1,5 @@
 import { Box } from "@mui/system";
-import { useLayoutEffect } from "react";
+import { memo, useLayoutEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { Page } from "#view/components/page.component.tsx";
@@ -57,4 +57,5 @@ const PrivacyPolicyPageBody = () => {
     );
 };
 
-export const PrivacyPolicyPage = CreatePage(HeaderUtilityControls, PrivacyPolicyPageBody);
+export const PrivacyPolicyPage = memo(CreatePage(HeaderUtilityControls, PrivacyPolicyPageBody));
+PrivacyPolicyPage.displayName = "PrivacyPolicyPage";
