@@ -29,6 +29,13 @@
       "when": 1776333115730,
       "tag": "0003_add-oidc-sub-to-user",
       "breakpoints": false
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1780397500794,
+      "tag": "0004_add_standard_icon_to_component_types",
+      "breakpoints": false
     }
   ]
 }

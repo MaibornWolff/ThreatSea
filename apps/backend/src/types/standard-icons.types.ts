@@ -1,0 +1,6 @@
+export enum STANDARD_ICONS {
+    USERS = "USERS",
+    CLIENT = "CLIENT",
+    SERVER = "SERVER",
+    DATABASE = "DATABASE",
+}
