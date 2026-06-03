@@ -16,6 +16,7 @@ import {
     ComponentTypeResponse,
     CreateComponentTypeRequest,
     UpdateComponentTypeRequest,
+    iconExactlyOne,
 } from "#types/component-type.types.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
 import {
@@ -36,7 +37,7 @@ componentTypesRouter.get<ProjectIdParam, ComponentTypeResponse[], void>(
 componentTypesRouter.post<ProjectIdParam, ComponentTypeResponse, CreateComponentTypeRequest>(
     "/",
     ValidateParamHandler(ProjectIdParam),
-    ValidateBodyHandler(CreateComponentTypeRequest),
+    ValidateBodyHandler(CreateComponentTypeRequest, [iconExactlyOne]),
     CheckProjectRoleHandler(USER_ROLES.EDITOR),
     createComponentType
 );
@@ -44,7 +45,7 @@ componentTypesRouter.post<ProjectIdParam, ComponentTypeResponse, CreateComponent
 componentTypesRouter.put<ComponentTypeIdParam, ComponentTypeResponse, UpdateComponentTypeRequest>(
     `/:${idParam}`,
     ValidateParamHandler(ComponentTypeIdParam),
-    ValidateBodyHandler(UpdateComponentTypeRequest),
+    ValidateBodyHandler(UpdateComponentTypeRequest, [iconExactlyOne]),
     CheckProjectRoleHandler(USER_ROLES.EDITOR),
     updateComponentType
 );

@@ -12,11 +12,7 @@ import {
     IsString,
     Matches,
     MaxLength,
-    Validate,
     ValidateIf,
-    ValidationArguments,
-    ValidatorConstraint,
-    ValidatorConstraintInterface,
 } from "class-validator";
 import {
     ARRAY_NEEDS_MIN_ITEMS_MESSAGE,
@@ -33,6 +29,7 @@ import {
     STRING_TOO_LONG_MESSAGE,
 } from "#middlewares/input-validations/validator-messages.js";
 import { Trim } from "#middlewares/input-validations/trim.decorator.js";
+import type { CrossFieldCheck } from "#middlewares/input-validations/input-validation.middleware.js";
 
 export class ComponentTypeIdParam extends ProjectIdParam {
     @IsDefined({ message: PARAM_MUST_EXIST_MESSAGE("componentTypeId") })
@@ -41,27 +38,12 @@ export class ComponentTypeIdParam extends ProjectIdParam {
     componentTypeId!: number;
 }
 
-@ValidatorConstraint({ name: "iconExactlyOne", async: false })
-class IconExactlyOneConstraint implements ValidatorConstraintInterface {
-    validate(_value: unknown, args: ValidationArguments): boolean {
-        const object = args.object as CreateComponentTypeRequest;
-        const hasSymbol = object.symbol != null;
-        const hasStandardIcon = object.standardIcon != null;
-        return hasSymbol !== hasStandardIcon;
-    }
-
-    defaultMessage(): string {
-        return "Exactly one of symbol or standardIcon must be set";
-    }
-}
-
 export class CreateComponentTypeRequest {
     @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("name") })
     @IsString({ message: FIELD_MUST_BE_STRING_MESSAGE("name") })
     @Trim()
     @IsNotEmpty({ message: STRING_MUST_NOT_BE_EMPTY_MESSAGE("name") })
     @MaxLength(MAX_NAME_LENGTH, { message: STRING_TOO_LONG_MESSAGE("name", MAX_NAME_LENGTH) })
-    @Validate(IconExactlyOneConstraint)
     name!: string;
 
     @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("pointsOfAttack") })
@@ -97,3 +79,12 @@ export interface ComponentTypeResponse extends CreateComponentTypeRequest {
     createdAt: string;
     updatedAt: string;
 }
+
+/**
+ * Document-level invariant: a component type must carry exactly one icon — either
+ * an uploaded base64 `symbol` or a referenced `standardIcon` — never both, never neither.
+ * Lives outside the DTO class because property-level decorators cannot express the
+ * null/null case without being skipped by `@ValidateIf`.
+ */
+export const iconExactlyOne: CrossFieldCheck<CreateComponentTypeRequest> = (body) =>
+    (body.symbol != null) === (body.standardIcon != null) ? "Exactly one of symbol or standardIcon must be set" : null;

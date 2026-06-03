@@ -33,15 +33,8 @@ const fillName = async (user: ReturnType<typeof userEvent.setup>, value = "MyTyp
     await user.type(nameField, value);
 };
 
-const getCustomTile = (): HTMLElement => {
-    const avatar = screen
-        .getAllByLabelText(/upload custom icon/i)
-        .find((element) => element.classList.contains("MuiAvatar-root"));
-    if (!avatar) {
-        throw new Error("custom upload Avatar tile not found");
-    }
-    return avatar;
-};
+const getStandardTile = (name: string) => screen.getByRole("button", { name });
+const getCustomTile = () => screen.getByRole("button", { name: /upload custom icon/i });
 
 const enableFirstPointOfAttack = async (user: ReturnType<typeof userEvent.setup>) => {
     const switches = screen.getAllByRole("switch");
@@ -55,11 +48,19 @@ describe("ComponentDialog — icon picker", () => {
 
     it("renders four standard-icon tiles plus a custom-upload tile", () => {
         setup();
-        expect(screen.getByAltText("Users")).toBeInTheDocument();
-        expect(screen.getByAltText("Client")).toBeInTheDocument();
-        expect(screen.getByAltText("Server")).toBeInTheDocument();
-        expect(screen.getByAltText("Database")).toBeInTheDocument();
+        expect(getStandardTile("Users")).toBeInTheDocument();
+        expect(getStandardTile("Client")).toBeInTheDocument();
+        expect(getStandardTile("Server")).toBeInTheDocument();
+        expect(getStandardTile("Database")).toBeInTheDocument();
         expect(getCustomTile()).toBeInTheDocument();
+    });
+
+    it("exposes the selection state to assistive tech via aria-pressed", async () => {
+        const { user } = setup();
+        expect(getStandardTile("Server")).toHaveAttribute("aria-pressed", "false");
+        await user.click(getStandardTile("Server"));
+        expect(getStandardTile("Server")).toHaveAttribute("aria-pressed", "true");
+        expect(getStandardTile("Client")).toHaveAttribute("aria-pressed", "false");
     });
 
     it("shows the inline 'icon required' error when submitting without choosing an icon", async () => {
@@ -74,7 +75,7 @@ describe("ComponentDialog — icon picker", () => {
     it("submits with the selected standardIcon and a null symbol", async () => {
         const { user } = setup();
         await fillName(user, "ServerType");
-        await user.click(screen.getByAltText("Server"));
+        await user.click(getStandardTile("Server"));
         await enableFirstPointOfAttack(user);
         await user.click(screen.getByRole("button", { name: /save/i }));
 
@@ -147,7 +148,7 @@ describe("ComponentDialog — icon picker", () => {
             updatedAt: new Date(),
         };
         const { user } = setup(component);
-        await user.click(screen.getByAltText("Client"));
+        await user.click(getStandardTile("Client"));
         await user.click(screen.getByRole("button", { name: /save/i }));
 
         await waitFor(() => expect(confirmDialog).toHaveBeenCalledOnce());
@@ -164,8 +165,8 @@ describe("ComponentDialog — icon picker", () => {
         await fillName(user);
         await enableFirstPointOfAttack(user);
 
-        await user.click(screen.getByAltText("Server"));
-        await user.click(screen.getByAltText("Server")); // re-click — must stay selected
+        await user.click(getStandardTile("Server"));
+        await user.click(getStandardTile("Server")); // re-click — must stay selected
         await user.click(screen.getByRole("button", { name: /save/i }));
 
         await waitFor(() => expect(confirmDialog).toHaveBeenCalledOnce());

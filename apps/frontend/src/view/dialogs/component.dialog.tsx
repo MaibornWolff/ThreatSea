@@ -3,10 +3,11 @@
  *     for the custom components.
  */
 
-import { AddPhotoAlternate } from "@mui/icons-material";
+import { AddPhotoAlternateOutlined } from "@mui/icons-material";
 import {
     Avatar,
     Box,
+    ButtonBase,
     DialogActions,
     DialogTitle,
     Divider,
@@ -121,7 +122,7 @@ const ComponentDialog = ({ component, ...props }: ComponentDialogProps) => {
         width: 48,
         height: 48,
         p: 1,
-        cursor: "pointer",
+        borderRadius: "50%",
         border: selected ? "2px solid" : "1px solid",
         borderColor: selected ? "primary.main" : "divider",
         backgroundColor: selected ? "primary.light" : "transparent",
@@ -129,6 +130,11 @@ const ComponentDialog = ({ component, ...props }: ComponentDialogProps) => {
         transition: "border-color 120ms, background-color 120ms",
         "&:hover": {
             borderColor: "primary.main",
+        },
+        "&.Mui-focusVisible": {
+            outline: "2px solid",
+            outlineColor: "primary.main",
+            outlineOffset: "2px",
         },
     });
 
@@ -280,17 +286,28 @@ const ComponentDialog = ({ component, ...props }: ComponentDialogProps) => {
                         const isSelected = selectedStandardIcon === icon;
                         const iconLabel = t(`contextMenu.${STANDARD_ICON_LABEL_KEYS[icon]}`);
                         return (
-                            <Avatar
+                            <ButtonBase
                                 key={icon}
-                                src={STANDARD_ICON_IMAGES[icon]}
-                                alt={iconLabel}
                                 onClick={() => handleSelectStandardIcon(icon)}
+                                aria-label={iconLabel}
+                                aria-pressed={isSelected}
                                 sx={iconTileSx(isSelected)}
-                            />
+                            >
+                                <Avatar
+                                    src={STANDARD_ICON_IMAGES[icon]}
+                                    alt={iconLabel}
+                                    sx={{ width: "100%", height: "100%", backgroundColor: "transparent" }}
+                                />
+                            </ButtonBase>
                         );
                     })}
                     <Tooltip title={t("customComponent.iconUploadTooltip")}>
-                        <Box component="label" sx={{ display: "inline-flex" }}>
+                        <ButtonBase
+                            component="label"
+                            aria-label={t("customComponent.iconUploadTooltip")}
+                            aria-pressed={isCustomSelected}
+                            sx={iconTileSx(isCustomSelected)}
+                        >
                             <input
                                 type="file"
                                 hidden
@@ -302,12 +319,16 @@ const ComponentDialog = ({ component, ...props }: ComponentDialogProps) => {
                             />
                             <Avatar
                                 src={isCustomSelected ? (uploadedSymbol ?? undefined) : undefined}
-                                aria-label={t("customComponent.iconUploadTooltip")}
-                                sx={iconTileSx(isCustomSelected)}
+                                sx={{
+                                    width: "100%",
+                                    height: "100%",
+                                    backgroundColor: "transparent",
+                                    color: "text.secondary",
+                                }}
                             >
-                                {!isCustomSelected && <AddPhotoAlternate fontSize="small" />}
+                                {!isCustomSelected && <AddPhotoAlternateOutlined fontSize="small" />}
                             </Avatar>
-                        </Box>
+                        </ButtonBase>
                     </Tooltip>
                 </Box>
                 <Typography variant="caption" color="text.secondary" sx={{ mb: 2 }}>
