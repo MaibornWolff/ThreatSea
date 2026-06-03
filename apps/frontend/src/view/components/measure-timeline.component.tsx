@@ -8,7 +8,7 @@ const TimeSlider = styled(Slider)(({ theme }) => ({
     "& .MuiSlider-thumb": {
         height: 25,
         width: 3,
-        backgroundColor: "rgba(35, 60, 87, 1)",
+        backgroundColor: theme.palette.primary.main,
         boxShadow: "none",
         borderRadius: 2,
     },
@@ -32,7 +32,7 @@ const TimeSlider = styled(Slider)(({ theme }) => ({
     "& .MuiSlider-rail": {
         opacity: 1, // 0.5,
         height: 2,
-        backgroundColor: "rgba(35, 60, 87, 1)", // "#bfbfbf",
+        backgroundColor: theme.palette.primary.main, // "#bfbfbf",
         borderRadius: 2,
     },
     "& .MuiSlider-markLabel": {
@@ -40,7 +40,7 @@ const TimeSlider = styled(Slider)(({ theme }) => ({
         top: -25,
     },
     "& .MuiSlider-mark": {
-        backgroundColor: "rgba(35, 60, 87, 1)",
+        backgroundColor: theme.palette.primary.main,
         height: 24,
         width: 2,
         "::before": {
@@ -58,7 +58,7 @@ const TimeSlider = styled(Slider)(({ theme }) => ({
         },
         "&.MuiSlider-markActive": {
             opacity: 1,
-            backgroundColor: "rgba(35, 60, 87, 1)",
+            backgroundColor: theme.palette.primary.main,
         },
         "&:hover + .MuiSlider-valueLabel": {
             color: "#f00",

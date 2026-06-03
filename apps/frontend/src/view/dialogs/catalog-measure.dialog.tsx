@@ -17,6 +17,7 @@ import {
     Switch,
 } from "@mui/material";
 import type { DialogProps } from "@mui/material/Dialog";
+import { useTheme } from "@mui/material/styles";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
@@ -88,6 +89,7 @@ const CatalogMeasureDialog = ({ catalogMeasure, isNew, catalogId, ...props }: Ca
     });
 
     const { t } = useTranslation("catalogPage");
+    const theme = useTheme();
 
     /**
      * Closes the dialog window.
@@ -189,7 +191,7 @@ const CatalogMeasureDialog = ({ catalogMeasure, isNew, catalogId, ...props }: Ca
                         sx={{
                             mr: 1,
                             "&:hover fieldset": {
-                                borderColor: "#fcac0c !important",
+                                borderColor: `${theme.palette.secondary.main} !important`,
                             },
                         }}
                     >
@@ -243,7 +245,7 @@ const CatalogMeasureDialog = ({ catalogMeasure, isNew, catalogId, ...props }: Ca
                                         },
                                         ".MuiSelect-iconOpen + fieldset": {
                                             borderWidth: "1px !important",
-                                            borderColor: "#fcac0c !important",
+                                            borderColor: `${theme.palette.secondary.main} !important`,
                                         },
                                     }}
                                     data-testid="catalog-measure-creation-modal_attacker-selection"
@@ -284,7 +286,7 @@ const CatalogMeasureDialog = ({ catalogMeasure, isNew, catalogId, ...props }: Ca
                         data-testid="PoAError"
                         sx={{
                             "&:hover fieldset": {
-                                borderColor: "#fcac0c !important",
+                                borderColor: `${theme.palette.secondary.main} !important`,
                             },
                         }}
                     >
@@ -338,7 +340,7 @@ const CatalogMeasureDialog = ({ catalogMeasure, isNew, catalogId, ...props }: Ca
                                         },
                                         ".MuiSelect-iconOpen + fieldset": {
                                             borderWidth: "1px !important",
-                                            borderColor: "#fcac0c !important",
+                                            borderColor: `${theme.palette.secondary.main} !important`,
                                         },
                                     }}
                                     data-testid="catalog-measure-creation-modal_poa-selection"

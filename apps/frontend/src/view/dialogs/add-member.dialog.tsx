@@ -15,6 +15,7 @@ import {
     Typography,
 } from "@mui/material";
 import type { DialogProps } from "@mui/material/Dialog";
+import { useTheme } from "@mui/material/styles";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -73,6 +74,7 @@ const AddMemberDialog = ({
     );
 
     const { t } = useTranslation("memberDialogPage");
+    const theme = useTheme();
     const {
         control,
         register,
@@ -215,7 +217,7 @@ const AddMemberDialog = ({
                         error={!!errors?.role}
                         sx={{
                             "&:hover fieldset": {
-                                borderColor: "#fcac0c !important",
+                                borderColor: `${theme.palette.secondary.main} !important`,
                             },
                         }}
                     >
@@ -272,7 +274,7 @@ const AddMemberDialog = ({
                                         },
                                         ".MuiSelect-iconOpen + fieldset": {
                                             borderWidth: "1px !important",
-                                            borderColor: "#fcac0c !important",
+                                            borderColor: `${theme.palette.secondary.main} !important`,
                                         },
                                     }}
                                 >

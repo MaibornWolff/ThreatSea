@@ -10,6 +10,7 @@ import { ToggleButtons } from "#view/components/toggle-buttons.component.tsx";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { useState, useEffect, useEffectEvent, memo } from "react";
 import { Box, FormGroup, ListItemAvatar, Typography, IconButton, Avatar } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import * as MuiIcons from "@mui/icons-material";
 import { useAssetHoverPopper } from "#application/hooks/useAssetHoverPopper.ts";
 import { useDebounce } from "#hooks/useDebounce.ts";
@@ -91,6 +92,7 @@ const EditorSidebarSelectedComponentInner = ({
     handleSelectConnectedComponent,
 }: EditorSidebarSelectedComponentProps) => {
     const { t } = useTranslation("editorPage");
+    const theme = useTheme();
     const [communicationInterfaces, setCommunicationInterfaces] = useState<SystemCommunicationInterface[]>([]);
     const [localName, setLocalName] = useState<string>("");
     const [localDescription, setLocalDescription] = useState<string>("");
@@ -180,7 +182,7 @@ const EditorSidebarSelectedComponentInner = ({
                             fontWeight: "bold",
                         },
                         "& .Mui-focused": {
-                            borderBottom: "1px solid rgba(35, 60, 87, 1) !important",
+                            borderBottom: `1px solid ${theme.palette.primary.main} !important`,
                         },
                         input: {
                             fontSize: "0.875rem !important",
@@ -256,7 +258,7 @@ const EditorSidebarSelectedComponentInner = ({
                         borderRadius: "0 !important",
                     },
                     "& .Mui-focused": {
-                        borderBottom: "1px solid rgba(35, 60, 87, 1) !important",
+                        borderBottom: `1px solid ${theme.palette.primary.main} !important`,
                     },
                     textarea: {
                         fontSize: "0.875rem !important",
@@ -474,7 +476,7 @@ const EditorSidebarSelectedComponentInner = ({
                                                 border: "none !important",
                                                 width: "82.5%",
                                                 "& .MuiInputBase-root": {
-                                                    borderBottom: "1px solid rgba(35, 60, 87, 1) !important",
+                                                    borderBottom: `1px solid ${theme.palette.primary.main} !important`,
                                                 },
                                                 "*": {
                                                     border: "none !important",

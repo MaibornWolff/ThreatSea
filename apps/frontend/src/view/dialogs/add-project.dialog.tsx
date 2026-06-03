@@ -15,6 +15,7 @@ import {
     Typography,
 } from "@mui/material";
 import type { DialogProps } from "@mui/material/Dialog";
+import { useTheme } from "@mui/material/styles";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -54,6 +55,7 @@ const AddProjectDialog = ({ project, ...props }: AddProjectDialogProps) => {
     const { cancelDialog, confirmDialog } = useDialog<ProjectFormValues | null>("projects");
     const { items: catalogs, loadCatalogs } = useCatalogs();
     const { t } = useTranslation("projectDialogPage");
+    const theme = useTheme();
     const {
         control,
         register,
@@ -148,7 +150,7 @@ const AddProjectDialog = ({ project, ...props }: AddProjectDialogProps) => {
                     error={!!errors?.catalogId}
                     sx={{
                         "&:hover fieldset": {
-                            borderColor: "#fcac0c !important",
+                            borderColor: `${theme.palette.secondary.main} !important`,
                         },
                     }}
                 >
@@ -214,7 +216,7 @@ const AddProjectDialog = ({ project, ...props }: AddProjectDialogProps) => {
                                     },
                                     ".MuiSelect-iconOpen + fieldset": {
                                         borderWidth: "1px !important",
-                                        borderColor: "#fcac0c !important",
+                                        borderColor: `${theme.palette.secondary.main} !important`,
                                     },
                                 }}
                             >
@@ -245,7 +247,7 @@ const AddProjectDialog = ({ project, ...props }: AddProjectDialogProps) => {
                     margin="normal"
                     sx={{
                         "&:hover fieldset": {
-                            borderColor: "#fcac0c !important",
+                            borderColor: `${theme.palette.secondary.main} !important`,
                         },
                     }}
                 >
@@ -301,7 +303,7 @@ const AddProjectDialog = ({ project, ...props }: AddProjectDialogProps) => {
                                     },
                                     ".MuiSelect-iconOpen + fieldset": {
                                         borderWidth: "1px !important",
-                                        borderColor: "#fcac0c !important",
+                                        borderColor: `${theme.palette.secondary.main} !important`,
                                     },
                                 }}
                             >

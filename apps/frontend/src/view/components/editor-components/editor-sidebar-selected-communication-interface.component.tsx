@@ -1,4 +1,5 @@
 import { IconButton, Typography, Box } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import { AssetSecurityNeedsPopper } from "./asset-security-needs-popper.component";
 import { EditorSidebarAssetList } from "./editor-sidebar-asset-list.component";
@@ -47,6 +48,7 @@ export const EditorSidebarSelectedCommunicationInterface = ({
     handleInterfaceBreadcrumbClick,
 }: EditorSidebarSelectedCommunicationInterfaceProps) => {
     const { t } = useTranslation("editorPage");
+    const theme = useTheme();
     const { anchorEl: assetAnchorEl, hoveredAsset, handleAssetHover, handleAssetLeave } = useAssetHoverPopper();
     return (
         <Box>
@@ -129,7 +131,7 @@ export const EditorSidebarSelectedCommunicationInterface = ({
                                 borderRadius: "0 !important",
                             },
                             "& .Mui-focused": {
-                                borderBottom: "1px solid rgba(35, 60, 87, 1) !important",
+                                borderBottom: `1px solid ${theme.palette.primary.main} !important`,
                             },
                             input: {
                                 fontSize: "0.875rem !important",
@@ -214,7 +216,7 @@ export const EditorSidebarSelectedCommunicationInterface = ({
                         borderRadius: "0 !important",
                     },
                     "& .Mui-focused": {
-                        borderBottom: "1px solid rgba(35, 60, 87, 1) !important",
+                        borderBottom: `1px solid ${theme.palette.primary.main} !important`,
                     },
                     textarea: {
                         fontSize: "0.875rem !important",

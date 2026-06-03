@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 import type { DialogProps } from "@mui/material/Dialog";
 import type { SelectChangeEvent } from "@mui/material/Select";
+import { useTheme } from "@mui/material/styles";
 import { InfoOutlined } from "@mui/icons-material";
 import SelectBoxCategorySubHeader from "#view/components/selectBox-CategorySubHeader.tsx";
 import { useEffect, useState, type ChangeEvent } from "react";
@@ -116,6 +117,7 @@ const MeasureImpactByThreatDialog = ({
     const [damageCheckbox, setDamageCheckbox] = useState(getValues("impactsDamage"));
 
     const { t } = useTranslation("applyMeasureDialogPage");
+    const theme = useTheme();
 
     /**
      * Cancel a dialog and closes it.
@@ -184,7 +186,7 @@ const MeasureImpactByThreatDialog = ({
                         data-testid="threatIdError"
                         sx={{
                             "&:hover fieldset": {
-                                borderColor: "#fcac0c !important",
+                                borderColor: `${theme.palette.secondary.main} !important`,
                             },
                         }}
                     >
@@ -245,7 +247,7 @@ const MeasureImpactByThreatDialog = ({
                                         },
                                         ".MuiSelect-iconOpen + fieldset": {
                                             borderWidth: "1px !important",
-                                            borderColor: "#fcac0c !important",
+                                            borderColor: `${theme.palette.secondary.main} !important`,
                                         },
                                     }}
                                 >
@@ -428,7 +430,7 @@ const MeasureImpactByThreatDialog = ({
                                                 className="info-adornment"
                                                 sx={{
                                                     "&:hover": {
-                                                        color: "#fcac0c !important",
+                                                        color: `${theme.palette.secondary.main} !important`,
                                                     },
                                                 }}
                                             />
@@ -536,7 +538,7 @@ const MeasureImpactByThreatDialog = ({
                                                 className="info-adornment"
                                                 sx={{
                                                     "&:hover": {
-                                                        color: "#fcac0c !important",
+                                                        color: `${theme.palette.secondary.main} !important`,
                                                     },
                                                 }}
                                             />

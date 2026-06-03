@@ -14,6 +14,7 @@ import {
     Select,
 } from "@mui/material";
 import type { DialogProps } from "@mui/material/Dialog";
+import { useTheme } from "@mui/material/styles";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
 import Switch from "@mui/material/Switch";
@@ -84,6 +85,7 @@ const CatalogThreatDialog = ({ catalogThreat, isNew, ...props }: CatalogThreatDi
         },
     });
     const { t } = useTranslation("catalogPage");
+    const theme = useTheme();
 
     /**
      * Cancel a dialog and closes it.
@@ -180,7 +182,7 @@ const CatalogThreatDialog = ({ catalogThreat, isNew, ...props }: CatalogThreatDi
                         sx={{
                             mr: 1,
                             "&:hover fieldset": {
-                                borderColor: "#fcac0c !important",
+                                borderColor: `${theme.palette.secondary.main} !important`,
                             },
                         }}
                         error={!!errors?.attacker}
@@ -235,7 +237,7 @@ const CatalogThreatDialog = ({ catalogThreat, isNew, ...props }: CatalogThreatDi
                                         },
                                         ".MuiSelect-iconOpen + fieldset": {
                                             borderWidth: "1px !important",
-                                            borderColor: "#fcac0c !important",
+                                            borderColor: `${theme.palette.secondary.main} !important`,
                                         },
                                     }}
                                     data-testid="catalog-threat-creation-modal_attacker-selection"
@@ -276,7 +278,7 @@ const CatalogThreatDialog = ({ catalogThreat, isNew, ...props }: CatalogThreatDi
                         data-testid="PoAError"
                         sx={{
                             "&:hover fieldset": {
-                                borderColor: "#fcac0c !important",
+                                borderColor: `${theme.palette.secondary.main} !important`,
                             },
                         }}
                     >
@@ -330,7 +332,7 @@ const CatalogThreatDialog = ({ catalogThreat, isNew, ...props }: CatalogThreatDi
                                         },
                                         ".MuiSelect-iconOpen + fieldset": {
                                             borderWidth: "1px !important",
-                                            borderColor: "#fcac0c !important",
+                                            borderColor: `${theme.palette.secondary.main} !important`,
                                         },
                                     }}
                                     data-testid="catalog-threat-creation-modal_poa-selection"
