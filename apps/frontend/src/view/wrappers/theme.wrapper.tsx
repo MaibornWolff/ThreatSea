@@ -5,6 +5,7 @@
 import type { ReactNode } from "react";
 import { createTheme } from "@mui/material/styles";
 import { ThemeProvider as MaterialThemeProvider } from "@mui/system";
+import { colorPrimitives, colors } from "./tokens";
 
 /**
  * Object to customize the mui theme.
@@ -16,65 +17,65 @@ const theme = createTheme({
     },
     palette: {
         primary: {
-            main: "rgba(35, 60, 87, 1)",
-            light: "rgba(252, 172, 12, 1)",
-            dark: "rgba(255, 255, 255, 0.90)",
+            main: colors.brand.primary,
+            light: colors.brand.accent,
+            dark: colorPrimitives.neutral.whiteAlpha90,
         },
         secondary: {
-            main: "rgba(252, 172, 12, 1)",
-            light: "rgba(252, 172, 12, 0.75)",
+            main: colors.brand.accent,
+            light: colors.brand.accentSubtle,
         },
         background: {
-            defaultIntransparent: "rgba(220, 222, 227, 1)",
-            default: "rgba(35, 60, 87, 0.1)",
-            mainIntransparent: "rgba(231, 232, 235, 1)",
-            main: "rgba(229, 232, 237, 1)",
-            paperIntransparent: "rgba(251, 251, 252, 1)",
-            paper: "rgba(255, 255, 255, 0.85)",
-            paperLight: "rgba(255,255,255, 0.65)",
-            headerToggleButtons: "rgba(173, 196, 230, 1)",
-            doneEditing: "rgba(65, 65, 65, 0.41)",
+            defaultIntransparent: colors.surface.pageDefaultOpaque,
+            default: colors.surface.pageDefault,
+            mainIntransparent: colors.surface.pageOpaque,
+            main: colors.surface.page,
+            paperIntransparent: colors.surface.paperOpaque,
+            paper: colors.surface.paper,
+            paperLight: colors.surface.paperLight,
+            headerToggleButtons: colors.component.headerToggleBg,
+            doneEditing: colors.surface.doneEditing,
         },
         text: {
-            primary: "rgba(35, 60, 87, 1)",
-            secondary: "rgba(35, 60, 87, 1)",
-            buttonselected: "rgba(255,255,255,1)",
-            white: "#fff",
-            formError: "rgba(211, 47, 47, 1)",
+            primary: colors.text.default,
+            secondary: colors.text.muted,
+            buttonselected: colors.text.inverse,
+            white: colors.text.inverse,
+            formError: colors.text.error,
         },
         toggleButtons: {
             header: {
-                background: "rgba(255,255,255,0.9)",
-                selectedBackground: "rgba(24,60,87,0.75)",
-                hoverBackground: "rgba(252, 172, 12, 1)",
-                selectedHoverBackground: "rgba(252, 172, 12, 1)",
+                background: colors.component.toggleHeader.bg,
+                selectedBackground: colors.component.toggleHeader.selectedBg,
+                hoverBackground: colors.component.toggleHeader.hoverBg,
+                selectedHoverBackground: colors.component.toggleHeader.selectedHoverBg,
             },
             page: {
-                background: "rgba(255, 255, 255, 1.0)", // "rgba(255, 255, 255, 0.25)",
-                selectedBackground: "rgba(24,60,87,0.9)",
-                hoverBackground: "rgba(252, 172, 12, 1)",
-                selectedHoverBackground: "rgba(252, 172, 12, 1)",
+                background: colors.component.togglePage.bg,
+                selectedBackground: colors.component.togglePage.selectedBg,
+                hoverBackground: colors.component.togglePage.hoverBg,
+                selectedHoverBackground: colors.component.togglePage.selectedHoverBg,
             },
         },
         matrix: {
             axisCells: {
-                background: "rgba(35, 60, 87, 0.1)",
-                color: "rgba(34, 34, 34, 1)",
+                background: colors.component.matrixAxis.bg,
+                color: colors.component.matrixAxis.fg,
             },
         },
         languagePicker: {
-            color: "rgba(255, 255, 255, 1)",
+            color: colors.component.languagePicker,
         },
         table: {
-            headerBackground: "rgba(255, 255, 255, 1.0)",
-            headerBackgroundSelected: "rgba(228, 230, 245, 1)",
-            hoverColor: "#ffffff",
+            headerBackground: colors.component.table.headerBg,
+            headerBackgroundSelected: colors.component.table.headerSelectedBg,
+            hoverColor: colors.component.table.hoverBg,
         },
         page: {
-            headerBackground: "rgba(79, 102, 132, 1)",
+            headerBackground: colors.component.pageHeaderBg,
         },
         action: {
-            active: "#000",
+            active: colors.component.actionActive,
         },
     },
 });
