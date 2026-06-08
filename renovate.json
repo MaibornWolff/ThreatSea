@@ -10,6 +10,5 @@
     "enabled": true
   },
   "minimumReleaseAge": "72 hours",
-  "prCreation": "not-pending",
   "rebaseWhen": "behind-base-branch"
 }
