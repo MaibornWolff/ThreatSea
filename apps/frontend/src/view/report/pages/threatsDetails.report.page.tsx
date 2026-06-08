@@ -8,6 +8,7 @@ import { Text } from "#view/report/components/text.report.component.tsx";
 import { MATRIX_COLOR } from "#view/colors/matrix.ts";
 import type { MatrixColorKey } from "#view/colors/matrix.ts";
 import type { IndexCallback, ProjectReport, ThreatReport } from "#api/types/project.types.ts";
+import { colors } from "#view/wrappers/tokens.ts";
 
 type ReportThreat = ProjectReport["threats"][number];
 type ThreatAsset = ReportThreat["assets"][number];
@@ -153,7 +154,7 @@ const ThreatCard = ({
                 style={{
                     display: "flex",
                     flexDirection: "column",
-                    backgroundColor: "#fff",
+                    backgroundColor: colors.surface.paperWhite,
                     borderRadius: 10,
                     padding: s1,
                 }}
@@ -313,7 +314,7 @@ const RiskInfo = ({
                     style={{
                         height: 1,
                         width: "100%",
-                        backgroundColor: "#fff",
+                        backgroundColor: colors.surface.paperWhite,
                         marginTop: s1 / 2,
                         marginBottom: s1 / 2,
                     }}

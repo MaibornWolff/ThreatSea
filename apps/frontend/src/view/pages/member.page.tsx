@@ -27,6 +27,7 @@ import { AlertActions } from "#application/actions/alert.actions.ts";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import type { NavigationState } from "#application/reducers/navigation.reducer.ts";
 import type { ConfirmAcceptColor } from "#application/reducers/confirm.reducer.ts";
+import { colors } from "#view/wrappers/tokens.ts";
 
 type MemberPath = "projects" | "catalogs";
 
@@ -503,7 +504,7 @@ const MemberTableRow = ({ member, onEdit, onDelete, userRole }: MemberTableRowPr
                 "&:last-child td, &:last-child th": { border: 0 },
                 "&:hover": {
                     cursor: "pointer",
-                    backgroundColor: "#ffffff !important",
+                    backgroundColor: `${colors.surface.paperWhite} !important`,
                 },
             }}
             onClick={(e) => onEdit(e, member)}
@@ -515,7 +516,7 @@ const MemberTableRow = ({ member, onEdit, onDelete, userRole }: MemberTableRowPr
                 sx={{
                     padding: 0,
                     paddingRight: 2,
-                    borderBottomColor: "#fff",
+                    borderBottomColor: colors.border.divider,
                 }}
             >
                 {checkUserRole(userRole, USER_ROLES.OWNER) && (

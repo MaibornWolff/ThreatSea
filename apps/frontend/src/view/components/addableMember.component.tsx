@@ -153,7 +153,7 @@ export const AddableMember = <TFieldValues extends BaseAddableMemberFormValues>(
                             <ListItem
                                 key={id}
                                 sx={{
-                                    backgroundColor: "#FFFFFF",
+                                    backgroundColor: colors.surface.paperWhite,
                                     ":hover": {
                                         backgroundColor: colors.surface.listItem,
                                     },

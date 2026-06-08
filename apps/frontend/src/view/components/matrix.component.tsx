@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { MATRIX_COLOR } from "#view/colors/matrix.ts";
 import type { MatrixColorKey } from "#view/colors/matrix.ts";
 import type { MatrixGrid, SelectedMatrixCell } from "#application/hooks/use-matrix.hook.ts";
+import { colors } from "#view/wrappers/tokens.ts";
 
 const damageAxis = [1, 2, 3, 4, 5];
 const probabilityAxis = [5, 4, 3, 2, 1];
@@ -91,7 +92,7 @@ export const Matrix = ({ matrix, size = 120, onSelectCell }: MatrixProps): JSX.E
                                 probability={probabilityAxis[i] as number}
                                 damage={damageAxis[j] as number}
                                 fontSize={"0.875rem"}
-                                foregroundColor={"#fff"}
+                                foregroundColor={colors.text.inverse}
                                 onClick={onSelectCell}
                                 {...cell}
                             />
@@ -176,7 +177,8 @@ const MatrixCell = ({
     const [backgroundColor, borderColor] = useMemo<[string, string]>(() => {
         const matrixColor = color ? MATRIX_COLOR[color] : undefined;
         const backgroundColor =
-            (selected ? matrixColor?.selected : amount ? matrixColor?.standard : matrixColor?.light) || "#fff";
+            (selected ? matrixColor?.selected : amount ? matrixColor?.standard : matrixColor?.light) ||
+            colors.surface.paperWhite;
         const borderColor = (selected ? matrixColor?.selected : matrixColor?.border) || "#000";
         return [backgroundColor, borderColor];
     }, [color, selected, amount]);

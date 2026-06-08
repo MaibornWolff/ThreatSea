@@ -25,6 +25,7 @@ import ThreatDialogPage from "./threat-dialog.page";
 import { MeasureImpactByMeasureDialogPage } from "./measure-impact-by-measure-dialog.page";
 import { withProject } from "#view/components/with-project.hoc.tsx";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
+import { colors } from "#view/wrappers/tokens.ts";
 
 /**
  * on this page all threats are listed
@@ -406,7 +407,7 @@ const ThreatsPageBody = () => {
                                                             "&:last-child td, &:last-child th": { border: 0 },
                                                             "&:hover": {
                                                                 cursor: "pointer",
-                                                                backgroundColor: "#ffffff !important",
+                                                                backgroundColor: `${colors.surface.paperWhite} !important`,
                                                             },
                                                         }}
                                                         onClick={(e) => onClickEditThreat(e, threat)}
@@ -448,7 +449,7 @@ const ThreatsPageBody = () => {
                                                         </CustomTableCell>
                                                         <CustomTableCell
                                                             sx={{
-                                                                borderBottomColor: "#fff",
+                                                                borderBottomColor: colors.border.divider,
                                                                 fontSize: "0.875rem",
                                                             }}
                                                         >
@@ -543,7 +544,7 @@ const CustomTableCell = ({ sx, showBorder = false, children, ...props }: CustomT
                 fontSize: "0.875rem",
                 borderRight,
                 borderRightColor: "primary.main",
-                borderBottomColor: "#fff",
+                borderBottomColor: colors.border.divider,
                 ...sx,
             }}
             {...props}

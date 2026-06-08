@@ -22,6 +22,7 @@ import type {
     SystemCommunicationInterface,
     SystemPointOfAttack,
 } from "#api/types/system.types.ts";
+import { colors } from "#view/wrappers/tokens.ts";
 
 const muiIconMap = MuiIcons as Record<string, ElementType>;
 
@@ -211,7 +212,7 @@ const EditorSidebarSelectedComponentInner = ({
             <Box
                 sx={{
                     display: "flex",
-                    backgroundColor: "#fff",
+                    backgroundColor: colors.surface.paperWhite,
                     borderRadius: 15,
                     height: "31px",
                     paddingLeft: 8,
@@ -273,7 +274,7 @@ const EditorSidebarSelectedComponentInner = ({
             <Box
                 sx={{
                     display: "flex",
-                    backgroundColor: "#fff",
+                    backgroundColor: colors.surface.paperWhite,
                     borderRadius: 15,
                     height: "31px",
                     paddingLeft: 8,
@@ -554,7 +555,7 @@ const EditorSidebarSelectedComponentInner = ({
             <Box
                 sx={{
                     display: "flex",
-                    backgroundColor: "#fff",
+                    backgroundColor: colors.surface.paperWhite,
                     borderRadius: 15,
                     height: "31px",
                     paddingLeft: 8,
@@ -749,7 +750,7 @@ const EditorSidebarSelectedComponentInner = ({
             <Box
                 sx={{
                     display: "flex",
-                    backgroundColor: "#fff",
+                    backgroundColor: colors.surface.paperWhite,
                     borderRadius: 15,
                     height: "31px",
                     paddingLeft: 8,

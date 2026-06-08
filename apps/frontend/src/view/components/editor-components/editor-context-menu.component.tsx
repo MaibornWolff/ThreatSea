@@ -169,11 +169,11 @@ export const EditorContextMenu = ({ onSelect, stageRef, ref }: EditorContextMenu
                     dense
                     divider
                     sx={{
-                        borderTop: "1px solid #fff",
+                        borderTop: `1px solid ${colors.border.divider}`,
                         borderBottom: "none",
                         backgroundColor: colors.surface.contextMenuHover,
                         "&:hover": {
-                            backgroundColor: "#fff",
+                            backgroundColor: colors.surface.paperWhite,
                         },
                         display: "flex",
                         justifyContent: "space-between",
@@ -188,7 +188,7 @@ export const EditorContextMenu = ({ onSelect, stageRef, ref }: EditorContextMenu
                             sx={{
                                 mr: 1,
                                 "&:hover": {
-                                    backgroundColor: "#fff",
+                                    backgroundColor: colors.surface.paperWhite,
                                     color: "secondary.light",
                                 },
                             }}
@@ -234,7 +234,7 @@ export const EditorContextMenu = ({ onSelect, stageRef, ref }: EditorContextMenu
                                 sx={{
                                     backgroundColor: colors.surface.contextMenuHover,
                                     borderBottom: "none",
-                                    borderTop: "1px solid #fff",
+                                    borderTop: `1px solid ${colors.border.divider}`,
                                 }}
                             />
                         );

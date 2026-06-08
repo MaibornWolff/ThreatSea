@@ -187,9 +187,9 @@ export const CommunicationContextMenu = ({
                                     onClose();
                                 }}
                                 sx={{
-                                    borderBottomColor: "#fff",
+                                    borderBottomColor: colors.border.divider,
                                     "&:hover": {
-                                        backgroundColor: "#fff",
+                                        backgroundColor: colors.surface.paperWhite,
                                     },
                                 }}
                             >
@@ -245,7 +245,7 @@ export const CommunicationContextMenu = ({
                     onClick={handleCreateNew}
                     sx={{
                         "&:hover": {
-                            backgroundColor: "#fff",
+                            backgroundColor: colors.surface.paperWhite,
                         },
                     }}
                 >

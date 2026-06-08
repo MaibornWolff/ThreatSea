@@ -22,6 +22,7 @@ import { SearchField } from "#view/components/search-field.component.tsx";
 import { MeasureImpactByThreatDialogPage } from "./measure-impact-by-threat-dialog.page";
 import ThreatDialogPage from "./threat-dialog.page";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
+import { colors } from "#view/wrappers/tokens.ts";
 
 interface MeasuresPageBodyProps {
     project: ExtendedProject;
@@ -302,7 +303,7 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                                                 showBorder={false}
                                                 sx={{
                                                     width: "1%",
-                                                    borderRightColor: "#fff",
+                                                    borderRightColor: colors.border.divider,
                                                     padding: 0,
                                                 }}
                                             ></CustomTableHeaderCell>
@@ -348,7 +349,7 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                                                             "&:last-child td, &:last-child th": { border: 0 },
                                                             "&:hover": {
                                                                 cursor: "pointer",
-                                                                backgroundColor: "#fff !important",
+                                                                backgroundColor: `${colors.surface.paperWhite} !important`,
                                                             },
                                                         }}
                                                         hover
@@ -361,7 +362,7 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                                                                 position: "relative",
                                                                 fontWeight: "bold",
                                                                 fontSize: "0.875rem",
-                                                                borderRightColor: "#fff",
+                                                                borderRightColor: colors.border.divider,
                                                             }}
                                                             align={"left"}
                                                             data-testid="measures-page_measures-list-entry_name"
@@ -371,7 +372,7 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                                                         <CustomTableCell
                                                             showBorder={true}
                                                             sx={{
-                                                                borderRightColor: "#fff",
+                                                                borderRightColor: colors.border.divider,
                                                             }}
                                                             data-testid="measures-page_measures-list-entry_scheduled-at"
                                                         >

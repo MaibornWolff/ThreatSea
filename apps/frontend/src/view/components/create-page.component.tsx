@@ -81,7 +81,7 @@ export const CreatePage = <P extends object>(
             case "upToDate":
             case "notUpToDate":
             case "saving":
-                autoSaveForegroundColor = "#fff";
+                autoSaveForegroundColor = colors.text.inverse;
                 break;
         }
 

@@ -19,13 +19,13 @@ export const styles = StyleSheet.create({
     coverPage: {
         flexDirection: "column",
         alignItems: "stretch",
-        backgroundColor: "#ffffff",
+        backgroundColor: colors.surface.paperWhite,
         padding: s6,
     },
     page: {
         flexDirection: "column",
         alignItems: "stretch",
-        backgroundColor: "#ffffff",
+        backgroundColor: colors.surface.paperWhite,
         padding: s2,
         paddingLeft: s6,
         paddingRight: s6,

@@ -14,6 +14,7 @@ import { useState, type ComponentType } from "react";
 import { useTranslation } from "react-i18next";
 import { EditorColorPicker } from "./editor-color-picker.component";
 import type { AnnotationType } from "#api/types/system.types.ts";
+import { colors } from "#view/wrappers/tokens.ts";
 
 const ANNOTATION_TYPE_LABEL_KEYS: Record<AnnotationType, string> = {
     rect: "canvas.annotation.rectangle",
@@ -57,7 +58,7 @@ const activeIconButtonSx = {
 };
 
 const iconSx = { fontSize: 30, color: "primary.main" };
-const activeIconSx = { fontSize: 30, color: "#ffffff" };
+const activeIconSx = { fontSize: 30, color: colors.text.inverse };
 
 const ANNOTATION_TOOLS: { tool: AnnotationType; Icon: ComponentType<{ sx?: object }> }[] = [
     { tool: "rect", Icon: CropSquare },

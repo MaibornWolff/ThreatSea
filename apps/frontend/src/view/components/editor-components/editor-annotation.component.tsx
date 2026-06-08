@@ -6,6 +6,7 @@ import type { Transformer as KonvaTransformer } from "konva/lib/shapes/Transform
 import { useAnnotationInteraction } from "#application/hooks/use-annotation-interaction.hook.ts";
 import type { Annotation, AnnotationChanges } from "#api/types/system.types.ts";
 import { EditorTextAnnotation } from "./editor-text-annotation.component";
+import { colors } from "#view/wrappers/tokens.ts";
 
 interface EditorAnnotationProps {
     annotation: Annotation;
@@ -320,8 +321,8 @@ const EditorAnnotationInner = ({
                         x={annotation.x + (points[0] ?? 0)}
                         y={annotation.y + (points[1] ?? 0)}
                         radius={ANCHOR_RADIUS}
-                        fill="#ffffff"
-                        stroke="#233c57"
+                        fill={colors.surface.canvasFill}
+                        stroke={colors.brand.primary}
                         strokeWidth={1}
                         draggable
                         onMouseEnter={handleMouseEnter}
@@ -341,8 +342,8 @@ const EditorAnnotationInner = ({
                         x={annotation.x + (points[2] ?? 0)}
                         y={annotation.y + (points[3] ?? 0)}
                         radius={ANCHOR_RADIUS}
-                        fill="#ffffff"
-                        stroke="#233c57"
+                        fill={colors.surface.canvasFill}
+                        stroke={colors.brand.primary}
                         strokeWidth={1}
                         draggable
                         onMouseEnter={handleMouseEnter}

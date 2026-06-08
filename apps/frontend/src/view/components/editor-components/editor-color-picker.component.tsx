@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { DEFAULT_ANNOTATION_COLOR } from "#view/colors/annotation.colors.ts";
 import { POA_COLORS } from "#view/colors/pointsOfAttack.colors.ts";
+import { colors } from "#view/wrappers/tokens.ts";
 
 const keepFocusOnClick = (event: MouseEvent): void => {
     event.preventDefault();
@@ -158,7 +159,7 @@ export const EditorColorPicker = ({
                 height: "24px",
                 borderRadius: "50%",
                 backgroundColor: displayColor,
-                border: "2px solid #ffffff",
+                border: `2px solid ${colors.border.divider}`,
                 boxShadow: "0 0 0 1px rgba(35, 60, 87, 0.6)",
             }}
         />

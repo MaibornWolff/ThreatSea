@@ -18,6 +18,7 @@ import { IconButton } from "./icon-button.component";
 import { ExportIconButton } from "./export-icon-button.component";
 import { useProjectExport } from "#application/hooks/use-export.hook.ts";
 import type { ExtendedProject } from "#api/types/project.types.ts";
+import { colors } from "#view/wrappers/tokens.ts";
 
 interface ProjectCardProps {
     project: ExtendedProject;
@@ -102,7 +103,7 @@ export const ProjectCard = ({ project, onClickEditProject, onClickDeleteProject,
                 boxShadow: 1,
                 p: 2,
                 "&:hover": {
-                    bgcolor: "#fff",
+                    bgcolor: colors.surface.paperWhite,
                 },
                 ...sx,
             }}

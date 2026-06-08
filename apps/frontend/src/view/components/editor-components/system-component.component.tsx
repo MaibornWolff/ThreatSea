@@ -25,14 +25,14 @@ import { editorSelectors } from "#application/selectors/editor.selectors.ts";
 import { colors } from "#view/wrappers/tokens.ts";
 
 const COLORS = {
-    normal: "#ffffffAA",
-    hover: "#ffffffAA",
+    normal: colors.surface.paperWhiteTranslucent,
+    hover: colors.surface.paperWhiteTranslucent,
     selected: "rgba(149, 163, 181, 0.7)",
 };
 
 const NAME_COLORS = {
     foreground: colors.brand.primary,
-    background: "#fffA",
+    background: colors.surface.paperWhiteTranslucent,
     stroke: colors.border.canvas,
 };
 
@@ -40,7 +40,7 @@ const ADD_CONNECTION_COLORS = {
     normal: "rgba(149, 163, 181, 1)",
     hover: "rgba(79, 102, 132, 1)",
     selected: colors.brand.primary,
-    foreground: "#ffffff",
+    foreground: colors.surface.canvasFill,
 };
 
 const imageMap: Record<string, string> = {
