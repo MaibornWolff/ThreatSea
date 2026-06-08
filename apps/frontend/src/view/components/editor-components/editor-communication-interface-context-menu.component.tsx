@@ -14,6 +14,7 @@ import {
     type SystemConnection,
 } from "#api/types/system.types.ts";
 import type { EditorConnectionAnchor } from "#application/hooks/use-editor.hook.ts";
+import { colors } from "#view/wrappers/tokens.ts";
 
 let opened: { x: number; y: number } = { x: 0, y: 0 };
 
@@ -148,7 +149,7 @@ export const CommunicationContextMenu = ({
             sx={{
                 position: "absolute",
                 zIndex: 1000,
-                bgcolor: "#e5e8ebEE",
+                bgcolor: colors.surface.contextMenu,
                 boxShadow: 4,
                 visibility: open ? "visible" : "hidden",
                 borderRadius: 4,

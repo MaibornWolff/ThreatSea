@@ -28,6 +28,7 @@ import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { useEditor } from "#application/hooks/use-editor.hook.ts";
 import { editorSelectors } from "#application/selectors/editor.selectors.ts";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
+import { colors } from "#view/wrappers/tokens.ts";
 
 let opened = {
     x: 0,
@@ -138,7 +139,7 @@ export const EditorContextMenu = ({ onSelect, stageRef, ref }: EditorContextMenu
             sx={{
                 position: "absolute",
                 zIndex: 1000,
-                bgcolor: "#e5e8ebEE",
+                bgcolor: colors.surface.contextMenu,
                 boxShadow: 4,
                 visibility: open ? "initial" : "hidden",
                 borderRadius: 4,
@@ -170,7 +171,7 @@ export const EditorContextMenu = ({ onSelect, stageRef, ref }: EditorContextMenu
                     sx={{
                         borderTop: "1px solid #fff",
                         borderBottom: "none",
-                        backgroundColor: "#dcdee3",
+                        backgroundColor: colors.surface.contextMenuHover,
                         "&:hover": {
                             backgroundColor: "#fff",
                         },
@@ -231,7 +232,7 @@ export const EditorContextMenu = ({ onSelect, stageRef, ref }: EditorContextMenu
                                 onEdit={() => onEditComponent(customComponent)}
                                 onClickDelete={() => onDeleteComponent(customComponent)}
                                 sx={{
-                                    backgroundColor: "#dcdee3",
+                                    backgroundColor: colors.surface.contextMenuHover,
                                     borderBottom: "none",
                                     borderTop: "1px solid #fff",
                                 }}

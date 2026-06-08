@@ -1,5 +1,6 @@
 import { Dialog as MaterialDialog } from "@mui/material";
 import type { DialogProps } from "@mui/material/Dialog";
+import { colors } from "#view/wrappers/tokens.ts";
 
 export const Dialog = ({ open, onClose, children, ...props }: DialogProps) => {
     return (
@@ -11,7 +12,7 @@ export const Dialog = ({ open, onClose, children, ...props }: DialogProps) => {
             slotProps={{
                 paper: {
                     sx: {
-                        bgcolor: "#e6e8ec",
+                        bgcolor: colors.surface.dialog,
                         borderRadius: 5,
                         padding: "30px",
                     },

@@ -33,6 +33,7 @@ import {
 import { EditorToolbar } from "#view/components/editor-components/editor-toolbar.component.tsx";
 import { TextEditingToolbarLayer } from "#view/components/editor-components/text-editing-toolbar-layer.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
+import { colors } from "#view/wrappers/tokens.ts";
 import { SystemComponentConnection } from "#view/components/editor-components/system-component-connection.component.tsx";
 import { SystemComponent } from "#view/components/editor-components/system-component.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
@@ -70,8 +71,8 @@ const GRID_CONFIG = {
     gridSizeY: 5,
     renderedGridSizeX: 20,
     renderedGridSizeY: 20,
-    gridLineColor: "#e5e8eb",
-    helpLineColor: "#98a3b3",
+    gridLineColor: colors.border.canvas,
+    helpLineColor: colors.border.canvasHelpLine,
 };
 
 // Memoize line array creation

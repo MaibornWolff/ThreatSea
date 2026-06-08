@@ -22,6 +22,7 @@ import { useTranslation } from "react-i18next";
 import type { User } from "#api/types/members.types.ts";
 import { useAddableMembersList } from "#application/hooks/use-addableMember-list.hook.ts";
 import { SearchField } from "#view/components/search-field.component.tsx";
+import { colors } from "#view/wrappers/tokens.ts";
 
 type BaseAddableMemberFormValues = FieldValues & {
     id: number | undefined;
@@ -154,7 +155,7 @@ export const AddableMember = <TFieldValues extends BaseAddableMemberFormValues>(
                                 sx={{
                                     backgroundColor: "#FFFFFF",
                                     ":hover": {
-                                        backgroundColor: "#f1f2f3",
+                                        backgroundColor: colors.surface.listItem,
                                     },
                                 }}
                                 onClick={() => setSelectedAddableMember(id, name, email)}
@@ -166,7 +167,7 @@ export const AddableMember = <TFieldValues extends BaseAddableMemberFormValues>(
                                             sx: { fontSize: "0.85em" },
                                         },
                                         secondary: {
-                                            sx: { color: "#5e666e", fontSize: "0.8em" },
+                                            sx: { color: colors.text.subtle, fontSize: "0.8em" },
                                         },
                                     }}
                                     secondary={email}

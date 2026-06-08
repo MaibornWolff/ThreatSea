@@ -33,7 +33,7 @@ const COLORS = {
 const NAME_COLORS = {
     foreground: colors.brand.primary,
     background: "#fffA",
-    stroke: "#e5e8eb",
+    stroke: colors.border.canvas,
 };
 
 const ADD_CONNECTION_COLORS = {
@@ -285,7 +285,7 @@ export const SystemComponent = ({
                         x={40}
                         y={40}
                         radius={(width - 20) / 2}
-                        stroke={"#e5e8eb"}
+                        stroke={colors.border.canvas}
                         strokeWidth={visualHover || visualSelected ? 9 : 4}
                     />
                 )}

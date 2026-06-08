@@ -15,6 +15,7 @@ import { editorSelectors } from "#application/selectors/editor.selectors.ts";
 import { projectsSelectors } from "#application/selectors/projects.selectors.ts";
 import logo from "#images/threatsealogo-dez.png";
 import ErrorBoundary from "#view/wrappers/error.wrapper.tsx";
+import { colors } from "#view/wrappers/tokens.ts";
 import { useProjectTabs } from "#application/hooks/use-project-tabs.hook.ts";
 import { HeaderLevelOneNav } from "./header-level-one-nav.component";
 import { HeaderProjectTabs } from "./header-project-tabs.component";
@@ -54,7 +55,7 @@ export const CreatePage = <P extends object>(
             setAutoSaveOnClick(() => onClick);
         };
 
-        let autoSaveIconColor = "#546581";
+        let autoSaveIconColor: string = colors.text.statusNeutral;
         switch (autoSaveStatus) {
             case "uninitialized":
                 autoSaveIconColor = "#67ad5b";
@@ -66,10 +67,10 @@ export const CreatePage = <P extends object>(
                 autoSaveIconColor = "#67ad5b";
                 break;
             case "notUpToDate":
-                autoSaveIconColor = "#546581";
+                autoSaveIconColor = colors.text.statusNeutral;
                 break;
             case "saving":
-                autoSaveIconColor = "#546581";
+                autoSaveIconColor = colors.text.statusNeutral;
                 break;
         }
 
