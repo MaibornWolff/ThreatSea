@@ -78,7 +78,10 @@
     "addComponent": "Add Component",
     "editComponent": "Edit Component",
     "iconLabel": "Icon",
-    "iconHint": "Pick a standard icon or upload your own (PNG / JPEG, up to 100 kB).",
+    "iconStandardLabel": "Standard icons",
+    "iconOr": "or",
+    "iconUploadLabel": "Custom upload",
+    "iconUploadHint": "PNG / JPEG, up to 100 kB.",
     "iconUploadTooltip": "Upload custom icon",
     "iconRequired": "An icon is required",
     "errorMessages": {

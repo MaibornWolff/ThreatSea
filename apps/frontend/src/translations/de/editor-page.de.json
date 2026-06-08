@@ -78,7 +78,10 @@
     "addComponent": "Komponente hinzufügen",
     "editComponent": "Komponente bearbeiten",
     "iconLabel": "Symbol",
-    "iconHint": "Wählen Sie ein Standardsymbol oder laden Sie ein eigenes hoch (PNG / JPEG, bis 100 kB).",
+    "iconStandardLabel": "Standardsymbole",
+    "iconOr": "oder",
+    "iconUploadLabel": "Eigenes Symbol",
+    "iconUploadHint": "PNG / JPEG, bis 100 kB.",
     "iconUploadTooltip": "Eigenes Symbol hochladen",
     "iconRequired": "Ein Symbol ist erforderlich"
   },

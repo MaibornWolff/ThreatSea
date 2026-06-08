@@ -277,63 +277,85 @@ const ComponentDialog = ({ component, ...props }: ComponentDialogProps) => {
                 <Box
                     sx={{
                         display: "flex",
-                        alignItems: "center",
+                        alignItems: "flex-start",
                         gap: 1,
-                        mb: 1,
+                        mb: 2,
                     }}
                 >
-                    {SELECTABLE_STANDARD_ICONS.map((icon) => {
-                        const isSelected = selectedStandardIcon === icon;
-                        const iconLabel = t(`contextMenu.${STANDARD_ICON_LABEL_KEYS[icon]}`);
-                        return (
+                    <Box sx={{ display: "flex", flexDirection: "column" }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5 }}>
+                            {t("customComponent.iconStandardLabel")}
+                        </Typography>
+                        <Box sx={{ display: "flex", gap: 1 }}>
+                            {SELECTABLE_STANDARD_ICONS.map((icon) => {
+                                const isSelected = selectedStandardIcon === icon;
+                                const iconLabel = t(`contextMenu.${STANDARD_ICON_LABEL_KEYS[icon]}`);
+                                return (
+                                    <ButtonBase
+                                        key={icon}
+                                        onClick={() => handleSelectStandardIcon(icon)}
+                                        aria-label={iconLabel}
+                                        aria-pressed={isSelected}
+                                        sx={iconTileSx(isSelected)}
+                                    >
+                                        <Avatar
+                                            src={STANDARD_ICON_IMAGES[icon]}
+                                            alt={iconLabel}
+                                            sx={{ width: "100%", height: "100%", backgroundColor: "transparent" }}
+                                        />
+                                    </ButtonBase>
+                                );
+                            })}
+                        </Box>
+                    </Box>
+                    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mx: 2 }}>
+                        <Typography variant="caption" aria-hidden sx={{ mb: 0.5, visibility: "hidden" }}>
+                            &nbsp;
+                        </Typography>
+                        <Box sx={{ height: 48, display: "flex", alignItems: "center" }}>
+                            <Typography color="text.secondary" sx={{ fontSize: "0.875rem" }}>
+                                {t("customComponent.iconOr")}
+                            </Typography>
+                        </Box>
+                    </Box>
+                    <Box sx={{ display: "flex", flexDirection: "column" }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5 }}>
+                            {t("customComponent.iconUploadLabel")}
+                        </Typography>
+                        <Tooltip title={t("customComponent.iconUploadTooltip")}>
                             <ButtonBase
-                                key={icon}
-                                onClick={() => handleSelectStandardIcon(icon)}
-                                aria-label={iconLabel}
-                                aria-pressed={isSelected}
-                                sx={iconTileSx(isSelected)}
+                                component="label"
+                                aria-label={t("customComponent.iconUploadTooltip")}
+                                aria-pressed={isCustomSelected}
+                                sx={iconTileSx(isCustomSelected)}
                             >
-                                <Avatar
-                                    src={STANDARD_ICON_IMAGES[icon]}
-                                    alt={iconLabel}
-                                    sx={{ width: "100%", height: "100%", backgroundColor: "transparent" }}
+                                <input
+                                    type="file"
+                                    hidden
+                                    accept={ACCEPTED_ICON_MIME_TYPES}
+                                    onChange={handleSelectSymbol}
+                                    onClick={(event) => {
+                                        event.currentTarget.value = "";
+                                    }}
                                 />
+                                <Avatar
+                                    src={isCustomSelected ? (uploadedSymbol ?? undefined) : undefined}
+                                    sx={{
+                                        width: "100%",
+                                        height: "100%",
+                                        backgroundColor: "transparent",
+                                        color: "text.secondary",
+                                    }}
+                                >
+                                    {!isCustomSelected && <AddPhotoAlternateOutlined fontSize="small" />}
+                                </Avatar>
                             </ButtonBase>
-                        );
-                    })}
-                    <Tooltip title={t("customComponent.iconUploadTooltip")}>
-                        <ButtonBase
-                            component="label"
-                            aria-label={t("customComponent.iconUploadTooltip")}
-                            aria-pressed={isCustomSelected}
-                            sx={iconTileSx(isCustomSelected)}
-                        >
-                            <input
-                                type="file"
-                                hidden
-                                accept={ACCEPTED_ICON_MIME_TYPES}
-                                onChange={handleSelectSymbol}
-                                onClick={(event) => {
-                                    (event.currentTarget as HTMLInputElement).value = "";
-                                }}
-                            />
-                            <Avatar
-                                src={isCustomSelected ? (uploadedSymbol ?? undefined) : undefined}
-                                sx={{
-                                    width: "100%",
-                                    height: "100%",
-                                    backgroundColor: "transparent",
-                                    color: "text.secondary",
-                                }}
-                            >
-                                {!isCustomSelected && <AddPhotoAlternateOutlined fontSize="small" />}
-                            </Avatar>
-                        </ButtonBase>
-                    </Tooltip>
+                        </Tooltip>
+                        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, fontSize: "0.5rem" }}>
+                            {t("customComponent.iconUploadHint")}
+                        </Typography>
+                    </Box>
                 </Box>
-                <Typography variant="caption" color="text.secondary" sx={{ mb: 2 }}>
-                    {t("customComponent.iconHint")}
-                </Typography>
                 {noIconError && (
                     <Typography variant="caption" color="error" sx={{ marginLeft: 1, mb: 1 }}>
                         {t("customComponent.iconRequired")}
