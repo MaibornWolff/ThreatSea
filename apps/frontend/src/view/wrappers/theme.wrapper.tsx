@@ -29,6 +29,12 @@ const theme = createTheme({
             main: colors.state.error,
             light: colors.state.errorLight,
         },
+        success: {
+            main: colors.state.success,
+        },
+        warning: {
+            main: colors.state.warning,
+        },
         background: {
             defaultIntransparent: colors.surface.pageDefaultOpaque,
             default: colors.surface.pageDefault,
@@ -68,7 +74,7 @@ const theme = createTheme({
             },
         },
         languagePicker: {
-            color: colors.component.languagePicker,
+            color: colorPrimitives.neutral.white,
         },
         table: {
             headerBackground: colors.component.table.headerBg,
@@ -79,7 +85,7 @@ const theme = createTheme({
             headerBackground: colors.component.pageHeaderBg,
         },
         action: {
-            active: colors.component.actionActive,
+            active: colorPrimitives.neutral.black,
         },
     },
 });

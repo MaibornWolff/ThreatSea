@@ -41,6 +41,8 @@ export const colorPrimitives = {
         errorMain: "rgba(211, 47, 47, 1)",
         errorLight: "rgba(239, 83, 80, 1)",
         errorBold: "rgba(255, 0, 0, 1)",
+        successMain: "rgba(103, 173, 91, 1)",
+        warningMain: "rgba(194, 63, 56, 1)",
     },
     brandAlpha: {
         blue900Alpha10: "rgba(35, 60, 87, 0.1)",
@@ -95,6 +97,8 @@ export const colors = {
         error: colorPrimitives.state.errorMain,
         errorLight: colorPrimitives.state.errorLight,
         errorBold: colorPrimitives.state.errorBold,
+        success: colorPrimitives.state.successMain,
+        warning: colorPrimitives.state.warningMain,
         hoverAccent: colorPrimitives.brand.orange500,
     },
     component: {
@@ -116,13 +120,11 @@ export const colors = {
             bg: colorPrimitives.brandAlpha.blue900Alpha10,
             fg: colorPrimitives.neutral.gray900,
         },
-        languagePicker: colorPrimitives.neutral.white,
         table: {
             headerBg: colorPrimitives.neutral.white,
             headerSelectedBg: colorPrimitives.neutral.gray300,
             hoverBg: colorPrimitives.neutral.white,
         },
-        actionActive: colorPrimitives.neutral.black,
         assetSwitchTrack: colorPrimitives.neutral.gray800SteelOff,
     },
 } as const;
