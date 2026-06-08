@@ -40,7 +40,7 @@
     "markdown-to-jsx": "9.8.1",
     "react": "19.2.7",
     "react-dom": "19.2.7",
-    "react-hook-form": "7.76.1",
+    "react-hook-form": "7.77.0",
     "react-i18next": "17.0.8",
     "react-konva": "19.2.4",
     "react-konva-utils": "2.0.0",
