@@ -13,6 +13,7 @@ import logo from "#images/threatsealogo-dez.png";
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
 import { translationUtil } from "#utils/translations.ts";
+import { colors } from "#view/wrappers/tokens.ts";
 
 interface ErrorBoundaryProps {
     children?: ReactNode;
@@ -302,7 +303,7 @@ const ErrorMenu = ({ children }: ErrorMenuProps) => {
                 alignItems: "stretch",
                 maxHeight: "100vh",
                 height: "100%",
-                bgcolor: "rgba(35, 60, 87, 0.1)",
+                bgcolor: colors.surface.pageDefault,
             }}
         >
             <Header />
@@ -315,8 +316,7 @@ const ErrorMenu = ({ children }: ErrorMenuProps) => {
                     height: "100%",
                     overflow: "hidden",
                     position: "relative",
-                    boxShadow: 8,
-                    bgcolor: "background.main",
+                    bgcolor: colors.surface.page,
                 }}
             >
                 {children}

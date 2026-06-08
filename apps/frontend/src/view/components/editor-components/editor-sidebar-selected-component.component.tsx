@@ -173,7 +173,7 @@ const EditorSidebarSelectedComponentInner = ({
                         border: "none !important",
                         width: "82.5%",
                         "& .MuiInputBase-root": {
-                            borderBottom: "1px solid rgba(35, 60, 87, 0) !important",
+                            borderBottom: "1px solid transparent !important",
                         },
                         "*": {
                             border: "none !important",
@@ -250,7 +250,7 @@ const EditorSidebarSelectedComponentInner = ({
                     border: "none !important",
                     width: "100%",
                     "& .MuiInputBase-root": {
-                        borderBottom: "1px solid rgba(35, 60, 87, 0) !important",
+                        borderBottom: "1px solid transparent !important",
                     },
                     "*": {
                         border: "none !important",

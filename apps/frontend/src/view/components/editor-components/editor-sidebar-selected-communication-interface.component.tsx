@@ -123,7 +123,7 @@ export const EditorSidebarSelectedCommunicationInterface = ({
                             border: "none !important",
                             width: "100%",
                             "& .MuiInputBase-root": {
-                                borderBottom: "1px solid rgba(35, 60, 87, 0) !important",
+                                borderBottom: "1px solid transparent !important",
                             },
                             "*": {
                                 border: "none !important",
@@ -208,7 +208,7 @@ export const EditorSidebarSelectedCommunicationInterface = ({
                     border: "none !important",
                     width: "100%",
                     "& .MuiInputBase-root": {
-                        borderBottom: "1px solid rgba(35, 60, 87, 0) !important",
+                        borderBottom: "1px solid transparent !important",
                     },
                     "*": {
                         border: "none !important",
