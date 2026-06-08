@@ -7,6 +7,8 @@
 export const colorPrimitives = {
     brand: {
         blue900: "rgba(35, 60, 87, 1)",
+        // PDF report variant of blue900 (B channel +1); preserved for rendering fidelity.
+        blue900Pdf: "rgba(35, 60, 88, 1)",
         blue700: "rgba(79, 102, 132, 1)",
         blue500Translucent: "rgba(24, 60, 87, 0.75)",
         blue500TranslucentDeep: "rgba(24, 60, 87, 0.9)",
@@ -18,6 +20,7 @@ export const colorPrimitives = {
         white: "rgba(255, 255, 255, 1)",
         whiteAlpha90: "rgba(255, 255, 255, 0.9)",
         whiteAlpha85: "rgba(255, 255, 255, 0.85)",
+        whiteAlpha75: "rgba(255, 255, 255, 0.75)",
         whiteAlpha67: "rgba(255, 255, 255, 0.667)",
         whiteAlpha65: "rgba(255, 255, 255, 0.65)",
         gray050: "rgba(251, 251, 252, 1)",
@@ -30,6 +33,7 @@ export const colorPrimitives = {
         gray250CoolAlpha93: "rgba(229, 232, 235, 0.933)",
         gray300: "rgba(228, 230, 245, 1)",
         gray500Cool: "rgba(152, 163, 179, 1)",
+        slate500: "rgba(149, 163, 181, 1)",
         gray700Cool: "rgba(94, 102, 110, 1)",
         gray700Alpha41: "rgba(65, 65, 65, 0.41)",
         gray800Steel: "rgba(84, 101, 129, 1)",

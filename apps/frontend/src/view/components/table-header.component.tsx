@@ -26,7 +26,7 @@ export const CustomTableHeaderCell = ({
 
     const backgroundColor = active ? "table.headerBackgroundSelected" : "table.headerBackground";
 
-    const borderRight = showBorder ? "1.5px solid #00000000" : undefined;
+    const borderRight = showBorder ? "1.5px solid transparent" : undefined;
 
     const handleOnClick = (event: SyntheticEvent) => {
         if (onClick) {

@@ -56,7 +56,7 @@ export const EditorSidebarSelectedCommunicationInterface = ({
             <Box
                 sx={{
                     display: "flex",
-                    backgroundColor: "#f2f4f500",
+                    backgroundColor: "transparent",
                     borderRadius: 15,
                     paddingLeft: 0,
                     paddingRight: 0,
@@ -69,7 +69,7 @@ export const EditorSidebarSelectedCommunicationInterface = ({
                     sx={{
                         display: "flex",
                         flexDirection: "column",
-                        backgroundColor: "#f2f4f500",
+                        backgroundColor: "transparent",
                         borderRadius: 15,
                         paddingLeft: 0,
                         paddingRight: 0,

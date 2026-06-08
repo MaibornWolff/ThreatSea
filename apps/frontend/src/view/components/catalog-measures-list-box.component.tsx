@@ -308,7 +308,7 @@ export const CatalogMeasuresListBox = ({
                                     >
                                         <Typography
                                             sx={{
-                                                bgcolor: "#00000000",
+                                                bgcolor: "transparent",
                                                 fontSize: "0.75rem",
                                                 fontStyle: "italic",
                                                 marginRight: 2,
@@ -319,7 +319,7 @@ export const CatalogMeasuresListBox = ({
                                         </Typography>
                                         <Typography
                                             sx={{
-                                                bgcolor: "#00000000",
+                                                bgcolor: "transparent",
                                                 fontSize: "0.75rem",
                                                 fontStyle: "italic",
                                             }}

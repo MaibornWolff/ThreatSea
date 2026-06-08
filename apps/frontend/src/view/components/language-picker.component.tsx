@@ -65,7 +65,7 @@ export const LanguagePicker = () => {
                     color: "languagePicker.color",
                     "&:hover": {
                         color: "primary.light",
-                        backgroundColor: "#00000000",
+                        backgroundColor: "transparent",
                     },
                 }}
             >

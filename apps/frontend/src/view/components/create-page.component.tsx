@@ -58,13 +58,13 @@ export const CreatePage = <P extends object>(
         let autoSaveIconColor: string = colors.text.statusNeutral;
         switch (autoSaveStatus) {
             case "uninitialized":
-                autoSaveIconColor = "#67ad5b";
+                autoSaveIconColor = colors.state.success;
                 break;
             case "failed":
-                autoSaveIconColor = "#c23f38";
+                autoSaveIconColor = colors.state.warning;
                 break;
             case "upToDate":
-                autoSaveIconColor = "#67ad5b";
+                autoSaveIconColor = colors.state.success;
                 break;
             case "notUpToDate":
                 autoSaveIconColor = colors.text.statusNeutral;

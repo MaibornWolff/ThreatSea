@@ -133,7 +133,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
                                         color: "text.primary",
                                         paddingRight: 2,
                                         "&:hover": {
-                                            backgroundColor: "#00000000",
+                                            backgroundColor: "transparent",
                                         },
                                     }}
                                 >
@@ -344,7 +344,7 @@ const Header = () => {
                 paddingBottom: 1.5,
                 paddingLeft: 6,
                 paddingRight: 6,
-                backgroundColor: "#4f6684",
+                backgroundColor: colors.component.pageHeaderBg,
             }}
         >
             <Box
@@ -359,7 +359,7 @@ const Header = () => {
                         margin: 0,
                         marginTop: "3.5px",
                         marginBottom: "9.5px",
-                        "&:hover": { backgroundColor: "#0000" },
+                        "&:hover": { backgroundColor: "transparent" },
                     }}
                     disableRipple
                     href="/"

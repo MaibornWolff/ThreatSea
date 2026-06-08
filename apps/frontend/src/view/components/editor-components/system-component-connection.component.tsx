@@ -74,7 +74,7 @@ function LineForPath({
             {/* Invisible hit detection area */}
             <Line
                 points={waypoints}
-                stroke={"#ff000000"}
+                stroke={"transparent"}
                 strokeWidth={15}
                 lineCap={"round"}
                 lineJoin={"round"}

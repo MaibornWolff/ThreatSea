@@ -188,7 +188,7 @@ const EditorTextAnnotationInner = ({
                     ref={textRectRef}
                     width={annotation.width ?? 0}
                     height={annotation.height ?? 0}
-                    fill="rgba(0,0,0,0)"
+                    fill="transparent"
                     fillEnabled
                     listening={!editing}
                 />

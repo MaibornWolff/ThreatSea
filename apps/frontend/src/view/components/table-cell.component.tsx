@@ -9,7 +9,7 @@ interface CustomTableCellProps extends TableCellProps {
 }
 
 const CustomTableCell = ({ sx, showBorder = false, children, ...props }: CustomTableCellProps) => {
-    const borderRight = showBorder ? "1.5px solid #00000000" : null;
+    const borderRight = showBorder ? "1.5px solid transparent" : null;
     return (
         <TableCell
             align="center"

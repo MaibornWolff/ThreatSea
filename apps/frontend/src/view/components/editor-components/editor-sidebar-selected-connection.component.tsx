@@ -26,7 +26,7 @@ export const EditorSidebarSelectedConnection = ({
             <Box
                 sx={{
                     display: "flex",
-                    backgroundColor: "#f2f4f500",
+                    backgroundColor: "transparent",
                     borderRadius: 15,
                     paddingLeft: 0,
                     paddingRight: 0,

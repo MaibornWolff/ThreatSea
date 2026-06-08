@@ -287,7 +287,7 @@ export const CatalogThreatsListBox = ({ catalogId, attacker, pointOfAttack, user
                                     >
                                         <Typography
                                             sx={{
-                                                bgcolor: "#00000000",
+                                                bgcolor: "transparent",
                                                 fontSize: "0.75rem",
                                                 fontStyle: "italic",
                                                 marginRight: 2,
@@ -298,7 +298,7 @@ export const CatalogThreatsListBox = ({ catalogId, attacker, pointOfAttack, user
                                         </Typography>
                                         <Typography
                                             sx={{
-                                                bgcolor: "#00000000",
+                                                bgcolor: "transparent",
                                                 fontSize: "0.75rem",
                                                 fontStyle: "italic",
                                             }}

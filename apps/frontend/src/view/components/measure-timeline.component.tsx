@@ -33,7 +33,7 @@ const TimeSlider = styled(Slider)(({ theme }) => ({
     "& .MuiSlider-rail": {
         opacity: 1, // 0.5,
         height: 2,
-        backgroundColor: theme.palette.primary.main, // "#bfbfbf",
+        backgroundColor: theme.palette.primary.main,
         borderRadius: 2,
     },
     "& .MuiSlider-markLabel": {
@@ -49,7 +49,7 @@ const TimeSlider = styled(Slider)(({ theme }) => ({
             content: '" "',
             width: 22,
             height: 35,
-            backgroundColor: "#0000",
+            backgroundColor: "transparent",
             opacity: 0.5,
             marginLeft: "-10px",
             marginTop: "-5px",

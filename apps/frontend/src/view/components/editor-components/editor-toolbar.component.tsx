@@ -10,11 +10,12 @@ import {
     TrendingFlat,
 } from "@mui/icons-material";
 import { Box, IconButton, Paper, Popover, Popper, Tooltip } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { useState, type ComponentType } from "react";
 import { useTranslation } from "react-i18next";
 import { EditorColorPicker } from "./editor-color-picker.component";
 import type { AnnotationType } from "#api/types/system.types.ts";
-import { colors } from "#view/wrappers/tokens.ts";
+import { colorPrimitives, colors } from "#view/wrappers/tokens.ts";
 
 const ANNOTATION_TYPE_LABEL_KEYS: Record<AnnotationType, string> = {
     rect: "canvas.annotation.rectangle",
@@ -46,14 +47,14 @@ const buttonContainerSx = {
 const iconButtonSx = {
     backgroundColor: "background.paperIntransparent",
     "&:hover": {
-        backgroundColor: "rgba(149, 163, 181, 0.7)",
+        backgroundColor: alpha(colorPrimitives.neutral.slate500, 0.7),
     },
 };
 
 const activeIconButtonSx = {
-    backgroundColor: "rgba(35, 60, 87, 0.85)",
+    backgroundColor: alpha(colors.brand.primary, 0.85),
     "&:hover": {
-        backgroundColor: "rgba(35, 60, 87, 1)",
+        backgroundColor: colors.brand.primary,
     },
 };
 

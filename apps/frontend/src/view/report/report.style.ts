@@ -1,12 +1,12 @@
 import { StyleSheet } from "@react-pdf/renderer";
-import { colors } from "#view/wrappers/tokens.ts";
+import { colorPrimitives, colors } from "#view/wrappers/tokens.ts";
 
 export const primaryColor = colors.brand.primary;
 export const backgroundColor = colors.surface.pageDefault;
 export const headerFontSize = 20;
 export const largeFontSize = 12;
 export const smallFontSize = 10;
-export const fontColor = "#233C58";
+export const fontColor = colorPrimitives.brand.blue900Pdf;
 const standardSpace = 8;
 export const s1 = standardSpace;
 export const s2 = standardSpace * 2;

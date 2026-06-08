@@ -22,12 +22,13 @@ import { AnchorOrientation, type AugmentedSystemComponent, type SystemPointOfAtt
 import type { EditorConnectionAnchor } from "#application/hooks/use-editor.hook.ts";
 import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import { editorSelectors } from "#application/selectors/editor.selectors.ts";
-import { colors } from "#view/wrappers/tokens.ts";
+import { alpha } from "@mui/material/styles";
+import { colorPrimitives, colors } from "#view/wrappers/tokens.ts";
 
 const COLORS = {
     normal: colors.surface.paperWhiteTranslucent,
     hover: colors.surface.paperWhiteTranslucent,
-    selected: "rgba(149, 163, 181, 0.7)",
+    selected: alpha(colorPrimitives.neutral.slate500, 0.7),
 };
 
 const NAME_COLORS = {
@@ -37,8 +38,8 @@ const NAME_COLORS = {
 };
 
 const ADD_CONNECTION_COLORS = {
-    normal: "rgba(149, 163, 181, 1)",
-    hover: "rgba(79, 102, 132, 1)",
+    normal: colorPrimitives.neutral.slate500,
+    hover: colorPrimitives.brand.blue700,
     selected: colors.brand.primary,
     foreground: colors.surface.canvasFill,
 };
@@ -432,7 +433,7 @@ const ConnectorGroup = ({
 
     return (
         <Group {...props} onMouseDown={handleMouseDown}>
-            <Rect x={-15} y={-15} width={110} height={130} fill={"#f000"} />
+            <Rect x={-15} y={-15} width={110} height={130} fill={"transparent"} />
             {children}
             <Connector
                 anchor={AnchorOrientation.top}
