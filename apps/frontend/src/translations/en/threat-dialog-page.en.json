@@ -1,7 +1,7 @@
 {
   "applyMeasure": "Apply Measure",
   "measureThreatDeleteMessage": "Do you really want to no longer apply the measure '{{measureName}}' to the threat '{{threatName}}'?",
-  "noThreatsFound": "Not applied to any threat",
+  "noMeasuresApplied": "Not applied to any measure",
   "setsOutOfScope": "Set out of Scope by measure",
   "editMeasureImpact": "Edit Impact",
   "deleteMeasureImpact": "Delete Impact",

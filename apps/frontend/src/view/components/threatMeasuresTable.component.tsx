@@ -143,7 +143,7 @@ export const ThreatMeasuresTable = ({
                                                 fontStyle: "italic",
                                             }}
                                         >
-                                            {t("noThreatsFound")}
+                                            {t("noMeasuresApplied")}
                                         </Typography>
                                     </TableCell>
                                 </TableRow>
