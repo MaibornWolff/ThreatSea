@@ -7,7 +7,7 @@ import {
     List,
     ListItem,
     ListItemAvatar,
-    ListItemSecondaryAction,
+    ListItemButton,
     ListItemText,
     Menu,
     MenuItem,
@@ -246,88 +246,58 @@ export const EditorContextMenu = ({ onSelect, stageRef, ref }: EditorContextMenu
 
 EditorContextMenu.displayName = "EditorContextMenu";
 
-interface ComponentListItemProps extends ListItemProps {
+interface ComponentListItemProps extends Omit<ListItemProps, "onClick"> {
     label: string;
     symbol: string | null;
     onEdit?: () => void;
     onClickDelete?: () => void;
+    onClick?: React.MouseEventHandler<HTMLDivElement>;
     sx?: SxProps<Theme>;
 }
 
-const ComponentListItem = ({ label, symbol, onEdit, onClickDelete, sx = {}, ...props }: ComponentListItemProps) => {
+const ComponentListItem = ({
+    label,
+    symbol,
+    onEdit,
+    onClickDelete,
+    sx = {},
+    onClick,
+    ...rest
+}: ComponentListItemProps) => {
     const { t } = useTranslation("editorPage");
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-    const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
+        event.stopPropagation();
         setAnchorEl(event.currentTarget);
     };
 
-    const handleClose = () => {
+    const handleCloseMenu = () => {
         setAnchorEl(null);
     };
 
     const open = Boolean(anchorEl);
 
     const handleDelete = () => {
-        handleClose();
+        handleCloseMenu();
         onClickDelete?.();
     };
 
     return (
         <ListItem
-            {...props}
-            dense
+            {...rest}
+            disablePadding
             divider
-            sx={{
-                borderBottomColor: "#fff",
-                "&:hover": {
-                    backgroundColor: "#fff",
-                },
-                ...sx,
-            }}
-        >
-            <ListItemAvatar
-                sx={{
-                    minWidth: "0px",
-                    border: "0.75px solid #233C57",
-                    borderRadius: 50,
-                    marginRight: "13px",
-                }}
-            >
-                <Avatar
-                    sx={{
-                        width: 18,
-                        height: 18,
-                        padding: 0.25,
-                    }}
-                    src={symbol ?? ""}
-                />
-            </ListItemAvatar>
-            <ListItemText
-                primary={
-                    <Typography
-                        sx={{
-                            color: "primary.main",
-                            fontSize: "0.75rem",
-                            fontWeight: "bold",
-                            minWidth: "100px",
-                            maxWidth: "100px",
-                        }}
-                    >
-                        {label}
-                    </Typography>
-                }
-            />
-            {onEdit && (
-                <ListItemSecondaryAction>
-                    <Box>
-                        <IconButton size="small" onClick={handleClick}>
+            secondaryAction={
+                onEdit && (
+                    <>
+                        <IconButton size="small" onClick={handleOpenMenu}>
                             <MoreVert sx={{ fontSize: 18 }} />
                         </IconButton>
                         <Menu
                             anchorEl={anchorEl}
                             open={open}
-                            onClose={handleClose}
+                            onClose={handleCloseMenu}
                             slotProps={{
                                 list: {
                                     sx: {
@@ -365,9 +335,56 @@ const ComponentListItem = ({ label, symbol, onEdit, onClickDelete, sx = {}, ...p
                                 </IconButton>
                             </MenuItem>
                         </Menu>
-                    </Box>
-                </ListItemSecondaryAction>
-            )}
+                    </>
+                )
+            }
+            sx={{
+                borderBottomColor: "#fff",
+                ...sx,
+            }}
+        >
+            <ListItemButton
+                dense
+                onClick={onClick}
+                sx={{
+                    "&:hover": {
+                        backgroundColor: "#fff",
+                    },
+                }}
+            >
+                <ListItemAvatar
+                    sx={{
+                        minWidth: "0px",
+                        border: "0.75px solid #233C57",
+                        borderRadius: 50,
+                        marginRight: "13px",
+                    }}
+                >
+                    <Avatar
+                        sx={{
+                            width: 18,
+                            height: 18,
+                            padding: 0.25,
+                        }}
+                        src={symbol ?? ""}
+                    />
+                </ListItemAvatar>
+                <ListItemText
+                    primary={
+                        <Typography
+                            sx={{
+                                color: "primary.main",
+                                fontSize: "0.75rem",
+                                fontWeight: "bold",
+                                minWidth: "100px",
+                                maxWidth: "100px",
+                            }}
+                        >
+                            {label}
+                        </Typography>
+                    }
+                />
+            </ListItemButton>
         </ListItem>
     );
 };

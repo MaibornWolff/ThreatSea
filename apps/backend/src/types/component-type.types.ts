@@ -1,5 +1,6 @@
 import { ProjectIdParam } from "#types/project.types.js";
 import { POINTS_OF_ATTACK } from "./points-of-attack.types.js";
+import { STANDARD_ICONS } from "./standard-icons.types.js";
 import { Type } from "class-transformer";
 import {
     ArrayMinSize,
@@ -21,12 +22,14 @@ import {
     FIELD_MUST_BE_VALID_IMAGE_DATA,
     FIELD_MUST_EXIST_MESSAGE,
     MAX_NAME_LENGTH,
+    MAX_SYMBOL_LENGTH,
     PARAM_MUST_BE_INT_MESSAGE,
     PARAM_MUST_EXIST_MESSAGE,
     STRING_MUST_NOT_BE_EMPTY_MESSAGE,
     STRING_TOO_LONG_MESSAGE,
 } from "#middlewares/input-validations/validator-messages.js";
 import { Trim } from "#middlewares/input-validations/trim.decorator.js";
+import type { CrossFieldCheck } from "#middlewares/input-validations/input-validation.middleware.js";
 
 export class ComponentTypeIdParam extends ProjectIdParam {
     @IsDefined({ message: PARAM_MUST_EXIST_MESSAGE("componentTypeId") })
@@ -55,10 +58,17 @@ export class CreateComponentTypeRequest {
     @ValidateIf((_, value) => value != null)
     @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("symbol") })
     @IsString({ message: FIELD_MUST_BE_STRING_MESSAGE("symbol", "or null") })
-    @Matches(/^data:image\/(png|jpeg|jpg);base64,[A-Za-z0-9+/=]+$/, {
+    @MaxLength(MAX_SYMBOL_LENGTH, { message: STRING_TOO_LONG_MESSAGE("symbol", MAX_SYMBOL_LENGTH) })
+    @Matches(/^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/, {
         message: FIELD_MUST_BE_VALID_IMAGE_DATA("symbol"),
     })
     symbol!: string | null;
+
+    @ValidateIf((_, value) => value != null)
+    @IsEnum(STANDARD_ICONS, {
+        message: FIELD_MUST_BE_ONE_OF_MESSAGE("standardIcon", Object.values(STANDARD_ICONS)),
+    })
+    standardIcon!: STANDARD_ICONS | null;
 }
 
 export { CreateComponentTypeRequest as UpdateComponentTypeRequest };
@@ -69,3 +79,12 @@ export interface ComponentTypeResponse extends CreateComponentTypeRequest {
     createdAt: string;
     updatedAt: string;
 }
+
+/**
+ * Document-level invariant: a component type must carry exactly one icon — either
+ * an uploaded base64 `symbol` or a referenced `standardIcon` — never both, never neither.
+ * Lives outside the DTO class because property-level decorators cannot express the
+ * null/null case without being skipped by `@ValidateIf`.
+ */
+export const iconExactlyOne: CrossFieldCheck<CreateComponentTypeRequest> = (body) =>
+    (body.symbol != null) === (body.standardIcon != null) ? "Exactly one of symbol or standardIcon must be set" : null;

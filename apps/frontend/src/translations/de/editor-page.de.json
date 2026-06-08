@@ -77,7 +77,13 @@
     "fileUnusable": "Die ausgewählte Datei kann nicht verwendet werden. Sie ist entweder zu groß (> 100kB) oder keine Bild-Datei.",
     "addComponent": "Komponente hinzufügen",
     "editComponent": "Komponente bearbeiten",
-    "selectSymbol": "Symbol auswählen"
+    "iconLabel": "Symbol",
+    "iconStandardLabel": "Standardsymbole",
+    "iconOr": "oder",
+    "iconUploadLabel": "Eigenes Symbol",
+    "iconUploadHint": "PNG / JPEG, bis 100 kB.",
+    "iconUploadTooltip": "Eigenes Symbol hochladen",
+    "iconRequired": "Ein Symbol ist erforderlich"
   },
   "deleteDialog": {
     "deleteCompMessage": "Wollen Sie die Komponente '{{ componentName }}' wirklich löschen?",

@@ -16,6 +16,8 @@ const LINE_OF_TOLERANCE_VALUES = (() => {
 
 export const MAX_NAME_LENGTH = 255;
 export const MAX_DESCRIPTION_LENGTH = 65535;
+// Allows ~100 kB binary after base64 inflation (~33%) plus the `data:image/...;base64,` prefix.
+export const MAX_SYMBOL_LENGTH = 150_000;
 export const CIA_VALUE_MIN = 1;
 export const CIA_VALUE_MAX = 5;
 export const PROBABILITY_VALUE_MIN = 1;
