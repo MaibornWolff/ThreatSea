@@ -57,6 +57,7 @@ export const colors = {
     },
     text: {
         default: colorPrimitives.brand.blue900,
+        // Currently equals text.default; kept as a separate alias until design specifies a distinct muted value.
         muted: colorPrimitives.brand.blue900,
         inverse: colorPrimitives.neutral.white,
         error: colorPrimitives.state.errorMain,
@@ -78,6 +79,7 @@ export const colors = {
         contextMenuHover: colorPrimitives.neutral.gray200,
         dialog: colorPrimitives.neutral.gray200Cool,
         listItem: colorPrimitives.neutral.gray100Cool,
+        // paperWhite and canvasFill share the same value; preserved as distinct aliases to keep paper-surface vs canvas-fill intent separable.
         paperWhite: colorPrimitives.neutral.white,
         paperWhiteTranslucent: colorPrimitives.neutral.whiteAlpha67,
         canvasFill: colorPrimitives.neutral.white,
