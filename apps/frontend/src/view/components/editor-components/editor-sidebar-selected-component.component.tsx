@@ -197,7 +197,7 @@ const EditorSidebarSelectedComponentInner = ({
                         onClick={handleDeleteComponent}
                         sx={{
                             "&:hover": {
-                                color: "#ef5350",
+                                color: "error.light",
                                 backgroundColor: "background.paperIntransparent",
                             },
                             marginTop: -1,
@@ -535,7 +535,7 @@ const EditorSidebarSelectedComponentInner = ({
                                                 }
                                                 sx={{
                                                     "&:hover": {
-                                                        color: "#ef5350",
+                                                        color: "error.light",
                                                         backgroundColor: "background.paperIntransparent",
                                                     },
                                                 }}
@@ -825,7 +825,7 @@ const EditorSidebarSelectedComponentInner = ({
                                 }
                                 sx={{
                                     "&:hover": {
-                                        color: "#ef5350",
+                                        color: "error.light",
                                         backgroundColor: "background.paperIntransparent",
                                     },
                                 }}

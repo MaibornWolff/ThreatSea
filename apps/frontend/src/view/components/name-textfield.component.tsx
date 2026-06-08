@@ -125,7 +125,7 @@ const nameTextFieldSx = <TFieldValues extends FieldValues>(
         borderBottom: `1px solid ${theme.palette.primary.main} !important`,
     },
     "& .MuiFormHelperText-root": {
-        color: props.error ? "#d32f2f" : "inherit",
+        color: props.error ? theme.palette.error.main : "inherit",
         margin: "4px 0 0 8px",
         fontWeight: "normal",
         fontSize: "0.75rem",
@@ -140,7 +140,7 @@ const nameTextFieldSx = <TFieldValues extends FieldValues>(
         autoComplete: "off",
     },
     "input::placeholder": {
-        color: props.error ? "#d32f2f" : "initial",
+        color: props.error ? theme.palette.error.main : "initial",
         opacity: props.error ? 0.7 : 0.5,
     },
     color: "text.primary !important",

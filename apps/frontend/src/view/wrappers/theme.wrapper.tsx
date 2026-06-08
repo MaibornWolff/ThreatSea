@@ -25,6 +25,10 @@ const theme = createTheme({
             main: colors.brand.accent,
             light: colors.brand.accentSubtle,
         },
+        error: {
+            main: colors.state.error,
+            light: colors.state.errorLight,
+        },
         background: {
             defaultIntransparent: colors.surface.pageDefaultOpaque,
             default: colors.surface.pageDefault,

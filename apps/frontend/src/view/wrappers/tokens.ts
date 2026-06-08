@@ -30,6 +30,8 @@ export const colorPrimitives = {
     },
     state: {
         errorMain: "rgba(211, 47, 47, 1)",
+        errorLight: "rgba(239, 83, 80, 1)",
+        errorBold: "#f00",
     },
     brandAlpha: {
         blue900Alpha10: "rgba(35, 60, 87, 0.1)",
@@ -67,6 +69,8 @@ export const colors = {
     },
     state: {
         error: colorPrimitives.state.errorMain,
+        errorLight: colorPrimitives.state.errorLight,
+        errorBold: colorPrimitives.state.errorBold,
         hoverAccent: colorPrimitives.brand.orange500,
     },
     component: {

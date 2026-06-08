@@ -326,7 +326,7 @@ const ComponentListItem = ({
                                 <IconButton
                                     sx={{
                                         "&:hover": {
-                                            color: "#ef5350",
+                                            color: "error.light",
                                             backgroundColor: "background.paperIntransparent",
                                         },
                                     }}

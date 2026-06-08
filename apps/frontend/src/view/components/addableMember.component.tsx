@@ -103,7 +103,8 @@ export const AddableMember = <TFieldValues extends BaseAddableMemberFormValues>(
             sx={{
                 margin: "20px 0px 15px 0px",
                 width: "100%",
-                border: highlightListError ? "1px solid #d32f2f" : "",
+                border: highlightListError ? "1px solid" : "",
+                borderColor: highlightListError ? "error.main" : undefined,
                 borderRadius: 5,
                 overflow: "hidden",
                 height: "200px",

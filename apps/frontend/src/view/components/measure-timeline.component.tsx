@@ -1,6 +1,7 @@
 import type { TimelineData } from "#application/hooks/use-matrix.hook.ts";
 import { Box, Slider, type BoxProps, type SxProps, type Theme } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { colors } from "#view/wrappers/tokens.ts";
 
 const TimeSlider = styled(Slider)(({ theme }) => ({
     height: 2,
@@ -61,8 +62,8 @@ const TimeSlider = styled(Slider)(({ theme }) => ({
             backgroundColor: theme.palette.primary.main,
         },
         "&:hover + .MuiSlider-valueLabel": {
-            color: "#f00",
-            backgroundColor: "#f00",
+            color: colors.state.errorBold,
+            backgroundColor: colors.state.errorBold,
         },
     },
 }));
