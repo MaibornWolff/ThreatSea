@@ -10,12 +10,13 @@ import {
     TrendingFlat,
 } from "@mui/icons-material";
 import { Box, IconButton, Paper, Popover, Popper, Tooltip } from "@mui/material";
-import { alpha } from "@mui/material/styles";
+import { alpha, useTheme } from "@mui/material/styles";
 import { useState, type ComponentType } from "react";
 import { useTranslation } from "react-i18next";
 import { EditorColorPicker } from "./editor-color-picker.component";
 import type { AnnotationType } from "#api/types/system.types.ts";
-import { colorPrimitives, colors } from "#view/wrappers/tokens.ts";
+// Primitive escape hatch: slate500 has no semantic palette equivalent.
+import { colorPrimitives } from "#view/wrappers/tokens.ts";
 
 const ANNOTATION_TYPE_LABEL_KEYS: Record<AnnotationType, string> = {
     rect: "canvas.annotation.rectangle",
@@ -44,22 +45,8 @@ const buttonContainerSx = {
     marginRight: "auto",
 };
 
-const iconButtonSx = {
-    backgroundColor: "background.paperIntransparent",
-    "&:hover": {
-        backgroundColor: alpha(colorPrimitives.neutral.slate500, 0.7),
-    },
-};
-
-const activeIconButtonSx = {
-    backgroundColor: alpha(colors.brand.primary, 0.85),
-    "&:hover": {
-        backgroundColor: colors.brand.primary,
-    },
-};
-
 const iconSx = { fontSize: 30, color: "primary.main" };
-const activeIconSx = { fontSize: 30, color: colors.text.inverse };
+const activeIconSx = { fontSize: 30, color: "text.white" };
 
 const ANNOTATION_TOOLS: { tool: AnnotationType; Icon: ComponentType<{ sx?: object }> }[] = [
     { tool: "rect", Icon: CropSquare },
@@ -87,9 +74,24 @@ export const EditorToolbar = ({
     onSetAnnotationColor,
 }: EditorToolbarProps) => {
     const { t } = useTranslation("editorPage");
+    const theme = useTheme();
     const [shapesButton, setShapesButton] = useState<HTMLButtonElement | null>(null);
     const [freehandButton, setFreehandButton] = useState<HTMLButtonElement | null>(null);
     const [shapesOpen, setShapesOpen] = useState(false);
+
+    const iconButtonSx = {
+        backgroundColor: "background.paperIntransparent",
+        "&:hover": {
+            backgroundColor: alpha(colorPrimitives.neutral.slate500, 0.7),
+        },
+    };
+
+    const activeIconButtonSx = {
+        backgroundColor: alpha(theme.palette.primary.main, 0.85),
+        "&:hover": {
+            backgroundColor: theme.palette.primary.main,
+        },
+    };
 
     const toggleTool = (tool: AnnotationType): void => {
         onSetAnnotationTool(annotationTool === tool ? null : tool);

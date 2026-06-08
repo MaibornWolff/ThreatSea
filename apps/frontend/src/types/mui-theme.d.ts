@@ -34,12 +34,19 @@ declare module "@mui/material/styles" {
         headerBackground: string;
     }
 
+    interface BorderPalette {
+        canvas: string;
+        canvasHelpLine: string;
+        divider: string;
+    }
+
     interface Palette {
         toggleButtons: ToggleButtonsPalette;
         matrix: MatrixPalette;
         languagePicker: LanguagePickerPalette;
         table: TablePalette;
         page: PagePalette;
+        border: BorderPalette;
     }
 
     interface PaletteOptions {
@@ -48,6 +55,15 @@ declare module "@mui/material/styles" {
         languagePicker?: LanguagePickerPalette;
         table?: TablePalette;
         page?: PagePalette;
+        border?: BorderPalette;
+    }
+
+    interface PaletteColor {
+        bold?: string;
+    }
+
+    interface SimplePaletteColorOptions {
+        bold?: string;
     }
 
     interface TypeBackground {
@@ -58,12 +74,23 @@ declare module "@mui/material/styles" {
         paperLight: string;
         headerToggleButtons: string;
         doneEditing: string;
+        assetSwitchTrack: string;
+        canvasFill: string;
+        contextMenu: string;
+        contextMenuHover: string;
+        dialog: string;
+        listItem: string;
+        paperWhite: string;
+        paperWhiteTranslucent: string;
+        tooltip: string;
     }
 
     interface TypeText {
         buttonselected: string;
         white: string;
         formError: string;
+        statusNeutral: string;
+        subtle: string;
     }
 }
 

@@ -28,6 +28,7 @@ const theme = createTheme({
         error: {
             main: colors.state.error,
             light: colors.state.errorLight,
+            bold: colors.state.errorBold,
         },
         success: {
             main: colors.state.success,
@@ -45,6 +46,15 @@ const theme = createTheme({
             paperLight: colors.surface.paperLight,
             headerToggleButtons: colors.component.headerToggleBg,
             doneEditing: colors.surface.doneEditing,
+            assetSwitchTrack: colors.component.assetSwitchTrack,
+            canvasFill: colors.surface.canvasFill,
+            contextMenu: colors.surface.contextMenu,
+            contextMenuHover: colors.surface.contextMenuHover,
+            dialog: colors.surface.dialog,
+            listItem: colors.surface.listItem,
+            paperWhite: colors.surface.paperWhite,
+            paperWhiteTranslucent: colors.surface.paperWhiteTranslucent,
+            tooltip: colors.surface.tooltip,
         },
         text: {
             primary: colors.text.default,
@@ -52,6 +62,13 @@ const theme = createTheme({
             buttonselected: colors.text.inverse,
             white: colors.text.inverse,
             formError: colors.text.error,
+            statusNeutral: colors.text.statusNeutral,
+            subtle: colors.text.subtle,
+        },
+        border: {
+            canvas: colors.border.canvas,
+            canvasHelpLine: colors.border.canvasHelpLine,
+            divider: colors.border.divider,
         },
         toggleButtons: {
             header: {

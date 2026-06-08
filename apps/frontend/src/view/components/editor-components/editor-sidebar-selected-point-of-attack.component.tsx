@@ -8,7 +8,6 @@ import { useAssetHoverPopper } from "#application/hooks/useAssetHoverPopper.ts";
 import type { ChangeEvent } from "react";
 import type { Asset } from "#api/types/asset.types.ts";
 import type { SystemComponent, SystemPointOfAttack } from "#api/types/system.types.ts";
-import { colors } from "#view/wrappers/tokens.ts";
 
 export interface EditorSidebarSelectedPointOfAttackProps {
     selectedComponent: SystemComponent & { pointsOfAttack?: SystemPointOfAttack[] };
@@ -81,7 +80,7 @@ export const EditorSidebarSelectedPointOfAttack = ({
             <Box
                 sx={{
                     display: "flex",
-                    backgroundColor: colors.surface.paperWhite,
+                    backgroundColor: "background.paperWhite",
                     borderRadius: 15,
                     height: "31px",
                     paddingLeft: 8,

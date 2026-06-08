@@ -12,7 +12,6 @@ import type { ChangeEvent } from "react";
 import type { SystemConnectionPoint } from "#application/adapters/system-connection-point.adapter.ts";
 import type { Asset } from "#api/types/asset.types.ts";
 import type { SystemPointOfAttack } from "#api/types/system.types.ts";
-import { colors } from "#view/wrappers/tokens.ts";
 
 export interface EditorSidebarSelectedCommunicationInterfaceProps {
     selectedConnectionPoint: SystemConnectionPoint;
@@ -171,7 +170,7 @@ export const EditorSidebarSelectedCommunicationInterface = ({
             <Box
                 sx={{
                     display: "flex",
-                    backgroundColor: colors.surface.paperWhite,
+                    backgroundColor: "background.paperWhite",
                     borderRadius: 15,
                     height: "31px",
                     paddingLeft: 8,
@@ -234,7 +233,7 @@ export const EditorSidebarSelectedCommunicationInterface = ({
                     <Box
                         sx={{
                             display: "flex",
-                            backgroundColor: colors.surface.paperWhite,
+                            backgroundColor: "background.paperWhite",
                             borderRadius: 15,
                             height: "31px",
                             paddingLeft: 8,

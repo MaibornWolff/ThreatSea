@@ -14,7 +14,6 @@ import {
     type SystemConnection,
 } from "#api/types/system.types.ts";
 import type { EditorConnectionAnchor } from "#application/hooks/use-editor.hook.ts";
-import { colors } from "#view/wrappers/tokens.ts";
 
 let opened: { x: number; y: number } = { x: 0, y: 0 };
 
@@ -149,7 +148,7 @@ export const CommunicationContextMenu = ({
             sx={{
                 position: "absolute",
                 zIndex: 1000,
-                bgcolor: colors.surface.contextMenu,
+                bgcolor: "background.contextMenu",
                 boxShadow: 4,
                 visibility: open ? "visible" : "hidden",
                 borderRadius: 4,
@@ -187,9 +186,9 @@ export const CommunicationContextMenu = ({
                                     onClose();
                                 }}
                                 sx={{
-                                    borderBottomColor: colors.border.divider,
+                                    borderBottomColor: "border.divider",
                                     "&:hover": {
-                                        backgroundColor: colors.surface.paperWhite,
+                                        backgroundColor: "background.paperWhite",
                                     },
                                 }}
                             >
@@ -245,7 +244,7 @@ export const CommunicationContextMenu = ({
                     onClick={handleCreateNew}
                     sx={{
                         "&:hover": {
-                            backgroundColor: colors.surface.paperWhite,
+                            backgroundColor: "background.paperWhite",
                         },
                     }}
                 >

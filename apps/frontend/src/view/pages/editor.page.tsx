@@ -4,6 +4,7 @@
  */
 
 import { Box, LinearProgress } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Group, Layer, Line } from "react-konva";
@@ -33,7 +34,6 @@ import {
 import { EditorToolbar } from "#view/components/editor-components/editor-toolbar.component.tsx";
 import { TextEditingToolbarLayer } from "#view/components/editor-components/text-editing-toolbar-layer.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
-import { colors } from "#view/wrappers/tokens.ts";
 import { SystemComponentConnection } from "#view/components/editor-components/system-component-connection.component.tsx";
 import { SystemComponent } from "#view/components/editor-components/system-component.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
@@ -71,8 +71,6 @@ const GRID_CONFIG = {
     gridSizeY: 5,
     renderedGridSizeX: 20,
     renderedGridSizeY: 20,
-    gridLineColor: colors.border.canvas,
-    helpLineColor: colors.border.canvasHelpLine,
 };
 
 // Memoize line array creation
@@ -103,6 +101,7 @@ interface EditorPageBodyProps {
 }
 
 const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
+    const theme = useTheme();
     const { projectId: projectIdParam } = useParams<{ projectId: string }>();
     const projectId = Number.parseInt(projectIdParam ?? "", 10);
     const stageRef = useRef<KonvaStage | null>(null);
@@ -1293,7 +1292,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                             index * GRID_CONFIG.renderedGridSizeY -
                                             gridRenderConfig.stageOffsetY,
                                     ]}
-                                    stroke={GRID_CONFIG.gridLineColor}
+                                    stroke={theme.palette.border.canvas}
                                     strokeWidth={0.75}
                                 />
                             ))}
@@ -1326,7 +1325,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                                 stageOffsetX,
                                             500000,
                                         ]}
-                                        stroke={GRID_CONFIG.gridLineColor}
+                                        stroke={theme.palette.border.canvas}
                                         strokeWidth={0.75}
                                     />
                                 );
@@ -1341,7 +1340,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                             10000,
                                             currentHelpLinesRef.current.y,
                                         ]}
-                                        stroke={GRID_CONFIG.helpLineColor}
+                                        stroke={theme.palette.border.canvasHelpLine}
                                         strokeWidth={0.75}
                                     />
                                     <Line
@@ -1351,7 +1350,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                             10000,
                                             currentHelpLinesRef.current.y2,
                                         ]}
-                                        stroke={GRID_CONFIG.helpLineColor}
+                                        stroke={theme.palette.border.canvasHelpLine}
                                         strokeWidth={0.75}
                                     />
                                     <Line
@@ -1361,7 +1360,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                             currentHelpLinesRef.current.x,
                                             10000,
                                         ]}
-                                        stroke={GRID_CONFIG.helpLineColor}
+                                        stroke={theme.palette.border.canvasHelpLine}
                                         strokeWidth={0.75}
                                     />
                                     <Line
@@ -1371,7 +1370,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                             currentHelpLinesRef.current.x2,
                                             10000,
                                         ]}
-                                        stroke={GRID_CONFIG.helpLineColor}
+                                        stroke={theme.palette.border.canvasHelpLine}
                                         strokeWidth={0.75}
                                     />
                                 </Group>

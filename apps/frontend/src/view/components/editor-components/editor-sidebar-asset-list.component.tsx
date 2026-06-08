@@ -1,7 +1,6 @@
 import { Box, FormGroup, Switch, Typography } from "@mui/material";
 import type { ChangeEvent, MouseEvent } from "react";
 import type { Asset } from "#api/types/asset.types.ts";
-import { colors } from "#view/wrappers/tokens.ts";
 
 export interface EditorSidebarAssetListProps {
     items: Asset[];
@@ -41,7 +40,7 @@ export const EditorSidebarAssetList = ({
                         "& .MuiSwitch-switchBase": {
                             "&.Mui-checked": {
                                 "& + .MuiSwitch-track": {
-                                    backgroundColor: colors.component.assetSwitchTrack,
+                                    backgroundColor: "background.assetSwitchTrack",
                                     opacity: 0.8,
                                 },
                             },

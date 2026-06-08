@@ -1,12 +1,11 @@
 import { Add } from "@mui/icons-material";
 import { IconButton, Tooltip, Box } from "@mui/material";
-import { alpha } from "@mui/material/styles";
+import { alpha, useTheme } from "@mui/material/styles";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { DEFAULT_ANNOTATION_COLOR } from "#view/colors/annotation.colors.ts";
 import { POA_COLORS } from "#view/colors/pointsOfAttack.colors.ts";
-import { colorPrimitives, colors } from "#view/wrappers/tokens.ts";
 
 const keepFocusOnClick = (event: MouseEvent): void => {
     event.preventDefault();
@@ -31,6 +30,7 @@ interface ColorPresetChipProps {
 }
 
 const ColorPresetChip = ({ presetColor, selectedColor, disabled, onClick, tooltip }: ColorPresetChipProps) => {
+    const theme = useTheme();
     const isCurrent = selectedColor.toLowerCase() === presetColor.toLowerCase();
     const button = (
         <IconButton
@@ -48,8 +48,8 @@ const ColorPresetChip = ({ presetColor, selectedColor, disabled, onClick, toolti
                     borderRadius: "50%",
                     backgroundColor: presetColor,
                     border: isCurrent
-                        ? `2px solid ${colors.brand.primary}`
-                        : `1px solid ${alpha(colorPrimitives.neutral.black, 0.25)}`,
+                        ? `2px solid ${theme.palette.primary.main}`
+                        : `1px solid ${alpha(theme.palette.common.black, 0.25)}`,
                 }}
             />
         </IconButton>
@@ -84,6 +84,7 @@ export const EditorColorPicker = ({
     stacked = false,
 }: EditorColorPickerProps) => {
     const { t } = useTranslation("editorPage");
+    const theme = useTheme();
     const customColorInputRef = useRef<HTMLInputElement>(null);
 
     const [previewColor, setPreviewColor] = useState<string | null>(null);
@@ -163,8 +164,8 @@ export const EditorColorPicker = ({
                 height: "24px",
                 borderRadius: "50%",
                 backgroundColor: displayColor,
-                border: `2px solid ${colors.border.divider}`,
-                boxShadow: `0 0 0 1px ${alpha(colors.brand.primary, 0.6)}`,
+                border: `2px solid ${theme.palette.border.divider}`,
+                boxShadow: `0 0 0 1px ${alpha(theme.palette.primary.main, 0.6)}`,
             }}
         />
     );
@@ -194,8 +195,8 @@ export const EditorColorPicker = ({
                             width: "20px",
                             height: "20px",
                             padding: 0,
-                            border: `1px dashed ${alpha(colors.brand.primary, 0.6)}`,
-                            color: alpha(colors.brand.primary, 0.8),
+                            border: `1px dashed ${alpha(theme.palette.primary.main, 0.6)}`,
+                            color: alpha(theme.palette.primary.main, 0.8),
                         }}
                         aria-label={t("canvas.annotation.color")}
                     >

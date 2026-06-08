@@ -22,27 +22,9 @@ import { AnchorOrientation, type AugmentedSystemComponent, type SystemPointOfAtt
 import type { EditorConnectionAnchor } from "#application/hooks/use-editor.hook.ts";
 import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import { editorSelectors } from "#application/selectors/editor.selectors.ts";
-import { alpha } from "@mui/material/styles";
-import { colorPrimitives, colors } from "#view/wrappers/tokens.ts";
-
-const COLORS = {
-    normal: colors.surface.paperWhiteTranslucent,
-    hover: colors.surface.paperWhiteTranslucent,
-    selected: alpha(colorPrimitives.neutral.slate500, 0.7),
-};
-
-const NAME_COLORS = {
-    foreground: colors.brand.primary,
-    background: colors.surface.paperWhiteTranslucent,
-    stroke: colors.border.canvas,
-};
-
-const ADD_CONNECTION_COLORS = {
-    normal: colorPrimitives.neutral.slate500,
-    hover: colorPrimitives.brand.blue700,
-    selected: colors.brand.primary,
-    foreground: colors.surface.canvasFill,
-};
+import { alpha, useTheme } from "@mui/material/styles";
+// Primitive escape hatch: slate500 and blue700 have no semantic palette equivalents.
+import { colorPrimitives } from "#view/wrappers/tokens.ts";
 
 const imageMap: Record<string, string> = {
     "communication-infrastructure.png": communicationInfrastructure,
@@ -138,6 +120,17 @@ export const SystemComponent = ({
     onClick,
     ...props
 }: SystemComponentProps): JSX.Element => {
+    const theme = useTheme();
+    const COLORS = {
+        normal: theme.palette.background.paperWhiteTranslucent,
+        hover: theme.palette.background.paperWhiteTranslucent,
+        selected: alpha(colorPrimitives.neutral.slate500, 0.7),
+    };
+    const NAME_COLORS = {
+        foreground: theme.palette.primary.main,
+        background: theme.palette.background.paperWhiteTranslucent,
+        stroke: theme.palette.border.canvas,
+    };
     const { id, height, width } = props;
     const [image] = useImage(remapImagePath(symbol) ?? "");
     const [smallImage] = useImage(smallIcon);
@@ -286,7 +279,7 @@ export const SystemComponent = ({
                         x={40}
                         y={40}
                         radius={(width - 20) / 2}
-                        stroke={colors.border.canvas}
+                        stroke={theme.palette.border.canvas}
                         strokeWidth={visualHover || visualSelected ? 9 : 4}
                     />
                 )}
@@ -485,6 +478,13 @@ const Connector = ({
     onSelectAnchor,
     stageRef,
 }: ConnectorProps) => {
+    const theme = useTheme();
+    const ADD_CONNECTION_COLORS = {
+        normal: colorPrimitives.neutral.slate500,
+        hover: colorPrimitives.brand.blue700,
+        selected: theme.palette.primary.main,
+        foreground: theme.palette.background.canvasFill,
+    };
     const [x, y] = useMemo<[number, number]>(() => {
         switch (anchor) {
             case "top":

@@ -28,7 +28,7 @@ import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { useEditor } from "#application/hooks/use-editor.hook.ts";
 import { editorSelectors } from "#application/selectors/editor.selectors.ts";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
-import { colors } from "#view/wrappers/tokens.ts";
+import { useTheme } from "@mui/material/styles";
 
 let opened = {
     x: 0,
@@ -43,6 +43,7 @@ interface EditorContextMenuProps {
 
 export const EditorContextMenu = ({ onSelect, stageRef, ref }: EditorContextMenuProps) => {
     const { t } = useTranslation("editorPage");
+    const theme = useTheme();
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const params = useParams<{ projectId: string }>();
@@ -139,7 +140,7 @@ export const EditorContextMenu = ({ onSelect, stageRef, ref }: EditorContextMenu
             sx={{
                 position: "absolute",
                 zIndex: 1000,
-                bgcolor: colors.surface.contextMenu,
+                bgcolor: "background.contextMenu",
                 boxShadow: 4,
                 visibility: open ? "initial" : "hidden",
                 borderRadius: 4,
@@ -169,11 +170,11 @@ export const EditorContextMenu = ({ onSelect, stageRef, ref }: EditorContextMenu
                     dense
                     divider
                     sx={{
-                        borderTop: `1px solid ${colors.border.divider}`,
+                        borderTop: `1px solid ${theme.palette.border.divider}`,
                         borderBottom: "none",
-                        backgroundColor: colors.surface.contextMenuHover,
+                        backgroundColor: "background.contextMenuHover",
                         "&:hover": {
-                            backgroundColor: colors.surface.paperWhite,
+                            backgroundColor: "background.paperWhite",
                         },
                         display: "flex",
                         justifyContent: "space-between",
@@ -188,7 +189,7 @@ export const EditorContextMenu = ({ onSelect, stageRef, ref }: EditorContextMenu
                             sx={{
                                 mr: 1,
                                 "&:hover": {
-                                    backgroundColor: colors.surface.paperWhite,
+                                    backgroundColor: "background.paperWhite",
                                     color: "secondary.light",
                                 },
                             }}
@@ -232,9 +233,9 @@ export const EditorContextMenu = ({ onSelect, stageRef, ref }: EditorContextMenu
                                 onEdit={() => onEditComponent(customComponent)}
                                 onClickDelete={() => onDeleteComponent(customComponent)}
                                 sx={{
-                                    backgroundColor: colors.surface.contextMenuHover,
+                                    backgroundColor: "background.contextMenuHover",
                                     borderBottom: "none",
-                                    borderTop: `1px solid ${colors.border.divider}`,
+                                    borderTop: `1px solid ${theme.palette.border.divider}`,
                                 }}
                             />
                         );

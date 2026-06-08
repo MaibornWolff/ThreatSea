@@ -17,7 +17,6 @@ import type {
     SystemConnection,
     SystemPointOfAttack,
 } from "#api/types/system.types.ts";
-import { colors } from "#view/wrappers/tokens.ts";
 
 export interface EditorSidebarProps {
     sidebarRef: RefObject<HTMLDivElement | null>;
@@ -114,7 +113,7 @@ export const EditorSidebar = ({
                 bottom: "40px",
                 width: "480px",
                 zIndex: 999,
-                bgcolor: colors.surface.contextMenu,
+                bgcolor: "background.contextMenu",
                 boxShadow: 6,
                 borderRadius: 5,
                 transition: "right 0.3s",
