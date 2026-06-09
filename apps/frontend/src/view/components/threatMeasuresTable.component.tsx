@@ -1,7 +1,6 @@
 import { Box, Table, TableBody, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import { Delete, Edit } from "@mui/icons-material";
 import TableCell from "@mui/material/TableCell";
-import { useTheme } from "@mui/material/styles";
 import type { SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import type { ThreatMeasure } from "#application/hooks/use-threat-measures-list.hook.ts";
@@ -180,7 +179,6 @@ const ThreatMeasuresTableRow = ({
         threatMeasure;
 
     const { t } = useTranslation("threatDialogPage");
-    const theme = useTheme();
     return (
         <TableRow
             sx={{
@@ -189,12 +187,9 @@ const ThreatMeasuresTableRow = ({
                 marginBottom: 1,
 
                 "&:last-child td, &:last-child th": { borderBottom: 0 },
-                "&:hover": {
-                    cursor: "pointer",
-                    backgroundColor: `${theme.vars.palette.background.paperWhite} !important`,
-                },
             }}
             onClick={(e) => onClickEditMeasureImpact(e, measureImpact, measure)}
+            hover
         >
             <TableCell
                 scope="row"

@@ -211,16 +211,7 @@ const AddMemberDialog = ({
                             <Typography sx={{ fontSize: "0.875rem" }}>{member.email}</Typography>
                         </Box>,
                     ]}
-                    <FormControl
-                        fullWidth
-                        margin="normal"
-                        error={!!errors?.role}
-                        sx={{
-                            "&:hover fieldset": {
-                                borderColor: `${theme.palette.secondary.main} !important`,
-                            },
-                        }}
-                    >
+                    <FormControl fullWidth margin="normal" error={!!errors?.role}>
                         <InputLabel
                             id="select-role-label"
                             shrink

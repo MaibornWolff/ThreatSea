@@ -181,9 +181,6 @@ const CatalogThreatDialog = ({ catalogThreat, isNew, ...props }: CatalogThreatDi
                         fullWidth
                         sx={{
                             mr: 1,
-                            "&:hover fieldset": {
-                                borderColor: `${theme.palette.secondary.main} !important`,
-                            },
                         }}
                         error={!!errors?.attacker}
                     >
@@ -272,16 +269,7 @@ const CatalogThreatDialog = ({ catalogThreat, isNew, ...props }: CatalogThreatDi
                         <FormHelperText>{errors?.attacker?.message}</FormHelperText>
                     </FormControl>
 
-                    <FormControl
-                        fullWidth
-                        error={!!errors?.pointOfAttack}
-                        data-testid="PoAError"
-                        sx={{
-                            "&:hover fieldset": {
-                                borderColor: `${theme.palette.secondary.main} !important`,
-                            },
-                        }}
-                    >
+                    <FormControl fullWidth error={!!errors?.pointOfAttack} data-testid="PoAError">
                         <InputLabel shrink sx={{ marginLeft: 1, fontSize: "1rem" }} id="select-points-of-attack-label">
                             {t("pointsOfAttackHeading")}
                         </InputLabel>

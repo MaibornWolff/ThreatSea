@@ -1,5 +1,4 @@
 import { TextField } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import type { TextFieldProps } from "@mui/material/TextField";
 import type { FieldError, FieldPath, FieldValues, UseFormRegister } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -20,7 +19,6 @@ export const BigTextField = <TFieldValues extends FieldValues>({
     ...props
 }: BigTextFieldProps<TFieldValues>) => {
     const { t } = useTranslation();
-    const theme = useTheme();
     return (
         <TextField
             slotProps={{
@@ -29,14 +27,7 @@ export const BigTextField = <TFieldValues extends FieldValues>({
                 },
             }}
             sx={{
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: `${theme.palette.secondary.main} !important`,
-                },
                 "& .MuiOutlinedInput-root": {
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                        borderColor: `${theme.palette.secondary.main} !important`,
-                        borderWidth: "1px !important",
-                    },
                     "& .MuiOutlinedInput-input": {
                         paddingLeft: 1,
                         fontSize: "0.875rem",

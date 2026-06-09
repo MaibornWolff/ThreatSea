@@ -180,16 +180,7 @@ const MeasureImpactByThreatDialog = ({
                 onSubmit={handleSubmit(handleConfirmDialog)}
             >
                 <Box sx={{ display: "flex", alignItems: "center", mt: 2, mb: 1 }}>
-                    <FormControl
-                        fullWidth
-                        error={!!errors?.threatId}
-                        data-testid="threatIdError"
-                        sx={{
-                            "&:hover fieldset": {
-                                borderColor: `${theme.palette.secondary.main} !important`,
-                            },
-                        }}
-                    >
+                    <FormControl fullWidth error={!!errors?.threatId} data-testid="threatIdError">
                         <InputLabel shrink sx={{ marginLeft: 1, fontSize: "1rem" }} id="select-threatId-label">
                             {t("threat")}
                         </InputLabel>

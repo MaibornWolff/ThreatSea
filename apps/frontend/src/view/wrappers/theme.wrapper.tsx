@@ -16,6 +16,31 @@ const theme = createTheme({
         fontFamily: '"Poppins", sans-serif',
         fontSize: 14,
     },
+    components: {
+        MuiTableRow: {
+            styleOverrides: {
+                root: {
+                    "&.MuiTableRow-hover:hover": {
+                        cursor: "pointer",
+                        backgroundColor: "var(--mui-palette-background-paperWhite)",
+                    },
+                },
+            },
+        },
+        MuiOutlinedInput: {
+            styleOverrides: {
+                root: {
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "var(--mui-palette-secondary-main)",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "var(--mui-palette-secondary-main)",
+                        borderWidth: "1px",
+                    },
+                },
+            },
+        },
+    },
     colorSchemes: {
         light: {
             palette: {

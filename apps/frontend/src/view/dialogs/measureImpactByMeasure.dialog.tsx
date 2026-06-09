@@ -227,16 +227,7 @@ const MeasureImpactByMeasureDialog = ({
                     </Typography>
                 )}
                 <Box sx={{ display: "flex", alignItems: "center", mt: 2, mb: 1 }}>
-                    <FormControl
-                        fullWidth
-                        error={!!errors?.measureId}
-                        data-testid="measureIdError"
-                        sx={{
-                            "&:hover fieldset": {
-                                borderColor: `${theme.palette.secondary.main} !important`,
-                            },
-                        }}
-                    >
+                    <FormControl fullWidth error={!!errors?.measureId} data-testid="measureIdError">
                         <InputLabel shrink sx={{ marginLeft: 1, fontSize: "1rem" }} id="select-measureId-label">
                             {t("measure")}
                         </InputLabel>

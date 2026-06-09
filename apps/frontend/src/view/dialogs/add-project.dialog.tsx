@@ -144,16 +144,7 @@ const AddProjectDialog = ({ project, ...props }: AddProjectDialogProps) => {
                     data-testid="project-creation-modal_description-input"
                 />
 
-                <FormControl
-                    fullWidth
-                    margin="normal"
-                    error={!!errors?.catalogId}
-                    sx={{
-                        "&:hover fieldset": {
-                            borderColor: `${theme.palette.secondary.main} !important`,
-                        },
-                    }}
-                >
+                <FormControl fullWidth margin="normal" error={!!errors?.catalogId}>
                     <InputLabel
                         id="select-catalog-label"
                         shrink
@@ -242,15 +233,7 @@ const AddProjectDialog = ({ project, ...props }: AddProjectDialogProps) => {
                     />
                     <FormHelperText>{errors?.catalogId?.message}</FormHelperText>
                 </FormControl>
-                <FormControl
-                    fullWidth
-                    margin="normal"
-                    sx={{
-                        "&:hover fieldset": {
-                            borderColor: `${theme.palette.secondary.main} !important`,
-                        },
-                    }}
-                >
+                <FormControl fullWidth margin="normal">
                     <InputLabel
                         id="select-catalog-label"
                         shrink

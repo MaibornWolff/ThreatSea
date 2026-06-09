@@ -30,7 +30,6 @@ import { HeaderUtilityControls } from "#view/components/header-utility-controls.
 import { withProject } from "#view/components/with-project.hoc.tsx";
 import AssetDialogPage from "./asset-dialog.page";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
-import { useTheme } from "@mui/material/styles";
 
 interface AssetsPageBodyProps {
     project: ExtendedProject;
@@ -413,7 +412,6 @@ const AssetTableRow = ({ asset, onEdit, onDelete, language: _language, userRole 
     const assetCreationDate = new Date(createdAt);
 
     const { t } = useTranslation("assetsPage");
-    const theme = useTheme();
     return (
         <TableRow
             sx={{
@@ -422,10 +420,6 @@ const AssetTableRow = ({ asset, onEdit, onDelete, language: _language, userRole 
                 marginBottom: 1,
 
                 "&:last-child td, &:last-child th": { border: 0 },
-                "&:hover": {
-                    cursor: "pointer",
-                    backgroundColor: `${theme.vars.palette.background.paperWhite} !important`,
-                },
             }}
             onClick={(e) => onEdit(e, asset)}
             hover

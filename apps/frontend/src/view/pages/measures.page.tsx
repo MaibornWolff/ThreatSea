@@ -22,7 +22,6 @@ import { SearchField } from "#view/components/search-field.component.tsx";
 import { MeasureImpactByThreatDialogPage } from "./measure-impact-by-threat-dialog.page";
 import ThreatDialogPage from "./threat-dialog.page";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
-import { useTheme } from "@mui/material/styles";
 
 interface MeasuresPageBodyProps {
     project: ExtendedProject;
@@ -43,7 +42,6 @@ type MeasureDialogState = Omit<Partial<Measure>, "id" | "scheduledAt"> & {
 
 const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
     const { t } = useTranslation("measuresPage");
-    const theme = useTheme();
     const { openConfirm } = useConfirm<Measure>();
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
@@ -348,10 +346,6 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                                                             marginBottom: 1,
 
                                                             "&:last-child td, &:last-child th": { border: 0 },
-                                                            "&:hover": {
-                                                                cursor: "pointer",
-                                                                backgroundColor: `${theme.vars.palette.background.paperWhite} !important`,
-                                                            },
                                                         }}
                                                         hover
                                                         data-testid="measures-page_measures-list-entry"

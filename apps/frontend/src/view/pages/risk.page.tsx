@@ -52,7 +52,6 @@ import AddMeasureDialogPage from "./add-measure-dialog.page";
 import { AlertActions } from "#application/actions/alert.actions.ts";
 import MeasureDetailsDialogPage from "./measure-details-dialog.page";
 import type { SortDirection } from "#application/actions/list.actions.ts";
-import { useTheme } from "@mui/material/styles";
 
 interface RiskPageBodyProps {
     project: ExtendedProject;
@@ -70,7 +69,6 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
         t,
         i18n: { language },
     } = useTranslation("riskPage");
-    const theme = useTheme();
     const {
         timeline,
         matrix,
@@ -737,10 +735,6 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
 
                                                                         "&:last-child td, &:last-child th": {
                                                                             border: 0,
-                                                                        },
-                                                                        "&:hover": {
-                                                                            cursor: "pointer",
-                                                                            backgroundColor: `${theme.vars.palette.background.paperWhite} !important`,
                                                                         },
                                                                     }}
                                                                     onClick={() =>

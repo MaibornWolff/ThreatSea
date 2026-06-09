@@ -8,7 +8,6 @@ import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import { CustomTableHeaderCell } from "#view/components/table-header.component.tsx";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { IconButton } from "./icon-button.component";
-import { useTheme } from "@mui/material/styles";
 import type { SortDirection } from "#application/actions/list.actions.ts";
 import type { MeasureThreat } from "#application/hooks/use-measure-threats-list.hook.ts";
 
@@ -168,7 +167,6 @@ const MeasureThreatTableRow = ({
         measureThreat;
 
     const { t } = useTranslation("measureDialog");
-    const theme = useTheme();
     return (
         <TableRow
             sx={{
@@ -177,12 +175,9 @@ const MeasureThreatTableRow = ({
                 marginBottom: 1,
 
                 "&:last-child td, &:last-child th": { borderBottom: 0 },
-                "&:hover": {
-                    cursor: "pointer",
-                    backgroundColor: `${theme.vars.palette.background.paperWhite} !important`,
-                },
             }}
             onClick={(e) => onClickEditMeasureImpact(e, measureImpact)}
+            hover
         >
             <TableCell
                 scope="row"

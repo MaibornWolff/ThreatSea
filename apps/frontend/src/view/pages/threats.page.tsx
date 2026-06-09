@@ -25,7 +25,6 @@ import ThreatDialogPage from "./threat-dialog.page";
 import { MeasureImpactByMeasureDialogPage } from "./measure-impact-by-measure-dialog.page";
 import { withProject } from "#view/components/with-project.hoc.tsx";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
-import { useTheme } from "@mui/material/styles";
 
 /**
  * on this page all threats are listed
@@ -38,7 +37,6 @@ const ThreatsPageBody = () => {
     const { openConfirm } = useConfirm<ExtendedThreat>();
     const navigate = useNavigate();
     const { t } = useTranslation("threatsPage");
-    const theme = useTheme();
 
     const {
         setSortDirection,
@@ -406,10 +404,6 @@ const ThreatsPageBody = () => {
                                                             marginBottom: 1,
 
                                                             "&:last-child td, &:last-child th": { border: 0 },
-                                                            "&:hover": {
-                                                                cursor: "pointer",
-                                                                backgroundColor: `${theme.vars.palette.background.paperWhite} !important`,
-                                                            },
                                                         }}
                                                         onClick={(e) => onClickEditThreat(e, threat)}
                                                         hover

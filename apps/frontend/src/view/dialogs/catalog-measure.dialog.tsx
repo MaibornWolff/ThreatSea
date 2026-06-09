@@ -190,9 +190,6 @@ const CatalogMeasureDialog = ({ catalogMeasure, isNew, catalogId, ...props }: Ca
                         data-testid="AttackerError"
                         sx={{
                             mr: 1,
-                            "&:hover fieldset": {
-                                borderColor: `${theme.palette.secondary.main} !important`,
-                            },
                         }}
                     >
                         <InputLabel shrink sx={{ marginLeft: 1, fontSize: "1rem" }} id="select-attacker-label">
@@ -280,16 +277,7 @@ const CatalogMeasureDialog = ({ catalogMeasure, isNew, catalogId, ...props }: Ca
                         <FormHelperText>{errors?.attacker?.message}</FormHelperText>
                     </FormControl>
 
-                    <FormControl
-                        fullWidth
-                        error={!!errors?.pointOfAttack}
-                        data-testid="PoAError"
-                        sx={{
-                            "&:hover fieldset": {
-                                borderColor: `${theme.palette.secondary.main} !important`,
-                            },
-                        }}
-                    >
+                    <FormControl fullWidth error={!!errors?.pointOfAttack} data-testid="PoAError">
                         <InputLabel shrink sx={{ marginLeft: 1, fontSize: "1rem" }} id="select-points-of-attack-label">
                             {t("pointsOfAttackHeading")}
                         </InputLabel>

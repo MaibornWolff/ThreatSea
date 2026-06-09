@@ -119,6 +119,8 @@ const nameTextFieldSx = <TFieldValues extends FieldValues>(
         border: "none !important",
         padding: "0 !important",
         borderRadius: "0 !important",
+    },
+    "& input, & textarea": {
         fontWeight: "bold",
     },
     "& .Mui-focused": {
@@ -148,17 +150,9 @@ const nameTextFieldSx = <TFieldValues extends FieldValues>(
 });
 
 const boxNameTextFieldSx = <TFieldValues extends FieldValues>(
-    props: NameTextFieldProps<TFieldValues>,
-    theme: Theme
+    props: NameTextFieldProps<TFieldValues>
 ): SxProps<Theme> => ({
-    "&:hover .MuiOutlinedInput-notchedOutline": {
-        borderColor: `${theme.palette.secondary.main} !important`,
-    },
     "& .MuiOutlinedInput-root": {
-        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-            borderColor: `${theme.palette.secondary.main} !important`,
-            borderWidth: "1px !important",
-        },
         "& .MuiOutlinedInput-input": {
             paddingLeft: props.multiline ? 1 : 3,
             fontSize: "0.875rem",
@@ -196,7 +190,6 @@ export const NameTextField = <TFieldValues extends FieldValues>(props: NameTextF
 
 export const BoxNameTextField = <TFieldValues extends FieldValues>(props: NameTextFieldProps<TFieldValues>) => {
     const { t } = useTranslation();
-    const theme = useTheme();
 
     return (
         <BaseNameTextField
@@ -209,7 +202,7 @@ export const BoxNameTextField = <TFieldValues extends FieldValues>(props: NameTe
             label={t("name")}
             projectId={props.projectId}
             {...props}
-            defaultSx={boxNameTextFieldSx(props, theme)}
+            defaultSx={boxNameTextFieldSx(props)}
         />
     );
 };
