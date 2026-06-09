@@ -47,6 +47,7 @@ declare module "@mui/material/styles" {
         table: TablePalette;
         page: PagePalette;
         border: BorderPalette;
+        errorBold: string;
     }
 
     interface PaletteOptions {
@@ -56,14 +57,7 @@ declare module "@mui/material/styles" {
         table?: TablePalette;
         page?: PagePalette;
         border?: BorderPalette;
-    }
-
-    interface PaletteColor {
-        bold?: string;
-    }
-
-    interface SimplePaletteColorOptions {
-        bold?: string;
+        errorBold?: string;
     }
 
     interface TypeBackground {
