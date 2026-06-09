@@ -740,7 +740,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                                         },
                                                                         "&:hover": {
                                                                             cursor: "pointer",
-                                                                            backgroundColor: `${theme.palette.background.paperWhite} !important`,
+                                                                            backgroundColor: `${theme.vars.palette.background.paperWhite} !important`,
                                                                         },
                                                                     }}
                                                                     onClick={() =>

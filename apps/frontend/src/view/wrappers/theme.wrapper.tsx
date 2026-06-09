@@ -2,15 +2,16 @@
  * @module theme.wrapper - Defines the theme styles for threatsea.
  */
 
+import type {} from "@mui/material/themeCssVarsAugmentation";
 import type { ReactNode } from "react";
-import { createTheme } from "@mui/material/styles";
-import { ThemeProvider as MaterialThemeProvider } from "@mui/system";
+import { createTheme, ThemeProvider as MaterialThemeProvider } from "@mui/material/styles";
 import { colorPrimitives, colors } from "./tokens";
 
 /**
  * Object to customize the mui theme.
  */
 const theme = createTheme({
+    cssVariables: true,
     typography: {
         fontFamily: '"Poppins", sans-serif',
         fontSize: 14,

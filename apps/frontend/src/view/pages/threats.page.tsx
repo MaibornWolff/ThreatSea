@@ -408,7 +408,7 @@ const ThreatsPageBody = () => {
                                                             "&:last-child td, &:last-child th": { border: 0 },
                                                             "&:hover": {
                                                                 cursor: "pointer",
-                                                                backgroundColor: `${theme.palette.background.paperWhite} !important`,
+                                                                backgroundColor: `${theme.vars.palette.background.paperWhite} !important`,
                                                             },
                                                         }}
                                                         onClick={(e) => onClickEditThreat(e, threat)}

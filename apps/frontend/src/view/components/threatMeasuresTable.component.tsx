@@ -191,7 +191,7 @@ const ThreatMeasuresTableRow = ({
                 "&:last-child td, &:last-child th": { borderBottom: 0 },
                 "&:hover": {
                     cursor: "pointer",
-                    backgroundColor: `${theme.palette.background.paperWhite} !important`,
+                    backgroundColor: `${theme.vars.palette.background.paperWhite} !important`,
                 },
             }}
             onClick={(e) => onClickEditMeasureImpact(e, measureImpact, measure)}

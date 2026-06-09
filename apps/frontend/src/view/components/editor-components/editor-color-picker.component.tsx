@@ -48,7 +48,7 @@ const ColorPresetChip = ({ presetColor, selectedColor, disabled, onClick, toolti
                     borderRadius: "50%",
                     backgroundColor: presetColor,
                     border: isCurrent
-                        ? `2px solid ${theme.palette.primary.main}`
+                        ? `2px solid ${theme.vars.palette.primary.main}`
                         : `1px solid ${alpha(theme.palette.common.black, 0.25)}`,
                 }}
             />
@@ -164,7 +164,7 @@ export const EditorColorPicker = ({
                 height: "24px",
                 borderRadius: "50%",
                 backgroundColor: displayColor,
-                border: `2px solid ${theme.palette.border.divider}`,
+                border: `2px solid ${theme.vars.palette.border.divider}`,
                 boxShadow: `0 0 0 1px ${alpha(theme.palette.primary.main, 0.6)}`,
             }}
         />

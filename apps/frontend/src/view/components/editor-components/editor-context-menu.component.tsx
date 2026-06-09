@@ -170,7 +170,7 @@ export const EditorContextMenu = ({ onSelect, stageRef, ref }: EditorContextMenu
                     dense
                     divider
                     sx={{
-                        borderTop: `1px solid ${theme.palette.border.divider}`,
+                        borderTop: `1px solid ${theme.vars.palette.border.divider}`,
                         borderBottom: "none",
                         backgroundColor: "background.contextMenuHover",
                         "&:hover": {
@@ -235,7 +235,7 @@ export const EditorContextMenu = ({ onSelect, stageRef, ref }: EditorContextMenu
                                 sx={{
                                     backgroundColor: "background.contextMenuHover",
                                     borderBottom: "none",
-                                    borderTop: `1px solid ${theme.palette.border.divider}`,
+                                    borderTop: `1px solid ${theme.vars.palette.border.divider}`,
                                 }}
                             />
                         );

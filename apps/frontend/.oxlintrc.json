@@ -73,6 +73,17 @@
     "use-isnan": "error",
     "valid-typeof": "error",
     "import/no-relative-parent-imports": "error",
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "#view/wrappers/tokens.ts",
+            "message": "Consume colors via theme.palette (useTheme/sx). Direct token imports are reserved for theme.wrapper and documented exceptions (editor-toolbar, system-component, view/report subtree)."
+          }
+        ]
+      }
+    ],
     "react/display-name": "error",
     "react/jsx-key": "error",
     "react/jsx-no-comment-textnodes": "error",
@@ -179,6 +190,17 @@
       "files": ["playwright/**"],
       "rules": {
         "import/no-relative-parent-imports": "off"
+      }
+    },
+    {
+      "files": [
+        "**/src/view/wrappers/theme.wrapper.tsx",
+        "**/src/view/components/editor-components/editor-toolbar.component.tsx",
+        "**/src/view/components/editor-components/system-component.component.tsx",
+        "**/src/view/report/**/*.{ts,tsx}"
+      ],
+      "rules": {
+        "no-restricted-imports": "off"
       }
     },
     {

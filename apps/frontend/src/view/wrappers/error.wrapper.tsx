@@ -169,13 +169,13 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
                                         sx={(theme) => ({
                                             fontSize: 18,
                                             marginRight: 1,
-                                            color: theme.palette.error.bold,
+                                            color: theme.vars.palette.error.bold,
                                         })}
                                     />
                                     <Typography
                                         sx={(theme) => ({
                                             fontSize: "0.875rem",
-                                            color: theme.palette.error.bold,
+                                            color: theme.vars.palette.error.bold,
                                         })}
                                     >
                                         {translationUtil.t("errorBoundary:errorNotice")}

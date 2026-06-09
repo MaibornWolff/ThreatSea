@@ -61,8 +61,8 @@ const TimeSlider = styled(Slider)(({ theme }) => ({
             backgroundColor: theme.palette.primary.main,
         },
         "&:hover + .MuiSlider-valueLabel": {
-            color: theme.palette.error.bold,
-            backgroundColor: theme.palette.error.bold,
+            color: theme.vars.palette.error.bold,
+            backgroundColor: theme.vars.palette.error.bold,
         },
     },
 }));
