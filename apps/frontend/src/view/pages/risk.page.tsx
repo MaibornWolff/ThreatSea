@@ -52,7 +52,7 @@ import AddMeasureDialogPage from "./add-measure-dialog.page";
 import { AlertActions } from "#application/actions/alert.actions.ts";
 import MeasureDetailsDialogPage from "./measure-details-dialog.page";
 import type { SortDirection } from "#application/actions/list.actions.ts";
-import { colors } from "#view/wrappers/tokens.ts";
+import { useTheme } from "@mui/material/styles";
 
 interface RiskPageBodyProps {
     project: ExtendedProject;
@@ -70,6 +70,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
         t,
         i18n: { language },
     } = useTranslation("riskPage");
+    const theme = useTheme();
     const {
         timeline,
         matrix,
@@ -326,7 +327,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                         width: "100%",
                         padding: 4,
                         boxShadow: 1,
-                        backgroundColor: colors.surface.paperWhite,
+                        backgroundColor: "background.paperWhite",
                         borderRadius: 5,
                         marginLeft: 10,
                         overflowY: "hidden",
@@ -543,7 +544,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                                 sx={{
                                                                     position: "relative",
                                                                     fontWeight: "bold",
-                                                                    borderRightColor: colors.border.divider,
+                                                                    borderRightColor: "border.divider",
                                                                     "&:hover": {
                                                                         textDecoration: "underline",
                                                                     },
@@ -557,7 +558,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                                 showBorder={true}
                                                                 sx={{
                                                                     position: "relative",
-                                                                    borderRightColor: colors.border.divider,
+                                                                    borderRightColor: "border.divider",
                                                                 }}
                                                             >
                                                                 {threat.newProbability}
@@ -566,7 +567,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                                 showBorder={true}
                                                                 sx={{
                                                                     position: "relative",
-                                                                    borderRightColor: colors.border.divider,
+                                                                    borderRightColor: "border.divider",
                                                                 }}
                                                             >
                                                                 {threat.newRisk}
@@ -644,7 +645,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                             showBorder={false}
                                                             sx={{
                                                                 width: "1%",
-                                                                borderRightColor: colors.border.divider,
+                                                                borderRightColor: "border.divider",
                                                                 padding: 0,
                                                             }}
                                                         ></ThreatTableHeaderCell>
@@ -739,7 +740,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                                         },
                                                                         "&:hover": {
                                                                             cursor: "pointer",
-                                                                            backgroundColor: `${colors.surface.paperWhite} !important`,
+                                                                            backgroundColor: `${theme.palette.background.paperWhite} !important`,
                                                                         },
                                                                     }}
                                                                     onClick={() =>
@@ -753,12 +754,12 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                                     <CustomTableCell
                                                                         showBorder={true}
                                                                         sx={{
-                                                                            borderRight: colors.border.divider,
+                                                                            borderRight: "border.divider",
                                                                             padding: 0,
                                                                             paddingLeft: 1,
                                                                             paddingTop: 0.5,
                                                                             verticalAlign: "center",
-                                                                            borderRightColor: colors.border.divider,
+                                                                            borderRightColor: "border.divider",
                                                                         }}
                                                                     >
                                                                         {active && (
@@ -786,7 +787,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                                         showBorder={true}
                                                                         sx={{
                                                                             position: "relative",
-                                                                            borderRightColor: colors.border.divider,
+                                                                            borderRightColor: "border.divider",
                                                                         }}
                                                                         align={"left"}
                                                                     >
@@ -809,7 +810,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                                     <CustomTableCell
                                                                         showBorder={true}
                                                                         sx={{
-                                                                            borderRightColor: colors.border.divider,
+                                                                            borderRightColor: "border.divider",
                                                                         }}
                                                                     >
                                                                         <Typography
@@ -931,7 +932,7 @@ const ThreatTableHeaderCell = ({
                 borderBottomWidth: "1.5px",
                 "&:hover": {
                     cursor: sortBy ? "pointer" : "default",
-                    backgroundColor: sortBy ? "primary.light" : colors.surface.paperWhite,
+                    backgroundColor: sortBy ? "primary.light" : "background.paperWhite",
                 },
                 borderRight,
                 borderRightColor: "primary.main",
@@ -964,7 +965,7 @@ const CustomTableCell = ({ sx, showBorder = false, children, ...props }: CustomT
                 fontSize: "0.875rem",
                 borderRight,
                 borderRightColor: "primary.main",
-                borderBottomColor: colors.border.divider,
+                borderBottomColor: "border.divider",
                 ...sx,
             }}
             {...props}

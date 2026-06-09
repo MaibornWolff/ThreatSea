@@ -30,7 +30,7 @@ import { HeaderUtilityControls } from "#view/components/header-utility-controls.
 import { withProject } from "#view/components/with-project.hoc.tsx";
 import AssetDialogPage from "./asset-dialog.page";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
-import { colors } from "#view/wrappers/tokens.ts";
+import { useTheme } from "@mui/material/styles";
 
 interface AssetsPageBodyProps {
     project: ExtendedProject;
@@ -413,6 +413,7 @@ const AssetTableRow = ({ asset, onEdit, onDelete, language: _language, userRole 
     const assetCreationDate = new Date(createdAt);
 
     const { t } = useTranslation("assetsPage");
+    const theme = useTheme();
     return (
         <TableRow
             sx={{
@@ -423,7 +424,7 @@ const AssetTableRow = ({ asset, onEdit, onDelete, language: _language, userRole 
                 "&:last-child td, &:last-child th": { border: 0 },
                 "&:hover": {
                     cursor: "pointer",
-                    backgroundColor: `${colors.surface.paperWhite} !important`,
+                    backgroundColor: `${theme.palette.background.paperWhite} !important`,
                 },
             }}
             onClick={(e) => onEdit(e, asset)}
@@ -435,7 +436,7 @@ const AssetTableRow = ({ asset, onEdit, onDelete, language: _language, userRole 
                 sx={{
                     fontWeight: "bold",
                     fontSize: "0.875rem",
-                    borderBottomColor: colors.border.divider,
+                    borderBottomColor: "border.divider",
                 }}
                 data-testid="assets-page_assets-list-entry_name"
             >
@@ -445,7 +446,7 @@ const AssetTableRow = ({ asset, onEdit, onDelete, language: _language, userRole 
             <TableCell
                 align="center"
                 sx={{
-                    borderBottomColor: colors.border.divider,
+                    borderBottomColor: "border.divider",
                     fontSize: "0.875rem",
                 }}
                 data-testid="assets-page_assets-list-entry_confidentiality"
@@ -456,7 +457,7 @@ const AssetTableRow = ({ asset, onEdit, onDelete, language: _language, userRole 
             <TableCell
                 align="center"
                 sx={{
-                    borderBottomColor: colors.border.divider,
+                    borderBottomColor: "border.divider",
                     fontSize: "0.875rem",
                 }}
                 data-testid="assets-page_assets-list-entry_integrity"
@@ -467,7 +468,7 @@ const AssetTableRow = ({ asset, onEdit, onDelete, language: _language, userRole 
             <TableCell
                 align="center"
                 sx={{
-                    borderBottomColor: colors.border.divider,
+                    borderBottomColor: "border.divider",
                     fontSize: "0.875rem",
                 }}
                 data-testid="assets-page_assets-list-entry_availability"
@@ -478,7 +479,7 @@ const AssetTableRow = ({ asset, onEdit, onDelete, language: _language, userRole 
             <TableCell
                 align="center"
                 sx={{
-                    borderBottomColor: colors.border.divider,
+                    borderBottomColor: "border.divider",
                     fontSize: "0.875rem",
                 }}
                 data-testid="assets-page_assets-list-entry_date"
@@ -491,7 +492,7 @@ const AssetTableRow = ({ asset, onEdit, onDelete, language: _language, userRole 
                 sx={{
                     padding: 0,
                     paddingRight: 2,
-                    borderBottomColor: colors.border.divider,
+                    borderBottomColor: "border.divider",
                 }}
             >
                 {checkUserRole(userRole, USER_ROLES.EDITOR) && (

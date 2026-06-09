@@ -13,7 +13,6 @@ import logo from "#images/threatsealogo-dez.png";
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
 import { translationUtil } from "#utils/translations.ts";
-import { colors } from "#view/wrappers/tokens.ts";
 
 interface ErrorBoundaryProps {
     children?: ReactNode;
@@ -167,17 +166,17 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
                                     }}
                                 >
                                     <ErrorOutlineOutlined
-                                        sx={{
+                                        sx={(theme) => ({
                                             fontSize: 18,
                                             marginRight: 1,
-                                            color: colors.state.errorBold,
-                                        }}
+                                            color: theme.palette.error.bold,
+                                        })}
                                     />
                                     <Typography
-                                        sx={{
+                                        sx={(theme) => ({
                                             fontSize: "0.875rem",
-                                            color: colors.state.errorBold,
-                                        }}
+                                            color: theme.palette.error.bold,
+                                        })}
                                     >
                                         {translationUtil.t("errorBoundary:errorNotice")}
                                     </Typography>
@@ -303,7 +302,7 @@ const ErrorMenu = ({ children }: ErrorMenuProps) => {
                 alignItems: "stretch",
                 maxHeight: "100vh",
                 height: "100%",
-                bgcolor: colors.surface.pageDefault,
+                bgcolor: "background.default",
             }}
         >
             <Header />
@@ -316,7 +315,7 @@ const ErrorMenu = ({ children }: ErrorMenuProps) => {
                     height: "100%",
                     overflow: "hidden",
                     position: "relative",
-                    bgcolor: colors.surface.page,
+                    bgcolor: "background.main",
                 }}
             >
                 {children}
@@ -344,7 +343,7 @@ const Header = () => {
                 paddingBottom: 1.5,
                 paddingLeft: 6,
                 paddingRight: 6,
-                backgroundColor: colors.component.pageHeaderBg,
+                backgroundColor: "page.headerBackground",
             }}
         >
             <Box

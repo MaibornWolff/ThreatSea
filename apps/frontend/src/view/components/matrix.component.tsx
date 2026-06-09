@@ -1,11 +1,11 @@
 import { Box, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { useMemo } from "react";
 import type { JSX, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { MATRIX_COLOR } from "#view/colors/matrix.ts";
 import type { MatrixColorKey } from "#view/colors/matrix.ts";
 import type { MatrixGrid, SelectedMatrixCell } from "#application/hooks/use-matrix.hook.ts";
-import { colorPrimitives, colors } from "#view/wrappers/tokens.ts";
 
 const damageAxis = [1, 2, 3, 4, 5];
 const probabilityAxis = [5, 4, 3, 2, 1];
@@ -43,6 +43,7 @@ interface AxisCellProps {
 
 export const Matrix = ({ matrix, size = 120, onSelectCell }: MatrixProps): JSX.Element => {
     const { t } = useTranslation("riskPage");
+    const theme = useTheme();
     return (
         <Box
             sx={{
@@ -92,7 +93,7 @@ export const Matrix = ({ matrix, size = 120, onSelectCell }: MatrixProps): JSX.E
                                 probability={probabilityAxis[i] as number}
                                 damage={damageAxis[j] as number}
                                 fontSize={"0.875rem"}
-                                foregroundColor={colors.text.inverse}
+                                foregroundColor={theme.palette.text.white}
                                 onClick={onSelectCell}
                                 {...cell}
                             />
@@ -174,14 +175,15 @@ const MatrixCell = ({
     fontSize,
     foregroundColor,
 }: MatrixCellProps): JSX.Element => {
+    const theme = useTheme();
     const [backgroundColor, borderColor] = useMemo<[string, string]>(() => {
         const matrixColor = color ? MATRIX_COLOR[color] : undefined;
         const backgroundColor =
             (selected ? matrixColor?.selected : amount ? matrixColor?.standard : matrixColor?.light) ||
-            colors.surface.paperWhite;
-        const borderColor = (selected ? matrixColor?.selected : matrixColor?.border) || colorPrimitives.neutral.black;
+            theme.palette.background.paperWhite;
+        const borderColor = (selected ? matrixColor?.selected : matrixColor?.border) || theme.palette.common.black;
         return [backgroundColor, borderColor];
-    }, [color, selected, amount]);
+    }, [color, selected, amount, theme]);
 
     return (
         <Box

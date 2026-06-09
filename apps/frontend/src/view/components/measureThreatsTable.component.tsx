@@ -8,7 +8,7 @@ import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import { CustomTableHeaderCell } from "#view/components/table-header.component.tsx";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { IconButton } from "./icon-button.component";
-import { colors } from "#view/wrappers/tokens.ts";
+import { useTheme } from "@mui/material/styles";
 import type { SortDirection } from "#application/actions/list.actions.ts";
 import type { MeasureThreat } from "#application/hooks/use-measure-threats-list.hook.ts";
 
@@ -168,6 +168,7 @@ const MeasureThreatTableRow = ({
         measureThreat;
 
     const { t } = useTranslation("measureDialog");
+    const theme = useTheme();
     return (
         <TableRow
             sx={{
@@ -178,7 +179,7 @@ const MeasureThreatTableRow = ({
                 "&:last-child td, &:last-child th": { borderBottom: 0 },
                 "&:hover": {
                     cursor: "pointer",
-                    backgroundColor: `${colors.surface.paperWhite} !important`,
+                    backgroundColor: `${theme.palette.background.paperWhite} !important`,
                 },
             }}
             onClick={(e) => onClickEditMeasureImpact(e, measureImpact)}
@@ -188,9 +189,9 @@ const MeasureThreatTableRow = ({
                 sx={{
                     fontWeight: "bold",
                     fontSize: "0.875rem",
-                    borderBottomColor: colors.border.divider,
+                    borderBottomColor: "border.divider",
                     borderRight: "1.5px solid",
-                    borderRightColor: colors.border.divider,
+                    borderRightColor: "border.divider",
                     maxWidth: 250,
                     overflow: "clip",
                     "&:hover": {
@@ -204,9 +205,9 @@ const MeasureThreatTableRow = ({
             <TableCell
                 align="center"
                 sx={{
-                    borderBottomColor: colors.border.divider,
+                    borderBottomColor: "border.divider",
                     borderRight: "1.5px solid",
-                    borderRightColor: colors.border.divider,
+                    borderRightColor: "border.divider",
                     fontSize: "0.875rem",
                 }}
             >
@@ -217,9 +218,9 @@ const MeasureThreatTableRow = ({
                     align="center"
                     colSpan={2}
                     sx={{
-                        borderBottomColor: colors.border.divider,
+                        borderBottomColor: "border.divider",
                         borderRight: "1.5px solid",
-                        borderRightColor: colors.border.divider,
+                        borderRightColor: "border.divider",
                         fontSize: "0.875rem",
                     }}
                 >
@@ -231,9 +232,9 @@ const MeasureThreatTableRow = ({
                     key="net-probability"
                     align="center"
                     sx={{
-                        borderBottomColor: colors.border.divider,
+                        borderBottomColor: "border.divider",
                         borderRight: "1.5px solid",
-                        borderRightColor: colors.border.divider,
+                        borderRightColor: "border.divider",
                         fontSize: "0.875rem",
                     }}
                 >
@@ -243,9 +244,9 @@ const MeasureThreatTableRow = ({
                     key="net-damage"
                     align="center"
                     sx={{
-                        borderBottomColor: colors.border.divider,
+                        borderBottomColor: "border.divider",
                         borderRight: "1.5px solid",
-                        borderRightColor: colors.border.divider,
+                        borderRightColor: "border.divider",
                         fontSize: "0.875rem",
                     }}
                 >
@@ -258,7 +259,7 @@ const MeasureThreatTableRow = ({
                 sx={{
                     padding: 0,
                     paddingRight: 1.5,
-                    borderBottomColor: colors.border.divider,
+                    borderBottomColor: "border.divider",
                 }}
             >
                 {checkUserRole(userRole, USER_ROLES.EDITOR) && (

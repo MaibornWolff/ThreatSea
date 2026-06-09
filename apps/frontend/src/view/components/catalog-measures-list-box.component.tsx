@@ -32,7 +32,6 @@ import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { IconButton } from "./icon-button.component";
 import type { CatalogMeasure, CreateCatalogMeasureRequest } from "#api/types/catalog-measure.types.ts";
 import type { SortDirection } from "#application/actions/list.actions.ts";
-import { colors } from "#view/wrappers/tokens.ts";
 
 interface CatalogMeasuresListBoxProps {
     catalogId: number;
@@ -277,7 +276,7 @@ export const CatalogMeasuresListBox = ({
                                     marginBottom: 1,
                                     borderRadius: 5,
                                     "&:hover": {
-                                        backgroundColor: colors.surface.paperWhite,
+                                        backgroundColor: "background.paperWhite",
                                     },
                                 }}
                                 divider

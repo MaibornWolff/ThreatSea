@@ -27,7 +27,7 @@ import { AlertActions } from "#application/actions/alert.actions.ts";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import type { NavigationState } from "#application/reducers/navigation.reducer.ts";
 import type { ConfirmAcceptColor } from "#application/reducers/confirm.reducer.ts";
-import { colors } from "#view/wrappers/tokens.ts";
+import { useTheme } from "@mui/material/styles";
 
 type MemberPath = "projects" | "catalogs";
 
@@ -459,6 +459,7 @@ interface MemberTableRowProps {
 const MemberTableRow = ({ member, onEdit, onDelete, userRole }: MemberTableRowProps) => {
     const { name, email, role } = member;
     const { t } = useTranslation("memberPage");
+    const theme = useTheme();
 
     // Setting up a config object for the tabel cells.
     const tableCellsConfig = {
@@ -504,7 +505,7 @@ const MemberTableRow = ({ member, onEdit, onDelete, userRole }: MemberTableRowPr
                 "&:last-child td, &:last-child th": { border: 0 },
                 "&:hover": {
                     cursor: "pointer",
-                    backgroundColor: `${colors.surface.paperWhite} !important`,
+                    backgroundColor: `${theme.palette.background.paperWhite} !important`,
                 },
             }}
             onClick={(e) => onEdit(e, member)}
@@ -516,7 +517,7 @@ const MemberTableRow = ({ member, onEdit, onDelete, userRole }: MemberTableRowPr
                 sx={{
                     padding: 0,
                     paddingRight: 2,
-                    borderBottomColor: colors.border.divider,
+                    borderBottomColor: "border.divider",
                 }}
             >
                 {checkUserRole(userRole, USER_ROLES.OWNER) && (

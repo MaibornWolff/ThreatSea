@@ -15,7 +15,7 @@ import { editorSelectors } from "#application/selectors/editor.selectors.ts";
 import { projectsSelectors } from "#application/selectors/projects.selectors.ts";
 import logo from "#images/threatsealogo-dez.png";
 import ErrorBoundary from "#view/wrappers/error.wrapper.tsx";
-import { colors } from "#view/wrappers/tokens.ts";
+import { useTheme } from "@mui/material/styles";
 import { useProjectTabs } from "#application/hooks/use-project-tabs.hook.ts";
 import { HeaderLevelOneNav } from "./header-level-one-nav.component";
 import { HeaderProjectTabs } from "./header-project-tabs.component";
@@ -28,6 +28,7 @@ export const CreatePage = <P extends object>(
     showAutoSave = false
 ) => {
     const Inner = (props: P) => {
+        const theme = useTheme();
         const dispatch = useAppDispatch();
         const navigate = useNavigate();
         const { pathname } = useLocation();
@@ -55,22 +56,22 @@ export const CreatePage = <P extends object>(
             setAutoSaveOnClick(() => onClick);
         };
 
-        let autoSaveIconColor: string = colors.text.statusNeutral;
+        let autoSaveIconColor: string = theme.palette.text.statusNeutral;
         switch (autoSaveStatus) {
             case "uninitialized":
-                autoSaveIconColor = colors.state.success;
+                autoSaveIconColor = theme.palette.success.main;
                 break;
             case "failed":
-                autoSaveIconColor = colors.state.warning;
+                autoSaveIconColor = theme.palette.warning.main;
                 break;
             case "upToDate":
-                autoSaveIconColor = colors.state.success;
+                autoSaveIconColor = theme.palette.success.main;
                 break;
             case "notUpToDate":
-                autoSaveIconColor = colors.text.statusNeutral;
+                autoSaveIconColor = theme.palette.text.statusNeutral;
                 break;
             case "saving":
-                autoSaveIconColor = colors.text.statusNeutral;
+                autoSaveIconColor = theme.palette.text.statusNeutral;
                 break;
         }
 
@@ -81,7 +82,7 @@ export const CreatePage = <P extends object>(
             case "upToDate":
             case "notUpToDate":
             case "saving":
-                autoSaveForegroundColor = colors.text.inverse;
+                autoSaveForegroundColor = theme.palette.text.white;
                 break;
         }
 

@@ -27,7 +27,6 @@ import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { IconButton } from "./icon-button.component";
 import type { CatalogThreat, CreateCatalogThreatRequest } from "#api/types/catalog-threat.types.ts";
 import type { SortDirection } from "#application/actions/list.actions.ts";
-import { colors } from "#view/wrappers/tokens.ts";
 
 interface CatalogThreatsListBoxProps {
     catalogId: number;
@@ -256,7 +255,7 @@ export const CatalogThreatsListBox = ({ catalogId, attacker, pointOfAttack, user
                                     marginBottom: 1,
                                     borderRadius: 5,
                                     "&:hover": {
-                                        backgroundColor: colors.surface.paperWhite,
+                                        backgroundColor: "background.paperWhite",
                                     },
                                 }}
                                 divider

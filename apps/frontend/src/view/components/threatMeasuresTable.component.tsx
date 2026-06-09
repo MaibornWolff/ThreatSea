@@ -1,6 +1,7 @@
 import { Box, Table, TableBody, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import { Delete, Edit } from "@mui/icons-material";
 import TableCell from "@mui/material/TableCell";
+import { useTheme } from "@mui/material/styles";
 import type { SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import type { ThreatMeasure } from "#application/hooks/use-threat-measures-list.hook.ts";
@@ -11,7 +12,6 @@ import type { SortDirection } from "#application/actions/list.actions.ts";
 import { CustomTableHeaderCell } from "./table-header.component";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { IconButton } from "./icon-button.component";
-import { colors } from "#view/wrappers/tokens.ts";
 
 interface ThreatMeasuresTableSharedProps {
     onClickDeleteMeasureThreat: (
@@ -180,6 +180,7 @@ const ThreatMeasuresTableRow = ({
         threatMeasure;
 
     const { t } = useTranslation("threatDialogPage");
+    const theme = useTheme();
     return (
         <TableRow
             sx={{
@@ -190,7 +191,7 @@ const ThreatMeasuresTableRow = ({
                 "&:last-child td, &:last-child th": { borderBottom: 0 },
                 "&:hover": {
                     cursor: "pointer",
-                    backgroundColor: `${colors.surface.paperWhite} !important`,
+                    backgroundColor: `${theme.palette.background.paperWhite} !important`,
                 },
             }}
             onClick={(e) => onClickEditMeasureImpact(e, measureImpact, measure)}
@@ -200,9 +201,9 @@ const ThreatMeasuresTableRow = ({
                 sx={{
                     fontWeight: "bold",
                     fontSize: "0.875rem",
-                    borderBottomColor: colors.border.divider,
+                    borderBottomColor: "border.divider",
                     borderRight: "1.5px solid",
-                    borderRightColor: colors.border.divider,
+                    borderRightColor: "border.divider",
                     maxWidth: 250,
                     overflow: "clip",
                     "&:hover": {
@@ -216,9 +217,9 @@ const ThreatMeasuresTableRow = ({
             <TableCell
                 align="center"
                 sx={{
-                    borderBottomColor: colors.border.divider,
+                    borderBottomColor: "border.divider",
                     borderRight: "1.5px solid",
-                    borderRightColor: colors.border.divider,
+                    borderRightColor: "border.divider",
                     fontSize: "0.875rem",
                 }}
             >
@@ -229,9 +230,9 @@ const ThreatMeasuresTableRow = ({
                     align="center"
                     colSpan={2}
                     sx={{
-                        borderBottomColor: colors.border.divider,
+                        borderBottomColor: "border.divider",
                         borderRight: "1.5px solid",
-                        borderRightColor: colors.border.divider,
+                        borderRightColor: "border.divider",
                         fontSize: "0.875rem",
                     }}
                 >
@@ -243,9 +244,9 @@ const ThreatMeasuresTableRow = ({
                     key="net-probability"
                     align="center"
                     sx={{
-                        borderBottomColor: colors.border.divider,
+                        borderBottomColor: "border.divider",
                         borderRight: "1.5px solid",
-                        borderRightColor: colors.border.divider,
+                        borderRightColor: "border.divider",
                         fontSize: "0.875rem",
                     }}
                 >
@@ -255,9 +256,9 @@ const ThreatMeasuresTableRow = ({
                     key="net-damage"
                     align="center"
                     sx={{
-                        borderBottomColor: colors.border.divider,
+                        borderBottomColor: "border.divider",
                         borderRight: "1.5px solid",
-                        borderRightColor: colors.border.divider,
+                        borderRightColor: "border.divider",
                         fontSize: "0.875rem",
                     }}
                 >
@@ -270,7 +271,7 @@ const ThreatMeasuresTableRow = ({
                 sx={{
                     padding: 0,
                     paddingRight: 1.5,
-                    borderBottomColor: colors.border.divider,
+                    borderBottomColor: "border.divider",
                 }}
             >
                 {checkUserRole(userRole, USER_ROLES.EDITOR) && (

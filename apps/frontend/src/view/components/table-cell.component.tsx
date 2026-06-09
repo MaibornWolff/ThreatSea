@@ -1,7 +1,6 @@
 import TableCell from "@mui/material/TableCell";
 import type { TableCellProps } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material";
-import { colors } from "#view/wrappers/tokens.ts";
 
 interface CustomTableCellProps extends TableCellProps {
     sx?: SxProps<Theme>;
@@ -17,7 +16,7 @@ const CustomTableCell = ({ sx, showBorder = false, children, ...props }: CustomT
                 fontSize: "0.875rem",
                 borderRight,
                 borderRightColor: "primary.main",
-                borderBottomColor: colors.border.divider,
+                borderBottomColor: "border.divider",
                 whiteSpace: "nowrap",
                 ...sx,
             }}

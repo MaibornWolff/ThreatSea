@@ -25,7 +25,7 @@ import ThreatDialogPage from "./threat-dialog.page";
 import { MeasureImpactByMeasureDialogPage } from "./measure-impact-by-measure-dialog.page";
 import { withProject } from "#view/components/with-project.hoc.tsx";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
-import { colors } from "#view/wrappers/tokens.ts";
+import { useTheme } from "@mui/material/styles";
 
 /**
  * on this page all threats are listed
@@ -38,6 +38,7 @@ const ThreatsPageBody = () => {
     const { openConfirm } = useConfirm<ExtendedThreat>();
     const navigate = useNavigate();
     const { t } = useTranslation("threatsPage");
+    const theme = useTheme();
 
     const {
         setSortDirection,
@@ -407,7 +408,7 @@ const ThreatsPageBody = () => {
                                                             "&:last-child td, &:last-child th": { border: 0 },
                                                             "&:hover": {
                                                                 cursor: "pointer",
-                                                                backgroundColor: `${colors.surface.paperWhite} !important`,
+                                                                backgroundColor: `${theme.palette.background.paperWhite} !important`,
                                                             },
                                                         }}
                                                         onClick={(e) => onClickEditThreat(e, threat)}
@@ -449,7 +450,7 @@ const ThreatsPageBody = () => {
                                                         </CustomTableCell>
                                                         <CustomTableCell
                                                             sx={{
-                                                                borderBottomColor: colors.border.divider,
+                                                                borderBottomColor: "border.divider",
                                                                 fontSize: "0.875rem",
                                                             }}
                                                         >
@@ -544,7 +545,7 @@ const CustomTableCell = ({ sx, showBorder = false, children, ...props }: CustomT
                 fontSize: "0.875rem",
                 borderRight,
                 borderRightColor: "primary.main",
-                borderBottomColor: colors.border.divider,
+                borderBottomColor: "border.divider",
                 ...sx,
             }}
             {...props}
