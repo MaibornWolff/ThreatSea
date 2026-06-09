@@ -16,7 +16,7 @@ import { useTranslation } from "react-i18next";
 import { EditorColorPicker } from "./editor-color-picker.component";
 import type { AnnotationType } from "#api/types/system.types.ts";
 // Primitive escape hatch: slate500 has no semantic palette equivalent.
-import { colorPrimitives } from "#view/wrappers/tokens.ts";
+import { colorPrimitives } from "#view/wrappers/color-tokens.ts";
 
 const ANNOTATION_TYPE_LABEL_KEYS: Record<AnnotationType, string> = {
     rect: "canvas.annotation.rectangle",

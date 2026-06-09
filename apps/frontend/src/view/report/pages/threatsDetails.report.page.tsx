@@ -8,7 +8,7 @@ import { Text } from "#view/report/components/text.report.component.tsx";
 import { MATRIX_COLOR } from "#view/colors/matrix.ts";
 import type { MatrixColorKey } from "#view/colors/matrix.ts";
 import type { IndexCallback, ProjectReport, ThreatReport } from "#api/types/project.types.ts";
-import { colors } from "#view/wrappers/tokens.ts";
+import { colors } from "#view/wrappers/color-tokens.ts";
 
 type ReportThreat = ProjectReport["threats"][number];
 type ThreatAsset = ReportThreat["assets"][number];

@@ -6,7 +6,7 @@ import { s1, backgroundColor, s5 } from "#view/report/report.style.ts";
 import { MATRIX_COLOR } from "#view/colors/matrix.ts";
 import type { MatrixColorKey } from "#view/colors/matrix.ts";
 import type { IndexCallback, ProjectReport, ThreatReport } from "#api/types/project.types.ts";
-import { colors } from "#view/wrappers/tokens.ts";
+import { colors } from "#view/wrappers/color-tokens.ts";
 
 interface ThreatsListPageProps {
     indexCallback: IndexCallback;

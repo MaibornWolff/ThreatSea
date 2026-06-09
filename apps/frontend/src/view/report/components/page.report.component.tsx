@@ -2,7 +2,7 @@ import type { ComponentProps, ReactNode } from "react";
 import { Page as PdfPage, View } from "@react-pdf/renderer";
 import { s2, s3, s6 } from "#view/report/report.style.ts";
 import { Text } from "./text.report.component";
-import { colors } from "#view/wrappers/tokens.ts";
+import { colors } from "#view/wrappers/color-tokens.ts";
 
 type PdfPageBaseProps = ComponentProps<typeof PdfPage>;
 type PdfPageOptionalChildren = Omit<PdfPageBaseProps, "children">;

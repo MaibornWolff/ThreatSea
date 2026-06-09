@@ -78,7 +78,7 @@
       {
         "paths": [
           {
-            "name": "#view/wrappers/tokens.ts",
+            "name": "#view/wrappers/color-tokens.ts",
             "message": "Consume colors via theme.palette (useTheme/sx). Direct token imports are reserved for theme.wrapper and documented exceptions (editor-toolbar, system-component, view/report subtree)."
           }
         ]

@@ -5,7 +5,7 @@
 import type {} from "@mui/material/themeCssVarsAugmentation";
 import type { ReactNode } from "react";
 import { createTheme, ThemeProvider as MaterialThemeProvider } from "@mui/material/styles";
-import { colorPrimitives, colors } from "./tokens";
+import { colorPrimitives, colors } from "./color-tokens";
 
 /**
  * Object to customize the mui theme.

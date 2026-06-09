@@ -2,7 +2,7 @@
 // without access to MUI's ThemeContext — useTheme() is unavailable here. Direct token imports are the
 // documented escape hatch for the entire view/report subtree; the values still source from the design system.
 import { StyleSheet } from "@react-pdf/renderer";
-import { colorPrimitives, colors } from "#view/wrappers/tokens.ts";
+import { colorPrimitives, colors } from "#view/wrappers/color-tokens.ts";
 
 export const primaryColor = colors.brand.primary;
 export const backgroundColor = colors.surface.pageDefault;

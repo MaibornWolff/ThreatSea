@@ -6,7 +6,7 @@ import { Page } from "#view/report/components/page.report.component.tsx";
 import { Text } from "#view/report/components/text.report.component.tsx";
 import { backgroundColor, s1 } from "#view/report/report.style.ts";
 import type { IndexCallback, ProjectReport } from "#api/types/project.types.ts";
-import { colors } from "#view/wrappers/tokens.ts";
+import { colors } from "#view/wrappers/color-tokens.ts";
 
 const LIST_BREAKPOINT = 30;
 

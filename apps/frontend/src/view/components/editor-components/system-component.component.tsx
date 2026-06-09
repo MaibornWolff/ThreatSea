@@ -24,7 +24,7 @@ import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import { editorSelectors } from "#application/selectors/editor.selectors.ts";
 import { alpha, useTheme } from "@mui/material/styles";
 // Primitive escape hatch: slate500 and blue700 have no semantic palette equivalents.
-import { colorPrimitives } from "#view/wrappers/tokens.ts";
+import { colorPrimitives } from "#view/wrappers/color-tokens.ts";
 
 const imageMap: Record<string, string> = {
     "communication-infrastructure.png": communicationInfrastructure,
