@@ -748,7 +748,6 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                                     <CustomTableCell
                                                                         showBorder={true}
                                                                         sx={{
-                                                                            borderRight: "border.divider",
                                                                             padding: 0,
                                                                             paddingLeft: 1,
                                                                             paddingTop: 0.5,
