@@ -5,7 +5,6 @@ export const ERR_TYPE_INTERNAL = "ServerError";
 export const ERR_TYPE_API = "AuthenticationError";
 export const ERR_TYPE_PROJECT_CATALOG_EXISTANCE = "ExistanceError";
 
-export const ERR_MESS_AUTH = "Authentication Error";
 export const ERR_MESS_SERVER_INTERNAL = "Internal Server Error";
 
 interface ErrorState {
