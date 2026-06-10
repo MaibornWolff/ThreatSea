@@ -6,7 +6,7 @@ import { Text } from "./text.report.component";
 type PdfPageBaseProps = ComponentProps<typeof PdfPage>;
 type PdfPageOptionalChildren = Omit<PdfPageBaseProps, "children">;
 
-export interface PageProps extends PdfPageOptionalChildren {
+interface PageProps extends PdfPageOptionalChildren {
     logo?: string | undefined;
     projectName: string;
     date: string;

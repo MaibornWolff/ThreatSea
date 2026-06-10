@@ -4,7 +4,7 @@ import { assetsAdapter } from "#application/adapters/asset.adapter.ts";
 
 type AssetsAdapterState = ReturnType<typeof assetsAdapter.getInitialState>;
 
-export type AssetsState = AssetsAdapterState & {
+type AssetsState = AssetsAdapterState & {
     isPending: boolean;
 };
 

@@ -43,5 +43,4 @@ export function createStore(preloadedState?: Partial<RootState>) {
     });
 }
 
-export type AppStore = ReturnType<typeof createStore>;
 export type { RootState, AppDispatch } from "./store.types";

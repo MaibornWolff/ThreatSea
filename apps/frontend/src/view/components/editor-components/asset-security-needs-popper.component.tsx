@@ -1,7 +1,7 @@
 import { Popper, Typography, Box } from "@mui/material";
 import type { Asset } from "#api/types/asset.types.ts";
 
-export interface AssetSecurityNeedsPopperProps {
+interface AssetSecurityNeedsPopperProps {
     anchorEl: HTMLElement | null;
     asset: Asset | null;
 }

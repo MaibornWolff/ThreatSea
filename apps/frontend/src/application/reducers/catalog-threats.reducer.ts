@@ -4,7 +4,7 @@ import { catalogThreatsAdapter } from "#application/adapters/catalog-threats.ada
 
 type CatalogThreatsAdapterState = ReturnType<typeof catalogThreatsAdapter.getInitialState>;
 
-export type CatalogThreatsState = CatalogThreatsAdapterState & {
+type CatalogThreatsState = CatalogThreatsAdapterState & {
     isPending: boolean;
 };
 

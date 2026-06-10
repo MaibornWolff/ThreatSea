@@ -5,7 +5,7 @@ export interface LineDrawingState {
     sourceType: "menu" | "connector" | null;
 }
 
-export interface LineDrawingContextValue {
+interface LineDrawingContextValue {
     drawingState: LineDrawingState;
     setDrawingState: Dispatch<SetStateAction<LineDrawingState>>;
 }
