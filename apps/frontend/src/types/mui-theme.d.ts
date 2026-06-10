@@ -76,6 +76,7 @@ declare module "@mui/material/styles" {
         listItem: string;
         paperWhite: string;
         paperWhiteTranslucent: string;
+        toolbarHover: string;
         tooltip: string;
     }
 

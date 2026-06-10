@@ -10,13 +10,11 @@ import {
     TrendingFlat,
 } from "@mui/icons-material";
 import { Box, IconButton, Paper, Popover, Popper, Tooltip } from "@mui/material";
-import { alpha, useTheme } from "@mui/material/styles";
+import { useTheme } from "@mui/material/styles";
 import { useState, type ComponentType } from "react";
 import { useTranslation } from "react-i18next";
 import { EditorColorPicker } from "./editor-color-picker.component";
 import type { AnnotationType } from "#api/types/system.types.ts";
-// Primitive escape hatch: slate500 has no semantic palette equivalent.
-import { colorPrimitives } from "#view/wrappers/color-tokens.ts";
 
 const ANNOTATION_TYPE_LABEL_KEYS: Record<AnnotationType, string> = {
     rect: "canvas.annotation.rectangle",
@@ -82,7 +80,7 @@ export const EditorToolbar = ({
     const iconButtonSx = {
         backgroundColor: "background.paperIntransparent",
         "&:hover": {
-            backgroundColor: alpha(colorPrimitives.neutral.slate500, 0.7),
+            backgroundColor: "background.toolbarHover",
         },
     };
 

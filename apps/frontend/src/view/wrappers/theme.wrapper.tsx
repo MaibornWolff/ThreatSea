@@ -82,6 +82,7 @@ const theme = createTheme({
                     listItem: colors.surface.listItem,
                     paperWhite: colors.surface.paperWhite,
                     paperWhiteTranslucent: colors.surface.paperWhiteTranslucent,
+                    toolbarHover: colors.surface.toolbarHover,
                     tooltip: colors.surface.tooltip,
                 },
                 text: {

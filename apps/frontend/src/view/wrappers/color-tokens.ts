@@ -35,6 +35,7 @@ export const colorPrimitives = {
         gray300: "rgba(228, 230, 245, 1)",
         gray500Cool: "rgba(152, 163, 179, 1)",
         slate500: "rgba(149, 163, 181, 1)",
+        slate500Alpha70: "rgba(149, 163, 181, 0.7)",
         gray700Cool: "rgba(94, 102, 110, 1)",
         gray800Alpha41: "rgba(65, 65, 65, 0.41)",
         // gray800Steel and gray800SteelOff differ by 1 unit in the green channel — preserved
@@ -89,6 +90,7 @@ export const colors = {
         paperWhite: colorPrimitives.neutral.white,
         paperWhiteTranslucent: colorPrimitives.neutral.whiteAlpha67,
         canvasFill: colorPrimitives.neutral.white,
+        toolbarHover: colorPrimitives.neutral.slate500Alpha70,
     },
     border: {
         default: colorPrimitives.brand.blue900,
