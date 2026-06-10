@@ -46,3 +46,4 @@ sx={{ bgcolor: `rgba(${theme.vars.palette.primary.mainChannel} / 0.6)` }}
 - All values are `rgba(r, g, b, a)`. Translucent and opaque variants are separate primitives.
 - `text.primary`, `text.secondary`, and `primary.main` currently resolve to the same brand blue — don't rely on them differing visually for active/inactive states.
 - PDF-rendering quirk primitives (e.g. `blue900Pdf`) stay separate from their on-screen counterparts even when values nearly match.
+- MUI does **not** auto-generate channel tokens for `common.black` / `common.white`. If you need a translucent black/white, use a literal `rgba(0, 0, 0, α)` rather than `theme.vars.palette.common.blackChannel`.
