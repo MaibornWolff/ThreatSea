@@ -119,8 +119,6 @@ const nameTextFieldSx = <TFieldValues extends FieldValues>(
         border: "none !important",
         padding: "0 !important",
         borderRadius: "0 !important",
-    },
-    "& input, & textarea": {
         fontWeight: "bold",
     },
     "& .Mui-focused": {
