@@ -277,4 +277,97 @@ test.describe("Editor Page Tests", () => {
             await expect(pg.contextMenu).toBeVisible();
         });
     });
+
+    test.describe("Custom Component Tests", () => {
+        const STANDARD_ICONS = ["Users", "Client", "Server", "Database"];
+
+        for (const icon of STANDARD_ICONS) {
+            test(`Should create a custom component with the ${icon} standard icon`, async ({ page, browserName }, {
+                testId,
+            }) => {
+                const pg = new EditorPage(page);
+                const name = `Custom ${icon} ${buildTestId(browserName, testId)}`;
+
+                await pg.openAddCustomComponentDialog();
+                await pg.componentNameInput.fill(name);
+                await pg.standardIconButton(icon).click();
+                await expect(pg.standardIconButton(icon)).toHaveAttribute("aria-pressed", "true");
+                await pg.poaSwitch("User Interface").click();
+                await pg.componentDialogSaveButton.click();
+                await expect(pg.componentDialog).toBeHidden();
+
+                await pg.openContextMenu();
+                await pg.expandCustomComponents();
+                await expect(pg.customComponentEntry(name)).toBeVisible();
+            });
+        }
+
+        test("Should create a custom component with an uploaded custom icon", async ({ page, browserName }, {
+            testId,
+        }) => {
+            const pg = new EditorPage(page);
+            const name = `Custom Upload ${buildTestId(browserName, testId)}`;
+
+            await pg.openAddCustomComponentDialog();
+            await pg.componentNameInput.fill(name);
+            await pg.uploadCustomIcon();
+            await pg.poaSwitch("User Interface").click();
+            await pg.componentDialogSaveButton.click();
+            await expect(pg.componentDialog).toBeHidden();
+
+            await pg.openContextMenu();
+            await pg.expandCustomComponents();
+            await expect(pg.customComponentEntry(name)).toBeVisible();
+        });
+
+        test("Should require an icon before saving a custom component", async ({ page, browserName }, { testId }) => {
+            const pg = new EditorPage(page);
+            const name = `No Icon ${buildTestId(browserName, testId)}`;
+
+            await pg.openAddCustomComponentDialog();
+            await pg.componentNameInput.fill(name);
+            await pg.poaSwitch("User Interface").click();
+            await pg.componentDialogSaveButton.click();
+
+            await expect(pg.iconRequiredError).toBeVisible();
+            await expect(pg.componentDialog).toBeVisible();
+        });
+
+        test("Should require a point of attack before saving a custom component", async ({ page, browserName }, {
+            testId,
+        }) => {
+            const pg = new EditorPage(page);
+            const name = `No POA ${buildTestId(browserName, testId)}`;
+
+            await pg.openAddCustomComponentDialog();
+            await pg.componentNameInput.fill(name);
+            await pg.standardIconButton("Users").click();
+            await pg.componentDialogSaveButton.click();
+
+            await expect(pg.poaRequiredError).toBeVisible();
+            await expect(pg.componentDialog).toBeVisible();
+        });
+
+        test("Should delete a custom component via the three-dot menu", async ({ page, browserName }, { testId }) => {
+            const pg = new EditorPage(page);
+            const name = `Deletable ${buildTestId(browserName, testId)}`;
+
+            await pg.openAddCustomComponentDialog();
+            await pg.componentNameInput.fill(name);
+            await pg.standardIconButton("Server").click();
+            await pg.poaSwitch("User Interface").click();
+            await pg.componentDialogSaveButton.click();
+            await expect(pg.componentDialog).toBeHidden();
+
+            await pg.openContextMenu();
+            await pg.expandCustomComponents();
+            await expect(pg.customComponentEntry(name)).toBeVisible();
+
+            await pg.customComponentMenuButton(name).click();
+            await pg.deleteComponentMenuItem.click();
+            await pg.confirmButton.click();
+
+            await expect(pg.customComponentEntry(name)).toHaveCount(0);
+        });
+    });
 });

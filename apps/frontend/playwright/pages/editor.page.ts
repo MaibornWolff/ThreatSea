@@ -1,4 +1,5 @@
 import type { Page, Locator } from "@playwright/test";
+import path from "path";
 import { BasePage } from "./base.page.ts";
 
 export class EditorPage extends BasePage {
@@ -33,6 +34,17 @@ export class EditorPage extends BasePage {
     readonly saveButton: Locator;
     readonly cancelButton: Locator;
 
+    // Custom component context menu + dialog
+    readonly addCustomComponentButton: Locator;
+    readonly customComponentsToggle: Locator;
+    readonly componentDialog: Locator;
+    readonly componentNameInput: Locator;
+    readonly componentDialogSaveButton: Locator;
+    readonly iconRequiredError: Locator;
+    readonly poaRequiredError: Locator;
+    readonly deleteComponentMenuItem: Locator;
+    readonly confirmButton: Locator;
+
     constructor(page: Page) {
         super(page);
         this.canvas = page.locator("canvas").nth(2);
@@ -60,6 +72,18 @@ export class EditorPage extends BasePage {
         this.assetCreationModalNameInput = page.locator('[data-testid="asset-creation-modal_name-input"]');
         this.saveButton = page.locator('[data-testid="save-button"]');
         this.cancelButton = page.locator('[data-testid="cancel-button"]');
+
+        // The "+" on the Custom row and the dialog have no data-testid, so rely on
+        // the MUI add-icon test id and accessible roles/labels instead.
+        this.addCustomComponentButton = this.contextMenu.locator('[data-testid="AddIcon"]');
+        this.customComponentsToggle = this.contextMenu.getByText("Custom", { exact: true });
+        this.componentDialog = page.getByRole("dialog");
+        this.componentNameInput = this.componentDialog.getByRole("textbox");
+        this.componentDialogSaveButton = this.componentDialog.getByRole("button", { name: "Save", exact: true });
+        this.iconRequiredError = this.componentDialog.getByText("An icon is required");
+        this.poaRequiredError = this.componentDialog.getByText("At least one point of attack must be selected");
+        this.deleteComponentMenuItem = page.getByTestId("DeleteComponent");
+        this.confirmButton = page.getByTestId("confirm-button");
     }
 
     async goto(projectId: number): Promise<void> {
@@ -104,6 +128,43 @@ export class EditorPage extends BasePage {
     async rightClickCanvas(): Promise<void> {
         await this.waitForEditorReady();
         await this.canvas.click({ button: "right" });
+    }
+
+    async openContextMenu(): Promise<void> {
+        await this.rightClickCanvas();
+        await this.contextMenu.waitFor({ state: "visible" });
+    }
+
+    async openAddCustomComponentDialog(): Promise<void> {
+        await this.openContextMenu();
+        await this.addCustomComponentButton.click();
+        await this.componentDialog.waitFor({ state: "visible" });
+    }
+
+    async expandCustomComponents(): Promise<void> {
+        await this.customComponentsToggle.click();
+    }
+
+    standardIconButton(name: string): Locator {
+        return this.componentDialog.getByRole("button", { name, exact: true });
+    }
+
+    poaSwitch(label: string): Locator {
+        return this.componentDialog.getByRole("switch", { name: label });
+    }
+
+    async uploadCustomIcon(): Promise<void> {
+        // PLAYWRIGHT_FRONTEND_ROOT is set in playwright.config.ts (avoids import.meta.url cache dir issues).
+        const iconPath = path.join(process.env["PLAYWRIGHT_FRONTEND_ROOT"]!, "playwright/fixtures/custom-icon.png");
+        await this.componentDialog.locator('input[type="file"]').setInputFiles(iconPath);
+    }
+
+    customComponentEntry(name: string): Locator {
+        return this.contextMenu.getByRole("listitem").filter({ hasText: name });
+    }
+
+    customComponentMenuButton(name: string): Locator {
+        return this.customComponentEntry(name).locator('[data-testid="MoreVertIcon"]');
     }
 
     poaSwitchButton(poa: string): Locator {
