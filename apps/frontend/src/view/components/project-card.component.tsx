@@ -221,7 +221,7 @@ export const ProjectCard = ({ project, onClickEditProject, onClickDeleteProject,
                     <GppGood
                         sx={{
                             fontSize: "20px",
-                            color: "green",
+                            color: "success.main",
                             marginRight: "5px",
                         }}
                     />

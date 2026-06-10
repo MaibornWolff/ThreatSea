@@ -409,7 +409,7 @@ export const CreatePage = <P extends object>(
                                     href={link.url}
                                     style={{
                                         paddingRight: "10px",
-                                        color: "grey",
+                                        color: "var(--mui-palette-text-subtle)",
                                     }}
                                 >
                                     {link.text}
