@@ -341,7 +341,7 @@ const ComponentListItem = ({
                 )
             }
             sx={{
-                borderBottomColor: "#fff",
+                borderBottomColor: "border.divider",
                 ...sx,
             }}
         >
@@ -350,14 +350,15 @@ const ComponentListItem = ({
                 onClick={onClick}
                 sx={{
                     "&:hover": {
-                        backgroundColor: "#fff",
+                        backgroundColor: "background.paperWhite",
                     },
                 }}
             >
                 <ListItemAvatar
                     sx={{
                         minWidth: "0px",
-                        border: "0.75px solid #233C57",
+                        border: "0.75px solid",
+                        borderColor: "primary.main",
                         borderRadius: 50,
                         marginRight: "13px",
                     }}
