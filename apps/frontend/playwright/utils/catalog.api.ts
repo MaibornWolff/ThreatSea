@@ -6,14 +6,6 @@ export async function getCatalogs(request: APIRequestContext, token: string): Pr
     return fetchApi(request, token, "GET", "/catalogs");
 }
 
-export async function getCatalog(
-    request: APIRequestContext,
-    token: string,
-    catalogId: number
-): Promise<CatalogWithRole> {
-    return fetchApi(request, token, "GET", `/catalogs/${catalogId}`);
-}
-
 export async function createCatalog(
     request: APIRequestContext,
     token: string,
@@ -42,13 +34,4 @@ export async function deleteCatalogs(request: APIRequestContext, token: string, 
     for (const id of catalogIds) {
         await deleteCatalog(request, token, id);
     }
-}
-
-export async function deleteAllCatalogs(request: APIRequestContext, token: string): Promise<void> {
-    const catalogs = await getCatalogs(request, token);
-    await deleteCatalogs(
-        request,
-        token,
-        catalogs.map((c) => c.id)
-    );
 }
