@@ -6,7 +6,7 @@ import { projectsAdapter } from "#application/adapters/project.adapter.ts";
 
 type ProjectsAdapterState = ReturnType<typeof projectsAdapter.getInitialState>;
 
-type ProjectsState = ProjectsAdapterState & {
+export type ProjectsState = ProjectsAdapterState & {
     isPending: boolean;
     current: ExtendedProject | undefined;
 };
