@@ -20,7 +20,7 @@ import { USER_ROLES } from "#types/user-roles.types.js";
 /**
  * Defines type of catalog with the role of the user.
  */
-export type CatalogWithRole = Catalog & {
+type CatalogWithRole = Catalog & {
     role: USER_ROLES;
 };
 

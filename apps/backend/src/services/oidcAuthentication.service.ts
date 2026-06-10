@@ -4,14 +4,14 @@ import { buildThreatSeaAccessToken, OidcProfile } from "#services/auth.service.j
 import crypto from "crypto";
 import * as client from "openid-client";
 
-export interface OidcLoginInitiation {
+interface OidcLoginInitiation {
     redirectUrl: string;
     state: string;
     nonce: string;
     codeVerifier: string;
 }
 
-export interface OidcCallbackParams {
+interface OidcCallbackParams {
     state: string;
     nonce: string;
     codeVerifier: string;

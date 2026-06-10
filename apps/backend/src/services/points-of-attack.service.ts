@@ -6,7 +6,7 @@ import { ComponentType } from "#types/system.types.js";
 import { findSystem } from "#services/system.service.js";
 import { getMultipleAssets } from "#services/assets.service.js";
 
-export interface PointOfAttack {
+interface PointOfAttack {
     id: string;
     name: string | null;
     assets: Asset[];
