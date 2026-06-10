@@ -33,6 +33,21 @@ sx={{ bgcolor: `rgba(${theme.vars.palette.primary.mainChannel} / 0.6)` }}
 <Rect stroke={theme.palette.border.canvas} />
 ```
 
+### Lint-enforced exceptions
+
+The [`no-restricted-imports`](../../../.oxlintrc.json) rule blocks direct imports of `#view/wrappers/color-tokens.ts` so components stay on `theme.vars.palette.*`. Four paths are exempted (override at the bottom of `.oxlintrc.json`):
+
+- **`theme.wrapper.tsx`** — has to import the tokens to wire them into the MUI palette.
+- **`editor-toolbar.component.tsx`** / **`system-component.component.tsx`** — Konva needs literal colors (can't read CSS variables), and `colorPrimitives.neutral.slate500` has no semantic palette home; used with `alpha()`.
+- **`view/report/**`** — `@react-pdf/renderer` renders to PDF and likewise can't resolve CSS variables.
+
+```tsx
+import { colorPrimitives } from "#view/wrappers/color-tokens.ts";
+backgroundColor: alpha(colorPrimitives.neutral.slate500, 0.7);
+```
+
+To add a new exception: the file must have a concrete reason (runtime that can't read CSS variables, or a primitive with no palette equivalent). Add it to the override and list it here.
+
 ### Adding a color
 
 1. If a semantic alias already fits, just use it.
