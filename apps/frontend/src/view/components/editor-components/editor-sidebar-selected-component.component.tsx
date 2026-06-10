@@ -182,7 +182,7 @@ const EditorSidebarSelectedComponentInner = ({
                             fontWeight: "bold",
                         },
                         "& .Mui-focused": {
-                            borderBottom: `1px solid ${theme.palette.primary.main} !important`,
+                            borderBottom: `1px solid ${theme.vars.palette.primary.main} !important`,
                         },
                         input: {
                             fontSize: "0.875rem !important",
@@ -258,7 +258,7 @@ const EditorSidebarSelectedComponentInner = ({
                         borderRadius: "0 !important",
                     },
                     "& .Mui-focused": {
-                        borderBottom: `1px solid ${theme.palette.primary.main} !important`,
+                        borderBottom: `1px solid ${theme.vars.palette.primary.main} !important`,
                     },
                     textarea: {
                         fontSize: "0.875rem !important",
@@ -476,7 +476,7 @@ const EditorSidebarSelectedComponentInner = ({
                                                 border: "none !important",
                                                 width: "82.5%",
                                                 "& .MuiInputBase-root": {
-                                                    borderBottom: `1px solid ${theme.palette.primary.main} !important`,
+                                                    borderBottom: `1px solid ${theme.vars.palette.primary.main} !important`,
                                                 },
                                                 "*": {
                                                     border: "none !important",

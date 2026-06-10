@@ -234,7 +234,7 @@ const CatalogThreatDialog = ({ catalogThreat, isNew, ...props }: CatalogThreatDi
                                         },
                                         ".MuiSelect-iconOpen + fieldset": {
                                             borderWidth: "1px !important",
-                                            borderColor: `${theme.palette.secondary.main} !important`,
+                                            borderColor: `${theme.vars.palette.secondary.main} !important`,
                                         },
                                     }}
                                     data-testid="catalog-threat-creation-modal_attacker-selection"
@@ -320,7 +320,7 @@ const CatalogThreatDialog = ({ catalogThreat, isNew, ...props }: CatalogThreatDi
                                         },
                                         ".MuiSelect-iconOpen + fieldset": {
                                             borderWidth: "1px !important",
-                                            borderColor: `${theme.palette.secondary.main} !important`,
+                                            borderColor: `${theme.vars.palette.secondary.main} !important`,
                                         },
                                     }}
                                     data-testid="catalog-threat-creation-modal_poa-selection"

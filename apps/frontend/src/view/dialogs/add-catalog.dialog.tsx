@@ -162,7 +162,7 @@ const AddCatalogDialog = ({ catalog, ...props }: AddCatalogDialogProps) => {
                                 fontWeight: "bold",
                             },
                             "& .MuiInputBase-root.Mui-focused": {
-                                borderBottom: `1px solid ${theme.palette.primary.main} !important`,
+                                borderBottom: `1px solid ${theme.vars.palette.primary.main} !important`,
                             },
                             input: {
                                 fontSize: "0.875rem !important",
@@ -234,7 +234,7 @@ const AddCatalogDialog = ({ catalog, ...props }: AddCatalogDialogProps) => {
                                 sx={{
                                     scale: "0.75",
                                     "&:hover": {
-                                        color: `${theme.palette.secondary.main} !important`,
+                                        color: `${theme.vars.palette.secondary.main} !important`,
                                     },
                                 }}
                             />

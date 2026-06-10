@@ -393,7 +393,7 @@ const AddThreatDialog = ({ threat, project, userRole, ...props }: AddThreatDialo
                                                 className="info-adornment"
                                                 sx={{
                                                     "&:hover": {
-                                                        color: `${theme.palette.secondary.main} !important`,
+                                                        color: `${theme.vars.palette.secondary.main} !important`,
                                                     },
                                                 }}
                                             />

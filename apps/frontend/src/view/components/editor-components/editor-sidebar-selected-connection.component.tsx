@@ -54,7 +54,7 @@ export const EditorSidebarSelectedConnection = ({
                             borderRadius: "0 !important",
                         },
                         "& .Mui-focused": {
-                            borderBottom: `1px solid ${theme.palette.primary.main} !important`,
+                            borderBottom: `1px solid ${theme.vars.palette.primary.main} !important`,
                         },
                         input: {
                             fontSize: "0.875rem !important",

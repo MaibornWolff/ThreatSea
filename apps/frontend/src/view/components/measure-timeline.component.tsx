@@ -8,7 +8,7 @@ const TimeSlider = styled(Slider)(({ theme }) => ({
     "& .MuiSlider-thumb": {
         height: 25,
         width: 3,
-        backgroundColor: theme.palette.primary.main,
+        backgroundColor: theme.vars.palette.primary.main,
         boxShadow: "none",
         borderRadius: 2,
     },
@@ -17,7 +17,7 @@ const TimeSlider = styled(Slider)(({ theme }) => ({
         fontWeight: "normal",
         top: 70,
         backgroundColor: "unset",
-        color: theme.palette.text.primary,
+        color: theme.vars.palette.text.primary,
         "&:before": {
             display: "none",
         },
@@ -32,7 +32,7 @@ const TimeSlider = styled(Slider)(({ theme }) => ({
     "& .MuiSlider-rail": {
         opacity: 1, // 0.5,
         height: 2,
-        backgroundColor: theme.palette.primary.main,
+        backgroundColor: theme.vars.palette.primary.main,
         borderRadius: 2,
     },
     "& .MuiSlider-markLabel": {
@@ -40,7 +40,7 @@ const TimeSlider = styled(Slider)(({ theme }) => ({
         top: -25,
     },
     "& .MuiSlider-mark": {
-        backgroundColor: theme.palette.primary.main,
+        backgroundColor: theme.vars.palette.primary.main,
         height: 24,
         width: 2,
         "::before": {
@@ -58,7 +58,7 @@ const TimeSlider = styled(Slider)(({ theme }) => ({
         },
         "&.MuiSlider-markActive": {
             opacity: 1,
-            backgroundColor: theme.palette.primary.main,
+            backgroundColor: theme.vars.palette.primary.main,
         },
         "&:hover + .MuiSlider-valueLabel": {
             color: theme.vars.palette.errorBold,

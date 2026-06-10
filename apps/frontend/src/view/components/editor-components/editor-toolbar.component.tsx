@@ -87,9 +87,9 @@ export const EditorToolbar = ({
     };
 
     const activeIconButtonSx = {
-        backgroundColor: alpha(theme.palette.primary.main, 0.85),
+        backgroundColor: `rgba(${theme.vars.palette.primary.mainChannel} / 0.85)`,
         "&:hover": {
-            backgroundColor: theme.palette.primary.main,
+            backgroundColor: theme.vars.palette.primary.main,
         },
     };
 

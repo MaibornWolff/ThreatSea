@@ -93,7 +93,7 @@ export const Matrix = ({ matrix, size = 120, onSelectCell }: MatrixProps): JSX.E
                                 probability={probabilityAxis[i] as number}
                                 damage={damageAxis[j] as number}
                                 fontSize={"0.875rem"}
-                                foregroundColor={theme.palette.text.white}
+                                foregroundColor={theme.vars.palette.text.white}
                                 onClick={onSelectCell}
                                 {...cell}
                             />
@@ -180,8 +180,8 @@ const MatrixCell = ({
         const matrixColor = color ? MATRIX_COLOR[color] : undefined;
         const backgroundColor =
             (selected ? matrixColor?.selected : amount ? matrixColor?.standard : matrixColor?.light) ||
-            theme.palette.background.paperWhite;
-        const borderColor = (selected ? matrixColor?.selected : matrixColor?.border) || theme.palette.common.black;
+            theme.vars.palette.background.paperWhite;
+        const borderColor = (selected ? matrixColor?.selected : matrixColor?.border) || theme.vars.palette.common.black;
         return [backgroundColor, borderColor];
     }, [color, selected, amount, theme]);
 

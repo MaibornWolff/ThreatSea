@@ -1,6 +1,6 @@
 import { Add } from "@mui/icons-material";
 import { IconButton, Tooltip, Box } from "@mui/material";
-import { alpha, useTheme } from "@mui/material/styles";
+import { useTheme } from "@mui/material/styles";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
@@ -49,7 +49,7 @@ const ColorPresetChip = ({ presetColor, selectedColor, disabled, onClick, toolti
                     backgroundColor: presetColor,
                     border: isCurrent
                         ? `2px solid ${theme.vars.palette.primary.main}`
-                        : `1px solid ${alpha(theme.palette.common.black, 0.25)}`,
+                        : `1px solid rgba(${theme.vars.palette.common.blackChannel} / 0.25)`,
                 }}
             />
         </IconButton>
@@ -165,7 +165,7 @@ export const EditorColorPicker = ({
                 borderRadius: "50%",
                 backgroundColor: displayColor,
                 border: `2px solid ${theme.vars.palette.border.divider}`,
-                boxShadow: `0 0 0 1px ${alpha(theme.palette.primary.main, 0.6)}`,
+                boxShadow: `0 0 0 1px rgba(${theme.vars.palette.primary.mainChannel} / 0.6)`,
             }}
         />
     );
@@ -195,8 +195,8 @@ export const EditorColorPicker = ({
                             width: "20px",
                             height: "20px",
                             padding: 0,
-                            border: `1px dashed ${alpha(theme.palette.primary.main, 0.6)}`,
-                            color: alpha(theme.palette.primary.main, 0.8),
+                            border: `1px dashed rgba(${theme.vars.palette.primary.mainChannel} / 0.6)`,
+                            color: `rgba(${theme.vars.palette.primary.mainChannel} / 0.8)`,
                         }}
                         aria-label={t("canvas.annotation.color")}
                     >

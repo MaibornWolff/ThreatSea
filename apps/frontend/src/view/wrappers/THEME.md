@@ -1,6 +1,6 @@
 # Theming
 
-The app theme is a thin layer over MUI. Design decisions live in token files, get mapped into the MUI theme in [`theme.wrapper.tsx`](./theme.wrapper.tsx), and reach components via `theme.palette.*` (with `cssVariables: true` enabled, so values are emitted as CSS custom properties). Custom palette slots are declared in [`src/types/mui-theme.d.ts`](../../types/mui-theme.d.ts).
+The app theme is a thin layer over MUI. Design decisions live in token files, get mapped into the MUI theme in [`theme.wrapper.tsx`](./theme.wrapper.tsx), and reach components via `theme.vars.palette.*` (with `cssVariables: true` enabled, so values resolve to CSS custom properties). Custom palette slots are declared in [`src/types/mui-theme.d.ts`](../../types/mui-theme.d.ts).
 
 ## Colors
 
@@ -15,10 +15,22 @@ Two aliases may resolve to the same primitive on purpose (e.g. `surface.paperWhi
 
 ### Consuming
 
-Always read from `theme.palette`. Never import tokens directly into a component — the palette indirection is what makes future theme variants possible without touching components.
+Read from `theme.vars.palette.*` ([MUI's recommended pattern](https://mui.com/material-ui/customization/css-theme-variables/usage/#using-theme-variables) when `cssVariables: true` is enabled — values resolve to `var(--mui-palette-…)`). Never import tokens directly into a component.
 
 ```tsx
-sx={{ color: theme.palette.text.primary, bgcolor: theme.palette.background.paper }}
+sx={{ color: theme.vars.palette.text.primary, bgcolor: theme.vars.palette.background.paper }}
+```
+
+For translucent colors, use the auto-generated **channel tokens** instead of `alpha()`:
+
+```tsx
+sx={{ bgcolor: `rgba(${theme.vars.palette.primary.mainChannel} / 0.6)` }}
+```
+
+**Canvas exception** — Konva (`Stage`, `Rect`, `Line`, etc.) can't parse CSS variable strings; it needs literal color values. In Konva render paths only, use raw `theme.palette.*`:
+
+```tsx
+<Rect stroke={theme.palette.border.canvas} />
 ```
 
 ### Adding a color

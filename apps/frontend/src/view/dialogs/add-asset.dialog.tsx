@@ -273,7 +273,7 @@ const AddAssetDialog = ({ projectId, asset, userRole, onDialogClose, ...props }:
                                                     className="info-adornment"
                                                     sx={{
                                                         "&:hover": {
-                                                            color: `${theme.palette.secondary.main} !important`,
+                                                            color: `${theme.vars.palette.secondary.main} !important`,
                                                         },
                                                     }}
                                                 />
@@ -371,7 +371,7 @@ const AddAssetDialog = ({ projectId, asset, userRole, onDialogClose, ...props }:
                                                     className="info-adornment"
                                                     sx={{
                                                         "&:hover": {
-                                                            color: `${theme.palette.secondary.main} !important`,
+                                                            color: `${theme.vars.palette.secondary.main} !important`,
                                                         },
                                                     }}
                                                 />
@@ -465,7 +465,7 @@ const AddAssetDialog = ({ projectId, asset, userRole, onDialogClose, ...props }:
                                                     className="info-adornment"
                                                     sx={{
                                                         "&:hover": {
-                                                            color: `${theme.palette.secondary.main} !important`,
+                                                            color: `${theme.vars.palette.secondary.main} !important`,
                                                         },
                                                     }}
                                                 />

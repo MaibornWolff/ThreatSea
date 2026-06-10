@@ -281,7 +281,7 @@ const MeasureImpactByMeasureDialog = ({
                                         },
                                         ".MuiSelect-iconOpen + fieldset": {
                                             borderWidth: "1px !important",
-                                            borderColor: `${theme.palette.secondary.main} !important`,
+                                            borderColor: `${theme.vars.palette.secondary.main} !important`,
                                         },
                                     }}
                                 >
@@ -463,7 +463,7 @@ const MeasureImpactByMeasureDialog = ({
                                                 className="info-adornment"
                                                 sx={{
                                                     "&:hover": {
-                                                        color: `${theme.palette.secondary.main} !important`,
+                                                        color: `${theme.vars.palette.secondary.main} !important`,
                                                     },
                                                 }}
                                             />
@@ -571,7 +571,7 @@ const MeasureImpactByMeasureDialog = ({
                                                 className="info-adornment"
                                                 sx={{
                                                     "&:hover": {
-                                                        color: `${theme.palette.secondary.main} !important`,
+                                                        color: `${theme.vars.palette.secondary.main} !important`,
                                                     },
                                                 }}
                                             />

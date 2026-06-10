@@ -56,22 +56,22 @@ export const CreatePage = <P extends object>(
             setAutoSaveOnClick(() => onClick);
         };
 
-        let autoSaveIconColor: string = theme.palette.text.statusNeutral;
+        let autoSaveIconColor: string = theme.vars.palette.text.statusNeutral;
         switch (autoSaveStatus) {
             case "uninitialized":
-                autoSaveIconColor = theme.palette.success.main;
+                autoSaveIconColor = theme.vars.palette.success.main;
                 break;
             case "failed":
-                autoSaveIconColor = theme.palette.warning.main;
+                autoSaveIconColor = theme.vars.palette.warning.main;
                 break;
             case "upToDate":
-                autoSaveIconColor = theme.palette.success.main;
+                autoSaveIconColor = theme.vars.palette.success.main;
                 break;
             case "notUpToDate":
-                autoSaveIconColor = theme.palette.text.statusNeutral;
+                autoSaveIconColor = theme.vars.palette.text.statusNeutral;
                 break;
             case "saving":
-                autoSaveIconColor = theme.palette.text.statusNeutral;
+                autoSaveIconColor = theme.vars.palette.text.statusNeutral;
                 break;
         }
 
@@ -82,7 +82,7 @@ export const CreatePage = <P extends object>(
             case "upToDate":
             case "notUpToDate":
             case "saving":
-                autoSaveForegroundColor = theme.palette.text.white;
+                autoSaveForegroundColor = theme.vars.palette.text.white;
                 break;
         }
 

@@ -242,7 +242,7 @@ const CatalogMeasureDialog = ({ catalogMeasure, isNew, catalogId, ...props }: Ca
                                         },
                                         ".MuiSelect-iconOpen + fieldset": {
                                             borderWidth: "1px !important",
-                                            borderColor: `${theme.palette.secondary.main} !important`,
+                                            borderColor: `${theme.vars.palette.secondary.main} !important`,
                                         },
                                     }}
                                     data-testid="catalog-measure-creation-modal_attacker-selection"
@@ -328,7 +328,7 @@ const CatalogMeasureDialog = ({ catalogMeasure, isNew, catalogId, ...props }: Ca
                                         },
                                         ".MuiSelect-iconOpen + fieldset": {
                                             borderWidth: "1px !important",
-                                            borderColor: `${theme.palette.secondary.main} !important`,
+                                            borderColor: `${theme.vars.palette.secondary.main} !important`,
                                         },
                                     }}
                                     data-testid="catalog-measure-creation-modal_poa-selection"
