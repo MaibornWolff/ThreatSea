@@ -1,4 +1,5 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
+import { renderWithProviders as render } from "#test-utils/render-with-providers.tsx";
 import userEvent from "@testing-library/user-event";
 import { IconButton } from "./icon-button.component";
 import { Star } from "@mui/icons-material";
