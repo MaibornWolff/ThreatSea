@@ -49,7 +49,7 @@ const ColorPresetChip = ({ presetColor, selectedColor, disabled, onClick, toolti
                     backgroundColor: presetColor,
                     border: isCurrent
                         ? `2px solid ${theme.vars.palette.primary.main}`
-                        : `1px solid rgba(${theme.vars.palette.common.blackChannel} / 0.25)`,
+                        : "1px solid rgba(0, 0, 0, 0.25)",
                 }}
             />
         </IconButton>
