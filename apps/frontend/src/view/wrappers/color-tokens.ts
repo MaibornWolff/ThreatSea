@@ -9,6 +9,7 @@ export const colorPrimitives = {
         blue900: "rgba(35, 60, 87, 1)",
         // PDF report variant of blue900 (B channel +1); preserved for rendering fidelity.
         blue900Pdf: "rgba(35, 60, 88, 1)",
+        blue900Alpha10: "rgba(35, 60, 87, 0.1)",
         blue700: "rgba(79, 102, 132, 1)",
         blue500Translucent: "rgba(24, 60, 87, 0.75)",
         blue500TranslucentDeep: "rgba(24, 60, 87, 0.9)",
@@ -35,7 +36,9 @@ export const colorPrimitives = {
         gray500Cool: "rgba(152, 163, 179, 1)",
         slate500: "rgba(149, 163, 181, 1)",
         gray700Cool: "rgba(94, 102, 110, 1)",
-        gray700Alpha41: "rgba(65, 65, 65, 0.41)",
+        gray800Alpha41: "rgba(65, 65, 65, 0.41)",
+        // gray800Steel and gray800SteelOff differ by 1 unit in the green channel — preserved
+        // as separate primitives because each is bound to a distinct designer-approved usage.
         gray800Steel: "rgba(84, 101, 129, 1)",
         gray800SteelOff: "rgba(84, 100, 129, 1)",
         gray900: "rgba(34, 34, 34, 1)",
@@ -47,9 +50,6 @@ export const colorPrimitives = {
         errorBold: "rgba(255, 0, 0, 1)",
         successMain: "rgba(103, 173, 91, 1)",
         warningMain: "rgba(194, 63, 56, 1)",
-    },
-    brandAlpha: {
-        blue900Alpha10: "rgba(35, 60, 87, 0.1)",
     },
 } as const;
 
@@ -74,12 +74,12 @@ export const colors = {
     surface: {
         page: colorPrimitives.neutral.gray100,
         pageOpaque: colorPrimitives.neutral.gray150,
-        pageDefault: colorPrimitives.brandAlpha.blue900Alpha10,
+        pageDefault: colorPrimitives.brand.blue900Alpha10,
         pageDefaultOpaque: colorPrimitives.neutral.gray200,
         paper: colorPrimitives.neutral.whiteAlpha85,
         paperLight: colorPrimitives.neutral.whiteAlpha65,
         paperOpaque: colorPrimitives.neutral.gray050,
-        doneEditing: colorPrimitives.neutral.gray700Alpha41,
+        doneEditing: colorPrimitives.neutral.gray800Alpha41,
         tooltip: colorPrimitives.neutral.gray500Cool,
         contextMenu: colorPrimitives.neutral.gray250CoolAlpha93,
         contextMenuHover: colorPrimitives.neutral.gray200,
@@ -121,7 +121,7 @@ export const colors = {
             selectedHoverBg: colorPrimitives.brand.orange500,
         },
         matrixAxis: {
-            bg: colorPrimitives.brandAlpha.blue900Alpha10,
+            bg: colorPrimitives.brand.blue900Alpha10,
             fg: colorPrimitives.neutral.gray900,
         },
         table: {
