@@ -108,9 +108,7 @@ export const AddableMember = <TFieldValues extends BaseAddableMemberFormValues>(
                 borderRadius: 5,
                 overflow: "hidden",
                 height: "200px",
-                boxShadow: `0px 2px 1px -1px rgb(0 0 0 / 20%),
-                                0px 1px 1px 0px rgb(0 0 0 / 14%),
-                                0px 1px 3px 0px rgb(0 0 0 / 12%)`,
+                boxShadow: 1,
             }}
         >
             <Box
