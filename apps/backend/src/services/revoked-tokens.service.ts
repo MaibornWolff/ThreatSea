@@ -6,15 +6,6 @@ import { db } from "#db/index.js";
 import { Token, tokens } from "#db/schema.js";
 
 /**
- * Gets all stored revoked tokens.
- *
- * @returns The stored tokens from the database.
- */
-export async function getRevokedTokens(): Promise<Token[]> {
-    return await db.select().from(tokens);
-}
-
-/**
  * Marks a token as revoked.
  * Skips, if the token is already inside the database
  *

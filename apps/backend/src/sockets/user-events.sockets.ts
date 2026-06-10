@@ -14,27 +14,11 @@ import { USER_ROLES } from "#types/user-roles.types.js";
 
 export const INVALID_PROJECT_CATALOG_ID = -1;
 
-export interface UserData {
+interface UserData {
     name: string;
     socketAmount: number;
     deletedCatalogs: Set<number>;
     deletedProjects: Set<number>;
-}
-
-export class GrantProjectAccessData {
-    projectId: number;
-
-    constructor(projectId: number) {
-        this.projectId = projectId;
-    }
-}
-
-export class GrantCatalogAccessData {
-    catalogId: number;
-
-    constructor(catalogId: number) {
-        this.catalogId = catalogId;
-    }
 }
 
 /**
