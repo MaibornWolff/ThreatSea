@@ -501,10 +501,6 @@ const MemberTableRow = ({ member, onEdit, onDelete, userRole }: MemberTableRowPr
                 marginBottom: 1,
 
                 "&:last-child td, &:last-child th": { border: 0 },
-                "&:hover": {
-                    cursor: "pointer",
-                    backgroundColor: "#ffffff !important",
-                },
             }}
             onClick={(e) => onEdit(e, member)}
             hover
@@ -515,7 +511,7 @@ const MemberTableRow = ({ member, onEdit, onDelete, userRole }: MemberTableRowPr
                 sx={{
                     padding: 0,
                     paddingRight: 2,
-                    borderBottomColor: "#fff",
+                    borderBottomColor: "border.divider",
                 }}
             >
                 {checkUserRole(userRole, USER_ROLES.OWNER) && (

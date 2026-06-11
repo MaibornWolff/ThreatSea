@@ -38,7 +38,7 @@ export const EditorSidebarSelectedPointOfAttack = ({
             <Box
                 sx={{
                     display: "flex",
-                    backgroundColor: "#f2f4f500",
+                    backgroundColor: "transparent",
                     paddingLeft: 0,
                     paddingRight: 0,
                     alignItems: "flex-start",
@@ -80,7 +80,7 @@ export const EditorSidebarSelectedPointOfAttack = ({
             <Box
                 sx={{
                     display: "flex",
-                    backgroundColor: "#fff",
+                    backgroundColor: "background.paperWhite",
                     borderRadius: 15,
                     height: "31px",
                     paddingLeft: 8,

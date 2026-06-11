@@ -5,6 +5,7 @@
 
 import { Box, Checkbox, DialogActions, DialogTitle, FormControlLabel, Tooltip } from "@mui/material";
 import type { DialogProps } from "@mui/material/Dialog";
+import { useTheme } from "@mui/material/styles";
 import { useState, type MouseEvent } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -45,6 +46,7 @@ const AddCatalogDialog = ({ catalog, ...props }: AddCatalogDialogProps) => {
     const [catalogLanguage, setCatalogLanguage] = useState<CatalogLanguage>("EN");
     const navigate = useNavigate();
     const { t } = useTranslation("catalogsPage");
+    const theme = useTheme();
     const {
         register,
         handleSubmit,
@@ -151,7 +153,7 @@ const AddCatalogDialog = ({ catalog, ...props }: AddCatalogDialogProps) => {
                             marginBottom: 1,
                             border: "none !important",
                             "& .MuiInputBase-root": {
-                                borderBottom: "1px solid rgba(35, 60, 87, 0) !important",
+                                borderBottom: "1px solid transparent !important",
                             },
                             "*": {
                                 border: "none !important",
@@ -160,7 +162,7 @@ const AddCatalogDialog = ({ catalog, ...props }: AddCatalogDialogProps) => {
                                 fontWeight: "bold",
                             },
                             "& .MuiInputBase-root.Mui-focused": {
-                                borderBottom: "1px solid rgba(35, 60, 87, 1) !important",
+                                borderBottom: `1px solid ${theme.vars.palette.primary.main} !important`,
                             },
                             input: {
                                 fontSize: "0.875rem !important",
@@ -232,7 +234,7 @@ const AddCatalogDialog = ({ catalog, ...props }: AddCatalogDialogProps) => {
                                 sx={{
                                     scale: "0.75",
                                     "&:hover": {
-                                        color: "#fcac0c !important",
+                                        color: `${theme.vars.palette.secondary.main} !important`,
                                     },
                                 }}
                             />

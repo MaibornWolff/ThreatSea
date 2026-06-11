@@ -16,6 +16,7 @@ import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 import { CONFIDENTIALITY_LEVELS } from "#utils/confidentiality.ts";
+import { DEFAULT_ANNOTATION_COLOR } from "#view/colors/annotation.colors.ts";
 
 export const createAsset = (overrides: Partial<Asset> = {}): Asset => ({
     id: 1,
@@ -140,7 +141,7 @@ export function createAnnotation<T extends AnnotationType>(
         projectId: 1,
         x: 0,
         y: 0,
-        stroke: "#5786ff",
+        stroke: DEFAULT_ANNOTATION_COLOR,
         strokeWidth: 3,
         ...ANNOTATION_VARIANT_DEFAULTS[overrides.type],
         ...overrides,

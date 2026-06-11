@@ -302,7 +302,7 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                                                 showBorder={false}
                                                 sx={{
                                                     width: "1%",
-                                                    borderRightColor: "#fff",
+                                                    borderRightColor: "border.divider",
                                                     padding: 0,
                                                 }}
                                             ></CustomTableHeaderCell>
@@ -346,10 +346,6 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                                                             marginBottom: 1,
 
                                                             "&:last-child td, &:last-child th": { border: 0 },
-                                                            "&:hover": {
-                                                                cursor: "pointer",
-                                                                backgroundColor: "#fff !important",
-                                                            },
                                                         }}
                                                         hover
                                                         data-testid="measures-page_measures-list-entry"
@@ -361,7 +357,7 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                                                                 position: "relative",
                                                                 fontWeight: "bold",
                                                                 fontSize: "0.875rem",
-                                                                borderRightColor: "#fff",
+                                                                borderRightColor: "border.divider",
                                                             }}
                                                             align={"left"}
                                                             data-testid="measures-page_measures-list-entry_name"
@@ -371,7 +367,7 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                                                         <CustomTableCell
                                                             showBorder={true}
                                                             sx={{
-                                                                borderRightColor: "#fff",
+                                                                borderRightColor: "border.divider",
                                                             }}
                                                             data-testid="measures-page_measures-list-entry_scheduled-at"
                                                         >

@@ -28,6 +28,7 @@ import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { useEditor } from "#application/hooks/use-editor.hook.ts";
 import { editorSelectors } from "#application/selectors/editor.selectors.ts";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
+import { useTheme } from "@mui/material/styles";
 
 let opened = {
     x: 0,
@@ -42,6 +43,7 @@ interface EditorContextMenuProps {
 
 export const EditorContextMenu = ({ onSelect, stageRef, ref }: EditorContextMenuProps) => {
     const { t } = useTranslation("editorPage");
+    const theme = useTheme();
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const params = useParams<{ projectId: string }>();
@@ -138,7 +140,7 @@ export const EditorContextMenu = ({ onSelect, stageRef, ref }: EditorContextMenu
             sx={{
                 position: "absolute",
                 zIndex: 1000,
-                bgcolor: "#e5e8ebEE",
+                bgcolor: "background.contextMenu",
                 boxShadow: 4,
                 visibility: open ? "initial" : "hidden",
                 borderRadius: 4,
@@ -168,11 +170,11 @@ export const EditorContextMenu = ({ onSelect, stageRef, ref }: EditorContextMenu
                     dense
                     divider
                     sx={{
-                        borderTop: "1px solid #fff",
+                        borderTop: `1px solid ${theme.vars.palette.border.divider}`,
                         borderBottom: "none",
-                        backgroundColor: "#dcdee3",
+                        backgroundColor: "background.contextMenuHover",
                         "&:hover": {
-                            backgroundColor: "#fff",
+                            backgroundColor: "background.paperWhite",
                         },
                         display: "flex",
                         justifyContent: "space-between",
@@ -187,7 +189,7 @@ export const EditorContextMenu = ({ onSelect, stageRef, ref }: EditorContextMenu
                             sx={{
                                 mr: 1,
                                 "&:hover": {
-                                    backgroundColor: "#fff",
+                                    backgroundColor: "background.paperWhite",
                                     color: "secondary.light",
                                 },
                             }}
@@ -231,9 +233,9 @@ export const EditorContextMenu = ({ onSelect, stageRef, ref }: EditorContextMenu
                                 onEdit={() => onEditComponent(customComponent)}
                                 onClickDelete={() => onDeleteComponent(customComponent)}
                                 sx={{
-                                    backgroundColor: "#dcdee3",
+                                    backgroundColor: "background.contextMenuHover",
                                     borderBottom: "none",
-                                    borderTop: "1px solid #fff",
+                                    borderTop: `1px solid ${theme.vars.palette.border.divider}`,
                                 }}
                             />
                         );
@@ -326,7 +328,7 @@ const ComponentListItem = ({
                                 <IconButton
                                     sx={{
                                         "&:hover": {
-                                            color: "#ef5350",
+                                            color: "error.light",
                                             backgroundColor: "background.paperIntransparent",
                                         },
                                     }}
@@ -339,7 +341,7 @@ const ComponentListItem = ({
                 )
             }
             sx={{
-                borderBottomColor: "#fff",
+                borderBottomColor: "border.divider",
                 ...sx,
             }}
         >
@@ -348,14 +350,15 @@ const ComponentListItem = ({
                 onClick={onClick}
                 sx={{
                     "&:hover": {
-                        backgroundColor: "#fff",
+                        backgroundColor: "background.paperWhite",
                     },
                 }}
             >
                 <ListItemAvatar
                     sx={{
                         minWidth: "0px",
-                        border: "0.75px solid #233C57",
+                        border: "0.75px solid",
+                        borderColor: "primary.main",
                         borderRadius: 50,
                         marginRight: "13px",
                     }}

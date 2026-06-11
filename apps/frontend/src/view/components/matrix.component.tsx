@@ -1,4 +1,5 @@
 import { Box, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { useMemo } from "react";
 import type { JSX, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
@@ -42,6 +43,7 @@ interface AxisCellProps {
 
 export const Matrix = ({ matrix, size = 120, onSelectCell }: MatrixProps): JSX.Element => {
     const { t } = useTranslation("riskPage");
+    const theme = useTheme();
     return (
         <Box
             sx={{
@@ -91,7 +93,7 @@ export const Matrix = ({ matrix, size = 120, onSelectCell }: MatrixProps): JSX.E
                                 probability={probabilityAxis[i] as number}
                                 damage={damageAxis[j] as number}
                                 fontSize={"0.875rem"}
-                                foregroundColor={"#fff"}
+                                foregroundColor={theme.vars.palette.text.white}
                                 onClick={onSelectCell}
                                 {...cell}
                             />
@@ -173,13 +175,15 @@ const MatrixCell = ({
     fontSize,
     foregroundColor,
 }: MatrixCellProps): JSX.Element => {
+    const theme = useTheme();
     const [backgroundColor, borderColor] = useMemo<[string, string]>(() => {
         const matrixColor = color ? MATRIX_COLOR[color] : undefined;
         const backgroundColor =
-            (selected ? matrixColor?.selected : amount ? matrixColor?.standard : matrixColor?.light) || "#fff";
-        const borderColor = (selected ? matrixColor?.selected : matrixColor?.border) || "#000";
+            (selected ? matrixColor?.selected : amount ? matrixColor?.standard : matrixColor?.light) ||
+            theme.vars.palette.background.paperWhite;
+        const borderColor = (selected ? matrixColor?.selected : matrixColor?.border) || theme.vars.palette.common.black;
         return [backgroundColor, borderColor];
-    }, [color, selected, amount]);
+    }, [color, selected, amount, theme]);
 
     return (
         <Box

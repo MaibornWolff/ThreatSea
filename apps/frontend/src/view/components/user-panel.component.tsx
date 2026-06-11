@@ -95,7 +95,8 @@ const UserPanel = () => {
                         elevation: 0,
                         sx: {
                             overflow: "visible",
-                            filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+                            // CSS filter drop-shadow has no MUI shadow-token equivalent; literal black is intentional.
+                            filter: "drop-shadow(0px 2px 8px rgba(0, 0, 0, 0.32))",
                             mt: 1.5,
                             bgcolor: "background.paperIntransparent",
                             "& .MuiAvatar-root": {

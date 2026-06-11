@@ -1,0 +1,64 @@
+# Theming
+
+The app theme is a thin layer over MUI. Design decisions live in token files, get mapped into the MUI theme in [`theme.wrapper.tsx`](./theme.wrapper.tsx), and reach components via `theme.vars.palette.*` (with `cssVariables: true` enabled, so values resolve to CSS custom properties). Custom palette slots are declared in [`src/types/mui-theme.d.ts`](../../types/mui-theme.d.ts).
+
+## Colors
+
+### Token model
+
+Defined in [`color-tokens.ts`](./color-tokens.ts) as two layers:
+
+1. **Primitives** (`colorPrimitives`) — raw `rgba()` values named by hue and scale (`brand.blue900`, `neutral.gray100`). Single source of truth; never imported by components.
+2. **Semantic aliases** (`colors`) — intent-based names mapped to primitives (`text.default`, `surface.paper`, `border.focus`). Wired into the MUI palette and consumed from there.
+
+Two aliases may resolve to the same primitive on purpose (e.g. `surface.paperWhite` vs `surface.canvasFill`). Keeping them distinct preserves intent so a later design change can diverge them without a wide refactor.
+
+### Consuming
+
+Read from `theme.vars.palette.*` ([MUI's recommended pattern](https://mui.com/material-ui/customization/css-theme-variables/usage/#using-theme-variables) when `cssVariables: true` is enabled — values resolve to `var(--mui-palette-…)`). Never import tokens directly into a component.
+
+```tsx
+sx={{ color: theme.vars.palette.text.primary, bgcolor: theme.vars.palette.background.paper }}
+```
+
+For translucent colors, use the auto-generated **channel tokens** instead of `alpha()`:
+
+```tsx
+sx={{ bgcolor: `rgba(${theme.vars.palette.primary.mainChannel} / 0.6)` }}
+```
+
+**Canvas exception** — Konva (`Stage`, `Rect`, `Line`, etc.) can't parse CSS variable strings; it needs literal color values. In Konva render paths only, use raw `theme.palette.*`:
+
+```tsx
+<Rect stroke={theme.palette.border.canvas} />
+```
+
+### Lint-enforced exceptions
+
+The [`no-restricted-imports`](../../../.oxlintrc.json) rule blocks direct imports of `#view/wrappers/color-tokens.ts` so components stay on `theme.vars.palette.*`. Four paths are exempted (override at the bottom of `.oxlintrc.json`):
+
+- **`theme.wrapper.tsx`** — has to import the tokens to wire them into the MUI palette.
+- **`editor-toolbar.component.tsx`** / **`system-component.component.tsx`** — Konva needs literal colors (can't read CSS variables), and `colorPrimitives.neutral.slate500` has no semantic palette home; used with `alpha()`.
+- **`view/report/**`** — `@react-pdf/renderer` renders to PDF and likewise can't resolve CSS variables.
+
+```tsx
+import { colorPrimitives } from "#view/wrappers/color-tokens.ts";
+backgroundColor: alpha(colorPrimitives.neutral.slate500, 0.7);
+```
+
+To add a new exception: the file must have a concrete reason (runtime that can't read CSS variables, or a primitive with no palette equivalent). Add it to the override and list it here.
+
+### Adding a color
+
+1. If a semantic alias already fits, just use it.
+2. Otherwise add a primitive in `colorPrimitives` (reuse if the value exists).
+3. Add a semantic alias in `colors` named by intent, not appearance.
+4. Wire it into the palette in `theme.wrapper.tsx`.
+5. Augment palette types in `src/types/mui-theme.d.ts` if the slot is new.
+
+### Conventions & gotchas
+
+- All values are `rgba(r, g, b, a)`. Translucent and opaque variants are separate primitives.
+- `text.primary`, `text.secondary`, and `primary.main` currently resolve to the same brand blue — don't rely on them differing visually for active/inactive states.
+- PDF-rendering quirk primitives (e.g. `blue900Pdf`) stay separate from their on-screen counterparts even when values nearly match.
+- MUI does **not** auto-generate channel tokens for `common.black` / `common.white`. If you need a translucent black/white, use a literal `rgba(0, 0, 0, α)` rather than `theme.vars.palette.common.blackChannel`.

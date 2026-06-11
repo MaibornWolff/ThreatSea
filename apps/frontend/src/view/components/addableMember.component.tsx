@@ -103,13 +103,12 @@ export const AddableMember = <TFieldValues extends BaseAddableMemberFormValues>(
             sx={{
                 margin: "20px 0px 15px 0px",
                 width: "100%",
-                border: highlightListError ? "1px solid #d32f2f" : "",
+                border: highlightListError ? "1px solid" : "",
+                borderColor: highlightListError ? "error.main" : undefined,
                 borderRadius: 5,
                 overflow: "hidden",
                 height: "200px",
-                boxShadow: `0px 2px 1px -1px rgb(0 0 0 / 20%),
-                                0px 1px 1px 0px rgb(0 0 0 / 14%),
-                                0px 1px 3px 0px rgb(0 0 0 / 12%)`,
+                boxShadow: 1,
             }}
         >
             <Box
@@ -151,9 +150,9 @@ export const AddableMember = <TFieldValues extends BaseAddableMemberFormValues>(
                             <ListItem
                                 key={id}
                                 sx={{
-                                    backgroundColor: "#FFFFFF",
+                                    backgroundColor: "background.paperWhite",
                                     ":hover": {
-                                        backgroundColor: "#f1f2f3",
+                                        backgroundColor: "background.listItem",
                                     },
                                 }}
                                 onClick={() => setSelectedAddableMember(id, name, email)}
@@ -165,7 +164,7 @@ export const AddableMember = <TFieldValues extends BaseAddableMemberFormValues>(
                                             sx: { fontSize: "0.85em" },
                                         },
                                         secondary: {
-                                            sx: { color: "#5e666e", fontSize: "0.8em" },
+                                            sx: { color: "text.subtle", fontSize: "0.8em" },
                                         },
                                     }}
                                     secondary={email}

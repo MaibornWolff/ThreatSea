@@ -1,6 +1,6 @@
 import type { Style } from "@react-pdf/types";
 import { View } from "@react-pdf/renderer";
-import { MATRIX_COLOR } from "#view/colors/matrix.ts";
+import { MATRIX_COLOR, MATRIX_FALLBACK_COLOR } from "#view/colors/matrix.ts";
 import type { MatrixColorKey } from "#view/colors/matrix.ts";
 import { Text } from "./text.report.component";
 import { largeFontSize, smallFontSize, backgroundColor, s1 } from "#view/report/report.style.ts";
@@ -85,7 +85,8 @@ export const Matrix = ({ language, title, data, style, cellSize = 40 }: MatrixPr
                             {row.map((cell, j) => {
                                 const { color, amount } = cell;
                                 const backgroundColor =
-                                    (amount ? MATRIX_COLOR[color]?.standard : MATRIX_COLOR[color]?.light) || "#aaa";
+                                    (amount ? MATRIX_COLOR[color]?.standard : MATRIX_COLOR[color]?.light) ||
+                                    MATRIX_FALLBACK_COLOR;
                                 return (
                                     <View
                                         key={j}

@@ -2,79 +2,138 @@
  * @module theme.wrapper - Defines the theme styles for threatsea.
  */
 
+import type {} from "@mui/material/themeCssVarsAugmentation";
 import type { ReactNode } from "react";
-import { createTheme } from "@mui/material/styles";
-import { ThemeProvider as MaterialThemeProvider } from "@mui/system";
+import { createTheme, ThemeProvider as MaterialThemeProvider } from "@mui/material/styles";
+import { colorPrimitives, colors } from "./color-tokens";
 
 /**
  * Object to customize the mui theme.
  */
 const theme = createTheme({
+    cssVariables: true,
     typography: {
         fontFamily: '"Poppins", sans-serif',
         fontSize: 14,
     },
-    palette: {
-        primary: {
-            main: "rgba(35, 60, 87, 1)",
-            light: "rgba(252, 172, 12, 1)",
-            dark: "rgba(255, 255, 255, 0.90)",
-        },
-        secondary: {
-            main: "rgba(252, 172, 12, 1)",
-            light: "rgba(252, 172, 12, 0.75)",
-        },
-        background: {
-            defaultIntransparent: "rgba(220, 222, 227, 1)",
-            default: "rgba(35, 60, 87, 0.1)",
-            mainIntransparent: "rgba(231, 232, 235, 1)",
-            main: "rgba(229, 232, 237, 1)",
-            paperIntransparent: "rgba(251, 251, 252, 1)",
-            paper: "rgba(255, 255, 255, 0.85)",
-            paperLight: "rgba(255,255,255, 0.65)",
-            headerToggleButtons: "rgba(173, 196, 230, 1)",
-            doneEditing: "rgba(65, 65, 65, 0.41)",
-        },
-        text: {
-            primary: "rgba(35, 60, 87, 1)",
-            secondary: "rgba(35, 60, 87, 1)",
-            buttonselected: "rgba(255,255,255,1)",
-            white: "#fff",
-            formError: "rgba(211, 47, 47, 1)",
-        },
-        toggleButtons: {
-            header: {
-                background: "rgba(255,255,255,0.9)",
-                selectedBackground: "rgba(24,60,87,0.75)",
-                hoverBackground: "rgba(252, 172, 12, 1)",
-                selectedHoverBackground: "rgba(252, 172, 12, 1)",
-            },
-            page: {
-                background: "rgba(255, 255, 255, 1.0)", // "rgba(255, 255, 255, 0.25)",
-                selectedBackground: "rgba(24,60,87,0.9)",
-                hoverBackground: "rgba(252, 172, 12, 1)",
-                selectedHoverBackground: "rgba(252, 172, 12, 1)",
+    components: {
+        MuiTableRow: {
+            styleOverrides: {
+                root: {
+                    "&.MuiTableRow-hover:hover": {
+                        cursor: "pointer",
+                        backgroundColor: "var(--mui-palette-background-paperWhite)",
+                    },
+                },
             },
         },
-        matrix: {
-            axisCells: {
-                background: "rgba(35, 60, 87, 0.1)",
-                color: "rgba(34, 34, 34, 1)",
+        MuiOutlinedInput: {
+            styleOverrides: {
+                root: {
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "var(--mui-palette-secondary-main)",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "var(--mui-palette-secondary-main)",
+                        borderWidth: "1px",
+                    },
+                },
             },
         },
-        languagePicker: {
-            color: "rgba(255, 255, 255, 1)",
-        },
-        table: {
-            headerBackground: "rgba(255, 255, 255, 1.0)",
-            headerBackgroundSelected: "rgba(228, 230, 245, 1)",
-            hoverColor: "#ffffff",
-        },
-        page: {
-            headerBackground: "rgba(79, 102, 132, 1)",
-        },
-        action: {
-            active: "#000",
+    },
+    colorSchemes: {
+        light: {
+            palette: {
+                primary: {
+                    main: colors.brand.primary,
+                    light: colors.brand.accent,
+                    dark: colorPrimitives.neutral.whiteAlpha90,
+                },
+                secondary: {
+                    main: colors.brand.accent,
+                    light: colors.brand.accentSubtle,
+                },
+                error: {
+                    main: colors.state.error,
+                    light: colors.state.errorLight,
+                },
+                errorBold: colors.state.errorBold,
+                success: {
+                    main: colors.state.success,
+                },
+                warning: {
+                    main: colors.state.warning,
+                },
+                background: {
+                    defaultIntransparent: colors.surface.pageDefaultOpaque,
+                    default: colors.surface.pageDefault,
+                    mainIntransparent: colors.surface.pageOpaque,
+                    main: colors.surface.page,
+                    paperIntransparent: colors.surface.paperOpaque,
+                    paper: colors.surface.paper,
+                    paperLight: colors.surface.paperLight,
+                    headerToggleButtons: colors.component.headerToggleBg,
+                    doneEditing: colors.surface.doneEditing,
+                    assetSwitchTrack: colors.component.assetSwitchTrack,
+                    canvasFill: colors.surface.canvasFill,
+                    contextMenu: colors.surface.contextMenu,
+                    contextMenuHover: colors.surface.contextMenuHover,
+                    dialog: colors.surface.dialog,
+                    listItem: colors.surface.listItem,
+                    paperWhite: colors.surface.paperWhite,
+                    paperWhiteTranslucent: colors.surface.paperWhiteTranslucent,
+                    toolbarHover: colors.surface.toolbarHover,
+                    tooltip: colors.surface.tooltip,
+                },
+                text: {
+                    primary: colors.text.default,
+                    secondary: colors.text.muted,
+                    buttonselected: colors.text.inverse,
+                    white: colors.text.inverse,
+                    formError: colors.text.error,
+                    statusNeutral: colors.text.statusNeutral,
+                    subtle: colors.text.subtle,
+                },
+                border: {
+                    canvas: colors.border.canvas,
+                    canvasHelpLine: colors.border.canvasHelpLine,
+                    divider: colors.border.divider,
+                },
+                toggleButtons: {
+                    header: {
+                        background: colors.component.toggleHeader.bg,
+                        selectedBackground: colors.component.toggleHeader.selectedBg,
+                        hoverBackground: colors.component.toggleHeader.hoverBg,
+                        selectedHoverBackground: colors.component.toggleHeader.selectedHoverBg,
+                    },
+                    page: {
+                        background: colors.component.togglePage.bg,
+                        selectedBackground: colors.component.togglePage.selectedBg,
+                        hoverBackground: colors.component.togglePage.hoverBg,
+                        selectedHoverBackground: colors.component.togglePage.selectedHoverBg,
+                    },
+                },
+                matrix: {
+                    axisCells: {
+                        background: colors.component.matrixAxis.bg,
+                        color: colors.component.matrixAxis.fg,
+                    },
+                },
+                languagePicker: {
+                    color: colorPrimitives.neutral.white,
+                },
+                table: {
+                    headerBackground: colors.component.table.headerBg,
+                    headerBackgroundSelected: colors.component.table.headerSelectedBg,
+                    hoverColor: colors.component.table.hoverBg,
+                },
+                page: {
+                    headerBackground: colors.component.pageHeaderBg,
+                },
+                action: {
+                    active: colorPrimitives.neutral.black,
+                },
+            },
         },
     },
 });

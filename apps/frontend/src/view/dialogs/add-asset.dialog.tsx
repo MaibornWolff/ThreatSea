@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import type { DialogProps } from "@mui/material/Dialog";
 import { ExpandLessRounded, ExpandMoreRounded, InfoOutlined } from "@mui/icons-material";
+import { useTheme } from "@mui/material/styles";
 import { useForm, type SubmitErrorHandler } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
@@ -69,6 +70,7 @@ const AddAssetDialog = ({ projectId, asset, userRole, onDialogClose, ...props }:
     const { cancelDialog, confirmDialog } = useDialog<AssetDialogFormValues | null>("assets");
     const navigate = useNavigate();
     const { t } = useTranslation("assetDialogPage");
+    const theme = useTheme();
     const {
         register,
         handleSubmit,
@@ -271,7 +273,7 @@ const AddAssetDialog = ({ projectId, asset, userRole, onDialogClose, ...props }:
                                                     className="info-adornment"
                                                     sx={{
                                                         "&:hover": {
-                                                            color: "#fcac0c !important",
+                                                            color: `${theme.vars.palette.secondary.main} !important`,
                                                         },
                                                     }}
                                                 />
@@ -369,7 +371,7 @@ const AddAssetDialog = ({ projectId, asset, userRole, onDialogClose, ...props }:
                                                     className="info-adornment"
                                                     sx={{
                                                         "&:hover": {
-                                                            color: "#fcac0c !important",
+                                                            color: `${theme.vars.palette.secondary.main} !important`,
                                                         },
                                                     }}
                                                 />
@@ -463,7 +465,7 @@ const AddAssetDialog = ({ projectId, asset, userRole, onDialogClose, ...props }:
                                                     className="info-adornment"
                                                     sx={{
                                                         "&:hover": {
-                                                            color: "#fcac0c !important",
+                                                            color: `${theme.vars.palette.secondary.main} !important`,
                                                         },
                                                     }}
                                                 />

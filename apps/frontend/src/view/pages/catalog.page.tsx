@@ -116,7 +116,7 @@ const CatalogPageBody = () => {
                         sx={{
                             color: "text.primary",
                             paddingRight: 2,
-                            "&:hover": { backgroundColor: "#00000000" },
+                            "&:hover": { backgroundColor: "transparent" },
                         }}
                     >
                         <ChevronLeft sx={{ fontSize: 18 }} />

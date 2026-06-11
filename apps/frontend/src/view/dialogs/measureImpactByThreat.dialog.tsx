@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 import type { DialogProps } from "@mui/material/Dialog";
 import type { SelectChangeEvent } from "@mui/material/Select";
+import { useTheme } from "@mui/material/styles";
 import { InfoOutlined } from "@mui/icons-material";
 import SelectBoxCategorySubHeader from "#view/components/selectBox-CategorySubHeader.tsx";
 import { useEffect, useState, type ChangeEvent } from "react";
@@ -116,6 +117,7 @@ const MeasureImpactByThreatDialog = ({
     const [damageCheckbox, setDamageCheckbox] = useState(getValues("impactsDamage"));
 
     const { t } = useTranslation("applyMeasureDialogPage");
+    const theme = useTheme();
 
     /**
      * Cancel a dialog and closes it.
@@ -178,16 +180,7 @@ const MeasureImpactByThreatDialog = ({
                 onSubmit={handleSubmit(handleConfirmDialog)}
             >
                 <Box sx={{ display: "flex", alignItems: "center", mt: 2, mb: 1 }}>
-                    <FormControl
-                        fullWidth
-                        error={!!errors?.threatId}
-                        data-testid="threatIdError"
-                        sx={{
-                            "&:hover fieldset": {
-                                borderColor: "#fcac0c !important",
-                            },
-                        }}
-                    >
+                    <FormControl fullWidth error={!!errors?.threatId} data-testid="threatIdError">
                         <InputLabel shrink sx={{ marginLeft: 1, fontSize: "1rem" }} id="select-threatId-label">
                             {t("threat")}
                         </InputLabel>
@@ -245,7 +238,7 @@ const MeasureImpactByThreatDialog = ({
                                         },
                                         ".MuiSelect-iconOpen + fieldset": {
                                             borderWidth: "1px !important",
-                                            borderColor: "#fcac0c !important",
+                                            borderColor: `${theme.vars.palette.secondary.main} !important`,
                                         },
                                     }}
                                 >
@@ -428,7 +421,7 @@ const MeasureImpactByThreatDialog = ({
                                                 className="info-adornment"
                                                 sx={{
                                                     "&:hover": {
-                                                        color: "#fcac0c !important",
+                                                        color: `${theme.vars.palette.secondary.main} !important`,
                                                     },
                                                 }}
                                             />
@@ -536,7 +529,7 @@ const MeasureImpactByThreatDialog = ({
                                                 className="info-adornment"
                                                 sx={{
                                                     "&:hover": {
-                                                        color: "#fcac0c !important",
+                                                        color: `${theme.vars.palette.secondary.main} !important`,
                                                     },
                                                 }}
                                             />

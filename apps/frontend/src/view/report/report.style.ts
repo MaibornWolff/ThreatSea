@@ -1,11 +1,15 @@
+// Report files render through @react-pdf/renderer (BlobProvider), which uses a separate React reconciler
+// without access to MUI's ThemeContext — useTheme() is unavailable here. Direct token imports are the
+// documented escape hatch for the entire view/report subtree; the values still source from the design system.
 import { StyleSheet } from "@react-pdf/renderer";
+import { colorPrimitives, colors } from "#view/wrappers/color-tokens.ts";
 
-export const primaryColor = "#233C57";
-export const backgroundColor = "rgba(35, 60, 87, 0.1)";
+export const primaryColor = colors.brand.primary;
+export const backgroundColor = colors.surface.pageDefault;
 export const headerFontSize = 20;
 export const largeFontSize = 12;
 export const smallFontSize = 10;
-export const fontColor = "#233C58";
+export const fontColor = colorPrimitives.brand.blue900Pdf;
 const standardSpace = 8;
 export const s1 = standardSpace;
 export const s2 = standardSpace * 2;
@@ -18,13 +22,13 @@ export const styles = StyleSheet.create({
     coverPage: {
         flexDirection: "column",
         alignItems: "stretch",
-        backgroundColor: "#ffffff",
+        backgroundColor: colors.surface.paperWhite,
         padding: s6,
     },
     page: {
         flexDirection: "column",
         alignItems: "stretch",
-        backgroundColor: "#ffffff",
+        backgroundColor: colors.surface.paperWhite,
         padding: s2,
         paddingLeft: s6,
         paddingRight: s6,

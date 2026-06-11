@@ -28,6 +28,7 @@ import {
     type DialogProps,
 } from "@mui/material";
 import { Add, InfoOutlined } from "@mui/icons-material";
+import { useTheme } from "@mui/material/styles";
 import { useRef, useState, type ChangeEvent, type MouseEvent, type SyntheticEvent } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -85,6 +86,7 @@ const AddThreatDialog = ({ threat, project, userRole, ...props }: AddThreatDialo
     const { confirmDialog, cancelDialog } = useDialog<ThreatFormValues | null>("threats");
     const navigate = useNavigate();
     const { t } = useTranslation("threatDialogPage");
+    const theme = useTheme();
     const [tab, setTab] = useState<ThreatTab>("MAIN");
     const formRef = useRef<HTMLFormElement | null>(null);
     const projectId = project.id;
@@ -391,7 +393,7 @@ const AddThreatDialog = ({ threat, project, userRole, ...props }: AddThreatDialo
                                                 className="info-adornment"
                                                 sx={{
                                                     "&:hover": {
-                                                        color: "#fcac0c !important",
+                                                        color: `${theme.vars.palette.secondary.main} !important`,
                                                     },
                                                 }}
                                             />

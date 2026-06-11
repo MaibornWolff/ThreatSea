@@ -64,7 +64,7 @@ export const EditorSidebarSelectedAnnotation = ({
                         aria-label={t("sidebar.annotation.delete")}
                         sx={{
                             "&:hover": {
-                                color: "#ef5350",
+                                color: "error.light",
                                 backgroundColor: "background.paperIntransparent",
                             },
                             marginTop: -1,

@@ -15,6 +15,7 @@ import {
     Typography,
 } from "@mui/material";
 import type { DialogProps } from "@mui/material/Dialog";
+import { useTheme } from "@mui/material/styles";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -73,6 +74,7 @@ const AddMemberDialog = ({
     );
 
     const { t } = useTranslation("memberDialogPage");
+    const theme = useTheme();
     const {
         control,
         register,
@@ -209,16 +211,7 @@ const AddMemberDialog = ({
                             <Typography sx={{ fontSize: "0.875rem" }}>{member.email}</Typography>
                         </Box>,
                     ]}
-                    <FormControl
-                        fullWidth
-                        margin="normal"
-                        error={!!errors?.role}
-                        sx={{
-                            "&:hover fieldset": {
-                                borderColor: "#fcac0c !important",
-                            },
-                        }}
-                    >
+                    <FormControl fullWidth margin="normal" error={!!errors?.role}>
                         <InputLabel
                             id="select-role-label"
                             shrink
@@ -272,7 +265,7 @@ const AddMemberDialog = ({
                                         },
                                         ".MuiSelect-iconOpen + fieldset": {
                                             borderWidth: "1px !important",
-                                            borderColor: "#fcac0c !important",
+                                            borderColor: `${theme.vars.palette.secondary.main} !important`,
                                         },
                                     }}
                                 >

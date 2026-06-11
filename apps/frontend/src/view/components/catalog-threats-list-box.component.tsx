@@ -255,7 +255,7 @@ export const CatalogThreatsListBox = ({ catalogId, attacker, pointOfAttack, user
                                     marginBottom: 1,
                                     borderRadius: 5,
                                     "&:hover": {
-                                        backgroundColor: "#fff",
+                                        backgroundColor: "background.paperWhite",
                                     },
                                 }}
                                 divider
@@ -286,7 +286,7 @@ export const CatalogThreatsListBox = ({ catalogId, attacker, pointOfAttack, user
                                     >
                                         <Typography
                                             sx={{
-                                                bgcolor: "#00000000",
+                                                bgcolor: "transparent",
                                                 fontSize: "0.75rem",
                                                 fontStyle: "italic",
                                                 marginRight: 2,
@@ -297,7 +297,7 @@ export const CatalogThreatsListBox = ({ catalogId, attacker, pointOfAttack, user
                                         </Typography>
                                         <Typography
                                             sx={{
-                                                bgcolor: "#00000000",
+                                                bgcolor: "transparent",
                                                 fontSize: "0.75rem",
                                                 fontStyle: "italic",
                                             }}

@@ -6,6 +6,7 @@ import { s1, backgroundColor, s5 } from "#view/report/report.style.ts";
 import { MATRIX_COLOR } from "#view/colors/matrix.ts";
 import type { MatrixColorKey } from "#view/colors/matrix.ts";
 import type { IndexCallback, ProjectReport, ThreatReport } from "#api/types/project.types.ts";
+import { colors } from "#view/wrappers/color-tokens.ts";
 
 interface ThreatsListPageProps {
     indexCallback: IndexCallback;
@@ -83,7 +84,7 @@ export const ThreatsListPage = ({ indexCallback, threats, project, logo, languag
                     style={{
                         display: "flex",
                         flexDirection: "column",
-                        backgroundColor: "#fff",
+                        backgroundColor: colors.surface.paperWhite,
                     }}
                 >
                     {threats.map((threat, i) => {
@@ -95,7 +96,7 @@ export const ThreatsListPage = ({ indexCallback, threats, project, logo, languag
                     style={{
                         height: 30,
                         width: "100%",
-                        borderTop: "2px solid #fff",
+                        borderTop: `2px solid ${colors.border.divider}`,
                     }}
                 ></View>
             </View>
@@ -113,7 +114,7 @@ const IndexThreatRow = ({ reportId, id, name, componentName, nettoColor }: Index
                 alignItems: "stretch",
                 justifyContent: "space-between",
                 textDecoration: "none",
-                borderTop: "2px solid #fff",
+                borderTop: `2px solid ${colors.border.divider}`,
                 backgroundColor: MATRIX_COLOR[nettoColor].light,
             }}
             wrap={false}
@@ -143,7 +144,7 @@ const IndexThreatRow = ({ reportId, id, name, componentName, nettoColor }: Index
                     alignItems: "center",
                     flex: 4,
                     padding: s1,
-                    borderLeft: "2px solid #fff",
+                    borderLeft: `2px solid ${colors.border.divider}`,
                 }}
             >
                 <Text size="small">{name}</Text>
@@ -155,7 +156,7 @@ const IndexThreatRow = ({ reportId, id, name, componentName, nettoColor }: Index
                     alignItems: "center",
                     flex: 2,
                     padding: s1,
-                    borderLeft: "2px solid #fff",
+                    borderLeft: `2px solid ${colors.border.divider}`,
                 }}
             >
                 <Text size="small">{componentName}</Text>

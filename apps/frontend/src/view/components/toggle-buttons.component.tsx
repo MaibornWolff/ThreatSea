@@ -59,7 +59,7 @@ export const ToggleButtons = ({ size = "small", buttons, buttonProps, sx = {}, .
                             borderRadius: 5,
                             border: 0,
                             lineHeight: 1.5,
-                            borderRight: "1px solid #00000000",
+                            borderRight: "1px solid transparent",
                             borderRightColor:
                                 buttonProps && buttonProps.borderRightColor
                                     ? buttonProps.borderRightColor

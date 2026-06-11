@@ -54,8 +54,10 @@ export const MATRIX_COLOR: MatrixColorMap = {
         lighter: "rgba(210, 210, 210, 0.4)",
         hover: "rgba(144, 144, 144, 0.6)",
         standard: grey[STANDARD_COLOR],
-        light: "rgb(218,218,218)",
+        light: "rgba(218, 218, 218, 1)",
         border: "rgba(144, 144, 144, 1)",
         selected: "rgba(66, 66, 66, 1)",
     },
 };
+
+export const MATRIX_FALLBACK_COLOR = "rgba(170, 170, 170, 1)";

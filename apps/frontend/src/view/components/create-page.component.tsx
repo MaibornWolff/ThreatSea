@@ -15,6 +15,7 @@ import { editorSelectors } from "#application/selectors/editor.selectors.ts";
 import { projectsSelectors } from "#application/selectors/projects.selectors.ts";
 import logo from "#images/threatsealogo-dez.png";
 import ErrorBoundary from "#view/wrappers/error.wrapper.tsx";
+import { useTheme } from "@mui/material/styles";
 import { useProjectTabs } from "#application/hooks/use-project-tabs.hook.ts";
 import { HeaderLevelOneNav } from "./header-level-one-nav.component";
 import { HeaderProjectTabs } from "./header-project-tabs.component";
@@ -27,6 +28,7 @@ export const CreatePage = <P extends object>(
     showAutoSave = false
 ) => {
     const Inner = (props: P) => {
+        const theme = useTheme();
         const dispatch = useAppDispatch();
         const navigate = useNavigate();
         const { pathname } = useLocation();
@@ -54,22 +56,22 @@ export const CreatePage = <P extends object>(
             setAutoSaveOnClick(() => onClick);
         };
 
-        let autoSaveIconColor = "#546581";
+        let autoSaveIconColor: string = theme.vars.palette.text.statusNeutral;
         switch (autoSaveStatus) {
             case "uninitialized":
-                autoSaveIconColor = "#67ad5b";
+                autoSaveIconColor = theme.vars.palette.success.main;
                 break;
             case "failed":
-                autoSaveIconColor = "#c23f38";
+                autoSaveIconColor = theme.vars.palette.warning.main;
                 break;
             case "upToDate":
-                autoSaveIconColor = "#67ad5b";
+                autoSaveIconColor = theme.vars.palette.success.main;
                 break;
             case "notUpToDate":
-                autoSaveIconColor = "#546581";
+                autoSaveIconColor = theme.vars.palette.text.statusNeutral;
                 break;
             case "saving":
-                autoSaveIconColor = "#546581";
+                autoSaveIconColor = theme.vars.palette.text.statusNeutral;
                 break;
         }
 
@@ -80,7 +82,7 @@ export const CreatePage = <P extends object>(
             case "upToDate":
             case "notUpToDate":
             case "saving":
-                autoSaveForegroundColor = "#fff";
+                autoSaveForegroundColor = theme.vars.palette.text.white;
                 break;
         }
 
@@ -407,7 +409,7 @@ export const CreatePage = <P extends object>(
                                     href={link.url}
                                     style={{
                                         paddingRight: "10px",
-                                        color: "grey",
+                                        color: "var(--mui-palette-text-subtle)",
                                     }}
                                 >
                                     {link.text}

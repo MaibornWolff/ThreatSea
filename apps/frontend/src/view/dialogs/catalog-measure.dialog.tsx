@@ -17,6 +17,7 @@ import {
     Switch,
 } from "@mui/material";
 import type { DialogProps } from "@mui/material/Dialog";
+import { useTheme } from "@mui/material/styles";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
@@ -88,6 +89,7 @@ const CatalogMeasureDialog = ({ catalogMeasure, isNew, catalogId, ...props }: Ca
     });
 
     const { t } = useTranslation("catalogPage");
+    const theme = useTheme();
 
     /**
      * Closes the dialog window.
@@ -188,9 +190,6 @@ const CatalogMeasureDialog = ({ catalogMeasure, isNew, catalogId, ...props }: Ca
                         data-testid="AttackerError"
                         sx={{
                             mr: 1,
-                            "&:hover fieldset": {
-                                borderColor: "#fcac0c !important",
-                            },
                         }}
                     >
                         <InputLabel shrink sx={{ marginLeft: 1, fontSize: "1rem" }} id="select-attacker-label">
@@ -243,7 +242,7 @@ const CatalogMeasureDialog = ({ catalogMeasure, isNew, catalogId, ...props }: Ca
                                         },
                                         ".MuiSelect-iconOpen + fieldset": {
                                             borderWidth: "1px !important",
-                                            borderColor: "#fcac0c !important",
+                                            borderColor: `${theme.vars.palette.secondary.main} !important`,
                                         },
                                     }}
                                     data-testid="catalog-measure-creation-modal_attacker-selection"
@@ -278,16 +277,7 @@ const CatalogMeasureDialog = ({ catalogMeasure, isNew, catalogId, ...props }: Ca
                         <FormHelperText>{errors?.attacker?.message}</FormHelperText>
                     </FormControl>
 
-                    <FormControl
-                        fullWidth
-                        error={!!errors?.pointOfAttack}
-                        data-testid="PoAError"
-                        sx={{
-                            "&:hover fieldset": {
-                                borderColor: "#fcac0c !important",
-                            },
-                        }}
-                    >
+                    <FormControl fullWidth error={!!errors?.pointOfAttack} data-testid="PoAError">
                         <InputLabel shrink sx={{ marginLeft: 1, fontSize: "1rem" }} id="select-points-of-attack-label">
                             {t("pointsOfAttackHeading")}
                         </InputLabel>
@@ -338,7 +328,7 @@ const CatalogMeasureDialog = ({ catalogMeasure, isNew, catalogId, ...props }: Ca
                                         },
                                         ".MuiSelect-iconOpen + fieldset": {
                                             borderWidth: "1px !important",
-                                            borderColor: "#fcac0c !important",
+                                            borderColor: `${theme.vars.palette.secondary.main} !important`,
                                         },
                                     }}
                                     data-testid="catalog-measure-creation-modal_poa-selection"

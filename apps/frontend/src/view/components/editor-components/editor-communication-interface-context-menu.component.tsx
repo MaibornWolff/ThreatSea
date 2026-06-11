@@ -143,152 +143,149 @@ export const CommunicationContextMenu = ({
     };
 
     return (
-        <>
-            <Box
-                ref={ref}
+        <Box
+            ref={ref}
+            sx={{
+                position: "absolute",
+                zIndex: 1000,
+                bgcolor: "background.contextMenu",
+                boxShadow: 4,
+                visibility: open ? "visible" : "hidden",
+                borderRadius: 4,
+                paddingTop: 1,
+                paddingBottom: 1,
+                overflow: "hidden",
+                width: 250,
+            }}
+        >
+            <Typography
                 sx={{
-                    position: "absolute",
-                    zIndex: 1000,
-                    bgcolor: "#e5e8ebEE",
-                    boxShadow: 4,
-                    visibility: open ? "visible" : "hidden",
-                    borderRadius: 4,
-                    paddingTop: 1,
-                    paddingBottom: 1,
-                    overflow: "hidden",
-                    width: 250,
+                    color: "primary.main",
+                    fontSize: "0.75rem",
+                    fontWeight: "bold",
+                    px: 2,
+                    py: 1,
                 }}
             >
-                <Typography
-                    sx={{
-                        color: "primary.main",
-                        fontSize: "0.75rem",
-                        fontWeight: "bold",
-                        px: 2,
-                        py: 1,
-                    }}
-                >
-                    {t("communicationMenu.title", { componentName })}
-                </Typography>
-                <List dense disablePadding>
-                    {communicationInterfaces.length > 0 &&
-                        communicationInterfaces.map((communicationInterface, index) => {
-                            const isConnected = connections.some(
-                                (c) => c.from.communicationInterfaceId === communicationInterface.id
-                            );
-                            const IconComponent =
-                                communicationInterface.icon != null
-                                    ? muiIconMap[communicationInterface.icon]
-                                    : undefined;
-                            return (
-                                <ListItem
-                                    key={index}
-                                    divider
-                                    onClick={() => {
-                                        onSelect(communicationInterface.id, componentId, componentType);
-                                        onClose();
-                                    }}
-                                    sx={{
-                                        borderBottomColor: "#fff",
-                                        "&:hover": {
-                                            backgroundColor: "#fff",
-                                        },
-                                    }}
-                                >
-                                    <ListItemAvatar
-                                        sx={{
-                                            minWidth: "0px",
-                                            marginRight: "13px",
-                                        }}
-                                    >
-                                        <Avatar
-                                            sx={{
-                                                width: 20,
-                                                height: 20,
-                                                fontSize: 15,
-                                                padding: 0.25,
-                                                bgcolor: "transparent",
-                                                color: "primary.main",
-                                            }}
-                                        >
-                                            {IconComponent ? <IconComponent /> : null}
-                                        </Avatar>
-                                    </ListItemAvatar>
-                                    <ListItemText
-                                        primary={
-                                            <Typography
-                                                sx={{
-                                                    color: "primary.main",
-                                                    fontSize: "0.75rem",
-                                                    fontWeight: "bold",
-                                                }}
-                                                data-testid="communication-list-item"
-                                            >
-                                                {communicationInterface.name}
-                                            </Typography>
-                                        }
-                                    />
-                                    <IconButton
-                                        edge="end"
-                                        size="small"
-                                        sx={{ color: "primary.main" }}
-                                        onClick={(e) => handleClick(e, communicationInterface)}
-                                    >
-                                        {isConnected ? (
-                                            <WifiTetheringOff sx={{ fontSize: 20 }} />
-                                        ) : (
-                                            <WifiTethering sx={{ fontSize: 20 }} />
-                                        )}
-                                    </IconButton>
-                                </ListItem>
-                            );
-                        })}
-                    <ListItem
-                        onClick={handleCreateNew}
-                        sx={{
-                            "&:hover": {
-                                backgroundColor: "#fff",
-                            },
-                        }}
-                    >
-                        <ListItemAvatar
-                            sx={{
-                                minWidth: "0px",
-                                border: "0.75px solid #233C57",
-                                borderRadius: 50,
-                                marginRight: "13px",
-                            }}
-                        >
-                            <Avatar
+                {t("communicationMenu.title", { componentName })}
+            </Typography>
+            <List dense disablePadding>
+                {communicationInterfaces.length > 0 &&
+                    communicationInterfaces.map((communicationInterface, index) => {
+                        const isConnected = connections.some(
+                            (c) => c.from.communicationInterfaceId === communicationInterface.id
+                        );
+                        const IconComponent =
+                            communicationInterface.icon != null ? muiIconMap[communicationInterface.icon] : undefined;
+                        return (
+                            <ListItem
+                                key={index}
+                                divider
+                                onClick={() => {
+                                    onSelect(communicationInterface.id, componentId, componentType);
+                                    onClose();
+                                }}
                                 sx={{
-                                    width: 15,
-                                    height: 15,
-                                    padding: 0.25,
-                                    bgcolor: "transparent",
-                                    color: "primary.main",
+                                    borderBottomColor: "border.divider",
+                                    "&:hover": {
+                                        backgroundColor: "background.paperWhite",
+                                    },
                                 }}
                             >
-                                <Add sx={{ fontSize: 18 }} />
-                            </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText
-                            primary={
-                                <Typography
+                                <ListItemAvatar
                                     sx={{
-                                        color: "primary.main",
-                                        fontSize: "0.75rem",
-                                        fontWeight: "bold",
+                                        minWidth: "0px",
+                                        marginRight: "13px",
                                     }}
-                                    data-testid="create-communication-button"
                                 >
-                                    {t("communicationMenu.createNew")}
-                                </Typography>
-                            }
-                        />
-                    </ListItem>
-                </List>
-            </Box>
-        </>
+                                    <Avatar
+                                        sx={{
+                                            width: 20,
+                                            height: 20,
+                                            fontSize: 15,
+                                            padding: 0.25,
+                                            bgcolor: "transparent",
+                                            color: "primary.main",
+                                        }}
+                                    >
+                                        {IconComponent ? <IconComponent /> : null}
+                                    </Avatar>
+                                </ListItemAvatar>
+                                <ListItemText
+                                    primary={
+                                        <Typography
+                                            sx={{
+                                                color: "primary.main",
+                                                fontSize: "0.75rem",
+                                                fontWeight: "bold",
+                                            }}
+                                            data-testid="communication-list-item"
+                                        >
+                                            {communicationInterface.name}
+                                        </Typography>
+                                    }
+                                />
+                                <IconButton
+                                    edge="end"
+                                    size="small"
+                                    sx={{ color: "primary.main" }}
+                                    onClick={(e) => handleClick(e, communicationInterface)}
+                                >
+                                    {isConnected ? (
+                                        <WifiTetheringOff sx={{ fontSize: 20 }} />
+                                    ) : (
+                                        <WifiTethering sx={{ fontSize: 20 }} />
+                                    )}
+                                </IconButton>
+                            </ListItem>
+                        );
+                    })}
+                <ListItem
+                    onClick={handleCreateNew}
+                    sx={{
+                        "&:hover": {
+                            backgroundColor: "background.paperWhite",
+                        },
+                    }}
+                >
+                    <ListItemAvatar
+                        sx={{
+                            minWidth: "0px",
+                            border: "0.75px solid",
+                            borderColor: "primary.main",
+                            borderRadius: 50,
+                            marginRight: "13px",
+                        }}
+                    >
+                        <Avatar
+                            sx={{
+                                width: 15,
+                                height: 15,
+                                padding: 0.25,
+                                bgcolor: "transparent",
+                                color: "primary.main",
+                            }}
+                        >
+                            <Add sx={{ fontSize: 18 }} />
+                        </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                        primary={
+                            <Typography
+                                sx={{
+                                    color: "primary.main",
+                                    fontSize: "0.75rem",
+                                    fontWeight: "bold",
+                                }}
+                                data-testid="create-communication-button"
+                            >
+                                {t("communicationMenu.createNew")}
+                            </Typography>
+                        }
+                    />
+                </ListItem>
+            </List>
+        </Box>
     );
 };
 

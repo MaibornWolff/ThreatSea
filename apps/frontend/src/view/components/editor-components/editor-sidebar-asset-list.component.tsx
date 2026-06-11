@@ -39,7 +39,10 @@ export const EditorSidebarAssetList = ({
                     sx={{
                         "& .MuiSwitch-switchBase": {
                             "&.Mui-checked": {
-                                "& + .MuiSwitch-track": { backgroundColor: "#546481", opacity: 0.8 },
+                                "& + .MuiSwitch-track": {
+                                    backgroundColor: "background.assetSwitchTrack",
+                                    opacity: 0.8,
+                                },
                             },
                         },
                     }}

@@ -1,5 +1,6 @@
 import { Delete } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { Box } from "@mui/system";
 import type { ChangeEvent } from "react";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
@@ -19,12 +20,13 @@ export const EditorSidebarSelectedConnection = ({
     handleOnConnectionNameChange,
     userRole,
 }: EditorSidebarSelectedConnectionProps) => {
+    const theme = useTheme();
     return (
         <Box>
             <Box
                 sx={{
                     display: "flex",
-                    backgroundColor: "#f2f4f500",
+                    backgroundColor: "transparent",
                     borderRadius: 15,
                     paddingLeft: 0,
                     paddingRight: 0,
@@ -52,7 +54,7 @@ export const EditorSidebarSelectedConnection = ({
                             borderRadius: "0 !important",
                         },
                         "& .Mui-focused": {
-                            borderBottom: "1px solid rgba(35, 60, 87, 1) !important",
+                            borderBottom: `1px solid ${theme.vars.palette.primary.main} !important`,
                         },
                         input: {
                             fontSize: "0.875rem !important",
@@ -68,7 +70,7 @@ export const EditorSidebarSelectedConnection = ({
                         onClick={handleDeleteConnection}
                         sx={{
                             "&:hover": {
-                                color: "#ef5350",
+                                color: "error.light",
                                 backgroundColor: "background.paperIntransparent",
                             },
                             marginTop: -1,

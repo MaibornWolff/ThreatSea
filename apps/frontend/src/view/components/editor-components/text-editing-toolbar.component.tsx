@@ -109,7 +109,7 @@ export const TextEditingToolbar = ({
                     onMouseDown={keepFocus}
                     onClick={onDelete}
                     aria-label={t("sidebar.annotation.delete")}
-                    sx={{ "&:hover": { color: "#ef5350" } }}
+                    sx={{ "&:hover": { color: "error.light" } }}
                 >
                     <Delete sx={{ fontSize: 18 }} />
                 </IconButton>

@@ -132,7 +132,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
                                         color: "text.primary",
                                         paddingRight: 2,
                                         "&:hover": {
-                                            backgroundColor: "#00000000",
+                                            backgroundColor: "transparent",
                                         },
                                     }}
                                 >
@@ -166,17 +166,17 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
                                     }}
                                 >
                                     <ErrorOutlineOutlined
-                                        sx={{
+                                        sx={(theme) => ({
                                             fontSize: 18,
                                             marginRight: 1,
-                                            color: "#f00",
-                                        }}
+                                            color: theme.vars.palette.errorBold,
+                                        })}
                                     />
                                     <Typography
-                                        sx={{
+                                        sx={(theme) => ({
                                             fontSize: "0.875rem",
-                                            color: "#f00",
-                                        }}
+                                            color: theme.vars.palette.errorBold,
+                                        })}
                                     >
                                         {translationUtil.t("errorBoundary:errorNotice")}
                                     </Typography>
@@ -302,7 +302,7 @@ const ErrorMenu = ({ children }: ErrorMenuProps) => {
                 alignItems: "stretch",
                 maxHeight: "100vh",
                 height: "100%",
-                bgcolor: "rgba(35, 60, 87, 0.1)",
+                bgcolor: "background.default",
             }}
         >
             <Header />
@@ -315,7 +315,6 @@ const ErrorMenu = ({ children }: ErrorMenuProps) => {
                     height: "100%",
                     overflow: "hidden",
                     position: "relative",
-                    boxShadow: 8,
                     bgcolor: "background.main",
                 }}
             >
@@ -344,7 +343,7 @@ const Header = () => {
                 paddingBottom: 1.5,
                 paddingLeft: 6,
                 paddingRight: 6,
-                backgroundColor: "#4f6684",
+                backgroundColor: "page.headerBackground",
             }}
         >
             <Box
@@ -359,7 +358,7 @@ const Header = () => {
                         margin: 0,
                         marginTop: "3.5px",
                         marginBottom: "9.5px",
-                        "&:hover": { backgroundColor: "#0000" },
+                        "&:hover": { backgroundColor: "transparent" },
                     }}
                     disableRipple
                     href="/"

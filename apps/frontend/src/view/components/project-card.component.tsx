@@ -102,7 +102,7 @@ export const ProjectCard = ({ project, onClickEditProject, onClickDeleteProject,
                 boxShadow: 1,
                 p: 2,
                 "&:hover": {
-                    bgcolor: "#fff",
+                    bgcolor: "background.paperWhite",
                 },
                 ...sx,
             }}
@@ -197,7 +197,7 @@ export const ProjectCard = ({ project, onClickEditProject, onClickDeleteProject,
                                 <IconButton
                                     sx={{
                                         "&:hover": {
-                                            color: "#ef5350",
+                                            color: "error.light",
                                             backgroundColor: "background.paperIntransparent",
                                         },
                                     }}
@@ -221,7 +221,7 @@ export const ProjectCard = ({ project, onClickEditProject, onClickDeleteProject,
                     <GppGood
                         sx={{
                             fontSize: "20px",
-                            color: "green",
+                            color: "success.main",
                             marginRight: "5px",
                         }}
                     />

@@ -175,21 +175,18 @@ const MeasureThreatTableRow = ({
                 marginBottom: 1,
 
                 "&:last-child td, &:last-child th": { borderBottom: 0 },
-                "&:hover": {
-                    cursor: "pointer",
-                    backgroundColor: "#ffffff !important",
-                },
             }}
             onClick={(e) => onClickEditMeasureImpact(e, measureImpact)}
+            hover
         >
             <TableCell
                 scope="row"
                 sx={{
                     fontWeight: "bold",
                     fontSize: "0.875rem",
-                    borderBottomColor: "#fff",
+                    borderBottomColor: "border.divider",
                     borderRight: "1.5px solid",
-                    borderRightColor: "#fff",
+                    borderRightColor: "border.divider",
                     maxWidth: 250,
                     overflow: "clip",
                     "&:hover": {
@@ -203,9 +200,9 @@ const MeasureThreatTableRow = ({
             <TableCell
                 align="center"
                 sx={{
-                    borderBottomColor: "#fff",
+                    borderBottomColor: "border.divider",
                     borderRight: "1.5px solid",
-                    borderRightColor: "#fff",
+                    borderRightColor: "border.divider",
                     fontSize: "0.875rem",
                 }}
             >
@@ -216,9 +213,9 @@ const MeasureThreatTableRow = ({
                     align="center"
                     colSpan={2}
                     sx={{
-                        borderBottomColor: "#fff",
+                        borderBottomColor: "border.divider",
                         borderRight: "1.5px solid",
-                        borderRightColor: "#fff",
+                        borderRightColor: "border.divider",
                         fontSize: "0.875rem",
                     }}
                 >
@@ -230,9 +227,9 @@ const MeasureThreatTableRow = ({
                     key="net-probability"
                     align="center"
                     sx={{
-                        borderBottomColor: "#fff",
+                        borderBottomColor: "border.divider",
                         borderRight: "1.5px solid",
-                        borderRightColor: "#fff",
+                        borderRightColor: "border.divider",
                         fontSize: "0.875rem",
                     }}
                 >
@@ -242,9 +239,9 @@ const MeasureThreatTableRow = ({
                     key="net-damage"
                     align="center"
                     sx={{
-                        borderBottomColor: "#fff",
+                        borderBottomColor: "border.divider",
                         borderRight: "1.5px solid",
-                        borderRightColor: "#fff",
+                        borderRightColor: "border.divider",
                         fontSize: "0.875rem",
                     }}
                 >
@@ -257,7 +254,7 @@ const MeasureThreatTableRow = ({
                 sx={{
                     padding: 0,
                     paddingRight: 1.5,
-                    borderBottomColor: "#fff",
+                    borderBottomColor: "border.divider",
                 }}
             >
                 {checkUserRole(userRole, USER_ROLES.EDITOR) && (

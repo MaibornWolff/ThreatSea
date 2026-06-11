@@ -16,14 +16,7 @@ export const DialogTextField = ({ sx, ...props }: TextFieldProps): JSX.Element =
                 },
             }}
             sx={{
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#fcac0c !important",
-                },
                 "& .MuiOutlinedInput-root": {
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "#fcac0c !important",
-                        borderWidth: "1px !important",
-                    },
                     "& .MuiOutlinedInput-input": {
                         paddingLeft,
                         fontSize: "0.875rem",

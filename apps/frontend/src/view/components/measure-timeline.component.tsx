@@ -8,7 +8,7 @@ const TimeSlider = styled(Slider)(({ theme }) => ({
     "& .MuiSlider-thumb": {
         height: 25,
         width: 3,
-        backgroundColor: "rgba(35, 60, 87, 1)",
+        backgroundColor: theme.vars.palette.primary.main,
         boxShadow: "none",
         borderRadius: 2,
     },
@@ -17,7 +17,7 @@ const TimeSlider = styled(Slider)(({ theme }) => ({
         fontWeight: "normal",
         top: 70,
         backgroundColor: "unset",
-        color: theme.palette.text.primary,
+        color: theme.vars.palette.text.primary,
         "&:before": {
             display: "none",
         },
@@ -32,7 +32,7 @@ const TimeSlider = styled(Slider)(({ theme }) => ({
     "& .MuiSlider-rail": {
         opacity: 1, // 0.5,
         height: 2,
-        backgroundColor: "rgba(35, 60, 87, 1)", // "#bfbfbf",
+        backgroundColor: theme.vars.palette.primary.main,
         borderRadius: 2,
     },
     "& .MuiSlider-markLabel": {
@@ -40,7 +40,7 @@ const TimeSlider = styled(Slider)(({ theme }) => ({
         top: -25,
     },
     "& .MuiSlider-mark": {
-        backgroundColor: "rgba(35, 60, 87, 1)",
+        backgroundColor: theme.vars.palette.primary.main,
         height: 24,
         width: 2,
         "::before": {
@@ -48,7 +48,7 @@ const TimeSlider = styled(Slider)(({ theme }) => ({
             content: '" "',
             width: 22,
             height: 35,
-            backgroundColor: "#0000",
+            backgroundColor: "transparent",
             opacity: 0.5,
             marginLeft: "-10px",
             marginTop: "-5px",
@@ -58,11 +58,11 @@ const TimeSlider = styled(Slider)(({ theme }) => ({
         },
         "&.MuiSlider-markActive": {
             opacity: 1,
-            backgroundColor: "rgba(35, 60, 87, 1)",
+            backgroundColor: theme.vars.palette.primary.main,
         },
         "&:hover + .MuiSlider-valueLabel": {
-            color: "#f00",
-            backgroundColor: "#f00",
+            color: theme.vars.palette.errorBold,
+            backgroundColor: theme.vars.palette.errorBold,
         },
     },
 }));

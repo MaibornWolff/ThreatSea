@@ -10,6 +10,7 @@ import {
     TrendingFlat,
 } from "@mui/icons-material";
 import { Box, IconButton, Paper, Popover, Popper, Tooltip } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { useState, type ComponentType } from "react";
 import { useTranslation } from "react-i18next";
 import { EditorColorPicker } from "./editor-color-picker.component";
@@ -42,22 +43,8 @@ const buttonContainerSx = {
     marginRight: "auto",
 };
 
-const iconButtonSx = {
-    backgroundColor: "background.paperIntransparent",
-    "&:hover": {
-        backgroundColor: "rgba(149, 163, 181, 0.7)",
-    },
-};
-
-const activeIconButtonSx = {
-    backgroundColor: "rgba(35, 60, 87, 0.85)",
-    "&:hover": {
-        backgroundColor: "rgba(35, 60, 87, 1)",
-    },
-};
-
 const iconSx = { fontSize: 30, color: "primary.main" };
-const activeIconSx = { fontSize: 30, color: "#ffffff" };
+const activeIconSx = { fontSize: 30, color: "text.white" };
 
 const ANNOTATION_TOOLS: { tool: AnnotationType; Icon: ComponentType<{ sx?: object }> }[] = [
     { tool: "rect", Icon: CropSquare },
@@ -85,9 +72,24 @@ export const EditorToolbar = ({
     onSetAnnotationColor,
 }: EditorToolbarProps) => {
     const { t } = useTranslation("editorPage");
+    const theme = useTheme();
     const [shapesButton, setShapesButton] = useState<HTMLButtonElement | null>(null);
     const [freehandButton, setFreehandButton] = useState<HTMLButtonElement | null>(null);
     const [shapesOpen, setShapesOpen] = useState(false);
+
+    const iconButtonSx = {
+        backgroundColor: "background.paperIntransparent",
+        "&:hover": {
+            backgroundColor: "background.toolbarHover",
+        },
+    };
+
+    const activeIconButtonSx = {
+        backgroundColor: `rgba(${theme.vars.palette.primary.mainChannel} / 0.85)`,
+        "&:hover": {
+            backgroundColor: theme.vars.palette.primary.main,
+        },
+    };
 
     const toggleTool = (tool: AnnotationType): void => {
         onSetAnnotationTool(annotationTool === tool ? null : tool);

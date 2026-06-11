@@ -420,10 +420,6 @@ const AssetTableRow = ({ asset, onEdit, onDelete, language: _language, userRole 
                 marginBottom: 1,
 
                 "&:last-child td, &:last-child th": { border: 0 },
-                "&:hover": {
-                    cursor: "pointer",
-                    backgroundColor: "#ffffff !important",
-                },
             }}
             onClick={(e) => onEdit(e, asset)}
             hover
@@ -434,7 +430,7 @@ const AssetTableRow = ({ asset, onEdit, onDelete, language: _language, userRole 
                 sx={{
                     fontWeight: "bold",
                     fontSize: "0.875rem",
-                    borderBottomColor: "#fff",
+                    borderBottomColor: "border.divider",
                 }}
                 data-testid="assets-page_assets-list-entry_name"
             >
@@ -444,7 +440,7 @@ const AssetTableRow = ({ asset, onEdit, onDelete, language: _language, userRole 
             <TableCell
                 align="center"
                 sx={{
-                    borderBottomColor: "#fff",
+                    borderBottomColor: "border.divider",
                     fontSize: "0.875rem",
                 }}
                 data-testid="assets-page_assets-list-entry_confidentiality"
@@ -455,7 +451,7 @@ const AssetTableRow = ({ asset, onEdit, onDelete, language: _language, userRole 
             <TableCell
                 align="center"
                 sx={{
-                    borderBottomColor: "#fff",
+                    borderBottomColor: "border.divider",
                     fontSize: "0.875rem",
                 }}
                 data-testid="assets-page_assets-list-entry_integrity"
@@ -466,7 +462,7 @@ const AssetTableRow = ({ asset, onEdit, onDelete, language: _language, userRole 
             <TableCell
                 align="center"
                 sx={{
-                    borderBottomColor: "#fff",
+                    borderBottomColor: "border.divider",
                     fontSize: "0.875rem",
                 }}
                 data-testid="assets-page_assets-list-entry_availability"
@@ -477,7 +473,7 @@ const AssetTableRow = ({ asset, onEdit, onDelete, language: _language, userRole 
             <TableCell
                 align="center"
                 sx={{
-                    borderBottomColor: "#fff",
+                    borderBottomColor: "border.divider",
                     fontSize: "0.875rem",
                 }}
                 data-testid="assets-page_assets-list-entry_date"
@@ -490,7 +486,7 @@ const AssetTableRow = ({ asset, onEdit, onDelete, language: _language, userRole 
                 sx={{
                     padding: 0,
                     paddingRight: 2,
-                    borderBottomColor: "#fff",
+                    borderBottomColor: "border.divider",
                 }}
             >
                 {checkUserRole(userRole, USER_ROLES.EDITOR) && (

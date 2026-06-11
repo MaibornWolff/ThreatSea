@@ -2,11 +2,11 @@ import { useState, type RefObject } from "react";
 import type { Stage as KonvaStage } from "konva/lib/Stage";
 import type { KonvaEventObject } from "konva/lib/Node";
 import { DEFAULT_TEXT_FONT_SIZE, type AnnotationType, type Coordinate } from "#api/types/system.types.ts";
+import { DEFAULT_ANNOTATION_TEXT_COLOR } from "#view/colors/annotation.colors.ts";
 import type { useEditorAnnotations } from "./use-editor-annotations.hook";
 
 // Visible stroke width for new annotations — matches the system connection-line
 export const ANNOTATION_STROKE_WIDTH = 3;
-const DEFAULT_TEXT_COLOR = "#000000";
 // Minimum dimension for a drawn annotation
 const MIN_DRAW_DIMENSION = 5;
 const DEFAULT_TEXT_BOX_WIDTH = 160;
@@ -148,7 +148,7 @@ export const useAnnotationDrawing = ({
                 height: finalHeight,
                 text: "",
                 fontSize: DEFAULT_TEXT_FONT_SIZE,
-                stroke: DEFAULT_TEXT_COLOR,
+                stroke: DEFAULT_ANNOTATION_TEXT_COLOR,
                 strokeWidth: ANNOTATION_STROKE_WIDTH,
             });
         }

@@ -2,7 +2,7 @@
  * @module render-with-providers - Custom render helper for component tests.
  *
  * Wraps @testing-library/react's `render()` with the application's required
- * providers: Redux store, React Router (MemoryRouter), and i18next.
+ * providers: Redux store, React Router (MemoryRouter), i18next, and the MUI theme.
  *
  * Usage:
  *   import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
@@ -21,6 +21,7 @@ import { I18nextProvider } from "react-i18next";
 import { createStore } from "#application/store.ts";
 import type { RootState } from "#application/store.ts";
 import { translationUtil } from "#utils/translations.ts";
+import { Theme } from "#view/wrappers/theme.wrapper.tsx";
 
 interface RenderWithProvidersOptions extends Omit<RenderOptions, "wrapper"> {
     /** Partial Redux state to pre-load into the store. */
@@ -34,6 +35,7 @@ interface RenderWithProvidersOptions extends Omit<RenderOptions, "wrapper"> {
  * - Redux `<Provider>` with an isolated store (optionally pre-loaded)
  * - `<MemoryRouter>` for React Router hooks
  * - `<I18nextProvider>` for translation hooks
+ * - `<Theme>` so components can resolve custom palette slots via `theme.vars.palette.*`
  *
  * @param ui - The React element to render.
  * @param options - Optional render options including `preloadedState` and `initialEntries`.
@@ -49,7 +51,9 @@ export function renderWithProviders(
         return (
             <Provider store={store}>
                 <MemoryRouter initialEntries={initialEntries}>
-                    <I18nextProvider i18n={translationUtil}>{children}</I18nextProvider>
+                    <I18nextProvider i18n={translationUtil}>
+                        <Theme>{children}</Theme>
+                    </I18nextProvider>
                 </MemoryRouter>
             </Provider>
         );

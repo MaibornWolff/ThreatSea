@@ -1,6 +1,7 @@
 import { MAX_NAME_LENGTH } from "#view/dialogs/validation-constants.ts";
 import { TextField } from "@mui/material";
 import type { TextFieldProps } from "@mui/material/TextField";
+import { useTheme } from "@mui/material/styles";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { FieldError, FieldPath, FieldValues, Path, UseFormRegister } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -106,12 +107,13 @@ const BaseNameTextField = <TFieldValues extends FieldValues>({
 };
 
 const nameTextFieldSx = <TFieldValues extends FieldValues>(
-    props: NameTextFieldProps<TFieldValues>
+    props: NameTextFieldProps<TFieldValues>,
+    theme: Theme
 ): SxProps<Theme> => ({
     marginBottom: 1,
     border: "none !important",
     "& .MuiInputBase-root": {
-        borderBottom: "1px solid rgba(35, 60, 87, 0) !important",
+        borderBottom: "1px solid transparent !important",
     },
     "*": {
         border: "none !important",
@@ -120,10 +122,10 @@ const nameTextFieldSx = <TFieldValues extends FieldValues>(
         fontWeight: "bold",
     },
     "& .Mui-focused": {
-        borderBottom: "1px solid rgba(35, 60, 87, 1) !important",
+        borderBottom: `1px solid ${theme.vars.palette.primary.main} !important`,
     },
     "& .MuiFormHelperText-root": {
-        color: props.error ? "#d32f2f" : "inherit",
+        color: props.error ? theme.vars.palette.error.main : "inherit",
         margin: "4px 0 0 8px",
         fontWeight: "normal",
         fontSize: "0.75rem",
@@ -138,7 +140,7 @@ const nameTextFieldSx = <TFieldValues extends FieldValues>(
         autoComplete: "off",
     },
     "input::placeholder": {
-        color: props.error ? "#d32f2f" : "initial",
+        color: props.error ? theme.vars.palette.error.main : "initial",
         opacity: props.error ? 0.7 : 0.5,
     },
     color: "text.primary !important",
@@ -148,14 +150,7 @@ const nameTextFieldSx = <TFieldValues extends FieldValues>(
 const boxNameTextFieldSx = <TFieldValues extends FieldValues>(
     props: NameTextFieldProps<TFieldValues>
 ): SxProps<Theme> => ({
-    "&:hover .MuiOutlinedInput-notchedOutline": {
-        borderColor: "#fcac0c !important",
-    },
     "& .MuiOutlinedInput-root": {
-        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-            borderColor: "#fcac0c !important",
-            borderWidth: "1px !important",
-        },
         "& .MuiOutlinedInput-input": {
             paddingLeft: props.multiline ? 1 : 3,
             fontSize: "0.875rem",
@@ -178,6 +173,7 @@ const boxNameTextFieldSx = <TFieldValues extends FieldValues>(
 
 export const NameTextField = <TFieldValues extends FieldValues>(props: NameTextFieldProps<TFieldValues>) => {
     const { t } = useTranslation();
+    const theme = useTheme();
 
     return (
         <BaseNameTextField
@@ -185,7 +181,7 @@ export const NameTextField = <TFieldValues extends FieldValues>(props: NameTextF
             placeholder={t("name")}
             catalogId={props.catalogId}
             {...props}
-            defaultSx={nameTextFieldSx(props)}
+            defaultSx={nameTextFieldSx(props, theme)}
         />
     );
 };

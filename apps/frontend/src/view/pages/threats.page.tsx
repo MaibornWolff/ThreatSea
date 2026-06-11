@@ -404,10 +404,6 @@ const ThreatsPageBody = () => {
                                                             marginBottom: 1,
 
                                                             "&:last-child td, &:last-child th": { border: 0 },
-                                                            "&:hover": {
-                                                                cursor: "pointer",
-                                                                backgroundColor: "#ffffff !important",
-                                                            },
                                                         }}
                                                         onClick={(e) => onClickEditThreat(e, threat)}
                                                         hover
@@ -448,7 +444,7 @@ const ThreatsPageBody = () => {
                                                         </CustomTableCell>
                                                         <CustomTableCell
                                                             sx={{
-                                                                borderBottomColor: "#fff",
+                                                                borderBottomColor: "border.divider",
                                                                 fontSize: "0.875rem",
                                                             }}
                                                         >
@@ -535,7 +531,7 @@ interface CustomTableCellProps extends TableCellProps {
 }
 
 const CustomTableCell = ({ sx, showBorder = false, children, ...props }: CustomTableCellProps) => {
-    const borderRight = showBorder ? "1.5px solid #00000000" : null;
+    const borderRight = showBorder ? "1.5px solid transparent" : null;
     return (
         <TableCell
             align="center"
@@ -543,7 +539,7 @@ const CustomTableCell = ({ sx, showBorder = false, children, ...props }: CustomT
                 fontSize: "0.875rem",
                 borderRight,
                 borderRightColor: "primary.main",
-                borderBottomColor: "#fff",
+                borderBottomColor: "border.divider",
                 ...sx,
             }}
             {...props}

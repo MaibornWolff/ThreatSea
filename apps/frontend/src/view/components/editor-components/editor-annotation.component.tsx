@@ -1,4 +1,5 @@
 import { Fragment, memo, useRef } from "react";
+import { useTheme } from "@mui/material/styles";
 import { Arrow, Circle, Line, Rect, Transformer } from "react-konva";
 import type { KonvaEventObject, Node as KonvaNode } from "konva/lib/Node";
 import type { Line as KonvaLineNode } from "konva/lib/shapes/Line";
@@ -34,6 +35,7 @@ const EditorAnnotationInner = ({
     onChange,
     onDragStateChange,
 }: EditorAnnotationProps) => {
+    const theme = useTheme();
     const shapeRef = useRef<KonvaNode | null>(null);
     const transformerRef = useRef<KonvaTransformer | null>(null);
     const anchor0Ref = useRef<KonvaNode | null>(null);
@@ -320,8 +322,8 @@ const EditorAnnotationInner = ({
                         x={annotation.x + (points[0] ?? 0)}
                         y={annotation.y + (points[1] ?? 0)}
                         radius={ANCHOR_RADIUS}
-                        fill="#ffffff"
-                        stroke="#233c57"
+                        fill={theme.palette.background.canvasFill}
+                        stroke={theme.palette.primary.main}
                         strokeWidth={1}
                         draggable
                         onMouseEnter={handleMouseEnter}
@@ -341,8 +343,8 @@ const EditorAnnotationInner = ({
                         x={annotation.x + (points[2] ?? 0)}
                         y={annotation.y + (points[3] ?? 0)}
                         radius={ANCHOR_RADIUS}
-                        fill="#ffffff"
-                        stroke="#233c57"
+                        fill={theme.palette.background.canvasFill}
+                        stroke={theme.palette.primary.main}
                         strokeWidth={1}
                         draggable
                         onMouseEnter={handleMouseEnter}

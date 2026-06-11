@@ -7,6 +7,7 @@ import { backgroundColor, s1 } from "#view/report/report.style.ts";
 import { Page } from "#view/report/components/page.report.component.tsx";
 import { useTranslation } from "react-i18next";
 import { Text } from "#view/report/components/text.report.component.tsx";
+import { colors } from "#view/wrappers/color-tokens.ts";
 
 type AssetWithReportId = Asset & { reportId: string };
 
@@ -107,7 +108,7 @@ const AssetCard = ({
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "stretch",
-                    backgroundColor: "#fff",
+                    backgroundColor: colors.surface.paperWhite,
                     borderRadius: 10,
                     padding: s1,
                 }}

@@ -113,7 +113,7 @@ export const EditorSidebar = ({
                 bottom: "40px",
                 width: "480px",
                 zIndex: 999,
-                bgcolor: "#e5e8ebEE",
+                bgcolor: "background.contextMenu",
                 boxShadow: 6,
                 borderRadius: 5,
                 transition: "right 0.3s",

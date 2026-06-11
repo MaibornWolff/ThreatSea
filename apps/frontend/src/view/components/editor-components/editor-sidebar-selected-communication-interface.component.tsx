@@ -1,4 +1,5 @@
 import { IconButton, Typography, Box } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import { AssetSecurityNeedsPopper } from "./asset-security-needs-popper.component";
 import { EditorSidebarAssetList } from "./editor-sidebar-asset-list.component";
@@ -47,13 +48,14 @@ export const EditorSidebarSelectedCommunicationInterface = ({
     handleInterfaceBreadcrumbClick,
 }: EditorSidebarSelectedCommunicationInterfaceProps) => {
     const { t } = useTranslation("editorPage");
+    const theme = useTheme();
     const { anchorEl: assetAnchorEl, hoveredAsset, handleAssetHover, handleAssetLeave } = useAssetHoverPopper();
     return (
         <Box>
             <Box
                 sx={{
                     display: "flex",
-                    backgroundColor: "#f2f4f500",
+                    backgroundColor: "transparent",
                     borderRadius: 15,
                     paddingLeft: 0,
                     paddingRight: 0,
@@ -66,7 +68,7 @@ export const EditorSidebarSelectedCommunicationInterface = ({
                     sx={{
                         display: "flex",
                         flexDirection: "column",
-                        backgroundColor: "#f2f4f500",
+                        backgroundColor: "transparent",
                         borderRadius: 15,
                         paddingLeft: 0,
                         paddingRight: 0,
@@ -121,7 +123,7 @@ export const EditorSidebarSelectedCommunicationInterface = ({
                             border: "none !important",
                             width: "100%",
                             "& .MuiInputBase-root": {
-                                borderBottom: "1px solid rgba(35, 60, 87, 0) !important",
+                                borderBottom: "1px solid transparent !important",
                             },
                             "*": {
                                 border: "none !important",
@@ -129,7 +131,7 @@ export const EditorSidebarSelectedCommunicationInterface = ({
                                 borderRadius: "0 !important",
                             },
                             "& .Mui-focused": {
-                                borderBottom: "1px solid rgba(35, 60, 87, 1) !important",
+                                borderBottom: `1px solid ${theme.vars.palette.primary.main} !important`,
                             },
                             input: {
                                 fontSize: "0.875rem !important",
@@ -155,7 +157,7 @@ export const EditorSidebarSelectedCommunicationInterface = ({
                         }}
                         sx={{
                             "&:hover": {
-                                color: "#ef5350",
+                                color: "error.light",
                                 backgroundColor: "background.paperIntransparent",
                             },
                             marginTop: -1,
@@ -168,7 +170,7 @@ export const EditorSidebarSelectedCommunicationInterface = ({
             <Box
                 sx={{
                     display: "flex",
-                    backgroundColor: "#fff",
+                    backgroundColor: "background.paperWhite",
                     borderRadius: 15,
                     height: "31px",
                     paddingLeft: 8,
@@ -206,7 +208,7 @@ export const EditorSidebarSelectedCommunicationInterface = ({
                     border: "none !important",
                     width: "100%",
                     "& .MuiInputBase-root": {
-                        borderBottom: "1px solid rgba(35, 60, 87, 0) !important",
+                        borderBottom: "1px solid transparent !important",
                     },
                     "*": {
                         border: "none !important",
@@ -214,7 +216,7 @@ export const EditorSidebarSelectedCommunicationInterface = ({
                         borderRadius: "0 !important",
                     },
                     "& .Mui-focused": {
-                        borderBottom: "1px solid rgba(35, 60, 87, 1) !important",
+                        borderBottom: `1px solid ${theme.vars.palette.primary.main} !important`,
                     },
                     textarea: {
                         fontSize: "0.875rem !important",
@@ -231,7 +233,7 @@ export const EditorSidebarSelectedCommunicationInterface = ({
                     <Box
                         sx={{
                             display: "flex",
-                            backgroundColor: "#fff",
+                            backgroundColor: "background.paperWhite",
                             borderRadius: 15,
                             height: "31px",
                             paddingLeft: 8,

@@ -11,7 +11,7 @@ export const Dialog = ({ open, onClose, children, ...props }: DialogProps) => {
             slotProps={{
                 paper: {
                     sx: {
-                        bgcolor: "#e6e8ec",
+                        bgcolor: "background.dialog",
                         borderRadius: 5,
                         padding: "30px",
                     },
