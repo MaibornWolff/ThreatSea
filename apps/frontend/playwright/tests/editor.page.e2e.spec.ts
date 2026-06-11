@@ -367,6 +367,8 @@ test.describe("Editor Page Tests", () => {
             await pg.deleteComponentMenuItem.click();
             await pg.confirmButton.click();
 
+            await pg.openContextMenu();
+            await pg.expandCustomComponents();
             await expect(pg.customComponentEntry(name)).toHaveCount(0);
         });
     });
