@@ -238,8 +238,8 @@ importers:
         specifier: 5.3.0
         version: 5.3.0
       write-excel-file:
-        specifier: 4.1.0
-        version: 4.1.0
+        specifier: 4.1.1
+        version: 4.1.1
     devDependencies:
       '@playwright/test':
         specifier: 1.60.0
@@ -4754,8 +4754,8 @@ packages:
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
 
-  write-excel-file@4.1.0:
-    resolution: {integrity: sha512-3zeXmgRk2AevcrWZHMP6PLuBJlRRO6z3GWigmfpNmWiFe+rAsplUuImIlgsCjw8WMWaRFwFm4nGMni27bySSJg==}
+  write-excel-file@4.1.1:
+    resolution: {integrity: sha512-MUnCnNtQrcZek832ZcU24uU0rSphFmKPD1DvIjXOlygVb93CV7Tme6H3jUTkxsMmjB2W7HIzERzjqTi5kui71A==}
     engines: {node: '>=18'}
 
   ws@8.20.1:
@@ -8937,7 +8937,7 @@ snapshots:
 
   wrappy@1.0.2: {}
 
-  write-excel-file@4.1.0:
+  write-excel-file@4.1.1:
     dependencies:
       fflate: 0.8.3
 
