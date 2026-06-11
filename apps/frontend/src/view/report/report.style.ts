@@ -1,13 +1,12 @@
 import { StyleSheet } from "@react-pdf/renderer";
 
-export const paperColor = "rgba(255, 255, 255, 0.75)";
 export const primaryColor = "#233C57";
 export const backgroundColor = "rgba(35, 60, 87, 0.1)";
 export const headerFontSize = 20;
 export const largeFontSize = 12;
 export const smallFontSize = 10;
 export const fontColor = "#233C58";
-export const standardSpace = 8;
+const standardSpace = 8;
 export const s1 = standardSpace;
 export const s2 = standardSpace * 2;
 export const s3 = standardSpace * 3;

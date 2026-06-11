@@ -5,7 +5,7 @@ import type { ExtendedThreat } from "#api/types/threat.types.ts";
 
 type ThreatsAdapterState = ReturnType<typeof threatAdapter.getInitialState>;
 
-export type ThreatsState = ThreatsAdapterState & {
+type ThreatsState = ThreatsAdapterState & {
     isPending: boolean;
 };
 

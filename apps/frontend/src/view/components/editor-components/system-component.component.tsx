@@ -56,15 +56,6 @@ const imageMap: Record<string, string> = {
 
 type ComponentTypeValue = STANDARD_COMPONENT_TYPES | number;
 
-export interface SelectAnchorPayload {
-    id: string;
-    anchor: AnchorOrientation | string;
-    type: ComponentTypeValue;
-    name?: string | null;
-    communicationInterfaceId?: string;
-    communicationInterfaceType?: string;
-}
-
 interface InteractConfig {
     onMouseOver: ((event: KonvaEventObject<MouseEvent>) => void) | null;
     onMouseOut: ((event: KonvaEventObject<MouseEvent>) => void) | null;

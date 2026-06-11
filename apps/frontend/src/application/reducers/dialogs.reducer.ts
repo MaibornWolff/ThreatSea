@@ -7,7 +7,7 @@ export type DialogValue = Record<string, unknown> & {
     error?: DialogError | null;
 };
 
-export type DialogsState = Record<string, DialogValue | null | undefined>;
+type DialogsState = Record<string, DialogValue | null | undefined>;
 
 const defaultState: DialogsState = {};
 

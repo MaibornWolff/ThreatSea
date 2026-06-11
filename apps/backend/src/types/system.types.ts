@@ -20,8 +20,6 @@ export interface SystemData {
     lastAutoSaveDate: string;
 }
 
-export type AnnotationType = "rect" | "circle" | "line" | "arrow" | "freehand" | "text";
-
 interface BaseAnnotation {
     id: string;
     projectId: number;
@@ -33,33 +31,33 @@ interface BaseAnnotation {
     fill?: string;
 }
 
-export interface RectAnnotation extends BaseAnnotation {
+interface RectAnnotation extends BaseAnnotation {
     type: "rect";
     width: number;
     height: number;
 }
 
-export interface CircleAnnotation extends BaseAnnotation {
+interface CircleAnnotation extends BaseAnnotation {
     type: "circle";
     radius: number;
 }
 
-export interface LineAnnotation extends BaseAnnotation {
+interface LineAnnotation extends BaseAnnotation {
     type: "line";
     points: number[];
 }
 
-export interface ArrowAnnotation extends BaseAnnotation {
+interface ArrowAnnotation extends BaseAnnotation {
     type: "arrow";
     points: number[];
 }
 
-export interface FreehandAnnotation extends BaseAnnotation {
+interface FreehandAnnotation extends BaseAnnotation {
     type: "freehand";
     points: number[];
 }
 
-export interface TextAnnotation extends BaseAnnotation {
+interface TextAnnotation extends BaseAnnotation {
     type: "text";
     width: number;
     height: number;
@@ -70,7 +68,7 @@ export interface TextAnnotation extends BaseAnnotation {
     underline?: boolean;
 }
 
-export type Annotation =
+type Annotation =
     | RectAnnotation
     | CircleAnnotation
     | LineAnnotation
@@ -93,7 +91,7 @@ export interface Connection {
     projectId: number;
 }
 
-export interface ConnectionAnchor {
+interface ConnectionAnchor {
     /**
      * ID of the component this anchor is set on
      */
@@ -123,7 +121,7 @@ export enum ComponentType {
     communicationInfrastructure = "COMMUNICATION_INFRASTRUCTURE",
 }
 
-export interface ConnectionPointMeta {
+interface ConnectionPointMeta {
     position: Coordinate;
     goesHorizontal: boolean;
     goesLeft: boolean;
@@ -131,7 +129,7 @@ export interface ConnectionPointMeta {
     pointOfAttack: PointOfAttack | null;
 }
 
-export interface Coordinate {
+interface Coordinate {
     x: number;
     y: number;
 }

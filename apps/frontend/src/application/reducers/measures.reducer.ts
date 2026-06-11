@@ -4,7 +4,7 @@ import { measuresAdapter } from "#application/adapters/measures.adapter.ts";
 
 type MeasuresAdapterState = ReturnType<typeof measuresAdapter.getInitialState>;
 
-export type MeasuresState = MeasuresAdapterState & {
+type MeasuresState = MeasuresAdapterState & {
     isPending: boolean;
 };
 

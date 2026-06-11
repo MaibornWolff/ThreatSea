@@ -39,5 +39,4 @@ const reducers = {
     members,
 };
 
-export type ReducersMap = typeof reducers;
 export const rootReducer = combineReducers(reducers);

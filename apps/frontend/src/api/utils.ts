@@ -18,7 +18,7 @@ function setCSRFToken(token: string) {
  * Fetches the csrf token from the local storage.
  * @returns The csrf token as an object or null if it doesn't exist.
  */
-export function getCSRFToken(): string {
+function getCSRFToken(): string {
     return localStorage.getItem("csrfToken") ?? "";
 }
 

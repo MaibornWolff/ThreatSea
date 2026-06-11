@@ -17,7 +17,7 @@ interface MembersAccessState {
     catalogId: number | undefined;
 }
 
-export interface MembersState {
+interface MembersState {
     added: AddedMembersState;
     addable: AddableMembersState;
     pending: MembersPendingState;

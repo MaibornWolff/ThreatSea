@@ -2,7 +2,7 @@
  * Module that defines the access and manipulation
  * for the MeasureImpact of a project.
  */
-import { eq, getTableColumns, inArray } from "drizzle-orm";
+import { eq, getTableColumns } from "drizzle-orm";
 import { db, TransactionType } from "#db/index.js";
 import { CreateMeasureImpact, MeasureImpact, measureImpacts, measures, UpdateMeasureImpact } from "#db/schema.js";
 
@@ -30,38 +30,6 @@ export async function getMeasureImpact(measureImpactId: number): Promise<Measure
     const measureImpact = await db.query.measureImpacts.findFirst({ where: eq(measureImpacts.id, measureImpactId) });
 
     return measureImpact ?? null;
-}
-
-/**
- * Gets multiple measure impacts by their ids.
- *
- * @param {number[]} measureImpactIds - The ids of the measure impacts.
- * @return {Promise<MeasureImpact[]>} A promise that resolves to an array of measure impacts.
- */
-export async function getMultipleMeasureImpacts(measureImpactIds: number[]): Promise<MeasureImpact[]> {
-    return await db.query.measureImpacts.findMany({ where: inArray(measureImpacts.id, measureImpactIds) });
-}
-
-/**
- * Gets a measure impact from a specified measure.
- *
- * @param {number} measureId - The id of the current project.
- * @returns {Promise<MeasureImpact | null>} A promise that resolves to the measure impact or null if not found.
- */
-export async function getMeasureImpactByMeasure(measureId: number): Promise<MeasureImpact | null> {
-    const measureImpact = await db.query.measureImpacts.findFirst({ where: eq(measureImpacts.measureId, measureId) });
-
-    return measureImpact ?? null;
-}
-
-/**
- * Gets measure impacts from a specified threat.
- *
- * @param {number} threatId - The id of the current project.
- * @returns {Promise<MeasureImpact[]>} A promise that resolves to an array of measure impacts.
- */
-export async function getMeasureImpactsByThreat(threatId: number): Promise<MeasureImpact[]> {
-    return await db.query.measureImpacts.findMany({ where: eq(measureImpacts.threatId, threatId) });
 }
 
 /**

@@ -3,7 +3,7 @@ import type { IconButtonProps as MuiIconButtonProps } from "@mui/material/IconBu
 import { Tooltip } from "./tooltip.component";
 import type { ReactNode } from "react";
 
-export type IconButtonProps = Omit<MuiIconButtonProps, "title"> & {
+type IconButtonProps = Omit<MuiIconButtonProps, "title"> & {
     hoverColor?: string;
     title?: ReactNode;
 };

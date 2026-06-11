@@ -4,7 +4,7 @@ import { measureImpactsAdapter } from "#application/adapters/measureImpactsAdapt
 
 type MeasureImpactsAdapterState = ReturnType<typeof measureImpactsAdapter.getInitialState>;
 
-export type MeasureImpactsState = MeasureImpactsAdapterState & {
+type MeasureImpactsState = MeasureImpactsAdapterState & {
     isPending: boolean;
 };
 

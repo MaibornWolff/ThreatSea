@@ -11,7 +11,7 @@ export type ConfirmMessage =
 
 export type ConfirmAcceptColor = "primary" | "secondary" | "error" | "warning" | "success" | "info" | string;
 
-export interface ConfirmState<TState = unknown> {
+interface ConfirmState<TState = unknown> {
     open: boolean;
     message: ConfirmMessage;
     cancelText: string | null;

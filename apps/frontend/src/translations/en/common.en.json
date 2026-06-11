@@ -92,7 +92,7 @@
     "confidentialityMin": "Confidentiality must be 1 or greater",
     "confidentialityMax": "Confidentiality must be 5 or smaller",
     "damageMin": "Damage must be 1 or greater",
-    "damageMax": "Damge must be 5 or smaller",
+    "damageMax": "Damage must be 5 or smaller",
     "integrityMin": "Integrity must be 1 or greater",
     "integrityMax": "Integrity must be 5 or smaller",
     "probabilityMin": "Probability must be 1 or greater",

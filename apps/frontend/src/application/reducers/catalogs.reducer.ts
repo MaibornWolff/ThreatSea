@@ -6,7 +6,7 @@ import { catalogsAdapter } from "#application/adapters/catalogs.adapter.ts";
 
 type CatalogsAdapterState = ReturnType<typeof catalogsAdapter.getInitialState>;
 
-export type CatalogsState = CatalogsAdapterState & {
+type CatalogsState = CatalogsAdapterState & {
     isPending: boolean;
     current: CatalogWithRole | undefined;
 };

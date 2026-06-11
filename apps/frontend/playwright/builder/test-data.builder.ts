@@ -11,13 +11,6 @@ export function buildTestId(browserName: string, testId: string): string {
 }
 
 /**
- * Builds a catalog creation payload.
- */
-export function buildCatalog(name: string, language = "EN", defaultContent = true) {
-    return { name, language, defaultContent };
-}
-
-/**
  * Builds a project creation payload.
  */
 export function buildProject(

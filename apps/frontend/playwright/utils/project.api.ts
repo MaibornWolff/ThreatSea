@@ -6,14 +6,6 @@ export async function getProjects(request: APIRequestContext, token: string): Pr
     return fetchApi(request, token, "GET", "/projects");
 }
 
-export async function getProject(
-    request: APIRequestContext,
-    token: string,
-    projectId: number
-): Promise<ExtendedProject> {
-    return fetchApi(request, token, "GET", `/projects/${projectId}`);
-}
-
 export async function createProject(
     request: APIRequestContext,
     token: string,
@@ -42,15 +34,6 @@ export async function deleteProjects(request: APIRequestContext, token: string, 
     for (const id of projectIds) {
         await deleteProject(request, token, id);
     }
-}
-
-export async function deleteAllProjects(request: APIRequestContext, token: string): Promise<void> {
-    const projects = await getProjects(request, token);
-    await deleteProjects(
-        request,
-        token,
-        projects.map((p) => p.id)
-    );
 }
 
 export async function importProject(request: APIRequestContext, token: string, project: object): Promise<void> {
