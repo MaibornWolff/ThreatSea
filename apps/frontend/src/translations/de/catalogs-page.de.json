@@ -15,5 +15,10 @@
     "alert.created.failure": "Der Katalog {{catalogName}} konnte nicht erstellt werden."
   },
   "deleteMessage": "Wollen Sie den Katalog '{{ catalogName }}' wirklich löschen?",
-  "heading": "Kataloge"
+  "heading": "Kataloge",
+  "alert": {
+    "deleted": "Der Katalog '{{catalogName}}' wurde erfolgreich gelöscht.",
+    "saved": "Der Katalog '{{catalogName}}' wurde erfolgreich gespeichert.",
+    "saveFailed": "Der Katalog '{{catalogName}}' konnte nicht gespeichert werden."
+  }
 }
