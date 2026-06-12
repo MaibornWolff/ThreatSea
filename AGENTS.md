@@ -101,6 +101,12 @@ Before opening a PR, run at minimum: `pnpm lint`, `pnpm format:check`, `pnpm typ
 
 ---
 
+## Architectural Decisions
+
+Cross-cutting decisions are recorded in [`Architectural Decision Record.md`](<./gh-pages/Technical Documentation/Architectural Decision Record.md>). Follow decided ADRs. If a task conflicts with one or makes a new architectural decision, raise it with the developer before adding a row — don't add or edit ADRs on your own.
+
+---
+
 ## Code Style & Conventions
 
 - **Match nearby code.** Before writing new code, read 1–2 similar files in the same directory and follow their patterns (naming, file structure, imports, styling approach). Convention consistency outweighs personal preference. If a local convention clearly conflicts with widely accepted community best practice, flag it explicitly (what the repo does, what the community recommends, why it matters) rather than silently following.
