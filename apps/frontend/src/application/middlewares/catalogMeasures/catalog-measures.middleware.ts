@@ -3,6 +3,7 @@ import type { AppMiddleware } from "#application/middlewares/types.ts";
 import { AlertActions } from "#application/actions/alert.actions.ts";
 import { CatalogMeasuresActions } from "#application/actions/catalog-measures.actions.ts";
 import { socket } from "#api/system-socket.api.ts";
+import { translationUtil } from "#utils/translations.ts";
 
 const asyncThunks = [
     CatalogMeasuresActions.createCatalogMeasure,
@@ -27,7 +28,7 @@ const handleSuccessfulRequest: AppMiddleware =
                 socket.emit("remove_catalog_measure", JSON.stringify(payload));
                 dispatch(
                     AlertActions.openSuccessAlert({
-                        text: `Catalog Measure '${payload.name}' was deleted successfully`,
+                        text: translationUtil.t("catalogPage:catalogMeasures.alert.deleted", { name: payload.name }),
                     })
                 );
             } else if (CatalogMeasuresActions.importCatalogMeasures.fulfilled.match(action)) {
@@ -38,7 +39,9 @@ const handleSuccessfulRequest: AppMiddleware =
                 });
                 dispatch(
                     AlertActions.openSuccessAlert({
-                        text: `${payload.length} Catalog Measures were successfully imported`,
+                        text: translationUtil.t("catalogPage:catalogMeasures.alert.imported", {
+                            amount: payload.length,
+                        }),
                     })
                 );
             } else {
@@ -47,7 +50,7 @@ const handleSuccessfulRequest: AppMiddleware =
                 socket.emit("set_catalog_measure", JSON.stringify(payload));
                 dispatch(
                     AlertActions.openSuccessAlert({
-                        text: `Catalog Measure '${payload.name}' was saved successfully`,
+                        text: translationUtil.t("catalogPage:catalogMeasures.alert.saved", { name: payload.name }),
                     })
                 );
             }
@@ -64,20 +67,24 @@ const handleFailedRequest: AppMiddleware =
                 const { arg: catalogMeasure } = action.meta;
                 dispatch(
                     AlertActions.openErrorAlert({
-                        text: `Failed to delete Catalog Measure '${catalogMeasure.name}'`,
+                        text: translationUtil.t("catalogPage:catalogMeasures.alert.deleteFailed", {
+                            name: catalogMeasure.name,
+                        }),
                     })
                 );
             } else if (CatalogMeasuresActions.importCatalogMeasures.rejected.match(action)) {
                 dispatch(
                     AlertActions.openErrorAlert({
-                        text: "Failed to import Catalog Measures",
+                        text: translationUtil.t("catalogPage:catalogMeasures.alert.importFailed"),
                     })
                 );
             } else {
                 const { arg: catalogMeasure } = action.meta;
                 dispatch(
                     AlertActions.openErrorAlert({
-                        text: `Failed to save Catalog Measure '${catalogMeasure.name}'`,
+                        text: translationUtil.t("catalogPage:catalogMeasures.alert.saveFailed", {
+                            name: catalogMeasure.name,
+                        }),
                     })
                 );
             }

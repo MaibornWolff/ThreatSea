@@ -339,9 +339,10 @@ export const CatalogMeasuresListBox = ({
                                                     },
                                                     color: "text.primary",
                                                 }}
-                                                onClick={(event: React.MouseEvent) =>
-                                                    handleDeleteCatalogMeasure(event, catalogMeasure)
-                                                }
+                                                onClick={(event: React.MouseEvent) => {
+                                                    event.stopPropagation();
+                                                    handleDeleteCatalogMeasure(event, catalogMeasure);
+                                                }}
                                                 data-testid="catalog-page_measures-list-entry_delete-button"
                                             >
                                                 <Delete sx={{ fontSize: 18 }} />

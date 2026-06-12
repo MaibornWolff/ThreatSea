@@ -318,7 +318,10 @@ export const CatalogThreatsListBox = ({ catalogId, attacker, pointOfAttack, user
                                                     },
                                                     color: "text.primary",
                                                 }}
-                                                onClick={(e) => handleDeleteCatalogThreat(e, catalogThreat)}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteCatalogThreat(e, catalogThreat);
+                                                }}
                                                 data-testid="catalog-page_threats-list-entry_delete-button"
                                             >
                                                 <Delete sx={{ fontSize: 18 }} />

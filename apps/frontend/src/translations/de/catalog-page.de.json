@@ -13,9 +13,25 @@
   "exportMeasures": "Maßnahmen exportieren",
   "importMeasures": "Maßnahmen importieren",
   "catalogThreats": {
-    "deleteMessage": "Sind Sie sicher, dass Sie die Bedrohung '{{name}}' löschen möchten?"
+    "deleteMessage": "Sind Sie sicher, dass Sie die Bedrohung '{{name}}' löschen möchten?",
+    "alert": {
+      "deleted": "Die Katalog-Bedrohung '{{name}}' wurde erfolgreich gelöscht.",
+      "saved": "Die Katalog-Bedrohung '{{name}}' wurde erfolgreich gespeichert.",
+      "imported": "{{amount}} Katalog-Bedrohungen wurden erfolgreich importiert.",
+      "deleteFailed": "Die Katalog-Bedrohung '{{name}}' konnte nicht gelöscht werden.",
+      "saveFailed": "Die Katalog-Bedrohung '{{name}}' konnte nicht gespeichert werden.",
+      "importFailed": "Die Katalog-Bedrohungen konnten nicht importiert werden."
+    }
   },
   "catalogMeasures": {
-    "deleteMessage": "Sind Sie sicher, dass Sie die Maßnahme '{{name}}' löschen möchten?"
+    "deleteMessage": "Sind Sie sicher, dass Sie die Maßnahme '{{name}}' löschen möchten?",
+    "alert": {
+      "deleted": "Die Katalog-Maßnahme '{{name}}' wurde erfolgreich gelöscht.",
+      "saved": "Die Katalog-Maßnahme '{{name}}' wurde erfolgreich gespeichert.",
+      "imported": "{{amount}} Katalog-Maßnahmen wurden erfolgreich importiert.",
+      "deleteFailed": "Die Katalog-Maßnahme '{{name}}' konnte nicht gelöscht werden.",
+      "saveFailed": "Die Katalog-Maßnahme '{{name}}' konnte nicht gespeichert werden.",
+      "importFailed": "Die Katalog-Maßnahmen konnten nicht importiert werden."
+    }
   }
 }

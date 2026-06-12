@@ -3,6 +3,7 @@ import type { AppMiddleware } from "#application/middlewares/types.ts";
 import { AlertActions } from "#application/actions/alert.actions.ts";
 import { CatalogThreatsActions } from "#application/actions/catalog-threats.actions.ts";
 import { socket } from "#api/system-socket.api.ts";
+import { translationUtil } from "#utils/translations.ts";
 
 const asyncThunks = [
     CatalogThreatsActions.createCatalogThreat,
@@ -27,7 +28,7 @@ const handleSuccessfulRequest: AppMiddleware =
                 socket.emit("remove_catalog_threat", JSON.stringify(payload));
                 dispatch(
                     AlertActions.openSuccessAlert({
-                        text: `Catalog Threat '${payload.name}' was deleted successfully`,
+                        text: translationUtil.t("catalogPage:catalogThreats.alert.deleted", { name: payload.name }),
                     })
                 );
             } else if (CatalogThreatsActions.importCatalogThreats.fulfilled.match(action)) {
@@ -38,7 +39,9 @@ const handleSuccessfulRequest: AppMiddleware =
                 });
                 dispatch(
                     AlertActions.openSuccessAlert({
-                        text: `${payload.length} Catalog Threats were successfully imported`,
+                        text: translationUtil.t("catalogPage:catalogThreats.alert.imported", {
+                            amount: payload.length,
+                        }),
                     })
                 );
             } else {
@@ -47,7 +50,7 @@ const handleSuccessfulRequest: AppMiddleware =
                 socket.emit("set_catalog_threat", JSON.stringify(payload));
                 dispatch(
                     AlertActions.openSuccessAlert({
-                        text: `Catalog Threat '${payload.name}' was saved successfully`,
+                        text: translationUtil.t("catalogPage:catalogThreats.alert.saved", { name: payload.name }),
                     })
                 );
             }
@@ -64,20 +67,20 @@ const handleFailedRequest: AppMiddleware =
                 const { arg: asset } = action.meta;
                 dispatch(
                     AlertActions.openErrorAlert({
-                        text: `Failed to delete Catalog Threat '${asset.name}'`,
+                        text: translationUtil.t("catalogPage:catalogThreats.alert.deleteFailed", { name: asset.name }),
                     })
                 );
             } else if (CatalogThreatsActions.importCatalogThreats.rejected.match(action)) {
                 dispatch(
                     AlertActions.openErrorAlert({
-                        text: "Failed to import Catalog Threats",
+                        text: translationUtil.t("catalogPage:catalogThreats.alert.importFailed"),
                     })
                 );
             } else {
                 const { arg: asset } = action.meta;
                 dispatch(
                     AlertActions.openErrorAlert({
-                        text: `Failed to save Catalog Threat '${asset.name}'`,
+                        text: translationUtil.t("catalogPage:catalogThreats.alert.saveFailed", { name: asset.name }),
                     })
                 );
             }
