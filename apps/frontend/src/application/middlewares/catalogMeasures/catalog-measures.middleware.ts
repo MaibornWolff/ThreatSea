@@ -91,6 +91,6 @@ const handleFailedRequest: AppMiddleware =
         }
     };
 
-const catalogThreatsMiddlewares: AppMiddleware[] = [handleSuccessfulRequest, handleFailedRequest];
+const catalogMeasuresMiddlewares: AppMiddleware[] = [handleSuccessfulRequest, handleFailedRequest];
 
-export default catalogThreatsMiddlewares;
+export default catalogMeasuresMiddlewares;

@@ -98,8 +98,7 @@ test.describe("Catalogs Page Tests", () => {
         }
     });
 
-    // TODO: Fix requires event.stopPropagation() on rename/delete buttons in CatalogListItem (catalogs.page.tsx)
-    test.skip("Should update an existing catalog", async ({ page, request, browserName }, { testId }) => {
+    test("Should update an existing catalog", async ({ page, request, browserName }, { testId }) => {
         const pg = new CatalogsPage(page);
         const tid = buildTestId(browserName, testId);
         const token = await pg.getCsrfToken();
@@ -117,8 +116,7 @@ test.describe("Catalogs Page Tests", () => {
         await expect(pg.catalogEntryNameFilter(tid)).toContainText(updatedName);
     });
 
-    // TODO: Fix requires event.stopPropagation() on rename/delete buttons in CatalogListItem (catalogs.page.tsx)
-    test.skip("Should delete an existing catalog", async ({ page, request, browserName }, { testId }) => {
+    test("Should delete an existing catalog", async ({ page, request, browserName }, { testId }) => {
         const pg = new CatalogsPage(page);
         const tid = buildTestId(browserName, testId);
         const token = await pg.getCsrfToken();
@@ -133,8 +131,7 @@ test.describe("Catalogs Page Tests", () => {
         await expect(pg.catalogEntryNameFilter(tid)).toHaveCount(1);
     });
 
-    // TODO: Fix requires event.stopPropagation() on rename button in CatalogListItem (catalogs.page.tsx)
-    test.skip("Should not create/update catalogs with invalid inputs", async ({ page, request, browserName }, {
+    test("Should not create/update catalogs with invalid inputs", async ({ page, request, browserName }, {
         testId,
     }) => {
         const pg = new CatalogsPage(page);

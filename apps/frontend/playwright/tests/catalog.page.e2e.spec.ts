@@ -305,16 +305,14 @@ test.describe("Catalog Page Tests", () => {
         }
     });
 
-    // TODO: Fix requires event.stopPropagation() on delete button in catalog threat/measure list items
-    test.skip("Should delete an existing catalog threat", async ({ page }) => {
+    test("Should delete an existing catalog threat", async ({ page }) => {
         const pg = new CatalogPage(page);
         await pg.threatDeleteButtons.first().click();
         await pg.confirmButton.click();
         await expect(pg.threatListEntries).toHaveCount(DEFAULT_THREATS - 1);
     });
 
-    // TODO: Fix requires event.stopPropagation() on delete button in catalog threat/measure list items
-    test.skip("Should delete an existing catalog measure", async ({ page }) => {
+    test("Should delete an existing catalog measure", async ({ page }) => {
         const pg = new CatalogPage(page);
         await pg.measureDeleteButtons.first().click();
         await pg.confirmButton.click();
