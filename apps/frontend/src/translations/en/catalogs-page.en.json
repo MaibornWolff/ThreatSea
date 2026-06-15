@@ -15,5 +15,10 @@
     "alert.created.failure": "Failed to create Catalog {{catalogName}}."
   },
   "deleteMessage": "Do you really want to delete the catalog '{{ catalogName }}'?",
-  "heading": "Catalogs"
+  "heading": "Catalogs",
+  "alert": {
+    "deleted": "Catalog '{{catalogName}}' was deleted successfully.",
+    "saved": "Catalog '{{catalogName}}' was saved successfully.",
+    "saveFailed": "Failed to save Catalog '{{catalogName}}'."
+  }
 }

@@ -318,7 +318,10 @@ const CatalogListItem = ({ catalog, onClick, onClickEdit, onClickDelete, ...prop
                 <ListItemSecondaryAction>
                     <IconButton
                         data-testid="catalogs-page_rename-catalog-button"
-                        onClick={(event) => onClickEdit(event, catalog)}
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            onClickEdit(event, catalog);
+                        }}
                         title={t("editCatalogBtn")}
                         sx={{
                             color: "text.primary",
@@ -333,7 +336,10 @@ const CatalogListItem = ({ catalog, onClick, onClickEdit, onClickDelete, ...prop
                         sx={{
                             color: "text.primary",
                         }}
-                        onClick={(event) => onClickDelete(event, catalog)}
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            onClickDelete(event, catalog);
+                        }}
                     >
                         <Delete sx={{ fontSize: 18 }} />
                     </IconButton>

@@ -7,10 +7,26 @@
   "noThreatFound": "Threat not found",
   "noMeasureFound": "Measure not found",
   "catalogThreats": {
-    "deleteMessage": "Do you really want to delete the catalog threat '{{name}}'?"
+    "deleteMessage": "Do you really want to delete the catalog threat '{{name}}'?",
+    "alert": {
+      "deleted": "Catalog Threat '{{name}}' was deleted successfully.",
+      "saved": "Catalog Threat '{{name}}' was saved successfully.",
+      "imported": "{{amount}} Catalog Threats were successfully imported.",
+      "deleteFailed": "Failed to delete Catalog Threat '{{name}}'.",
+      "saveFailed": "Failed to save Catalog Threat '{{name}}'.",
+      "importFailed": "Failed to import Catalog Threats."
+    }
   },
   "catalogMeasures": {
-    "deleteMessage": "Do you really want to delete the catalog measure '{{name}}'?"
+    "deleteMessage": "Do you really want to delete the catalog measure '{{name}}'?",
+    "alert": {
+      "deleted": "Catalog Measure '{{name}}' was deleted successfully.",
+      "saved": "Catalog Measure '{{name}}' was saved successfully.",
+      "imported": "{{amount}} Catalog Measures were successfully imported.",
+      "deleteFailed": "Failed to delete Catalog Measure '{{name}}'.",
+      "saveFailed": "Failed to save Catalog Measure '{{name}}'.",
+      "importFailed": "Failed to import Catalog Measures."
+    }
   },
   "exportData": "Export",
   "importData": "Import",

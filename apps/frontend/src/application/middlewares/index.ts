@@ -10,7 +10,7 @@ import threats from "./threats/threats.middleware";
 import measures from "./measures/measures.middleware";
 import measureImpacts from "./measureImpacts/measureImpacts.middleware";
 import catalogThreats from "./catalogThreats/catalog-threats.middleware";
-import catalogMeasures from "./catalogMeasures/catalog-threats.middleware";
+import catalogMeasures from "./catalogMeasures/catalog-measures.middleware";
 import errors from "./error.middleware";
 import members from "./members.middleware";
 import user from "./user/user.middleware";

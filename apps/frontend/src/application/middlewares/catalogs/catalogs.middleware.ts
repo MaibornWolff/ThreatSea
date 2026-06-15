@@ -3,6 +3,7 @@ import type { AppMiddleware } from "#application/middlewares/types.ts";
 import { socket } from "#api/system-socket.api.ts";
 import { AlertActions } from "#application/actions/alert.actions.ts";
 import { CatalogsActions } from "#application/actions/catalogs.actions.ts";
+import { translationUtil } from "#utils/translations.ts";
 
 const asyncThunks = [
     CatalogsActions.createCatalog,
@@ -25,7 +26,7 @@ const handleSuccessfulRequest: AppMiddleware =
                 dispatch(CatalogsActions.removeCatalog(catalog));
                 dispatch(
                     AlertActions.openSuccessAlert({
-                        text: `Catalog '${catalog.name}' was deleted successfully`,
+                        text: translationUtil.t("catalogsPage:alert.deleted", { catalogName: catalog.name }),
                     })
                 );
             } else {
@@ -34,7 +35,7 @@ const handleSuccessfulRequest: AppMiddleware =
                 dispatch(CatalogsActions.setCatalog(catalog));
                 dispatch(
                     AlertActions.openSuccessAlert({
-                        text: `Catalog '${catalog.name}' was saved successfully`,
+                        text: translationUtil.t("catalogsPage:alert.saved", { catalogName: catalog.name }),
                     })
                 );
             }
@@ -50,7 +51,7 @@ const handleFailedRequest: AppMiddleware =
             const { arg: catalog } = action.meta;
             dispatch(
                 AlertActions.openErrorAlert({
-                    text: `Failed to save Catalog '${catalog.name}''`,
+                    text: translationUtil.t("catalogsPage:alert.saveFailed", { catalogName: catalog.name }),
                 })
             );
         }
