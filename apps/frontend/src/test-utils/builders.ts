@@ -1,6 +1,8 @@
 import type { Asset } from "#api/types/asset.types.ts";
 import type { ExtendedProject } from "#api/types/project.types.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
+import type { Measure } from "#api/types/measure.types.ts";
+import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
 import {
     AnchorOrientation,
     type Annotation,
@@ -147,6 +149,34 @@ export function createAnnotation<T extends AnnotationType>(
         ...overrides,
     } as unknown as Extract<Annotation, { type: T }>;
 }
+
+export const createMeasure = (overrides: Partial<Measure> = {}): Measure => ({
+    id: 1,
+    name: "Test Measure",
+    description: "",
+    scheduledAt: new Date("2025-01-01"),
+    projectId: 1,
+    catalogMeasureId: null,
+    createdAt: new Date("2025-01-01"),
+    updatedAt: new Date("2025-01-01"),
+    ...overrides,
+});
+
+export const createMeasureImpact = (overrides: Partial<MeasureImpact> = {}): MeasureImpact => ({
+    id: 1,
+    measureId: 1,
+    threatId: 1,
+    description: "",
+    setsOutOfScope: false,
+    impactsProbability: false,
+    impactsDamage: false,
+    probability: null,
+    damage: null,
+    projectId: 1,
+    createdAt: new Date("2025-01-01"),
+    updatedAt: new Date("2025-01-01"),
+    ...overrides,
+});
 
 export const createConnection = (overrides: Partial<SystemConnection> = {}): SystemConnection => ({
     id: "conn-1",

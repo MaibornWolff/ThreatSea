@@ -5,6 +5,10 @@ import * as alertHook from "#application/hooks/use-alert.hook.ts";
 import * as editorHook from "#application/hooks/use-editor.hook.ts";
 import * as assetsHook from "#application/hooks/use-assets.hook.ts";
 import * as threatMeasuresListHook from "#application/hooks/use-threat-measures-list.hook.ts";
+import * as threatsHook from "#application/hooks/use-threats.hook.ts";
+import * as measuresHook from "#application/hooks/use-measures.hook.ts";
+import * as measureImpactsHook from "#application/hooks/use-measureImpacts.hook.ts";
+import * as catalogMeasuresHook from "#application/hooks/use-catalog-measures.hook.ts";
 
 /**
  * @module mock-hooks - Reusable hook spies.
@@ -25,6 +29,10 @@ type UseAlertResult = ReturnType<typeof alertHook.useAlert>;
 type UseEditorResult = ReturnType<typeof editorHook.useEditor>;
 type UseAssetsResult = ReturnType<typeof assetsHook.useAssets>;
 type UseThreatMeasuresListResult = ReturnType<typeof threatMeasuresListHook.useThreatMeasuresList>;
+type UseThreatsResult = ReturnType<typeof threatsHook.useThreats>;
+type UseMeasuresResult = ReturnType<typeof measuresHook.useMeasures>;
+type UseMeasureImpactsResult = ReturnType<typeof measureImpactsHook.useMeasureImpacts>;
+type UseCatalogMeasuresResult = ReturnType<typeof catalogMeasuresHook.useCatalogMeasures>;
 
 export const mockUseDialog = (config?: Partial<UseDialogResult>): MockInstance => {
     return vi.spyOn(dialogHook, "useDialog").mockImplementation(() => ({
@@ -164,6 +172,47 @@ export const mockUseThreatMeasuresList = (config?: Partial<UseThreatMeasuresList
         setSortDirection: vi.fn(),
         setSearchValue: vi.fn(),
         deleteMeasureImpact: vi.fn(),
+        ...config,
+    }));
+};
+
+export const mockUseThreats = (config?: Partial<UseThreatsResult>): MockInstance => {
+    return vi.spyOn(threatsHook, "useThreats").mockImplementation(() => ({
+        items: [],
+        isPending: false,
+        loadThreats: vi.fn(),
+        deleteThreat: vi.fn(),
+        duplicateThreat: vi.fn(),
+        ...config,
+    }));
+};
+
+export const mockUseMeasures = (config?: Partial<UseMeasuresResult>): MockInstance => {
+    return vi.spyOn(measuresHook, "useMeasures").mockImplementation(() => ({
+        items: [],
+        isPending: false,
+        loadMeasures: vi.fn(),
+        deleteMeasure: vi.fn(),
+        ...config,
+    }));
+};
+
+export const mockUseMeasureImpacts = (config?: Partial<UseMeasureImpactsResult>): MockInstance => {
+    return vi.spyOn(measureImpactsHook, "useMeasureImpacts").mockImplementation(() => ({
+        items: [],
+        isPending: false,
+        loadMeasureImpacts: vi.fn(),
+        deleteMeasureImpact: vi.fn(),
+        ...config,
+    }));
+};
+
+export const mockUseCatalogMeasures = (config?: Partial<UseCatalogMeasuresResult>): MockInstance => {
+    return vi.spyOn(catalogMeasuresHook, "useCatalogMeasures").mockImplementation(() => ({
+        items: [],
+        isPending: false,
+        loadCatalogMeasures: vi.fn(),
+        deleteCatalogMeasure: vi.fn(),
         ...config,
     }));
 };
