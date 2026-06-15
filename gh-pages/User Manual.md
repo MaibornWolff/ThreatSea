@@ -119,7 +119,7 @@ The system editor is used to draw graphical representations of technical systems
 
 ![Editor Page View](assets/Editor.png "Editor Page View")
 
-By holding the primary mouse key and moving the cursor, users can navigate through the system sketch. The top-left "focus" button <img src="../assets/images_1_.png" alt="Editor Page Focus Button" style="height:1em; width:auto; vertical-align:middle;"> allows quick navigation by centering and scaling the editor view relatively to the overall system sketch. With the "download" button <img src="../assets/download-1459070_960_720.png" alt="Editor Page Download Icon" style="height:1em; width:auto; vertical-align:middle;"> the system sketch can be downloaded as png file.
+By holding the primary mouse key and moving the cursor, users can navigate through the system sketch. The top-left "focus" button <img src="../assets/images_1_.png" alt="Editor Page Focus Button" style="height:1em; width:auto; vertical-align:middle;"> allows quick navigation by centering and scaling the editor view relatively to the overall system sketch. With the "download" button <img src="../assets/download-1459070_960_720.png" alt="Editor Page Download Icon" style="height:1em; width:auto; vertical-align:middle;"> the system sketch can be downloaded as png file. For users with the `Editor` role, the same toolbar additionally offers annotation tools for adding shapes, freehand drawings and text to the system sketch (see [Annotations](#annotations)).
 
 In the system editor, a system is represented by a set of components. A component is an arbitrary unit of a system that is a combination of one or more of the six attack points. The scope of components differs individually for each project depending on the depth of the threat analysis. For large enterprise scale threat models, a component within the system sketch might (technically) be a system on its own like a server, a client or a database, while in other projects, single applications or even processes might be modeled as dedicated components. Due to its high abstraction of technical details, the methodology works for all scopes.
 
@@ -299,6 +299,62 @@ Components of type "user" cannot be assigned with other attack points than "User
 To make user interactions visually distinct from regular communication flows, ThreatSea renders any connection where one endpoint is a "user" component in <span style="color: rgb(255, 104, 189);">pink</span> instead of the default <span style="color: rgb(87, 134, 255);">blue</span> used for communication connections. The pink matches the user component's own border color (the "User behaviour" attack point). This is purely a visual cue and does not affect threat generation.
 
 ![Editor Page User Component](assets/image-2024-7-30_13-58-48.png "Editor Page User Component")
+
+### Annotations
+
+Besides modelling components and their connections, users can add freeform annotations to the system sketch. Annotations are graphical markup — shapes, freehand drawings and text — that can be used to highlight areas, group components visually or leave notes for collaborators. Like user connections, annotations are purely visual and have no effect on the threat generation. The annotation tools are only available to users with the `Editor` role (or higher).
+
+![Editor Annotation Toolbar](assets/editor-annotations-toolbar.png "Editor Annotation Toolbar")
+
+#### The annotation toolbar
+
+The annotation tools are located on the left edge of the editor, below the "focus" and "download" buttons. The following tools are available:
+
+- Shapes: opens a small popover with four shape tools — Rectangle, Circle, Line and Arrow.
+- Pencil: a freehand drawing tool.
+- Text: places a text box on the canvas.
+
+Clicking a tool activates it (the button is highlighted); clicking the active tool again deactivates it. While a shape or the pencil tool is active, a color picker appears next to the toolbar for choosing the annotation color.
+
+![Annotation Shapes Popover](assets/shapes-popover-open.png "Annotation Shapes Popover")
+
+#### Drawing shapes and lines
+
+To draw a shape, open the Shapes popover and select Rectangle, Circle, Line or Arrow. The mouse pointer turns into a crosshair. Click and drag on the canvas to draw the shape in the currently selected color. After a shape, line or arrow has been drawn, the tool deactivates automatically, so each click of a shape tool draws a single annotation.
+
+![Rectangle and Arrow Annotations](assets/rectangle-and-an-arrow-on-the-canvas.png "Rectangle and Arrow Annotations")
+
+#### Freehand drawing
+
+The Pencil tool lets users draw freehand lines. Select the tool and drag across the canvas to draw. Unlike the shape tools, the pencil stays active after each stroke, so several strokes can be drawn in a row.
+
+#### Adding text
+
+Select the Text tool — the mouse pointer turns into a text cursor — then click on the canvas to place a text box (or drag to size it). The box is created empty and immediately switches to edit mode, so the text can be typed right away. Press `Escape` or click somewhere else to finish editing; a text box that is left empty is discarded automatically.
+
+To edit an existing text annotation again, double-click it (or click it once to select it and then click a second time).
+
+While a text annotation is selected or being edited, a small formatting toolbar appears next to it (above the text, or below when there is no room). It provides:
+
+- a color picker for the text color,
+- Bold, Italic and Underline toggles,
+- a font-size selector (from 12 to 48),
+- a delete button.
+
+![Text Annotation Formatting Toolbar](assets/text-annotation-edit.png "Text Annotation Formatting Toolbar")
+
+#### Choosing a color
+
+The color picker offers six preset colors (black, red, green, blue, pink and yellow). For any other color, click the "+" button to open the system color picker and choose a custom color. The selected color is remembered per project and used as the default for new shapes and freehand drawings. New text annotations always start black; their color can be changed afterwards from the text formatting toolbar or the sidebar.
+
+#### Selecting, editing and deleting annotations
+
+When no annotation tool is active, clicking an annotation selects it. Selected annotations show handles and can be moved by drag and drop or resized via the handles. The sidebar then displays an "Annotation" panel that also names the annotation's type (for example "Annotation: Arrow") with the available options:
+
+- Color: change the color of the selected annotation.
+- Delete (trash icon) button in the top-right corner: delete the selected annotation (requires `Editor` role).
+
+![Selected Annotation Sidebar Panel](assets/selected-annotation-sidebar-panel.png "Selected Annotation Sidebar Panel")
 
 ## Assets
 
