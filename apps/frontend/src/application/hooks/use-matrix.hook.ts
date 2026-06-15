@@ -72,6 +72,8 @@ const sortableThreatFields: (keyof Pick<
     "name" | "description" | "componentName" | "attacker" | "pointOfAttack"
 >)[] = ["name", "description", "componentName", "attacker", "pointOfAttack"];
 
+const toDayNumber = (date: Date): number => Math.floor(date.getTime() / 1000 / 3600 / 24);
+
 export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
     const project = useAppSelector((state) => projectsSelectors.selectById(state, projectId));
     const defaultGreen = project?.lineOfToleranceGreen ?? 6;
@@ -113,7 +115,7 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
                             })
                             .map((measure) => {
                                 const active =
-                                    !!timelineDate && timelineDate.getTime() >= measure?.scheduledAt?.getTime();
+                                    !!timelineDate && toDayNumber(timelineDate) >= toDayNumber(measure.scheduledAt);
                                 return {
                                     measureId: measure.id,
                                     active: active,
@@ -258,19 +260,17 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
 
         const startDate = measures[0]?.scheduledAt ?? new Date();
         const endDate = measures[measures.length - 1]?.scheduledAt ?? new Date();
-        const maxDate = Math.floor(endDate.getTime() / 1000 / 3600 / 24);
-        const minDate = Math.floor(startDate.getTime() / 1000 / 3600 / 24);
+        const maxDate = toDayNumber(endDate);
+        const minDate = toDayNumber(startDate);
         const minValue = -1;
         const maxValue = maxDate - minDate;
         const marks: TimelineMark[] = measures.map((measure) => {
-            const value = Math.floor(measure.scheduledAt.getTime() / 1000 / 3600 / 24) - minDate;
+            const value = toDayNumber(measure.scheduledAt) - minDate;
             const tooltipText = measure.scheduledAt.toISOString().split("T")[0] ?? "";
-            const date = measure.scheduledAt;
-            date.setHours(0, 0, 0, 0);
             return {
                 value: value,
                 tooltipText: tooltipText,
-                date: date,
+                date: measure.scheduledAt,
                 label: tooltipText,
             };
         });
