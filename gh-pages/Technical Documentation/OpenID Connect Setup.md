@@ -71,7 +71,7 @@ ORIGIN_BACKEND=http://localhost:8000
 AUTH_METHOD=oidc
 OIDC_ISSUER_URL=http://localhost:9090/realms/ThreatSea-Realm
 OIDC_CLIENT_ID=threatsea-client
-OIDC_CLIENT_SECRET=dFeUP5wA5j0sztucuzhxGToPIq0eYrx2
+OIDC_CLIENT_SECRET=your-real-secret-here
 ```
 
 ### 7. Start the Application
