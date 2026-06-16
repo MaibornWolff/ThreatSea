@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
-import { calcRiskColour } from "#utils/calcRisk.ts";
+import { calcNetRisk, calcRiskColour } from "#utils/calcRisk.ts";
 import { useCatalogMeasures } from "./use-catalog-measures.hook.ts";
 import { useMeasureImpacts } from "./use-measureImpacts.hook.ts";
 import { useMeasures } from "./use-measures.hook.ts";
@@ -134,35 +134,15 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
                 })
                 .map((threat) => {
                     const { measures, probability, damage } = threat;
-                    const [newProbability, newDamage] = measures
+                    const activeMeasureImpacts = measures
                         .filter((measure) => measure.active)
-                        .reduce(
-                            (arr, measure) => {
-                                const [newProbability, newDamage] = arr;
-                                if (measure.measureImpact == null) {
-                                    return [newProbability, newDamage];
-                                }
-
-                                let { probability, damage } = measure.measureImpact;
-
-                                if (!measure.measureImpact.impactsDamage) {
-                                    damage = newDamage;
-                                }
-                                if (!measure.measureImpact.impactsProbability) {
-                                    probability = newProbability;
-                                }
-
-                                probability = measure.measureImpact.setsOutOfScope ? 0 : probability;
-                                damage = measure.measureImpact.setsOutOfScope ? 0 : damage;
-                                return [
-                                    probability != null && newProbability > probability ? probability : newProbability,
-                                    damage != null && newDamage > damage ? damage : newDamage,
-                                ];
-                            },
-                            [probability, damage]
-                        );
+                        .map((measure) => measure.measureImpact);
+                    const {
+                        netProbability: newProbability,
+                        netDamage: newDamage,
+                        netRisk: newRisk,
+                    } = calcNetRisk(probability, damage, activeMeasureImpacts);
                     const risk = probability * damage;
-                    const newRisk = newProbability * newDamage;
                     const activeMeasures = measures.reduce((sum, measure) => {
                         if (measure.scheduledAt) {
                             sum++;
