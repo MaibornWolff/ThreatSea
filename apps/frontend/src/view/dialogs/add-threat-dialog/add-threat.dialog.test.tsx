@@ -63,3 +63,22 @@ describe("AddThreatDialog — Apply Measure button", () => {
         });
     });
 });
+
+describe("AddThreatDialog — Risk preview", () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it("clamps the live gross risk to the 1–5 probability scale when a higher value is typed", async () => {
+        const { user } = setup(USER_ROLES.EDITOR);
+
+        const probabilityField = screen.getByRole("spinbutton");
+        await user.clear(probabilityField);
+        await user.type(probabilityField, "9");
+
+        // damage is 4 (the asset's confidentiality); probability clamps to 5, so gross stays 5 × 4 = 20.
+        const grossRisk = screen.getByTestId("GrossRisk");
+        expect(grossRisk).toHaveTextContent("20");
+        expect(grossRisk).not.toHaveTextContent("36");
+    });
+});
