@@ -489,7 +489,7 @@ export const useEditor = ({
 
     const handleDeleteCommunicationInterface = (componentId: string, interfaceId: string): void => {
         const selectedComponent = components.find((component) => component.id === componentId);
-        if (!selectedComponent || !selectedComponent.communicationInterfaces) {
+        if (!selectedComponent?.communicationInterfaces) {
             return;
         }
 
