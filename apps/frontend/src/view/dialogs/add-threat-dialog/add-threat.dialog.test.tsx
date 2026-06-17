@@ -2,7 +2,13 @@ import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import AddThreatDialog from "./add-threat.dialog";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
-import { createAsset, createProject, createThreat } from "#test-utils/builders.ts";
+import {
+    createAsset,
+    createMeasureImpact,
+    createProject,
+    createThreat,
+    createThreatMeasure,
+} from "#test-utils/builders.ts";
 import { mockUseConfirm, mockUseDialog, mockUseThreatMeasuresList } from "#test-utils/mock-hooks.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 
@@ -67,6 +73,7 @@ describe("AddThreatDialog — Apply Measure button", () => {
 describe("AddThreatDialog — Risk preview", () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        mockUseThreatMeasuresList();
     });
 
     it("clamps the live gross risk to the 1–5 probability scale when a higher value is typed", async () => {
@@ -80,5 +87,24 @@ describe("AddThreatDialog — Risk preview", () => {
         const grossRisk = screen.getByTestId("GrossRisk");
         expect(grossRisk).toHaveTextContent("20");
         expect(grossRisk).not.toHaveTextContent("36");
+    });
+
+    it("shows a reduced net risk when an active measure impact lowers the probability", () => {
+        mockUseThreatMeasuresList({
+            allThreatMeasures: [
+                createThreatMeasure({
+                    measureImpact: createMeasureImpact({ impactsProbability: true, probability: 1 }),
+                }),
+            ],
+        });
+
+        setup(USER_ROLES.EDITOR);
+
+        // Gross: probability 3 × damage 4 = 12. The measure caps probability at 1, so net = 1 × 4 = 4.
+        const grossRisk = screen.getByTestId("GrossRisk");
+        const netRisk = screen.getByTestId("NetRisk");
+        expect(grossRisk).toHaveTextContent("12");
+        expect(netRisk).toHaveTextContent("4");
+        expect(netRisk).not.toHaveTextContent("12");
     });
 });

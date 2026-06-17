@@ -12,7 +12,7 @@ import type { ExtendedProject } from "#api/types/project.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
 import type { Measure } from "#api/types/measure.types.ts";
 
-interface AddThreatMeasuresTabProps {
+export interface AddThreatMeasuresTabProps {
     active: boolean;
     threatMeasures: ThreatMeasure[];
     sortBy: string;

@@ -22,6 +22,23 @@ describe("calcNetRisk", () => {
         expect(calcNetRisk(3, 5, [measureImpact])).toEqual({ netProbability: 3, netDamage: 1, netRisk: 3 });
     });
 
+    it("lowers both probability and damage when a single measure impacts both", () => {
+        const measureImpact = createMeasureImpact({
+            impactsProbability: true,
+            probability: 2,
+            impactsDamage: true,
+            damage: 1,
+        });
+
+        expect(calcNetRisk(5, 4, [measureImpact])).toEqual({ netProbability: 2, netDamage: 1, netRisk: 2 });
+    });
+
+    it("leaves the damage untouched when the measure impacts damage but carries a null value", () => {
+        const measureImpact = createMeasureImpact({ impactsDamage: true, damage: null });
+
+        expect(calcNetRisk(4, 4, [measureImpact]).netDamage).toBe(4);
+    });
+
     it("never raises a value when the measure impact is higher than the gross value", () => {
         const measureImpact = createMeasureImpact({ impactsProbability: true, probability: 5 });
 
