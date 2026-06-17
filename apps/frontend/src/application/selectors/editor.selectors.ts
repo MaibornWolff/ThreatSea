@@ -1,18 +1,12 @@
 import { createSelector } from "reselect";
 import type { RootState } from "#application/store.ts";
 import type { EditorState } from "#application/reducers/editor.reducer.ts";
-import {
-    editorComponentConnectionLinesAdapter,
-    type EditorComponentConnectionLine,
-} from "#application/adapters/editor-component-connection-lines.adapter.ts";
+import { editorComponentConnectionLinesAdapter } from "#application/adapters/editor-component-connection-lines.adapter.ts";
 import {
     editorComponentTypeAdapter,
     type EditorComponentType,
 } from "#application/adapters/editor-component-type.adapter.ts";
-import {
-    editorMousePointersAdapter,
-    type EditorMousePointer,
-} from "#application/adapters/editor-mouse-pointers.adapter.ts";
+import { editorMousePointersAdapter } from "#application/adapters/editor-mouse-pointers.adapter.ts";
 
 type ExtendedEditorState = EditorState & {
     startAnchor?: unknown;
@@ -92,13 +86,11 @@ export const editorSelectors = {
     ),
 
     /**
-     * Reduces the entities to an array.
+     * The adapter's `selectAll` is already memoized, so we expose it directly
+     * rather than wrapping it in an identity selector.
      * @returns An array of mouse cursors.
      */
-    selectMousePointers: createSelector(
-        [selectAllMousePointers],
-        (mousePointers): EditorMousePointer[] => mousePointers
-    ),
+    selectMousePointers: selectAllMousePointers,
 
     /**
      * Gets the standard components.
@@ -122,13 +114,11 @@ export const editorSelectors = {
     ),
 
     /**
-     * Converts the connection entities to an array.
+     * The adapter's `selectAll` is already memoized, so we expose it directly
+     * rather than wrapping it in an identity selector.
      * @returns An array of connection lines.
      */
-    selectComponentConnectionLines: createSelector(
-        [selectAllComponentConnectionLines],
-        (componentConnectionLines): EditorComponentConnectionLine[] => componentConnectionLines
-    ),
+    selectComponentConnectionLines: selectAllComponentConnectionLines,
 
     /**
      * Filters whether a component is in use.
