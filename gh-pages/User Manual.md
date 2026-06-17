@@ -429,7 +429,7 @@ Tipp:
 
 Users can edit a threat scenario by clicking on the respective entry in the threats list which opens the "Edit Threat" dialog.
 
-![Threats Page Edit Threat Dialog](assets/image-2024-7-31_9-53-14.png "Threats Page Edit Threat Dialog")
+![Threats Page Edit Threat Dialog](assets/edit-threat-dialog.png "Threats Page Edit Threat Dialog")
 
 The top row of this dialog contains the base information of the threat:
 
@@ -438,6 +438,8 @@ The top row of this dialog contains the base information of the threat:
 - **Component:** Name of the component that is affected by the threat scenario
 
 The main part of the dialog is the "THREAT" tab, where the user can refine the threat during the threat assessment (i.e., refine the generated 4x6 threat scenario to a concrete threat scenario instance that could occur in the system under consideration). The values for "Name", "Description" and "Probability" are filled with the values defined in the catalogue used in the project. When refining a threat, the user can give custom text values for the threat scenario name and description and fill the probability value for the associated risk in a range from 1 to 5 according to the 4x6 probability scale.
+
+The "Risk" block on the right of the "THREAT" tab shows a live preview of the gross risk (probability × damage) and the net risk (after the measures assigned to the threat). Both values are color-coded according to the project's line of tolerance and update as the probability or the protection goal toggles change.
 
 Tipp:
 
