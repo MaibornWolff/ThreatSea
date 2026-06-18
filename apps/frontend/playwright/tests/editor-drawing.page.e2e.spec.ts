@@ -178,7 +178,7 @@ test.describe("Editor Drawing Tests", () => {
             await pg.clickCanvas(570, 430);
             await expect(pg.deleteAnnotationButton).toBeVisible();
 
-            const redChip = page.getByRole("button", { name: "#e74c3c" });
+            const redChip = pg.colorPresetChip("#e74c3c");
             await expect(redChip).toHaveAttribute("aria-pressed", "false");
             await redChip.click();
             await expect(redChip).toHaveAttribute("aria-pressed", "true");

@@ -204,6 +204,11 @@ export class EditorPage extends BasePage {
         return this.page.getByRole("button", { name, exact: true });
     }
 
+    // Color picker preset chips are labelled by their hex value (e.g. "#e74c3c").
+    colorPresetChip(hex: string): Locator {
+        return this.page.getByRole("button", { name: hex });
+    }
+
     async selectShapeTool(name: string): Promise<void> {
         await this.shapesButton.click();
         await this.shapeToolButton(name).click();
