@@ -3,7 +3,7 @@ import ErrorOutlineIcon from "@mui/icons-material/ErrorOutlined";
 import SyncIcon from "@mui/icons-material/Sync";
 import { IconButton, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
-import { useLayoutEffect, useState, type ComponentType } from "react";
+import { useLayoutEffect, useState, type ComponentType, type MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import { Link, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
@@ -17,8 +17,12 @@ import logo from "#images/threatsealogo-dez.png";
 import ErrorBoundary from "#view/wrappers/error.wrapper.tsx";
 import { useTheme } from "@mui/material/styles";
 import { useProjectTabs } from "#application/hooks/use-project-tabs.hook.ts";
+import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
+import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
+import type { ExtendedProject } from "#api/types/project.types.ts";
 import { HeaderLevelOneNav } from "./header-level-one-nav.component";
 import { HeaderProjectTabs } from "./header-project-tabs.component";
+import { ProjectActionsMenu } from "./project-actions-menu.component";
 import ProjectDialogPage from "#view/pages/project-dialog.page.tsx";
 import { Edit } from "@mui/icons-material";
 
@@ -93,6 +97,10 @@ export const CreatePage = <P extends object>(
             if (showProjectInfo && projectId) {
                 const pid = parseInt(projectId);
 
+                if (store.getState().projects.deletingProjectId === pid) {
+                    return;
+                }
+
                 if (projectsSelectors.selectById(store.getState(), pid)) {
                     dispatch(ProjectsActions.getProjectFromRedux(pid));
                 } else {
@@ -112,15 +120,30 @@ export const CreatePage = <P extends object>(
         }, [showProjectInfo, projectId, dispatch, getCatalogInfo, catalogId, catalog?.id, currentProjectJSON]);
 
         const { t } = useTranslation("mainMenu");
+        const { t: tProjects } = useTranslation("projectsPage");
+        const { openConfirm } = useConfirm<ExtendedProject>();
         const footerLinks = [
             { url: "/imprint", text: t("imprint") },
             { url: "/privacy-policy", text: t("privacy") },
         ];
 
-        const handleProjectInfoClick = (event: React.MouseEvent) => {
+        const handleEditProject = (event: MouseEvent<HTMLElement>, projectToEdit: ExtendedProject) => {
             event.stopPropagation();
             navigate(`${pathname}/editProject`, {
-                state: { project },
+                state: { project: projectToEdit },
+            });
+        };
+
+        const handleDeleteProject = (_event: MouseEvent<HTMLElement>, projectToDelete: ExtendedProject) => {
+            openConfirm({
+                state: projectToDelete,
+                message: tProjects("deleteMessage", { projectName: projectToDelete.name }),
+                acceptText: tProjects("delete"),
+                cancelText: tProjects("cancel"),
+                onAccept: (confirmedProject) => {
+                    dispatch(ProjectsActions.deleteProject(confirmedProject));
+                    navigate("/projects");
+                },
             });
         };
 
@@ -343,19 +366,32 @@ export const CreatePage = <P extends object>(
                                             ? new Date(project.createdAt).toISOString().split("T")[0]
                                             : ""}
                                     </Typography>
-                                    <IconButton
-                                        onClick={(event) => handleProjectInfoClick(event)}
-                                        sx={{
-                                            ml: 1,
-                                            "&:hover": {
-                                                color: "secondary.main",
-                                            },
-                                            color: "text.primary",
-                                            fontSize: "1rem",
-                                        }}
-                                    >
-                                        <Edit sx={{ fontSize: "1rem" }} />
-                                    </IconButton>
+                                    {project &&
+                                        (checkUserRole(project.role, USER_ROLES.OWNER) ? (
+                                            <ProjectActionsMenu
+                                                project={project}
+                                                onClickEditProject={handleEditProject}
+                                                onClickDeleteProject={handleDeleteProject}
+                                                testIdPrefix="project-header_action-menu"
+                                                triggerSize="medium"
+                                                triggerSx={{ ml: 1, color: "text.primary" }}
+                                                triggerIconSx={{ fontSize: "1rem" }}
+                                            />
+                                        ) : (
+                                            <IconButton
+                                                onClick={(event) => handleEditProject(event, project)}
+                                                sx={{
+                                                    ml: 1,
+                                                    "&:hover": {
+                                                        color: "secondary.main",
+                                                    },
+                                                    color: "text.primary",
+                                                    fontSize: "1rem",
+                                                }}
+                                            >
+                                                <Edit sx={{ fontSize: "1rem" }} />
+                                            </IconButton>
+                                        ))}
                                 </Box>
                             </Box>
                         )}

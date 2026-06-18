@@ -20,6 +20,9 @@ const handleSaveSystem: AppMiddleware =
             SystemActions.saveSystem.match(action)
         ) {
             const { projectId, image } = action.payload;
+            if (getState().projects.deletingProjectId === projectId) {
+                return;
+            }
             const { system, editor } = getState();
             const {
                 id,

@@ -1,28 +1,17 @@
-import { Delete, Edit, ExpandLess, ExpandMore, MoreVert, GppGood } from "@mui/icons-material";
-import {
-    Box,
-    Button as MaterialButton,
-    Collapse,
-    Menu,
-    MenuItem,
-    Typography,
-    type SxProps,
-    type Theme,
-} from "@mui/material";
-import { useState } from "react";
+import { ExpandLess, ExpandMore, GppGood } from "@mui/icons-material";
+import { Box, Button as MaterialButton, Collapse, Typography, type SxProps, type Theme } from "@mui/material";
+import { useState, type MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { Button } from "./button.component";
-import { IconButton } from "./icon-button.component";
-import { ExportIconButton } from "./export-icon-button.component";
-import { useProjectExport } from "#application/hooks/use-export.hook.ts";
+import { ProjectActionsMenu } from "./project-actions-menu.component";
 import type { ExtendedProject } from "#api/types/project.types.ts";
 
 interface ProjectCardProps {
     project: ExtendedProject;
-    onClickEditProject: (event: React.MouseEvent<HTMLElement, MouseEvent>, project: ExtendedProject) => void;
-    onClickDeleteProject: (event: React.MouseEvent<HTMLElement, MouseEvent>, project: ExtendedProject) => void;
+    onClickEditProject: (event: MouseEvent<HTMLElement>, project: ExtendedProject) => void;
+    onClickDeleteProject: (event: MouseEvent<HTMLElement>, project: ExtendedProject) => void;
     sx?: SxProps<Theme>;
 }
 
@@ -30,31 +19,9 @@ export const ProjectCard = ({ project, onClickEditProject, onClickDeleteProject,
     const { t } = useTranslation("projectsPage");
     const navigate = useNavigate();
     const { id, name, createdAt, description, image, confidentialityLevel } = project;
-    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [showDescription, setShowDescription] = useState(false);
-    const open = Boolean(anchorEl);
-
-    const { exportProject } = useProjectExport();
 
     const projectCreationDate = new Date(createdAt);
-
-    const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
-
-    const handleEditProject = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
-        onClickEditProject(event, project);
-        handleClose();
-    };
-
-    const handleDeleteProject = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
-        onClickDeleteProject(event, project);
-        handleClose();
-    };
 
     const handleClickShowDescription = () => {
         setShowDescription(!showDescription);
@@ -88,10 +55,6 @@ export const ProjectCard = ({ project, onClickEditProject, onClickDeleteProject,
 
     const onClickOpenMembers = () => {
         navigate(`/projects/${id}/members`, { state: { project } });
-    };
-
-    const handleExport = () => {
-        exportProject(project);
     };
 
     return (
@@ -129,84 +92,14 @@ export const ProjectCard = ({ project, onClickEditProject, onClickDeleteProject,
                     >
                         {name}
                     </Typography>
-                    {checkUserRole(project.role, USER_ROLES.OWNER) && [
-                        <IconButton
-                            key={"iconbutton" + project.id}
-                            size="small"
-                            onClick={handleClick}
-                            data-testid="projects-page_project-card_action-menu-button"
-                        >
-                            <MoreVert sx={{ fontSize: 18 }} />
-                        </IconButton>,
-
-                        <Menu
-                            key={"menu" + project.id}
-                            anchorEl={anchorEl}
-                            open={open}
-                            onClose={handleClose}
-                            slotProps={{
-                                list: {
-                                    sx: { bgcolor: "background.mainIntransparent" },
-                                },
-                                paper: {
-                                    sx: {
-                                        borderRadius: 5,
-                                    },
-                                },
-                            }}
-                        >
-                            <MenuItem
-                                title={t("edit")}
-                                onClick={handleEditProject}
-                                sx={{
-                                    "&:hover": {
-                                        backgroundColor: "background.mainIntransparent",
-                                        color: "secondary.light",
-                                    },
-                                }}
-                                data-testid="projects-page_project-card_action-menu_edit-project-button"
-                            >
-                                {" "}
-                                <IconButton>
-                                    <Edit />
-                                </IconButton>{" "}
-                            </MenuItem>
-                            <MenuItem
-                                title={t("exportProject")}
-                                onClick={handleExport}
-                                sx={{
-                                    "&:hover": {
-                                        backgroundColor: "background.mainIntransparent",
-                                        color: "secondary.light",
-                                    },
-                                }}
-                                data-testid="projects-page_project-card_action-menu_export-project-button"
-                            >
-                                <ExportIconButton />
-                            </MenuItem>
-                            <MenuItem
-                                title={t("delete")}
-                                onClick={handleDeleteProject}
-                                sx={{
-                                    "&:hover": {
-                                        backgroundColor: "background.mainIntransparent",
-                                    },
-                                }}
-                                data-testid="projects-page_project-card_action-menu_delete-project-button"
-                            >
-                                <IconButton
-                                    sx={{
-                                        "&:hover": {
-                                            color: "error.light",
-                                            backgroundColor: "background.paperIntransparent",
-                                        },
-                                    }}
-                                >
-                                    <Delete />
-                                </IconButton>{" "}
-                            </MenuItem>
-                        </Menu>,
-                    ]}
+                    {checkUserRole(project.role, USER_ROLES.OWNER) && (
+                        <ProjectActionsMenu
+                            project={project}
+                            onClickEditProject={onClickEditProject}
+                            onClickDeleteProject={onClickDeleteProject}
+                            testIdPrefix="projects-page_project-card_action-menu"
+                        />
+                    )}
                 </Box>
                 <Typography
                     variant="body2"

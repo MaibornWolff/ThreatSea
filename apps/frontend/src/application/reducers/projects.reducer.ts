@@ -9,12 +9,14 @@ type ProjectsAdapterState = ReturnType<typeof projectsAdapter.getInitialState>;
 export type ProjectsState = ProjectsAdapterState & {
     isPending: boolean;
     current: ExtendedProject | undefined;
+    deletingProjectId: number | undefined;
 };
 
 const defaultState: ProjectsState = {
     ...projectsAdapter.getInitialState(),
     isPending: false,
     current: undefined,
+    deletingProjectId: undefined,
 };
 
 const projectsReducer = createReducer(defaultState, (builder) => {
@@ -38,10 +40,25 @@ const projectsReducer = createReducer(defaultState, (builder) => {
     builder.addCase(ProjectsActions.getProjectFromBackend.fulfilled, (state, action) => {
         state.current = action.payload;
         state.isPending = false;
+        if (state.deletingProjectId !== action.payload.id) {
+            state.deletingProjectId = undefined;
+        }
     });
 
     builder.addCase(ProjectsActions.getProjectFromBackend.rejected, (state) => {
         state.isPending = false;
+    });
+
+    // Marks a project as being deleted so the editor's lazy/Suspense teardown skips saving/refetching
+    // it. Not cleared on `fulfilled` (teardown can fire after the project leaves the store)
+    builder.addCase(ProjectsActions.deleteProject.pending, (state, action) => {
+        state.deletingProjectId = action.meta.arg.id;
+    });
+
+    builder.addCase(ProjectsActions.deleteProject.rejected, (state, action) => {
+        if (state.deletingProjectId === action.meta.arg.id) {
+            state.deletingProjectId = undefined;
+        }
     });
 
     builder.addCase(ProjectsActions.createProject.pending, (state) => {
@@ -54,6 +71,9 @@ const projectsReducer = createReducer(defaultState, (builder) => {
 
     builder.addCase(ProjectsActions.getProjectFromRedux, (state, action) => {
         state.current = state.entities[action.payload];
+        if (state.deletingProjectId !== action.payload) {
+            state.deletingProjectId = undefined;
+        }
     });
 
     builder.addCase(ProjectsActions.setProject, (state, action) => {
