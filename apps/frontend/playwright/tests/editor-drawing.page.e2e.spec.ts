@@ -60,11 +60,8 @@ test.afterEach(async ({ page, request }) => {
     }
 });
 
-// The sample project places its components around Konva coordinates
-// Users (465, 305), Client (810, 305) and Server (810, 545). The region between
-// Users and Client and below their connection (x ≈ 490–650, y ≈ 420–520) is empty
-// and well inside the viewport, so annotations drawn there don't overlap any
-// component, label or connection.
+// Draw in the empty area between the components (Konva x ≈ 490–650, y ≈ 420–520)
+// so annotations don't overlap any component, label or connection.
 
 test.describe("Editor Drawing Tests", () => {
     test.describe("Toolbar Button Tests", () => {
@@ -101,12 +98,10 @@ test.describe("Editor Drawing Tests", () => {
 
             await pg.shapeToolButton("Rectangle").click();
             await expect(pg.shapesButton).toHaveAttribute("aria-pressed", "true");
-            // Selecting a shape closes the sub-toolbar.
             await expect(pg.shapeToolButton("Rectangle")).toHaveCount(0);
         });
 
-        // The pencil and text buttons' clickable-and-functional behaviour (including
-        // toggling off) is covered by the freehand and text drawing tests below.
+        // Pencil/text button behaviour (incl. toggling off) is covered by the freehand and text tests below.
     });
 
     test.describe("Shape Drawing Tests", () => {
@@ -119,8 +114,7 @@ test.describe("Editor Drawing Tests", () => {
         }
         const BOX_SHAPES: BoxShape[] = [
             { tool: "Rectangle", className: "Rect", from: [490, 430], to: [650, 510], selectAt: [570, 430] },
-            // Click a 45° point on the ring — the stroke-only circle has no fill to hit,
-            // and the exact top tangent is too thin a target to land reliably.
+            // Click a 45° ring point — the stroke-only circle has no fill and the top tangent is too thin to hit reliably.
             { tool: "Circle", className: "Circle", from: [490, 420], to: [620, 550], selectAt: [601, 439] },
             { tool: "Line", className: "Line", from: [490, 440], to: [650, 510], selectAt: [570, 475] },
             { tool: "Arrow", className: "Arrow", from: [490, 440], to: [650, 510], selectAt: [570, 475] },

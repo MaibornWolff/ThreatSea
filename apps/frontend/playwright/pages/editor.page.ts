@@ -101,12 +101,9 @@ export class EditorPage extends BasePage {
         this.shapesButton = page.getByRole("button", { name: "Shapes" });
         this.pencilButton = page.getByRole("button", { name: "Pencil", exact: true });
         this.textToolButton = page.getByRole("button", { name: "Text", exact: true });
-        // For a selected shape this is the only "Delete annotation" control on the page
-        // (the floating text toolbar only renders while a text annotation is active).
+        // Unambiguous for a selected shape; the floating text toolbar adds one only while editing text.
         this.deleteAnnotationButton = page.getByRole("button", { name: "Delete annotation" });
-        // The floating text toolbar is the only Paper tagged data-edit-protected.
         this.textEditingToolbar = page.locator(".MuiPaper-root[data-edit-protected]");
-        // The inline annotation editor is the only <textarea> on the editor page.
         this.annotationTextarea = page.locator("textarea");
     }
 
@@ -232,10 +229,8 @@ export class EditorPage extends BasePage {
         return { x: box.x + pos.x, y: box.y + pos.y };
     }
 
-    // The drawing preview lives in React state set on mousedown. Pausing between
-    // pointer steps lets React commit and the rAF-throttled move handler flush,
-    // so the preview exists when mouseup commits it. Without the pauses a synthetic
-    // drag fires fast enough that mouseup sees a still-null preview and draws nothing.
+    // Pause between pointer steps so React commits the mousedown draw-preview before mouseup;
+    // a too-fast synthetic drag would commit a still-null preview and draw nothing.
     private static readonly DRAW_STEP_DELAY_MS = 100;
 
     private async pressDragThrough(points: { x: number; y: number }[]): Promise<void> {
