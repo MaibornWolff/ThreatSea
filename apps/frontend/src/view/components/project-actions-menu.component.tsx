@@ -1,5 +1,5 @@
 import { Delete, Edit, MoreVert } from "@mui/icons-material";
-import { Menu, MenuItem, type SxProps, type Theme } from "@mui/material";
+import { Menu, MenuItem } from "@mui/material";
 import { useState, type MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useProjectExport } from "#application/hooks/use-export.hook.ts";
@@ -12,9 +12,7 @@ interface ProjectActionsMenuProps {
     onClickEditProject: (event: MouseEvent<HTMLElement>, project: ExtendedProject) => void;
     onClickDeleteProject: (event: MouseEvent<HTMLElement>, project: ExtendedProject) => void;
     testIdPrefix: string;
-    triggerSx?: SxProps<Theme>;
-    triggerIconSx?: SxProps<Theme>;
-    triggerSize?: "small" | "medium" | "large";
+    variant?: "card" | "header";
 }
 
 export const ProjectActionsMenu = ({
@@ -22,10 +20,9 @@ export const ProjectActionsMenu = ({
     onClickEditProject,
     onClickDeleteProject,
     testIdPrefix,
-    triggerSx,
-    triggerIconSx = { fontSize: 18 },
-    triggerSize = "small",
+    variant = "card",
 }: ProjectActionsMenuProps) => {
+    const isHeader = variant === "header";
     const { t } = useTranslation("projectsPage");
     const [anchorElement, setAnchorElement] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorElement);
@@ -57,8 +54,13 @@ export const ProjectActionsMenu = ({
 
     return (
         <>
-            <IconButton size={triggerSize} onClick={handleClick} sx={triggerSx} data-testid={`${testIdPrefix}-button`}>
-                <MoreVert sx={triggerIconSx} />
+            <IconButton
+                size={isHeader ? "medium" : "small"}
+                onClick={handleClick}
+                sx={isHeader ? { ml: 1, color: "text.primary" } : undefined}
+                data-testid={`${testIdPrefix}-button`}
+            >
+                <MoreVert sx={{ fontSize: isHeader ? "1rem" : 18 }} />
             </IconButton>
             <Menu
                 anchorEl={anchorElement}

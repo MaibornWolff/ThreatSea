@@ -38,11 +38,12 @@ const projectsReducer = createReducer(defaultState, (builder) => {
     });
 
     builder.addCase(ProjectsActions.getProjectFromBackend.fulfilled, (state, action) => {
-        state.current = action.payload;
         state.isPending = false;
-        if (state.deletingProjectId !== action.payload.id) {
-            state.deletingProjectId = undefined;
+        if (state.deletingProjectId === action.payload?.id) {
+            return;
         }
+        state.current = action.payload;
+        state.deletingProjectId = undefined;
     });
 
     builder.addCase(ProjectsActions.getProjectFromBackend.rejected, (state) => {
@@ -90,6 +91,9 @@ const projectsReducer = createReducer(defaultState, (builder) => {
     builder.addCase(ProjectsActions.removeProject, (state, action) => {
         projectsAdapter.removeOne(state, action.payload.id);
         state.isPending = false;
+        if (state.current?.id === action.payload.id) {
+            state.current = undefined;
+        }
     });
 
     builder.addCase(ProjectsActions.changeOwnProjectRole, (state, action) => {

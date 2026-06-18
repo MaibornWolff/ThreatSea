@@ -373,9 +373,7 @@ export const CreatePage = <P extends object>(
                                                 onClickEditProject={handleEditProject}
                                                 onClickDeleteProject={handleDeleteProject}
                                                 testIdPrefix="project-header_action-menu"
-                                                triggerSize="medium"
-                                                triggerSx={{ ml: 1, color: "text.primary" }}
-                                                triggerIconSx={{ fontSize: "1rem" }}
+                                                variant="header"
                                             />
                                         ) : (
                                             <IconButton
