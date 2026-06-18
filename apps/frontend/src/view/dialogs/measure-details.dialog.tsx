@@ -214,7 +214,7 @@ const MeasureDetailsDialog = ({ project, measure, ...props }: MeasureDetailsDial
                     fontWeight: "bold",
                 }}
             >
-                {isNew ? t("addMeasure") : t("editMeasure")}
+                {isNew ? t("addMeasure") : t("editMeasureWithName", { name: measure.name })}
             </DialogTitle>
             <Tabs onChange={handleChangeTab} value={tab} sx={{ marginBottom: 1 }}>
                 <Tab

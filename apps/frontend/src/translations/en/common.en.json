@@ -9,6 +9,7 @@
   "copy": "Duplicate Measure",
   "deleteMeasureText": "Do you really want to delete the measure '{{ measureName }}'?",
   "editMeasure": "Edit Measure",
+  "editMeasureWithName": "Edit Measure: {{ name }}",
   "measure": "Measure",
   "measures": "Measures",
   "reset": "Reset Measure",
@@ -21,6 +22,7 @@
 
   "addThreatBtn": "Add Threat",
   "editThreat": "Edit Threat",
+  "editThreatWithName": "Edit Threat: {{ name }}",
   "threat": "Threat",
   "threats": "Threats",
 

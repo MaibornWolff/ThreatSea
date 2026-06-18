@@ -10,6 +10,7 @@
   "copy": "Maßnahme duplizieren",
   "deleteMeasureText": "Wollen Sie wirklich die Maßnahme '{{ measureName }}' löschen?",
   "editMeasure": "Maßnahme bearbeiten",
+  "editMeasureWithName": "Maßnahme bearbeiten: {{ name }}",
   "measure": "Maßnahme",
   "measures": "Maßnahmen",
   "scheduledTooltip": "Geplante Maßnahme",
@@ -22,6 +23,7 @@
 
   "addThreatBtn": "Bedrohung hinzufügen",
   "editThreat": "Bedrohung bearbeiten",
+  "editThreatWithName": "Bedrohung bearbeiten: {{ name }}",
   "threat": "Bedrohung",
   "threats": "Bedrohungen",
 
