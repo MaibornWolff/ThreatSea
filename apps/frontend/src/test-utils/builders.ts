@@ -3,6 +3,7 @@ import type { ExtendedProject } from "#api/types/project.types.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import type { Measure } from "#api/types/measure.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
+import type { ThreatMeasure } from "#application/hooks/use-threat-measures-list.hook.ts";
 import {
     AnchorOrientation,
     type Annotation,
@@ -175,6 +176,20 @@ export const createMeasureImpact = (overrides: Partial<MeasureImpact> = {}): Mea
     projectId: 1,
     createdAt: new Date("2025-01-01"),
     updatedAt: new Date("2025-01-01"),
+    ...overrides,
+});
+
+export const createThreatMeasure = (overrides: Partial<ThreatMeasure> = {}): ThreatMeasure => ({
+    measureImpactId: 1,
+    setsOutOfScope: false,
+    netProbability: null,
+    netDamage: null,
+    measureId: 1,
+    measureName: "Test Measure",
+    measureScheduleAt: new Date("2025-01-01"),
+    threatName: "Test Threat",
+    measure: createMeasure(),
+    measureImpact: createMeasureImpact(),
     ...overrides,
 });
 

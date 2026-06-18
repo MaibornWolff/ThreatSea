@@ -143,5 +143,6 @@ export const useThreatMeasuresList = ({ projectId, threatId }: UseThreatMeasures
         searchValue,
         sortBy,
         threatMeasures: sortedItems,
+        allThreatMeasures: items,
     };
 };

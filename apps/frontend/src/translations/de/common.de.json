@@ -56,6 +56,8 @@
   "probabilityAxis": "Eintrittswahrscheinlichkeit",
   "report": "Report",
   "risk": "Risiko",
+  "gross": "brutto",
+  "net": "netto",
   "role": "Rolle",
   "scheduledAt": "Geplant für",
   "system": "System",

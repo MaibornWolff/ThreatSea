@@ -53,6 +53,8 @@
   "probabilityAxis": "Probability",
   "report": "Report",
   "risk": "Risk",
+  "gross": "gross",
+  "net": "net",
   "role": "Role",
   "scheduledAt": "Scheduled at",
   "system": "System",

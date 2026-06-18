@@ -25,6 +25,14 @@ interface MatrixColorMap {
 
 export type MatrixColorKey = keyof MatrixColorMap;
 
+/**
+ * NOTE (deferred): these risk-band colors live outside the theme token system
+ * (view/wrappers/THEME.md). Planned direction — move the literals into
+ * `colorPrimitives.risk.*` + semantic `colors.risk.*` (single source of truth);
+ * on-screen consumers would then read `theme.vars.palette.risk.*`, while the
+ * report (@react-pdf) and Konva paths keep raw primitives, since they cannot
+ * resolve CSS variables. Out of scope for the risk-preview work (#717).
+ */
 export const MATRIX_COLOR: MatrixColorMap = {
     red: {
         lighter: "rgba(243, 130, 132, 0.4)",

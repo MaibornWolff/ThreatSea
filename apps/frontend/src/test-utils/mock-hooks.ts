@@ -165,6 +165,7 @@ export const mockUseAssets = (config?: Partial<UseAssetsResult>): MockInstance =
 export const mockUseThreatMeasuresList = (config?: Partial<UseThreatMeasuresListResult>): MockInstance => {
     return vi.spyOn(threatMeasuresListHook, "useThreatMeasuresList").mockImplementation(() => ({
         threatMeasures: [],
+        allThreatMeasures: [],
         sortBy: "measureName",
         sortDirection: "asc",
         searchValue: "",
