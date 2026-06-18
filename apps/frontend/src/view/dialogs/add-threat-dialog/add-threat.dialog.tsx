@@ -63,8 +63,6 @@ const AddThreatDialog = ({ threat, project, userRole, ...props }: AddThreatDialo
             integrity: threat?.integrity ?? false,
             availability: threat?.availability ?? false,
             doneEditing: threat?.doneEditing ?? false,
-            // TODO: measures part of ExtendedThreat?
-            measures: (threat as unknown as { measures: ThreatMeasure[] | undefined } | undefined)?.measures ?? [],
         },
     });
 

@@ -54,7 +54,9 @@ describe("AddThreatMeasuresTab", () => {
 
         await user.type(screen.getByRole("textbox"), "db");
 
-        expect(props.onChangeSearchValue).toHaveBeenCalled();
+        expect(props.onChangeSearchValue).toHaveBeenCalledWith(
+            expect.objectContaining({ target: expect.objectContaining({ value: "db" }) })
+        );
     });
 
     it("renders a row for each applied threat measure", () => {
