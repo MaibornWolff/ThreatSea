@@ -67,6 +67,45 @@ describe("system.middleware — handleSaveSystem", () => {
     });
 });
 
+describe("system.middleware — handleSaveSystem skips a project being deleted", () => {
+    let updateSystemSpy: MockInstance;
+
+    const buildState = (role: USER_ROLES, deletingProjectId: number | undefined) => {
+        const base = projectsReducer(undefined, { type: "@@INIT" });
+        return { ...base, current: { role } as ProjectsState["current"], deletingProjectId };
+    };
+
+    beforeEach(() => {
+        updateSystemSpy = vi.spyOn(SystemAPI, "updateSystem").mockResolvedValue({
+            id: 1,
+            projectId: 1,
+            data: null,
+            image: null,
+        });
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    it("does not dispatch updateSystem when the saved project is the one being deleted", async () => {
+        const store = createStore({ projects: buildState(USER_ROLES.EDITOR, 1) });
+        store.dispatch(SystemActions.saveSystem({ projectId: 1, image: undefined }));
+
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(updateSystemSpy).not.toHaveBeenCalled();
+    });
+
+    it("still dispatches updateSystem when a different project is being deleted", async () => {
+        const store = createStore({ projects: buildState(USER_ROLES.EDITOR, 99) });
+        store.dispatch(SystemActions.saveSystem({ projectId: 1, image: undefined }));
+
+        await vi.waitFor(() => expect(updateSystemSpy).toHaveBeenCalledTimes(1));
+    });
+});
+
 describe("system.middleware — getSystem awaits in-flight save", () => {
     const systemResponse = { id: 1, projectId: 1, data: null, image: null };
     let getSystemSpy: MockInstance;

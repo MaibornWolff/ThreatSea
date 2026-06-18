@@ -9,6 +9,7 @@ import * as threatsHook from "#application/hooks/use-threats.hook.ts";
 import * as measuresHook from "#application/hooks/use-measures.hook.ts";
 import * as measureImpactsHook from "#application/hooks/use-measureImpacts.hook.ts";
 import * as catalogMeasuresHook from "#application/hooks/use-catalog-measures.hook.ts";
+import * as projectExportHook from "#application/hooks/use-export.hook.ts";
 
 /**
  * @module mock-hooks - Reusable hook spies.
@@ -33,6 +34,7 @@ type UseThreatsResult = ReturnType<typeof threatsHook.useThreats>;
 type UseMeasuresResult = ReturnType<typeof measuresHook.useMeasures>;
 type UseMeasureImpactsResult = ReturnType<typeof measureImpactsHook.useMeasureImpacts>;
 type UseCatalogMeasuresResult = ReturnType<typeof catalogMeasuresHook.useCatalogMeasures>;
+type UseProjectExportResult = ReturnType<typeof projectExportHook.useProjectExport>;
 
 export const mockUseDialog = (config?: Partial<UseDialogResult>): MockInstance => {
     return vi.spyOn(dialogHook, "useDialog").mockImplementation(() => ({
@@ -214,6 +216,13 @@ export const mockUseCatalogMeasures = (config?: Partial<UseCatalogMeasuresResult
         isPending: false,
         loadCatalogMeasures: vi.fn(),
         deleteCatalogMeasure: vi.fn(),
+        ...config,
+    }));
+};
+
+export const mockUseProjectExport = (config?: Partial<UseProjectExportResult>): MockInstance => {
+    return vi.spyOn(projectExportHook, "useProjectExport").mockImplementation(() => ({
+        exportProject: vi.fn(),
         ...config,
     }));
 };
