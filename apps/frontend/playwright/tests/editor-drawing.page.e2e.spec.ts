@@ -55,7 +55,7 @@ test.afterEach(async ({ page, request }) => {
     }
     const remaining = await getProjects(request, token);
     const stillUsed = remaining.some((p) => p.catalogId === catalogId);
-    if (catalogId && !stillUsed) {
+    if (catalogId !== undefined && !stillUsed) {
         await deleteCatalog(request, token, catalogId);
     }
 });
