@@ -24,8 +24,8 @@ import { editorSelectors } from "#application/selectors/editor.selectors.ts";
 import { systemSelectors } from "#application/selectors/system.selectors.ts";
 import { useAppDispatch, useAppSelector } from "./use-app-redux.hook";
 import { useSystem } from "./use-system.hook";
-import type { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
 import type { EditorComponentType } from "#application/adapters/editor-component-type.adapter.ts";
+import { validateConnection } from "#utils/connection-rules.ts";
 
 let lastMousePointerUpdate = 0;
 
@@ -538,10 +538,6 @@ export const useEditor = ({
         dispatch(EditorActions.deselectComponent());
     };
 
-    const isSystemOrCustomComponent = (type: EditorConnectionAnchor["type"]): boolean => {
-        return ["CLIENT", "SERVER", "DATABASE"].includes(type as STANDARD_COMPONENT_TYPES) || typeof type === "number";
-    };
-
     const selectConnector = (connector: EditorConnectionAnchor): void => {
         // First connection, set the from, start connection preview
         if (!isConnectionPreview(newConnection)) {
@@ -569,37 +565,10 @@ export const useEditor = ({
             }
 
             // Check connection rules
-            if (from.type === "USERS") {
-                if (!isSystemOrCustomComponent(to.type)) {
-                    showErrorMessage?.({
-                        message: t("errors.userConnectionInvalid"),
-                    });
-                    return;
-                }
-            } else if (to.type === "USERS") {
-                if (!isSystemOrCustomComponent(from.type)) {
-                    showErrorMessage?.({
-                        message: t("errors.componentToUserInvalid"),
-                    });
-                    return;
-                }
-            } else if (isSystemOrCustomComponent(from.type)) {
-                if (to.type !== "COMMUNICATION_INFRASTRUCTURE" || !from.communicationInterfaceId) {
-                    showErrorMessage?.({
-                        message: t("errors.componentToCommunicationInfraInvalid"),
-                    });
-                    return;
-                }
-            } else if (from.type === "COMMUNICATION_INFRASTRUCTURE") {
-                if (!isSystemOrCustomComponent(to.type) || !to.communicationInterfaceId) {
-                    showErrorMessage?.({
-                        message: t("errors.communicationInfraToComponentInvalid"),
-                    });
-                    return;
-                }
-            } else {
+            const validation = validateConnection(from, to);
+            if (!validation.ok) {
                 showErrorMessage?.({
-                    message: t("errors.invalidConnection"),
+                    message: t(validation.messageKey),
                 });
                 return;
             }
