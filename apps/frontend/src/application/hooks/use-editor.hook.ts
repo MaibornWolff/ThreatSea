@@ -27,6 +27,8 @@ import { useSystem } from "./use-system.hook";
 import type { EditorComponentType } from "#application/adapters/editor-component-type.adapter.ts";
 import { validateConnection } from "#utils/connection-rules.ts";
 import { enhanceComponents } from "#utils/enhance-components.ts";
+import { buildPointOfAttackPayload } from "#utils/build-point-of-attack-payload.ts";
+import type { CreatePointOfAttackArgs } from "#utils/build-point-of-attack-payload.ts";
 
 let lastMousePointerUpdate = 0;
 
@@ -39,9 +41,6 @@ export type EditorConnectionAnchor = ConnectionAnchor & {
     communicationInterfaceId?: string | null;
     component?: SystemComponent;
 };
-
-type CreatePointOfAttackArgs = Pick<SystemPointOfAttack, "id" | "type" | "projectId" | "componentId"> &
-    Partial<Omit<SystemPointOfAttack, "id" | "type" | "projectId" | "componentId">>;
 
 export const useEditor = ({
     projectId,
@@ -789,19 +788,7 @@ export const useEditor = ({
     }, [projectId, dispatch]);
 
     const createPointOfAttack = (data: CreatePointOfAttackArgs): void => {
-        const payload: SystemPointOfAttack = {
-            id: data.id,
-            type: data.type,
-            projectId: data.projectId,
-            componentId: data.componentId,
-            connectionId: data.connectionId ?? null,
-            connectionPointId: data.connectionPointId ?? null,
-            name: data.name ?? null,
-            componentName: data.componentName ?? null,
-            assets: data.assets ?? [],
-        };
-
-        dispatch(PointsOfAttackActions.createPointOfAttack(payload));
+        dispatch(PointsOfAttackActions.createPointOfAttack(buildPointOfAttackPayload(data)));
     };
 
     const addComponentConnectionLine = (
