@@ -26,6 +26,7 @@ import { useAppDispatch, useAppSelector } from "./use-app-redux.hook";
 import { useSystem } from "./use-system.hook";
 import type { EditorComponentType } from "#application/adapters/editor-component-type.adapter.ts";
 import { validateConnection } from "#utils/connection-rules.ts";
+import { enhanceComponents } from "#utils/enhance-components.ts";
 
 let lastMousePointerUpdate = 0;
 
@@ -724,18 +725,7 @@ export const useEditor = ({
     const standardComponents = useAppSelector(editorSelectors.selectStandardComponents);
 
     const enhancedComponents = useMemo(() => {
-        return components.map((c) => {
-            // Finde die Standardkomponente, die dem Typ von c entspricht
-            const standardComponent = standardComponents.find((sc) => sc.id === c.type);
-
-            return {
-                ...c,
-                selected: selectedComponentId === c.id,
-                startAnchor,
-                // Setze das Symbol basierend auf der gefundenen Standardkomponente
-                symbol: standardComponent ? standardComponent.symbol : c.symbol,
-            };
-        });
+        return enhanceComponents(components, standardComponents, selectedComponentId, startAnchor);
     }, [components, standardComponents, selectedComponentId, startAnchor]);
 
     const selectConnectionPoint = (connectionId: string): void => {
