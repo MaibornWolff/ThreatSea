@@ -211,7 +211,7 @@ const AddThreatDialog = ({ threat, project, userRole, ...props }: AddThreatDialo
                     fontWeight: "bold",
                 }}
             >
-                {t("editThreat")}
+                {t("editThreatWithName", { name: threat.name })}
             </DialogTitle>
             <List>
                 <ListItem>
