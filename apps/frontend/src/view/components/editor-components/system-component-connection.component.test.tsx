@@ -9,6 +9,13 @@ import { SystemComponentConnection } from "./system-component-connection.compone
 
 const defaultEditorState = editorReducer(undefined, { type: "@@INIT" });
 
+// The connection component types each endpoint as a ConnectionAnchor that also
+// carries its resolved component, so the anchors need that field present.
+const connectionAnchor = (overrides: Parameters<typeof createConnectionAnchor>[0] = {}) => ({
+    ...createConnectionAnchor(overrides),
+    component: undefined,
+});
+
 const defaultProps = {
     id: "connection-1",
     name: "Connection 1",
@@ -33,8 +40,8 @@ describe("SystemComponentConnection", () => {
             renderWithProviders(
                 <SystemComponentConnection
                     {...defaultProps}
-                    from={createConnectionAnchor({ type: STANDARD_COMPONENT_TYPES.USERS })}
-                    to={createConnectionAnchor({ id: "comp-2" })}
+                    from={connectionAnchor({ type: STANDARD_COMPONENT_TYPES.USERS })}
+                    to={connectionAnchor({ id: "comp-2" })}
                     fromComponent={createSystemComponent({ type: STANDARD_COMPONENT_TYPES.USERS })}
                     toComponent={createSystemComponent({ id: "comp-2" })}
                 />
@@ -48,8 +55,8 @@ describe("SystemComponentConnection", () => {
             renderWithProviders(
                 <SystemComponentConnection
                     {...defaultProps}
-                    from={createConnectionAnchor()}
-                    to={createConnectionAnchor({ id: "comp-2", type: STANDARD_COMPONENT_TYPES.USERS })}
+                    from={connectionAnchor()}
+                    to={connectionAnchor({ id: "comp-2", type: STANDARD_COMPONENT_TYPES.USERS })}
                     fromComponent={createSystemComponent()}
                     toComponent={createSystemComponent({ id: "comp-2", type: STANDARD_COMPONENT_TYPES.USERS })}
                 />
@@ -63,8 +70,8 @@ describe("SystemComponentConnection", () => {
             renderWithProviders(
                 <SystemComponentConnection
                     {...defaultProps}
-                    from={createConnectionAnchor({ type: STANDARD_COMPONENT_TYPES.SERVER })}
-                    to={createConnectionAnchor({ id: "comp-2", type: STANDARD_COMPONENT_TYPES.DATABASE })}
+                    from={connectionAnchor({ type: STANDARD_COMPONENT_TYPES.SERVER })}
+                    to={connectionAnchor({ id: "comp-2", type: STANDARD_COMPONENT_TYPES.DATABASE })}
                     fromComponent={createSystemComponent({ type: STANDARD_COMPONENT_TYPES.SERVER })}
                     toComponent={createSystemComponent({ id: "comp-2", type: STANDARD_COMPONENT_TYPES.DATABASE })}
                 />
@@ -84,8 +91,8 @@ describe("SystemComponentConnection", () => {
                 <SystemComponentConnection
                     {...defaultProps}
                     waypoints={waypoints}
-                    from={createConnectionAnchor()}
-                    to={createConnectionAnchor({ id: "comp-2" })}
+                    from={connectionAnchor()}
+                    to={connectionAnchor({ id: "comp-2" })}
                     fromComponent={createSystemComponent()}
                     toComponent={createSystemComponent({ id: "comp-2" })}
                 />
@@ -101,8 +108,8 @@ describe("SystemComponentConnection", () => {
                 <SystemComponentConnection
                     {...defaultProps}
                     selected={true}
-                    from={createConnectionAnchor({ type: STANDARD_COMPONENT_TYPES.USERS })}
-                    to={createConnectionAnchor({ id: "comp-2" })}
+                    from={connectionAnchor({ type: STANDARD_COMPONENT_TYPES.USERS })}
+                    to={connectionAnchor({ id: "comp-2" })}
                     fromComponent={createSystemComponent({ type: STANDARD_COMPONENT_TYPES.USERS })}
                     toComponent={createSystemComponent({ id: "comp-2" })}
                 />
@@ -117,8 +124,8 @@ describe("SystemComponentConnection", () => {
                 <SystemComponentConnection
                     {...defaultProps}
                     selected={true}
-                    from={createConnectionAnchor({ type: STANDARD_COMPONENT_TYPES.USERS })}
-                    to={createConnectionAnchor({ id: "comp-2" })}
+                    from={connectionAnchor({ type: STANDARD_COMPONENT_TYPES.USERS })}
+                    to={connectionAnchor({ id: "comp-2" })}
                     fromComponent={createSystemComponent({ type: STANDARD_COMPONENT_TYPES.USERS })}
                     toComponent={createSystemComponent({ id: "comp-2" })}
                 />,

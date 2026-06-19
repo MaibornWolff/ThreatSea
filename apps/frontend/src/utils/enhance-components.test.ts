@@ -45,7 +45,7 @@ describe("enhanceComponents", () => {
 
         const result = enhanceComponents(components, standardComponents, null, START_ANCHOR);
 
-        expect(result[0].symbol).toBe("server-symbol");
+        expect(result[0]?.symbol).toBe("server-symbol");
     });
 
     it("keeps the component's own symbol when no standard component matches the type", () => {
@@ -54,7 +54,7 @@ describe("enhanceComponents", () => {
 
         const result = enhanceComponents(components, standardComponents, null, START_ANCHOR);
 
-        expect(result[0].symbol).toBe("own-symbol");
+        expect(result[0]?.symbol).toBe("own-symbol");
     });
 
     it("attaches the start anchor to every component", () => {
