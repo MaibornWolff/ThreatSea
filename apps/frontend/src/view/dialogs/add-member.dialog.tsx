@@ -18,7 +18,7 @@ import type { DialogProps } from "@mui/material/Dialog";
 import { useTheme } from "@mui/material/styles";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useDialog } from "#application/hooks/use-dialog.hook.ts";
 import { AddableMember } from "#view/components/addableMember.component.tsx";
 import { Button } from "#view/components/button.component.tsx";

@@ -8,7 +8,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { memo, useEffect, useLayoutEffect, useState, type ChangeEvent, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { Route, Routes, useNavigate, useParams } from "react-router-dom";
+import { Route, Routes, useNavigate, useParams } from "react-router";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";

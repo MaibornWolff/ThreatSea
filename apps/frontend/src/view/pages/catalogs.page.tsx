@@ -16,8 +16,7 @@ import {
 } from "@mui/material";
 import { memo, useLayoutEffect, type ChangeEvent, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router";
-import { Route, Routes } from "react-router-dom";
+import { useNavigate, Route, Routes } from "react-router";
 import type { CatalogWithRole } from "#api/types/catalogs.types.ts";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { useCatalogsList } from "#application/hooks/use-catalogs-list.hook.ts";

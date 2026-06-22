@@ -18,8 +18,7 @@ import {
 } from "@mui/material";
 import { useEffect, useImperativeHandle, useRef, useState, type RefObject, type Ref, useEffectEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router";
 import type { Stage } from "konva/lib/Stage";
 import type { ComponentType } from "#api/types/component-types.types.ts";
 import type { EditorComponentType } from "#application/adapters/editor-component-type.adapter.ts";

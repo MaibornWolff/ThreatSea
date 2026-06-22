@@ -1,4 +1,4 @@
-import { Navigate, useLocation, useParams, type Location } from "react-router-dom";
+import { Navigate, useLocation, useParams, type Location } from "react-router";
 import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import AddThreatDialog from "#view/dialogs/add-threat-dialog/add-threat.dialog.tsx";

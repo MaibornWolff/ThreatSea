@@ -14,7 +14,7 @@ import TableRow from "@mui/material/TableRow";
 import { Box } from "@mui/system";
 import { memo, useLayoutEffect, type ChangeEvent, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { Route, Routes, useNavigate } from "react-router-dom";
+import { Route, Routes, useNavigate } from "react-router";
 import type { ExtendedProject } from "#api/types/project.types.ts";
 import type { Asset } from "#api/types/asset.types.ts";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";

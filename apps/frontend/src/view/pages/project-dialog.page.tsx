@@ -1,4 +1,4 @@
-import { useLocation, type Location } from "react-router-dom";
+import { useLocation, type Location } from "react-router";
 import type { Project } from "#api/types/project.types.ts";
 import AddProjectDialog from "#view/dialogs/add-project.dialog.tsx";
 

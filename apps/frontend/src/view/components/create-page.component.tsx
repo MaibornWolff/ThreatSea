@@ -6,7 +6,7 @@ import Box from "@mui/material/Box";
 import { useLayoutEffect, useState, type ComponentType, type MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
-import { Link, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, Route, Routes, useLocation, useNavigate, useParams } from "react-router";
 import { store } from "#main.tsx";
 import { CatalogsActions } from "#application/actions/catalogs.actions.ts";
 import { ProjectsActions } from "#application/actions/projects.actions.ts";

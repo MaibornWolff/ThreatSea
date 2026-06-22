@@ -3,7 +3,7 @@
  *     page dialog.
  */
 
-import { useLocation, type Location } from "react-router-dom";
+import { useLocation, type Location } from "react-router";
 import type { Catalog } from "#api/types/catalogs.types.ts";
 import AddCatalogDialog from "#view/dialogs/add-catalog.dialog.tsx";
 
