@@ -55,7 +55,7 @@
     "@types/supertest": "7.2.0",
     "@vitest/coverage-v8": "4.1.9",
     "drizzle-kit": "0.31.10",
-    "nanoid": "5.1.14",
+    "nanoid": "5.1.15",
     "oxlint": "1.70.0",
     "oxlint-tsgolint": "0.23.0",
     "supertest": "7.2.2",
