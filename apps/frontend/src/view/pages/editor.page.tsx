@@ -8,7 +8,7 @@ import { useTheme } from "@mui/material/styles";
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Group, Layer, Line } from "react-konva";
-import { Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Route, Routes, useLocation, useNavigate, useParams } from "react-router";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { EditorActions } from "#application/actions/editor.actions.ts";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";

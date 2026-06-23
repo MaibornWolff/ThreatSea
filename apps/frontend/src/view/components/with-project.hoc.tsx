@@ -1,7 +1,7 @@
 import { LinearProgress } from "@mui/material";
 import type { ComponentType } from "react";
 import { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams } from "react-router";
 import type { ExtendedProject } from "#api/types/project.types.ts";
 import { ProjectsActions } from "#application/actions/projects.actions.ts";
 import { projectsSelectors } from "#application/selectors/projects.selectors.ts";

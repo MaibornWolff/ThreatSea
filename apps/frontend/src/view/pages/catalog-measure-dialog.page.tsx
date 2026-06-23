@@ -3,7 +3,7 @@
  *     measure dialog page.
  */
 
-import { useParams, useLocation, Navigate, type Location } from "react-router-dom";
+import { useParams, useLocation, Navigate, type Location } from "react-router";
 import type { CatalogMeasure } from "#api/types/catalog-measure.types.ts";
 import CatalogMeasureDialog from "#view/dialogs/catalog-measure.dialog.tsx";
 

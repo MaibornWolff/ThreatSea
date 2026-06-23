@@ -3,7 +3,7 @@
  *     threat dialog page.
  */
 
-import { useParams, useLocation, Navigate, type Location } from "react-router-dom";
+import { useParams, useLocation, Navigate, type Location } from "react-router";
 import type { CatalogThreat } from "#api/types/catalog-threat.types.ts";
 import CatalogThreatDialog from "#view/dialogs/catalog-threat.dialog.tsx";
 

@@ -16,7 +16,7 @@ import type { ReactNode } from "react";
 import { render } from "@testing-library/react";
 import type { RenderOptions, RenderResult } from "@testing-library/react";
 import { Provider } from "react-redux";
-import { MemoryRouter, type InitialEntry } from "react-router-dom";
+import { MemoryRouter, type InitialEntry } from "react-router";
 import { I18nextProvider } from "react-i18next";
 import { createStore } from "#application/store.ts";
 import type { RootState } from "#application/store.ts";

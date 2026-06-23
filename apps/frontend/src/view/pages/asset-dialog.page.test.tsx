@@ -1,5 +1,5 @@
 import { screen } from "@testing-library/react";
-import { Route, Routes, type InitialEntry } from "react-router-dom";
+import { Route, Routes, type InitialEntry } from "react-router";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { createAsset, createProject } from "#test-utils/builders.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";

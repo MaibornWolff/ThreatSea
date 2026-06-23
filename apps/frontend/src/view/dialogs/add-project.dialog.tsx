@@ -19,7 +19,7 @@ import { useTheme } from "@mui/material/styles";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useCatalogs } from "#application/hooks/use-catalogs.hook.ts";
 import { useDialog } from "#application/hooks/use-dialog.hook.ts";
 import { Button } from "#view/components/button.component.tsx";

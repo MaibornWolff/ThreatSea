@@ -8,7 +8,7 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { Box } from "@mui/system";
 import { Component, type ErrorInfo, type ReactNode } from "react";
-import { useLocation, type Location } from "react-router-dom";
+import { useLocation, type Location } from "react-router";
 import logo from "#images/threatsealogo-dez.png";
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { Page } from "#view/components/page.component.tsx";

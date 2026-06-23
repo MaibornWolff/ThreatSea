@@ -1,5 +1,4 @@
-import { useParams, useLocation, Navigate } from "react-router-dom";
-import type { Location } from "react-router-dom";
+import { useParams, useLocation, Navigate, type Location } from "react-router";
 import type { Project } from "#api/types/project.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
 import MeasureImpactByMeasureDialog, { type ApplyMeasureThreat } from "#view/dialogs/measureImpactByMeasure.dialog.tsx";

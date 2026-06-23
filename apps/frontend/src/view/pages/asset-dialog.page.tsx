@@ -4,7 +4,7 @@
  */
 
 import { useCallback } from "react";
-import { Navigate, useLocation, useNavigate, useParams, type Location } from "react-router-dom";
+import { Navigate, useLocation, useNavigate, useParams, type Location } from "react-router";
 import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import { assetsSelectors } from "#application/selectors/assets.selectors.ts";
 import type { Asset } from "#api/types/asset.types.ts";

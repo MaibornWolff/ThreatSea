@@ -19,8 +19,7 @@ import {
 import type { DialogProps } from "@mui/material/Dialog";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import type { StandardIcon } from "#api/types/standard-component.types.ts";
 import { POA_COLORS } from "#view/colors/pointsOfAttack.colors.ts";

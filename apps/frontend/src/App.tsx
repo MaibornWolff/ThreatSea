@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { Translations } from "./view/wrappers/translations.wrapper";
 import { Alert } from "./view/components/alert.component";
 import { Confirm } from "./view/components/confirm.component";

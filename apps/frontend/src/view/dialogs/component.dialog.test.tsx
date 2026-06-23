@@ -14,11 +14,7 @@ mockUseConfirm();
 const navigate = vi.fn();
 vi.mock("react-router", async (importOriginal) => {
     const actual = await importOriginal<typeof import("react-router")>();
-    return { ...actual, useNavigate: () => navigate };
-});
-vi.mock("react-router-dom", async (importOriginal) => {
-    const actual = await importOriginal<typeof import("react-router-dom")>();
-    return { ...actual, useParams: () => ({ projectId: "7" }) };
+    return { ...actual, useNavigate: () => navigate, useParams: () => ({ projectId: "7" }) };
 });
 
 const setup = (component?: ComponentType) => {

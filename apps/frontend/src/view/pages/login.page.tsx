@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { memo, useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { useLocation, useNavigate, type Location } from "react-router-dom";
+import { useLocation, useNavigate, type Location } from "react-router";
 import { LoginAPI } from "#api/login.api.ts";
 import { API_URI } from "#api/utils.ts";
 import openIDLogo from "#images/openid-logo.svg";

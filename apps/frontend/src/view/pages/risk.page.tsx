@@ -21,8 +21,7 @@ import {
 } from "react";
 
 import { useTranslation } from "react-i18next";
-import { Route } from "react-router";
-import { Routes, useNavigate, useParams } from "react-router-dom";
+import { Route, Routes, useNavigate, useParams } from "react-router";
 import type { SxProps, Theme } from "@mui/material";
 import type { TableCellProps } from "@mui/material/TableCell";
 import type { ExtendedProject } from "#api/types/project.types.ts";

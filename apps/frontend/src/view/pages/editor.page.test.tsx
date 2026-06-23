@@ -1,5 +1,5 @@
 import { screen, act } from "@testing-library/react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router";
 import { EditorPage } from "./editor.page";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { createAsset } from "#test-utils/builders.ts";

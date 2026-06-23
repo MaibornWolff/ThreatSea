@@ -1,7 +1,7 @@
 import { Alert as MaterialAlert, Box, Typography } from "@mui/material";
 import type { AlertColor } from "@mui/material/Alert";
 import { useEffect, useRef, type JSX } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router";
 
 import { useAlert } from "#application/hooks/use-alert.hook.ts";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";

@@ -3,7 +3,7 @@ import { Box, LinearProgress, Table, TableBody, TableContainer, TableHead, Table
 import { memo, useLayoutEffect } from "react";
 import type { ChangeEvent, SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { Route, Routes, useNavigate, useParams } from "react-router-dom";
+import { Route, Routes, useNavigate, useParams } from "react-router";
 import type { ExtendedProject } from "#api/types/project.types.ts";
 import type { Measure } from "#api/types/measure.types.ts";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
