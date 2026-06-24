@@ -16,6 +16,7 @@ import {
     type SystemPointOfAttack,
 } from "#api/types/system.types.ts";
 import type { SystemConnectionPoint } from "#application/adapters/system-connection-point.adapter.ts";
+import type { AugmentedSystemConnection } from "#application/selectors/system.selectors.ts";
 import { ATTACKERS } from "#api/types/attackers.types.ts";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
@@ -239,3 +240,28 @@ export const createConnection = (overrides: Partial<SystemConnection> = {}): Sys
     communicationInterface: null,
     ...overrides,
 });
+
+export const createAugmentedConnection = (
+    overrides: {
+        id?: string;
+        fromComponent?: AugmentedSystemComponent;
+        toComponent?: AugmentedSystemComponent;
+        pointsOfAttack?: SystemPointOfAttack[];
+        waypoints?: number[];
+    } = {}
+): AugmentedSystemConnection => {
+    const fromComponent = overrides.fromComponent ?? createSystemComponent({ id: "comp-1" });
+    const toComponent = overrides.toComponent ?? createSystemComponent({ id: "comp-2" });
+    const base = createConnection({
+        ...(overrides.id !== undefined ? { id: overrides.id } : {}),
+        from: { id: fromComponent.id, anchor: AnchorOrientation.right, type: fromComponent.type },
+        to: { id: toComponent.id, anchor: AnchorOrientation.left, type: toComponent.type },
+        ...(overrides.waypoints !== undefined ? { waypoints: overrides.waypoints } : {}),
+    });
+    return {
+        ...base,
+        from: { ...base.from, component: fromComponent },
+        to: { ...base.to, component: toComponent },
+        pointsOfAttack: overrides.pointsOfAttack ?? [],
+    };
+};
