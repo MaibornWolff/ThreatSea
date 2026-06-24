@@ -40,6 +40,7 @@ export interface EditorSidebarProps {
     selectedConnection: SystemConnection | undefined;
     handleDeleteConnection: () => void;
     handleOnConnectionNameChange: (event: ChangeEvent<HTMLInputElement>) => void;
+    handleResetConnectionRouting: () => void;
     handleOnAssetChanged: (event: ChangeEvent<HTMLInputElement>, asset: Asset) => void;
     selectedConnectionPoint: SystemConnectionPoint | null | undefined;
     userRole: USER_ROLES | undefined;
@@ -84,6 +85,7 @@ export const EditorSidebar = ({
     selectedConnection,
     handleDeleteConnection,
     handleOnConnectionNameChange,
+    handleResetConnectionRouting,
     handleOnAssetChanged,
     selectedConnectionPoint,
     userRole,
@@ -171,6 +173,7 @@ export const EditorSidebar = ({
                         selectedConnection={selectedConnection}
                         handleDeleteConnection={handleDeleteConnection}
                         handleOnConnectionNameChange={handleOnConnectionNameChange}
+                        handleResetConnectionRouting={handleResetConnectionRouting}
                         userRole={userRole}
                     />
                 )}

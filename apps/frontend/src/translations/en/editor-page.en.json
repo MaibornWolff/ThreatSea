@@ -37,7 +37,8 @@
       "title": "Assets"
     },
     "connection": {
-      "title": "Communication Infrastructure"
+      "title": "Communication Infrastructure",
+      "resetRouting": "Reset routing"
     },
     "connectionPoint": {
       "title": "Communication Interface"
