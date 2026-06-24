@@ -72,6 +72,11 @@ const seedComponentWithInterface = (store: EditorStore, interfaceId: string, int
     );
 };
 
+const getConnection = (store: EditorStore, id: string) => store.getState().system.connections.entities[id];
+
+const seedComponent = (store: EditorStore, overrides: Parameters<typeof createComponentPayload>[0]) =>
+    store.dispatch(SystemActions.createComponent(createComponentPayload(overrides)));
+
 describe("useEditor", () => {
     describe("selectConnector", () => {
         const seedConnectorComponents = (store: EditorStore) => {
@@ -833,6 +838,183 @@ describe("useEditor", () => {
                 );
             });
             expect(store.getState().system.pointsOfAttack.entities["poa-1"]?.assets).toEqual([]);
+        });
+    });
+
+    describe("connectionEdited", () => {
+        it("pins the connection with the given waypoints and clears recalculate", () => {
+            const { result, store } = renderUseEditor((store) => {
+                store.dispatch(SystemActions.createConnection(createConnection({ id: "conn-1" })));
+            });
+            const newWaypoints = [0, 0, 100, 0, 100, 100];
+
+            act(() => {
+                result.current.connectionEdited("conn-1", newWaypoints);
+            });
+
+            const updated = getConnection(store, "conn-1");
+            expect(updated?.waypoints).toEqual(newWaypoints);
+            expect(updated?.pinned).toBe(true);
+            expect(updated?.recalculate).toBe(false);
+        });
+    });
+
+    describe("resetConnectionRouting", () => {
+        it("unpins the connection and marks it for recalculation", () => {
+            const { result, store } = renderUseEditor((store) => {
+                store.dispatch(
+                    SystemActions.createConnection(createConnection({ id: "conn-1", waypoints: [0, 0, 100, 0] }))
+                );
+                store.dispatch(SystemActions.setConnection({ id: "conn-1", changes: { pinned: true } }));
+            });
+
+            act(() => {
+                result.current.resetConnectionRouting("conn-1");
+            });
+
+            const updated = getConnection(store, "conn-1");
+            expect(updated?.pinned).toBe(false);
+            expect(updated?.recalculate).toBe(true);
+        });
+    });
+
+    // Moving a component re-anchors the moved terminal of its pinned connections; the auto-router
+    // never touches pinned lines, so they stay hand-drawn while following their component.
+    describe("updateConnectionsOfComponent pinned re-anchoring", () => {
+        const seedPinnedConnection = (store: EditorStore, waypoints: number[]) => {
+            store.dispatch(
+                SystemActions.createConnection(
+                    createConnection({
+                        id: "conn-pin",
+                        from: createConnectionAnchor({ id: "comp-a" }),
+                        to: createConnectionAnchor({ id: "comp-b" }),
+                        waypoints,
+                    })
+                )
+            );
+            // The createConnection reducer does not persist `pinned`; set it explicitly.
+            store.dispatch(SystemActions.setConnection({ id: "conn-pin", changes: { pinned: true } }));
+        };
+
+        it("re-anchors a pinned terminal and keeps recalculate:false", () => {
+            const { result, store } = renderUseEditor((store) => {
+                seedComponent(store, { id: "comp-a", type: STANDARD_COMPONENT_TYPES.CLIENT, x: 0, y: 0, gridX: 0, gridY: 0 });
+                seedComponent(store, { id: "comp-b", type: STANDARD_COMPONENT_TYPES.SERVER, x: 400, y: 0, gridX: 400, gridY: 0 });
+                seedPinnedConnection(store, [0, 40, 400, 40]);
+            });
+
+            const waypointsBeforeMove = getConnection(store, "conn-pin")?.waypoints;
+
+            act(() => {
+                result.current.updateConnectionsOfComponent("comp-a");
+            });
+
+            const updated = getConnection(store, "conn-pin");
+            expect(updated?.recalculate).toBe(false);
+            expect(updated!.waypoints.length).toBeGreaterThanOrEqual(4);
+            expect(updated!.waypoints.length % 2).toBe(0);
+            // Every segment stays orthogonal (horizontal or vertical).
+            const waypoints = updated!.waypoints;
+            for (let i = 0; i < waypoints.length - 2; i += 2) {
+                const horizontal = waypoints[i + 1] === waypoints[i + 3];
+                const vertical = waypoints[i] === waypoints[i + 2];
+                expect(horizontal || vertical).toBe(true);
+            }
+            expect(updated!.waypoints).not.toEqual(waypointsBeforeMove);
+        });
+
+        it("re-anchors the moved terminal to the component edge in pixel space", () => {
+            const { result, store } = renderUseEditor((store) => {
+                // comp-a at pixel (500,500), grid (100,100): its right edge is x+width = 580, not
+                // gridX+width. Asserting the absolute pixel position guards against a grid-vs-pixel bug.
+                seedComponent(store, { id: "comp-a", type: STANDARD_COMPONENT_TYPES.CLIENT, x: 500, y: 500, gridX: 100, gridY: 100 });
+                seedComponent(store, { id: "comp-b", type: STANDARD_COMPONENT_TYPES.SERVER, x: 900, y: 500, gridX: 180, gridY: 100 });
+                seedPinnedConnection(store, [500, 540, 900, 540]);
+            });
+
+            act(() => {
+                result.current.updateConnectionsOfComponent("comp-a");
+            });
+
+            const updated = getConnection(store, "conn-pin");
+            // comp-a right edge: x = 500 + 80 = 580, y = 500 + 40 = 540.
+            expect(updated!.waypoints[0]).toBe(580);
+            expect(updated!.waypoints[1]).toBe(540);
+            expect(updated?.recalculate).toBe(false);
+        });
+
+        it("re-anchors the moved component's own terminal, not the nearest one", () => {
+            const { result, store } = renderUseEditor((store) => {
+                // comp-a dragged right so its new anchor sits closer to the END terminal; picking the
+                // endpoint by distance to the *stationary* component still re-anchors START (comp-a's).
+                seedComponent(store, { id: "comp-a", type: STANDARD_COMPONENT_TYPES.CLIENT, x: 380, y: 0, gridX: 76, gridY: 0 });
+                seedComponent(store, { id: "comp-b", type: STANDARD_COMPONENT_TYPES.SERVER, x: 480, y: 0, gridX: 96, gridY: 0 });
+                seedPinnedConnection(store, [0, 40, 400, 40]);
+            });
+
+            act(() => {
+                result.current.updateConnectionsOfComponent("comp-a");
+            });
+
+            const updated = getConnection(store, "conn-pin");
+            // START moves to comp-a's right edge (460,40); END (400,40) stays put.
+            expect(updated!.waypoints.slice(0, 2)).toEqual([460, 40]);
+            expect(updated!.waypoints.slice(-2)).toEqual([400, 40]);
+        });
+
+        it("re-anchors the moved terminal when waypoints are stored to->from order", () => {
+            const { result, store } = renderUseEditor((store) => {
+                seedComponent(store, { id: "comp-a", type: STANDARD_COMPONENT_TYPES.CLIENT, x: 500, y: 500, gridX: 100, gridY: 100 });
+                seedComponent(store, { id: "comp-b", type: STANDARD_COMPONENT_TYPES.SERVER, x: 900, y: 500, gridX: 180, gridY: 100 });
+                // to->from order: index 0 is comp-b's terminal, the last point is comp-a's.
+                seedPinnedConnection(store, [896, 540, 580, 540]);
+            });
+
+            act(() => {
+                result.current.updateConnectionsOfComponent("comp-b");
+            });
+
+            const updated = getConnection(store, "conn-pin");
+            // comp-b left edge: x = 900, y = 540. Index 0 snaps there; comp-a's terminal stays.
+            expect(updated!.waypoints.slice(0, 2)).toEqual([900, 540]);
+            expect(updated!.waypoints.slice(-2)).toEqual([580, 540]);
+            expect(updated?.recalculate).toBe(false);
+        });
+
+        it("unpins and marks for recalculation a pinned connection whose waypoints are empty", () => {
+            const { result, store } = renderUseEditor((store) => {
+                seedComponent(store, { id: "comp-a", type: STANDARD_COMPONENT_TYPES.CLIENT, x: 500, y: 500, gridX: 100, gridY: 100 });
+                seedComponent(store, { id: "comp-b", type: STANDARD_COMPONENT_TYPES.SERVER, x: 900, y: 500, gridX: 180, gridY: 100 });
+                seedPinnedConnection(store, []);
+            });
+
+            act(() => {
+                result.current.updateConnectionsOfComponent("comp-a");
+            });
+
+            const updated = getConnection(store, "conn-pin");
+            // A degenerate path cannot be re-anchored: unpin it and let the auto-router re-route it
+            // instead of detaching. Not routed in this call, so the empty line is left untouched.
+            expect(updated?.pinned).toBe(false);
+            expect(updated?.recalculate).toBe(true);
+            expect(updated!.waypoints).toEqual([]);
+        });
+
+        it("unpins and marks for recalculation a pinned connection whose waypoints are too short", () => {
+            const { result, store } = renderUseEditor((store) => {
+                seedComponent(store, { id: "comp-a", type: STANDARD_COMPONENT_TYPES.CLIENT, x: 500, y: 500, gridX: 100, gridY: 100 });
+                seedComponent(store, { id: "comp-b", type: STANDARD_COMPONENT_TYPES.SERVER, x: 900, y: 500, gridX: 180, gridY: 100 });
+                seedPinnedConnection(store, [0, 40]); // one point — below the 4-value minimum
+            });
+
+            act(() => {
+                result.current.updateConnectionsOfComponent("comp-a");
+            });
+
+            const updated = getConnection(store, "conn-pin");
+            expect(updated?.pinned).toBe(false);
+            expect(updated?.recalculate).toBe(true);
+            expect(updated!.waypoints).toEqual([0, 40]);
         });
     });
 });

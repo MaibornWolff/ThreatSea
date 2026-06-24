@@ -15,6 +15,7 @@ import type {
     SystemConnection,
     SystemPointOfAttack,
 } from "#api/types/system.types.ts";
+import { findBestAnchor, anchorPointForComponent, reanchorEndpoint, snapToGrid } from "#utils/connection-waypoints.ts";
 import type { EditorConnection, EditorEntityId } from "#application/reducers/editor.reducer.ts";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { EditorActions } from "#application/actions/editor.actions.ts";
@@ -313,11 +314,13 @@ export const useEditor = ({
             const freshConnections = systemSelectors.selectConnections(state, projectId);
             const componentById = new Map(freshComponents.map((component) => [component.id, component]));
 
+            // Pinned connections are hand-drawn: the auto-router never touches them until the user
+            // explicitly unpins/resets them, so exclude them from routing entirely here.
             // Connections whose geometry the edit did not touch route first, so they keep their
             // established lines; the edited ones route last and adapt around them. Id order breaks
             // ties, so the same edit always produces the same layout.
             const connectionsToRoute = freshConnections
-                .filter((connection) => connectionIds.has(connection.id))
+                .filter((connection) => connectionIds.has(connection.id) && !connection.pinned)
                 .sort((first, second) => {
                     const firstRoutesLast = connectionIdsToRouteLast.has(first.id) ? 1 : 0;
                     const secondRoutesLast = connectionIdsToRouteLast.has(second.id) ? 1 : 0;
@@ -455,6 +458,25 @@ export const useEditor = ({
                 changes: {
                     visible,
                 },
+            })
+        );
+    };
+
+    const connectionEdited = (connectionId: string, waypoints: number[]): void => {
+        // connectionPointsMeta intentionally left stale: the connector renderer reads only `waypoints` for pinned paths.
+        dispatch(
+            SystemActions.setConnection({
+                id: connectionId,
+                changes: { waypoints, pinned: true, recalculate: false },
+            })
+        );
+    };
+
+    const resetConnectionRouting = (connectionId: string): void => {
+        dispatch(
+            SystemActions.setConnection({
+                id: connectionId,
+                changes: { pinned: false, recalculate: true },
             })
         );
     };
@@ -813,23 +835,92 @@ export const useEditor = ({
         );
     };
 
-    const updateConnectionsOfComponent = (): void => {
-        if (!selectedComponentId) {
+    const updateConnectionsOfComponent = (movedComponentId?: string): void => {
+        // The moved component is the one being dragged; callers that don't pass it fall back to the
+        // current selection (during a drag the moved component is the selected one).
+        const targetComponentId = movedComponentId ?? selectedComponentId;
+        if (!targetComponentId) {
             return;
         }
-        // Read the store, not the render snapshot — connections may have changed in this same tick.
-        const freshConnections = systemSelectors.selectConnections(store.getState(), projectId);
+        // Read components and connections from the store, not the render snapshot — the move that
+        // made these routes stale was dispatched in the same tick, and pinned re-anchoring needs the
+        // moved component's new position.
+        const state = store.getState();
+        const freshComponents = systemSelectors.selectComponents(state, projectId);
+        const freshConnections = systemSelectors.selectConnections(state, projectId);
+        const movedComponent = freshComponents.find((component) => component.id === targetComponentId);
+        const componentById = new Map(freshComponents.map((component) => [component.id, component]));
+
         const affectedComponents = new Set<string>();
         const movedConnectionIds = new Set<string>();
+
         freshConnections.forEach((connection) => {
-            if (connection.from.id === selectedComponentId || connection.to.id === selectedComponentId) {
-                affectedComponents.add(connection.from.id);
-                affectedComponents.add(connection.to.id);
-                movedConnectionIds.add(connection.id);
+            if (connection.from.id !== targetComponentId && connection.to.id !== targetComponentId) {
+                return;
             }
+
+            if (connection.pinned) {
+                // Hand-drawn line: the auto-router leaves it alone (see routeConnectionsSequentially),
+                // so we glue its moved terminal to the component's new anchor ourselves.
+                if (!movedComponent) {
+                    return;
+                }
+                // A pinned path missing or too short to re-anchor can't keep its terminal glued to the
+                // moved component. Unpin it and mark it for recalculation so the auto-router re-routes
+                // it cleanly (a still-pinned connection is skipped by the router forever) instead of
+                // detaching. Left for the engine to route on the next pass rather than routed here.
+                if (!connection.waypoints || connection.waypoints.length < 4) {
+                    dispatch(
+                        SystemActions.setConnection({
+                            id: connection.id,
+                            changes: { pinned: false, recalculate: true },
+                        })
+                    );
+                    return;
+                }
+                const otherComponentId =
+                    connection.from.id === targetComponentId ? connection.to.id : connection.from.id;
+                const otherComponent = componentById.get(otherComponentId);
+                if (!otherComponent) {
+                    return;
+                }
+                const orientation = findBestAnchor(movedComponent, otherComponent);
+                const rawAnchor = anchorPointForComponent(movedComponent, orientation);
+                const snapped = { x: snapToGrid(rawAnchor.x), y: snapToGrid(rawAnchor.y) };
+                // Waypoint order is NOT tied to from/to identity: the renderer stores
+                // whichever of the two A* paths (from->to or to->from) yields fewer points,
+                // so the moved component's terminal may sit at either end of the array.
+                // Pick the endpoint to re-anchor by proximity to the *other* (stationary)
+                // component — its terminal stays adjacent to it, so the far terminal is the
+                // moved component's.
+                const waypoints = connection.waypoints;
+                const otherCenterX = otherComponent.x + otherComponent.width / 2;
+                const otherCenterY = otherComponent.y + otherComponent.height / 2;
+                const startToOther = Math.hypot(waypoints[0]! - otherCenterX, waypoints[1]! - otherCenterY);
+                const endToOther = Math.hypot(
+                    waypoints[waypoints.length - 2]! - otherCenterX,
+                    waypoints[waypoints.length - 1]! - otherCenterY
+                );
+                const which = startToOther < endToOther ? "end" : "start";
+                const newWaypoints = reanchorEndpoint(waypoints, which, snapped, orientation);
+                // connectionPointsMeta intentionally left stale: the connector renderer reads only `waypoints` for pinned paths.
+                dispatch(
+                    SystemActions.setConnection({
+                        id: connection.id,
+                        changes: { waypoints: newWaypoints, recalculate: false },
+                    })
+                );
+                return;
+            }
+
+            // Unpinned: route through the engine. Collect both endpoints so the neighbours' other
+            // connections keep their established lines, and mark this one to route last so it adapts
+            // around them.
+            affectedComponents.add(connection.from.id);
+            affectedComponents.add(connection.to.id);
+            movedConnectionIds.add(connection.id);
         });
-        // The moved component's own connections route last: the neighbours' other connections keep
-        // their established lines and the moved ones adapt around them.
+
         recalculateConnectionsOfComponents([...affectedComponents], movedConnectionIds);
     };
 
@@ -976,6 +1067,8 @@ export const useEditor = ({
         setStageScale,
         loadComponentTypes,
         setConnectionVisibility,
+        connectionEdited,
+        resetConnectionRouting,
         setAlwaysShowAnchorsOfComponent,
         addComponentConnectionLine,
         removeComponentConnectionLine,
