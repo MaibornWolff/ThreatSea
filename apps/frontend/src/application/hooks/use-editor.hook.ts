@@ -24,8 +24,11 @@ import { editorSelectors } from "#application/selectors/editor.selectors.ts";
 import { systemSelectors } from "#application/selectors/system.selectors.ts";
 import { useAppDispatch, useAppSelector } from "./use-app-redux.hook";
 import { useSystem } from "./use-system.hook";
-import type { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
 import type { EditorComponentType } from "#application/adapters/editor-component-type.adapter.ts";
+import { validateConnection } from "#utils/connection-rules.ts";
+import { enhanceComponents } from "#utils/enhance-components.ts";
+import { buildPointOfAttackPayload } from "#utils/build-point-of-attack-payload.ts";
+import type { CreatePointOfAttackArgs } from "#utils/build-point-of-attack-payload.ts";
 
 let lastMousePointerUpdate = 0;
 
@@ -38,9 +41,6 @@ export type EditorConnectionAnchor = ConnectionAnchor & {
     communicationInterfaceId?: string | null;
     component?: SystemComponent;
 };
-
-type CreatePointOfAttackArgs = Pick<SystemPointOfAttack, "id" | "type" | "projectId" | "componentId"> &
-    Partial<Omit<SystemPointOfAttack, "id" | "type" | "projectId" | "componentId">>;
 
 export const useEditor = ({
     projectId,
@@ -489,7 +489,7 @@ export const useEditor = ({
 
     const handleDeleteCommunicationInterface = (componentId: string, interfaceId: string): void => {
         const selectedComponent = components.find((component) => component.id === componentId);
-        if (!selectedComponent || !selectedComponent.communicationInterfaces) {
+        if (!selectedComponent?.communicationInterfaces) {
             return;
         }
 
@@ -538,10 +538,6 @@ export const useEditor = ({
         dispatch(EditorActions.deselectComponent());
     };
 
-    const isSystemOrCustomComponent = (type: EditorConnectionAnchor["type"]): boolean => {
-        return ["CLIENT", "SERVER", "DATABASE"].includes(type as STANDARD_COMPONENT_TYPES) || typeof type === "number";
-    };
-
     const selectConnector = (connector: EditorConnectionAnchor): void => {
         // First connection, set the from, start connection preview
         if (!isConnectionPreview(newConnection)) {
@@ -569,37 +565,10 @@ export const useEditor = ({
             }
 
             // Check connection rules
-            if (from.type === "USERS") {
-                if (!isSystemOrCustomComponent(to.type)) {
-                    showErrorMessage?.({
-                        message: t("errors.userConnectionInvalid"),
-                    });
-                    return;
-                }
-            } else if (to.type === "USERS") {
-                if (!isSystemOrCustomComponent(from.type)) {
-                    showErrorMessage?.({
-                        message: t("errors.componentToUserInvalid"),
-                    });
-                    return;
-                }
-            } else if (isSystemOrCustomComponent(from.type)) {
-                if (to.type !== "COMMUNICATION_INFRASTRUCTURE" || !from.communicationInterfaceId) {
-                    showErrorMessage?.({
-                        message: t("errors.componentToCommunicationInfraInvalid"),
-                    });
-                    return;
-                }
-            } else if (from.type === "COMMUNICATION_INFRASTRUCTURE") {
-                if (!isSystemOrCustomComponent(to.type) || !to.communicationInterfaceId) {
-                    showErrorMessage?.({
-                        message: t("errors.communicationInfraToComponentInvalid"),
-                    });
-                    return;
-                }
-            } else {
+            const validation = validateConnection(from, to);
+            if (!validation.ok) {
                 showErrorMessage?.({
-                    message: t("errors.invalidConnection"),
+                    message: t(validation.messageKey),
                 });
                 return;
             }
@@ -755,18 +724,7 @@ export const useEditor = ({
     const standardComponents = useAppSelector(editorSelectors.selectStandardComponents);
 
     const enhancedComponents = useMemo(() => {
-        return components.map((c) => {
-            // Finde die Standardkomponente, die dem Typ von c entspricht
-            const standardComponent = standardComponents.find((sc) => sc.id === c.type);
-
-            return {
-                ...c,
-                selected: selectedComponentId === c.id,
-                startAnchor,
-                // Setze das Symbol basierend auf der gefundenen Standardkomponente
-                symbol: standardComponent ? standardComponent.symbol : c.symbol,
-            };
-        });
+        return enhanceComponents(components, standardComponents, selectedComponentId, startAnchor);
     }, [components, standardComponents, selectedComponentId, startAnchor]);
 
     const selectConnectionPoint = (connectionId: string): void => {
@@ -830,19 +788,7 @@ export const useEditor = ({
     }, [projectId, dispatch]);
 
     const createPointOfAttack = (data: CreatePointOfAttackArgs): void => {
-        const payload: SystemPointOfAttack = {
-            id: data.id,
-            type: data.type,
-            projectId: data.projectId,
-            componentId: data.componentId,
-            connectionId: data.connectionId ?? null,
-            connectionPointId: data.connectionPointId ?? null,
-            name: data.name ?? null,
-            componentName: data.componentName ?? null,
-            assets: data.assets ?? [],
-        };
-
-        dispatch(PointsOfAttackActions.createPointOfAttack(payload));
+        dispatch(PointsOfAttackActions.createPointOfAttack(buildPointOfAttackPayload(data)));
     };
 
     const addComponentConnectionLine = (

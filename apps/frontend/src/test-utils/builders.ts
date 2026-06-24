@@ -9,7 +9,9 @@ import {
     type Annotation,
     type AnnotationType,
     type AugmentedSystemComponent,
+    type Component,
     type ConnectionAnchor,
+    type SystemCommunicationInterface,
     type SystemConnection,
     type SystemPointOfAttack,
 } from "#api/types/system.types.ts";
@@ -78,6 +80,21 @@ export const createSystemComponent = (overrides: Partial<AugmentedSystemComponen
     ...overrides,
 });
 
+export const createComponentPayload = (
+    overrides: Partial<Omit<Component, "width" | "height" | "selected">> = {}
+): Omit<Component, "width" | "height" | "selected"> => ({
+    id: "comp-1",
+    name: "Test Component",
+    type: STANDARD_COMPONENT_TYPES.CLIENT,
+    x: 0,
+    y: 0,
+    gridX: 0,
+    gridY: 0,
+    projectId: 1,
+    symbol: null,
+    ...overrides,
+});
+
 export const createPointOfAttack = (overrides: Partial<SystemPointOfAttack> = {}): SystemPointOfAttack => ({
     id: "poa-1",
     name: null,
@@ -102,6 +119,19 @@ export const createConnectionPoint = (overrides: Partial<SystemConnectionPoint> 
     ...overrides,
 });
 
+export const createCommunicationInterface = (
+    overrides: Partial<SystemCommunicationInterface> = {}
+): SystemCommunicationInterface => ({
+    id: "ci-1",
+    name: "REST API",
+    icon: null,
+    type: POINTS_OF_ATTACK.COMMUNICATION_INTERFACES,
+    projectId: 1,
+    componentId: "comp-1",
+    componentName: "Test Component",
+    ...overrides,
+});
+
 export const createProject = (overrides: Partial<ExtendedProject> = {}): ExtendedProject => ({
     id: 1,
     catalogId: 1,
@@ -116,11 +146,12 @@ export const createProject = (overrides: Partial<ExtendedProject> = {}): Extende
     ...overrides,
 });
 
-export const createConnectionAnchor = (overrides: Partial<ConnectionAnchor> = {}) => ({
+export const createConnectionAnchor = (
+    overrides: Partial<ConnectionAnchor> & { communicationInterfaceId?: string | null } = {}
+) => ({
     id: "comp-1",
     anchor: AnchorOrientation.right,
     type: STANDARD_COMPONENT_TYPES.CLIENT,
-    component: undefined,
     ...overrides,
 });
 
