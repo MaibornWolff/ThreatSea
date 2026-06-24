@@ -299,6 +299,19 @@ export const useEditor = ({
         dispatch(SystemActions.removeComponent({ id: selectedComponentId }));
     };
 
+    const flagAllConnectionsForRecalculation = (): void => {
+        connections.forEach((connection) => {
+            dispatch(
+                SystemActions.setConnection({
+                    id: connection.id,
+                    changes: {
+                        recalculate: true,
+                    },
+                })
+            );
+        });
+    };
+
     const removeConnection = (connection?: SystemConnection | null): void => {
         const targetConnection = connection ?? selectedConnection;
         if (!targetConnection) {
@@ -320,6 +333,8 @@ export const useEditor = ({
                 connectionPoints: targetConnection.connectionPoints,
             })
         );
+
+        flagAllConnectionsForRecalculation();
     };
 
     const removeConnectionById = (connectionId: string): void => {
@@ -588,6 +603,8 @@ export const useEditor = ({
                     communicationInterface: null,
                 })
             );
+
+            flagAllConnectionsForRecalculation();
 
             dispatch(EditorActions.resetConnection());
         }

@@ -1433,6 +1433,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                         fromComponent={fromComponent}
                                         toComponent={toComponent}
                                         components={components}
+                                        connections={connections}
                                         selected={selectedConnectionId === connection.id}
                                         recalculate={connection.recalculate}
                                         onRecalculated={onRecalculated}

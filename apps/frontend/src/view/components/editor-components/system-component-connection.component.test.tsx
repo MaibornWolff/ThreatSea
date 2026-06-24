@@ -25,6 +25,7 @@ const defaultProps = {
     recalculate: false,
     waypoints: [100, 100, 300, 300],
     components: [],
+    connections: [],
     onClick: vi.fn(),
     onPointOfAttackClicked: vi.fn(),
     selected: false,
