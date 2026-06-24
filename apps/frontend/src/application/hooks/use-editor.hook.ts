@@ -479,6 +479,15 @@ export const useEditor = ({
                 changes: { pinned: false, recalculate: true },
             })
         );
+        // The engine routes imperatively, so re-route this connection now instead of waiting for one
+        // of its components to move. Unpinning above means routeConnectionsSequentially no longer
+        // skips it; routing it last lets it adapt around the neighbours' established lines.
+        const connection = systemSelectors
+            .selectConnections(store.getState(), projectId)
+            .find((item) => item.id === connectionId);
+        if (connection) {
+            recalculateConnectionsOfComponents([connection.from.id, connection.to.id], new Set([connectionId]));
+        }
     };
 
     const setSelectedConnectionName = (name: string): void => {
