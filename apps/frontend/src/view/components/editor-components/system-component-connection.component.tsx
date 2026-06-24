@@ -1,10 +1,11 @@
 import { Group, Line } from "react-konva";
-import { memo, useState, type JSX, type RefObject } from "react";
+import { memo, type JSX, type RefObject } from "react";
 import { POA_COLORS } from "#view/colors/pointsOfAttack.colors.ts";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import type { KonvaEventObject } from "konva/lib/Node";
 import type { Stage as KonvaStage } from "konva/lib/Stage";
 import { AnchorOrientation, type AugmentedSystemComponent, type ConnectionPointMeta } from "#api/types/system.types.ts";
+import { findBestAnchor, anchorPointForComponent } from "#utils/connection-waypoints.ts";
 import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
 import type { AugmentedSystemConnection } from "#application/selectors/system.selectors.ts";
 import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
@@ -35,6 +36,10 @@ interface SystemComponentConnectionProps extends AugmentedSystemConnection {
     connectionPointsMeta: ConnectionPointMeta[];
     selectedConnectionPointId?: string | null;
     onConnectionPointClicked?: (event: KonvaEventObject<MouseEvent>, connectionPointId: string) => void;
+    /** Whether the connection is hovered. Drives the visible line's hover highlight. Driven from the parent so the always-on segment hit-lines can set it. */
+    hovered?: boolean;
+    /** Called from the line's own hover events (fallback when no waypoints overlay is present). */
+    onHoverChange?: (connectionId: string, hovering: boolean) => void;
 }
 
 interface GridNode {
@@ -123,13 +128,14 @@ const SystemComponentConnectionInner = ({
     waypoints = [],
     stageRef,
     connectionPointsMeta: initialConnectionPointsMeta = [],
+    hovered = false,
+    onHoverChange,
 }: SystemComponentConnectionProps): JSX.Element | null => {
     let connectionPointsMeta = initialConnectionPointsMeta;
-    const [hover, setHover] = useState<boolean>(false);
     const isCapturing = useAppSelector((state) => state.editor.isCapturing);
     const annotationTool = useAppSelector(editorSelectors.selectAnnotationTool);
     const visualSelected = selected && !isCapturing;
-    const visualHover = hover && !isCapturing;
+    const visualHover = hovered && !isCapturing;
     let calculatedWaypoints = waypoints;
     let fromAnchor = from;
     let toAnchor = to;
@@ -154,14 +160,14 @@ const SystemComponentConnectionInner = ({
         if (annotationTool !== null) {
             return;
         }
-        setHover(true);
+        onHoverChange?.(id, true);
         if (stageRef && stageRef.current) {
             stageRef.current.content.style.cursor = "pointer";
         }
     };
 
     const onMouseLeave = () => {
-        setHover(false);
+        onHoverChange?.(id, false);
         if (annotationTool !== null) {
             return;
         }
@@ -219,8 +225,8 @@ const SystemComponentConnectionInner = ({
             Math.floor(gridOffset / 2),
     };
 
-    const startNodeGridPosition = calculateGridPositionForAnchor(fromComponent, 8, begin, toComponent);
-    const endNodeGridPosition = calculateGridPositionForAnchor(toComponent, 8, begin, fromComponent);
+    const startNodeGridPosition = calculateGridPositionForAnchor(fromComponent, begin, toComponent);
+    const endNodeGridPosition = calculateGridPositionForAnchor(toComponent, begin, fromComponent);
 
     if (gridSize.x > 0 && gridSize.y > 0) {
         let grid = createGridForAStar(components, begin, gridSize);
@@ -318,6 +324,7 @@ export const SystemComponentConnection = memo<SystemComponentConnectionProps>(
     SystemComponentConnectionInner,
     (prevProps, nextProps) =>
         prevProps.selected === nextProps.selected &&
+        prevProps.hovered === nextProps.hovered &&
         prevProps.waypoints === nextProps.waypoints &&
         prevProps.from === nextProps.from &&
         prevProps.to === nextProps.to
@@ -351,50 +358,28 @@ const calculateAbsolutePositionForAnchor = (x: number, y: number, anchor: Anchor
 
 const calculateGridPositionForAnchor = (
     component: AugmentedSystemComponent,
-    offset: number,
     begin: { x: number; y: number },
     otherComponent: AugmentedSystemComponent
 ) => {
+    const resolvedAnchor = findBestAnchor(component, otherComponent);
+    const anchorPixels = anchorPointForComponent(component, resolvedAnchor);
+
+    // Convert pixel anchor to A* grid units (pixel = grid * 5) relative to the
+    // grid origin `begin`.
     const position = {
-        // start at mid of the component
-        x: component.gridX - begin.x + 8,
-        y: component.gridY - begin.y + 8,
+        x: anchorPixels.x / 5 - begin.x,
+        y: anchorPixels.y / 5 - begin.y,
     };
 
-    const resolvedAnchor = findBestAnchor(component, otherComponent);
-
-    switch (resolvedAnchor) {
-        case "top":
-            position.y -= offset;
-            break;
-
-        case "left":
-            position.x -= offset;
-            break;
-
-        case "right":
-            position.x += offset;
-            break;
-
-        case "bottom":
-            position.y += offset + 5;
-            break;
+    // Routing-only clearance: push the bottom start one extra grid cell below
+    // the boundary so the path leaves clear of the component edge.
+    if (resolvedAnchor === AnchorOrientation.bottom) {
+        position.y += 5;
     }
+
     return position;
 };
 
-const findBestAnchor = (
-    component: AugmentedSystemComponent,
-    otherComponent: AugmentedSystemComponent
-): AnchorOrientation => {
-    const dx = otherComponent.gridX - component.gridX;
-    const dy = otherComponent.gridY - component.gridY;
-
-    if (Math.abs(dx) > Math.abs(dy)) {
-        return dx > 0 ? AnchorOrientation.right : AnchorOrientation.left;
-    }
-    return dy > 0 ? AnchorOrientation.bottom : AnchorOrientation.top;
-};
 const calculateWaypoints = (
     path: GridNode[],
     connectionName: string,
