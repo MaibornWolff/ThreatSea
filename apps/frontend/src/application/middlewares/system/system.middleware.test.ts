@@ -4,11 +4,22 @@ import { SystemAPI } from "#api/system.api.ts";
 import { createStore } from "#application/store.ts";
 import projectsReducer, { type ProjectsState } from "#application/reducers/projects.reducer.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
+import { compareConnections } from "./system.middleware";
+import type { Connection, SystemConnection } from "#api/types/system.types.ts";
 
 const buildProjectsState = (role: USER_ROLES) => {
     const base = projectsReducer(undefined, { type: "@@INIT" });
     return { ...base, current: { role } as ProjectsState["current"] };
 };
+
+const makeConnection = (overrides: Partial<Connection>): Connection =>
+    ({
+        id: "conn-1",
+        recalculate: false,
+        pinned: false,
+        waypoints: [0, 0, 40, 0, 40, 40],
+        ...overrides,
+    }) as unknown as Connection;
 
 describe("system.middleware — handleSaveSystem", () => {
     let updateSystemSpy: MockInstance;
@@ -231,5 +242,27 @@ describe("system.middleware — getSystem hydrates the per-project default annot
         await vi.waitFor(() =>
             expect(store.getState().system.defaultAnnotationColorByProject).toEqual({ 1: "#ff00aa" })
         );
+    });
+});
+
+describe("system.middleware — compareConnections", () => {
+    it("treats identical connections as unchanged", () => {
+        expect(compareConnections(makeConnection({}), makeConnection({}) as unknown as SystemConnection)).toBe(true);
+    });
+
+    it("detects a waypoint edit that permutes coordinate order without changing the multiset", () => {
+        const a = makeConnection({ waypoints: [0, 0, 40, 0, 40, 40] });
+        const b = makeConnection({ waypoints: [0, 0, 0, 40, 40, 40] }) as unknown as SystemConnection;
+        expect(compareConnections(a, b)).toBe(false);
+    });
+
+    it("detects a change to the pinned flag", () => {
+        const a = makeConnection({ pinned: true });
+        const b = makeConnection({ pinned: false }) as unknown as SystemConnection;
+        expect(compareConnections(a, b)).toBe(false);
+    });
+
+    it("returns false when the second connection is undefined", () => {
+        expect(compareConnections(makeConnection({}), undefined)).toBe(false);
     });
 });

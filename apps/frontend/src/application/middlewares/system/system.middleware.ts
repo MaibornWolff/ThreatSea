@@ -150,14 +150,17 @@ const compareComponents = (component1: SystemComponent, component2: SystemCompon
     );
 };
 
-const compareConnections = (connection1: Connection, connection2: SystemConnection | undefined): boolean => {
+export const compareConnections = (connection1: Connection, connection2: SystemConnection | undefined): boolean => {
     if (!connection2) {
         return false;
     }
     return (
         connection1.id === connection2.id &&
         connection1.recalculate === connection2.recalculate &&
-        JSON.stringify([...connection1.waypoints].sort()) === JSON.stringify([...connection2.waypoints].sort())
+        connection1.pinned === connection2.pinned &&
+        // Compare in order: sorting the flat [x1,y1,x2,y2,…] array destroys coordinate pairing, so
+        // two genuinely different paths with the same coordinate multiset would look equal.
+        JSON.stringify(connection1.waypoints ?? []) === JSON.stringify(connection2.waypoints ?? [])
     );
 };
 
