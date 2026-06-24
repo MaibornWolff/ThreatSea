@@ -247,22 +247,6 @@ export const shrinkRectangle = (rectangle: Rectangle): Rectangle => ({
     maxY: rectangle.maxY - GEOMETRY_TOLERANCE,
 });
 
-// ----- face selection -----
-
-/** Which face of a box points most directly at another box (left/right if it's more sideways, else top/bottom). */
-export const findBestAnchor = (
-    component: AugmentedSystemComponent,
-    otherComponent: AugmentedSystemComponent
-): AnchorOrientation => {
-    const dx = otherComponent.gridX - component.gridX;
-    const dy = otherComponent.gridY - component.gridY;
-
-    if (Math.abs(dx) > Math.abs(dy)) {
-        return dx > 0 ? AnchorOrientation.right : AnchorOrientation.left;
-    }
-    return dy > 0 ? AnchorOrientation.bottom : AnchorOrientation.top;
-};
-
 // ----- connection topology -----
 
 /** Counts how many connections touch each component (its "degree") — used to tell a hub from a leaf. */

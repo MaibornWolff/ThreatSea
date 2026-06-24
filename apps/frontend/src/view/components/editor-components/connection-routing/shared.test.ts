@@ -3,7 +3,6 @@ import {
     compareRouteDefects,
     countObstacleHits,
     faceMidpoint,
-    findBestAnchor,
     flattenPoints,
     rectangleOf,
     routeLength,
@@ -43,30 +42,6 @@ describe("faceMidpoint", () => {
         expect(faceMidpoint(component, AnchorOrientation.right)).toEqual({ x: 130, y: 140 });
         expect(faceMidpoint(component, AnchorOrientation.top)).toEqual({ x: 90, y: 100 });
         expect(faceMidpoint(component, AnchorOrientation.bottom)).toEqual({ x: 90, y: 180 });
-    });
-});
-
-describe("findBestAnchor", () => {
-    const base = createSystemComponent({ gridX: 0, gridY: 0 });
-
-    it("picks the right anchor when the other component is mostly to the right", () => {
-        expect(findBestAnchor(base, createSystemComponent({ gridX: 50, gridY: 0 }))).toBe(AnchorOrientation.right);
-    });
-
-    it("picks the left anchor when the other component is mostly to the left", () => {
-        expect(findBestAnchor(base, createSystemComponent({ gridX: -50, gridY: 0 }))).toBe(AnchorOrientation.left);
-    });
-
-    it("picks the bottom anchor when the other component is mostly below", () => {
-        expect(findBestAnchor(base, createSystemComponent({ gridX: 0, gridY: 50 }))).toBe(AnchorOrientation.bottom);
-    });
-
-    it("picks the top anchor when the other component is mostly above", () => {
-        expect(findBestAnchor(base, createSystemComponent({ gridX: 0, gridY: -50 }))).toBe(AnchorOrientation.top);
-    });
-
-    it("breaks an equal horizontal/vertical offset in favour of the vertical axis", () => {
-        expect(findBestAnchor(base, createSystemComponent({ gridX: 50, gridY: 50 }))).toBe(AnchorOrientation.bottom);
     });
 });
 

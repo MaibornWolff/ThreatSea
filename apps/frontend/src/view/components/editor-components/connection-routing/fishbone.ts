@@ -15,6 +15,7 @@
  */
 import { AnchorOrientation, type AugmentedSystemComponent, type ConnectionPointMeta } from "#api/types/system.types.ts";
 import type { AugmentedSystemConnection } from "#application/selectors/system.selectors.ts";
+import { findBestAnchor } from "#utils/connection-waypoints.ts";
 import {
     type ConnectionRoutingInput,
     type ConnectionRoutingResult,
@@ -27,7 +28,6 @@ import {
     countObstacleHits,
     crossesTransversally,
     faceMidpoint,
-    findBestAnchor,
     flattenPoints,
     isHorizontalFace,
     isOrthogonal,

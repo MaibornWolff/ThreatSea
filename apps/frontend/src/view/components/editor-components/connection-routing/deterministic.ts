@@ -3,6 +3,7 @@
  * connections don't form a fishbone.
  */
 import { AnchorOrientation, type AugmentedSystemComponent, type ConnectionPointMeta } from "#api/types/system.types.ts";
+import { findBestAnchor } from "#utils/connection-waypoints.ts";
 import {
     type ConnectionRoutingInput,
     type ConnectionRoutingResult,
@@ -18,7 +19,6 @@ import {
     compareRouteDefects,
     countRouteDefects,
     faceMidpoint,
-    findBestAnchor,
     flattenPoints,
     isHorizontalFace,
     isOrthogonal,
