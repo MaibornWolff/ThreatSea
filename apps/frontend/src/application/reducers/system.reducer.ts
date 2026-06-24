@@ -101,6 +101,7 @@ const systemReducer = createReducer(defaultState, (builder) => {
             connectionPointsMeta: action.payload.connectionPointsMeta,
             waypoints: action.payload.waypoints,
             recalculate: action.payload.recalculate,
+            pinned: action.payload.pinned ?? false,
             projectId: action.payload.projectId,
             visible: true,
             communicationInterface: action.payload.communicationInterface,
