@@ -1,5 +1,5 @@
 import { Group, Line } from "react-konva";
-import { memo, useState, type JSX, type RefObject } from "react";
+import { memo, type JSX, type RefObject } from "react";
 import { POA_COLORS } from "#view/colors/pointsOfAttack.colors.ts";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import type { KonvaEventObject } from "konva/lib/Node";
@@ -26,6 +26,11 @@ interface SystemComponentConnectionProps extends AugmentedSystemConnection {
     onPointOfAttackClicked: (event: KonvaEventObject<MouseEvent>, pointOfAttackId: string) => void;
     selected: boolean;
     stageRef: RefObject<KonvaStage | null>;
+    /** Whether the connection is highlighted. Driven from the parent so the drag/edit overlay's
+     * segment hit-lines can set it; falls back to the line's own hover events. */
+    hovered?: boolean;
+    /** Called from the line's own hover events so the parent can track the highlighted connection. */
+    onHoverChange?: (connectionId: string, hovering: boolean) => void;
 }
 
 // LineForPath is a pure presentational component that handles the visual rendering of connections
@@ -95,12 +100,13 @@ const SystemComponentConnectionInner = ({
     pointsOfAttack = [],
     waypoints = [],
     stageRef,
+    hovered = false,
+    onHoverChange,
 }: SystemComponentConnectionProps): JSX.Element | null => {
-    const [hover, setHover] = useState<boolean>(false);
     const isCapturing = useAppSelector((state) => state.editor.isCapturing);
     const annotationTool = useAppSelector(editorSelectors.selectAnnotationTool);
     const visualSelected = selected && !isCapturing;
-    const visualHover = hover && !isCapturing;
+    const visualHover = hovered && !isCapturing;
 
     const isUserConnection = from.type === STANDARD_COMPONENT_TYPES.USERS || to.type === STANDARD_COMPONENT_TYPES.USERS;
     const connectionColors = isUserConnection
@@ -118,14 +124,14 @@ const SystemComponentConnectionInner = ({
         if (annotationTool !== null) {
             return;
         }
-        setHover(true);
+        onHoverChange?.(id, true);
         if (stageRef && stageRef.current) {
             stageRef.current.content.style.cursor = "pointer";
         }
     };
 
     const onMouseLeave = () => {
-        setHover(false);
+        onHoverChange?.(id, false);
         if (annotationTool !== null) {
             return;
         }
@@ -168,6 +174,7 @@ export const SystemComponentConnection = memo<SystemComponentConnectionProps>(
     SystemComponentConnectionInner,
     (prevProps, nextProps) =>
         prevProps.selected === nextProps.selected &&
+        prevProps.hovered === nextProps.hovered &&
         prevProps.waypoints === nextProps.waypoints &&
         prevProps.from === nextProps.from &&
         prevProps.to === nextProps.to
