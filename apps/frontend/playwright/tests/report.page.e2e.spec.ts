@@ -121,10 +121,17 @@ test.describe("Report Page Tests", () => {
         expect(download.suggestedFilename()).toMatch(/\.xlsx$/);
     });
 
+    test("Should not show download buttons before PDF is generated", async ({ page }) => {
+        const pg = new ReportPage(page);
+        await expect(pg.downloadPdfButton).toBeHidden();
+        await expect(pg.openPdfButton).toBeHidden();
+    });
+
     test("Should mark report as changed when scheduled at date is set", async ({ page }) => {
         const pg = new ReportPage(page);
         await pg.createPdfButton.click();
         await expect(pg.downloadPdfButton).toBeVisible({ timeout: 30000 });
+        await expect(pg.createPdfButton).toBeHidden();
 
         await pg.scheduledFromInput.fill("2026-01-01");
         await expect(pg.createPdfButton).toBeVisible();
