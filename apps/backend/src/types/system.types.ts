@@ -89,6 +89,7 @@ export interface Connection {
     waypoints: number[];
     recalculate: boolean;
     projectId: number;
+    pinned?: boolean;
 }
 
 interface ConnectionAnchor {
