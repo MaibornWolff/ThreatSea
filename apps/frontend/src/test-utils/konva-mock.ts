@@ -29,12 +29,20 @@ export const konvaMock = () => ({
     Group: ({ children }: { children?: ReactNode }) => stub("konva-group", {}, children),
 
     Line: (props: AnyProps) =>
-        stub("konva-line", {
+        createElement("div", {
+            "data-testid": "konva-line",
             "data-stroke": str(props["stroke"]),
             "data-stroke-width": str(props["strokeWidth"]),
             "data-listening": str(props["listening"]),
             "data-points": json(props["points"]),
             "data-dash": json(props["dash"]),
+            "data-draggable": str(props["draggable"]),
+            "data-drag-distance": str(props["dragDistance"]),
+            // Map Konva drag/click handlers to standard DOM events so tests can
+            // use fireEvent.drag / fireEvent.dragEnd / fireEvent.click with a stub event.target.
+            onDrag: props["onDragMove"] as () => void,
+            onDragEnd: props["onDragEnd"] as () => void,
+            onClick: props["onClick"] as () => void,
         }),
 
     Rect: (props: AnyProps) =>
@@ -49,12 +57,19 @@ export const konvaMock = () => ({
         }),
 
     Circle: (props: AnyProps) =>
-        stub("konva-circle", {
+        createElement("div", {
+            "data-testid": "konva-circle",
             "data-x": str(props["x"]),
             "data-y": str(props["y"]),
             "data-radius": str(props["radius"]),
             "data-stroke": str(props["stroke"]),
             "data-stroke-width": str(props["strokeWidth"]),
+            "data-draggable": str(props["draggable"]),
+            // Map Konva drag/click handlers to standard DOM events so tests can
+            // use fireEvent.drag / fireEvent.dragEnd / fireEvent.dblClick.
+            onDrag: props["onDragMove"] as () => void,
+            onDragEnd: props["onDragEnd"] as () => void,
+            onDoubleClick: props["onDblClick"] as () => void,
         }),
 
     Arrow: (props: AnyProps) =>
