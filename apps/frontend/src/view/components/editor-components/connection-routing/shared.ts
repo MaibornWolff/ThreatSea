@@ -226,6 +226,25 @@ export const findBestAnchor = (
     return dy > 0 ? AnchorOrientation.bottom : AnchorOrientation.top;
 };
 
+// ----- connection topology -----
+
+/** Counts how many connections touch each component (its "degree") — used to tell a hub from a leaf. */
+export const buildDegreeMap = (connections: AugmentedSystemConnection[]): Map<string, number> => {
+    const counted = new Set<string>();
+    const degree = new Map<string, number>();
+    for (const connection of connections) {
+        if (counted.has(connection.id)) {
+            continue;
+        }
+        counted.add(connection.id);
+        degree.set(connection.from.id, (degree.get(connection.from.id) ?? 0) + 1);
+        if (connection.to.id !== connection.from.id) {
+            degree.set(connection.to.id, (degree.get(connection.to.id) ?? 0) + 1);
+        }
+    }
+    return degree;
+};
+
 // ----- shared scoring + connection-point meta -----
 
 /** How many of the given boxes a route's segments run into (each box counted at most once). */

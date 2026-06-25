@@ -299,16 +299,19 @@ export const useEditor = ({
         dispatch(SystemActions.removeComponent({ id: selectedComponentId }));
     };
 
-    const flagAllConnectionsForRecalculation = (): void => {
+    const flagConnectionsForRecalculation = (componentIds: string[]): void => {
+        const affectedComponents = new Set(componentIds);
         connections.forEach((connection) => {
-            dispatch(
-                SystemActions.setConnection({
-                    id: connection.id,
-                    changes: {
-                        recalculate: true,
-                    },
-                })
-            );
+            if (affectedComponents.has(connection.from.id) || affectedComponents.has(connection.to.id)) {
+                dispatch(
+                    SystemActions.setConnection({
+                        id: connection.id,
+                        changes: {
+                            recalculate: true,
+                        },
+                    })
+                );
+            }
         });
     };
 
@@ -334,7 +337,7 @@ export const useEditor = ({
             })
         );
 
-        flagAllConnectionsForRecalculation();
+        flagConnectionsForRecalculation([targetConnection.from.id, targetConnection.to.id]);
     };
 
     const removeConnectionById = (connectionId: string): void => {
@@ -604,7 +607,7 @@ export const useEditor = ({
                 })
             );
 
-            flagAllConnectionsForRecalculation();
+            flagConnectionsForRecalculation([from.id, to.id]);
 
             dispatch(EditorActions.resetConnection());
         }
@@ -709,16 +712,12 @@ export const useEditor = ({
     };
 
     const updateConnectionsOfComponent = (): void => {
+        const affectedComponents = new Set<string>();
         connectionsOfComponent.forEach((connection) => {
-            dispatch(
-                SystemActions.setConnection({
-                    id: connection.id,
-                    changes: {
-                        recalculate: true,
-                    },
-                })
-            );
+            affectedComponents.add(connection.from.id);
+            affectedComponents.add(connection.to.id);
         });
+        flagConnectionsForRecalculation([...affectedComponents]);
     };
 
     const connectionRecalculated = (
