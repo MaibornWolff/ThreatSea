@@ -206,3 +206,38 @@ describe("routeDeterministic line-crossing avoidance", () => {
         expect(crossesBlocker(withBlocker!.waypoints)).toBe(false);
     });
 });
+
+describe("routeDeterministic radial hub entry", () => {
+    it("enters a shared hub on the side facing each leaf, so two lines into it do not cross", () => {
+        const hub = createSystemComponent({ id: "hub", gridX: 160, gridY: 120 });
+        const leftLeaf = createSystemComponent({ id: "left-leaf", gridX: 50, gridY: 80 });
+        const topLeaf = createSystemComponent({ id: "top-leaf", gridX: 130, gridY: 45 });
+        const components = [hub, leftLeaf, topLeaf];
+
+        const leftConnection = createAugmentedConnection({ id: "left-hub", fromComponent: leftLeaf, toComponent: hub });
+        const topConnection = createAugmentedConnection({ id: "top-hub", fromComponent: topLeaf, toComponent: hub });
+        const connections = [leftConnection, topConnection];
+
+        const routeOf = (connection: AugmentedSystemConnection, leaf: AugmentedSystemComponent) =>
+            routeDeterministic({
+                fromComponent: leaf,
+                toComponent: hub,
+                components,
+                connections,
+                from: connection.from,
+                to: connection.to,
+                pointsOfAttack: [],
+            });
+
+        const leftRoute = routeOf(leftConnection, leftLeaf);
+        const topRoute = routeOf(topConnection, topLeaf);
+
+        expect(leftRoute).not.toBeNull();
+        expect(topRoute).not.toBeNull();
+
+        const leftSegments = segmentsOf(leftRoute!.waypoints);
+        const topSegments = segmentsOf(topRoute!.waypoints);
+        const theyCross = leftSegments.some(([a, b]) => topSegments.some(([c, d]) => crossesTransversally(a, b, c, d)));
+        expect(theyCross).toBe(false);
+    });
+});

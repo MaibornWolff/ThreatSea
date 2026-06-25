@@ -151,7 +151,7 @@ describe("routeFishbone trunk-merging", () => {
 });
 
 describe("routeFishbone congestion (merges over the cluster)", () => {
-    it("does not let a comb connection run over another member squeezed against the hub", () => {
+    it("declines a two-member congested comb so it routes directly instead of looping over the cluster", () => {
         const hub = createSystemComponent({ id: "hub", gridX: 60, gridY: 0 });
         const nearLeaf = createSystemComponent({ id: "near", gridX: 42, gridY: 0 }); // squeezed against the hub
         const farLeaf = createSystemComponent({ id: "far", gridX: 0, gridY: 0 });
@@ -160,11 +160,8 @@ describe("routeFishbone congestion (merges over the cluster)", () => {
             createAugmentedConnection({ id: "c-near", fromComponent: nearLeaf, toComponent: hub }),
             createAugmentedConnection({ id: "c-far", fromComponent: farLeaf, toComponent: hub }),
         ];
-        // c-far must never run through nearLeaf (the comb merges over the cluster to avoid it).
-        const nearRectangle = rectOf(nearLeaf);
-        for (const [a, b] of segmentsOf(routeInContext("c-far", connections, components)!.waypoints)) {
-            expect(segHitsRect(a, b, nearRectangle)).toBe(false);
-        }
+        expect(routeInContext("c-near", connections, components)).toBeNull();
+        expect(routeInContext("c-far", connections, components)).toBeNull();
     });
 
     it("(repro) d merges over the top instead of crossing d1 — real logged geometry", () => {
@@ -192,47 +189,58 @@ describe("routeFishbone congestion (merges over the cluster)", () => {
         expect(toPoints(route).at(-1)).toEqual({ x: -85, y: 450 });
     });
 
-    it("does not let a far comb connection run over a nearer member on the same row", () => {
-        // Mirrors d → d1: two same-row right-side connections where an inside trunk would cross.
-        const hub = createSystemComponent({ id: "hub", gridX: 0, gridY: 60 });
-        const nearLeaf = createSystemComponent({ id: "d1", gridX: 60, gridY: 50 });
-        const farLeaf = createSystemComponent({ id: "d", gridX: 120, gridY: 50 });
-        const components = [hub, nearLeaf, farLeaf];
+    it("(repro) declines two servers near a hub instead of looping them over the top — real logged geometry", () => {
+        const hub = createSystemComponent({ id: "hub", gridX: 34, gridY: -20 });
+        const server1 = createSystemComponent({ id: "server1", gridX: -20, gridY: -34 });
+        const server2 = createSystemComponent({ id: "server2", gridX: 10, gridY: -30 });
+        const components = [hub, server1, server2];
         const connections = [
-            createAugmentedConnection({ id: "c-near", fromComponent: nearLeaf, toComponent: hub }),
-            createAugmentedConnection({ id: "c-far", fromComponent: farLeaf, toComponent: hub }),
+            createAugmentedConnection({ id: "c-server1", fromComponent: server1, toComponent: hub }),
+            createAugmentedConnection({ id: "c-server2", fromComponent: server2, toComponent: hub }),
         ];
-        const nearRectangle = rectOf(nearLeaf);
-        for (const [a, b] of segmentsOf(routeInContext("c-far", connections, components)!.waypoints)) {
-            expect(segHitsRect(a, b, nearRectangle)).toBe(false);
-        }
+        expect(routeInContext("c-server1", connections, components)).toBeNull();
+        expect(routeInContext("c-server2", connections, components)).toBeNull();
     });
 
-    it("merges a congested same-row comb over the cluster, sharing one perpendicular trunk", () => {
-        // Same-row d1/d: an inside trunk would cross, so the comb flips to one trunk above the cluster.
+    it("merges a congested same-row comb of three over the cluster, sharing one perpendicular trunk", () => {
+        // Three same-row right-side leaves where an inside trunk would cross: a comb this size is worth
+        // the lift, so it flips to one trunk above the cluster and they share the approach into the hub.
         const hub = createSystemComponent({ id: "hub", gridX: 0, gridY: 60 });
         const nearLeaf = createSystemComponent({ id: "d1", gridX: 60, gridY: 50 });
-        const farLeaf = createSystemComponent({ id: "d", gridX: 120, gridY: 50 });
-        const components = [hub, nearLeaf, farLeaf];
+        const midLeaf = createSystemComponent({ id: "d2", gridX: 120, gridY: 50 });
+        const farLeaf = createSystemComponent({ id: "d3", gridX: 180, gridY: 50 });
+        const components = [hub, nearLeaf, midLeaf, farLeaf];
         const connections = [
             createAugmentedConnection({ id: "c-near", fromComponent: nearLeaf, toComponent: hub }),
+            createAugmentedConnection({ id: "c-mid", fromComponent: midLeaf, toComponent: hub }),
             createAugmentedConnection({ id: "c-far", fromComponent: farLeaf, toComponent: hub }),
         ];
-        const nearRoute = routeInContext("c-near", connections, components)!.waypoints;
-        const farRoute = routeInContext("c-far", connections, components)!.waypoints;
-        // Both end at the hub's top-face midpoint (40, 300) — one shared approach.
+        const ids = ["c-near", "c-mid", "c-far"];
+        const routes = ids.map((id) => routeInContext(id, connections, components)!.waypoints);
         const hubTopMidpoint = { x: 40, y: 300 };
-        expect(toPoints(nearRoute).at(-1)).toEqual(hubTopMidpoint);
-        expect(toPoints(farRoute).at(-1)).toEqual(hubTopMidpoint);
-        for (const [a1, a2] of segmentsOf(nearRoute)) {
-            for (const [b1, b2] of segmentsOf(farRoute)) {
-                expect(crossesTransversally(a1, a2, b1, b2)).toBe(false);
+
+        for (const route of routes) {
+            expect(toPoints(route).at(-1)).toEqual(hubTopMidpoint);
+        }
+
+        const nearRectangle = rectOf(nearLeaf);
+        for (const route of [routes[1]!, routes[2]!]) {
+            for (const [a, b] of segmentsOf(route)) {
+                expect(segHitsRect(a, b, nearRectangle)).toBe(false);
             }
         }
-        const nearPoints = toPoints(nearRoute);
-        const farPoints = toPoints(farRoute);
+        // No two approaches cross transversally.
+        for (let first = 0; first < routes.length; first++) {
+            for (let second = first + 1; second < routes.length; second++) {
+                for (const [a1, a2] of segmentsOf(routes[first]!)) {
+                    for (const [b1, b2] of segmentsOf(routes[second]!)) {
+                        expect(crossesTransversally(a1, a2, b1, b2)).toBe(false);
+                    }
+                }
+            }
+        }
+        const nearPoints = toPoints(routes[0]!);
         expectRadialEnd(nearLeaf.gridX, nearLeaf.gridY, nearPoints[0]!, nearPoints[1]!);
-        expectRadialEnd(farLeaf.gridX, farLeaf.gridY, farPoints[0]!, farPoints[1]!);
         expectRadialEnd(hub.gridX, hub.gridY, nearPoints.at(-1)!, nearPoints.at(-2)!);
     });
 });

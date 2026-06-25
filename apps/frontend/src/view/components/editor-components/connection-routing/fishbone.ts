@@ -22,6 +22,7 @@ import {
     type Point,
     allFinite,
     buildAnchorMeta,
+    buildDegreeMap,
     centerOf,
     countObstacleHits,
     faceMidpoint,
@@ -40,23 +41,7 @@ import {
 
 const TRUNK_CLEARANCE = 20; // how far outside the hub the shared trunk sits, in pixels
 const FISHBONE_DIAGONAL_RATIO = 0.5; // above this, a leaf counts as "almost diagonal" from the hub
-
-/** Counts how many connections touch each component (its "degree"). */
-const buildDegreeMap = (connections: AugmentedSystemConnection[]): Map<string, number> => {
-    const counted = new Set<string>();
-    const degree = new Map<string, number>();
-    for (const connection of connections) {
-        if (counted.has(connection.id)) {
-            continue;
-        }
-        counted.add(connection.id);
-        degree.set(connection.from.id, (degree.get(connection.from.id) ?? 0) + 1);
-        if (connection.to.id !== connection.from.id) {
-            degree.set(connection.to.id, (degree.get(connection.to.id) ?? 0) + 1);
-        }
-    }
-    return degree;
-};
+const MIN_OVER_TRUNK_MEMBERS = 3; // an over-the-top trunk is only worth its detour for 3+ merged lines
 
 interface FishbonePath {
     points: Point[];
@@ -318,22 +303,26 @@ const perpendicularApproachFace = (
 
 /**
  * Decides a leaf's hub face + trunk mode: its direction face with an INSIDE trunk, or — if that face
- * is crowded — the clear 90° face with an OVER trunk. Depends only on the comb, so every member lands
- * on the same face+mode and they stay merged.
+ * is crowded — the clear 90° face with an OVER trunk. Returns null when a congested comb is too small
+ * to be worth lifting over the cluster, so its members route directly (radially) instead. Depends only
+ * on the comb, so every member lands on the same decision and they stay consistent.
  */
 const resolveHubFace = (
     hub: AugmentedSystemComponent,
     leaf: AugmentedSystemComponent,
     connections: AugmentedSystemConnection[],
     components: AugmentedSystemComponent[]
-): HubFaceResolution => {
+): HubFaceResolution | null => {
     const directionFace = assignHubFace(hub, leaf, connections, components);
     const directionMembers = collectDirectionMembers(hub, leaf, directionFace, connections, components);
     if (directionMembers.length >= 2 && combCollides(hub, directionFace, directionMembers, "inside")) {
-        const flippedFace = perpendicularApproachFace(hub, directionFace, directionMembers);
-        if (!combCollides(hub, flippedFace, directionMembers, "over")) {
-            return { hubFace: flippedFace, mode: "over" };
+        if (directionMembers.length >= MIN_OVER_TRUNK_MEMBERS) {
+            const flippedFace = perpendicularApproachFace(hub, directionFace, directionMembers);
+            if (!combCollides(hub, flippedFace, directionMembers, "over")) {
+                return { hubFace: flippedFace, mode: "over" };
+            }
         }
+        return null;
     }
     return { hubFace: directionFace, mode: "inside" };
 };
@@ -364,7 +353,11 @@ export const routeFishbone = (input: ConnectionRoutingInput): ConnectionRoutingR
     const hub = fromIsHub ? fromComponent : toComponent;
     const leaf = fromIsHub ? toComponent : fromComponent;
 
-    const { hubFace, mode } = resolveHubFace(hub, leaf, connections, components);
+    const resolution = resolveHubFace(hub, leaf, connections, components);
+    if (!resolution) {
+        return null;
+    }
+    const { hubFace, mode } = resolution;
 
     // This comb's members: the hub's connections landing on the same face AND mode (incl. this leaf).
     // A comb needs at least two — a lone connection draws better as a plain direct line.
@@ -381,7 +374,7 @@ export const routeFishbone = (input: ConnectionRoutingInput): ConnectionRoutingR
             continue;
         }
         const otherResolution = resolveHubFace(hub, other, connections, components);
-        if (otherResolution.hubFace === hubFace && otherResolution.mode === mode) {
+        if (otherResolution && otherResolution.hubFace === hubFace && otherResolution.mode === mode) {
             members.push(other);
         }
     }

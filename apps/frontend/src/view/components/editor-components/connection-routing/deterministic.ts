@@ -12,6 +12,7 @@ import {
     GEOMETRY_TOLERANCE,
     allFinite,
     buildAnchorMeta,
+    buildDegreeMap,
     countObstacleHits,
     faceMidpoint,
     findBestAnchor,
@@ -36,6 +37,7 @@ interface ScoredRoute {
     crossings: number;
     bendCount: number;
     length: number;
+    hubFacePenalty: number;
     facePairRank: number;
     candidateRank: number;
 }
@@ -175,7 +177,8 @@ const countLineCrossings = (points: Point[], otherSegments: Segment[]): number =
 };
 
 // Ranks two routes: avoid component boxes first, then keep turns few, then cross fewer other lines,
-// then stay short — with face/candidate order as the final, fully deterministic tiebreak.
+// then stay short, then enter a hub on the side facing this leaf — with face/candidate order as the
+// final, fully deterministic tiebreak.
 const isBetterRoute = (candidate: ScoredRoute, best: ScoredRoute): boolean => {
     if (candidate.obstacleHits !== best.obstacleHits) {
         return candidate.obstacleHits < best.obstacleHits;
@@ -190,6 +193,9 @@ const isBetterRoute = (candidate: ScoredRoute, best: ScoredRoute): boolean => {
     const bestLength = Math.round(best.length * 1000);
     if (candidateLength !== bestLength) {
         return candidateLength < bestLength;
+    }
+    if (candidate.hubFacePenalty !== best.hubFacePenalty) {
+        return candidate.hubFacePenalty < best.hubFacePenalty;
     }
     if (candidate.facePairRank !== best.facePairRank) {
         return candidate.facePairRank < best.facePairRank;
@@ -236,6 +242,15 @@ export function routeDeterministic({
         }
     }
 
+    const degree = buildDegreeMap(connections);
+    const fromIsHub = (degree.get(fromComponent.id) ?? 0) > (degree.get(toComponent.id) ?? 0);
+    const toIsHub = (degree.get(toComponent.id) ?? 0) > (degree.get(fromComponent.id) ?? 0);
+    const hubPrimaryFace = fromIsHub
+        ? (findBestAnchor(fromComponent, toComponent) as Face)
+        : toIsHub
+          ? (findBestAnchor(toComponent, fromComponent) as Face)
+          : null;
+
     const sourceFaces = candidateFaces(fromComponent, toComponent);
     const targetFaces = candidateFaces(toComponent, fromComponent);
 
@@ -266,6 +281,11 @@ export function routeDeterministic({
                     continue;
                 }
 
+                // 0 when this route enters the hub on the side facing the leaf, 1 otherwise (and for
+                // hubless pairs, where hubPrimaryFace is null and every route scores 0).
+                const hubFace = fromIsHub ? sourceFace : toIsHub ? targetFace : null;
+                const hubFacePenalty = hubPrimaryFace !== null && hubFace !== hubPrimaryFace ? 1 : 0;
+
                 const scored: ScoredRoute = {
                     points,
                     sourceFace,
@@ -274,6 +294,7 @@ export function routeDeterministic({
                     crossings: countLineCrossings(points, otherSegments),
                     bendCount: Math.max(0, points.length - 2),
                     length: routeLength(points),
+                    hubFacePenalty,
                     facePairRank,
                     candidateRank,
                 };
