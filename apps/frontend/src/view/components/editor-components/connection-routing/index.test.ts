@@ -1,6 +1,7 @@
 import { computeConnectionRouting } from "./index.ts";
 import { routeFishbone } from "./fishbone.ts";
 import { routeDeterministic } from "./deterministic.ts";
+import { crossesTransversally, segmentsOf } from "#test-utils/connection-routing-helpers.ts";
 import { createAugmentedConnection, createSystemComponent } from "#test-utils/builders.ts";
 
 describe("computeConnectionRouting composition", () => {
@@ -58,5 +59,51 @@ describe("computeConnectionRouting composition", () => {
         };
 
         expect(computeConnectionRouting(input)).toBeNull();
+    });
+
+    it("keeps a dense real-world hub crossing-free by merging a boxed-in leaf while a level one enters directly", () => {
+        const hub = createSystemComponent({ id: "hub", gridX: 153, gridY: 55 });
+        const grid: Record<string, { gridX: number; gridY: number }> = {
+            A: { gridX: 270, gridY: 97 },
+            B: { gridX: 226, gridY: 100 },
+            C: { gridX: 191, gridY: 99 },
+            D: { gridX: 268, gridY: 55 },
+            E: { gridX: 126, gridY: 121 },
+            F: { gridX: 116, gridY: 19 },
+            G: { gridX: 75, gridY: 90 },
+            H: { gridX: 155, gridY: -26 },
+            J: { gridX: 41, gridY: 55 },
+            K: { gridX: 74, gridY: -24 },
+            L: { gridX: -20, gridY: 47 },
+        };
+        const leaves = Object.fromEntries(
+            Object.entries(grid).map(([id, position]) => [id, createSystemComponent({ id, ...position })])
+        );
+        const components = [hub, ...Object.values(leaves)];
+        const connections = Object.keys(grid).map((id) =>
+            createAugmentedConnection({ id, fromComponent: leaves[id]!, toComponent: hub })
+        );
+        const routes = Object.keys(grid).map((id) => {
+            const connection = connections.find((candidate) => candidate.id === id)!;
+            return computeConnectionRouting({
+                fromComponent: leaves[id]!,
+                toComponent: hub,
+                components,
+                connections,
+                from: connection.from,
+                to: connection.to,
+                pointsOfAttack: [],
+            })!.waypoints;
+        });
+
+        for (let first = 0; first < routes.length; first++) {
+            for (let second = first + 1; second < routes.length; second++) {
+                for (const [a, b] of segmentsOf(routes[first]!)) {
+                    for (const [c, d] of segmentsOf(routes[second]!)) {
+                        expect(crossesTransversally(a, b, c, d)).toBe(false);
+                    }
+                }
+            }
+        }
     });
 });

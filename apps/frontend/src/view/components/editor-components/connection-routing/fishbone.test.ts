@@ -243,6 +243,28 @@ describe("routeFishbone congestion (merges over the cluster)", () => {
         expectRadialEnd(nearLeaf.gridX, nearLeaf.gridY, nearPoints[0]!, nearPoints[1]!);
         expectRadialEnd(hub.gridX, hub.gridY, nearPoints.at(-1)!, nearPoints.at(-2)!);
     });
+
+    it("merges a comb's offset members over the cluster and drops a hub-level member to a direct entry", () => {
+        const hub = createSystemComponent({ id: "hub", gridX: 0, gridY: 0 });
+        const level = createSystemComponent({ id: "level", gridX: 100, gridY: 0 }); // level with the hub
+        const below1 = createSystemComponent({ id: "below1", gridX: 100, gridY: 40 }); // stacked below `level`
+        const below2 = createSystemComponent({ id: "below2", gridX: 90, gridY: 40 });
+        const below3 = createSystemComponent({ id: "below3", gridX: 110, gridY: 40 });
+        const components = [hub, level, below1, below2, below3];
+        const connections = [
+            createAugmentedConnection({ id: "c-level", fromComponent: level, toComponent: hub }),
+            createAugmentedConnection({ id: "c-below1", fromComponent: below1, toComponent: hub }),
+            createAugmentedConnection({ id: "c-below2", fromComponent: below2, toComponent: hub }),
+            createAugmentedConnection({ id: "c-below3", fromComponent: below3, toComponent: hub }),
+        ];
+        // The level leaf can't ride the over-trunk → declines (the plain router enters it directly).
+        expect(routeInContext("c-level", connections, components)).toBeNull();
+        // The three below it merge onto one shared trunk into the hub's bottom face.
+        const hubBottomMidpoint = { x: 40, y: 80 };
+        for (const id of ["c-below1", "c-below2", "c-below3"]) {
+            expect(toPoints(routeInContext(id, connections, components)!.waypoints).at(-1)).toEqual(hubBottomMidpoint);
+        }
+    });
 });
 
 describe("routeFishbone declines (hands off to the plain router)", () => {

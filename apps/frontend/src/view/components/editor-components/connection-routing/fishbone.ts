@@ -259,8 +259,26 @@ const collectDirectionMembers = (
     return members;
 };
 
+/** True when one member's run onto the shared trunk would cut through another member's box. */
+const memberRunHitsOthers = (
+    hub: AugmentedSystemComponent,
+    hubFace: Face,
+    member: AugmentedSystemComponent,
+    members: AugmentedSystemComponent[],
+    trunkPosition: number
+): boolean => {
+    const path = fishbonePath(hub, member, hubFace, trunkPosition);
+    if (!path) {
+        return true;
+    }
+    const otherInteriors = members
+        .filter((candidate) => candidate.id !== member.id)
+        .map((candidate) => shrinkRectangle(rectOf(candidate)));
+    return countObstacleHits(simplifyPolyline(path.points), otherInteriors) > 0;
+};
+
 /**
- * True if this comb can't be drawn cleanly here — one member's line would cut through another member.
+ * True if this comb can't be drawn cleanly here — any member's line would cut through another member.
  * (Boxes are shrunk first, so just touching a stacked neighbour's edge is fine.) This is what makes a
  * crowded face switch to an over-the-cluster trunk.
  */
@@ -271,19 +289,7 @@ const combCollides = (
     mode: CombMode
 ): boolean => {
     const trunkPosition = combTrunkPosition(hub, hubFace, members, mode);
-    for (const member of members) {
-        const path = fishbonePath(hub, member, hubFace, trunkPosition);
-        if (!path) {
-            return true;
-        }
-        const otherInteriors = members
-            .filter((candidate) => candidate.id !== member.id)
-            .map((candidate) => shrinkRectangle(rectOf(candidate)));
-        if (countObstacleHits(simplifyPolyline(path.points), otherInteriors) > 0) {
-            return true;
-        }
-    }
-    return false;
+    return members.some((member) => memberRunHitsOthers(hub, hubFace, member, members, trunkPosition));
 };
 
 /** The clear 90° side a crowded comb switches to, picked by where most of its members sit. */
@@ -302,6 +308,29 @@ const perpendicularApproachFace = (
 };
 
 /**
+ * The members that can actually share an over-the-cluster trunk: drop the ones whose run onto it would
+ * cross another member (typically a leaf level with the hub, sitting in front of a lower one) — those
+ * enter the hub directly instead. Re-checked after each drop, since removing a member shifts the trunk.
+ */
+const overMergeableMembers = (
+    hub: AugmentedSystemComponent,
+    flippedFace: Face,
+    members: AugmentedSystemComponent[]
+): AugmentedSystemComponent[] => {
+    let survivors = members;
+    for (;;) {
+        const trunkPosition = combTrunkPosition(hub, flippedFace, survivors, "over");
+        const kept = survivors.filter(
+            (member) => !memberRunHitsOthers(hub, flippedFace, member, survivors, trunkPosition)
+        );
+        if (kept.length === survivors.length || kept.length === 0) {
+            return kept;
+        }
+        survivors = kept;
+    }
+};
+
+/**
  * Decides a leaf's hub face + trunk mode: its direction face with an INSIDE trunk, or — if that face
  * is crowded — the clear 90° face with an OVER trunk. Returns null when a congested comb is too small
  * to be worth lifting over the cluster, so its members route directly (radially) instead. Depends only
@@ -316,11 +345,10 @@ const resolveHubFace = (
     const directionFace = assignHubFace(hub, leaf, connections, components);
     const directionMembers = collectDirectionMembers(hub, leaf, directionFace, connections, components);
     if (directionMembers.length >= 2 && combCollides(hub, directionFace, directionMembers, "inside")) {
-        if (directionMembers.length >= MIN_OVER_TRUNK_MEMBERS) {
-            const flippedFace = perpendicularApproachFace(hub, directionFace, directionMembers);
-            if (!combCollides(hub, flippedFace, directionMembers, "over")) {
-                return { hubFace: flippedFace, mode: "over" };
-            }
+        const flippedFace = perpendicularApproachFace(hub, directionFace, directionMembers);
+        const mergeable = overMergeableMembers(hub, flippedFace, directionMembers);
+        if (mergeable.length >= MIN_OVER_TRUNK_MEMBERS && mergeable.some((member) => member.id === leaf.id)) {
+            return { hubFace: flippedFace, mode: "over" };
         }
         return null;
     }
