@@ -461,14 +461,14 @@ const splitIsCrossingFree = (
     }
     for (let first = 0; first < routes.length; first++) {
         for (let second = first + 1; second < routes.length; second++) {
-            for (let a = 1; a < routes[first]!.length; a++) {
-                for (let b = 1; b < routes[second]!.length; b++) {
+            for (let firstSegmentIndex = 1; firstSegmentIndex < routes[first]!.length; firstSegmentIndex++) {
+                for (let secondSegmentIndex = 1; secondSegmentIndex < routes[second]!.length; secondSegmentIndex++) {
                     if (
                         crossesTransversally(
-                            routes[first]![a - 1]!,
-                            routes[first]![a]!,
-                            routes[second]![b - 1]!,
-                            routes[second]![b]!
+                            routes[first]![firstSegmentIndex - 1]!,
+                            routes[first]![firstSegmentIndex]!,
+                            routes[second]![secondSegmentIndex - 1]!,
+                            routes[second]![secondSegmentIndex]!
                         )
                     ) {
                         return false;
@@ -513,8 +513,10 @@ const resolveFace = (
     if (mergeable.length >= MIN_OVER_TRUNK_MEMBERS) {
         // The over-trunk forms: its members merge over the cluster; the rest route directly. (No split
         // here — mixing an over-trunk member into an inside sub-comb would draw a trunk we never validated.)
+        // The combKey identifies THIS cluster: two crowded faces that both flip to the same perpendicular
+        // face would otherwise share (hubFace, mode) and fuse into one trunk neither cluster validated.
         setAll(directionMembers, null);
-        setAll(mergeable, { hubFace: flippedFace, mode: "over", combKey: "" });
+        setAll(mergeable, { hubFace: flippedFace, mode: "over", combKey: combRepresentative(mergeable) });
         return byMember;
     }
 
