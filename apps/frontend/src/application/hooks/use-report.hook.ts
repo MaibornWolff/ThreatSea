@@ -5,7 +5,7 @@ import { useAlert } from "#application/hooks/use-alert.hook.ts";
 import { useState, useMemo, useEffect, useEffectEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { ProjectsAPI } from "#api/projects.api.ts";
-import { calcRiskColour } from "#utils/calcRisk.ts";
+import { calcRiskColour, calcNetRisk } from "#utils/calcRisk.ts";
 import type { MatrixColorKey } from "#view/colors/matrix.ts";
 
 type ReportThreat = ProjectReport["threats"][number];
@@ -42,38 +42,18 @@ const calcNetRiskMatrix = (
     }
     return threats.reduce(
         (arr, threat) => {
-            const probability = threat.measures.reduce((min, measure) => {
-                if (measure.probability == null) {
-                    return min;
+            const activeMeasures = threat.measures.filter((measure) => {
+                if (!measure.scheduledAt) {
+                    return false;
                 }
-                const measureScheduledAt = measure.scheduledAt ? new Date(measure.scheduledAt) : null;
-                if (
-                    measureScheduledAt &&
-                    !Number.isNaN(measureScheduledAt.getTime()) &&
-                    min > measure.probability &&
-                    measureScheduledAt.getTime() <= scheduledAt.getTime()
-                ) {
-                    return measure.probability;
-                }
-                return min;
-            }, threat.probability);
-            const damage = threat.measures.reduce((min, measure) => {
-                if (measure.damage == null) {
-                    return min;
-                }
-                const measureScheduledAt = measure.scheduledAt ? new Date(measure.scheduledAt) : null;
-                if (
-                    measureScheduledAt &&
-                    !Number.isNaN(measureScheduledAt.getTime()) &&
-                    min > measure.damage &&
-                    measureScheduledAt.getTime() <= scheduledAt.getTime()
-                ) {
-                    return measure.damage;
-                }
-                return min;
-            }, threat.damage);
-            const y = 5 - probability;
-            const x = damage - 1;
+                const measureScheduledAt = new Date(measure.scheduledAt.toString().substring(0, 10));
+                return (
+                    !Number.isNaN(measureScheduledAt.getTime()) && measureScheduledAt.getTime() <= scheduledAt.getTime()
+                );
+            });
+            const { netProbability, netDamage } = calcNetRisk(threat.probability, threat.damage, activeMeasures);
+            const y = 5 - netProbability;
+            const x = netDamage - 1;
             if (x >= 0 && y >= 0 && arr[y]?.[x]) {
                 // if no protection goal is affected risk is not in the matrix
                 if (typeof arr[y][x].amount !== "number") {
@@ -190,8 +170,9 @@ export const useReport = ({ projectId }: { projectId: number }) => {
                 ...threat,
                 measures: threat.measures.filter((measure) => {
                     let result = true;
-                    const scheduledAt = measure.scheduledAt ? new Date(measure.scheduledAt) : null;
-                    const scheduledAtTime = scheduledAt?.getTime() ?? Number.NaN;
+                    const scheduledAtTime = measure.scheduledAt
+                        ? new Date(measure.scheduledAt.toString().substring(0, 10)).getTime()
+                        : NaN;
                     if (from && from.getTime() > scheduledAtTime) {
                         result = false;
                     }
@@ -323,7 +304,7 @@ export const useReport = ({ projectId }: { projectId: number }) => {
                 if (!item.scheduledAt) {
                     return obj;
                 }
-                const scheduledAt = new Date(item.scheduledAt);
+                const scheduledAt = new Date(item.scheduledAt.toString().substring(0, 10));
                 const scheduledAtTime = scheduledAt.getTime();
                 if (Number.isNaN(scheduledAtTime)) {
                     return obj;
