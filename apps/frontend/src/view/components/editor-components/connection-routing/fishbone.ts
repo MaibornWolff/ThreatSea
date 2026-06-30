@@ -25,6 +25,7 @@ import {
     buildDegreeMap,
     centerOf,
     countObstacleHits,
+    crossesTransversally,
     faceMidpoint,
     findBestAnchor,
     flattenPoints,
@@ -32,6 +33,7 @@ import {
     isOrthogonal,
     outwardUnit,
     rectOf,
+    routeLength,
     sameDirection,
     segHitsRect,
     shrinkRectangle,
@@ -42,6 +44,8 @@ import {
 const TRUNK_CLEARANCE = 20; // how far outside the hub the shared trunk sits, in pixels
 const FISHBONE_DIAGONAL_RATIO = 0.5; // above this, a leaf counts as "almost diagonal" from the hub
 const MIN_OVER_TRUNK_MEMBERS = 3; // an over-the-top trunk is only worth its detour for 3+ merged lines
+const MAX_OVER_DETOUR_RATIO = 2; // a leaf joins an over-trunk only if its route stays within 2x a direct line
+const SPLIT_MEMBER_CAP = 12; // skip the (polynomial) sub-comb split for absurdly crowded faces — rare, and the plain router handles them
 
 interface FishbonePath {
     points: Point[];
@@ -233,6 +237,8 @@ const fishbonePath = (
 interface HubFaceResolution {
     hubFace: Face;
     mode: CombMode;
+    // Distinguishes sub-combs that share a face + mode after a crowded face is split
+    combKey: string;
 }
 
 /** The hub's other leaves (plus this one) that point at the same hub face by direction. */
@@ -317,12 +323,24 @@ const overMergeableMembers = (
     flippedFace: Face,
     members: AugmentedSystemComponent[]
 ): AugmentedSystemComponent[] => {
+    const hubCenter = centerOf(hub);
     let survivors = members;
     for (;;) {
         const trunkPosition = combTrunkPosition(hub, flippedFace, survivors, "over");
-        const kept = survivors.filter(
-            (member) => !memberRunHitsOthers(hub, flippedFace, member, survivors, trunkPosition)
-        );
+        const kept = survivors.filter((member) => {
+            if (memberRunHitsOthers(hub, flippedFace, member, survivors, trunkPosition)) {
+                return false;
+            }
+
+            const path = fishbonePath(hub, member, flippedFace, trunkPosition);
+            if (!path) {
+                return false;
+            }
+            const overLength = routeLength(simplifyPolyline(path.points));
+            const memberCenter = centerOf(member);
+            const directLength = Math.abs(memberCenter.x - hubCenter.x) + Math.abs(memberCenter.y - hubCenter.y);
+            return overLength <= directLength * MAX_OVER_DETOUR_RATIO;
+        });
         if (kept.length === survivors.length || kept.length === 0) {
             return kept;
         }
@@ -331,28 +349,208 @@ const overMergeableMembers = (
 };
 
 /**
- * Decides a leaf's hub face + trunk mode: its direction face with an INSIDE trunk, or — if that face
- * is crowded — the clear 90° face with an OVER trunk. Returns null when a congested comb is too small
- * to be worth lifting over the cluster, so its members route directly (radially) instead. Depends only
- * on the comb, so every member lands on the same decision and they stay consistent.
+ * One comb member's inside route, validated exactly as routeFishbone validates the final route:
+ * orthogonal, finite, clear of the hub interior and of every other component box. Returns the
+ * simplified points when clean, else null.
+ */
+const cleanInsideMemberRoute = (
+    hub: AugmentedSystemComponent,
+    hubFace: Face,
+    member: AugmentedSystemComponent,
+    trunkPosition: number,
+    components: AugmentedSystemComponent[]
+): Point[] | null => {
+    const path = fishbonePath(hub, member, hubFace, trunkPosition);
+    if (!path) {
+        return null;
+    }
+    const points = simplifyPolyline(path.points);
+    if (points.length < 2 || !isOrthogonal(points) || !allFinite(points)) {
+        return null;
+    }
+    // Mirror routeFishbone's straight-out check: leave the leaf outward, enter the hub inward.
+    const leafOutward = outwardUnit(path.leafFace);
+    const hubOutward = outwardUnit(path.hubFace);
+    const leafStep = stepDirection(points[0]!, points[1]!);
+    const hubStep = stepDirection(points[points.length - 2]!, points[points.length - 1]!);
+    if (!sameDirection(leafStep, leafOutward) || !sameDirection(hubStep, { x: -hubOutward.x, y: -hubOutward.y })) {
+        return null;
+    }
+    const hubInterior = shrinkRectangle(rectOf(hub));
+    for (let index = 1; index < points.length; index++) {
+        if (segHitsRect(points[index - 1]!, points[index]!, hubInterior)) {
+            return null;
+        }
+    }
+    const obstacles = components
+        .filter((component) => component.id !== hub.id && component.id !== member.id)
+        .map(rectOf);
+    return countObstacleHits(points, obstacles) > 0 ? null : points;
+};
+
+/** How far a member sits from the hub along the axis the trunk is perpendicular to. */
+const hubNormalDistance = (hub: AugmentedSystemComponent, hubFace: Face, member: AugmentedSystemComponent): number => {
+    const hubCenter = centerOf(hub);
+    const memberCenter = centerOf(member);
+    return isHorizontalFace(hubFace) ? Math.abs(memberCenter.x - hubCenter.x) : Math.abs(memberCenter.y - hubCenter.y);
+};
+
+/**
+ * Greedily partitions a crowded face's members into inside sub-combs that each draw cleanly (no run
+ * cuts the hub or any box). Farthest-from-hub members seed combs first, so the trunk stays tight.
+ * Deterministic — the order depends only on positions and ids — so every member computes the same
+ * partition and agrees which sub-comb it belongs to.
+ */
+const partitionSubCombs = (
+    hub: AugmentedSystemComponent,
+    hubFace: Face,
+    members: AugmentedSystemComponent[],
+    components: AugmentedSystemComponent[]
+): AugmentedSystemComponent[][] => {
+    const sorted = [...members].sort(
+        (first, second) =>
+            hubNormalDistance(hub, hubFace, second) - hubNormalDistance(hub, hubFace, first) ||
+            (first.id < second.id ? -1 : 1)
+    );
+    const combs: AugmentedSystemComponent[][] = [];
+    for (const member of sorted) {
+        let placed = false;
+        for (const comb of combs) {
+            const candidate = [...comb, member];
+            const trunkPosition = combTrunkPosition(hub, hubFace, candidate, "inside");
+            if (
+                candidate.every(
+                    (each) => cleanInsideMemberRoute(hub, hubFace, each, trunkPosition, components) !== null
+                )
+            ) {
+                comb.push(member);
+                placed = true;
+                break;
+            }
+        }
+        if (!placed) {
+            combs.push([member]);
+        }
+    }
+    return combs;
+};
+
+/**
+ * The gate that makes a split safe to use: every 2+ member sub-comb must draw cleanly AND no two of
+ * their routes may cross. Otherwise the cluster stays on the plain router (no regression).
+ */
+const splitIsCrossingFree = (
+    hub: AugmentedSystemComponent,
+    hubFace: Face,
+    combs: AugmentedSystemComponent[][],
+    components: AugmentedSystemComponent[]
+): boolean => {
+    const routes: Point[][] = [];
+    for (const comb of combs) {
+        if (comb.length < 2) {
+            continue;
+        }
+        const trunkPosition = combTrunkPosition(hub, hubFace, comb, "inside");
+        for (const member of comb) {
+            const points = cleanInsideMemberRoute(hub, hubFace, member, trunkPosition, components);
+            if (!points) {
+                return false;
+            }
+            routes.push(points);
+        }
+    }
+    for (let first = 0; first < routes.length; first++) {
+        for (let second = first + 1; second < routes.length; second++) {
+            for (let a = 1; a < routes[first]!.length; a++) {
+                for (let b = 1; b < routes[second]!.length; b++) {
+                    if (
+                        crossesTransversally(
+                            routes[first]![a - 1]!,
+                            routes[first]![a]!,
+                            routes[second]![b - 1]!,
+                            routes[second]![b]!
+                        )
+                    ) {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+    return true;
+};
+
+/** The id a sub-comb is keyed by, so its members recognise each other: the smallest id, stably. */
+const combRepresentative = (comb: AugmentedSystemComponent[]): string => comb.map((member) => member.id).sort()[0]!;
+
+type FaceResolutionCache = Map<Face, Map<string, HubFaceResolution | null>>;
+
+/**
+ * Resolves EVERY member of one (crowded or not) hub face at once: a plain INSIDE comb, an OVER trunk
+ * for the members that can merge over the cluster, or — only when no over-trunk forms — a split into
+ * compact INSIDE sub-combs. Members with no clean comb get null (they route directly).
+ */
+const resolveFace = (
+    hub: AugmentedSystemComponent,
+    directionFace: Face,
+    directionMembers: AugmentedSystemComponent[],
+    components: AugmentedSystemComponent[]
+): Map<string, HubFaceResolution | null> => {
+    const byMember = new Map<string, HubFaceResolution | null>();
+    const setAll = (members: AugmentedSystemComponent[], resolution: HubFaceResolution | null): void => {
+        for (const member of members) {
+            byMember.set(member.id, resolution);
+        }
+    };
+
+    if (directionMembers.length < 2 || !combCollides(hub, directionFace, directionMembers, "inside")) {
+        setAll(directionMembers, { hubFace: directionFace, mode: "inside", combKey: "" });
+        return byMember;
+    }
+
+    const flippedFace = perpendicularApproachFace(hub, directionFace, directionMembers);
+    const mergeable = overMergeableMembers(hub, flippedFace, directionMembers);
+    if (mergeable.length >= MIN_OVER_TRUNK_MEMBERS) {
+        // The over-trunk forms: its members merge over the cluster; the rest route directly. (No split
+        // here — mixing an over-trunk member into an inside sub-comb would draw a trunk we never validated.)
+        setAll(directionMembers, null);
+        setAll(mergeable, { hubFace: flippedFace, mode: "over", combKey: "" });
+        return byMember;
+    }
+
+    // No over-trunk. Try splitting the crowded face into compact inside sub-combs — adopting it only
+    // when every sub-comb draws cleanly and none of their routes cross (else everyone routes directly).
+    setAll(directionMembers, null);
+    if (directionMembers.length <= SPLIT_MEMBER_CAP) {
+        const combs = partitionSubCombs(hub, directionFace, directionMembers, components);
+        if (combs.every((comb) => comb.length >= 2) && splitIsCrossingFree(hub, directionFace, combs, components)) {
+            for (const comb of combs) {
+                setAll(comb, { hubFace: directionFace, mode: "inside", combKey: combRepresentative(comb) });
+            }
+        }
+    }
+    return byMember;
+};
+
+/**
+ * Decides a leaf's hub face + trunk mode (see resolveFace), cached per face. Returns null when no clean
+ * comb fits, so the leaf routes directly. Depends only on the comb, so every member stays consistent.
  */
 const resolveHubFace = (
     hub: AugmentedSystemComponent,
     leaf: AugmentedSystemComponent,
     connections: AugmentedSystemConnection[],
-    components: AugmentedSystemComponent[]
+    components: AugmentedSystemComponent[],
+    cache: FaceResolutionCache
 ): HubFaceResolution | null => {
     const directionFace = assignHubFace(hub, leaf, connections, components);
-    const directionMembers = collectDirectionMembers(hub, leaf, directionFace, connections, components);
-    if (directionMembers.length >= 2 && combCollides(hub, directionFace, directionMembers, "inside")) {
-        const flippedFace = perpendicularApproachFace(hub, directionFace, directionMembers);
-        const mergeable = overMergeableMembers(hub, flippedFace, directionMembers);
-        if (mergeable.length >= MIN_OVER_TRUNK_MEMBERS && mergeable.some((member) => member.id === leaf.id)) {
-            return { hubFace: flippedFace, mode: "over" };
-        }
-        return null;
+    let byMember = cache.get(directionFace);
+    if (!byMember) {
+        const directionMembers = collectDirectionMembers(hub, leaf, directionFace, connections, components);
+        byMember = resolveFace(hub, directionFace, directionMembers, components);
+        cache.set(directionFace, byMember);
     }
-    return { hubFace: directionFace, mode: "inside" };
+    return byMember.get(leaf.id) ?? null;
 };
 
 /**
@@ -381,14 +579,16 @@ export const routeFishbone = (input: ConnectionRoutingInput): ConnectionRoutingR
     const hub = fromIsHub ? fromComponent : toComponent;
     const leaf = fromIsHub ? toComponent : fromComponent;
 
-    const resolution = resolveHubFace(hub, leaf, connections, components);
+    // One cache for every resolveHubFace call below, so the hub's face decision is computed once.
+    const faceCache: FaceResolutionCache = new Map();
+    const resolution = resolveHubFace(hub, leaf, connections, components, faceCache);
     if (!resolution) {
         return null;
     }
-    const { hubFace, mode } = resolution;
+    const { hubFace, mode, combKey } = resolution;
 
-    // This comb's members: the hub's connections landing on the same face AND mode (incl. this leaf).
-    // A comb needs at least two — a lone connection draws better as a plain direct line.
+    // This comb's members: the hub's connections landing on the same face, mode AND sub-comb (incl.
+    // this leaf). A comb needs at least two — a lone connection draws better as a plain direct line.
     const componentById = new Map(components.map((component) => [component.id, component]));
     const members: AugmentedSystemComponent[] = [leaf];
     for (const connection of connections) {
@@ -401,8 +601,13 @@ export const routeFishbone = (input: ConnectionRoutingInput): ConnectionRoutingR
         if (!other) {
             continue;
         }
-        const otherResolution = resolveHubFace(hub, other, connections, components);
-        if (otherResolution && otherResolution.hubFace === hubFace && otherResolution.mode === mode) {
+        const otherResolution = resolveHubFace(hub, other, connections, components, faceCache);
+        if (
+            otherResolution &&
+            otherResolution.hubFace === hubFace &&
+            otherResolution.mode === mode &&
+            otherResolution.combKey === combKey
+        ) {
             members.push(other);
         }
     }

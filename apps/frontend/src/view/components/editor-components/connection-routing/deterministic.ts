@@ -14,6 +14,7 @@ import {
     buildAnchorMeta,
     buildDegreeMap,
     countObstacleHits,
+    crossesTransversally,
     faceMidpoint,
     findBestAnchor,
     flattenPoints,
@@ -132,43 +133,12 @@ const segmentsOfPoints = (points: Point[]): Segment[] => {
     return segments;
 };
 
-const isHorizontalSegment = (segment: Segment): boolean =>
-    segment.start.y === segment.end.y && segment.start.x !== segment.end.x;
-
-const isVerticalSegment = (segment: Segment): boolean =>
-    segment.start.x === segment.end.x && segment.start.y !== segment.end.y;
-
-/**
- * True when one horizontal and one vertical segment cross at a point inside BOTH. Lines that only
- * touch at an end (a shared box, a T-junction) don't count — so connections meeting at the same
- * component aren't mistaken for a crossing.
- */
-const segmentsCrossTransversally = (first: Segment, second: Segment): boolean => {
-    let horizontal: Segment;
-    let vertical: Segment;
-    if (isHorizontalSegment(first) && isVerticalSegment(second)) {
-        horizontal = first;
-        vertical = second;
-    } else if (isVerticalSegment(first) && isHorizontalSegment(second)) {
-        horizontal = second;
-        vertical = first;
-    } else {
-        return false; // parallel — a side-by-side or collinear overlap is not a crossing
-    }
-    const strictlyBetween = (value: number, bound1: number, bound2: number): boolean =>
-        value > Math.min(bound1, bound2) && value < Math.max(bound1, bound2);
-    return (
-        strictlyBetween(vertical.start.x, horizontal.start.x, horizontal.end.x) &&
-        strictlyBetween(horizontal.start.y, vertical.start.y, vertical.end.y)
-    );
-};
-
 /** How many of the other connections' segments this route crosses (used to prefer non-crossing routes). */
 const countLineCrossings = (points: Point[], otherSegments: Segment[]): number => {
     let crossings = 0;
     for (const routeSegment of segmentsOfPoints(points)) {
         for (const otherSegment of otherSegments) {
-            if (segmentsCrossTransversally(routeSegment, otherSegment)) {
+            if (crossesTransversally(routeSegment.start, routeSegment.end, otherSegment.start, otherSegment.end)) {
                 crossings++;
             }
         }

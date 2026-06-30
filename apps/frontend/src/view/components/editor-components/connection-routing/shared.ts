@@ -121,6 +121,37 @@ export const segHitsRect = (a: Point, b: Point, rectangle: Rectangle): boolean =
     );
 };
 
+/**
+ * True when one horizontal and one vertical segment cross at a point strictly inside BOTH — a real X.
+ * Segments that merely touch at an end (a shared box, a T-junction) or run parallel don't count, so two
+ * lines meeting at the same component aren't mistaken for a crossing.
+ */
+export const crossesTransversally = (a: Point, b: Point, c: Point, d: Point): boolean => {
+    const firstHorizontal = a.y === b.y && a.x !== b.x;
+    const firstVertical = a.x === b.x && a.y !== b.y;
+    const secondHorizontal = c.y === d.y && c.x !== d.x;
+    const secondVertical = c.x === d.x && c.y !== d.y;
+
+    let horizontalStart: Point;
+    let horizontalEnd: Point;
+    let verticalStart: Point;
+    let verticalEnd: Point;
+    if (firstHorizontal && secondVertical) {
+        [horizontalStart, horizontalEnd, verticalStart, verticalEnd] = [a, b, c, d];
+    } else if (firstVertical && secondHorizontal) {
+        [horizontalStart, horizontalEnd, verticalStart, verticalEnd] = [c, d, a, b];
+    } else {
+        return false; // parallel, or not both axis-aligned
+    }
+
+    const strictlyBetween = (value: number, bound1: number, bound2: number): boolean =>
+        value > Math.min(bound1, bound2) && value < Math.max(bound1, bound2);
+    return (
+        strictlyBetween(verticalStart.x, horizontalStart.x, horizontalEnd.x) &&
+        strictlyBetween(horizontalStart.y, verticalStart.y, verticalEnd.y)
+    );
+};
+
 /** Removes duplicate points and points sitting in the middle of a straight line — keeps only real corners. */
 export const simplifyPolyline = (points: Point[]): Point[] => {
     const deduped: Point[] = [];

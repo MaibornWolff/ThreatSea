@@ -106,4 +106,127 @@ describe("computeConnectionRouting composition", () => {
             }
         }
     });
+
+    it("splits a crowded hub face into compact sub-combs so same-target lines merge without crossing", () => {
+        const grid: Record<string, { gridX: number; gridY: number }> = {
+            main: { gridX: 197, gridY: 20 },
+            A: { gridX: 226, gridY: -11 },
+            C: { gridX: 235, gridY: 73 },
+            B: { gridX: 298, gridY: 74 },
+            D: { gridX: 307, gridY: 146 },
+            H: { gridX: 347, gridY: 21 },
+            F: { gridX: 166, gridY: -36 },
+            J: { gridX: 106, gridY: 27 },
+            G: { gridX: 101, gridY: 85 },
+            E: { gridX: 140, gridY: 67 },
+            K: { gridX: 112, gridY: -11 },
+            L: { gridX: -25, gridY: 49 },
+        };
+        const components = Object.entries(grid).map(([id, position]) => createSystemComponent({ id, ...position }));
+        const byId = new Map(components.map((component) => [component.id, component]));
+        const leaves = Object.keys(grid).filter((id) => id !== "main");
+        const connections = leaves.map((id) =>
+            createAugmentedConnection({
+                id: `${id}-main`,
+                fromComponent: byId.get(id)!,
+                toComponent: byId.get("main")!,
+            })
+        );
+        const routeOf = (leafId: string): number[] => {
+            const connection = connections.find((candidate) => candidate.from.id === leafId)!;
+            return computeConnectionRouting({
+                fromComponent: byId.get(leafId)!,
+                toComponent: byId.get("main")!,
+                components,
+                connections,
+                from: connection.from,
+                to: connection.to,
+                pointsOfAttack: [],
+            })!.waypoints;
+        };
+        const routes = leaves.map((id) => routeOf(id));
+
+        // No two connections to the same target (main) may cross.
+        for (let first = 0; first < routes.length; first++) {
+            for (let second = first + 1; second < routes.length; second++) {
+                for (const [a, b] of segmentsOf(routes[first]!)) {
+                    for (const [c, d] of segmentsOf(routes[second]!)) {
+                        expect(crossesTransversally(a, b, c, d)).toBe(false);
+                    }
+                }
+            }
+        }
+
+        // B and H land in the same sub-comb: their routes must share a collinear trunk segment (merge),
+        // not run independently.
+        const sharesTrunk = (first: number[], second: number[]): boolean =>
+            segmentsOf(first).some(([a, b]) =>
+                segmentsOf(second).some(([c, d]) => {
+                    if (a.x === b.x && c.x === d.x && a.x === c.x) {
+                        return (
+                            Math.min(Math.max(a.y, b.y), Math.max(c.y, d.y)) >
+                            Math.max(Math.min(a.y, b.y), Math.min(c.y, d.y))
+                        );
+                    }
+                    if (a.y === b.y && c.y === d.y && a.y === c.y) {
+                        return (
+                            Math.min(Math.max(a.x, b.x), Math.max(c.x, d.x)) >
+                            Math.max(Math.min(a.x, b.x), Math.min(c.x, d.x))
+                        );
+                    }
+                    return false;
+                })
+            );
+        expect(sharesTrunk(routeOf("B"), routeOf("H"))).toBe(true);
+    });
+
+    // Detour cap: a leaf level with / above a busy hub must not plunge out to a far over-trunk and back.
+    // Without the cap, A and H loop ~1600-2045px (5x and 2.7x their straight-line distance to the hub).
+    it("does not route a busy hub's leaves on absurd over-trunk detours", () => {
+        const grid: Record<string, { gridX: number; gridY: number }> = {
+            main: { gridX: 197, gridY: 20 },
+            A: { gridX: 226, gridY: -11 },
+            C: { gridX: 235, gridY: 73 },
+            B: { gridX: 298, gridY: 74 },
+            D: { gridX: 307, gridY: 146 },
+            H: { gridX: 347, gridY: 21 },
+            F: { gridX: 166, gridY: -36 },
+            K: { gridX: 112, gridY: -11 },
+            L: { gridX: -25, gridY: 49 },
+        };
+        const components = Object.entries(grid).map(([id, position]) => createSystemComponent({ id, ...position }));
+        const byId = new Map(components.map((component) => [component.id, component]));
+        const leaves = Object.keys(grid).filter((id) => id !== "main");
+        const connections = leaves.map((id) =>
+            createAugmentedConnection({
+                id: `${id}-main`,
+                fromComponent: byId.get(id)!,
+                toComponent: byId.get("main")!,
+            })
+        );
+        const lengthOf = (waypoints: number[]): number => {
+            let total = 0;
+            for (let index = 2; index < waypoints.length; index += 2) {
+                total +=
+                    Math.abs(waypoints[index]! - waypoints[index - 2]!) +
+                    Math.abs(waypoints[index + 1]! - waypoints[index - 1]!);
+            }
+            return total;
+        };
+        for (const id of leaves) {
+            const connection = connections.find((candidate) => candidate.from.id === id)!;
+            const route = computeConnectionRouting({
+                fromComponent: byId.get(id)!,
+                toComponent: byId.get("main")!,
+                components,
+                connections,
+                from: connection.from,
+                to: connection.to,
+                pointsOfAttack: [],
+            })!;
+            const directDistance =
+                (Math.abs(grid[id]!.gridX - grid["main"]!.gridX) + Math.abs(grid[id]!.gridY - grid["main"]!.gridY)) * 5;
+            expect(lengthOf(route.waypoints)).toBeLessThanOrEqual(directDistance * 2.5);
+        }
+    });
 });
