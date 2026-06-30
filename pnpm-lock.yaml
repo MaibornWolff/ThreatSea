@@ -21,8 +21,8 @@ importers:
         specifier: 14.1.1
         version: 14.1.1(semantic-release@25.0.5(typescript@6.0.3))
       conventional-changelog-conventionalcommits:
-        specifier: 10.0.0
-        version: 10.0.0
+        specifier: 10.2.0
+        version: 10.2.0
       husky:
         specifier: 9.1.7
         version: 9.1.7
@@ -410,8 +410,8 @@ packages:
     resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==}
     engines: {node: '>=0.1.90'}
 
-  '@conventional-changelog/template@1.0.0':
-    resolution: {integrity: sha512-gJCWgneQIGfxZ22B4nGh7LF3cHbIdhwTHZi9octL7kagH4UHfnsLvp/yPl6tzWvdnIIRUutJtVNEih6Ln2YzFw==}
+  '@conventional-changelog/template@1.2.0':
+    resolution: {integrity: sha512-12qHxvlKjHmP0PQ+17EREgC7lWyLwbph1RKcZQZ7k7ZWGmrxfxC9gadHGfvzr0g0u8BhiBGg3tks93txodlyRQ==}
     engines: {node: '>=22'}
 
   '@csstools/color-helpers@6.1.0':
@@ -2284,8 +2284,8 @@ packages:
     resolution: {integrity: sha512-6gfI3otXK5Ph5DfCOI1dblr+kN3FAm5a97hYoQkqNZxOaYa5WKfXH+AnpsmS+iUH2mgVC2Cg2Qw9m5OKcmNrIg==}
     engines: {node: '>=18'}
 
-  conventional-changelog-conventionalcommits@10.0.0:
-    resolution: {integrity: sha512-MI9NHlb+21eTLJyd6c8mgH2XHGz+ZaQanCFyH1A6AGtqqbTw+w9Ren4Oi5yWFi/pDehlmbnFU1pJzRqQXTOp+w==}
+  conventional-changelog-conventionalcommits@10.2.0:
+    resolution: {integrity: sha512-UtlM9GqolY7OmlQh5L/UEVoKsTUpTgUVy1PU8JN5gl5Ydaejb7WRklGliG1SKPxxj7hzA173eG3Kt5fYWE2pmg==}
     engines: {node: '>=22'}
 
   conventional-changelog-writer@8.4.0:
@@ -4960,7 +4960,7 @@ snapshots:
   '@colors/colors@1.5.0':
     optional: true
 
-  '@conventional-changelog/template@1.0.0': {}
+  '@conventional-changelog/template@1.2.0': {}
 
   '@csstools/color-helpers@6.1.0': {}
 
@@ -6570,9 +6570,9 @@ snapshots:
     dependencies:
       compare-func: 2.0.0
 
-  conventional-changelog-conventionalcommits@10.0.0:
+  conventional-changelog-conventionalcommits@10.2.0:
     dependencies:
-      '@conventional-changelog/template': 1.0.0
+      '@conventional-changelog/template': 1.2.0
 
   conventional-changelog-writer@8.4.0:
     dependencies:
