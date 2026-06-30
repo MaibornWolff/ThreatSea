@@ -75,10 +75,10 @@ describe("routeFishbone trunk-merging", () => {
 
     it("does not let approaches into the same hub cross transversally", () => {
         const routes = connectionIds.map((id) => routeInContext(id, connections, components)!.waypoints);
-        for (let i = 0; i < routes.length; i++) {
-            for (let j = i + 1; j < routes.length; j++) {
-                for (const [a1, a2] of segmentsOf(routes[i]!)) {
-                    for (const [b1, b2] of segmentsOf(routes[j]!)) {
+        for (let first = 0; first < routes.length; first++) {
+            for (let second = first + 1; second < routes.length; second++) {
+                for (const [a1, a2] of segmentsOf(routes[first]!)) {
+                    for (const [b1, b2] of segmentsOf(routes[second]!)) {
                         expect(crossesTransversally(a1, a2, b1, b2)).toBe(false);
                     }
                 }

@@ -103,7 +103,7 @@ const SystemComponentConnectionInner = ({
     onClick,
     onPointOfAttackClicked,
     components,
-    connections,
+    connections = [],
     selected,
     recalculate,
     onRecalculated,
