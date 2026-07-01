@@ -29,6 +29,8 @@ export interface Milestone {
     active?: boolean;
 }
 
+const toDayNumber = (date: Date): number => Math.floor(date.getTime() / 1000 / 3600 / 24);
+
 const calcNetRiskMatrix = (
     threats: ReportThreat[] | null | undefined,
     matrix: RiskMatrix | null,
@@ -46,10 +48,8 @@ const calcNetRiskMatrix = (
                 if (!measure.scheduledAt) {
                     return false;
                 }
-                const measureScheduledAt = new Date(measure.scheduledAt.toString().substring(0, 10));
-                return (
-                    !Number.isNaN(measureScheduledAt.getTime()) && measureScheduledAt.getTime() <= scheduledAt.getTime()
-                );
+                const measureScheduledAt = toDayNumber(new Date(measure.scheduledAt));
+                return !Number.isNaN(measureScheduledAt) && measureScheduledAt <= toDayNumber(scheduledAt);
             });
             const { netProbability, netDamage } = calcNetRisk(threat.probability, threat.damage, activeMeasures);
             const y = 5 - netProbability;
@@ -170,13 +170,11 @@ export const useReport = ({ projectId }: { projectId: number }) => {
                 ...threat,
                 measures: threat.measures.filter((measure) => {
                     let result = true;
-                    const scheduledAtTime = measure.scheduledAt
-                        ? new Date(measure.scheduledAt.toString().substring(0, 10)).getTime()
-                        : NaN;
-                    if (from && from.getTime() > scheduledAtTime) {
+                    const scheduledAtTime = measure.scheduledAt ? toDayNumber(new Date(measure.scheduledAt)) : NaN;
+                    if (from && toDayNumber(from) > scheduledAtTime) {
                         result = false;
                     }
-                    if (till && till.getTime() < scheduledAtTime) {
+                    if (till && toDayNumber(till) < scheduledAtTime) {
                         result = false;
                     }
                     return result;
@@ -223,17 +221,15 @@ export const useReport = ({ projectId }: { projectId: number }) => {
         if (!fromScheduledAt && !tillScheduledAt) {
             return measures;
         }
-        const from = fromScheduledAt ? new Date(fromScheduledAt.substring(0, 10)) : null;
-        const till = tillScheduledAt ? new Date(tillScheduledAt.substring(0, 10)) : null;
+        const from = fromScheduledAt ? toDayNumber(new Date(fromScheduledAt)) : null;
+        const till = tillScheduledAt ? toDayNumber(new Date(tillScheduledAt)) : null;
         return measures.filter((measure) => {
             let result = true;
-            const scheduledAt = measure.scheduledAt
-                ? new Date(measure.scheduledAt.toString().substring(0, 10)).getTime()
-                : NaN;
-            if (from && from.getTime() > scheduledAt) {
+            const scheduledAt = measure.scheduledAt ? toDayNumber(new Date(measure.scheduledAt)) : NaN;
+            if (from && from > scheduledAt) {
                 result = false;
             }
-            if (till && till.getTime() < scheduledAt) {
+            if (till && till < scheduledAt) {
                 result = false;
             }
             return result;
