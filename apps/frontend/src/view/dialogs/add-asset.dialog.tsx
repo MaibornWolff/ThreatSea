@@ -76,6 +76,7 @@ const AddAssetDialog = ({ projectId, asset, userRole, onDialogClose, ...props }:
         handleSubmit,
         formState: { errors },
     } = useForm<AssetDialogFormValues>({
+        mode: "onTouched",
         defaultValues: {
             ...asset,
             id: asset?.id ?? undefined,
@@ -221,8 +222,6 @@ const AddAssetDialog = ({ projectId, asset, userRole, onDialogClose, ...props }:
                             }}
                             type="number"
                             label={t("confidentiality")}
-                            min={MIN_CIA_VALUE}
-                            max={MIN_CIA_VALUE}
                             margin="normal"
                             {...register("confidentiality", {
                                 required: t("errorMessages.confidentialityValue"),
@@ -240,6 +239,10 @@ const AddAssetDialog = ({ projectId, asset, userRole, onDialogClose, ...props }:
                             helperText={errors?.confidentiality?.message}
                             data-testid="asset-creation-modal_confidentiality-input"
                             slotProps={{
+                                htmlInput: {
+                                    min: MIN_CIA_VALUE,
+                                    max: MAX_CIA_VALUE,
+                                },
                                 input: {
                                     endAdornment: (
                                         <InputAdornment position="end">
@@ -308,8 +311,6 @@ const AddAssetDialog = ({ projectId, asset, userRole, onDialogClose, ...props }:
                             type="number"
                             label={t("integrity")}
                             margin="normal"
-                            min={1}
-                            max={5}
                             sx={{
                                 marginLeft: 1,
                                 "& .info-adornment": {
@@ -326,11 +327,11 @@ const AddAssetDialog = ({ projectId, asset, userRole, onDialogClose, ...props }:
                                 required: t("errorMessages.integrityValue"),
                                 valueAsNumber: true,
                                 min: {
-                                    value: 1,
+                                    value: MIN_CIA_VALUE,
                                     message: t("errorMessages.integrityMin"),
                                 },
                                 max: {
-                                    value: 5,
+                                    value: MAX_CIA_VALUE,
                                     message: t("errorMessages.integrityMax"),
                                 },
                             })}
@@ -338,6 +339,10 @@ const AddAssetDialog = ({ projectId, asset, userRole, onDialogClose, ...props }:
                             helperText={errors?.integrity?.message}
                             data-testid="asset-creation-modal_integrity-input"
                             slotProps={{
+                                htmlInput: {
+                                    min: MIN_CIA_VALUE,
+                                    max: MAX_CIA_VALUE,
+                                },
                                 input: {
                                     endAdornment: (
                                         <InputAdornment position="end">
@@ -402,8 +407,6 @@ const AddAssetDialog = ({ projectId, asset, userRole, onDialogClose, ...props }:
                             type="number"
                             label={t("availability")}
                             margin="normal"
-                            min={1}
-                            max={5}
                             sx={{
                                 marginLeft: 1,
                                 "& .info-adornment": {
@@ -420,11 +423,11 @@ const AddAssetDialog = ({ projectId, asset, userRole, onDialogClose, ...props }:
                                 required: t("errorMessages.availabilityValue"),
                                 valueAsNumber: true,
                                 min: {
-                                    value: 1,
+                                    value: MIN_CIA_VALUE,
                                     message: t("errorMessages.availabilityMin"),
                                 },
                                 max: {
-                                    value: 5,
+                                    value: MAX_CIA_VALUE,
                                     message: t("errorMessages.availabilityMax"),
                                 },
                             })}
@@ -432,6 +435,10 @@ const AddAssetDialog = ({ projectId, asset, userRole, onDialogClose, ...props }:
                             helperText={errors?.availability?.message}
                             data-testid="asset-creation-modal_availability-input"
                             slotProps={{
+                                htmlInput: {
+                                    min: MIN_CIA_VALUE,
+                                    max: MAX_CIA_VALUE,
+                                },
                                 input: {
                                     endAdornment: (
                                         <InputAdornment position="end">
@@ -551,7 +558,7 @@ const AddAssetDialog = ({ projectId, asset, userRole, onDialogClose, ...props }:
                         color="success"
                         sx={{ marginRight: 0 }}
                         data-testid="save-button"
-                        disabled={!checkUserRole(userRole, USER_ROLES.EDITOR)}
+                        disabled={!checkUserRole(userRole, USER_ROLES.EDITOR) || Object.keys(errors).length > 0}
                     >
                         {t("saveBtn")}
                     </Button>
