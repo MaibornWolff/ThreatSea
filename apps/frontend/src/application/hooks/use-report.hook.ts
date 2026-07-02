@@ -1,6 +1,7 @@
 import type { ProjectReport } from "#api/types/project.types.ts";
 import type { SortDirection } from "#application/actions/list.actions.ts";
 import { exportAsExcelFile } from "#utils/export.ts";
+import { toDayNumber, createRiskMatrixDesign, addThreatsToRiskMatrix } from "#utils/riskMatrix.ts";
 import { useAlert } from "#application/hooks/use-alert.hook.ts";
 import { useState, useMemo, useEffect, useEffectEvent } from "react";
 import { useTranslation } from "react-i18next";
@@ -29,42 +30,29 @@ export interface Milestone {
     active?: boolean;
 }
 
-const toDayNumber = (date: Date): number => Math.floor(date.getTime() / 1000 / 3600 / 24);
+const calcActiveMeasureNetRisk = (threat: ReportThreat, scheduledAt: Date) => {
+    const activeMeasures = threat.measures.filter((measure) => {
+        if (!measure.scheduledAt) {
+            return false;
+        }
+        const measureScheduledAt = toDayNumber(new Date(measure.scheduledAt));
+        return !Number.isNaN(measureScheduledAt) && measureScheduledAt <= toDayNumber(scheduledAt);
+    });
+    return calcNetRisk(threat.probability, threat.damage, activeMeasures);
+};
 
 const calcNetRiskMatrix = (
     threats: ReportThreat[] | null | undefined,
     matrix: RiskMatrix | null,
     scheduledAt: Date
 ): RiskMatrix | null => {
-    if (!threats) {
+    if (!threats || !matrix) {
         return null;
     }
-    if (!matrix) {
-        return null;
-    }
-    return threats.reduce(
-        (arr, threat) => {
-            const activeMeasures = threat.measures.filter((measure) => {
-                if (!measure.scheduledAt) {
-                    return false;
-                }
-                const measureScheduledAt = toDayNumber(new Date(measure.scheduledAt));
-                return !Number.isNaN(measureScheduledAt) && measureScheduledAt <= toDayNumber(scheduledAt);
-            });
-            const { netProbability, netDamage } = calcNetRisk(threat.probability, threat.damage, activeMeasures);
-            const y = 5 - netProbability;
-            const x = netDamage - 1;
-            if (x >= 0 && y >= 0 && arr[y]?.[x]) {
-                // if no protection goal is affected risk is not in the matrix
-                if (typeof arr[y][x].amount !== "number") {
-                    arr[y][x].amount = 0;
-                }
-                arr[y][x].amount++;
-            }
-            return arr;
-        },
-        [...matrix.map((row) => [...row].map((cell) => ({ ...cell })))]
-    );
+    return addThreatsToRiskMatrix(matrix, threats, (threat) => {
+        const { netProbability, netDamage } = calcActiveMeasureNetRisk(threat, scheduledAt);
+        return { probability: netProbability, damage: netDamage };
+    });
 };
 
 const calcRiskBarGraph = (matrix: RiskMatrix | null): RiskBarGraph | null => {
@@ -140,20 +128,7 @@ export const useReport = ({ projectId }: { projectId: number }) => {
         if (typeof data?.project?.lineOfToleranceRed !== "number") {
             return null;
         }
-        const lineOfToleranceGreen = data?.project?.lineOfToleranceGreen;
-        const lineOfToleranceRed = data?.project?.lineOfToleranceRed;
-        const matrix: RiskMatrix = [];
-        for (let y = 0; y < 5; y++) {
-            const row: RiskMatrixCell[] = [];
-            for (let x = 0; x < 5; x++) {
-                const color = calcRiskColour(x + 1, 5 - y, lineOfToleranceGreen, lineOfToleranceRed);
-                row.push({
-                    color,
-                });
-            }
-            matrix.push(row);
-        }
-        return matrix;
+        return createRiskMatrixDesign(data.project.lineOfToleranceGreen, data.project.lineOfToleranceRed);
     }, [data?.project?.lineOfToleranceGreen, data?.project?.lineOfToleranceRed]);
 
     const filteredThreats: ReportThreat[] | null = useMemo(() => {
@@ -237,52 +212,21 @@ export const useReport = ({ projectId }: { projectId: number }) => {
     }, [measures, fromScheduledAt, tillScheduledAt]);
 
     const bruttoMatrix: RiskMatrix | null = useMemo(() => {
-        if (!transformedThreats) {
+        if (!transformedThreats || !matrixDesign) {
             return null;
         }
-        if (!matrixDesign) {
-            return null;
-        }
-        return transformedThreats.reduce(
-            (arr, threat) => {
-                const y = 5 - threat.probability;
-                const x = threat.damage - 1;
-                if (x >= 0 && y >= 0 && arr[y]?.[x]) {
-                    // if no protection goal is affected risk is not in the matrix
-                    if (typeof arr[y][x]?.amount !== "number") {
-                        arr[y][x].amount = 0;
-                    }
-                    arr[y][x].amount++;
-                }
-                return arr;
-            },
-            [...matrixDesign.map((row) => [...row].map((cell) => ({ ...cell })))]
-        );
+        return addThreatsToRiskMatrix(matrixDesign, transformedThreats, (threat) => {
+            return { probability: threat.probability, damage: threat.damage };
+        });
     }, [transformedThreats, matrixDesign]);
 
     const nettoMatrix: RiskMatrix | null = useMemo(() => {
-        if (!transformedThreats) {
+        if (!transformedThreats || !matrixDesign) {
             return null;
         }
-        if (!matrixDesign) {
-            return null;
-        }
-        return transformedThreats.reduce(
-            (arr, threat) => {
-                const { netProbability, netDamage } = threat;
-                const y = 5 - netProbability;
-                const x = netDamage - 1;
-                if (x >= 0 && y >= 0 && arr[y]?.[x]) {
-                    // if no protection goal is affected risk is not in the matrix
-                    if (typeof arr[y][x].amount !== "number") {
-                        arr[y][x].amount = 0;
-                    }
-                    arr[y][x].amount++;
-                }
-                return arr;
-            },
-            [...matrixDesign.map((row) => [...row].map((cell) => ({ ...cell })))]
-        );
+        return addThreatsToRiskMatrix(matrixDesign, transformedThreats, (threat) => {
+            return { probability: threat.netProbability, damage: threat.netDamage };
+        });
     }, [transformedThreats, matrixDesign]);
 
     const milestones: Milestone[] | null = useMemo(() => {

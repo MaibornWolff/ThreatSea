@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
-import { calcNetRisk, calcRiskColour } from "#utils/calcRisk.ts";
+import { calcNetRisk } from "#utils/calcRisk.ts";
+import { createRiskMatrixDesign, addThreatsToRiskMatrix, toDayNumber } from "#utils/riskMatrix.ts";
 import { useCatalogMeasures } from "./use-catalog-measures.hook.ts";
 import { useMeasureImpacts } from "./use-measureImpacts.hook.ts";
 import { useMeasures } from "./use-measures.hook.ts";
@@ -71,8 +72,6 @@ const sortableThreatFields: (keyof Pick<
     ThreatWithMetrics,
     "name" | "description" | "componentName" | "attacker" | "pointOfAttack"
 >)[] = ["name", "description", "componentName", "attacker", "pointOfAttack"];
-
-const toDayNumber = (date: Date): number => Math.floor(date.getTime() / 1000 / 3600 / 24);
 
 export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
     const project = useAppSelector((state) => projectsSelectors.selectById(state, projectId));
@@ -165,36 +164,14 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
     );
 
     const matrixDesign: MatrixGrid = useMemo(() => {
-        const matrix = [];
-        for (let y = 0; y < 5; y++) {
-            const row = [];
-            for (let x = 0; x < 5; x++) {
-                const color = calcRiskColour(x + 1, 5 - y, currentGreenValue, currentRedValue);
-                row.push({
-                    color,
-                });
-            }
-            matrix.push(row);
-        }
-        return matrix;
+        return createRiskMatrixDesign(currentGreenValue, currentRedValue);
     }, [currentGreenValue, currentRedValue]);
 
     const matrix: MatrixGrid = useMemo(() => {
-        return threats.reduce(
-            (arr, threat) => {
-                const y = 5 - threat.newProbability;
-                const x = threat.newDamage - 1;
-                if (x >= 0 && y >= 0 && arr[y]?.[x]) {
-                    // if no protection goal is affected risk is not in the matrix
-                    if (typeof arr[y]?.[x]?.amount !== "number") {
-                        arr[y][x].amount = 0;
-                    }
-                    arr[y][x].amount++;
-                }
-                return arr;
-            },
-            [...matrixDesign.map((row) => [...row].map((cell) => ({ ...cell })))]
-        );
+        return addThreatsToRiskMatrix(matrixDesign, threats, (threat) => ({
+            probability: threat.newProbability,
+            damage: threat.newDamage,
+        }));
     }, [threats, matrixDesign]);
 
     const filteredThreats: ThreatWithMetrics[] = useMemo(() => {
