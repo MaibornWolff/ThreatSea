@@ -75,7 +75,7 @@ jobs:
       - name: Extract metadata for next branch (prerelease)
         if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'next'
         id: meta-next
-        uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9 # v6
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6
         with:
           images: |
             ghcr.io/maibornwolff/threatsea
@@ -121,7 +121,7 @@ jobs:
       - name: Extract metadata for main branch
         if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'main'
         id: meta-main
-        uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9 # v6
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6
         with:
           images: |
             maibornwolff/threatsea
