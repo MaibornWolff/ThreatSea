@@ -5,6 +5,7 @@ import AddThreatDialog from "#view/dialogs/add-threat-dialog/add-threat.dialog.t
 
 interface ThreatDialogLocationState {
     threat: ExtendedThreat | undefined;
+    returnToTab?: "MAIN" | "ASSETS" | "MEASURES";
 }
 
 /**
@@ -22,7 +23,16 @@ const ThreatDialogPage = () => {
     const project = useAppSelector((state) => state.projects.current);
 
     if (threat && project) {
-        return <AddThreatDialog open={true} threat={threat} project={project} userRole={userRole} />;
+        const returnToTab = state?.returnToTab;
+        return (
+            <AddThreatDialog
+                open={true}
+                threat={threat}
+                project={project}
+                userRole={userRole}
+                {...(returnToTab !== undefined ? { initialTab: returnToTab } : {})}
+            />
+        );
     } else {
         return <Navigate to={`/projects/${projectId}/threats`} replace />;
     }

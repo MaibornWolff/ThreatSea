@@ -13,7 +13,7 @@ import {
 import { useRef, useState, type ChangeEvent, type MouseEvent, type SyntheticEvent } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { useDialog } from "#application/hooks/use-dialog.hook.ts";
 import { Button } from "#view/components/button.component.tsx";
 import { Dialog } from "#view/components/dialog.component.tsx";
@@ -37,13 +37,15 @@ interface AddThreatDialogProps extends DialogProps {
     threat: ExtendedThreat;
     project: ExtendedProject;
     userRole: USER_ROLES | undefined;
+    initialTab?: ThreatTab;
 }
 
-const AddThreatDialog = ({ threat, project, userRole, ...props }: AddThreatDialogProps) => {
+const AddThreatDialog = ({ threat, project, userRole, initialTab, ...props }: AddThreatDialogProps) => {
     const { confirmDialog, cancelDialog } = useDialog<ThreatFormValues | null>("threats");
     const navigate = useNavigate();
+    const location = useLocation();
     const { t } = useTranslation("threatDialogPage");
-    const [tab, setTab] = useState<ThreatTab>("MAIN");
+    const [tab, setTab] = useState<ThreatTab>(initialTab ?? "MAIN");
     const formRef = useRef<HTMLFormElement | null>(null);
     const projectId = project.id;
     const threatId = threat.id;
@@ -181,6 +183,10 @@ const AddThreatDialog = ({ threat, project, userRole, ...props }: AddThreatDialo
      */
     const handleChangeTab = (_event: SyntheticEvent, newTab: ThreatTab) => {
         setTab(newTab);
+        navigate(location.pathname, {
+            replace: true,
+            state: { ...location.state, returnToTab: newTab },
+        });
     };
 
     /**

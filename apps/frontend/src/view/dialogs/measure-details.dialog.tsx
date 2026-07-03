@@ -8,7 +8,7 @@ import type { DialogProps } from "@mui/material/Dialog";
 import { useState, type ChangeEvent, type SyntheticEvent } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { useDialog } from "#application/hooks/use-dialog.hook.ts";
 import { Button } from "#view/components/button.component.tsx";
 import { Dialog } from "#view/components/dialog.component.tsx";
@@ -42,6 +42,7 @@ interface MeasureDetailsFormValues extends FormValues, Omit<Measure, keyof FormV
 interface MeasureDetailsDialogProps extends DialogProps {
     project: Project;
     measure: Measure;
+    initialTab?: MeasureDetailsTab;
 }
 
 type MeasureDetailsTab = "MAIN" | "THREATS";
@@ -54,8 +55,9 @@ type MeasureDetailsTab = "MAIN" | "THREATS";
  * @param {object} props - Dialog properties.
  * @returns React component for the measure dialog.
  */
-const MeasureDetailsDialog = ({ project, measure, ...props }: MeasureDetailsDialogProps) => {
+const MeasureDetailsDialog = ({ project, measure, initialTab, ...props }: MeasureDetailsDialogProps) => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { confirmDialog, cancelDialog } = useDialog<MeasureDetailsFormValues | null>("measures");
     const userRole = useAppSelector((state) => state.projects.current?.role);
 
@@ -77,7 +79,7 @@ const MeasureDetailsDialog = ({ project, measure, ...props }: MeasureDetailsDial
         },
     });
 
-    const [tab, setTab] = useState<MeasureDetailsTab>("MAIN");
+    const [tab, setTab] = useState<MeasureDetailsTab>(initialTab ?? "MAIN");
     const isNew = !measureId;
 
     const { t } = useTranslation("measureDialog");
@@ -137,10 +139,7 @@ const MeasureDetailsDialog = ({ project, measure, ...props }: MeasureDetailsDial
     };
     const onClickAddMeasureImpact = () => {
         navigate(`/projects/${projectId}/measures/${measureId}/measureImpacts/edit`, {
-            state: {
-                measure,
-                project,
-            },
+            state: { measure, project },
         });
     };
 
@@ -148,11 +147,7 @@ const MeasureDetailsDialog = ({ project, measure, ...props }: MeasureDetailsDial
         event.preventDefault();
         event.stopPropagation();
         navigate(`/projects/${projectId}/measures/${measureId}/measureImpacts/edit`, {
-            state: {
-                measure,
-                measureImpact,
-                project,
-            },
+            state: { measure, measureImpact, project },
         });
     };
 
@@ -173,6 +168,10 @@ const MeasureDetailsDialog = ({ project, measure, ...props }: MeasureDetailsDial
 
     const handleChangeTab = (_event: SyntheticEvent, newTab: MeasureDetailsTab) => {
         setTab(newTab);
+        navigate(location.pathname, {
+            replace: true,
+            state: { ...location.state, returnToTab: newTab },
+        });
     };
 
     /**

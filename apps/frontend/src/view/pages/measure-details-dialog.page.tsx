@@ -13,6 +13,7 @@ import MeasureDetailsDialog from "#view/dialogs/measure-details.dialog.tsx";
 interface MeasureDetailsDialogLocationState {
     measure: Measure;
     project: Project;
+    returnToTab?: "MAIN" | "THREATS";
 }
 
 const MeasureDetailsDialogPage = () => {
@@ -20,9 +21,16 @@ const MeasureDetailsDialogPage = () => {
     const { state } = useLocation() as Location<MeasureDetailsDialogLocationState | undefined>;
 
     if (state) {
-        const { measure, project } = state;
+        const { measure, project, returnToTab } = state;
 
-        return <MeasureDetailsDialog project={project} open={true} measure={measure} />;
+        return (
+            <MeasureDetailsDialog
+                project={project}
+                open={true}
+                measure={measure}
+                {...(returnToTab !== undefined ? { initialTab: returnToTab } : {})}
+            />
+        );
     } else {
         return <Navigate to={`/projects/${projectId}/risk`} replace />;
     }
