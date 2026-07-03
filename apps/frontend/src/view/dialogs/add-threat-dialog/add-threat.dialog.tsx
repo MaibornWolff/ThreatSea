@@ -128,13 +128,23 @@ const AddThreatDialog = ({ threat, project, userRole, initialTab, ...props }: Ad
     ) => {
         event.preventDefault();
         event.stopPropagation();
-        navigate(`/projects/${projectId}/measures/${measure.id}/measureImpacts/edit`, {
-            state: {
-                measure,
-                measureImpact,
-                project,
-            },
-        });
+        if (location.pathname.startsWith(`/projects/${projectId}/threats/`)) {
+            navigate(`/projects/${projectId}/threats/measureImpacts/edit`, {
+                state: {
+                    threat: { ...threat, damage: calcDamage(threat) },
+                    measureImpact,
+                    project,
+                },
+            });
+        } else {
+            navigate(`/projects/${projectId}/measures/${measure.id}/measureImpacts/edit`, {
+                state: {
+                    measure,
+                    measureImpact,
+                    project,
+                },
+            });
+        }
     };
 
     const onClickDeleteMeasureThreat = (
