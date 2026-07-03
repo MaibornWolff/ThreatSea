@@ -57,7 +57,7 @@
     "drizzle-kit": "0.31.10",
     "nanoid": "5.1.16",
     "oxlint": "1.72.0",
-    "oxlint-tsgolint": "0.23.0",
+    "oxlint-tsgolint": "0.24.0",
     "supertest": "7.2.2",
     "tsc-alias": "1.8.17",
     "tsx": "4.22.4",
