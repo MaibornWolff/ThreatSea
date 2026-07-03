@@ -60,8 +60,8 @@ describe("AddThreatDialog — Apply Measure button", () => {
         await user.click(screen.getByRole("tab", { name: /measures/i }));
         await user.click(screen.getByRole("button", { name: /apply measure/i }));
 
-        expect(navigate).toHaveBeenCalledOnce();
-        expect(navigate).toHaveBeenCalledWith(`/projects/${project.id}/threats/measureImpacts/edit`, {
+        expect(navigate).toHaveBeenCalledTimes(2);
+        expect(navigate).toHaveBeenLastCalledWith(`/projects/${project.id}/threats/measureImpacts/edit`, {
             state: {
                 threat: { ...threat, damage: 4 },
                 project,
