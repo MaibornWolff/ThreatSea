@@ -1,5 +1,5 @@
 import { nanoid } from "@reduxjs/toolkit";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { Asset } from "#api/types/asset.types.ts";
 import type { ComponentType } from "#api/types/component-types.types.ts";
@@ -299,10 +299,19 @@ export const useEditor = ({
         dispatch(SystemActions.removeComponent({ id: selectedComponentId }));
     };
 
+    // One batch of connections flagged for recalculation together (see flagConnectionsForRecalculation).
+    const recalculationBatchRef = useRef<{
+        connectionIds: string[];
+        remaining: Set<string>;
+        isSecondPass: boolean;
+    } | null>(null);
+
     const flagConnectionsForRecalculation = (componentIds: string[]): void => {
         const affectedComponents = new Set(componentIds);
+        const affectedConnectionIds: string[] = [];
         connections.forEach((connection) => {
             if (affectedComponents.has(connection.from.id) || affectedComponents.has(connection.to.id)) {
+                affectedConnectionIds.push(connection.id);
                 dispatch(
                     SystemActions.setConnection({
                         id: connection.id,
@@ -313,6 +322,18 @@ export const useEditor = ({
                 );
             }
         });
+        // Connections recalculated in the same batch only see each other's OLD lines, so two fresh
+        // routes can cross without either noticing. Remember the batch; once every member has
+        // reported back, connectionRecalculated flags them all a second time — in that pass each one
+        // sees its siblings' fresh lines. A single connection has no sibling to be stale against.
+        recalculationBatchRef.current =
+            affectedConnectionIds.length >= 2
+                ? {
+                      connectionIds: affectedConnectionIds,
+                      remaining: new Set(affectedConnectionIds),
+                      isSecondPass: false,
+                  }
+                : null;
     };
 
     const removeConnection = (connection?: SystemConnection | null): void => {
@@ -735,6 +756,33 @@ export const useEditor = ({
                 },
             })
         );
+
+        // Second recalculation pass (see flagConnectionsForRecalculation): once the whole batch has
+        // reported its first-pass route, flag it once more so every member re-routes against the
+        // others' fresh lines. The second pass ends here — no third one.
+        const batch = recalculationBatchRef.current;
+        if (!batch?.remaining.delete(connectionId) || batch.remaining.size > 0) {
+            return;
+        }
+        if (batch.isSecondPass) {
+            recalculationBatchRef.current = null;
+            return;
+        }
+        recalculationBatchRef.current = {
+            connectionIds: batch.connectionIds,
+            remaining: new Set(batch.connectionIds),
+            isSecondPass: true,
+        };
+        batch.connectionIds.forEach((id) => {
+            dispatch(
+                SystemActions.setConnection({
+                    id,
+                    changes: {
+                        recalculate: true,
+                    },
+                })
+            );
+        });
     };
 
     const standardComponents = useAppSelector(editorSelectors.selectStandardComponents);

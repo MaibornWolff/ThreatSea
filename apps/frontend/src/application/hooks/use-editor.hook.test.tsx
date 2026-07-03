@@ -472,6 +472,95 @@ describe("useEditor", () => {
         });
     });
 
+    // A batch of connections recalculated together only sees each other's old lines, so once the
+    // whole batch has reported, it is flagged one more time (and only one more time) — in that
+    // second pass every member routes against its siblings' fresh lines.
+    describe("connection recalculation second pass", () => {
+        const seedHubWithTwoConnections = (store: EditorStore): void => {
+            store.dispatch(SystemActions.createComponent(createComponentPayload({ id: "comp-1" })));
+            store.dispatch(SystemActions.createComponent(createComponentPayload({ id: "comp-2" })));
+            store.dispatch(SystemActions.createComponent(createComponentPayload({ id: "comp-3" })));
+            store.dispatch(
+                SystemActions.createConnection(
+                    createConnection({
+                        id: "conn-1",
+                        from: createConnectionAnchor({ id: "comp-1" }),
+                        to: createConnectionAnchor({ id: "comp-2" }),
+                    })
+                )
+            );
+            store.dispatch(
+                SystemActions.createConnection(
+                    createConnection({
+                        id: "conn-2",
+                        from: createConnectionAnchor({ id: "comp-1" }),
+                        to: createConnectionAnchor({ id: "comp-3" }),
+                    })
+                )
+            );
+            store.dispatch(EditorActions.selectComponent("comp-1"));
+        };
+
+        const recalculateFlags = (store: EditorStore): (boolean | undefined)[] => [
+            store.getState().system.connections.entities["conn-1"]?.recalculate,
+            store.getState().system.connections.entities["conn-2"]?.recalculate,
+        ];
+
+        it("re-flags the whole batch once after every member reported, then stops", () => {
+            const { result, store } = renderUseEditor(seedHubWithTwoConnections);
+
+            act(() => {
+                result.current.updateConnectionsOfComponent();
+            });
+            expect(recalculateFlags(store)).toEqual([true, true]);
+
+            // First pass: nothing re-flags until the last member reports.
+            act(() => {
+                result.current.connectionRecalculated("conn-1", [0, 0, 10, 0], []);
+            });
+            expect(recalculateFlags(store)).toEqual([false, true]);
+
+            act(() => {
+                result.current.connectionRecalculated("conn-2", [0, 5, 10, 5], []);
+            });
+            expect(recalculateFlags(store)).toEqual([true, true]);
+
+            // Second pass: reporting clears the flags for good — no third pass.
+            act(() => {
+                result.current.connectionRecalculated("conn-1", [0, 0, 10, 0], []);
+                result.current.connectionRecalculated("conn-2", [0, 5, 10, 5], []);
+            });
+            expect(recalculateFlags(store)).toEqual([false, false]);
+        });
+
+        it("does not re-flag a single-connection batch", () => {
+            const { result, store } = renderUseEditor((store) => {
+                store.dispatch(SystemActions.createComponent(createComponentPayload({ id: "comp-1" })));
+                store.dispatch(SystemActions.createComponent(createComponentPayload({ id: "comp-2" })));
+                store.dispatch(
+                    SystemActions.createConnection(
+                        createConnection({
+                            id: "conn-1",
+                            from: createConnectionAnchor({ id: "comp-1" }),
+                            to: createConnectionAnchor({ id: "comp-2" }),
+                        })
+                    )
+                );
+                store.dispatch(EditorActions.selectComponent("comp-1"));
+            });
+
+            act(() => {
+                result.current.updateConnectionsOfComponent();
+            });
+            expect(store.getState().system.connections.entities["conn-1"]?.recalculate).toBe(true);
+
+            act(() => {
+                result.current.connectionRecalculated("conn-1", [0, 0, 10, 0], []);
+            });
+            expect(store.getState().system.connections.entities["conn-1"]?.recalculate).toBe(false);
+        });
+    });
+
     // removeAssetFromPointOfAttack only removes an asset that is actually attached
     describe("removeAssetFromPointOfAttack", () => {
         it("removes an attached asset and ignores an unattached one", () => {

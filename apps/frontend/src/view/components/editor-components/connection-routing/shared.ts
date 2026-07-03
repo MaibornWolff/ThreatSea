@@ -278,6 +278,49 @@ export const buildDegreeMap = (connections: AugmentedSystemConnection[]): Map<st
 
 // ----- shared scoring + connection-point meta -----
 
+/** Reads a flat [x, y, x, y, …] waypoint array back into points. */
+export const pointsFromWaypoints = (waypoints: number[]): Point[] => {
+    const points: Point[] = [];
+    for (let index = 0; index + 1 < waypoints.length; index += 2) {
+        points.push({ x: waypoints[index]!, y: waypoints[index + 1]! });
+    }
+    return points;
+};
+
+/**
+ * How many X-crossings a route makes with the lines of connections sharing no component with it.
+ * Lines touching the same hub/leaf are skipped — they merge into trunks on purpose.
+ */
+export const countUnrelatedLineCrossings = (
+    waypoints: number[],
+    input: Pick<ConnectionRoutingInput, "connections" | "from" | "to">
+): number => {
+    const ownEndpointIds = new Set([input.from.id, input.to.id]);
+    const ownPoints = pointsFromWaypoints(waypoints);
+    let crossings = 0;
+    for (const connection of input.connections) {
+        if (ownEndpointIds.has(connection.from.id) || ownEndpointIds.has(connection.to.id)) {
+            continue;
+        }
+        const otherPoints = pointsFromWaypoints(connection.waypoints);
+        for (let own = 1; own < ownPoints.length; own++) {
+            for (let other = 1; other < otherPoints.length; other++) {
+                if (
+                    crossesTransversally(
+                        ownPoints[own - 1]!,
+                        ownPoints[own]!,
+                        otherPoints[other - 1]!,
+                        otherPoints[other]!
+                    )
+                ) {
+                    crossings++;
+                }
+            }
+        }
+    }
+    return crossings;
+};
+
 /** How many of the given boxes a route's segments run into (each box counted at most once). */
 export const countObstacleHits = (points: Point[], obstacles: Rectangle[]): number => {
     let hits = 0;

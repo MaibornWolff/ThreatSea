@@ -1,6 +1,6 @@
 /**
- * Deterministic router: one straight-out line per connection — fewest turns, avoids boxes and other
- * lines where it can. This is the fallback used whenever connections don't form a fishbone.
+ * Deterministic router: routes one connection on its own — no trunk merging. Fallback whenever
+ * connections don't form a fishbone.
  */
 import { AnchorOrientation, type AugmentedSystemComponent, type ConnectionPointMeta } from "#api/types/system.types.ts";
 import {
@@ -21,6 +21,7 @@ import {
     isHorizontalFace,
     isOrthogonal,
     outwardUnit,
+    pointsFromWaypoints,
     rectOf,
     routeLength,
     sameDirection,
@@ -29,6 +30,7 @@ import {
 } from "./shared.ts";
 
 const WRAP_CLEARANCE = 20; // how far outside the boxes a wrap-around line routes, in pixels
+const CHANNEL_NUDGE = 20; // sideways offset for the extra Z-channels that dodge an occupied channel
 
 interface ScoredRoute {
     points: Point[];
@@ -36,6 +38,7 @@ interface ScoredRoute {
     targetFace: Face;
     obstacleHits: number;
     crossings: number;
+    overlapLength: number;
     bendCount: number;
     length: number;
     hubFacePenalty: number;
@@ -45,27 +48,32 @@ interface ScoredRoute {
 
 // ----- face selection -----
 
-/** A backup face turned 90° from the primary, still leaning toward the other component — lets a connection route around a blocked side. */
-const alternateFace = (face: Face, self: AugmentedSystemComponent, other: AugmentedSystemComponent): Face => {
-    if (isHorizontalFace(face)) {
-        return other.gridY > self.gridY ? AnchorOrientation.bottom : AnchorOrientation.top;
+/**
+ * The faces to try, best first: the face pointing at the other component, then the 90° turn toward
+ * it, then the 90° turn away from it.
+ */
+const extendedCandidateFaces = (self: AugmentedSystemComponent, other: AugmentedSystemComponent): Face[] => {
+    const primary = findBestAnchor(self, other) as Face;
+    if (isHorizontalFace(primary)) {
+        return other.gridY > self.gridY
+            ? [primary, AnchorOrientation.bottom, AnchorOrientation.top]
+            : [primary, AnchorOrientation.top, AnchorOrientation.bottom];
     }
-    return other.gridX > self.gridX ? AnchorOrientation.right : AnchorOrientation.left;
+    return other.gridX > self.gridX
+        ? [primary, AnchorOrientation.right, AnchorOrientation.left]
+        : [primary, AnchorOrientation.left, AnchorOrientation.right];
 };
 
-const candidateFaces = (self: AugmentedSystemComponent, other: AugmentedSystemComponent): Face[] => {
-    const primary = findBestAnchor(self, other) as Face;
-    const alternate = alternateFace(primary, self, other);
-    return primary === alternate ? [primary] : [primary, alternate];
-};
+/** The normal face set: primary + toward-side turn. The away-side face is escalation-only. */
+const candidateFaces = (self: AugmentedSystemComponent, other: AugmentedSystemComponent): Face[] =>
+    extendedCandidateFaces(self, other).slice(0, 2);
 
 // ----- connector between the two attach points -----
 
 /**
- * Lists the possible right-angled line shapes between the two attach points: straight, the two
- * L-shapes, two Z-shapes, and wrap-around paths that go outside both boxes (for when the faces point
- * away from each other). Each entry is just the corner points in between — the two ends are added by
- * the caller, which then checks and ranks them.
+ * The right-angled line shapes between the two attach points: straight, L-shapes, Z-shapes, and
+ * wrap-arounds outside both boxes. Each entry holds only the corner points — the caller adds the
+ * two ends, then checks and ranks.
  */
 const buildConnectorCandidates = (p: Point, q: Point, fromRectangle: Rectangle, toRectangle: Rectangle): Point[][] => {
     const candidates: Point[][] = [];
@@ -79,14 +87,19 @@ const buildConnectorCandidates = (p: Point, q: Point, fromRectangle: Rectangle, 
 
     const midX = (p.x + q.x) / 2;
     const midY = (p.y + q.y) / 2;
-    candidates.push([
-        { x: midX, y: p.y },
-        { x: midX, y: q.y },
-    ]); // Z, vertical channel at mid-x
-    candidates.push([
-        { x: p.x, y: midY },
-        { x: q.x, y: midY },
-    ]); // Z, horizontal channel at mid-y
+    // Z-shapes at the middle channel plus nudged ones, so a route can sidestep an occupied channel.
+    for (const channelX of [midX, midX - CHANNEL_NUDGE, midX + CHANNEL_NUDGE]) {
+        candidates.push([
+            { x: channelX, y: p.y },
+            { x: channelX, y: q.y },
+        ]);
+    }
+    for (const channelY of [midY, midY - CHANNEL_NUDGE, midY + CHANNEL_NUDGE]) {
+        candidates.push([
+            { x: p.x, y: channelY },
+            { x: q.x, y: channelY },
+        ]);
+    }
 
     const unionMinX = Math.min(fromRectangle.minX, toRectangle.minX);
     const unionMaxX = Math.max(fromRectangle.maxX, toRectangle.maxX);
@@ -115,15 +128,6 @@ interface Segment {
     end: Point;
 }
 
-/** Reads a flat [x, y, x, y, …] waypoint array back into points. */
-const pointsFromWaypoints = (waypoints: number[]): Point[] => {
-    const points: Point[] = [];
-    for (let index = 0; index + 1 < waypoints.length; index += 2) {
-        points.push({ x: waypoints[index]!, y: waypoints[index + 1]! });
-    }
-    return points;
-};
-
 /** The straight segments of a polyline. */
 const segmentsOfPoints = (points: Point[]): Segment[] => {
     const segments: Segment[] = [];
@@ -146,18 +150,56 @@ const countLineCrossings = (points: Point[], otherSegments: Segment[]): number =
     return crossings;
 };
 
-// Ranks two routes: avoid component boxes first, then keep turns few, then cross fewer other lines,
-// then stay short, then enter a hub on the side facing this leaf — with face/candidate order as the
-// final, fully deterministic tiebreak.
+/** How far two 1-D ranges overlap (0 when they don't touch). */
+const rangeOverlap = (start1: number, end1: number, start2: number, end2: number): number =>
+    Math.max(
+        0,
+        Math.min(Math.max(start1, end1), Math.max(start2, end2)) -
+            Math.max(Math.min(start1, end1), Math.min(start2, end2))
+    );
+
+/** The length two parallel collinear segments run on top of each other (0 when they don't). */
+const collinearOverlap = (a: Point, b: Point, c: Point, d: Point): number => {
+    const bothVerticalOnSameX = a.x === b.x && c.x === d.x && a.x === c.x;
+    if (bothVerticalOnSameX) {
+        return rangeOverlap(a.y, b.y, c.y, d.y);
+    }
+    const bothHorizontalOnSameY = a.y === b.y && c.y === d.y && a.y === c.y;
+    if (bothHorizontalOnSameY) {
+        return rangeOverlap(a.x, b.x, c.x, d.x);
+    }
+    return 0;
+};
+
+/**
+ * How many pixels of this route lie on top of unrelated connections' lines — on canvas that reads
+ * as a false merge. (Overlap with lines into a shared component is intended trunk merging and is
+ * not counted here.)
+ */
+const countUnrelatedOverlap = (points: Point[], unrelatedSegments: Segment[]): number => {
+    let overlap = 0;
+    for (const routeSegment of segmentsOfPoints(points)) {
+        for (const otherSegment of unrelatedSegments) {
+            overlap += collinearOverlap(routeSegment.start, routeSegment.end, otherSegment.start, otherSegment.end);
+        }
+    }
+    return overlap;
+};
+
+// Ranking order: boxes avoided > fewer crossings > less overlap > fewer bends > shorter > hub face,
+// with face/candidate order as the final deterministic tiebreak.
 const isBetterRoute = (candidate: ScoredRoute, best: ScoredRoute): boolean => {
     if (candidate.obstacleHits !== best.obstacleHits) {
         return candidate.obstacleHits < best.obstacleHits;
     }
-    if (candidate.bendCount !== best.bendCount) {
-        return candidate.bendCount < best.bendCount;
-    }
     if (candidate.crossings !== best.crossings) {
         return candidate.crossings < best.crossings;
+    }
+    if (candidate.overlapLength !== best.overlapLength) {
+        return candidate.overlapLength < best.overlapLength;
+    }
+    if (candidate.bendCount !== best.bendCount) {
+        return candidate.bendCount < best.bendCount;
     }
     const candidateLength = Math.round(candidate.length * 1000);
     const bestLength = Math.round(best.length * 1000);
@@ -173,10 +215,7 @@ const isBetterRoute = (candidate: ScoredRoute, best: ScoredRoute): boolean => {
     return candidate.candidateRank < best.candidateRank;
 };
 
-/**
- * Works out the waypoints + connection-point info for one connection WITHOUT trunk-merging. Returns
- * null when no route is possible.
- */
+/** Computes the waypoints + connection-point info for one connection. Null when no route is possible. */
 export function routeDeterministic({
     fromComponent,
     toComponent,
@@ -197,9 +236,11 @@ export function routeDeterministic({
         .filter((component) => component.id !== fromComponent.id && component.id !== toComponent.id)
         .map(rectOf);
 
-    // The other connections' drawn lines (from their cached waypoints), so equal-cost routes can
-    // prefer the one that crosses fewer of them. This connection's own line is left out.
+    // The other connections' drawn lines, split by whether they share a component with this one:
+    // crossings are counted against all of them, overlap only against the unrelated ones.
     const otherSegments: Segment[] = [];
+    const unrelatedSegments: Segment[] = [];
+    const ownEndpointIds = new Set([from.id, to.id]);
     for (const connection of connections) {
         const isThisConnection =
             (connection.from.id === from.id && connection.to.id === to.id) ||
@@ -207,8 +248,12 @@ export function routeDeterministic({
         if (isThisConnection) {
             continue;
         }
+        const sharesEndpoint = ownEndpointIds.has(connection.from.id) || ownEndpointIds.has(connection.to.id);
         for (const segment of segmentsOfPoints(pointsFromWaypoints(connection.waypoints))) {
             otherSegments.push(segment);
+            if (!sharesEndpoint) {
+                unrelatedSegments.push(segment);
+            }
         }
     }
 
@@ -221,57 +266,74 @@ export function routeDeterministic({
           ? (findBestAnchor(toComponent, fromComponent) as Face)
           : null;
 
-    const sourceFaces = candidateFaces(fromComponent, toComponent);
-    const targetFaces = candidateFaces(toComponent, fromComponent);
+    const bestRouteForFaces = (sourceFaces: Face[], targetFaces: Face[]): ScoredRoute | null => {
+        let best: ScoredRoute | null = null;
 
-    let best: ScoredRoute | null = null;
+        for (const [sourceIndex, sourceFace] of sourceFaces.entries()) {
+            const sourceAttach = faceMidpoint(fromComponent, sourceFace);
+            const sourceOutward = outwardUnit(sourceFace);
 
-    for (const [sourceIndex, sourceFace] of sourceFaces.entries()) {
-        const sourceAttach = faceMidpoint(fromComponent, sourceFace);
-        const sourceOutward = outwardUnit(sourceFace);
+            for (const [targetIndex, targetFace] of targetFaces.entries()) {
+                const targetAttach = faceMidpoint(toComponent, targetFace);
+                const targetOutward = outwardUnit(targetFace);
+                const targetInward = { x: -targetOutward.x, y: -targetOutward.y };
+                const facePairRank = sourceIndex * targetFaces.length + targetIndex;
 
-        for (const [targetIndex, targetFace] of targetFaces.entries()) {
-            const targetAttach = faceMidpoint(toComponent, targetFace);
-            const targetOutward = outwardUnit(targetFace);
-            // Entering the target means moving inward — the opposite of its outward arrow.
-            const targetInward = { x: -targetOutward.x, y: -targetOutward.y };
-            const facePairRank = sourceIndex * 2 + targetIndex;
+                const candidates = buildConnectorCandidates(sourceAttach, targetAttach, fromRectangle, toRectangle);
+                for (const [candidateRank, corners] of candidates.entries()) {
+                    const points = simplifyPolyline([sourceAttach, ...corners, targetAttach]);
+                    if (points.length < 2 || !isOrthogonal(points) || !allFinite(points)) {
+                        continue;
+                    }
+                    // The route must leave the source face outward and enter the target face inward.
+                    const firstStep = stepDirection(points[0]!, points[1]!);
+                    const lastStep = stepDirection(points[points.length - 2]!, points[points.length - 1]!);
+                    if (!sameDirection(firstStep, sourceOutward) || !sameDirection(lastStep, targetInward)) {
+                        continue;
+                    }
 
-            const candidates = buildConnectorCandidates(sourceAttach, targetAttach, fromRectangle, toRectangle);
-            for (const [candidateRank, corners] of candidates.entries()) {
-                const points = simplifyPolyline([sourceAttach, ...corners, targetAttach]);
-                if (points.length < 2 || !isOrthogonal(points) || !allFinite(points)) {
-                    continue;
-                }
-                // Straight-out ends: the first segment must leave the source face outward and the last
-                // must enter the target face inward. Segments run to the real corner, no short stub.
-                const firstStep = stepDirection(points[0]!, points[1]!);
-                const lastStep = stepDirection(points[points.length - 2]!, points[points.length - 1]!);
-                if (!sameDirection(firstStep, sourceOutward) || !sameDirection(lastStep, targetInward)) {
-                    continue;
-                }
+                    // 1 when this route enters a hub on a side not facing the leaf, else 0.
+                    const hubFace = fromIsHub ? sourceFace : toIsHub ? targetFace : null;
+                    const hubFacePenalty = hubPrimaryFace !== null && hubFace !== hubPrimaryFace ? 1 : 0;
 
-                // 0 when this route enters the hub on the side facing the leaf, 1 otherwise (and for
-                // hubless pairs, where hubPrimaryFace is null and every route scores 0).
-                const hubFace = fromIsHub ? sourceFace : toIsHub ? targetFace : null;
-                const hubFacePenalty = hubPrimaryFace !== null && hubFace !== hubPrimaryFace ? 1 : 0;
-
-                const scored: ScoredRoute = {
-                    points,
-                    sourceFace,
-                    targetFace,
-                    obstacleHits: countObstacleHits(points, obstacles),
-                    crossings: countLineCrossings(points, otherSegments),
-                    bendCount: Math.max(0, points.length - 2),
-                    length: routeLength(points),
-                    hubFacePenalty,
-                    facePairRank,
-                    candidateRank,
-                };
-                if (best === null || isBetterRoute(scored, best)) {
-                    best = scored;
+                    const scored: ScoredRoute = {
+                        points,
+                        sourceFace,
+                        targetFace,
+                        obstacleHits: countObstacleHits(points, obstacles),
+                        crossings: countLineCrossings(points, otherSegments),
+                        overlapLength: countUnrelatedOverlap(points, unrelatedSegments),
+                        bendCount: Math.max(0, points.length - 2),
+                        length: routeLength(points),
+                        hubFacePenalty,
+                        facePairRank,
+                        candidateRank,
+                    };
+                    if (best === null || isBetterRoute(scored, best)) {
+                        best = scored;
+                    }
                 }
             }
+        }
+
+        return best;
+    };
+
+    let best = bestRouteForFaces(
+        candidateFaces(fromComponent, toComponent),
+        candidateFaces(toComponent, fromComponent)
+    );
+
+    // Still crossing? Retry with the away-side faces too — a detour may only exist there. Not part
+    // of the normal search: against not-yet-drawn lines (batch recalculation) nothing would count
+    // against those wide sweeps, so they'd win too often.
+    if (best && best.crossings > 0) {
+        const extended = bestRouteForFaces(
+            extendedCandidateFaces(fromComponent, toComponent),
+            extendedCandidateFaces(toComponent, fromComponent)
+        );
+        if (extended && extended.crossings < best.crossings) {
+            best = extended;
         }
     }
 
