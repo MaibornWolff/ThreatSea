@@ -1,5 +1,5 @@
 import { routeFishbone } from "./fishbone.ts";
-import { rectOf, segHitsRect } from "./shared.ts";
+import { rectangleOf, segmentHitsRectangle } from "./shared.ts";
 import {
     crossesTransversally,
     expectRadialEnd,
@@ -220,9 +220,9 @@ describe("routeFishbone congestion (merges over the cluster)", () => {
             createAugmentedConnection({ id: "c-client", fromComponent: client, toComponent: hub }),
         ];
         const route = routeInContext("c-d", connections, components)!.waypoints;
-        const d1Rect = rectOf(d1);
+        const d1Rect = rectangleOf(d1);
         for (const [a, b] of segmentsOf(route)) {
-            expect(segHitsRect(a, b, d1Rect)).toBe(false);
+            expect(segmentHitsRectangle(a, b, d1Rect)).toBe(false);
         }
         // It enters the hub's top-face midpoint (-85, 450) after the comb flips over the cluster.
         expect(toPoints(route).at(-1)).toEqual({ x: -85, y: 450 });
@@ -262,10 +262,10 @@ describe("routeFishbone congestion (merges over the cluster)", () => {
             expect(toPoints(route).at(-1)).toEqual(hubTopMidpoint);
         }
 
-        const nearRectangle = rectOf(nearLeaf);
+        const nearRectangle = rectangleOf(nearLeaf);
         for (const route of [routes[1]!, routes[2]!]) {
             for (const [a, b] of segmentsOf(route)) {
-                expect(segHitsRect(a, b, nearRectangle)).toBe(false);
+                expect(segmentHitsRectangle(a, b, nearRectangle)).toBe(false);
             }
         }
         // No two approaches cross transversally.

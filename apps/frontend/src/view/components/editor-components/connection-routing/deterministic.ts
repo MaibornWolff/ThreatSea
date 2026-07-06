@@ -23,7 +23,7 @@ import {
     isHorizontalFace,
     isOrthogonal,
     outwardUnit,
-    rectOf,
+    rectangleOf,
     routeLength,
     sameDirection,
     simplifyPolyline,
@@ -73,29 +73,37 @@ const candidateFaces = (self: AugmentedSystemComponent, other: AugmentedSystemCo
  * wrap-arounds outside both boxes. Each entry holds only the corner points — the caller adds the
  * two ends, then checks and ranks.
  */
-const buildConnectorCandidates = (p: Point, q: Point, fromRectangle: Rectangle, toRectangle: Rectangle): Point[][] => {
+const buildConnectorCandidates = (
+    sourceAttach: Point,
+    targetAttach: Point,
+    fromRectangle: Rectangle,
+    toRectangle: Rectangle
+): Point[][] => {
     const candidates: Point[][] = [];
 
-    if (Math.abs(p.x - q.x) < GEOMETRY_TOLERANCE || Math.abs(p.y - q.y) < GEOMETRY_TOLERANCE) {
+    if (
+        Math.abs(sourceAttach.x - targetAttach.x) < GEOMETRY_TOLERANCE ||
+        Math.abs(sourceAttach.y - targetAttach.y) < GEOMETRY_TOLERANCE
+    ) {
         candidates.push([]); // straight
     }
 
-    candidates.push([{ x: q.x, y: p.y }]); // L, horizontal first
-    candidates.push([{ x: p.x, y: q.y }]); // L, vertical first
+    candidates.push([{ x: targetAttach.x, y: sourceAttach.y }]); // L, horizontal first
+    candidates.push([{ x: sourceAttach.x, y: targetAttach.y }]); // L, vertical first
 
-    const midX = (p.x + q.x) / 2;
-    const midY = (p.y + q.y) / 2;
+    const midX = (sourceAttach.x + targetAttach.x) / 2;
+    const midY = (sourceAttach.y + targetAttach.y) / 2;
     // Z-shapes at the middle channel plus nudged ones, so a route can sidestep an occupied channel.
     for (const channelX of [midX, midX - CHANNEL_NUDGE, midX + CHANNEL_NUDGE]) {
         candidates.push([
-            { x: channelX, y: p.y },
-            { x: channelX, y: q.y },
+            { x: channelX, y: sourceAttach.y },
+            { x: channelX, y: targetAttach.y },
         ]);
     }
     for (const channelY of [midY, midY - CHANNEL_NUDGE, midY + CHANNEL_NUDGE]) {
         candidates.push([
-            { x: p.x, y: channelY },
-            { x: q.x, y: channelY },
+            { x: sourceAttach.x, y: channelY },
+            { x: targetAttach.x, y: channelY },
         ]);
     }
 
@@ -105,14 +113,14 @@ const buildConnectorCandidates = (p: Point, q: Point, fromRectangle: Rectangle, 
     const unionMaxY = Math.max(fromRectangle.maxY, toRectangle.maxY);
     for (const channelX of [unionMinX - WRAP_CLEARANCE, unionMaxX + WRAP_CLEARANCE]) {
         candidates.push([
-            { x: channelX, y: p.y },
-            { x: channelX, y: q.y },
+            { x: channelX, y: sourceAttach.y },
+            { x: channelX, y: targetAttach.y },
         ]);
     }
     for (const channelY of [unionMinY - WRAP_CLEARANCE, unionMaxY + WRAP_CLEARANCE]) {
         candidates.push([
-            { x: p.x, y: channelY },
-            { x: q.x, y: channelY },
+            { x: sourceAttach.x, y: channelY },
+            { x: targetAttach.x, y: channelY },
         ]);
     }
 
@@ -151,8 +159,8 @@ export function routeDeterministic(input: ConnectionRoutingInput): ConnectionRou
         return null;
     }
 
-    const fromRectangle = rectOf(fromComponent);
-    const toRectangle = rectOf(toComponent);
+    const fromRectangle = rectangleOf(fromComponent);
+    const toRectangle = rectangleOf(toComponent);
     const scoringContext = buildRouteScoringContext(input);
 
     const degree = buildDegreeMap(connections);

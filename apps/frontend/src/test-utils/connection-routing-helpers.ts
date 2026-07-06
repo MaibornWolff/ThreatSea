@@ -92,9 +92,24 @@ export const expectNoTransversalCrossings = (waypointsA: number[], waypointsB: n
  * True when a horizontal and a vertical segment cross at a point strictly interior to BOTH (an
  * X-crossing). Shared endpoints and T-junctions (an endpoint of one touching the other) are allowed.
  */
-export const crossesTransversally = (a1: Point, a2: Point, b1: Point, b2: Point): boolean => {
-    const horizontal = a1.y === a2.y ? [a1, a2] : b1.y === b2.y ? [b1, b2] : null;
-    const vertical = a1.x === a2.x ? [a1, a2] : b1.x === b2.x ? [b1, b2] : null;
+export const crossesTransversally = (
+    firstStart: Point,
+    firstEnd: Point,
+    secondStart: Point,
+    secondEnd: Point
+): boolean => {
+    const horizontal =
+        firstStart.y === firstEnd.y
+            ? [firstStart, firstEnd]
+            : secondStart.y === secondEnd.y
+              ? [secondStart, secondEnd]
+              : null;
+    const vertical =
+        firstStart.x === firstEnd.x
+            ? [firstStart, firstEnd]
+            : secondStart.x === secondEnd.x
+              ? [secondStart, secondEnd]
+              : null;
     if (!horizontal || !vertical || horizontal === vertical) {
         return false; // parallel segments — collinear overlap is allowed, not a crossing
     }

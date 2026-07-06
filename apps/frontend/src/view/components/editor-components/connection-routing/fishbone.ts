@@ -32,10 +32,10 @@ import {
     isHorizontalFace,
     isOrthogonal,
     outwardUnit,
-    rectOf,
+    rectangleOf,
     routeLength,
     sameDirection,
-    segHitsRect,
+    segmentHitsRectangle,
     shrinkRectangle,
     simplifyPolyline,
     stepDirection,
@@ -124,8 +124,8 @@ const combTrunkPosition = (
     members: AugmentedSystemComponent[],
     mode: CombMode
 ): number => {
-    const hubRectangle = rectOf(hub);
-    const memberRectangles = members.map(rectOf);
+    const hubRectangle = rectangleOf(hub);
+    const memberRectangles = members.map(rectangleOf);
 
     if (mode === "over") {
         const clusterRectangles = [hubRectangle, ...memberRectangles];
@@ -177,8 +177,8 @@ const fishbonePath = (
     trunkPosition: number
 ): FishbonePath | null => {
     const hubMidpoint = faceMidpoint(hub, hubFace);
-    const hubRectangle = rectOf(hub);
-    const leafRectangle = rectOf(leaf);
+    const hubRectangle = rectangleOf(hub);
+    const leafRectangle = rectangleOf(leaf);
     const leafCenter = centerOf(leaf);
 
     if (isHorizontalFace(hubFace)) {
@@ -296,7 +296,7 @@ const memberRunHitsOthers = (
     }
     const otherInteriors = members
         .filter((candidate) => candidate.id !== member.id)
-        .map((candidate) => shrinkRectangle(rectOf(candidate)));
+        .map((candidate) => shrinkRectangle(rectangleOf(candidate)));
     return countObstacleHits(simplifyPolyline(path.points), otherInteriors) > 0;
 };
 
@@ -393,15 +393,15 @@ const cleanInsideMemberRoute = (
     if (!sameDirection(leafStep, leafOutward) || !sameDirection(hubStep, { x: -hubOutward.x, y: -hubOutward.y })) {
         return null;
     }
-    const hubInterior = shrinkRectangle(rectOf(hub));
+    const hubInterior = shrinkRectangle(rectangleOf(hub));
     for (let index = 1; index < points.length; index++) {
-        if (segHitsRect(points[index - 1]!, points[index]!, hubInterior)) {
+        if (segmentHitsRectangle(points[index - 1]!, points[index]!, hubInterior)) {
             return null;
         }
     }
     const obstacles = components
         .filter((component) => component.id !== hub.id && component.id !== member.id)
-        .map(rectOf);
+        .map(rectangleOf);
     return countObstacleHits(points, obstacles) > 0 ? null : points;
 };
 
@@ -657,10 +657,12 @@ export const routeFishbone = (input: ConnectionRoutingInput): ConnectionRoutingR
 
     // The route must not cross the hub or any other box (only this connection's own hub and leaf are
     // exempt). If any segment would, this connection drops out to the plain router instead.
-    const hubInterior = shrinkRectangle(rectOf(hub));
-    const obstacles = components.filter((component) => component.id !== hub.id && component.id !== leaf.id).map(rectOf);
+    const hubInterior = shrinkRectangle(rectangleOf(hub));
+    const obstacles = components
+        .filter((component) => component.id !== hub.id && component.id !== leaf.id)
+        .map(rectangleOf);
     for (let index = 1; index < points.length; index++) {
-        if (segHitsRect(points[index - 1]!, points[index]!, hubInterior)) {
+        if (segmentHitsRectangle(points[index - 1]!, points[index]!, hubInterior)) {
             return null;
         }
     }

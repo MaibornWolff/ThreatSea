@@ -1,5 +1,5 @@
 import { routeDeterministic } from "./deterministic.ts";
-import { rectOf, segHitsRect } from "./shared.ts";
+import { rectangleOf, segmentHitsRectangle } from "./shared.ts";
 import {
     bendCountOf,
     crossesTransversally,
@@ -115,9 +115,9 @@ describe("routeDeterministic", () => {
         expectOrthogonal(routing!.waypoints);
 
         const points = toPoints(routing!.waypoints);
-        const obstacleRect = rectOf(obstacle);
+        const obstacleRect = rectangleOf(obstacle);
         for (let index = 1; index < points.length; index++) {
-            expect(segHitsRect(points[index - 1]!, points[index]!, obstacleRect)).toBe(false);
+            expect(segmentHitsRectangle(points[index - 1]!, points[index]!, obstacleRect)).toBe(false);
         }
     });
 

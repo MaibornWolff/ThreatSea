@@ -50,7 +50,7 @@ export interface ConnectionRoutingResult {
 // ----- geometry helpers (pure) -----
 
 /** Pixel-space bounding box of a component's fixed 80x80 footprint. */
-export const rectOf = (component: AugmentedSystemComponent): Rectangle => {
+export const rectangleOf = (component: AugmentedSystemComponent): Rectangle => {
     const minX = component.gridX * 5;
     const minY = component.gridY * 5;
     return { minX, minY, maxX: minX + COMPONENT_SIZE, maxY: minY + COMPONENT_SIZE };
@@ -64,7 +64,7 @@ export const centerOf = (component: AugmentedSystemComponent): Point => ({
 
 /** The pixel point at the middle of one of a component's four edges — where a connection attaches. */
 export const faceMidpoint = (component: AugmentedSystemComponent, face: Face): Point => {
-    const rectangle = rectOf(component);
+    const rectangle = rectangleOf(component);
     const center = centerOf(component);
     switch (face) {
         case AnchorOrientation.left:
@@ -109,16 +109,16 @@ export const isHorizontalFace = (face: Face): boolean =>
 const isFace = (anchor: AnchorOrientation): anchor is Face => anchor !== AnchorOrientation.center;
 
 /** True when a horizontal/vertical line touches a box — the check for "does this connection cross a component". */
-export const segHitsRect = (a: Point, b: Point, rectangle: Rectangle): boolean => {
-    const segMinX = Math.min(a.x, b.x);
-    const segMaxX = Math.max(a.x, b.x);
-    const segMinY = Math.min(a.y, b.y);
-    const segMaxY = Math.max(a.y, b.y);
+export const segmentHitsRectangle = (start: Point, end: Point, rectangle: Rectangle): boolean => {
+    const segmentMinX = Math.min(start.x, end.x);
+    const segmentMaxX = Math.max(start.x, end.x);
+    const segmentMinY = Math.min(start.y, end.y);
+    const segmentMaxY = Math.max(start.y, end.y);
     return !(
-        segMinX > rectangle.maxX ||
-        segMaxX < rectangle.minX ||
-        segMinY > rectangle.maxY ||
-        segMaxY < rectangle.minY
+        segmentMinX > rectangle.maxX ||
+        segmentMaxX < rectangle.minX ||
+        segmentMinY > rectangle.maxY ||
+        segmentMaxY < rectangle.minY
     );
 };
 
@@ -127,20 +127,25 @@ export const segHitsRect = (a: Point, b: Point, rectangle: Rectangle): boolean =
  * Segments that merely touch at an end (a shared box, a T-junction) or run parallel don't count, so two
  * lines meeting at the same component aren't mistaken for a crossing.
  */
-export const crossesTransversally = (a: Point, b: Point, c: Point, d: Point): boolean => {
-    const firstHorizontal = a.y === b.y && a.x !== b.x;
-    const firstVertical = a.x === b.x && a.y !== b.y;
-    const secondHorizontal = c.y === d.y && c.x !== d.x;
-    const secondVertical = c.x === d.x && c.y !== d.y;
+export const crossesTransversally = (
+    firstStart: Point,
+    firstEnd: Point,
+    secondStart: Point,
+    secondEnd: Point
+): boolean => {
+    const firstHorizontal = firstStart.y === firstEnd.y && firstStart.x !== firstEnd.x;
+    const firstVertical = firstStart.x === firstEnd.x && firstStart.y !== firstEnd.y;
+    const secondHorizontal = secondStart.y === secondEnd.y && secondStart.x !== secondEnd.x;
+    const secondVertical = secondStart.x === secondEnd.x && secondStart.y !== secondEnd.y;
 
     let horizontalStart: Point;
     let horizontalEnd: Point;
     let verticalStart: Point;
     let verticalEnd: Point;
     if (firstHorizontal && secondVertical) {
-        [horizontalStart, horizontalEnd, verticalStart, verticalEnd] = [a, b, c, d];
+        [horizontalStart, horizontalEnd, verticalStart, verticalEnd] = [firstStart, firstEnd, secondStart, secondEnd];
     } else if (firstVertical && secondHorizontal) {
-        [horizontalStart, horizontalEnd, verticalStart, verticalEnd] = [c, d, a, b];
+        [horizontalStart, horizontalEnd, verticalStart, verticalEnd] = [secondStart, secondEnd, firstStart, firstEnd];
     } else {
         return false; // parallel, or not both axis-aligned
     }
@@ -298,7 +303,7 @@ export const countObstacleHits = (points: Point[], obstacles: Rectangle[]): numb
         for (let index = 1; index < points.length; index++) {
             const previous = points[index - 1];
             const current = points[index];
-            if (previous && current && segHitsRect(previous, current, obstacle)) {
+            if (previous && current && segmentHitsRectangle(previous, current, obstacle)) {
                 hits++;
                 break;
             }
@@ -384,7 +389,7 @@ export const buildRouteScoringContext = (input: ConnectionRoutingInput): RouteSc
     const { connectionId, fromComponent, toComponent, components, connections, from, to } = input;
     const obstacles = components
         .filter((component) => component.id !== fromComponent.id && component.id !== toComponent.id)
-        .map(rectOf);
+        .map(rectangleOf);
 
     const otherSegments: Segment[] = [];
     const unrelatedSegments: Segment[] = [];

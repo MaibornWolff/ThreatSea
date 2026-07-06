@@ -5,9 +5,9 @@ import {
     faceMidpoint,
     findBestAnchor,
     flattenPoints,
-    rectOf,
+    rectangleOf,
     routeLength,
-    segHitsRect,
+    segmentHitsRectangle,
     shrinkRectangle,
     simplifyPolyline,
     stepDirection,
@@ -15,9 +15,9 @@ import {
 import { createSystemComponent, createPointOfAttack } from "#test-utils/builders.ts";
 import { AnchorOrientation } from "#api/types/system.types.ts";
 
-describe("rectOf", () => {
+describe("rectangleOf", () => {
     it("converts a component's grid position to its 80x80 pixel box (gridX*5 top-left)", () => {
-        expect(rectOf(createSystemComponent({ gridX: 10, gridY: 20 }))).toEqual({
+        expect(rectangleOf(createSystemComponent({ gridX: 10, gridY: 20 }))).toEqual({
             minX: 50,
             minY: 100,
             maxX: 130,
@@ -26,7 +26,12 @@ describe("rectOf", () => {
     });
 
     it("places a component at the origin spanning one box size", () => {
-        expect(rectOf(createSystemComponent({ gridX: 0, gridY: 0 }))).toEqual({ minX: 0, minY: 0, maxX: 80, maxY: 80 });
+        expect(rectangleOf(createSystemComponent({ gridX: 0, gridY: 0 }))).toEqual({
+            minX: 0,
+            minY: 0,
+            maxX: 80,
+            maxY: 80,
+        });
     });
 });
 
@@ -107,19 +112,19 @@ describe("simplifyPolyline", () => {
     });
 });
 
-describe("segHitsRect", () => {
+describe("segmentHitsRectangle", () => {
     const rectangle = { minX: 100, minY: 100, maxX: 200, maxY: 200 };
 
     it("detects a segment crossing the rectangle", () => {
-        expect(segHitsRect({ x: 50, y: 150 }, { x: 250, y: 150 }, rectangle)).toBe(true);
+        expect(segmentHitsRectangle({ x: 50, y: 150 }, { x: 250, y: 150 }, rectangle)).toBe(true);
     });
 
     it("ignores a segment that passes clear of the rectangle", () => {
-        expect(segHitsRect({ x: 50, y: 50 }, { x: 250, y: 50 }, rectangle)).toBe(false);
+        expect(segmentHitsRectangle({ x: 50, y: 50 }, { x: 250, y: 50 }, rectangle)).toBe(false);
     });
 
     it("counts touching an edge as a hit", () => {
-        expect(segHitsRect({ x: 50, y: 100 }, { x: 250, y: 100 }, rectangle)).toBe(true);
+        expect(segmentHitsRectangle({ x: 50, y: 100 }, { x: 250, y: 100 }, rectangle)).toBe(true);
     });
 });
 
@@ -139,8 +144,8 @@ describe("shrinkRectangle", () => {
             { x: 50, y: 100 },
             { x: 250, y: 100 },
         ];
-        expect(segHitsRect(onTopEdge[0], onTopEdge[1], box)).toBe(true); // grazes the full box
-        expect(segHitsRect(onTopEdge[0], onTopEdge[1], shrinkRectangle(box))).toBe(false); // clears the shrunk box
+        expect(segmentHitsRectangle(onTopEdge[0], onTopEdge[1], box)).toBe(true); // grazes the full box
+        expect(segmentHitsRectangle(onTopEdge[0], onTopEdge[1], shrinkRectangle(box))).toBe(false); // clears the shrunk box
     });
 });
 
