@@ -111,6 +111,9 @@ export interface Connection {
     connectionPoints: string[];
     connectionPointsMeta: ConnectionPointMeta[];
     waypoints: number[];
+    // TODO: since routing moved to use-editor.hook — only the load-time fallback still
+    // reads it. Retire end-to-end (reducer, middleware comparator, builders, backend payload) once no
+    // persisted project relies on it.
     recalculate: boolean;
     projectId: number;
 }
