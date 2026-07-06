@@ -54,6 +54,18 @@ interface FishbonePath {
 }
 
 /**
+ * True when the connection between `hub` and `neighbour` routes onto `hub`'s trunk. Only the busier
+ * endpoint becomes the hub (see routeFishbone), so a neighbour with equal or higher degree hubs
+ * elsewhere and must not count toward this hub's comb — otherwise the trunk is placed for a member
+ * that never rides it.
+ */
+const ridesHubTrunk = (
+    hub: AugmentedSystemComponent,
+    neighbour: AugmentedSystemComponent,
+    degree: Map<string, number>
+): boolean => (degree.get(hub.id) ?? 0) > (degree.get(neighbour.id) ?? 0);
+
+/**
  * Picks which hub face a leaf joins, by direction. An almost-diagonal leaf takes whichever of its two
  * possible faces already has more connections, so same-direction leaves share one comb.
  */
@@ -241,7 +253,7 @@ interface HubFaceResolution {
     combKey: string;
 }
 
-/** The hub's other leaves (plus this one) that point at the same hub face by direction. */
+/** The hub's other leaves (plus this one) that ride this hub's trunk and point at the same face. */
 const collectDirectionMembers = (
     hub: AugmentedSystemComponent,
     leaf: AugmentedSystemComponent,
@@ -250,6 +262,7 @@ const collectDirectionMembers = (
     components: AugmentedSystemComponent[]
 ): AugmentedSystemComponent[] => {
     const componentById = new Map(components.map((component) => [component.id, component]));
+    const degree = buildDegreeMap(connections);
     const members: AugmentedSystemComponent[] = [leaf];
     for (const connection of connections) {
         const otherId =
@@ -258,7 +271,11 @@ const collectDirectionMembers = (
             continue;
         }
         const other = componentById.get(otherId);
-        if (other && assignHubFace(hub, other, connections, components) === directionFace) {
+        if (
+            other &&
+            ridesHubTrunk(hub, other, degree) &&
+            assignHubFace(hub, other, connections, components) === directionFace
+        ) {
             members.push(other);
         }
     }
@@ -591,6 +608,7 @@ export const routeFishbone = (input: ConnectionRoutingInput): ConnectionRoutingR
 
     // This comb's members: the hub's connections landing on the same face, mode AND sub-comb (incl.
     // this leaf). A comb needs at least two — a lone connection draws better as a plain direct line.
+    // Only neighbours that ride this hub's trunk count; a busier neighbour hubs elsewhere.
     const componentById = new Map(components.map((component) => [component.id, component]));
     const members: AugmentedSystemComponent[] = [leaf];
     for (const connection of connections) {
@@ -600,7 +618,7 @@ export const routeFishbone = (input: ConnectionRoutingInput): ConnectionRoutingR
             continue;
         }
         const other = componentById.get(otherId);
-        if (!other) {
+        if (!other || !ridesHubTrunk(hub, other, degree)) {
             continue;
         }
         const otherResolution = resolveHubFace(hub, other, connections, components, faceCache);

@@ -150,6 +150,45 @@ describe("routeFishbone trunk-merging", () => {
     });
 });
 
+describe("routeFishbone reciprocity", () => {
+    // Hub with two plain leaves on its right, plus a connection to a busier neighbour also on the
+    // right. The busier neighbour hubs its own comb elsewhere, so it must not join this hub's trunk.
+    const hub = createSystemComponent({ id: "hub", gridX: 0, gridY: 50 });
+    const leafA = createSystemComponent({ id: "leaf-a", gridX: 80, gridY: 45 });
+    const leafB = createSystemComponent({ id: "leaf-b", gridX: 80, gridY: 55 });
+    const busyNeighbour = createSystemComponent({ id: "busy", gridX: 120, gridY: 50 });
+    const farLeaves = [0, 1, 2, 3].map((index) =>
+        createSystemComponent({ id: `far-${index}`, gridX: 200 + index * 20, gridY: 50 })
+    );
+    const components = [hub, leafA, leafB, busyNeighbour, ...farLeaves];
+
+    const baseConnections = [
+        createAugmentedConnection({ id: "c-a", fromComponent: leafA, toComponent: hub }),
+        createAugmentedConnection({ id: "c-b", fromComponent: leafB, toComponent: hub }),
+        // busyNeighbour connects to four far leaves — degree 5, well above the hub's degree.
+        ...farLeaves.map((farLeaf, index) =>
+            createAugmentedConnection({ id: `c-far-${index}`, fromComponent: busyNeighbour, toComponent: farLeaf })
+        ),
+    ];
+
+    it("does not let a busier neighbour's connection change the hub's own comb", () => {
+        // World A: the hub also connects to the busier neighbour.
+        const withNeighbour = [
+            ...baseConnections,
+            createAugmentedConnection({ id: "c-busy", fromComponent: hub, toComponent: busyNeighbour }),
+        ];
+        // World B: the same graph without that one connection.
+        const withoutNeighbour = baseConnections;
+
+        const routeWith = routeInContext("c-a", withNeighbour, components)!;
+        const routeWithout = routeInContext("c-a", withoutNeighbour, components)!;
+
+        expect(routeWith).not.toBeNull();
+        // Leaf A's route onto the hub is the same either way — the busier neighbour is not a member.
+        expect(routeWith.waypoints).toEqual(routeWithout.waypoints);
+    });
+});
+
 describe("routeFishbone congestion (merges over the cluster)", () => {
     it("declines a two-member congested comb so it routes directly instead of looping over the cluster", () => {
         const hub = createSystemComponent({ id: "hub", gridX: 60, gridY: 0 });
