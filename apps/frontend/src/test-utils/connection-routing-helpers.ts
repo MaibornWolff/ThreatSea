@@ -69,6 +69,25 @@ export const routeCoversPoint = (waypoints: number[], point: Point): boolean =>
         return onVertical || onHorizontal;
     });
 
+/** True when the point sits on the perimeter of the component box at the given grid cell. */
+export const isOnComponentPerimeter = (gridX: number, gridY: number, point: Point): boolean => {
+    const minX = gridX * 5;
+    const minY = gridY * 5;
+    const maxX = minX + 80;
+    const maxY = minY + 80;
+    const withinBox = point.x >= minX && point.x <= maxX && point.y >= minY && point.y <= maxY;
+    return withinBox && (point.x === minX || point.x === maxX || point.y === minY || point.y === maxY);
+};
+
+/** Asserts no segment of one route X-crosses a segment of the other. */
+export const expectNoTransversalCrossings = (waypointsA: number[], waypointsB: number[]): void => {
+    for (const [firstStart, firstEnd] of segmentsOf(waypointsA)) {
+        for (const [secondStart, secondEnd] of segmentsOf(waypointsB)) {
+            expect(crossesTransversally(firstStart, firstEnd, secondStart, secondEnd)).toBe(false);
+        }
+    }
+};
+
 /**
  * True when a horizontal and a vertical segment cross at a point strictly interior to BOTH (an
  * X-crossing). Shared endpoints and T-junctions (an endpoint of one touching the other) are allowed.

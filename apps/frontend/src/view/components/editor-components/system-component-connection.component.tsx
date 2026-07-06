@@ -4,12 +4,11 @@ import { POA_COLORS } from "#view/colors/pointsOfAttack.colors.ts";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import type { KonvaEventObject } from "konva/lib/Node";
 import type { Stage as KonvaStage } from "konva/lib/Stage";
-import type { AugmentedSystemComponent, ConnectionPointMeta } from "#api/types/system.types.ts";
 import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
 import type { AugmentedSystemConnection } from "#application/selectors/system.selectors.ts";
 import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import { editorSelectors } from "#application/selectors/editor.selectors.ts";
-import { computeConnectionRouting } from "./connection-routing/index.ts";
+import { hasDrawableLine } from "./connection-routing/index.ts";
 
 interface LineForPathProps {
     waypoints: number[];
@@ -23,16 +22,10 @@ interface LineForPathProps {
 }
 
 interface SystemComponentConnectionProps extends AugmentedSystemConnection {
-    fromComponent?: AugmentedSystemComponent;
-    toComponent?: AugmentedSystemComponent;
-    components: AugmentedSystemComponent[];
-    connections: AugmentedSystemConnection[];
     onClick: (event: KonvaEventObject<MouseEvent>, connectionId: string) => void;
     onPointOfAttackClicked: (event: KonvaEventObject<MouseEvent>, pointOfAttackId: string) => void;
     selected: boolean;
-    onRecalculated: (connectionId: string, waypoints: number[], connectionPointsMeta: ConnectionPointMeta[]) => void;
     stageRef: RefObject<KonvaStage | null>;
-    connectionPointsMeta: ConnectionPointMeta[];
     selectedConnectionPointId?: string | null;
     onConnectionPointClicked?: (event: KonvaEventObject<MouseEvent>, connectionPointId: string) => void;
 }
@@ -98,15 +91,9 @@ const SystemComponentConnectionInner = ({
     id,
     from,
     to,
-    fromComponent,
-    toComponent,
     onClick,
     onPointOfAttackClicked,
-    components,
-    connections = [],
     selected,
-    recalculate,
-    onRecalculated,
     pointsOfAttack = [],
     waypoints = [],
     stageRef,
@@ -121,10 +108,6 @@ const SystemComponentConnectionInner = ({
     const connectionColors = isUserConnection
         ? POA_COLORS[POINTS_OF_ATTACK.USER_BEHAVIOUR]
         : POA_COLORS[POINTS_OF_ATTACK.COMMUNICATION_INFRASTRUCTURE];
-
-    if (!fromComponent || !toComponent) {
-        return null;
-    }
 
     const handleClick = (event: KonvaEventObject<MouseEvent>) => {
         if (annotationTool !== null) {
@@ -162,41 +145,15 @@ const SystemComponentConnectionInner = ({
         }
     };
 
-    if (recalculate === false) {
-        return (
-            <Group x={0} y={0}>
-                <MemoizedLineForPath
-                    waypoints={waypoints}
-                    handleClick={handleClick}
-                    onMouseEnter={onMouseEnter}
-                    onMouseLeave={onMouseLeave}
-                    onPointOfAttackClicked={handleLinePointOfAttackClicked}
-                    selected={visualSelected}
-                    hover={visualHover}
-                    colors={connectionColors}
-                />
-            </Group>
-        );
+    // No routed line yet; use-editor.hook fills the waypoints in.
+    if (!hasDrawableLine(waypoints)) {
+        return null;
     }
 
-    const routing = computeConnectionRouting({
-        fromComponent,
-        toComponent,
-        components,
-        connections,
-        from,
-        to,
-        pointsOfAttack,
-    });
-    if (!routing) {
-        return <Group></Group>;
-    }
-
-    onRecalculated(id, routing.waypoints, routing.connectionPointsMeta);
     return (
         <Group x={0} y={0}>
             <MemoizedLineForPath
-                waypoints={routing.waypoints}
+                waypoints={waypoints}
                 handleClick={handleClick}
                 onMouseEnter={onMouseEnter}
                 onMouseLeave={onMouseLeave}

@@ -1,5 +1,5 @@
 import { nanoid } from "@reduxjs/toolkit";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type { Asset } from "#api/types/asset.types.ts";
 import type { ComponentType } from "#api/types/component-types.types.ts";
@@ -22,7 +22,11 @@ import { PointsOfAttackActions } from "#application/actions/points-of-attack.act
 import { SystemActions } from "#application/actions/system.actions.ts";
 import { editorSelectors } from "#application/selectors/editor.selectors.ts";
 import { systemSelectors } from "#application/selectors/system.selectors.ts";
-import { useAppDispatch, useAppSelector } from "./use-app-redux.hook";
+import { useAppDispatch, useAppSelector, useAppStore } from "./use-app-redux.hook";
+import {
+    computeConnectionRouting,
+    hasDrawableLine,
+} from "#view/components/editor-components/connection-routing/index.ts";
 import { useSystem } from "./use-system.hook";
 import type { EditorComponentType } from "#application/adapters/editor-component-type.adapter.ts";
 import { validateConnection } from "#utils/connection-rules.ts";
@@ -50,6 +54,7 @@ export const useEditor = ({
     showErrorMessage?: (payload: { message: string }) => void;
 }) => {
     const dispatch = useAppDispatch();
+    const store = useAppStore();
     const { t, i18n } = useTranslation("editorPage");
     const {
         loadSystem,
@@ -284,9 +289,16 @@ export const useEditor = ({
             return;
         }
 
+        // Remove the component and everything attached to it first, then re-route the neighbours'
+        // remaining connections in one go — otherwise they would route around the not-yet-removed
+        // component and its doomed connections.
+        const neighbourComponentIds = new Set<string>();
         connectionsOfComponent.forEach((connection) => {
-            removeConnection(connection);
+            neighbourComponentIds.add(connection.from.id);
+            neighbourComponentIds.add(connection.to.id);
+            removeConnectionWithoutRerouting(connection);
         });
+        neighbourComponentIds.delete(selectedComponentId);
 
         pointsOfAttackOfSelectedComponent.forEach((pointOfAttack) => {
             dispatch(
@@ -297,52 +309,115 @@ export const useEditor = ({
         });
 
         dispatch(SystemActions.removeComponent({ id: selectedComponentId }));
+
+        recalculateConnectionsOfComponents([...neighbourComponentIds]);
     };
 
-    // One batch of connections flagged for recalculation together (see flagConnectionsForRecalculation).
-    const recalculationBatchRef = useRef<{
-        connectionIds: string[];
-        remaining: Set<string>;
-        isSecondPass: boolean;
-    } | null>(null);
+    /**
+     * Routes the given connections one at a time: each route already sees the final lines of the
+     * ones routed before it, so two fresh routes cannot cross by accident (which happens when all
+     * routes are computed at once, each seeing only the others' old lines). Reads state straight
+     * from the store because callers dispatch the change that made routes stale right before.
+     */
+    const routeConnectionsSequentially = useCallback(
+        (connectionIds: Set<string>): void => {
+            const state = store.getState();
+            const freshComponents = systemSelectors.selectComponents(state, projectId);
+            const freshConnections = systemSelectors.selectConnections(state, projectId);
+            const componentById = new Map(freshComponents.map((component) => [component.id, component]));
 
-    const flagConnectionsForRecalculation = (componentIds: string[]): void => {
-        const affectedComponents = new Set(componentIds);
-        const affectedConnectionIds: string[] = [];
-        connections.forEach((connection) => {
-            if (affectedComponents.has(connection.from.id) || affectedComponents.has(connection.to.id)) {
-                affectedConnectionIds.push(connection.id);
+            // Fixed order, so the same edit always produces the same layout.
+            const connectionsToRoute = freshConnections
+                .filter((connection) => connectionIds.has(connection.id))
+                .sort((first, second) => first.id.localeCompare(second.id));
+
+            let workingConnections = freshConnections;
+            connectionsToRoute.forEach((connection) => {
+                const fromComponent = componentById.get(connection.from.id);
+                const toComponent = componentById.get(connection.to.id);
+                if (!fromComponent || !toComponent) {
+                    return;
+                }
+
+                const routing = computeConnectionRouting({
+                    fromComponent,
+                    toComponent,
+                    components: freshComponents,
+                    connections: workingConnections,
+                    from: connection.from,
+                    to: connection.to,
+                    pointsOfAttack: connection.pointsOfAttack,
+                });
+                if (!routing) {
+                    // No route possible (e.g. both endpoints on one grid cell) — keep the stored line.
+                    return;
+                }
+
+                const waypointsUnchanged =
+                    routing.waypoints.length === connection.waypoints.length &&
+                    routing.waypoints.every((value, index) => value === connection.waypoints[index]);
+                if (waypointsUnchanged && connection.recalculate === false) {
+                    // Same line as before — skip the dispatch so untouched connections don't mark
+                    // the project as changed.
+                    return;
+                }
+
+                workingConnections = workingConnections.map((other) =>
+                    other.id === connection.id ? { ...other, waypoints: routing.waypoints } : other
+                );
                 dispatch(
                     SystemActions.setConnection({
                         id: connection.id,
                         changes: {
-                            recalculate: true,
+                            waypoints: routing.waypoints,
+                            connectionPointsMeta: routing.connectionPointsMeta,
+                            recalculate: false,
                         },
                     })
                 );
-            }
-        });
-        // Connections recalculated in the same batch only see each other's OLD lines, so two fresh
-        // routes can cross without either noticing. Remember the batch; once every member has
-        // reported back, connectionRecalculated flags them all a second time — in that pass each one
-        // sees its siblings' fresh lines. A single connection has no sibling to be stale against.
-        recalculationBatchRef.current =
-            affectedConnectionIds.length >= 2
-                ? {
-                      connectionIds: affectedConnectionIds,
-                      remaining: new Set(affectedConnectionIds),
-                      isSecondPass: false,
-                  }
-                : null;
+            });
+        },
+        [store, dispatch, projectId]
+    );
+
+    const recalculateConnectionsOfComponents = (componentIds: string[]): void => {
+        const state = store.getState();
+        const freshConnections = systemSelectors.selectConnections(state, projectId);
+        const affectedComponents = new Set(componentIds);
+        const affectedConnectionIds = new Set(
+            freshConnections
+                .filter(
+                    (connection) =>
+                        affectedComponents.has(connection.from.id) || affectedComponents.has(connection.to.id)
+                )
+                .map((connection) => connection.id)
+        );
+        routeConnectionsSequentially(affectedConnectionIds);
     };
 
-    const removeConnection = (connection?: SystemConnection | null): void => {
-        const targetConnection = connection ?? selectedConnection;
-        if (!targetConnection) {
+    const loadedProjectId = useAppSelector((state) => state.system.loadedProjectId);
+
+    // On load, route only the connections that have no usable line yet; stored routes stay untouched.
+    // Keyed on loadedProjectId (set after the system data landed in the store), not on `initialized` —
+    // that flag stays true across project switches, so an effect keyed on it would fire before the
+    // new project's connections arrive and never again.
+    useEffect(() => {
+        if (loadedProjectId !== projectId) {
             return;
         }
+        const freshConnections = systemSelectors.selectConnections(store.getState(), projectId);
+        const connectionIdsWithoutRoute = new Set(
+            freshConnections
+                .filter((connection) => connection.recalculate || !hasDrawableLine(connection.waypoints))
+                .map((connection) => connection.id)
+        );
+        if (connectionIdsWithoutRoute.size > 0) {
+            routeConnectionsSequentially(connectionIdsWithoutRoute);
+        }
+    }, [loadedProjectId, store, projectId, routeConnectionsSequentially]);
 
-        const pointsOfAttackOfConnection = pointsOfAttack.filter((item) => item.connectionId === targetConnection.id);
+    const removeConnectionWithoutRerouting = (connection: SystemConnection): void => {
+        const pointsOfAttackOfConnection = pointsOfAttack.filter((item) => item.connectionId === connection.id);
         pointsOfAttackOfConnection.forEach((pointOfAttack) => {
             dispatch(
                 PointsOfAttackActions.removePointOfAttack({
@@ -353,12 +428,20 @@ export const useEditor = ({
 
         dispatch(
             SystemActions.removeConnection({
-                id: targetConnection.id,
-                connectionPoints: targetConnection.connectionPoints,
+                id: connection.id,
+                connectionPoints: connection.connectionPoints,
             })
         );
+    };
 
-        flagConnectionsForRecalculation([targetConnection.from.id, targetConnection.to.id]);
+    const removeConnection = (connection?: SystemConnection | null): void => {
+        const targetConnection = connection ?? selectedConnection;
+        if (!targetConnection) {
+            return;
+        }
+
+        removeConnectionWithoutRerouting(targetConnection);
+        recalculateConnectionsOfComponents([targetConnection.from.id, targetConnection.to.id]);
     };
 
     const removeConnectionById = (connectionId: string): void => {
@@ -628,7 +711,7 @@ export const useEditor = ({
                 })
             );
 
-            flagConnectionsForRecalculation([from.id, to.id]);
+            recalculateConnectionsOfComponents([from.id, to.id]);
 
             dispatch(EditorActions.resetConnection());
         }
@@ -733,56 +816,19 @@ export const useEditor = ({
     };
 
     const updateConnectionsOfComponent = (): void => {
+        if (!selectedComponentId) {
+            return;
+        }
+        // Read the store, not the render snapshot — connections may have changed in this same tick.
+        const freshConnections = systemSelectors.selectConnections(store.getState(), projectId);
         const affectedComponents = new Set<string>();
-        connectionsOfComponent.forEach((connection) => {
-            affectedComponents.add(connection.from.id);
-            affectedComponents.add(connection.to.id);
+        freshConnections.forEach((connection) => {
+            if (connection.from.id === selectedComponentId || connection.to.id === selectedComponentId) {
+                affectedComponents.add(connection.from.id);
+                affectedComponents.add(connection.to.id);
+            }
         });
-        flagConnectionsForRecalculation([...affectedComponents]);
-    };
-
-    const connectionRecalculated = (
-        connectionId: string,
-        waypoints: number[],
-        connectionPointsMeta: ConnectionPointMeta[]
-    ): void => {
-        dispatch(
-            SystemActions.setConnection({
-                id: connectionId,
-                changes: {
-                    waypoints,
-                    connectionPointsMeta,
-                    recalculate: false,
-                },
-            })
-        );
-
-        // Second recalculation pass (see flagConnectionsForRecalculation): once the whole batch has
-        // reported its first-pass route, flag it once more so every member re-routes against the
-        // others' fresh lines. The second pass ends here — no third one.
-        const batch = recalculationBatchRef.current;
-        if (!batch?.remaining.delete(connectionId) || batch.remaining.size > 0) {
-            return;
-        }
-        if (batch.isSecondPass) {
-            recalculationBatchRef.current = null;
-            return;
-        }
-        recalculationBatchRef.current = {
-            connectionIds: batch.connectionIds,
-            remaining: new Set(batch.connectionIds),
-            isSecondPass: true,
-        };
-        batch.connectionIds.forEach((id) => {
-            dispatch(
-                SystemActions.setConnection({
-                    id,
-                    changes: {
-                        recalculate: true,
-                    },
-                })
-            );
-        });
+        recalculateConnectionsOfComponents([...affectedComponents]);
     };
 
     const standardComponents = useAppSelector(editorSelectors.selectStandardComponents);
@@ -928,7 +974,6 @@ export const useEditor = ({
         addAssetToSelectedPointOfAttack,
         removeAssetToSelectedPointOfAttack,
         updateConnectionsOfComponent,
-        connectionRecalculated,
         selectConnectionPoint,
         deselectConnectionPoint,
         setMousePointers,

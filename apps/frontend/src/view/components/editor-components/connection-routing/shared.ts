@@ -278,6 +278,9 @@ export const buildDegreeMap = (connections: AugmentedSystemConnection[]): Map<st
 
 // ----- shared scoring + connection-point meta -----
 
+/** A drawable line needs at least two points (four values). Tolerates legacy data without the field. */
+export const hasDrawableLine = (waypoints: number[] | undefined): boolean => (waypoints?.length ?? 0) >= 4;
+
 /** Reads a flat [x, y, x, y, …] waypoint array back into points. */
 export const pointsFromWaypoints = (waypoints: number[]): Point[] => {
     const points: Point[] = [];

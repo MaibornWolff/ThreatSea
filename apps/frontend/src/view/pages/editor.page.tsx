@@ -58,7 +58,6 @@ import type {
     ConnectionEndpointWithComponent,
     Coordinate,
     SystemPointOfAttack,
-    ConnectionPointMeta,
     TextAnnotation,
 } from "#api/types/system.types.ts";
 import type { EditorComponentType } from "#application/adapters/editor-component-type.adapter.ts";
@@ -148,7 +147,6 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         addAssetToSelectedPointOfAttack,
         removeAssetToSelectedPointOfAttack,
         updateConnectionsOfComponent,
-        connectionRecalculated,
         selectConnectionPoint,
         deselectConnectionPoint,
         setMousePointers,
@@ -1058,14 +1056,6 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         }
     };
 
-    const onRecalculated = (
-        connectionId: string,
-        waypoints: number[],
-        connectionPointsMeta: ConnectionPointMeta[]
-    ): void => {
-        connectionRecalculated(connectionId, waypoints, connectionPointsMeta);
-    };
-
     const handleAssetSearchChanged = (e: ChangeEvent<HTMLInputElement>): void => {
         setAssetSearchValue(e.target.value);
     };
@@ -1414,13 +1404,11 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                     return <Group key={i}></Group>;
                                 }
 
-                                const fromComponent = components.filter(
-                                    (component) => component.id === connection.from.id
-                                )[0];
-                                const toComponent = components.filter(
-                                    (component) => component.id === connection.to.id
-                                )[0];
-                                if (!fromComponent || !toComponent) {
+                                // A connection whose endpoint component is gone has no valid line.
+                                const endpointsExist =
+                                    components.some((component) => component.id === connection.from.id) &&
+                                    components.some((component) => component.id === connection.to.id);
+                                if (!endpointsExist) {
                                     return null;
                                 }
 
@@ -1430,13 +1418,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                         {...connection}
                                         onClick={handleSelectConnection}
                                         onPointOfAttackClicked={handleOnPointOfAttackClicked}
-                                        fromComponent={fromComponent}
-                                        toComponent={toComponent}
-                                        components={components}
-                                        connections={connections}
                                         selected={selectedConnectionId === connection.id}
-                                        recalculate={connection.recalculate}
-                                        onRecalculated={onRecalculated}
                                         onConnectionPointClicked={handleOnConnectionPointClicked}
                                         selectedConnectionPointId={selectedConnectionPointId}
                                         stageRef={stageRef}

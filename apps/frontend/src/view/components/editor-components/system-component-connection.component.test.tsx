@@ -2,7 +2,7 @@ import { screen } from "@testing-library/react";
 import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
 import { POA_COLORS } from "#view/colors/pointsOfAttack.colors.ts";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
-import { createSystemComponent, createConnectionAnchor } from "#test-utils/builders.ts";
+import { createConnectionAnchor } from "#test-utils/builders.ts";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import editorReducer from "#application/reducers/editor.reducer.ts";
 import { SystemComponentConnection } from "./system-component-connection.component";
@@ -24,12 +24,9 @@ const defaultProps = {
     projectId: 1,
     recalculate: false,
     waypoints: [100, 100, 300, 300],
-    components: [],
-    connections: [],
     onClick: vi.fn(),
     onPointOfAttackClicked: vi.fn(),
     selected: false,
-    onRecalculated: vi.fn(),
     stageRef: { current: null },
     pointsOfAttack: [],
     communicationInterface: null,
@@ -43,8 +40,6 @@ describe("SystemComponentConnection", () => {
                     {...defaultProps}
                     from={connectionAnchor({ type: STANDARD_COMPONENT_TYPES.USERS })}
                     to={connectionAnchor({ id: "comp-2" })}
-                    fromComponent={createSystemComponent({ type: STANDARD_COMPONENT_TYPES.USERS })}
-                    toComponent={createSystemComponent({ id: "comp-2" })}
                 />
             );
 
@@ -58,8 +53,6 @@ describe("SystemComponentConnection", () => {
                     {...defaultProps}
                     from={connectionAnchor()}
                     to={connectionAnchor({ id: "comp-2", type: STANDARD_COMPONENT_TYPES.USERS })}
-                    fromComponent={createSystemComponent()}
-                    toComponent={createSystemComponent({ id: "comp-2", type: STANDARD_COMPONENT_TYPES.USERS })}
                 />
             );
 
@@ -73,8 +66,6 @@ describe("SystemComponentConnection", () => {
                     {...defaultProps}
                     from={connectionAnchor({ type: STANDARD_COMPONENT_TYPES.SERVER })}
                     to={connectionAnchor({ id: "comp-2", type: STANDARD_COMPONENT_TYPES.DATABASE })}
-                    fromComponent={createSystemComponent({ type: STANDARD_COMPONENT_TYPES.SERVER })}
-                    toComponent={createSystemComponent({ id: "comp-2", type: STANDARD_COMPONENT_TYPES.DATABASE })}
                 />
             );
 
@@ -84,8 +75,10 @@ describe("SystemComponentConnection", () => {
                 POA_COLORS[POINTS_OF_ATTACK.COMMUNICATION_INFRASTRUCTURE].normal
             );
         });
+    });
 
-        it("passes waypoints through to the Line when recalculate is false", () => {
+    describe("waypoint rendering", () => {
+        it("passes the stored waypoints through to the Line", () => {
             const waypoints = [50, 50, 200, 100, 350, 350];
 
             renderWithProviders(
@@ -94,8 +87,6 @@ describe("SystemComponentConnection", () => {
                     waypoints={waypoints}
                     from={connectionAnchor()}
                     to={connectionAnchor({ id: "comp-2" })}
-                    fromComponent={createSystemComponent()}
-                    toComponent={createSystemComponent({ id: "comp-2" })}
                 />
             );
 
@@ -104,6 +95,21 @@ describe("SystemComponentConnection", () => {
             expect(renderedPoints).toEqual(waypoints);
         });
 
+        it("renders nothing while the waypoints hold fewer than two points", () => {
+            renderWithProviders(
+                <SystemComponentConnection
+                    {...defaultProps}
+                    waypoints={[100, 100]}
+                    from={connectionAnchor()}
+                    to={connectionAnchor({ id: "comp-2" })}
+                />
+            );
+
+            expect(screen.queryByTestId("konva-line")).not.toBeInTheDocument();
+        });
+    });
+
+    describe("selection styling", () => {
         it("applies hover color when selected", () => {
             renderWithProviders(
                 <SystemComponentConnection
@@ -111,8 +117,6 @@ describe("SystemComponentConnection", () => {
                     selected={true}
                     from={connectionAnchor({ type: STANDARD_COMPONENT_TYPES.USERS })}
                     to={connectionAnchor({ id: "comp-2" })}
-                    fromComponent={createSystemComponent({ type: STANDARD_COMPONENT_TYPES.USERS })}
-                    toComponent={createSystemComponent({ id: "comp-2" })}
                 />
             );
 
@@ -127,8 +131,6 @@ describe("SystemComponentConnection", () => {
                     selected={true}
                     from={connectionAnchor({ type: STANDARD_COMPONENT_TYPES.USERS })}
                     to={connectionAnchor({ id: "comp-2" })}
-                    fromComponent={createSystemComponent({ type: STANDARD_COMPONENT_TYPES.USERS })}
-                    toComponent={createSystemComponent({ id: "comp-2" })}
                 />,
                 { preloadedState: { editor: { ...defaultEditorState, isCapturing: true } } }
             );

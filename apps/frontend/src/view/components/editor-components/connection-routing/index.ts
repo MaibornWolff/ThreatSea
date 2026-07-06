@@ -10,7 +10,7 @@ import { routeFishbone } from "./fishbone.ts";
 import { routeDeterministic } from "./deterministic.ts";
 
 export type { ConnectionRoutingInput, ConnectionRoutingResult } from "./shared.ts";
-export { rectOf, segHitsRect, simplifyPolyline, findBestAnchor } from "./shared.ts";
+export { rectOf, segHitsRect, simplifyPolyline, findBestAnchor, hasDrawableLine } from "./shared.ts";
 
 /** True when the route runs through any component box other than its own two endpoints. */
 const hitsAnyComponent = (waypoints: number[], input: ConnectionRoutingInput): boolean => {
