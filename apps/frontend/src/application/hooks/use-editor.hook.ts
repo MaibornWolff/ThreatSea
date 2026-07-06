@@ -320,16 +320,22 @@ export const useEditor = ({
      * from the store because callers dispatch the change that made routes stale right before.
      */
     const routeConnectionsSequentially = useCallback(
-        (connectionIds: Set<string>): void => {
+        (connectionIds: Set<string>, connectionIdsToRouteLast = new Set<string>()): void => {
             const state = store.getState();
             const freshComponents = systemSelectors.selectComponents(state, projectId);
             const freshConnections = systemSelectors.selectConnections(state, projectId);
             const componentById = new Map(freshComponents.map((component) => [component.id, component]));
 
-            // Fixed order, so the same edit always produces the same layout.
+            // Connections whose geometry the edit did not touch route first, so they keep their
+            // established lines; the edited ones route last and adapt around them. Id order breaks
+            // ties, so the same edit always produces the same layout.
             const connectionsToRoute = freshConnections
                 .filter((connection) => connectionIds.has(connection.id))
-                .sort((first, second) => first.id.localeCompare(second.id));
+                .sort((first, second) => {
+                    const firstRoutesLast = connectionIdsToRouteLast.has(first.id) ? 1 : 0;
+                    const secondRoutesLast = connectionIdsToRouteLast.has(second.id) ? 1 : 0;
+                    return firstRoutesLast - secondRoutesLast || first.id.localeCompare(second.id);
+                });
 
             let workingConnections = freshConnections;
             connectionsToRoute.forEach((connection) => {
@@ -340,6 +346,7 @@ export const useEditor = ({
                 }
 
                 const routing = computeConnectionRouting({
+                    connectionId: connection.id,
                     fromComponent,
                     toComponent,
                     components: freshComponents,
@@ -380,7 +387,10 @@ export const useEditor = ({
         [store, dispatch, projectId]
     );
 
-    const recalculateConnectionsOfComponents = (componentIds: string[]): void => {
+    const recalculateConnectionsOfComponents = (
+        componentIds: string[],
+        connectionIdsToRouteLast?: Set<string>
+    ): void => {
         const state = store.getState();
         const freshConnections = systemSelectors.selectConnections(state, projectId);
         const affectedComponents = new Set(componentIds);
@@ -392,7 +402,7 @@ export const useEditor = ({
                 )
                 .map((connection) => connection.id)
         );
-        routeConnectionsSequentially(affectedConnectionIds);
+        routeConnectionsSequentially(affectedConnectionIds, connectionIdsToRouteLast);
     };
 
     const loadedProjectId = useAppSelector((state) => state.system.loadedProjectId);
@@ -711,7 +721,8 @@ export const useEditor = ({
                 })
             );
 
-            recalculateConnectionsOfComponents([from.id, to.id]);
+            // The new connection routes last, adapting around its siblings' established lines.
+            recalculateConnectionsOfComponents([from.id, to.id], new Set([connectionId]));
 
             dispatch(EditorActions.resetConnection());
         }
@@ -822,13 +833,17 @@ export const useEditor = ({
         // Read the store, not the render snapshot — connections may have changed in this same tick.
         const freshConnections = systemSelectors.selectConnections(store.getState(), projectId);
         const affectedComponents = new Set<string>();
+        const movedConnectionIds = new Set<string>();
         freshConnections.forEach((connection) => {
             if (connection.from.id === selectedComponentId || connection.to.id === selectedComponentId) {
                 affectedComponents.add(connection.from.id);
                 affectedComponents.add(connection.to.id);
+                movedConnectionIds.add(connection.id);
             }
         });
-        recalculateConnectionsOfComponents([...affectedComponents]);
+        // The moved component's own connections route last: the neighbours' other connections keep
+        // their established lines and the moved ones adapt around them.
+        recalculateConnectionsOfComponents([...affectedComponents], movedConnectionIds);
     };
 
     const standardComponents = useAppSelector(editorSelectors.selectStandardComponents);

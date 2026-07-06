@@ -217,6 +217,7 @@ const isBetterRoute = (candidate: ScoredRoute, best: ScoredRoute): boolean => {
 
 /** Computes the waypoints + connection-point info for one connection. Null when no route is possible. */
 export function routeDeterministic({
+    connectionId,
     fromComponent,
     toComponent,
     components,
@@ -242,13 +243,15 @@ export function routeDeterministic({
     const unrelatedSegments: Segment[] = [];
     const ownEndpointIds = new Set([from.id, to.id]);
     for (const connection of connections) {
-        const isThisConnection =
+        const isSamePair =
             (connection.from.id === from.id && connection.to.id === to.id) ||
             (connection.from.id === to.id && connection.to.id === from.id);
+        const isThisConnection = connectionId !== undefined ? connection.id === connectionId : isSamePair;
         if (isThisConnection) {
             continue;
         }
-        const sharesEndpoint = ownEndpointIds.has(connection.from.id) || ownEndpointIds.has(connection.to.id);
+        const sharesEndpoint =
+            !isSamePair && (ownEndpointIds.has(connection.from.id) || ownEndpointIds.has(connection.to.id));
         for (const segment of segmentsOfPoints(pointsFromWaypoints(connection.waypoints))) {
             otherSegments.push(segment);
             if (!sharesEndpoint) {

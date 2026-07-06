@@ -32,6 +32,7 @@ export interface Rectangle {
 }
 
 export interface ConnectionRoutingInput {
+    connectionId?: string;
     fromComponent: AugmentedSystemComponent;
     toComponent: AugmentedSystemComponent;
     components: AugmentedSystemComponent[];

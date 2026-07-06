@@ -207,6 +207,41 @@ describe("routeDeterministic line-crossing avoidance", () => {
     });
 });
 
+describe("routeDeterministic duplicate connections between the same pair", () => {
+    it("routes a second connection off its sibling's line instead of on top of it", () => {
+        const fromComponent = createSystemComponent({ id: "from", gridX: 0, gridY: 0 });
+        const toComponent = createSystemComponent({ id: "to", gridX: 60, gridY: 0 });
+        // The first connection's straight line between the facing faces.
+        const siblingWaypoints = [80, 40, 300, 40];
+        const sibling = createAugmentedConnection({
+            id: "sibling",
+            fromComponent,
+            toComponent,
+            waypoints: siblingWaypoints,
+        });
+
+        const routing = routeDeterministic({
+            connectionId: "duplicate",
+            fromComponent,
+            toComponent,
+            components: [fromComponent, toComponent],
+            connections: [sibling],
+            from: { ...createConnectionAnchor({ id: "from" }), component: fromComponent },
+            to: { ...createConnectionAnchor({ id: "to" }), component: toComponent },
+            pointsOfAttack: [],
+        });
+
+        expect(routing).not.toBeNull();
+        expectOrthogonal(routing!.waypoints);
+        // The duplicate must not fuse with the sibling: its mid-section leaves the sibling's y=40 line.
+        expect(routing!.waypoints).not.toEqual(siblingWaypoints);
+        const interiorYs = toPoints(routing!.waypoints)
+            .slice(1, -1)
+            .map((point) => point.y);
+        expect(interiorYs.some((y) => y !== 40)).toBe(true);
+    });
+});
+
 describe("routeDeterministic radial hub entry", () => {
     it("enters a shared hub on the side facing each leaf, so two lines into it do not cross", () => {
         const hub = createSystemComponent({ id: "hub", gridX: 160, gridY: 120 });
