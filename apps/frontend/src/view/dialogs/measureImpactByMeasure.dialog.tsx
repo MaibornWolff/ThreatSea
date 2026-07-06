@@ -87,6 +87,7 @@ const MeasureImpactByMeasureDialog = ({
     });
 
     const disableSelect = !!measureImpact;
+    const [measureSelectOpen, setMeasureSelectOpen] = useState(false);
 
     const {
         register,
@@ -156,9 +157,7 @@ const MeasureImpactByMeasureDialog = ({
         navigate(-1);
     };
 
-    const measuresAddRoute = location.pathname.startsWith(`/projects/${project.id}/threats/`)
-        ? `/projects/${project.id}/threats/measures/add`
-        : `/projects/${project.id}/risk/measures/add`;
+    const measuresAddRoute = `${location.pathname}/measures/add`;
 
     const handleImplementCatalogMeasure = (event: React.MouseEvent<HTMLElement>, catalogMeasure: CatalogMeasure) => {
         event.preventDefault();
@@ -181,6 +180,7 @@ const MeasureImpactByMeasureDialog = ({
     const handleNewBlankMeasure = (event: React.MouseEvent<HTMLElement>) => {
         event.preventDefault();
         event.stopPropagation();
+        setMeasureSelectOpen(false);
         navigate(measuresAddRoute, {
             state: {
                 measure: {
@@ -250,6 +250,9 @@ const MeasureImpactByMeasureDialog = ({
                                     label={t("measure")}
                                     multiple={false}
                                     value={value}
+                                    open={measureSelectOpen}
+                                    onOpen={() => setMeasureSelectOpen(true)}
+                                    onClose={() => setMeasureSelectOpen(false)}
                                     {...register("measureId", {
                                         validate: (value) => value != null,
                                         valueAsNumber: true,

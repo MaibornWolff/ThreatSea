@@ -520,8 +520,9 @@ const ThreatsPageBody = () => {
                 </Box>
                 <Routes>
                     <Route path="edit" element={<ThreatDialogPage />} />
-                    <Route path="measureImpacts/edit" element={<MeasureImpactByMeasureDialogPage />} />
-                    <Route path="measures/add" element={<AddMeasureDialogPage />} />
+                    <Route path="measureImpacts/edit" element={<MeasureImpactByMeasureDialogPage />}>
+                        <Route path="measures/add" element={<AddMeasureDialogPage />} />
+                    </Route>
                 </Routes>
             </Page>
         </Box>

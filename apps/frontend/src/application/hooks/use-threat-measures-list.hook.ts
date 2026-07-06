@@ -63,8 +63,8 @@ export const useThreatMeasuresList = ({ projectId, threatId }: UseThreatMeasures
     }, [projectId, loadMeasureImpacts]);
 
     const items: ThreatMeasure[] = useMemo(() => {
-        if (measuresPending || measureImpactsPending) {
-            //wait until all data is loaded
+        if ((measuresPending && measures.length === 0) || (measureImpactsPending && measureImpacts.length === 0)) {
+            // wait until initial data is loaded; keep showing stale data on re-fetches
             return [];
         }
 
