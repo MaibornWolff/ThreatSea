@@ -20,6 +20,7 @@ interface EditorStageProps {
     handleMouseUp: (event: KonvaEventObject<MouseEvent>) => void;
     onMouseLeave: (event: KonvaEventObject<MouseEvent>) => void;
     onKeyUp: (event: KeyboardEvent) => void;
+    onKeyDown: (event: KeyboardEvent) => void;
     onScale: (scale: number, position: Coordinate) => void;
     scale: number;
     position: Coordinate;
@@ -41,6 +42,7 @@ export const EditorStage = ({
     handleMouseUp,
     onMouseLeave,
     onKeyUp,
+    onKeyDown,
     onScale,
     scale,
     position,
@@ -167,6 +169,13 @@ export const EditorStage = ({
             window.onkeyup = null;
         };
     }, [onKeyUp]);
+
+    useEffect(() => {
+        window.onkeydown = onKeyDown;
+        return () => {
+            window.onkeydown = null;
+        };
+    }, [onKeyDown]);
 
     useEffect(() => {
         const stage = stageRef.current;

@@ -16,6 +16,7 @@ import { useAssets } from "#application/hooks/use-assets.hook.ts";
 import { useAutoSavePreview } from "#application/hooks/use-auto-save-preview.hook.ts";
 import { useAnnotationDrawing, ANNOTATION_STROKE_WIDTH } from "#application/hooks/use-annotation-drawing.hook.ts";
 import { useEditor, type EditorConnectionAnchor } from "#application/hooks/use-editor.hook.ts";
+import { useKeyboardComponentMove, type HelpLines } from "#application/hooks/use-keyboard-component-move.hook.ts";
 import { useEditorAnnotations } from "#application/hooks/use-editor-annotations.hook.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { DEFAULT_ANNOTATION_COLOR } from "#view/colors/annotation.colors.ts";
@@ -87,13 +88,6 @@ const isEditableEventTarget = (target: EventTarget | null): boolean => {
     const tag = target.tagName;
     return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
 };
-
-interface HelpLines {
-    x: number;
-    y: number;
-    x2: number;
-    y2: number;
-}
 
 interface EditorPageBodyProps {
     updateAutoSaveOnClick?: (handler: (() => void) | undefined) => void;
@@ -306,6 +300,19 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     // Add ref to store current help lines position
     const currentHelpLinesRef = useRef<HelpLines | null>(null);
 
+    const { handleKeyDown, clearKeyboardNudgeTimeouts } = useKeyboardComponentMove({
+        selectedComponent,
+        isEditor,
+        isAnyComponentInUse,
+        layerPosition,
+        gridSizeX: GRID_CONFIG.gridSizeX,
+        gridSizeY: GRID_CONFIG.gridSizeY,
+        currentHelpLinesRef,
+        moveComponent,
+        updateConnectionsOfComponent,
+        setShowHelpLines,
+    });
+
     const newConnectionPreviewComponent = useMemo(() => {
         if (!newConnection) {
             return undefined;
@@ -352,6 +359,8 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     }, [loadedProjectId, projectId, lastCenteredProjectId, dispatch, navigate, location.pathname, location.state]);
 
     const handleComponentDragStart = (_event: KonvaEventObject<DragEvent>, componentId: string): void => {
+        // Cancel any pending keyboard-nudge hide so it can't clear the drag's help lines.
+        clearKeyboardNudgeTimeouts();
         addInUseComponent(componentId);
         selectComponent(componentId);
         deselectConnection();
@@ -1231,6 +1240,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                         onContextMenuAction={handleContextMenuAction}
                         onMouseLeave={handleMouseOut}
                         onKeyUp={handleKeyUp}
+                        onKeyDown={handleKeyDown}
                         onScale={onStageScale}
                         scale={stageScale}
                         position={stagePosition}
