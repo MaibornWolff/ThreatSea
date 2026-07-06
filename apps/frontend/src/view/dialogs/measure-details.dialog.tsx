@@ -45,7 +45,7 @@ interface MeasureDetailsDialogProps extends DialogProps {
     initialTab?: MeasureDetailsTab;
 }
 
-type MeasureDetailsTab = "MAIN" | "THREATS";
+export type MeasureDetailsTab = "MAIN" | "THREATS";
 
 /**
  * Creates a dialog for the measures.

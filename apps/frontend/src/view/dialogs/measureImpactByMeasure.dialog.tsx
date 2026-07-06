@@ -25,7 +25,7 @@ import SelectBoxCategorySubHeader from "#view/components/selectBox-CategorySubHe
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { useDialog } from "#application/hooks/use-dialog.hook.ts";
 import { Button } from "#view/components/button.component.tsx";
 import { Dialog } from "#view/components/dialog.component.tsx";
@@ -74,6 +74,7 @@ const MeasureImpactByMeasureDialog = ({
     ...props
 }: MeasureImpactByMeasureDialogProps) => {
     const navigate = useNavigate();
+    const location = useLocation();
     const {
         confirmDialog,
         cancelDialog,
@@ -155,10 +156,14 @@ const MeasureImpactByMeasureDialog = ({
         navigate(-1);
     };
 
+    const measuresAddRoute = location.pathname.startsWith(`/projects/${project.id}/threats/`)
+        ? `/projects/${project.id}/threats/measures/add`
+        : `/projects/${project.id}/risk/measures/add`;
+
     const handleImplementCatalogMeasure = (event: React.MouseEvent<HTMLElement>, catalogMeasure: CatalogMeasure) => {
         event.preventDefault();
         event.stopPropagation();
-        navigate(`/projects/${project.id}/risk/measures/add`, {
+        navigate(measuresAddRoute, {
             state: {
                 measure: {
                     active: false,
@@ -176,7 +181,7 @@ const MeasureImpactByMeasureDialog = ({
     const handleNewBlankMeasure = (event: React.MouseEvent<HTMLElement>) => {
         event.preventDefault();
         event.stopPropagation();
-        navigate(`/projects/${project.id}/risk/measures/add`, {
+        navigate(measuresAddRoute, {
             state: {
                 measure: {
                     active: false,

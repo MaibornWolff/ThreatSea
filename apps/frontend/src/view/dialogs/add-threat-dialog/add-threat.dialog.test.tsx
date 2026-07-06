@@ -1,6 +1,6 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import AddThreatDialog from "./add-threat.dialog";
+import AddThreatDialog, { type ThreatDialogHostRoute } from "./add-threat.dialog";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import {
     createAsset,
@@ -22,14 +22,16 @@ vi.mock("react-router", async (importOriginal) => {
     return { ...actual, useNavigate: () => navigate };
 });
 
-const setup = (userRole: USER_ROLES = USER_ROLES.EDITOR) => {
+const setup = (userRole: USER_ROLES = USER_ROLES.EDITOR, hostRoute: ThreatDialogHostRoute = "threats") => {
     const project = createProject({ id: 7 });
     const threat = createThreat({
         id: 42,
         assets: [createAsset({ confidentiality: 4, integrity: 2, availability: 1 })],
     });
     const user = userEvent.setup();
-    renderWithProviders(<AddThreatDialog threat={threat} project={project} userRole={userRole} open={true} />);
+    renderWithProviders(
+        <AddThreatDialog threat={threat} project={project} userRole={userRole} open={true} hostRoute={hostRoute} />
+    );
     return { project, threat, user };
 };
 
@@ -54,8 +56,8 @@ describe("AddThreatDialog — Apply Measure button", () => {
         expect(screen.queryByRole("button", { name: /apply measure/i })).not.toBeInTheDocument();
     });
 
-    it("navigates to the apply-measure route with the threat and computed damage on click", async () => {
-        const { project, threat, user } = setup(USER_ROLES.EDITOR);
+    it("navigates to the threats apply-measure route when hostRoute is threats", async () => {
+        const { project, threat, user } = setup(USER_ROLES.EDITOR, "threats");
 
         await user.click(screen.getByRole("tab", { name: /measures/i }));
         await user.click(screen.getByRole("button", { name: /apply measure/i }));
@@ -64,6 +66,93 @@ describe("AddThreatDialog — Apply Measure button", () => {
         expect(navigate).toHaveBeenLastCalledWith(`/projects/${project.id}/threats/measureImpacts/edit`, {
             state: {
                 threat: { ...threat, damage: 4 },
+                project,
+            },
+        });
+    });
+
+    it("navigates to the risk apply-measure route when hostRoute is risk", async () => {
+        const { project, threat, user } = setup(USER_ROLES.EDITOR, "risk");
+
+        await user.click(screen.getByRole("tab", { name: /measures/i }));
+        await user.click(screen.getByRole("button", { name: /apply measure/i }));
+
+        expect(navigate).toHaveBeenCalledTimes(2);
+        expect(navigate).toHaveBeenLastCalledWith(`/projects/${project.id}/risk/measureImpacts/edit`, {
+            state: {
+                threat: { ...threat, damage: 4 },
+                project,
+            },
+        });
+    });
+
+    it("navigates to the threats apply-measure route when hostRoute is measures (no measures sub-route for this action)", async () => {
+        const { project, threat, user } = setup(USER_ROLES.EDITOR, "measures");
+
+        await user.click(screen.getByRole("tab", { name: /measures/i }));
+        await user.click(screen.getByRole("button", { name: /apply measure/i }));
+
+        expect(navigate).toHaveBeenCalledTimes(2);
+        expect(navigate).toHaveBeenLastCalledWith(`/projects/${project.id}/threats/measureImpacts/edit`, {
+            state: {
+                threat: { ...threat, damage: 4 },
+                project,
+            },
+        });
+    });
+});
+
+describe("AddThreatDialog — Edit Measure Impact routing", () => {
+    const threatMeasure = createThreatMeasure();
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+        mockUseThreatMeasuresList({ threatMeasures: [threatMeasure] });
+    });
+
+    it("navigates to threats measureImpacts route when hostRoute is threats", async () => {
+        const { project, threat, user } = setup(USER_ROLES.EDITOR, "threats");
+
+        await user.click(screen.getByRole("tab", { name: /measures/i }));
+        await user.click(screen.getByText("2025-01-01"));
+
+        expect(navigate).toHaveBeenLastCalledWith(`/projects/${project.id}/threats/measureImpacts/edit`, {
+            state: {
+                threat: { ...threat, damage: 4 },
+                measureImpact: threatMeasure.measureImpact,
+                project,
+            },
+        });
+    });
+
+    it("navigates to measures measureImpacts route when hostRoute is measures", async () => {
+        const { project, user } = setup(USER_ROLES.EDITOR, "measures");
+
+        await user.click(screen.getByRole("tab", { name: /measures/i }));
+        await user.click(screen.getByText("2025-01-01"));
+
+        expect(navigate).toHaveBeenLastCalledWith(
+            `/projects/${project.id}/measures/${threatMeasure.measure.id}/measureImpacts/edit`,
+            {
+                state: {
+                    measure: threatMeasure.measure,
+                    measureImpact: threatMeasure.measureImpact,
+                    project,
+                },
+            }
+        );
+    });
+
+    it("navigates to risk measureImpacts route when hostRoute is risk", async () => {
+        const { project, threat, user } = setup(USER_ROLES.EDITOR, "risk");
+
+        await user.click(screen.getByRole("tab", { name: /measures/i }));
+        await user.click(screen.getByText("2025-01-01"));
+
+        expect(navigate).toHaveBeenLastCalledWith(`/projects/${project.id}/risk/measureImpacts/edit`, {
+            state: {
+                threat: { ...threat, damage: 4 },
+                measureImpact: threatMeasure.measureImpact,
                 project,
             },
         });

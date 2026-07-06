@@ -23,6 +23,7 @@ import { CreatePage } from "#view/components/create-page.component.tsx";
 import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
 import ThreatDialogPage from "./threat-dialog.page";
 import { MeasureImpactByMeasureDialogPage } from "./measure-impact-by-measure-dialog.page";
+import AddMeasureDialogPage from "./add-measure-dialog.page";
 import { withProject } from "#view/components/with-project.hoc.tsx";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 
@@ -520,6 +521,7 @@ const ThreatsPageBody = () => {
                 <Routes>
                     <Route path="edit" element={<ThreatDialogPage />} />
                     <Route path="measureImpacts/edit" element={<MeasureImpactByMeasureDialogPage />} />
+                    <Route path="measures/add" element={<AddMeasureDialogPage />} />
                 </Routes>
             </Page>
         </Box>

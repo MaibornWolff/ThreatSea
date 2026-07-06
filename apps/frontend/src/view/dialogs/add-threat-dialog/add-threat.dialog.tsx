@@ -31,16 +31,26 @@ import { AddThreatMainTab } from "./add-threat-main-tab.component.tsx";
 import { AddThreatAssetsTab } from "./add-threat-assets-tab.component.tsx";
 import { AddThreatMeasuresTab } from "./add-threat-measures-tab.component.tsx";
 
-type ThreatTab = "MAIN" | "ASSETS" | "MEASURES";
+export type ThreatTab = "MAIN" | "ASSETS" | "MEASURES";
+
+export type ThreatDialogHostRoute = "threats" | "measures" | "risk";
 
 interface AddThreatDialogProps extends DialogProps {
     threat: ExtendedThreat;
     project: ExtendedProject;
     userRole: USER_ROLES | undefined;
     initialTab?: ThreatTab;
+    hostRoute?: ThreatDialogHostRoute;
 }
 
-const AddThreatDialog = ({ threat, project, userRole, initialTab, ...props }: AddThreatDialogProps) => {
+const AddThreatDialog = ({
+    threat,
+    project,
+    userRole,
+    initialTab,
+    hostRoute = "threats",
+    ...props
+}: AddThreatDialogProps) => {
     const { confirmDialog, cancelDialog } = useDialog<ThreatFormValues | null>("threats");
     const navigate = useNavigate();
     const location = useLocation();
@@ -128,18 +138,15 @@ const AddThreatDialog = ({ threat, project, userRole, initialTab, ...props }: Ad
     ) => {
         event.preventDefault();
         event.stopPropagation();
-        if (location.pathname.startsWith(`/projects/${projectId}/threats/`)) {
-            navigate(`/projects/${projectId}/threats/measureImpacts/edit`, {
-                state: {
-                    threat: { ...threat, damage: calcDamage(threat) },
-                    measureImpact,
-                    project,
-                },
+        if (hostRoute === "measures") {
+            navigate(`/projects/${projectId}/measures/${measure.id}/measureImpacts/edit`, {
+                state: { measure, measureImpact, project },
             });
         } else {
-            navigate(`/projects/${projectId}/measures/${measure.id}/measureImpacts/edit`, {
+            // threats and risk both have a measureImpacts/edit route at their own root
+            navigate(`/projects/${projectId}/${hostRoute}/measureImpacts/edit`, {
                 state: {
-                    measure,
+                    threat: { ...threat, damage: calcDamage(threat) },
                     measureImpact,
                     project,
                 },
@@ -177,7 +184,8 @@ const AddThreatDialog = ({ threat, project, userRole, initialTab, ...props }: Ad
     };
 
     const onClickApplyMeasure = () => {
-        navigate(`/projects/${projectId}/threats/measureImpacts/edit`, {
+        const basePath = hostRoute === "risk" ? `/projects/${projectId}/risk` : `/projects/${projectId}/threats`;
+        navigate(`${basePath}/measureImpacts/edit`, {
             state: {
                 threat: { ...threat, damage: calcDamage(threat) },
                 project,
