@@ -32,7 +32,7 @@ export interface Rectangle {
 }
 
 export interface ConnectionRoutingInput {
-    connectionId?: string;
+    connectionId: string;
     fromComponent: AugmentedSystemComponent;
     toComponent: AugmentedSystemComponent;
     components: AugmentedSystemComponent[];
@@ -395,13 +395,12 @@ export const buildRouteScoringContext = (input: ConnectionRoutingInput): RouteSc
     const unrelatedSegments: Segment[] = [];
     const ownEndpointIds = new Set([from.id, to.id]);
     for (const connection of connections) {
+        if (connection.id === connectionId) {
+            continue;
+        }
         const isSamePair =
             (connection.from.id === from.id && connection.to.id === to.id) ||
             (connection.from.id === to.id && connection.to.id === from.id);
-        const isThisConnection = connectionId !== undefined ? connection.id === connectionId : isSamePair;
-        if (isThisConnection) {
-            continue;
-        }
         const sharesEndpoint =
             !isSamePair && (ownEndpointIds.has(connection.from.id) || ownEndpointIds.has(connection.to.id));
         for (const segment of segmentsOfPoints(pointsFromWaypoints(connection.waypoints))) {

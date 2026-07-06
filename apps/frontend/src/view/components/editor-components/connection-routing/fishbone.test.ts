@@ -22,6 +22,7 @@ const routeInContext = (
     const fromComponent = components.find((component) => component.id === connection.from.id)!;
     const toComponent = components.find((component) => component.id === connection.to.id)!;
     return routeFishbone({
+        connectionId,
         fromComponent,
         toComponent,
         components,

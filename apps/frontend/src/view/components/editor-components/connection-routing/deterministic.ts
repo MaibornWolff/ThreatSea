@@ -230,13 +230,14 @@ export function routeDeterministic(input: ConnectionRoutingInput): ConnectionRou
 
     // Still crossing? Retry with the away-side faces too — a detour may only exist there. Not part
     // of the normal search: against not-yet-drawn lines (batch recalculation) nothing would count
-    // against those wide sweeps, so they'd win too often.
+    // against those wide sweeps, so they'd win too often. (Gated on crossings only on purpose —
+    // firing on box/overlap defects pulls in away-side routes that cross siblings in dense hubs.)
     if (best && best.crossings > 0) {
         const extended = bestRouteForFaces(
             extendedCandidateFaces(fromComponent, toComponent),
             extendedCandidateFaces(toComponent, fromComponent)
         );
-        if (extended && extended.crossings < best.crossings) {
+        if (extended && compareRouteDefects(extended, best) < 0) {
             best = extended;
         }
     }

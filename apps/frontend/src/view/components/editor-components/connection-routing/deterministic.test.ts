@@ -30,6 +30,7 @@ const routeBetween = (
     const fromComponent = createSystemComponent({ id: "from", ...fromGrid });
     const toComponent = createSystemComponent({ id: "to", ...toGrid });
     return routeDeterministic({
+        connectionId: "self",
         fromComponent,
         toComponent,
         components: [fromComponent, toComponent, ...(options.obstacles ?? [])],
@@ -183,6 +184,7 @@ describe("routeDeterministic line-crossing avoidance", () => {
 
         const routeAtoB = (connections: AugmentedSystemConnection[]) =>
             routeDeterministic({
+                connectionId: connection.id,
                 fromComponent: boxA,
                 toComponent: boxB,
                 components,
@@ -255,6 +257,7 @@ describe("routeDeterministic radial hub entry", () => {
 
         const routeOf = (connection: AugmentedSystemConnection, leaf: AugmentedSystemComponent) =>
             routeDeterministic({
+                connectionId: connection.id,
                 fromComponent: leaf,
                 toComponent: hub,
                 components,

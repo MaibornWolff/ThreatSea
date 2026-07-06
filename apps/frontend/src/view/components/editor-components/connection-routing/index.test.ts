@@ -14,6 +14,7 @@ describe("computeConnectionRouting composition", () => {
         const connectionA = createAugmentedConnection({ id: "c-a", fromComponent: leafA, toComponent: hub });
         const connectionB = createAugmentedConnection({ id: "c-b", fromComponent: leafB, toComponent: hub });
         const input = {
+            connectionId: "c-a",
             fromComponent: leafA,
             toComponent: hub,
             components,
@@ -82,6 +83,7 @@ describe("computeConnectionRouting composition", () => {
         const to = createSystemComponent({ id: "to", gridX: 60, gridY: 0 });
         const connection = createAugmentedConnection({ id: "lone", fromComponent: from, toComponent: to });
         const input = {
+            connectionId: "lone",
             fromComponent: from,
             toComponent: to,
             components: [from, to],
@@ -100,6 +102,7 @@ describe("computeConnectionRouting composition", () => {
         const b = createSystemComponent({ id: "b", gridX: 0, gridY: 0 });
         const connection = createAugmentedConnection({ id: "same", fromComponent: a, toComponent: b });
         const input = {
+            connectionId: "same",
             fromComponent: a,
             toComponent: b,
             components: [a, b],
@@ -137,6 +140,7 @@ describe("computeConnectionRouting composition", () => {
         const routes = Object.keys(grid).map((id) => {
             const connection = connections.find((candidate) => candidate.id === id)!;
             return computeConnectionRouting({
+                connectionId: connection.id,
                 fromComponent: leaves[id]!,
                 toComponent: hub,
                 components,
@@ -186,6 +190,7 @@ describe("computeConnectionRouting composition", () => {
         const routeOf = (leafId: string): number[] => {
             const connection = connections.find((candidate) => candidate.from.id === leafId)!;
             return computeConnectionRouting({
+                connectionId: connection.id,
                 fromComponent: byId.get(leafId)!,
                 toComponent: byId.get("main")!,
                 components,
@@ -267,6 +272,7 @@ describe("computeConnectionRouting composition", () => {
         for (const id of leaves) {
             const connection = connections.find((candidate) => candidate.from.id === id)!;
             const route = computeConnectionRouting({
+                connectionId: connection.id,
                 fromComponent: byId.get(id)!,
                 toComponent: byId.get("main")!,
                 components,
