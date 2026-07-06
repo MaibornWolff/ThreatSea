@@ -172,7 +172,6 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         selectedConnection,
         selectedConnectionId,
         selectedPointOfAttack,
-        selectedConnectionPointId,
         mousePointers,
         newConnection,
         pointsOfAttackOfSelectedComponent,
@@ -1419,8 +1418,6 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                         onClick={handleSelectConnection}
                                         onPointOfAttackClicked={handleOnPointOfAttackClicked}
                                         selected={selectedConnectionId === connection.id}
-                                        onConnectionPointClicked={handleOnConnectionPointClicked}
-                                        selectedConnectionPointId={selectedConnectionPointId}
                                         stageRef={stageRef}
                                     />
                                 );

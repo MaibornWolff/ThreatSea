@@ -26,8 +26,6 @@ interface SystemComponentConnectionProps extends AugmentedSystemConnection {
     onPointOfAttackClicked: (event: KonvaEventObject<MouseEvent>, pointOfAttackId: string) => void;
     selected: boolean;
     stageRef: RefObject<KonvaStage | null>;
-    selectedConnectionPointId?: string | null;
-    onConnectionPointClicked?: (event: KonvaEventObject<MouseEvent>, connectionPointId: string) => void;
 }
 
 // LineForPath is a pure presentational component that handles the visual rendering of connections

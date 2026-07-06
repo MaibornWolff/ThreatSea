@@ -772,6 +772,40 @@ describe("useEditor", () => {
                 { gridX: 40, gridY: 0 }
             );
         });
+
+        it("keeps the stored line when no route is possible", () => {
+            // Both endpoints sit on the same grid cell, so the router returns no route.
+            const storedWaypoints = [40, 90, 240, 90];
+            const { result, store } = renderUseEditor((store) => {
+                store.dispatch(
+                    SystemActions.createComponent(createComponentPayload({ id: "comp-1", gridX: 0, gridY: 0 }))
+                );
+                store.dispatch(
+                    SystemActions.createComponent(createComponentPayload({ id: "comp-2", gridX: 0, gridY: 0 }))
+                );
+                store.dispatch(
+                    SystemActions.createConnection(
+                        createConnection({
+                            id: "conn-1",
+                            from: createConnectionAnchor({ id: "comp-1" }),
+                            to: createConnectionAnchor({ id: "comp-2" }),
+                            waypoints: storedWaypoints,
+                            recalculate: true,
+                        })
+                    )
+                );
+                store.dispatch(EditorActions.selectComponent("comp-1"));
+            });
+
+            act(() => {
+                result.current.updateConnectionsOfComponent();
+            });
+
+            // No route found: the stored line stays and the recalculate flag is left as-is.
+            const connection = connectionFromStore(store, "conn-1");
+            expect(connection?.waypoints).toEqual(storedWaypoints);
+            expect(connection?.recalculate).toBe(true);
+        });
     });
 
     // removeAssetFromPointOfAttack only removes an asset that is actually attached
