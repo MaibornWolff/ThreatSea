@@ -9,19 +9,20 @@ import {
     type Face,
     type Point,
     type Rectangle,
+    type RouteDefects,
     GEOMETRY_TOLERANCE,
     allFinite,
     buildAnchorMeta,
     buildDegreeMap,
-    countObstacleHits,
-    crossesTransversally,
+    buildRouteScoringContext,
+    compareRouteDefects,
+    countRouteDefects,
     faceMidpoint,
     findBestAnchor,
     flattenPoints,
     isHorizontalFace,
     isOrthogonal,
     outwardUnit,
-    pointsFromWaypoints,
     rectOf,
     routeLength,
     sameDirection,
@@ -32,13 +33,10 @@ import {
 const WRAP_CLEARANCE = 20; // how far outside the boxes a wrap-around line routes, in pixels
 const CHANNEL_NUDGE = 20; // sideways offset for the extra Z-channels that dodge an occupied channel
 
-interface ScoredRoute {
+interface ScoredRoute extends RouteDefects {
     points: Point[];
     sourceFace: Face;
     targetFace: Face;
-    obstacleHits: number;
-    crossings: number;
-    overlapLength: number;
     bendCount: number;
     length: number;
     hubFacePenalty: number;
@@ -121,82 +119,12 @@ const buildConnectorCandidates = (p: Point, q: Point, fromRectangle: Rectangle, 
     return candidates;
 };
 
-// ----- line-crossing avoidance -----
-
-interface Segment {
-    start: Point;
-    end: Point;
-}
-
-/** The straight segments of a polyline. */
-const segmentsOfPoints = (points: Point[]): Segment[] => {
-    const segments: Segment[] = [];
-    for (let index = 1; index < points.length; index++) {
-        segments.push({ start: points[index - 1]!, end: points[index]! });
-    }
-    return segments;
-};
-
-/** How many of the other connections' segments this route crosses (used to prefer non-crossing routes). */
-const countLineCrossings = (points: Point[], otherSegments: Segment[]): number => {
-    let crossings = 0;
-    for (const routeSegment of segmentsOfPoints(points)) {
-        for (const otherSegment of otherSegments) {
-            if (crossesTransversally(routeSegment.start, routeSegment.end, otherSegment.start, otherSegment.end)) {
-                crossings++;
-            }
-        }
-    }
-    return crossings;
-};
-
-/** How far two 1-D ranges overlap (0 when they don't touch). */
-const rangeOverlap = (start1: number, end1: number, start2: number, end2: number): number =>
-    Math.max(
-        0,
-        Math.min(Math.max(start1, end1), Math.max(start2, end2)) -
-            Math.max(Math.min(start1, end1), Math.min(start2, end2))
-    );
-
-/** The length two parallel collinear segments run on top of each other (0 when they don't). */
-const collinearOverlap = (a: Point, b: Point, c: Point, d: Point): number => {
-    const bothVerticalOnSameX = a.x === b.x && c.x === d.x && a.x === c.x;
-    if (bothVerticalOnSameX) {
-        return rangeOverlap(a.y, b.y, c.y, d.y);
-    }
-    const bothHorizontalOnSameY = a.y === b.y && c.y === d.y && a.y === c.y;
-    if (bothHorizontalOnSameY) {
-        return rangeOverlap(a.x, b.x, c.x, d.x);
-    }
-    return 0;
-};
-
-/**
- * How many pixels of this route lie on top of unrelated connections' lines — on canvas that reads
- * as a false merge. (Overlap with lines into a shared component is intended trunk merging and is
- * not counted here.)
- */
-const countUnrelatedOverlap = (points: Point[], unrelatedSegments: Segment[]): number => {
-    let overlap = 0;
-    for (const routeSegment of segmentsOfPoints(points)) {
-        for (const otherSegment of unrelatedSegments) {
-            overlap += collinearOverlap(routeSegment.start, routeSegment.end, otherSegment.start, otherSegment.end);
-        }
-    }
-    return overlap;
-};
-
-// Ranking order: boxes avoided > fewer crossings > less overlap > fewer bends > shorter > hub face,
-// with face/candidate order as the final deterministic tiebreak.
+// Ranking order: fewest defects (boxes > crossings > overlap, see compareRouteDefects) > fewer
+// bends > shorter > hub face, with face/candidate order as the final deterministic tiebreak.
 const isBetterRoute = (candidate: ScoredRoute, best: ScoredRoute): boolean => {
-    if (candidate.obstacleHits !== best.obstacleHits) {
-        return candidate.obstacleHits < best.obstacleHits;
-    }
-    if (candidate.crossings !== best.crossings) {
-        return candidate.crossings < best.crossings;
-    }
-    if (candidate.overlapLength !== best.overlapLength) {
-        return candidate.overlapLength < best.overlapLength;
+    const defectComparison = compareRouteDefects(candidate, best);
+    if (defectComparison !== 0) {
+        return defectComparison < 0;
     }
     if (candidate.bendCount !== best.bendCount) {
         return candidate.bendCount < best.bendCount;
@@ -216,16 +144,8 @@ const isBetterRoute = (candidate: ScoredRoute, best: ScoredRoute): boolean => {
 };
 
 /** Computes the waypoints + connection-point info for one connection. Null when no route is possible. */
-export function routeDeterministic({
-    connectionId,
-    fromComponent,
-    toComponent,
-    components,
-    connections,
-    from,
-    to,
-    pointsOfAttack,
-}: ConnectionRoutingInput): ConnectionRoutingResult | null {
+export function routeDeterministic(input: ConnectionRoutingInput): ConnectionRoutingResult | null {
+    const { fromComponent, toComponent, connections, from, to, pointsOfAttack } = input;
     // Same spot — nothing to draw.
     if (fromComponent.gridX === toComponent.gridX && fromComponent.gridY === toComponent.gridY) {
         return null;
@@ -233,32 +153,7 @@ export function routeDeterministic({
 
     const fromRectangle = rectOf(fromComponent);
     const toRectangle = rectOf(toComponent);
-    const obstacles = components
-        .filter((component) => component.id !== fromComponent.id && component.id !== toComponent.id)
-        .map(rectOf);
-
-    // The other connections' drawn lines, split by whether they share a component with this one:
-    // crossings are counted against all of them, overlap only against the unrelated ones.
-    const otherSegments: Segment[] = [];
-    const unrelatedSegments: Segment[] = [];
-    const ownEndpointIds = new Set([from.id, to.id]);
-    for (const connection of connections) {
-        const isSamePair =
-            (connection.from.id === from.id && connection.to.id === to.id) ||
-            (connection.from.id === to.id && connection.to.id === from.id);
-        const isThisConnection = connectionId !== undefined ? connection.id === connectionId : isSamePair;
-        if (isThisConnection) {
-            continue;
-        }
-        const sharesEndpoint =
-            !isSamePair && (ownEndpointIds.has(connection.from.id) || ownEndpointIds.has(connection.to.id));
-        for (const segment of segmentsOfPoints(pointsFromWaypoints(connection.waypoints))) {
-            otherSegments.push(segment);
-            if (!sharesEndpoint) {
-                unrelatedSegments.push(segment);
-            }
-        }
-    }
+    const scoringContext = buildRouteScoringContext(input);
 
     const degree = buildDegreeMap(connections);
     const fromIsHub = (degree.get(fromComponent.id) ?? 0) > (degree.get(toComponent.id) ?? 0);
@@ -303,9 +198,7 @@ export function routeDeterministic({
                         points,
                         sourceFace,
                         targetFace,
-                        obstacleHits: countObstacleHits(points, obstacles),
-                        crossings: countLineCrossings(points, otherSegments),
-                        overlapLength: countUnrelatedOverlap(points, unrelatedSegments),
+                        ...countRouteDefects(points, scoringContext),
                         bendCount: Math.max(0, points.length - 2),
                         length: routeLength(points),
                         hubFacePenalty,

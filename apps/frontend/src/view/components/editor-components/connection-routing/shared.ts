@@ -291,40 +291,6 @@ export const pointsFromWaypoints = (waypoints: number[]): Point[] => {
     return points;
 };
 
-/**
- * How many X-crossings a route makes with the lines of connections sharing no component with it.
- * Lines touching the same hub/leaf are skipped — they merge into trunks on purpose.
- */
-export const countUnrelatedLineCrossings = (
-    waypoints: number[],
-    input: Pick<ConnectionRoutingInput, "connections" | "from" | "to">
-): number => {
-    const ownEndpointIds = new Set([input.from.id, input.to.id]);
-    const ownPoints = pointsFromWaypoints(waypoints);
-    let crossings = 0;
-    for (const connection of input.connections) {
-        if (ownEndpointIds.has(connection.from.id) || ownEndpointIds.has(connection.to.id)) {
-            continue;
-        }
-        const otherPoints = pointsFromWaypoints(connection.waypoints);
-        for (let own = 1; own < ownPoints.length; own++) {
-            for (let other = 1; other < otherPoints.length; other++) {
-                if (
-                    crossesTransversally(
-                        ownPoints[own - 1]!,
-                        ownPoints[own]!,
-                        otherPoints[other - 1]!,
-                        otherPoints[other]!
-                    )
-                ) {
-                    crossings++;
-                }
-            }
-        }
-    }
-    return crossings;
-};
-
 /** How many of the given boxes a route's segments run into (each box counted at most once). */
 export const countObstacleHits = (points: Point[], obstacles: Rectangle[]): number => {
     let hits = 0;
@@ -340,6 +306,127 @@ export const countObstacleHits = (points: Point[], obstacles: Rectangle[]): numb
     }
     return hits;
 };
+
+// ----- route defect scoring — one policy for both routers and the arbitration between them -----
+
+export interface Segment {
+    start: Point;
+    end: Point;
+}
+
+/** The straight segments of a polyline. */
+export const segmentsOfPoints = (points: Point[]): Segment[] => {
+    const segments: Segment[] = [];
+    for (let index = 1; index < points.length; index++) {
+        segments.push({ start: points[index - 1]!, end: points[index]! });
+    }
+    return segments;
+};
+
+/** How many of the other connections' segments this route crosses. */
+export const countLineCrossings = (points: Point[], otherSegments: Segment[]): number => {
+    let crossings = 0;
+    for (const routeSegment of segmentsOfPoints(points)) {
+        for (const otherSegment of otherSegments) {
+            if (crossesTransversally(routeSegment.start, routeSegment.end, otherSegment.start, otherSegment.end)) {
+                crossings++;
+            }
+        }
+    }
+    return crossings;
+};
+
+/** How far two 1-D ranges overlap (0 when they don't touch). */
+const rangeOverlap = (start1: number, end1: number, start2: number, end2: number): number =>
+    Math.max(
+        0,
+        Math.min(Math.max(start1, end1), Math.max(start2, end2)) -
+            Math.max(Math.min(start1, end1), Math.min(start2, end2))
+    );
+
+/** The length two parallel collinear segments run on top of each other (0 when they don't). */
+const collinearOverlap = (a: Point, b: Point, c: Point, d: Point): number => {
+    const bothVerticalOnSameX = a.x === b.x && c.x === d.x && a.x === c.x;
+    if (bothVerticalOnSameX) {
+        return rangeOverlap(a.y, b.y, c.y, d.y);
+    }
+    const bothHorizontalOnSameY = a.y === b.y && c.y === d.y && a.y === c.y;
+    if (bothHorizontalOnSameY) {
+        return rangeOverlap(a.x, b.x, c.x, d.x);
+    }
+    return 0;
+};
+
+/** How many pixels of this route lie on top of unrelated lines — on canvas that reads as a false merge. */
+export const countUnrelatedOverlap = (points: Point[], unrelatedSegments: Segment[]): number => {
+    let overlap = 0;
+    for (const routeSegment of segmentsOfPoints(points)) {
+        for (const otherSegment of unrelatedSegments) {
+            overlap += collinearOverlap(routeSegment.start, routeSegment.end, otherSegment.start, otherSegment.end);
+        }
+    }
+    return overlap;
+};
+
+export interface RouteScoringContext {
+    obstacles: Rectangle[];
+    otherSegments: Segment[];
+    unrelatedSegments: Segment[];
+}
+
+/**
+ * Collects what a route is scored against: obstacle boxes (every component but its own endpoints),
+ * all other lines (for crossings), and the unrelated subset (for overlap). Lines into a shared
+ * component are left out of the overlap set — they merge into trunks on purpose — but a second
+ * connection between the same pair is kept in, so two of them don't fuse into one line.
+ */
+export const buildRouteScoringContext = (input: ConnectionRoutingInput): RouteScoringContext => {
+    const { connectionId, fromComponent, toComponent, components, connections, from, to } = input;
+    const obstacles = components
+        .filter((component) => component.id !== fromComponent.id && component.id !== toComponent.id)
+        .map(rectOf);
+
+    const otherSegments: Segment[] = [];
+    const unrelatedSegments: Segment[] = [];
+    const ownEndpointIds = new Set([from.id, to.id]);
+    for (const connection of connections) {
+        const isSamePair =
+            (connection.from.id === from.id && connection.to.id === to.id) ||
+            (connection.from.id === to.id && connection.to.id === from.id);
+        const isThisConnection = connectionId !== undefined ? connection.id === connectionId : isSamePair;
+        if (isThisConnection) {
+            continue;
+        }
+        const sharesEndpoint =
+            !isSamePair && (ownEndpointIds.has(connection.from.id) || ownEndpointIds.has(connection.to.id));
+        for (const segment of segmentsOfPoints(pointsFromWaypoints(connection.waypoints))) {
+            otherSegments.push(segment);
+            if (!sharesEndpoint) {
+                unrelatedSegments.push(segment);
+            }
+        }
+    }
+    return { obstacles, otherSegments, unrelatedSegments };
+};
+
+/** What makes a route objectively bad, independent of style: boxes hit, lines crossed, false merges. */
+export interface RouteDefects {
+    obstacleHits: number;
+    crossings: number;
+    overlapLength: number;
+}
+
+export const countRouteDefects = (points: Point[], context: RouteScoringContext): RouteDefects => ({
+    obstacleHits: countObstacleHits(points, context.obstacles),
+    crossings: countLineCrossings(points, context.otherSegments),
+    overlapLength: countUnrelatedOverlap(points, context.unrelatedSegments),
+});
+
+/** Negative when the candidate is objectively better: boxes avoided > fewer crossings > less overlap. */
+export const compareRouteDefects = (candidate: RouteDefects, best: RouteDefects): number =>
+    candidate.obstacleHits - best.obstacleHits ||
+    candidate.crossings - best.crossings ||
+    candidate.overlapLength - best.overlapLength;
 
 /** Builds the connection-point info for one end: where it sits and which way it leaves the box. */
 export const buildAnchorMeta = (

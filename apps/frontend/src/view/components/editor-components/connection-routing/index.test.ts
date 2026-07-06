@@ -1,6 +1,7 @@
 import { computeConnectionRouting } from "./index.ts";
 import { routeFishbone } from "./fishbone.ts";
 import { routeDeterministic } from "./deterministic.ts";
+import { buildRouteScoringContext, countRouteDefects, pointsFromWaypoints } from "./shared.ts";
 import { crossesTransversally, segmentsOf } from "#test-utils/connection-routing-helpers.ts";
 import { createAugmentedConnection, createSystemComponent } from "#test-utils/builders.ts";
 
@@ -24,6 +25,56 @@ describe("computeConnectionRouting composition", () => {
 
         expect(routeFishbone(input)).not.toBeNull();
         expect(computeConnectionRouting(input)).toEqual(routeFishbone(input));
+    });
+
+    it("abandons a fishbone that would fuse with an unrelated line for a route with fewer defects", () => {
+        const hub = createSystemComponent({ id: "hub", gridX: 0, gridY: 50 });
+        const leafA = createSystemComponent({ id: "leaf-a", gridX: 80, gridY: 40 });
+        const leafB = createSystemComponent({ id: "leaf-b", gridX: 80, gridY: 60 });
+        const connectionA = createAugmentedConnection({ id: "c-a", fromComponent: leafA, toComponent: hub });
+        const connectionB = createAugmentedConnection({ id: "c-b", fromComponent: leafB, toComponent: hub });
+        const baseInput = {
+            connectionId: "c-a",
+            fromComponent: leafA,
+            toComponent: hub,
+            components: [hub, leafA, leafB],
+            connections: [connectionA, connectionB],
+            from: connectionA.from,
+            to: connectionA.to,
+            pointsOfAttack: [],
+        };
+        const fishbone = routeFishbone(baseInput)!;
+        expect(fishbone).not.toBeNull();
+
+        // Lay an unrelated connection's stored line exactly along the fishbone route's longest
+        // segment, so keeping the fishbone would draw the two as one fused line.
+        const fishboneSegments = segmentsOf(fishbone.waypoints);
+        const longest = fishboneSegments.reduce((best, candidate) => {
+            const lengthOf = ([start, end]: (typeof fishboneSegments)[number]) =>
+                Math.abs(end.x - start.x) + Math.abs(end.y - start.y);
+            return lengthOf(candidate) > lengthOf(best) ? candidate : best;
+        });
+        const farAway = createSystemComponent({ id: "far-away", gridX: 400, gridY: 400 });
+        const farAwayToo = createSystemComponent({ id: "far-away-too", gridX: 400, gridY: 440 });
+        const unrelated = createAugmentedConnection({
+            id: "unrelated",
+            fromComponent: farAway,
+            toComponent: farAwayToo,
+            waypoints: [longest[0].x, longest[0].y, longest[1].x, longest[1].y],
+        });
+        const input = {
+            ...baseInput,
+            components: [...baseInput.components, farAway, farAwayToo],
+            connections: [...baseInput.connections, unrelated],
+        };
+
+        const chosen = computeConnectionRouting(input)!;
+        expect(chosen).not.toBeNull();
+        const scoringContext = buildRouteScoringContext(input);
+        const chosenDefects = countRouteDefects(pointsFromWaypoints(chosen.waypoints), scoringContext);
+        const fishboneDefects = countRouteDefects(pointsFromWaypoints(fishbone.waypoints), scoringContext);
+        expect(fishboneDefects.overlapLength).toBeGreaterThan(0);
+        expect(chosenDefects.overlapLength).toBeLessThan(fishboneDefects.overlapLength);
     });
 
     it("falls back to the deterministic route when there is no hub", () => {

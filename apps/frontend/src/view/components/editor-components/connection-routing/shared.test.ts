@@ -1,5 +1,6 @@
 import {
     buildAnchorMeta,
+    compareRouteDefects,
     countObstacleHits,
     faceMidpoint,
     findBestAnchor,
@@ -249,5 +250,30 @@ describe("buildAnchorMeta", () => {
             createPointOfAttack({ id: "poa-x" })
         );
         expect(meta.pointOfAttack?.id).toBe("poa-x");
+    });
+});
+
+describe("compareRouteDefects", () => {
+    const defects = (obstacleHits: number, crossings: number, overlapLength: number) => ({
+        obstacleHits,
+        crossings,
+        overlapLength,
+    });
+
+    it("ranks a box hit above any number of crossings", () => {
+        expect(compareRouteDefects(defects(0, 5, 0), defects(1, 0, 0))).toBeLessThan(0);
+    });
+
+    it("ranks a crossing above any amount of overlap", () => {
+        expect(compareRouteDefects(defects(0, 0, 500), defects(0, 1, 0))).toBeLessThan(0);
+    });
+
+    it("breaks a crossing tie by overlap length", () => {
+        expect(compareRouteDefects(defects(0, 1, 10), defects(0, 1, 40))).toBeLessThan(0);
+        expect(compareRouteDefects(defects(0, 1, 40), defects(0, 1, 10))).toBeGreaterThan(0);
+    });
+
+    it("returns zero for equal defects", () => {
+        expect(compareRouteDefects(defects(1, 2, 3), defects(1, 2, 3))).toBe(0);
     });
 });
