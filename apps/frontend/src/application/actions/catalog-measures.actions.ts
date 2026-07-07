@@ -24,6 +24,12 @@ export class CatalogMeasuresActions {
         "[catalog measures] get catalog measures",
         async (data: { catalogId: number }) => {
             return await CatalogMeasuresApi.getCatalogMeasures(data);
+        },
+        {
+            condition: (_, { getState }) => {
+                const state = getState() as { catalogMeasures: { isPending: boolean } };
+                return !state.catalogMeasures.isPending;
+            },
         }
     );
 

@@ -27,6 +27,12 @@ export class CatalogThreatsActions {
         "[catalog threats] get catalog threats",
         async (data: { catalogId: number }) => {
             return await CatalogThreatsApi.getCatalogThreats(data);
+        },
+        {
+            condition: (_, { getState }) => {
+                const state = getState() as { catalogThreats: { isPending: boolean } };
+                return !state.catalogThreats.isPending;
+            },
         }
     );
 

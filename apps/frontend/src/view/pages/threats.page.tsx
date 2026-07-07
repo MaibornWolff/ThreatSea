@@ -6,7 +6,7 @@ import TableCell, { type TableCellProps } from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { memo, useEffect, useLayoutEffect, useState, type ChangeEvent, type SyntheticEvent } from "react";
+import { memo, useEffect, useLayoutEffect, useRef, useState, type ChangeEvent, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
@@ -124,8 +124,11 @@ const ThreatsPageBody = () => {
         });
     };
 
+    const prevAutoSaveStatusRef = useRef(autoSaveStatus);
     useEffect(() => {
-        if (autoSaveStatus === "upToDate") {
+        const prev = prevAutoSaveStatusRef.current;
+        prevAutoSaveStatusRef.current = autoSaveStatus;
+        if (autoSaveStatus === "upToDate" && prev !== "upToDate") {
             loadThreats();
         }
     }, [autoSaveStatus, loadThreats]);

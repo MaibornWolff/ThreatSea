@@ -14,6 +14,7 @@ import {
     memo,
     useEffect,
     useLayoutEffect,
+    useRef,
     useState,
     type ChangeEvent,
     type ReactNode,
@@ -262,8 +263,11 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
         }
     };
 
+    const prevAutoSaveStatusRef = useRef(autoSaveStatus);
     useEffect(() => {
-        if (autoSaveStatus === "upToDate") {
+        const prev = prevAutoSaveStatusRef.current;
+        prevAutoSaveStatusRef.current = autoSaveStatus;
+        if (autoSaveStatus === "upToDate" && prev !== "upToDate") {
             loadThreats();
         }
     }, [autoSaveStatus, loadThreats]);
