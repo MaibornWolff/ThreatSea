@@ -25,7 +25,7 @@ export const MeasureImpactByMeasureDialogPage = () => {
     // parent dialog retains its original threat/project/measureImpact data.
     const [state] = useState(locationState);
 
-    if (state) {
+    if (state?.threat) {
         const { threat, project, measureImpact } = state;
 
         return (
