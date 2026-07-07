@@ -25,7 +25,7 @@ import SelectBoxCategorySubHeader from "#view/components/selectBox-CategorySubHe
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { useDialog } from "#application/hooks/use-dialog.hook.ts";
 import { Button } from "#view/components/button.component.tsx";
 import { Dialog } from "#view/components/dialog.component.tsx";
@@ -74,6 +74,7 @@ const MeasureImpactByMeasureDialog = ({
     ...props
 }: MeasureImpactByMeasureDialogProps) => {
     const navigate = useNavigate();
+    const location = useLocation();
     const {
         confirmDialog,
         cancelDialog,
@@ -86,6 +87,7 @@ const MeasureImpactByMeasureDialog = ({
     });
 
     const disableSelect = !!measureImpact;
+    const [measureSelectOpen, setMeasureSelectOpen] = useState(false);
 
     const {
         register,
@@ -155,10 +157,12 @@ const MeasureImpactByMeasureDialog = ({
         navigate(-1);
     };
 
+    const measuresAddRoute = `${location.pathname}/measures/add`;
+
     const handleImplementCatalogMeasure = (event: React.MouseEvent<HTMLElement>, catalogMeasure: CatalogMeasure) => {
         event.preventDefault();
         event.stopPropagation();
-        navigate(`/projects/${project.id}/risk/measures/add`, {
+        navigate(measuresAddRoute, {
             state: {
                 measure: {
                     active: false,
@@ -176,7 +180,8 @@ const MeasureImpactByMeasureDialog = ({
     const handleNewBlankMeasure = (event: React.MouseEvent<HTMLElement>) => {
         event.preventDefault();
         event.stopPropagation();
-        navigate(`/projects/${project.id}/risk/measures/add`, {
+        setMeasureSelectOpen(false);
+        navigate(measuresAddRoute, {
             state: {
                 measure: {
                     active: false,
@@ -245,6 +250,9 @@ const MeasureImpactByMeasureDialog = ({
                                     label={t("measure")}
                                     multiple={false}
                                     value={value}
+                                    open={measureSelectOpen}
+                                    onOpen={() => setMeasureSelectOpen(true)}
+                                    onClose={() => setMeasureSelectOpen(false)}
                                     {...register("measureId", {
                                         validate: (value) => value != null,
                                         valueAsNumber: true,

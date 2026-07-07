@@ -1,4 +1,5 @@
-import { useParams, useLocation, Navigate, type Location } from "react-router";
+import { useState } from "react";
+import { useParams, useLocation, Navigate, Outlet, type Location } from "react-router";
 import type { Project } from "#api/types/project.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
 import MeasureImpactByMeasureDialog, { type ApplyMeasureThreat } from "#view/dialogs/measureImpactByMeasure.dialog.tsx";
@@ -18,18 +19,25 @@ interface MeasureImpactByMeasureDialogLocationState {
 
 export const MeasureImpactByMeasureDialogPage = () => {
     const { projectId = "" } = useParams<{ projectId: string }>();
-    const { state } = useLocation() as Location<MeasureImpactByMeasureDialogLocationState | undefined>;
+    const { state: locationState } = useLocation() as Location<MeasureImpactByMeasureDialogLocationState | undefined>;
+    // Capture the initial location state at mount time so that when the child route
+    // (measures/add) is active and useLocation() reflects the child's state, the
+    // parent dialog retains its original threat/project/measureImpact data.
+    const [state] = useState(locationState);
 
-    if (state) {
+    if (state?.threat) {
         const { threat, project, measureImpact } = state;
 
         return (
-            <MeasureImpactByMeasureDialog
-                project={project}
-                open={true}
-                threat={threat}
-                measureImpact={measureImpact ?? null}
-            />
+            <>
+                <MeasureImpactByMeasureDialog
+                    project={project}
+                    open={true}
+                    threat={threat}
+                    measureImpact={measureImpact ?? null}
+                />
+                <Outlet />
+            </>
         );
     } else {
         return <Navigate to={`/projects/${projectId}/risk`} replace />;

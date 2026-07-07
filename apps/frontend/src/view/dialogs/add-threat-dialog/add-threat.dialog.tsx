@@ -13,7 +13,7 @@ import {
 import { useRef, useState, type ChangeEvent, type MouseEvent, type SyntheticEvent } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { useDialog } from "#application/hooks/use-dialog.hook.ts";
 import { Button } from "#view/components/button.component.tsx";
 import { Dialog } from "#view/components/dialog.component.tsx";
@@ -31,19 +31,31 @@ import { AddThreatMainTab } from "./add-threat-main-tab.component.tsx";
 import { AddThreatAssetsTab } from "./add-threat-assets-tab.component.tsx";
 import { AddThreatMeasuresTab } from "./add-threat-measures-tab.component.tsx";
 
-type ThreatTab = "MAIN" | "ASSETS" | "MEASURES";
+export type ThreatTab = "MAIN" | "ASSETS" | "MEASURES";
+
+export type ThreatDialogHostRoute = "threats" | "measures" | "risk";
 
 interface AddThreatDialogProps extends DialogProps {
     threat: ExtendedThreat;
     project: ExtendedProject;
     userRole: USER_ROLES | undefined;
+    initialTab?: ThreatTab;
+    hostRoute?: ThreatDialogHostRoute;
 }
 
-const AddThreatDialog = ({ threat, project, userRole, ...props }: AddThreatDialogProps) => {
+const AddThreatDialog = ({
+    threat,
+    project,
+    userRole,
+    initialTab,
+    hostRoute = "threats",
+    ...props
+}: AddThreatDialogProps) => {
     const { confirmDialog, cancelDialog } = useDialog<ThreatFormValues | null>("threats");
     const navigate = useNavigate();
+    const location = useLocation();
     const { t } = useTranslation("threatDialogPage");
-    const [tab, setTab] = useState<ThreatTab>("MAIN");
+    const [tab, setTab] = useState<ThreatTab>(initialTab ?? "MAIN");
     const formRef = useRef<HTMLFormElement | null>(null);
     const projectId = project.id;
     const threatId = threat.id;
@@ -126,13 +138,20 @@ const AddThreatDialog = ({ threat, project, userRole, ...props }: AddThreatDialo
     ) => {
         event.preventDefault();
         event.stopPropagation();
-        navigate(`/projects/${projectId}/measures/${measure.id}/measureImpacts/edit`, {
-            state: {
-                measure,
-                measureImpact,
-                project,
-            },
-        });
+        if (hostRoute === "measures") {
+            navigate(`/projects/${projectId}/measures/${measure.id}/measureImpacts/edit`, {
+                state: { measure, measureImpact, project },
+            });
+        } else {
+            // threats and risk both have a measureImpacts/edit route at their own root
+            navigate(`/projects/${projectId}/${hostRoute}/measureImpacts/edit`, {
+                state: {
+                    threat: { ...threat, damage: calcDamage(threat) },
+                    measureImpact,
+                    project,
+                },
+            });
+        }
     };
 
     const onClickDeleteMeasureThreat = (
@@ -165,7 +184,8 @@ const AddThreatDialog = ({ threat, project, userRole, ...props }: AddThreatDialo
     };
 
     const onClickApplyMeasure = () => {
-        navigate(`/projects/${projectId}/threats/measureImpacts/edit`, {
+        const basePath = hostRoute === "risk" ? `/projects/${projectId}/risk` : `/projects/${projectId}/threats`;
+        navigate(`${basePath}/measureImpacts/edit`, {
             state: {
                 threat: { ...threat, damage: calcDamage(threat) },
                 project,
@@ -181,6 +201,10 @@ const AddThreatDialog = ({ threat, project, userRole, ...props }: AddThreatDialo
      */
     const handleChangeTab = (_event: SyntheticEvent, newTab: ThreatTab) => {
         setTab(newTab);
+        navigate(location.pathname, {
+            replace: true,
+            state: { ...location.state, returnToTab: newTab },
+        });
     };
 
     /**
