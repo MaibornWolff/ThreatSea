@@ -469,7 +469,7 @@ const ThreatsPageBody = () => {
                                                             >
                                                                 {checkUserRole(userRole, USER_ROLES.EDITOR) && [
                                                                     <IconButton
-                                                                        key={threat.id}
+                                                                        key={`${threat.id}-duplicate`}
                                                                         title={t("duplicateThreat")}
                                                                         onClick={(e) =>
                                                                             handleDuplicateThreat(e, threat)
@@ -482,7 +482,7 @@ const ThreatsPageBody = () => {
                                                                         />
                                                                     </IconButton>,
                                                                     <IconButton
-                                                                        key={threat.id}
+                                                                        key={`${threat.id}-delete`}
                                                                         title={t("deleteThreat")}
                                                                         hoverColor="error"
                                                                         onClick={(e) => handleDeleteThreat(e, threat)}
