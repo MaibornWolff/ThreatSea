@@ -20,10 +20,11 @@ With line breaks.
 1. [The 4x6 Methodology](#chapter-methodExplanation)
 2. [Explanation of Probability and Damage Scale](#chapter-explanationScale)
 3. [Risk Matrices](#chapter-matrix)
-4. [Assets](#chapter-assetsDetails)
-5. [Measures](#chapter-measuresDetails)
-6. [List of Threats](#chapter-riskList)
-7. [Threats](#chapter-riskDetails)
+4. [Components](#chapter-componentsDetails)
+5. [Assets](#chapter-assetsDetails)
+6. [Measures](#chapter-measuresDetails)
+7. [List of Threats](#chapter-riskList)
+8. [Threats](#chapter-riskDetails)
 
 ---
 
@@ -110,6 +111,23 @@ For the existence of the company
 ---
 
 ## <a id="chapter-matrix"></a>Risk Matrices
+
+
+---
+
+## <a id="chapter-componentsDetails"></a>Components
+
+### <a id="component-C.1"></a>C.1 Database Server
+
+**Description:**
+
+Central PostgreSQL database storing all customer and order records.
+
+### <a id="component-C.2"></a>C.2 Login Form
+
+**Description:**
+
+Public-facing web form handling user authentication.
 
 
 ---
@@ -209,7 +227,7 @@ Use parameterised queries and input sanitisation to prevent injection attacks.
 | gross | 3 | 4 | 12 |
 | net | 2 | 4 | 8 |
 
-**Component:** Database Server
+**Component:** [C.1 Database Server](#component-C.1)
 
 **Attackers:** Unauthorised Parties
 
@@ -239,7 +257,7 @@ This can lead to data exfiltration or destruction.
 | gross | 4 | 3 | 12 |
 | net | 2 | 3 | 6 |
 
-**Component:** Login Form
+**Component:** [C.2 Login Form](#component-C.2)
 
 **Attackers:** Unauthorised Parties
 

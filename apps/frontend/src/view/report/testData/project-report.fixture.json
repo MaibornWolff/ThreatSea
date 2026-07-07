@@ -44,6 +44,40 @@
             "updatedAt": "2024-01-01T00:00:00.000Z"
         }
     ],
+    "components": [
+        {
+            "id": "comp-1",
+            "name": "Database Server",
+            "description": "Central PostgreSQL database storing all customer and order records.",
+            "type": 0,
+            "x": 100,
+            "y": 100,
+            "gridX": 5,
+            "gridY": 5,
+            "width": 80,
+            "height": 80,
+            "selected": false,
+            "projectId": 1,
+            "symbol": null,
+            "reportId": "C.1"
+        },
+        {
+            "id": "comp-2",
+            "name": "Login Form",
+            "description": "Public-facing web form handling user authentication.",
+            "type": 0,
+            "x": 300,
+            "y": 100,
+            "gridX": 15,
+            "gridY": 5,
+            "width": 80,
+            "height": 80,
+            "selected": false,
+            "projectId": 1,
+            "symbol": null,
+            "reportId": "C.2"
+        }
+    ],
     "threats": [
         {
             "id": 1,
@@ -71,7 +105,11 @@
             "bruttoColor": "red",
             "nettoColor": "yellow",
             "assets": [
-                { "id": 1, "name": "Customer Database", "reportId": "A-01" }
+                {
+                    "id": 1,
+                    "name": "Customer Database",
+                    "reportId": "A-01"
+                }
             ],
             "measures": [
                 {
@@ -93,7 +131,8 @@
                 }
             ],
             "createdAt": "2024-01-01T00:00:00.000Z",
-            "updatedAt": "2024-01-01T00:00:00.000Z"
+            "updatedAt": "2024-01-01T00:00:00.000Z",
+            "componentReportId": "C.1"
         },
         {
             "id": 2,
@@ -121,11 +160,16 @@
             "bruttoColor": "red",
             "nettoColor": "green",
             "assets": [
-                { "id": 2, "name": "Authentication Service", "reportId": "A-02" }
+                {
+                    "id": 2,
+                    "name": "Authentication Service",
+                    "reportId": "A-02"
+                }
             ],
             "measures": [],
             "createdAt": "2024-01-01T00:00:00.000Z",
-            "updatedAt": "2024-01-01T00:00:00.000Z"
+            "updatedAt": "2024-01-01T00:00:00.000Z",
+            "componentReportId": "C.2"
         }
     ],
     "measures": [
@@ -138,7 +182,11 @@
             "catalogMeasureId": null,
             "reportId": "M-01",
             "threats": [
-                { "id": 1, "reportId": "T-01", "name": "SQL Injection" }
+                {
+                    "id": 1,
+                    "reportId": "T-01",
+                    "name": "SQL Injection"
+                }
             ],
             "createdAt": "2024-01-01T00:00:00.000Z",
             "updatedAt": "2024-01-01T00:00:00.000Z"

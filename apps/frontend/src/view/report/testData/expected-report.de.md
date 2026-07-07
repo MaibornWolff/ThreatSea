@@ -20,10 +20,11 @@ With line breaks.
 1. [Die 4x6 Methodik](#chapter-methodExplanation)
 2. [Erklärung der Wahrscheinlichkeits- und Schadensskala](#chapter-explanationScale)
 3. [Risiko Matrizen](#chapter-matrix)
-4. [Assets](#chapter-assetsDetails)
-5. [Maßnahmen](#chapter-measuresDetails)
-6. [Auflistung der Bedrohungen](#chapter-riskList)
-7. [Bedrohungen](#chapter-riskDetails)
+4. [Komponenten](#chapter-componentsDetails)
+5. [Assets](#chapter-assetsDetails)
+6. [Maßnahmen](#chapter-measuresDetails)
+7. [Auflistung der Bedrohungen](#chapter-riskList)
+8. [Bedrohungen](#chapter-riskDetails)
 
 ---
 
@@ -110,6 +111,23 @@ Für die Existenz des Unternehmens
 ---
 
 ## <a id="chapter-matrix"></a>Risiko Matrizen
+
+
+---
+
+## <a id="chapter-componentsDetails"></a>Komponenten
+
+### <a id="component-C.1"></a>C.1 Database Server
+
+**Beschreibung:**
+
+Central PostgreSQL database storing all customer and order records.
+
+### <a id="component-C.2"></a>C.2 Login Form
+
+**Beschreibung:**
+
+Public-facing web form handling user authentication.
 
 
 ---
@@ -209,7 +227,7 @@ Use parameterised queries and input sanitisation to prevent injection attacks.
 | brutto | 3 | 4 | 12 |
 | netto | 2 | 4 | 8 |
 
-**Komponente:** Database Server
+**Komponente:** [C.1 Database Server](#component-C.1)
 
 **Angreifer:** Dritte
 
@@ -239,7 +257,7 @@ This can lead to data exfiltration or destruction.
 | brutto | 4 | 3 | 12 |
 | netto | 2 | 3 | 6 |
 
-**Komponente:** Login Form
+**Komponente:** [C.2 Login Form](#component-C.2)
 
 **Angreifer:** Dritte
 
