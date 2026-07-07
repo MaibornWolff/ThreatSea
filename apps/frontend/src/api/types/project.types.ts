@@ -5,6 +5,7 @@ import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
 import type { Measure } from "#api/types/measure.types.ts";
 import type { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import type { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
+import type { Component } from "#api/types/system.types.ts";
 import type { Threat } from "#api/types/threat.types.ts";
 import type { USER_ROLES } from "#api/types/user-roles.types.ts";
 import type { MatrixColorKey } from "#view/colors/matrix.ts";
@@ -40,10 +41,12 @@ export interface ExtendedProject extends Project {
 export interface ProjectReport {
     systemImage: string | null;
     project: Project;
+    components: (Component & { reportId: string })[];
     assets: (Asset & { reportId: string })[];
     threats: (Threat & {
         componentName: string | null;
         componentType: number | STANDARD_COMPONENT_TYPES | null;
+        componentReportId: string | null;
         interfaceName: string | null;
         damage: number;
         risk: number;

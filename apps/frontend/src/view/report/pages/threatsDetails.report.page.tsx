@@ -51,6 +51,7 @@ interface HeaderProps {
 
 interface InformationsProps {
     componentName: ReportThreat["componentName"];
+    componentReportId: ReportThreat["componentReportId"];
     attacker: ReportThreat["attacker"];
     pointOfAttack: ReportThreat["pointOfAttack"];
     language: string;
@@ -124,6 +125,7 @@ const ThreatCard = ({
     measures,
     assets,
     componentName,
+    componentReportId,
     attacker,
     pointOfAttack,
     language,
@@ -207,6 +209,7 @@ const ThreatCard = ({
                     >
                         <Informations
                             componentName={componentName}
+                            componentReportId={componentReportId}
                             attacker={attacker}
                             pointOfAttack={pointOfAttack}
                             {...props}
@@ -444,7 +447,7 @@ const Header = ({ language, reportId, id, name, confidentiality, integrity, avai
     );
 };
 
-const Informations = ({ componentName, attacker, pointOfAttack, language }: InformationsProps) => {
+const Informations = ({ componentName, componentReportId, attacker, pointOfAttack, language }: InformationsProps) => {
     const { t } = useTranslation("report", { lng: language });
     return (
         <View
@@ -458,9 +461,17 @@ const Informations = ({ componentName, attacker, pointOfAttack, language }: Info
             <Text size="small" style={{ fontWeight: 600 }}>
                 {t("component")}
             </Text>
-            <Text size="small" style={{ marginLeft: s2 }}>
-                {componentName}
-            </Text>
+            {componentReportId ? (
+                <Link src={`#${componentReportId}`} style={{ textDecoration: "none" }}>
+                    <Text size="small" style={{ marginLeft: s2 }}>
+                        {componentReportId} {componentName}
+                    </Text>
+                </Link>
+            ) : (
+                <Text size="small" style={{ marginLeft: s2 }}>
+                    {componentName}
+                </Text>
+            )}
             <Text size="small" style={{ fontWeight: 600 }}>
                 {t("attackersHeader")}
             </Text>

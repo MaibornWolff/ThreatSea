@@ -21,6 +21,7 @@ interface MarkdownDownloadState {
     showMethodExplanation?: boolean;
     showScaleExplanation?: boolean;
     showMatrixPage?: boolean;
+    showComponentsPage?: boolean;
     showAssetsPage?: boolean;
     showMeasuresPage?: boolean;
     showThreatListPage?: boolean;
@@ -47,6 +48,7 @@ export function downloadMarkdownReport({
     showMethodExplanation,
     showScaleExplanation,
     showMatrixPage,
+    showComponentsPage,
     showAssetsPage,
     showMeasuresPage,
     showThreatListPage,
@@ -67,6 +69,7 @@ export function downloadMarkdownReport({
         showMethodExplanation,
         showScaleExplanation,
         showMatrixPage,
+        showComponentsPage,
         showAssetsPage,
         showMeasuresPage,
         showThreatListPage,

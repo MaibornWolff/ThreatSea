@@ -89,6 +89,7 @@ export const useReport = ({ projectId }: { projectId: number }) => {
     const [showMethodExplanation, setShowMethodExplanation] = useState<boolean>(true);
     const [showScaleExplanation, setShowScaleExplanation] = useState<boolean>(true);
     const [showMatrixPage, setShowMatrixPage] = useState<boolean>(true);
+    const [showComponentsPage, setShowComponentsPage] = useState<boolean>(true);
     const [showAssetsPage, setShowAssetsPage] = useState<boolean>(true);
     const [showMeasuresPage, setShowMeasuresPage] = useState<boolean>(true);
     const [showThreatListPage, setShowThreatListPage] = useState<boolean>(true);
@@ -582,6 +583,7 @@ export const useReport = ({ projectId }: { projectId: number }) => {
         showMethodExplanation,
         showScaleExplanation,
         showMatrixPage,
+        showComponentsPage,
         showAssetsPage,
         showMeasuresPage,
         showThreatListPage,
@@ -601,6 +603,7 @@ export const useReport = ({ projectId }: { projectId: number }) => {
         setShowMethodExplanation,
         setShowScaleExplanation,
         setShowMatrixPage,
+        setShowComponentsPage,
         setShowAssetsPage,
         setShowMeasuresPage,
         setShowThreatListPage,
