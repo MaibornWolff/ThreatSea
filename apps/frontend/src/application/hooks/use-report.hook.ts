@@ -3,7 +3,7 @@ import type { SortDirection } from "#application/actions/list.actions.ts";
 import { exportAsExcelFile } from "#utils/export.ts";
 import { toDayNumber, createRiskMatrixDesign, addThreatsToRiskMatrix } from "#utils/riskMatrix.ts";
 import { useAlert } from "#application/hooks/use-alert.hook.ts";
-import { useState, useMemo, useEffect, useEffectEvent } from "react";
+import { useState, useMemo, useEffect, useEffectEvent, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { ProjectsAPI } from "#api/projects.api.ts";
 import { calcRiskColour, calcNetRisk } from "#utils/calcRisk.ts";
@@ -101,11 +101,19 @@ export const useReport = ({ projectId }: { projectId: number }) => {
     const threats = data?.threats;
     const measures = data?.measures;
 
+    const isFetchingRef = useRef(false);
+
     const fetchReport = useEffectEvent(async () => {
-        const report = await ProjectsAPI.getReport({
-            projectId,
-        });
-        setData(report);
+        if (isFetchingRef.current) {
+            return;
+        }
+        isFetchingRef.current = true;
+        try {
+            const report = await ProjectsAPI.getReport({ projectId });
+            setData(report);
+        } finally {
+            isFetchingRef.current = false;
+        }
     });
 
     const filename = useMemo(() => {

@@ -28,6 +28,12 @@ export class MeasureImpactsActions {
         "[measureImpacts] get measureImpacts",
         async (data: { projectId: number }) => {
             return await MeasureImpactsApi.getMeasureImpacts(data);
+        },
+        {
+            condition: (_, { getState }) => {
+                const state = getState() as { measureImpacts: { isPending: boolean } };
+                return !state.measureImpacts.isPending;
+            },
         }
     );
 

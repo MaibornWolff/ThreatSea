@@ -23,6 +23,12 @@ export class MemberActions {
         "[member] get added members",
         async ({ projectCatalogId, memberPath }: { projectCatalogId: number; memberPath: string }) => {
             return await MemberAPI.getAddedMembers(projectCatalogId, memberPath);
+        },
+        {
+            condition: (_, { getState }) => {
+                const state = getState() as { members: { pending: { isAddedPending: boolean } } };
+                return !state.members.pending.isAddedPending;
+            },
         }
     );
 
@@ -38,6 +44,12 @@ export class MemberActions {
         "[member] get addable members",
         async ({ projectCatalogId, memberPath }: { projectCatalogId: number; memberPath: string }) => {
             return await MemberAPI.getAddableMembers(projectCatalogId, memberPath);
+        },
+        {
+            condition: (_, { getState }) => {
+                const state = getState() as { members: { pending: { isAddablePending: boolean } } };
+                return !state.members.pending.isAddablePending;
+            },
         }
     );
 
