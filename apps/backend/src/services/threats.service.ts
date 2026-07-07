@@ -38,6 +38,7 @@ export type ExtendedThreat = Threat & {
     assets: Asset[];
     componentName: string | null;
     componentType: number | ComponentType | null;
+    componentReportId?: string | null;
     interfaceName: string | null;
 };
 
