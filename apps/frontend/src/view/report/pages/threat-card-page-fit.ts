@@ -4,11 +4,8 @@ const HEADER_AND_CHROME_HEIGHT = 120;
 const PAGE_CONTENT_HEIGHT = 750;
 
 /**
- * Estimate whether a threat card fits within a single page's content area. A card that fits is
- * rendered atomically (wrap={false}) so it relocates whole to the next page instead of leaving a
- * header sliver at a page bottom; a taller card must wrap. The estimate is deliberately
- * conservative (20% margin) so a taller-than-page card is never wrongly kept atomic — that would
- * render degenerately in @react-pdf (#847).
+ * decides whether a threat card is rendered atomically (fits → moves whole
+ * to the next page, no header sliver) or allowed to wrap (taller than a page → must split).
  */
 export const threatCardFitsOnOnePage = ({
     description,

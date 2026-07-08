@@ -1,11 +1,5 @@
 import { threatCardFitsOnOnePage } from "#view/report/pages/threat-card-page-fit.ts";
 
-/**
- * threatCardFitsOnOnePage decides whether a threat card is rendered atomically (fits → moves whole
- * to the next page, no header sliver) or allowed to wrap (taller than a page → must split). These
- * tests pin that decision, not the internal point estimate: they assert the boolean contract for
- * cards of different content sizes.
- */
 const makeAssets = (count: number) => Array.from({ length: count }, () => ({}));
 const makeMeasures = (count: number, descriptionLength: number) =>
     Array.from({ length: count }, () => ({ description: "x".repeat(descriptionLength) }));
