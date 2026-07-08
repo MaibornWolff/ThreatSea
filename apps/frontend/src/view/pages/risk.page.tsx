@@ -263,14 +263,21 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
         }
     };
 
-    const prevAutoSaveStatusRef = useRef(autoSaveStatus);
+    const prevProjectIdRef = useRef(projectId);
+    const loadedRef = useRef(false);
     useEffect(() => {
-        const prev = prevAutoSaveStatusRef.current;
-        prevAutoSaveStatusRef.current = autoSaveStatus;
-        if (autoSaveStatus === "upToDate" && prev !== "upToDate") {
+        if (prevProjectIdRef.current !== projectId) {
+            prevProjectIdRef.current = projectId;
+            loadedRef.current = false;
+        }
+        if (loadedRef.current) {
+            return;
+        }
+        if (autoSaveStatus === "upToDate" || autoSaveStatus === "uninitialized") {
+            loadedRef.current = true;
             loadThreats();
         }
-    }, [autoSaveStatus, loadThreats]);
+    }, [projectId, autoSaveStatus, loadThreats]);
 
     return (
         <Page sx={{ boxSizing: "border-box" }}>

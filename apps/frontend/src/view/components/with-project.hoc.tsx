@@ -20,8 +20,10 @@ export const withProject = <P extends object>(Component: ComponentType<P & Injec
         const project = useAppSelector((state) => projectsSelectors.selectById(state, Number(projectId)));
 
         useEffect(() => {
-            dispatch(ProjectsActions.getProjects());
-        }, [dispatch]);
+            if (!project) {
+                dispatch(ProjectsActions.getProjects());
+            }
+        }, [dispatch, project]);
 
         return project ? <Component project={project} {...props} /> : <LinearProgress />;
     };

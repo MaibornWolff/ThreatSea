@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import { useList } from "./use-list.hooks";
 import { useThreats } from "./use-threats.hook";
@@ -32,10 +32,6 @@ export const useThreatsList = ({ projectId }: { projectId: number }) => {
         projectId,
     });
     const { setSortDirection, setSearchValue, setSortBy, sortDirection, searchValue, sortBy } = useList("threats");
-
-    useEffect(() => {
-        loadThreats();
-    }, [projectId, loadThreats]);
 
     const filteredItems: ExtendedThreat[] = useMemo(() => {
         return items.filter((item) => {
