@@ -633,6 +633,7 @@ The "Page Settings" panel provides the user with the possibility to select which
 - **Show Table of Contents:** Table of contents for the report sections
 - **Show Method Explanation:** A short explanation of the 4x6 methodology
 - **Show Matrix Page:** At least gross and net risk matrices for the whole threat model. With the "Risk Matrix for Milestones" switches, matrices for the different points in the timeline can be added to this section
+- **Show Component Page:** A list of all system components together with their descriptions. Each threat in the threat details links to the component it affects on this page
 - **Show Asset Page:** A list of all analyzed assets together with their description and their protection need
 - **Show Measures Page:** A list of all (planned) measures together with their descriptions, their (planned) implementation date and the threats to which they are applied
 - **Show List of Threats:** A list overview of all threats and the component to which they apply, color-coded according to their gross or net risk value. This behaviour can be changed in the "Sort (Threats)" section. The list of threats also serves as a table of contents for the threat details.
