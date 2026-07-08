@@ -149,7 +149,17 @@ export async function updateChildThreat(
             return;
         }
 
-        const updated = await childThreatsService.updateChildThreat(childThreatId, updateBody);
+        // Pass only the refinement fields; anything else in the body (e.g. identity
+        // fields) must not reach the database update.
+        const updated = await childThreatsService.updateChildThreat(childThreatId, {
+            name: updateBody.name,
+            description: updateBody.description,
+            probability: updateBody.probability,
+            confidentiality: updateBody.confidentiality,
+            integrity: updateBody.integrity,
+            availability: updateBody.availability,
+            status: updateBody.status,
+        });
 
         response.json(updated);
     } catch (err) {

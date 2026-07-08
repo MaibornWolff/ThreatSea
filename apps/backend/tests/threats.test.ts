@@ -299,6 +299,27 @@ describe("get, delete or update a single threat", () => {
         expect(res.body.status).toBe(VALID_UPDATE_CHILD_THREAT.status);
     });
 
+    it("should ignore client-supplied identity fields on update", async () => {
+        const res = await request(app)
+            .put("/api/projects/" + projectId + "/system/childThreats/" + childThreatId)
+            .send({
+                ...VALID_UPDATE_CHILD_THREAT,
+                pointOfAttackId: "spoofed-poa-id",
+                pointOfAttack: POINTS_OF_ATTACK.DATA_STORAGE_INFRASTRUCTURE,
+                attacker: ATTACKERS.SYSTEM_USERS,
+                genericThreatId: genericThreatId + 1000,
+            })
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(200);
+
+        expect(res.body.name).toBe(VALID_UPDATE_CHILD_THREAT.name);
+        expect(res.body.genericThreatId).toBe(genericThreatId);
+        expect(res.body.pointOfAttack).toBe(VALID_CHILD_THREAT_1.pointOfAttack);
+        expect(res.body.pointOfAttackId).toBe(VALID_CHILD_THREAT_1.pointOfAttackId);
+        expect(res.body.attacker).toBe(VALID_CHILD_THREAT_1.attacker);
+    });
+
     it("should delete a threat", async () => {
         const res = await request(app)
             .delete("/api/projects/" + projectId + "/system/childThreats/" + childThreatId)
