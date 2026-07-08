@@ -20,9 +20,18 @@ export class MeasuresActions {
      *      to fetch the measures.
      * @returns Action function for getting the measures.
      */
-    static getMeasures = createAsyncThunk("[measures] get measures", async (data: { projectId: number }) => {
-        return await MeasuresAPI.getMeasures(data);
-    });
+    static getMeasures = createAsyncThunk(
+        "[measures] get measures",
+        async (data: { projectId: number }) => {
+            return await MeasuresAPI.getMeasures(data);
+        },
+        {
+            condition: (_, { getState }) => {
+                const state = getState() as { measures: { isPending: boolean } };
+                return !state.measures.isPending;
+            },
+        }
+    );
 
     /**
      * Action that creates a measure using the backend

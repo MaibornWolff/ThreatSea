@@ -18,9 +18,18 @@ export class ThreatsActions {
      *      to fetch the threats.
      * @returns Action function for getting the threats.
      */
-    static getThreats = createAsyncThunk("[threats] get threats", async (data: { projectId: number }) => {
-        return await ThreatsAPI.getThreats(data);
-    });
+    static getThreats = createAsyncThunk(
+        "[threats] get threats",
+        async (data: { projectId: number }) => {
+            return await ThreatsAPI.getThreats(data);
+        },
+        {
+            condition: (_, { getState }) => {
+                const state = getState() as { threats: { isPending: boolean } };
+                return !state.threats.isPending;
+            },
+        }
+    );
 
     /**
      * Action that creates a threat using the backend api.

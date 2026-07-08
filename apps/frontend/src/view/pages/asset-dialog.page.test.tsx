@@ -38,7 +38,14 @@ describe("AssetDialogPage", () => {
             url: "/projects/1/assets/5/edit",
             preloadedState: {
                 assets: { ids: [], entities: {}, isPending: true },
-                projects: { ids: [], entities: {}, isPending: false, current: undefined, deletingProjectId: undefined },
+                projects: {
+                    ids: [],
+                    entities: {},
+                    isLoadingAll: false,
+                    isPending: false,
+                    current: undefined,
+                    deletingProjectId: undefined,
+                },
             },
         });
 
@@ -53,7 +60,14 @@ describe("AssetDialogPage", () => {
             url: "/projects/1/assets/999/edit",
             preloadedState: {
                 assets: { ids: [10], entities: { 10: otherAsset }, isPending: false },
-                projects: { ids: [], entities: {}, isPending: false, current: undefined, deletingProjectId: undefined },
+                projects: {
+                    ids: [],
+                    entities: {},
+                    isLoadingAll: false,
+                    isPending: false,
+                    current: undefined,
+                    deletingProjectId: undefined,
+                },
             },
         });
 
@@ -69,7 +83,14 @@ describe("AssetDialogPage", () => {
             url: "/projects/1/assets/5/edit",
             preloadedState: {
                 assets: { ids: [5], entities: { 5: asset }, isPending: false },
-                projects: { ids: [], entities: {}, isPending: false, current: project, deletingProjectId: undefined },
+                projects: {
+                    ids: [],
+                    entities: {},
+                    isLoadingAll: false,
+                    isPending: false,
+                    current: project,
+                    deletingProjectId: undefined,
+                },
             },
         });
 
@@ -85,7 +106,14 @@ describe("AssetDialogPage", () => {
             url: { pathname: "/projects/1/assets/edit", state: { asset: { name: "New Asset" } } },
             preloadedState: {
                 assets: { ids: [], entities: {}, isPending: false },
-                projects: { ids: [], entities: {}, isPending: false, current: undefined, deletingProjectId: undefined },
+                projects: {
+                    ids: [],
+                    entities: {},
+                    isLoadingAll: false,
+                    isPending: false,
+                    current: undefined,
+                    deletingProjectId: undefined,
+                },
             },
         });
 

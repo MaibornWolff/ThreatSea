@@ -8,6 +8,7 @@ type ProjectsAdapterState = ReturnType<typeof projectsAdapter.getInitialState>;
 
 export type ProjectsState = ProjectsAdapterState & {
     isPending: boolean;
+    isLoadingAll: boolean;
     current: ExtendedProject | undefined;
     deletingProjectId: number | undefined;
 };
@@ -15,6 +16,7 @@ export type ProjectsState = ProjectsAdapterState & {
 const defaultState: ProjectsState = {
     ...projectsAdapter.getInitialState(),
     isPending: false,
+    isLoadingAll: false,
     current: undefined,
     deletingProjectId: undefined,
 };
@@ -22,15 +24,18 @@ const defaultState: ProjectsState = {
 const projectsReducer = createReducer(defaultState, (builder) => {
     builder.addCase(ProjectsActions.getProjects.pending, (state) => {
         state.isPending = true;
+        state.isLoadingAll = true;
     });
 
     builder.addCase(ProjectsActions.getProjects.fulfilled, (state, action) => {
         projectsAdapter.setAll(state, action);
         state.isPending = false;
+        state.isLoadingAll = false;
     });
 
     builder.addCase(ProjectsActions.getProjects.rejected, (state) => {
         state.isPending = false;
+        state.isLoadingAll = false;
     });
 
     builder.addCase(ProjectsActions.getProjectFromBackend.pending, (state) => {

@@ -19,9 +19,18 @@ export class AssetsActions {
      *      to fetch the assets.
      * @returns Action function for getting the assets.
      */
-    static getAssets = createAsyncThunk("[assets] get assets", async (data: { projectId: number }) => {
-        return await AssetsAPI.getAssets(data);
-    });
+    static getAssets = createAsyncThunk(
+        "[assets] get assets",
+        async (data: { projectId: number }) => {
+            return await AssetsAPI.getAssets(data);
+        },
+        {
+            condition: (_, { getState }) => {
+                const state = getState() as { assets: { isPending: boolean } };
+                return !state.assets.isPending;
+            },
+        }
+    );
 
     /**
      * Action that creates an asset using the backend api.

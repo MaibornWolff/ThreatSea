@@ -22,9 +22,18 @@ export class ProjectsActions {
      *      to fetch the projects.
      * @returns Action function for getting the projects.
      */
-    static getProjects = createAsyncThunk("[projects] get projects", async () => {
-        return await ProjectsAPI.getProjects();
-    });
+    static getProjects = createAsyncThunk(
+        "[projects] get projects",
+        async () => {
+            return await ProjectsAPI.getProjects();
+        },
+        {
+            condition: (_, { getState }) => {
+                const state = getState() as { projects: { isLoadingAll: boolean } };
+                return !state.projects.isLoadingAll;
+            },
+        }
+    );
 
     /**
      * Action that fetches the data of a single project with the backend api.

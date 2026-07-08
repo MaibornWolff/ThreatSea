@@ -128,7 +128,8 @@
     "componentToCommunicationInfraInvalid": "Clients, servers, and databases can only connect to communication infrastructure via communication interfaces",
     "communicationInfraToComponentInvalid": "Communication infrastructure can only connect to clients, servers, or databases via communication interfaces",
     "invalidConnection": "Invalid connection",
-    "excelExportFailed": "Excel export failed."
+    "excelExportFailed": "Excel export failed.",
+    "reportFetchFailed": "Report cannot be loaded."
   },
 
   "pointsOfAttackList": {

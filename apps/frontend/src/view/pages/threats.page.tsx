@@ -6,7 +6,7 @@ import TableCell, { type TableCellProps } from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { memo, useEffect, useLayoutEffect, useState, type ChangeEvent, type SyntheticEvent } from "react";
+import { memo, useLayoutEffect, useState, type ChangeEvent, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
@@ -14,6 +14,7 @@ import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { useEditor } from "#application/hooks/use-editor.hook.ts";
+import { useLoadThreatsOnce } from "#application/hooks/use-load-threats-once.hook.ts";
 import { useThreatsList, type ThreatListItem } from "#application/hooks/use-threats-list.hook.ts";
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
@@ -124,11 +125,7 @@ const ThreatsPageBody = () => {
         });
     };
 
-    useEffect(() => {
-        if (autoSaveStatus === "upToDate") {
-            loadThreats();
-        }
-    }, [autoSaveStatus, loadThreats]);
+    useLoadThreatsOnce({ projectId, autoSaveStatus, load: loadThreats });
 
     const [assetAnchorEl, setAssetAnchorEl] = useState<HTMLElement | null>(null);
     const [currentAssetList, setCurrentAssetList] = useState<ExtendedThreat["assets"] | null>(null);
@@ -466,7 +463,7 @@ const ThreatsPageBody = () => {
                                                             >
                                                                 {checkUserRole(userRole, USER_ROLES.EDITOR) && [
                                                                     <IconButton
-                                                                        key={threat.id}
+                                                                        key={`${threat.id}-duplicate`}
                                                                         title={t("duplicateThreat")}
                                                                         onClick={(e) =>
                                                                             handleDuplicateThreat(e, threat)
@@ -479,7 +476,7 @@ const ThreatsPageBody = () => {
                                                                         />
                                                                     </IconButton>,
                                                                     <IconButton
-                                                                        key={threat.id}
+                                                                        key={`${threat.id}-delete`}
                                                                         title={t("deleteThreat")}
                                                                         hoverColor="error"
                                                                         onClick={(e) => handleDeleteThreat(e, threat)}

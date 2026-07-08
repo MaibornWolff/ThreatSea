@@ -131,7 +131,8 @@
     "componentToCommunicationInfraInvalid": "Clients, Server und Datenbanken können sich nur über Kommunikationsschnittstellen mit der Kommunikationsinfrastruktur verbinden",
     "communicationInfraToComponentInvalid": "Kommunikationsinfrastruktur kann sich nur über Kommunikationsschnittstellen mit Clients, Servern oder Datenbanken verbinden",
     "invalidConnection": "Ungültige Verbindung",
-    "excelExportFailed": "Excel-Export fehlgeschlagen."
+    "excelExportFailed": "Excel-Export fehlgeschlagen.",
+    "reportFetchFailed": "Report kann nicht geladen werden."
   },
 
   "pointsOfAttackList": {

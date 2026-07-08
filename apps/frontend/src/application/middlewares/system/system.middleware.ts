@@ -5,7 +5,6 @@ import { AlertActions } from "#application/actions/alert.actions.ts";
 import { EditorActions } from "#application/actions/editor.actions.ts";
 import { PointsOfAttackActions } from "#application/actions/points-of-attack.actions.ts";
 import { SystemActions, trackInFlightSave } from "#application/actions/system.actions.ts";
-import { ProjectsActions } from "#application/actions/projects.actions.ts";
 import type { Connection, SystemComponent, SystemConnection, UpdateSystemRequest } from "#api/types/system.types.ts";
 import type { EditorState } from "#application/reducers/editor.reducer.ts";
 
@@ -103,7 +102,6 @@ const handleUpdateSystemSuccesful: AppMiddleware =
         next(action);
         if (SystemActions.updateSystem.fulfilled.match(action)) {
             dispatch(SystemActions.setHasChanged(false));
-            dispatch(ProjectsActions.getProjects());
         }
     };
 
