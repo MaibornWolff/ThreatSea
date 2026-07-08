@@ -9,6 +9,7 @@ import {
     catalogMeasures,
     catalogs,
     catalogThreats,
+    CreateChildThreat,
     CreateMeasure,
     childThreats,
     genericThreats,
@@ -24,7 +25,6 @@ import { LANGUAGES } from "#types/languages.type.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
 import { CreateProjectRequest } from "#types/project.types.js";
 import { CreateGenericThreatRequest } from "#types/genericThreat.types.js";
-import { CreateChildThreatRequest } from "#types/childThreat.types.js";
 import { CHILD_THREAT_STATUSES } from "#types/child-threat-statuses.types.js";
 import { CreateMeasureRequest } from "#types/measure.types.js";
 import { CreateCatalogThreatRequest } from "#types/catalog-threat.types.js";
@@ -56,7 +56,7 @@ const VALID_GENERIC_THREAT_1: Omit<InstanceType<typeof CreateGenericThreatReques
     attacker: ATTACKERS.ADMINISTRATORS,
 };
 
-const VALID_CHILD_THREAT_1: Omit<InstanceType<typeof CreateChildThreatRequest>, "genericThreatId"> = {
+const VALID_CHILD_THREAT_1: Omit<CreateChildThreat, "genericThreatId" | "projectId"> = {
     pointOfAttackId: nanoid(),
     name: "valid threat",
     description: "valid description test test",

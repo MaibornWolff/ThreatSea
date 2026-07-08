@@ -5,12 +5,7 @@
 import { NextFunction, Request, Response } from "express";
 import { BadRequestError } from "#errors/bad-request.error.js";
 import { NotFoundError } from "#errors/not-found.error.js";
-import {
-    ChildThreatIdParam,
-    ChildThreatResponse,
-    CreateChildThreatRequest,
-    UpdateChildThreatRequest,
-} from "#types/childThreat.types.js";
+import { ChildThreatIdParam, ChildThreatResponse, UpdateChildThreatRequest } from "#types/childThreat.types.js";
 import { GenericThreatIdParam } from "#types/genericThreat.types.js";
 import * as childThreatsService from "#services/childThreats.service.js";
 import * as genericThreatsService from "#services/genericThreats.service.js";
@@ -86,12 +81,12 @@ export async function getChildThreat(
  * Creates a new child threat.
  */
 export async function createChildThreat(
-    request: Request<GenericThreatIdParam, ChildThreatResponse, CreateChildThreatRequest>,
+    request: Request<GenericThreatIdParam, ChildThreatResponse, UpdateChildThreatRequest>,
     response: Response<ChildThreatResponse>,
     next: NextFunction
 ): Promise<void> {
     const projectId = request.params.projectId;
-    const createBody = request.body as CreateChildThreatRequest;
+    const createBody = request.body;
     const genericThreatId = request.params.genericThreatId;
 
     try {
@@ -107,14 +102,21 @@ export async function createChildThreat(
             return;
         }
 
-        if (createBody.genericThreatId !== genericThreatId) {
-            next(new BadRequestError("genericThreatId in body does not match url"));
-            return;
-        }
-
+        // The body carries only the user's refinement; identity is inherited
+        // from the immutable parent and cannot be chosen by the client.
         const created = await childThreatsService.createChildThreat({
-            ...createBody,
+            name: createBody.name,
+            description: createBody.description,
+            probability: createBody.probability,
+            confidentiality: createBody.confidentiality,
+            integrity: createBody.integrity,
+            availability: createBody.availability,
+            status: createBody.status,
+            genericThreatId,
             projectId,
+            pointOfAttackId: genericThreat.pointOfAttackId,
+            pointOfAttack: genericThreat.pointOfAttack,
+            attacker: genericThreat.attacker,
         });
 
         response.status(201).json(created);
