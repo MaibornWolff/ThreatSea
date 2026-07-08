@@ -189,6 +189,9 @@ export const Report: FC<ReportProps> = ({
                         logo={logo}
                         indexCallback={addToIndex}
                         date={date}
+                        showComponentsPage={showComponentsPage}
+                        showAssetsPage={showAssetsPage}
+                        showMeasuresPage={showMeasuresPage}
                         {...data}
                     />
                 )}
