@@ -7,6 +7,8 @@ import {
     catalogThreats,
     componentTypes,
     threats,
+    genericThreats,
+    childThreats,
     measureImpacts,
     measures,
     systems,
@@ -58,6 +60,30 @@ export const catalogThreatsRelations = relations(catalogThreats, ({ one, many })
     threats: many(threats),
 }));
 
+export const genericThreatsRelations = relations(genericThreats, ({ one, many }) => ({
+    catalogThreat: one(catalogThreats, {
+        fields: [genericThreats.catalogThreatId],
+        references: [catalogThreats.id],
+    }),
+    project: one(projects, {
+        fields: [genericThreats.projectId],
+        references: [projects.id],
+    }),
+    childThreats: many(childThreats),
+}));
+
+export const childThreatsRelations = relations(childThreats, ({ one, many }) => ({
+    genericThreat: one(genericThreats, {
+        fields: [childThreats.genericThreatId],
+        references: [genericThreats.id],
+    }),
+    project: one(projects, {
+        fields: [childThreats.projectId],
+        references: [projects.id],
+    }),
+    measureImpacts: many(measureImpacts),
+}));
+
 export const componentTypesRelations = relations(componentTypes, ({ one }) => ({
     project: one(projects, {
         fields: [componentTypes.projectId],
@@ -66,9 +92,9 @@ export const componentTypesRelations = relations(componentTypes, ({ one }) => ({
 }));
 
 export const measureImpactsRelations = relations(measureImpacts, ({ one }) => ({
-    threat: one(threats, {
-        fields: [measureImpacts.threatId],
-        references: [threats.id],
+    childThreat: one(childThreats, {
+        fields: [measureImpacts.childThreatId],
+        references: [childThreats.id],
     }),
     measure: one(measures, {
         fields: [measureImpacts.measureId],
@@ -76,8 +102,7 @@ export const measureImpactsRelations = relations(measureImpacts, ({ one }) => ({
     }),
 }));
 
-export const threatsRelations = relations(threats, ({ one, many }) => ({
-    measureImpacts: many(measureImpacts),
+export const threatsRelations = relations(threats, ({ one }) => ({
     catalogThreat: one(catalogThreats, {
         fields: [threats.catalogThreatId],
         references: [catalogThreats.id],

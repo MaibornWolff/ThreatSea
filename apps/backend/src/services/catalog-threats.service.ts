@@ -3,8 +3,15 @@
  * of catalog threats.
  */
 import { db, TransactionType } from "#db/index.js";
-import { CatalogThreat, catalogThreats, CreateCatalogThreat, UpdateCatalogThreat } from "#db/schema.js";
-import { eq } from "drizzle-orm";
+import {
+    catalogs,
+    CatalogThreat,
+    catalogThreats,
+    CreateCatalogThreat,
+    projects,
+    UpdateCatalogThreat,
+} from "#db/schema.js";
+import { eq, getTableColumns } from "drizzle-orm";
 // oxlint-disable-next-line import/no-relative-parent-imports -- templates live outside src/; no alias defined
 import DefaultThreatMatrix from "../../templates/matrix/threats.matrix.json" with { type: "json" };
 import { POINTS_OF_ATTACK } from "#types/points-of-attack.types.js";
@@ -53,6 +60,24 @@ function getDefaultCatalogThreats(catalogId: number, language = "DE"): CreateCat
 }
 
 /**
+ * Gets the threads of the current catalogue used.
+ *
+ * @param {number} projectId - id of the current project.
+ * @returns Array of threads from the database.
+ */
+export async function getCatalogThreatsByProjectId(
+    projectId: number,
+    transaction: TransactionType | undefined = undefined
+): Promise<CatalogThreat[]> {
+    return await (transaction ?? db)
+        .select({ ...getTableColumns(catalogThreats) })
+        .from(catalogThreats)
+        .innerJoin(catalogs, eq(catalogThreats.catalogId, catalogs.id))
+        .innerJoin(projects, eq(projects.catalogId, catalogs.id))
+        .where(eq(projects.id, projectId));
+}
+
+/**
  * Gets all catalog threats of the specific catalog.
  *
  * @param {number} catalogId - The id of the catalog.
@@ -71,8 +96,13 @@ export async function getCatalogThreatsByCatalogId(
  * @param {number} catalogThreatId - The id of the catalog threat.
  * @returns {Promise<CatalogThreat | null>} A promise that resolves to the catalog threat or null if not found.
  */
-export async function getCatalogThreatById(catalogThreatId: number): Promise<CatalogThreat | null> {
-    const catalogThreat = await db.query.catalogThreats.findFirst({ where: eq(catalogThreats.id, catalogThreatId) });
+export async function getCatalogThreatById(
+    catalogThreatId: number,
+    transaction: TransactionType | undefined = undefined
+): Promise<CatalogThreat | null> {
+    const catalogThreat = await (transaction ?? db).query.catalogThreats.findFirst({
+        where: eq(catalogThreats.id, catalogThreatId),
+    });
 
     return catalogThreat ?? null;
 }

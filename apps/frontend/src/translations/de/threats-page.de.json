@@ -7,6 +7,7 @@
   "duplicateMessage": "Wollen Sie die Bedrohung '{{ threatName }}' wirklich duplizieren?",
   "duplicate": "Duplizieren",
   "duplicateThreat": "Bedrohung duplizieren",
+  "editThreat": "Bedrohung bearbeiten",
   "deleteThreat": "Bedrohung löschen",
   "edited": "Bearbeitet",
   "threatsLoading": "Bedrohungen werden geladen...",

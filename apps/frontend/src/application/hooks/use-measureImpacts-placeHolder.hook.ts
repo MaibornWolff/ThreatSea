@@ -1,30 +1,29 @@
 import { useEffect, useMemo, useState } from "react";
-import type { ExtendedThreat } from "#api/types/threat.types.ts";
-import { useThreats } from "./use-threats.hook";
+import { useChildThreats } from "./use-child-threats.hook";
 
 export const useMeasureImpactPlaceholder = ({ projectId }: { projectId: number }) => {
-    const { items: threats, loadThreats } = useThreats({
+    const { items: childThreats, loadChildThreats } = useChildThreats({
         projectId,
     });
 
     useEffect(() => {
-        loadThreats();
-    }, [projectId, loadThreats]);
+        loadChildThreats();
+    }, [projectId, loadChildThreats]);
 
-    const [currentThreatId, setCurrentThreatId] = useState<number | null>(null);
+    const [currentChildThreatId, setCurrentChildThreatId] = useState<number | null>(null);
 
     const damagePlaceholder = useMemo(() => {
-        if (currentThreatId === null) {
+        if (currentChildThreatId === null) {
             return null;
         }
-        const threat = threats.find((candidate) => candidate.id === currentThreatId) as ExtendedThreat | undefined;
+        const childThreat = childThreats.find((candidate) => candidate.id === currentChildThreatId);
 
-        if (!threat) {
+        if (!childThreat) {
             return null;
         }
 
-        const { confidentiality, integrity, availability, assets } = threat;
-        return assets.reduce((value, asset) => {
+        const { confidentiality, integrity, availability } = childThreat;
+        return childThreat.assets.reduce((value, asset) => {
             if (confidentiality && value < asset.confidentiality) {
                 value = asset.confidentiality;
             }
@@ -36,18 +35,18 @@ export const useMeasureImpactPlaceholder = ({ projectId }: { projectId: number }
             }
             return value;
         }, 0); // default 0 if no protection goal is affected
-    }, [currentThreatId, threats]);
+    }, [currentChildThreatId, childThreats]);
 
     const probabilityPlaceholder = useMemo(() => {
-        if (currentThreatId === null) {
+        if (currentChildThreatId === null) {
             return null;
         }
-        const threat = threats.find((candidate) => candidate.id === currentThreatId);
-        return threat?.probability ?? null;
-    }, [currentThreatId, threats]);
+        const childThreat = childThreats.find((candidate) => candidate.id === currentChildThreatId);
+        return childThreat?.probability ?? null;
+    }, [currentChildThreatId, childThreats]);
 
     return {
-        setCurrentThreatId,
+        setCurrentChildThreatId,
         damagePlaceholder,
         probabilityPlaceholder,
     };

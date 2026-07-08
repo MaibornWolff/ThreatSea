@@ -2,6 +2,7 @@ import type { Asset } from "#api/types/asset.types.ts";
 import type { CatalogWithRole } from "#api/types/catalogs.types.ts";
 import type { ExtendedProject, ProjectReport, ThreatReport } from "#api/types/project.types.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
+import type { ExtendedChildThreat } from "#api/types/child-threat.types.ts";
 import type { Measure } from "#api/types/measure.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
 import type { ThreatMeasure } from "#application/hooks/use-threat-measures-list.hook.ts";
@@ -58,6 +59,29 @@ export const createThreat = (overrides: Partial<ExtendedThreat> = {}): ExtendedT
     projectId: 1,
     createdAt: new Date("2025-01-01"),
     updatedAt: new Date("2025-01-01"),
+    componentName: "Test Component",
+    componentType: null,
+    interfaceName: null,
+    assets: [],
+    ...overrides,
+});
+
+export const createChildThreat = (overrides: Partial<ExtendedChildThreat> = {}): ExtendedChildThreat => ({
+    id: 1,
+    projectId: 1,
+    genericThreatId: 1,
+    pointOfAttackId: "poa-1",
+    name: "Test Child Threat",
+    description: "",
+    pointOfAttack: POINTS_OF_ATTACK.USER_INTERFACE,
+    attacker: ATTACKERS.UNAUTHORISED_PARTIES,
+    probability: 3,
+    confidentiality: true,
+    integrity: false,
+    availability: false,
+    doneEditing: false,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z",
     componentName: "Test Component",
     componentType: null,
     interfaceName: null,
@@ -218,7 +242,7 @@ export const createReportMilestone = (overrides: Partial<Milestone> = {}): Miles
 export const createMeasureImpact = (overrides: Partial<MeasureImpact> = {}): MeasureImpact => ({
     id: 1,
     measureId: 1,
-    threatId: 1,
+    childThreatId: 1,
     description: "",
     setsOutOfScope: false,
     impactsProbability: false,

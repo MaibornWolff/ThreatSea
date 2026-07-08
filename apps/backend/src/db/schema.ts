@@ -17,6 +17,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { LANGUAGES } from "#types/languages.type.js";
 import { ATTACKERS } from "#types/attackers.types.js";
+import { CHILD_THREAT_STATUSES } from "#types/child-threat-statuses.types.js";
 import { CONFIDENTIALITY_LEVELS } from "#types/confidentiality-levels.types.js";
 import { POINTS_OF_ATTACK } from "#types/points-of-attack.types.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
@@ -35,6 +36,8 @@ export const ConfidentialityLevelsEnum = pgEnum("confidentiality_level", CONFIDE
 export const PointsOfAttackEnum = pgEnum("point_of_attack", POINTS_OF_ATTACK);
 
 export const StandardIconsEnum = pgEnum("standard_icon", STANDARD_ICONS);
+
+export const ChildThreatStatusesEnum = pgEnum("child_threat_status", CHILD_THREAT_STATUSES);
 
 export type CreateAsset = Omit<typeof assets.$inferInsert, DefaultFields>;
 export type UpdateAsset = Omit<CreateAsset, "projectId">;
@@ -190,7 +193,7 @@ export const componentTypes = pgTable(
 );
 
 export type CreateMeasureImpact = Omit<typeof measureImpacts.$inferInsert, DefaultFields>;
-export type UpdateMeasureImpact = Omit<CreateMeasureImpact, "threatId" | "measureId">;
+export type UpdateMeasureImpact = Omit<CreateMeasureImpact, "childThreatId" | "measureId">;
 export type MeasureImpact = typeof measureImpacts.$inferSelect;
 
 export const measureImpacts = pgTable(
@@ -209,15 +212,15 @@ export const measureImpacts = pgTable(
         updatedAt: timestamp({ mode: "string", withTimezone: true })
             .notNull()
             .default(sql`now()`),
-        threatId: integer()
+        childThreatId: integer()
             .notNull()
-            .references(() => threats.id, { onDelete: "cascade", onUpdate: "cascade" }),
+            .references(() => childThreats.id, { onDelete: "cascade", onUpdate: "cascade" }),
         measureId: integer()
             .notNull()
             .references(() => measures.id, { onDelete: "cascade", onUpdate: "cascade" }),
     },
     (table) => [
-        unique("measure_impacts_measure_id_threat_id_unique").on(table.measureId, table.threatId),
+        unique("measure_impacts_measure_id_child_threat_id_unique").on(table.measureId, table.childThreatId),
         check("measure_impacts_probability_min_max", sql`${table.probability} between 1 and 5`),
         check(
             "measure_impacts_probability",
@@ -225,9 +228,16 @@ export const measureImpacts = pgTable(
         ),
         check("measure_impacts_damage_min_max", sql`${table.damage} between 1 and 5`),
         check("measure_impacts_damage", sql`${table.impactsDamage} = false OR ${table.damage} IS NOT NULL`),
-        index("measure_impacts_measure_id_threat_id").on(table.measureId, table.threatId),
+        index("measure_impacts_measure_id_child_threat_id").on(table.measureId, table.childThreatId),
+        index("measure_impacts_child_threat_id").on(table.childThreatId),
+        index("measure_impacts_measure_id").on(table.measureId),
     ]
 );
+
+// TODO: Delete this types in an upcoming migration
+export type CreateChildThreatMeasureImpact = CreateMeasureImpact;
+export type UpdateChildThreatMeasureImpact = UpdateMeasureImpact;
+export type ChildThreatMeasureImpact = MeasureImpact;
 
 export type Measure = typeof measures.$inferSelect;
 export type CreateMeasure = Omit<typeof measures.$inferInsert, DefaultFields>;
@@ -346,6 +356,89 @@ export const threats = pgTable(
         check("threats_probability_min_max", sql`${table.probability} between 1 and 5`),
         index("threats_catalog_threat_id").on(table.catalogThreatId),
         index("threats_project_id").on(table.projectId),
+    ]
+);
+
+export type GenericThreat = typeof genericThreats.$inferSelect;
+export type CreateGenericThreat = Omit<typeof genericThreats.$inferInsert, DefaultFields>;
+export type UpdateGenericThreat = Omit<
+    CreateGenericThreat,
+    "pointOfAttackId" | "pointOfAttack" | "attacker" | "catalogThreatId"
+>;
+
+export const genericThreats = pgTable(
+    "generic_threats",
+    {
+        id: integer().notNull().primaryKey().generatedByDefaultAsIdentity(),
+        pointOfAttackId: varchar({ length: 21 }).notNull(),
+        name: varchar({ length: 255 }).notNull(),
+        description: text().notNull(),
+        pointOfAttack: PointsOfAttackEnum().notNull(),
+        attacker: AttackersEnum().notNull(),
+        createdAt: timestamp({ mode: "string", withTimezone: true })
+            .notNull()
+            .default(sql`now()`),
+        updatedAt: timestamp({ mode: "string", withTimezone: true })
+            .notNull()
+            .default(sql`now()`),
+        catalogThreatId: integer()
+            .notNull()
+            .references(() => catalogThreats.id, { onDelete: "cascade", onUpdate: "cascade" }),
+        projectId: integer()
+            .notNull()
+            .references(() => projects.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    },
+    (table) => [
+        check("generic_threats_name_not_empty", sql`${table.name} <> ''`),
+        index("generic_threats_catalog_threat_id").on(table.catalogThreatId),
+        index("generic_threats_project_id").on(table.projectId),
+    ]
+);
+
+/*
+ *   The child threats need to be renamed to just "threats" and the old "threats" table needs to be deleted.
+ */
+
+export type ChildThreat = typeof childThreats.$inferSelect;
+export type CreateChildThreat = Omit<typeof childThreats.$inferInsert, DefaultFields>;
+export type UpdateChildThreat = Omit<
+    CreateChildThreat,
+    "pointOfAttackId" | "pointOfAttack" | "attacker" | "genericThreatId" | "projectId"
+>;
+
+export const childThreats = pgTable(
+    "child_threats",
+    {
+        id: integer().notNull().primaryKey().generatedByDefaultAsIdentity(),
+        pointOfAttackId: varchar({ length: 21 }).notNull(),
+        name: varchar({ length: 255 }).notNull(),
+        description: text().notNull(),
+        pointOfAttack: PointsOfAttackEnum().notNull(),
+        attacker: AttackersEnum().notNull(),
+        probability: integer().notNull(),
+        confidentiality: boolean().notNull(),
+        integrity: boolean().notNull(),
+        availability: boolean().notNull(),
+        status: ChildThreatStatusesEnum().notNull().default(CHILD_THREAT_STATUSES.NEW),
+
+        createdAt: timestamp({ mode: "string", withTimezone: true })
+            .notNull()
+            .default(sql`now()`),
+        updatedAt: timestamp({ mode: "string", withTimezone: true })
+            .notNull()
+            .default(sql`now()`),
+        genericThreatId: integer()
+            .notNull()
+            .references(() => genericThreats.id, { onDelete: "cascade", onUpdate: "cascade" }),
+        projectId: integer()
+            .notNull()
+            .references(() => projects.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    },
+    (table) => [
+        check("child_threats_name_not_empty", sql`${table.name} <> ''`),
+        check("child_threats_probability_min_max", sql`${table.probability} between 1 and 5`),
+        index("child_threats_generic_threat_id").on(table.genericThreatId),
+        index("child_threats_project_id").on(table.projectId),
     ]
 );
 
