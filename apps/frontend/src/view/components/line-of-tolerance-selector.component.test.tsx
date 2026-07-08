@@ -32,6 +32,16 @@ const setup = (role: USER_ROLES | undefined, props: Partial<ComponentProps<typeo
     return { onLoTChange, user };
 };
 
+const expectSliderDisabled = (disabled: boolean) => {
+    for (const thumb of screen.getAllByRole("slider")) {
+        if (disabled) {
+            expect(thumb).toBeDisabled();
+        } else {
+            expect(thumb).toBeEnabled();
+        }
+    }
+};
+
 describe("LineOfToleranceSelector — rendering & role gating", () => {
     it("renders the title", () => {
         setup(USER_ROLES.EDITOR);
@@ -42,33 +52,25 @@ describe("LineOfToleranceSelector — rendering & role gating", () => {
     it("enables the slider for an owner", () => {
         setup(USER_ROLES.OWNER);
 
-        for (const thumb of screen.getAllByRole("slider")) {
-            expect(thumb).toBeEnabled();
-        }
+        expectSliderDisabled(false);
     });
 
     it("enables the slider for an editor", () => {
         setup(USER_ROLES.EDITOR);
 
-        for (const thumb of screen.getAllByRole("slider")) {
-            expect(thumb).toBeEnabled();
-        }
+        expectSliderDisabled(false);
     });
 
     it("disables the slider for a viewer", () => {
         setup(USER_ROLES.VIEWER);
 
-        for (const thumb of screen.getAllByRole("slider")) {
-            expect(thumb).toBeDisabled();
-        }
+        expectSliderDisabled(true);
     });
 
     it("disables the slider when there is no current project role", () => {
         setup(undefined);
 
-        for (const thumb of screen.getAllByRole("slider")) {
-            expect(thumb).toBeDisabled();
-        }
+        expectSliderDisabled(true);
     });
 });
 

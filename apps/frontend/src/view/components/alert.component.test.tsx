@@ -18,6 +18,16 @@ import { Alert } from "./alert.component";
 
 const errorState = (overrides: Partial<typeof errorDefaultState> = {}) => ({ ...errorDefaultState, ...overrides });
 
+const setupError = (error: Partial<typeof errorDefaultState>, initialEntries?: string[]) => {
+    const showErrorMessage = vi.fn();
+    mockUseAlert({ visible: false, showErrorMessage });
+    renderWithProviders(<Alert />, {
+        preloadedState: { error: errorState(error) },
+        ...(initialEntries && { initialEntries }),
+    });
+    return { showErrorMessage };
+};
+
 describe("Alert — visibility", () => {
     it("renders nothing while not visible", () => {
         mockUseAlert({ visible: false, text: "Saved" });
@@ -49,49 +59,31 @@ describe("Alert — visibility", () => {
 
 describe("Alert — error side effects", () => {
     it("does nothing when there is no error", () => {
-        const showErrorMessage = vi.fn();
-        mockUseAlert({ visible: false, showErrorMessage });
-
-        renderWithProviders(<Alert />, { preloadedState: { error: errorState() } });
+        const { showErrorMessage } = setupError({});
 
         expect(navigate).not.toHaveBeenCalled();
         expect(showErrorMessage).not.toHaveBeenCalled();
     });
 
     it("redirects to /login and surfaces the message on an authentication error", () => {
-        const showErrorMessage = vi.fn();
-        mockUseAlert({ visible: false, showErrorMessage });
-
-        renderWithProviders(<Alert />, {
-            preloadedState: { error: errorState({ type: ERR_TYPE_API, message: "Session expired" }) },
-            initialEntries: ["/projects"],
-        });
+        const { showErrorMessage } = setupError({ type: ERR_TYPE_API, message: "Session expired" }, ["/projects"]);
 
         expect(navigate).toHaveBeenCalledWith("/login", { replace: true });
         expect(showErrorMessage).toHaveBeenCalledWith({ message: "Session expired" });
     });
 
     it("does not redirect again when already on the login page", () => {
-        const showErrorMessage = vi.fn();
-        mockUseAlert({ visible: false, showErrorMessage });
-
-        renderWithProviders(<Alert />, {
-            preloadedState: { error: errorState({ type: ERR_TYPE_API, message: "Session expired" }) },
-            initialEntries: ["/login"],
-        });
+        const { showErrorMessage } = setupError({ type: ERR_TYPE_API, message: "Session expired" }, ["/login"]);
 
         expect(navigate).not.toHaveBeenCalled();
         expect(showErrorMessage).toHaveBeenCalledWith({ message: "Session expired" });
     });
 
     it("redirects to /projects on a project/catalog existence error", () => {
-        const showErrorMessage = vi.fn();
-        mockUseAlert({ visible: false, showErrorMessage });
-
-        renderWithProviders(<Alert />, {
-            preloadedState: { error: errorState({ type: ERR_TYPE_PROJECT_CATALOG_EXISTANCE, message: "Gone" }) },
-            initialEntries: ["/projects/1"],
-        });
+        const { showErrorMessage } = setupError(
+            { type: ERR_TYPE_PROJECT_CATALOG_EXISTANCE, message: "Gone" },
+            ["/projects/1"]
+        );
 
         expect(navigate).toHaveBeenCalledWith("/projects", { replace: true });
         expect(showErrorMessage).toHaveBeenCalledWith({ message: "Gone" });
