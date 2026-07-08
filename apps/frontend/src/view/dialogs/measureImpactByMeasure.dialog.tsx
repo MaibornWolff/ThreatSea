@@ -36,9 +36,9 @@ import type { Project } from "#api/types/project.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
 import type { DialogValue } from "#application/reducers/dialogs.reducer.ts";
 import type { CatalogMeasure } from "#api/types/catalog-measure.types.ts";
-import type { ExtendedThreat } from "#api/types/threat.types.ts";
+import type { ExtendedChildThreat } from "#api/types/child-threat.types.ts";
 
-export type ApplyMeasureThreat = ExtendedThreat & { damage: number };
+export type ApplyMeasureThreat = ExtendedChildThreat & { damage: number };
 
 interface FormValues {
     id: number | undefined;

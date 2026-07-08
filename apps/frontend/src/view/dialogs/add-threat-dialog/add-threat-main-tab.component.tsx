@@ -1,4 +1,16 @@
-import { Box, Checkbox, FormControlLabel, FormGroup, InputAdornment, Switch, Tooltip, Typography } from "@mui/material";
+import {
+    Box,
+    FormControl,
+    FormControlLabel,
+    FormGroup,
+    InputAdornment,
+    InputLabel,
+    MenuItem,
+    Select,
+    Switch,
+    Tooltip,
+    Typography,
+} from "@mui/material";
 import { InfoOutlined } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import { Controller, useWatch, type Control, type FieldErrors, type UseFormRegister } from "react-hook-form";
@@ -12,6 +24,7 @@ import { calcNetRisk, calcRiskColour } from "#utils/calcRisk.ts";
 import type { Asset } from "#api/types/asset.types.ts";
 import type { ThreatMeasure } from "#application/hooks/use-threat-measures-list.hook.ts";
 import type { ThreatFormValues } from "./add-threat-form.types.ts";
+import { CHILD_THREAT_STATUSES } from "#api/types/child-threat-statuses.types.ts";
 
 interface AddThreatMainTabProps {
     active: boolean;
@@ -210,25 +223,27 @@ export const AddThreatMainTab = ({
                             },
                         }}
                     />
-                    <FormGroup>
-                        <FormControlLabel
-                            control={
-                                <Controller
-                                    control={control}
-                                    render={({ field }) => <Checkbox {...field} checked={!!field?.value} />}
-                                    {...register("doneEditing")}
-                                    name="doneEditing"
-                                />
-                            }
-                            label={t("doneEditing")}
-                            labelPlacement="start"
-                            sx={{
-                                ".MuiFormControlLabel-label": {
-                                    fontSize: "0.875rem",
-                                },
-                            }}
+                    <FormControl size="small" sx={{ minWidth: 180 }}>
+                        <InputLabel id="child-threat-status-label">{t("status")}</InputLabel>
+                        <Controller
+                            control={control}
+                            name="status"
+                            render={({ field }) => (
+                                <Select
+                                    {...field}
+                                    labelId="child-threat-status-label"
+                                    label={t("status")}
+                                    data-testid="ThreatStatusSelect"
+                                >
+                                    {Object.values(CHILD_THREAT_STATUSES).map((status) => (
+                                        <MenuItem key={status} value={status}>
+                                            {t(`statusList.${status}`)}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            )}
                         />
-                    </FormGroup>
+                    </FormControl>
                 </FormGroup>
                 <ThreatRiskPreview
                     grossRisk={grossRisk}

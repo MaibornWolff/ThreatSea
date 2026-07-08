@@ -9,7 +9,7 @@
   "netProbability": "Net Probability",
   "netDamage": "Net Damage",
   "pointOfAttack": "Point of Attack",
-  "doneEditing": "Done editing",
+  "status": "Status",
   "scheduledAt": "Scheduled at",
   "tab": {
     "threat": "Threat",

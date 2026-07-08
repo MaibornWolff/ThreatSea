@@ -1,8 +1,6 @@
 import { useEffect, useMemo } from "react";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
 import type { ExtendedChildThreat } from "#api/types/child-threat.types.ts";
-import { CHILD_THREAT_STATUSES } from "#api/types/child-threat-statuses.types.ts";
-import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import { useChildThreats } from "./use-child-threats.hook";
 import { useMeasureImpacts } from "./use-measureImpacts.hook";
 import { useList } from "./use-list.hooks";
@@ -17,7 +15,6 @@ export interface MeasureThreat {
     threatDescription: string | undefined;
     componentName: string | null;
     threat: ExtendedChildThreat | undefined;
-    editThreat: ExtendedThreat | undefined;
     measureImpact: MeasureImpact;
 }
 
@@ -66,32 +63,6 @@ export const useMeasureThreatsList = ({ projectId, measureId }: { projectId: num
             .map((measureImpact) => {
                 const threat = childThreats.find((item) => item.id === measureImpact.childThreatId);
 
-                const editThreat = threat
-                    ? {
-                          id: threat.id,
-                          pointOfAttackId: threat.pointOfAttackId,
-                          catalogThreatId: threat.genericThreatId,
-                          name: threat.name,
-                          description: threat.description,
-                          pointOfAttack: threat.pointOfAttack,
-                          attacker: threat.attacker,
-                          probability: threat.probability,
-                          confidentiality: threat.confidentiality,
-                          integrity: threat.integrity,
-                          availability: threat.availability,
-                          doneEditing:
-                              threat.status === CHILD_THREAT_STATUSES.FINALIZED ||
-                              threat.status === CHILD_THREAT_STATUSES.OUTOFSCOPE,
-                          projectId: threat.projectId,
-                          createdAt: new Date(threat.createdAt),
-                          updatedAt: new Date(threat.updatedAt),
-                          componentName: threat.componentName,
-                          componentType: threat.componentType,
-                          interfaceName: threat.interfaceName,
-                          assets: threat.assets,
-                      }
-                    : undefined;
-
                 return {
                     measureImpactId: measureImpact.id,
                     setsOutOfScope: measureImpact.setsOutOfScope,
@@ -102,7 +73,6 @@ export const useMeasureThreatsList = ({ projectId, measureId }: { projectId: num
                     threatDescription: threat?.description,
                     componentName: threat?.componentName ?? null,
                     threat,
-                    editThreat,
                     measureImpact,
                 };
             });
