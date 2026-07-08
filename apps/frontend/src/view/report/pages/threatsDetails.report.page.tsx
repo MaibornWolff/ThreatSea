@@ -82,8 +82,6 @@ interface MeasuresListProps {
     showMeasuresPage: boolean;
 }
 
-const LIST_BREAKPOINT = 30;
-
 export const ThreatsDetailsPage = ({
     indexCallback,
     language,
@@ -163,12 +161,26 @@ const ThreatCard = ({
     netRisk,
     ...props
 }: ThreatCardProps) => {
-    const desc_lines = description.length / 40; // estimate on line count
+    const APPROX_LINE_HEIGHT = 15;
+    const APPROX_CHARS_PER_LINE = 42;
+    const HEADER_AND_CHROME_HEIGHT = 120;
+    const PAGE_CONTENT_HEIGHT = 750;
+    const descriptionLines = Math.ceil((description?.length ?? 0) / APPROX_CHARS_PER_LINE);
+    const informationLines = 8 + assets.length;
+    // Count each measure's name line plus its description length, so a card with a few
+    // long-described measures is not underestimated (which would wrongly mark it atomic).
+    const measureLines = measures.reduce(
+        (lines, measure) => lines + 1 + Math.ceil((measure.description?.length ?? 0) / APPROX_CHARS_PER_LINE),
+        0
+    );
+    const estimatedCardHeight =
+        HEADER_AND_CHROME_HEIGHT + (Math.max(descriptionLines, informationLines) + measureLines) * APPROX_LINE_HEIGHT;
+    const fitsOnOnePage = estimatedCardHeight < PAGE_CONTENT_HEIGHT * 0.8;
     return (
         <View
             id={`threat-${reportId}`}
-            //conditional Wrap
-            wrap={Math.max(desc_lines, assets.length) + 2.5 * measures.length > LIST_BREAKPOINT} // measures take at least two lines
+            // Keep a card that fits on a page together, otherwise allow it to break across pages
+            wrap={!fitsOnOnePage}
             style={{
                 backgroundColor,
                 padding: s1,

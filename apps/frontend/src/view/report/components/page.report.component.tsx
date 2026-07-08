@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactNode } from "react";
 import { Page as PdfPage, View } from "@react-pdf/renderer";
-import { s2, s3, s6 } from "#view/report/report.style.ts";
+import { s2, s5, s6 } from "#view/report/report.style.ts";
 import { Text } from "./text.report.component";
 import { colors } from "#view/wrappers/color-tokens.ts";
 
@@ -28,12 +28,12 @@ export const Page = ({ logo, projectName, date, children, confidentialityLevel, 
             style={{
                 flexDirection: "column",
                 alignItems: "stretch",
-                justifyContent: "space-between",
                 backgroundColor: colors.surface.paperWhite,
-                padding: s2,
+                // Reserve vertical space for the fixed header/footer
+                paddingTop: s6,
+                paddingBottom: s5,
                 paddingLeft: s6,
                 paddingRight: s6,
-                height: "100%",
             }}
             wrap
             {...props}
@@ -41,7 +41,6 @@ export const Page = ({ logo, projectName, date, children, confidentialityLevel, 
             <Header logo={logo} projectName={projectName} date={date} {...props} />
             <View
                 style={{
-                    flex: 1,
                     flexDirection: "column",
                     alignItems: "stretch",
                 }}
@@ -57,11 +56,14 @@ const Header = ({ projectName, date }: HeaderProps) => {
     return (
         <View
             style={{
+                position: "absolute",
+                top: s2,
+                left: s6,
+                right: s6,
                 display: "flex",
                 flexDirection: "row",
                 justifyContent: "space-between",
                 alignItems: "flex-start",
-                marginBottom: s3,
             }}
             fixed
         >
@@ -75,6 +77,10 @@ const Footer = ({ confidentialityLevel }: FooterProps) => {
     return (
         <View
             style={{
+                position: "absolute",
+                bottom: s2,
+                left: s6,
+                right: s6,
                 display: "flex",
                 flexDirection: "row",
                 justifyContent: "space-between",
