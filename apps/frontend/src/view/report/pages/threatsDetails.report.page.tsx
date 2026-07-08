@@ -21,10 +21,16 @@ interface ThreatsDetailsPageProps {
     logo: string | undefined;
     date: string;
     threats: ThreatReport[];
+    showComponentsPage: boolean;
+    showAssetsPage: boolean;
+    showMeasuresPage: boolean;
 }
 
 interface ThreatCardProps extends ThreatReport {
     language: string;
+    showComponentsPage: boolean;
+    showAssetsPage: boolean;
+    showMeasuresPage: boolean;
 }
 
 interface RiskInfoProps {
@@ -51,6 +57,8 @@ interface HeaderProps {
 
 interface InformationsProps {
     componentName: ReportThreat["componentName"];
+    componentReportId: ReportThreat["componentReportId"];
+    showComponentsPage: boolean;
     attacker: ReportThreat["attacker"];
     pointOfAttack: ReportThreat["pointOfAttack"];
     language: string;
@@ -64,12 +72,14 @@ interface DescriptionProps {
 
 interface AssetsListProps {
     assets: ThreatAsset[];
+    showAssetsPage: boolean;
 }
 
 interface MeasuresListProps {
     measures: ThreatMeasure[];
     style?: Style;
     language: string;
+    showMeasuresPage: boolean;
 }
 
 const LIST_BREAKPOINT = 30;
@@ -81,6 +91,9 @@ export const ThreatsDetailsPage = ({
     logo,
     date,
     threats,
+    showComponentsPage,
+    showAssetsPage,
+    showMeasuresPage,
 }: ThreatsDetailsPageProps) => {
     const linkId = "riskDetails";
     const { t } = useTranslation("report", { lng: language });
@@ -107,7 +120,16 @@ export const ThreatsDetailsPage = ({
                 {t("threats")}
             </Text>
             {threats.map((threat, i) => {
-                return <ThreatCard key={i} language={language} {...threat} />;
+                return (
+                    <ThreatCard
+                        key={i}
+                        language={language}
+                        showComponentsPage={showComponentsPage}
+                        showAssetsPage={showAssetsPage}
+                        showMeasuresPage={showMeasuresPage}
+                        {...threat}
+                    />
+                );
             })}
         </Page>
     );
@@ -124,9 +146,13 @@ const ThreatCard = ({
     measures,
     assets,
     componentName,
+    componentReportId,
     attacker,
     pointOfAttack,
     language,
+    showComponentsPage,
+    showAssetsPage,
+    showMeasuresPage,
     bruttoColor,
     nettoColor,
     damage,
@@ -207,19 +233,26 @@ const ThreatCard = ({
                     >
                         <Informations
                             componentName={componentName}
+                            componentReportId={componentReportId}
+                            showComponentsPage={showComponentsPage}
                             attacker={attacker}
                             pointOfAttack={pointOfAttack}
                             {...props}
                             language={language}
                         />
-                        <AssetsList assets={assets} />
+                        <AssetsList assets={assets} showAssetsPage={showAssetsPage} />
                     </View>
                     <Description style={{ flex: 1, marginLeft: s1 }} language={language}>
                         {description}
                     </Description>
                 </View>
                 {measures && measures.length > 0 && (
-                    <MeasuresList measures={measures} language={language} style={{ marginTop: s1 }} />
+                    <MeasuresList
+                        measures={measures}
+                        language={language}
+                        showMeasuresPage={showMeasuresPage}
+                        style={{ marginTop: s1 }}
+                    />
                 )}
             </View>
         </View>
@@ -444,7 +477,14 @@ const Header = ({ language, reportId, id, name, confidentiality, integrity, avai
     );
 };
 
-const Informations = ({ componentName, attacker, pointOfAttack, language }: InformationsProps) => {
+const Informations = ({
+    componentName,
+    componentReportId,
+    showComponentsPage,
+    attacker,
+    pointOfAttack,
+    language,
+}: InformationsProps) => {
     const { t } = useTranslation("report", { lng: language });
     return (
         <View
@@ -458,9 +498,17 @@ const Informations = ({ componentName, attacker, pointOfAttack, language }: Info
             <Text size="small" style={{ fontWeight: 600 }}>
                 {t("component")}
             </Text>
-            <Text size="small" style={{ marginLeft: s2 }}>
-                {componentName}
-            </Text>
+            {componentReportId && showComponentsPage ? (
+                <Link src={`#${componentReportId}`} style={{ textDecoration: "none" }}>
+                    <Text size="small" style={{ marginLeft: s2 }}>
+                        {componentReportId} {componentName}
+                    </Text>
+                </Link>
+            ) : (
+                <Text size="small" style={{ marginLeft: s2 }}>
+                    {componentName}
+                </Text>
+            )}
             <Text size="small" style={{ fontWeight: 600 }}>
                 {t("attackersHeader")}
             </Text>
@@ -496,38 +544,31 @@ const Description = ({ style, children, language }: DescriptionProps) => {
     );
 };
 
-const AssetsList = ({ assets }: AssetsListProps) => {
+const AssetsList = ({ assets, showAssetsPage }: AssetsListProps) => {
     return (
         <View>
             <Text size="small" style={{ fontWeight: 600 }}>
                 Assets
             </Text>
             {assets.map((asset, j) => {
-                return (
-                    <Link
-                        key={asset.id}
-                        src={`#${asset.reportId}`}
-                        style={{
-                            textDecoration: "none",
-                        }}
-                    >
-                        <Text
-                            size="small"
-                            key={j}
-                            style={{
-                                marginTop: s1 / 4,
-                            }}
-                        >
-                            {asset.reportId} {asset.name}
-                        </Text>
+                const label = (
+                    <Text size="small" key={j} style={{ marginTop: s1 / 4 }}>
+                        {asset.reportId} {asset.name}
+                    </Text>
+                );
+                return showAssetsPage ? (
+                    <Link key={asset.id} src={`#${asset.reportId}`} style={{ textDecoration: "none" }}>
+                        {label}
                     </Link>
+                ) : (
+                    <View key={asset.id}>{label}</View>
                 );
             })}
         </View>
     );
 };
 
-const MeasuresList = ({ measures, style, language }: MeasuresListProps) => {
+const MeasuresList = ({ measures, style, language, showMeasuresPage }: MeasuresListProps) => {
     const { t } = useTranslation("report", { lng: language });
     return (
         <View {...style}>
@@ -536,6 +577,11 @@ const MeasuresList = ({ measures, style, language }: MeasuresListProps) => {
             </Text>
             {measures.map((measure, i) => {
                 const { reportId, name, description } = measure;
+                const label = (
+                    <Text size="small" style={{ marginTop: s1 / 4 }}>
+                        {`${reportId} ${name}`}
+                    </Text>
+                );
                 return (
                     <View
                         key={i}
@@ -545,17 +591,13 @@ const MeasuresList = ({ measures, style, language }: MeasuresListProps) => {
                             marginTop: s1 / 2,
                         }}
                     >
-                        <Link
-                            style={{
-                                color: fontColor,
-                                textDecoration: "none",
-                            }}
-                            src={`#measure-${reportId}`}
-                        >
-                            <Text size="small" style={{ marginTop: s1 / 4 }}>
-                                {`${reportId} ${name}`}
-                            </Text>
-                        </Link>
+                        {showMeasuresPage ? (
+                            <Link style={{ color: fontColor, textDecoration: "none" }} src={`#measure-${reportId}`}>
+                                {label}
+                            </Link>
+                        ) : (
+                            label
+                        )}
                         <Text size="small" style={{ marginLeft: s2, fontStyle: "italic" }}>
                             {description}
                         </Text>

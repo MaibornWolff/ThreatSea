@@ -15,6 +15,7 @@ type ReportMeasure = Omit<ProjectReport["measures"][number], "scheduledAt"> & {
     reportId?: string;
 };
 type AssetWithReportId = ProjectReport["assets"][number];
+type ComponentWithReportId = ProjectReport["components"][number];
 
 export interface MarkdownReportOptions {
     data: ProjectReport & { milestones?: Milestone[] | null | undefined };
@@ -27,6 +28,7 @@ export interface MarkdownReportOptions {
     showMethodExplanation?: boolean | undefined;
     showScaleExplanation?: boolean | undefined;
     showMatrixPage?: boolean | undefined;
+    showComponentsPage?: boolean | undefined;
     showAssetsPage?: boolean | undefined;
     showMeasuresPage?: boolean | undefined;
     showThreatListPage?: boolean | undefined;
@@ -65,6 +67,7 @@ interface Translations {
     threats: string;
     name: string;
     component: string;
+    components: string;
     description: string;
     confidentiality: string;
     integrity: string;
@@ -128,6 +131,7 @@ function buildTranslations(language: string): Translations {
         threats: t("threats"),
         name: t("name"),
         component: t("component"),
+        components: t("components"),
         description: t("description"),
         confidentiality: t("confidentiality"),
         integrity: t("integrity"),
@@ -247,6 +251,10 @@ function threatAnchorId(reportId: string): string {
 
 function assetAnchorId(reportId: string): string {
     return `asset-${reportId}`;
+}
+
+function componentAnchorId(reportId: string): string {
+    return `component-${reportId}`;
 }
 
 function measureAnchorId(reportId: string): string {
@@ -460,6 +468,28 @@ function matrixSection(
     return lines.join("\n");
 }
 
+function componentsSection(T: Translations, components: ComponentWithReportId[]): string {
+    const lines: string[] = [];
+    lines.push(`## ${anchor("chapter-componentsDetails")}${T.components}`);
+    lines.push("");
+
+    components.forEach((component) => {
+        lines.push(
+            `### ${anchor(componentAnchorId(component.reportId))}${escapeInline(component.reportId)} ${escapeInline(component.name)}`
+        );
+        lines.push("");
+
+        if (component.description) {
+            lines.push(`**${T.description}:**`);
+            lines.push("");
+            lines.push(escapeBlock(component.description));
+            lines.push("");
+        }
+    });
+
+    return lines.join("\n");
+}
+
 function assetsSection(T: Translations, assets: AssetWithReportId[]): string {
     const lines: string[] = [];
     lines.push(`## ${anchor("chapter-assetsDetails")}${T.assets}`);
@@ -567,7 +597,13 @@ function threatsListSection(T: Translations, threats: ThreatReport[]): string {
     return lines.join("\n");
 }
 
-function threatsDetailSection(T: Translations, threats: ThreatReport[]): string {
+interface ThreatLinkOptions {
+    linkComponents: boolean;
+    linkAssets: boolean;
+    linkMeasures: boolean;
+}
+
+function threatsDetailSection(T: Translations, threats: ThreatReport[], linkOptions: ThreatLinkOptions): string {
     const lines: string[] = [];
     lines.push(`## ${anchor("chapter-riskDetails")}${T.threats}`);
     lines.push("");
@@ -605,7 +641,13 @@ function threatsDetailSection(T: Translations, threats: ThreatReport[]): string 
         );
         lines.push("");
 
-        lines.push(`**${T.component}:** ${escapeInline(threat.componentName ?? "–")}`);
+        if (threat.componentReportId && linkOptions.linkComponents) {
+            const componentLinkText = escapeLinkText(`${threat.componentReportId} ${threat.componentName ?? ""}`);
+            const componentLink = `[${componentLinkText}](#${componentAnchorId(threat.componentReportId)})`;
+            lines.push(`**${T.component}:** ${componentLink}`);
+        } else {
+            lines.push(`**${T.component}:** ${escapeInline(threat.componentName ?? "–")}`);
+        }
         lines.push("");
         lines.push(`**${T.attackersHeader}:** ${attackerName}`);
         lines.push("");
@@ -624,9 +666,12 @@ function threatsDetailSection(T: Translations, threats: ThreatReport[]): string 
             lines.push("");
             threat.assets.forEach((asset) => {
                 const assetRid = asset.reportId ?? String(asset.id);
-                const linkText = escapeLinkText(`${assetRid} ${asset.name ?? ""}`);
-                const link = `[${linkText}](#${assetAnchorId(assetRid)})`;
-                lines.push(`- ${link}`);
+                const label = `${assetRid} ${asset.name ?? ""}`;
+                if (linkOptions.linkAssets) {
+                    lines.push(`- [${escapeLinkText(label)}](#${assetAnchorId(assetRid)})`);
+                } else {
+                    lines.push(`- ${escapeInline(label)}`);
+                }
             });
             lines.push("");
         }
@@ -636,12 +681,14 @@ function threatsDetailSection(T: Translations, threats: ThreatReport[]): string 
             lines.push("");
             threat.measures.forEach((measure) => {
                 const mRid = measure.reportId ?? String(measure.measureId);
-                const linkText = escapeLinkText(`${mRid} ${measure.name ?? ""}`);
-                const link = `[${linkText}](#${measureAnchorId(mRid)})`;
+                const label = `${mRid} ${measure.name ?? ""}`;
+                const rendered = linkOptions.linkMeasures
+                    ? `[${escapeLinkText(label)}](#${measureAnchorId(mRid)})`
+                    : escapeInline(label);
                 if (measure.description) {
-                    lines.push(`- ${link}<br>*${escapeInline(measure.description)}*`);
+                    lines.push(`- ${rendered}<br>*${escapeInline(measure.description)}*`);
                 } else {
-                    lines.push(`- ${link}`);
+                    lines.push(`- ${rendered}`);
                 }
             });
             lines.push("");
@@ -667,6 +714,7 @@ export function generateMarkdownReport(options: MarkdownReportOptions): string {
         showMethodExplanation = true,
         showScaleExplanation = true,
         showMatrixPage = true,
+        showComponentsPage = true,
         showAssetsPage = true,
         showMeasuresPage = true,
         showThreatListPage = true,
@@ -692,6 +740,9 @@ export function generateMarkdownReport(options: MarkdownReportOptions): string {
     }
     if (showMatrixPage) {
         chapters.push({ label: T.riskMatrices, id: "chapter-matrix" });
+    }
+    if (showComponentsPage) {
+        chapters.push({ label: T.components, id: "chapter-componentsDetails" });
     }
     if (showAssetsPage) {
         chapters.push({ label: T.assets, id: "chapter-assetsDetails" });
@@ -732,6 +783,10 @@ export function generateMarkdownReport(options: MarkdownReportOptions): string {
         sections.push(matrixSection(T, bruttoMatrix, nettoMatrix, tillScheduledAt, data.milestones));
     }
 
+    if (showComponentsPage && data.components.length > 0) {
+        sections.push(componentsSection(T, data.components));
+    }
+
     if (showAssetsPage && data.assets.length > 0) {
         sections.push(assetsSection(T, data.assets));
     }
@@ -745,7 +800,13 @@ export function generateMarkdownReport(options: MarkdownReportOptions): string {
     }
 
     if (showThreatsPage && data.threats.length > 0) {
-        sections.push(threatsDetailSection(T, data.threats));
+        sections.push(
+            threatsDetailSection(T, data.threats, {
+                linkComponents: showComponentsPage && data.components.length > 0,
+                linkAssets: showAssetsPage && data.assets.length > 0,
+                linkMeasures: showMeasuresPage && data.measures.length > 0,
+            })
+        );
     }
 
     return sections.join(`\n${hr()}\n`);

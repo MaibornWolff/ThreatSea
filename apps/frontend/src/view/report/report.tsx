@@ -16,6 +16,7 @@ import poppinsSemiBold from "./font/Poppins_SemiBold_600.ttf";
 import poppinsBold from "./font/Poppins_Bold_700.ttf";
 import poppinsExtraBold from "./font/Poppins_ExtraBold_800.ttf";
 import { AssetsDetailsPage } from "./pages/assetsDetails.report.page";
+import { ComponentsDetailsPage } from "./pages/componentsDetails.report.page";
 import { MeasuresDetailsPage } from "./pages/measures.report.page";
 import { Translations } from "#view/wrappers/translations.wrapper.tsx";
 import type { Index, ProjectReport } from "#api/types/project.types.ts";
@@ -61,6 +62,7 @@ interface ReportProps {
     showMethodExplanation?: boolean;
     showScaleExplanation?: boolean;
     showMatrixPage?: boolean;
+    showComponentsPage?: boolean;
     showAssetsPage?: boolean;
     showMeasuresPage?: boolean;
     showThreatListPage?: boolean;
@@ -81,6 +83,7 @@ export const Report: FC<ReportProps> = ({
     showMethodExplanation = true,
     showScaleExplanation = true,
     showMatrixPage = true,
+    showComponentsPage = true,
     showAssetsPage = true,
     showMeasuresPage = true,
     showThreatListPage = true,
@@ -163,6 +166,9 @@ export const Report: FC<ReportProps> = ({
                         {...data}
                     />
                 )}
+                {showComponentsPage && (
+                    <ComponentsDetailsPage indexCallback={addToIndex} language={language} date={date} {...data} />
+                )}
                 {showAssetsPage && (
                     <AssetsDetailsPage indexCallback={addToIndex} language={language} date={date} {...data} />
                 )}
@@ -183,6 +189,9 @@ export const Report: FC<ReportProps> = ({
                         logo={logo}
                         indexCallback={addToIndex}
                         date={date}
+                        showComponentsPage={showComponentsPage}
+                        showAssetsPage={showAssetsPage}
+                        showMeasuresPage={showMeasuresPage}
                         {...data}
                     />
                 )}

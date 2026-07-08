@@ -1,5 +1,5 @@
+import type { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import type { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
-import type { POINTS_OF_ATTACK } from "./points-of-attack.types";
 
 export interface UpdateSystemRequest {
     projectId: number;

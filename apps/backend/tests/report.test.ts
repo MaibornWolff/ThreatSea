@@ -17,6 +17,34 @@ const VALID_PROJECT: Omit<InstanceType<typeof CreateProjectRequest>, "catalogId"
     confidentialityLevel: CONFIDENTIALITY_LEVELS.INTERNAL,
 };
 
+function makeSystemBody(componentNames: string[], description?: string) {
+    return {
+        data: {
+            connections: [],
+            pointsOfAttack: [],
+            connectionPoints: [],
+            annotations: [],
+            lastAutoSaveDate: "2025-01-01T00:00:00.000Z",
+            components: componentNames.map((name, index) => ({
+                id: "comp-" + index,
+                name,
+                description,
+                type: 0,
+                x: 0,
+                y: 0,
+                gridX: 0,
+                gridY: 0,
+                width: 80,
+                height: 80,
+                selected: false,
+                projectId: 0,
+                symbol: "",
+            })),
+        },
+        image: "",
+    };
+}
+
 let projectId: number;
 let cookies: string[];
 let csrfToken: string;
@@ -69,5 +97,55 @@ describe("report", () => {
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(200);
+    });
+
+    it("should include a components array in the report", async () => {
+        const res = await request(app)
+            .get("/api/projects/" + projectId + "/report")
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(200);
+        expect(Array.isArray(res.body.components)).toBe(true);
+    });
+
+    it("sorts components by name and tags them with sequential report ids", async () => {
+        // Save a system whose components are intentionally out of alphabetical order.
+        await request(app)
+            .put("/api/projects/" + projectId + "/system")
+            .send(makeSystemBody(["Zebra Service", "Alpha Service"]))
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+
+        const res = await request(app)
+            .get("/api/projects/" + projectId + "/report")
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.components.map((component: { name: string }) => component.name)).toEqual([
+            "Alpha Service",
+            "Zebra Service",
+        ]);
+        expect(res.body.components.map((component: { reportId: string }) => component.reportId)).toEqual([
+            "C.1",
+            "C.2",
+        ]);
+    });
+
+    it("carries the component description through into the report", async () => {
+        await request(app)
+            .put("/api/projects/" + projectId + "/system")
+            .send(makeSystemBody(["Only Component"], "A described component."))
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+
+        const res = await request(app)
+            .get("/api/projects/" + projectId + "/report")
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.components).toHaveLength(1);
+        expect(res.body.components[0].description).toEqual("A described component.");
     });
 });

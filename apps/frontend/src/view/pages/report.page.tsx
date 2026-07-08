@@ -46,6 +46,7 @@ interface PdfDocumentToolbarProps {
     showMethodExplanation: boolean;
     showScaleExplanation: boolean;
     showMatrixPage: boolean;
+    showComponentsPage: boolean;
     showAssetsPage: boolean;
     showMeasuresPage: boolean;
     showThreatListPage: boolean;
@@ -83,6 +84,7 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
         showMethodExplanation,
         showScaleExplanation,
         showMatrixPage,
+        showComponentsPage,
         showAssetsPage,
         showMeasuresPage,
         showThreatListPage,
@@ -102,6 +104,7 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
         setShowMethodExplanation,
         setShowScaleExplanation,
         setShowMatrixPage,
+        setShowComponentsPage,
         setShowAssetsPage,
         setShowMeasuresPage,
         setShowThreatListPage,
@@ -158,6 +161,11 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
 
     const onChangeShowMatrixPage = (_event: ChangeEvent<HTMLInputElement>, value: boolean) => {
         setShowMatrixPage(value);
+        setIsChanged(true);
+    };
+
+    const onChangeShowComponentsPage = (_event: ChangeEvent<HTMLInputElement>, value: boolean) => {
+        setShowComponentsPage(value);
         setIsChanged(true);
     };
 
@@ -246,6 +254,7 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
             showMethodExplanation,
             showScaleExplanation,
             showMatrixPage,
+            showComponentsPage,
             showAssetsPage,
             showMeasuresPage,
             showThreatListPage,
@@ -366,6 +375,20 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
                                     <FormControlLabel
                                         control={<Switch checked={showMatrixPage} onChange={onChangeShowMatrixPage} />}
                                         label={<Typography sx={{ fontSize: "0.875rem" }}>{t("matrixPage")}</Typography>}
+                                        labelPlacement="end"
+                                    />
+                                </FormControl>
+                                <FormControl sx={{ margin: 0, marginBottom: 1 }}>
+                                    <FormControlLabel
+                                        control={
+                                            <Switch
+                                                checked={showComponentsPage}
+                                                onChange={onChangeShowComponentsPage}
+                                            />
+                                        }
+                                        label={
+                                            <Typography sx={{ fontSize: "0.875rem" }}>{t("componentPage")}</Typography>
+                                        }
                                         labelPlacement="end"
                                     />
                                 </FormControl>
@@ -714,6 +737,7 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
                                     showMethodExplanation={showMethodExplanation}
                                     showScaleExplanation={showScaleExplanation}
                                     showMatrixPage={showMatrixPage}
+                                    showComponentsPage={showComponentsPage}
                                     showAssetsPage={showAssetsPage}
                                     showMeasuresPage={showMeasuresPage}
                                     showThreatListPage={showThreatListPage}

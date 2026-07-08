@@ -145,6 +145,57 @@ describe("generateMarkdownReport – line break preservation", () => {
 });
 
 // ---------------------------------------------------------------------------
+// Components section
+// ---------------------------------------------------------------------------
+
+describe("generateMarkdownReport – components section", () => {
+    it("omits the components section when showComponentsPage is false", () => {
+        const md = generateMarkdownReport({ ...BASE_OPTIONS, language: "en", showComponentsPage: false });
+        expect(md).not.toContain("chapter-componentsDetails");
+    });
+
+    it("omits the components section when there are no components", () => {
+        const md = generateMarkdownReport({ ...BASE_OPTIONS, language: "en", data: { ...report, components: [] } });
+        // The section heading (not the table-of-contents entry) is what gets suppressed on an empty list.
+        expect(md).not.toContain(`## <a id="chapter-componentsDetails"></a>`);
+        expect(md).not.toContain(`<a id="component-`);
+    });
+
+    it("renders a component heading with its report id, name and anchor", () => {
+        const md = generateMarkdownReport({ ...BASE_OPTIONS, language: "en" });
+        expect(md).toContain(`### <a id="component-C.1"></a>C.1 Database Server`);
+    });
+
+    it("links a threat to its component when componentReportId is set", () => {
+        const md = generateMarkdownReport({ ...BASE_OPTIONS, language: "en" });
+        expect(md).toContain("**Component:** [C.1 Database Server](#component-C.1)");
+    });
+
+    it("renders the threat component as plain text (no dangling link) when showComponentsPage is false", () => {
+        const md = generateMarkdownReport({ ...BASE_OPTIONS, language: "en", showComponentsPage: false });
+        expect(md).toContain("**Component:** Database Server");
+        expect(md).not.toContain("(#component-C.1)");
+    });
+
+    it("renders a component heading but no description block when the component has no description", () => {
+        const component = { ...report.components[0]!, description: "" };
+        const md = generateMarkdownReport({
+            ...BASE_OPTIONS,
+            language: "en",
+            data: { ...report, components: [component] },
+            // Disable sibling sections so the only "**Description:**" that could appear is the component's.
+            showCoverPage: false,
+            showAssetsPage: false,
+            showMeasuresPage: false,
+            showThreatListPage: false,
+            showThreatsPage: false,
+        });
+        expect(md).toContain(`### <a id="component-C.1"></a>C.1 Database Server`);
+        expect(md).not.toContain("**Description:**");
+    });
+});
+
+// ---------------------------------------------------------------------------
 // Matrix rendering
 // ---------------------------------------------------------------------------
 

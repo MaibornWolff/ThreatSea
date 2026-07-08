@@ -176,6 +176,20 @@ export async function getReportData(projectId: number) {
     // Gets the images of the parsed system.
     const { image = null } = system || {};
 
+    // Gets the components of the parsed system, sorted and tagged with report ids.
+    const componentReportIdsDict = new Map<string, string>();
+    const components = (system?.data?.components ?? [])
+        .slice()
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((component, index) => {
+            const reportId = "C." + (index + 1);
+            componentReportIdsDict.set(component.id, reportId);
+            return {
+                ...component,
+                reportId,
+            };
+        });
+
     // Get all the threats of the project.
     let threats = await getThreats(projectId);
 
@@ -187,6 +201,10 @@ export async function getReportData(projectId: number) {
         if (pointOfAttack?.type === "COMMUNICATION_INTERFACES") {
             threat.componentName = pointOfAttack.componentName + " > " + pointOfAttack.name;
         }
+
+        threat.componentReportId = pointOfAttack?.componentId
+            ? (componentReportIdsDict.get(pointOfAttack.componentId) ?? null)
+            : null;
 
         return threat;
     });
@@ -241,6 +259,7 @@ export async function getReportData(projectId: number) {
     return {
         systemImage: image,
         project: project,
+        components: components,
         assets: assetsWithIds,
         threats: threatsWithIds,
         measures: transformMeasures(measuresWithIds, threatsWithIds, measureImpacts),
