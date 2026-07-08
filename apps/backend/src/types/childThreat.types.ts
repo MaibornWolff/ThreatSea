@@ -75,31 +75,13 @@ export class UpdateChildThreatRequest {
     status!: CHILD_THREAT_STATUSES;
 }
 
-export class CreateChildThreatRequest extends UpdateChildThreatRequest {
-    @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("genericThreatId") })
-    @IsInt({ message: FIELD_MUST_BE_INT_MESSAGE("genericThreatId") })
-    genericThreatId!: number;
-
-    @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("pointOfAttackId") })
-    @IsString({ message: FIELD_MUST_BE_STRING_MESSAGE("pointOfAttackId") })
-    pointOfAttackId!: string;
-
-    @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("pointOfAttack") })
-    @IsString({ message: FIELD_MUST_BE_STRING_MESSAGE("pointOfAttack") })
-    @IsEnum(POINTS_OF_ATTACK, {
-        message: FIELD_MUST_BE_ONE_OF_MESSAGE("pointOfAttack", Object.values(POINTS_OF_ATTACK)),
-    })
-    pointOfAttack!: POINTS_OF_ATTACK;
-
-    @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("attacker") })
-    @IsString({ message: FIELD_MUST_BE_STRING_MESSAGE("attacker") })
-    @IsEnum(ATTACKERS, { message: FIELD_MUST_BE_ONE_OF_MESSAGE("attacker", Object.values(ATTACKERS)) })
-    attacker!: ATTACKERS;
-}
-
-export interface ChildThreatResponse extends CreateChildThreatRequest {
+export interface ChildThreatResponse extends UpdateChildThreatRequest {
     id: number;
     projectId: number;
+    genericThreatId: number;
+    pointOfAttackId: string;
+    pointOfAttack: POINTS_OF_ATTACK;
+    attacker: ATTACKERS;
     createdAt: string;
     updatedAt: string;
 }

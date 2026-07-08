@@ -5,7 +5,15 @@ import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import { nanoid } from "nanoid";
 import { db } from "#db/index.js";
-import { catalogs, childThreats, genericThreats, measureImpacts, measures, usersCatalogs } from "#db/schema.js";
+import {
+    catalogs,
+    childThreats,
+    CreateChildThreat,
+    genericThreats,
+    measureImpacts,
+    measures,
+    usersCatalogs,
+} from "#db/schema.js";
 import { POINTS_OF_ATTACK } from "#types/points-of-attack.types.js";
 import { ATTACKERS } from "#types/attackers.types.js";
 import { CONFIDENTIALITY_LEVELS } from "#types/confidentiality-levels.types.js";
@@ -16,7 +24,6 @@ import { CreateProjectRequest } from "#types/project.types.js";
 import { CreateMeasureRequest } from "#types/measure.types.js";
 import { CreateMeasureImpactRequest } from "#types/measure-impact.types.js";
 import { CreateGenericThreatRequest } from "#types/genericThreat.types.js";
-import { CreateChildThreatRequest } from "#types/childThreat.types.js";
 import { CHILD_THREAT_STATUSES } from "#types/child-threat-statuses.types.js";
 import { CreateCatalogThreatRequest } from "#types/catalog-threat.types.js";
 import { CreateCatalogMeasureRequest } from "#types/catalog-measure.types.js";
@@ -76,7 +83,7 @@ const VALID_GENERIC_THREAT_1: Omit<InstanceType<typeof CreateGenericThreatReques
     attacker: ATTACKERS.ADMINISTRATORS,
 };
 
-const VALID_CHILD_THREAT_1: Omit<InstanceType<typeof CreateChildThreatRequest>, "genericThreatId"> = {
+const VALID_CHILD_THREAT_1: Omit<CreateChildThreat, "genericThreatId" | "projectId"> = {
     pointOfAttackId: nanoid(),
     name: "valid threat",
     description: "valid description test test",
