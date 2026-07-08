@@ -641,8 +641,6 @@ function threatsDetailSection(T: Translations, threats: ThreatReport[], linkOpti
         );
         lines.push("");
 
-        // Only link to the components chapter when it is actually rendered; otherwise the "C.x"
-        // report id has no target and no meaning, so fall back to the plain component name.
         if (threat.componentReportId && linkOptions.linkComponents) {
             const componentLinkText = escapeLinkText(`${threat.componentReportId} ${threat.componentName ?? ""}`);
             const componentLink = `[${componentLinkText}](#${componentAnchorId(threat.componentReportId)})`;
