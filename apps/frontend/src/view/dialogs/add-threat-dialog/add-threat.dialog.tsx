@@ -108,7 +108,7 @@ const AddThreatDialog = ({
         sortBy,
         threatMeasures,
         allThreatMeasures,
-    } = useThreatMeasuresList({ projectId, threatId });
+    } = useThreatMeasuresList({ projectId, childThreatId: threatId });
 
     const onChangeSortBy = (_event: SyntheticEvent, newSortBy: string | null) => {
         // If the attribute is clicked again, the order is changed.
