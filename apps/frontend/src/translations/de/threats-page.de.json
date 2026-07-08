@@ -10,6 +10,7 @@
   "editThreat": "Bedrohung bearbeiten",
   "deleteThreat": "Bedrohung löschen",
   "edited": "Bearbeitet",
+  "status": "Status",
   "notEdited": "Nicht bearbeitet",
   "filterAll": "Alle",
   "threatsLoading": "Bedrohungen werden geladen...",
