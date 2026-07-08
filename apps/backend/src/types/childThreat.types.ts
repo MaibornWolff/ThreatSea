@@ -1,7 +1,7 @@
 import { ProjectIdParam } from "#types/project.types.js";
-import { ComponentType } from "#types/system.types.js";
 import { POINTS_OF_ATTACK } from "./points-of-attack.types.js";
 import { ATTACKERS } from "./attackers.types.js";
+import { CHILD_THREAT_STATUSES } from "./child-threat-statuses.types.js";
 import { IsBoolean, IsDefined, IsEnum, IsInt, IsNotEmpty, IsString, Length, Max, Min } from "class-validator";
 import {
     FIELD_MUST_BE_BOOLEAN_MESSAGE,
@@ -21,16 +21,17 @@ import {
 } from "#middlewares/input-validations/validator-messages.js";
 import { Type } from "class-transformer";
 import { Trim } from "#middlewares/input-validations/trim.decorator.js";
+import { ComponentType } from "./system.types.js";
 import { AssetResponse } from "./asset.types.js";
 
-export class ThreatIdParam extends ProjectIdParam {
-    @IsDefined({ message: PARAM_MUST_EXIST_MESSAGE("threatId") })
+export class ChildThreatIdParam extends ProjectIdParam {
+    @IsDefined({ message: PARAM_MUST_EXIST_MESSAGE("childThreatId") })
     @Type(() => Number)
-    @IsInt({ message: PARAM_MUST_BE_INT_MESSAGE("threatId") })
-    threatId!: number;
+    @IsInt({ message: PARAM_MUST_BE_INT_MESSAGE("childThreatId") })
+    childThreatId!: number;
 }
 
-export class UpdateThreatRequest {
+export class UpdateChildThreatRequest {
     @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("name") })
     @IsString({ message: FIELD_MUST_BE_STRING_MESSAGE("name") })
     @Trim()
@@ -66,15 +67,18 @@ export class UpdateThreatRequest {
     @IsBoolean({ message: FIELD_MUST_BE_BOOLEAN_MESSAGE("availability") })
     availability!: boolean;
 
-    @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("doneEditing") })
-    @IsBoolean({ message: FIELD_MUST_BE_BOOLEAN_MESSAGE("doneEditing") })
-    doneEditing!: boolean;
+    @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("status") })
+    @IsString({ message: FIELD_MUST_BE_STRING_MESSAGE("status") })
+    @IsEnum(CHILD_THREAT_STATUSES, {
+        message: FIELD_MUST_BE_ONE_OF_MESSAGE("status", Object.values(CHILD_THREAT_STATUSES)),
+    })
+    status!: CHILD_THREAT_STATUSES;
 }
 
-export class CreateThreatRequest extends UpdateThreatRequest {
-    @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("catalogThreatId") })
-    @IsInt({ message: FIELD_MUST_BE_INT_MESSAGE("catalogThreatId") })
-    catalogThreatId!: number;
+export class CreateChildThreatRequest extends UpdateChildThreatRequest {
+    @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("genericThreatId") })
+    @IsInt({ message: FIELD_MUST_BE_INT_MESSAGE("genericThreatId") })
+    genericThreatId!: number;
 
     @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("pointOfAttackId") })
     @IsString({ message: FIELD_MUST_BE_STRING_MESSAGE("pointOfAttackId") })
@@ -93,14 +97,14 @@ export class CreateThreatRequest extends UpdateThreatRequest {
     attacker!: ATTACKERS;
 }
 
-export interface ThreatResponse extends CreateThreatRequest {
+export interface ChildThreatResponse extends CreateChildThreatRequest {
     id: number;
     projectId: number;
     createdAt: string;
     updatedAt: string;
 }
 
-export interface ExtendedThreatResponse extends ThreatResponse {
+export interface ExtendedChildThreatResponse extends ChildThreatResponse {
     componentName: string | null;
     componentType: number | ComponentType | null;
     interfaceName: string | null;

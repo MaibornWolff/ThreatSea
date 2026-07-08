@@ -1,6 +1,6 @@
 {
   "success": true,
-  "datamodelVersion": 3,
+  "datamodelVersion": 4,
   "project": {
     "id": 1,
     "name": "test",
@@ -136,7 +136,21 @@
       "projectId": 1
     }
   ],
-  "threats": [
+  "genericThreats": [
+    {
+      "id": 1,
+      "pointOfAttackId": "YlmYQr-24kYm8lZ-w7AZ6",
+      "name": "Test",
+      "description": "Des 1",
+      "pointOfAttack": "DATA_STORAGE_INFRASTRUCTURE",
+      "attacker": "SYSTEM_USERS",
+      "createdAt": "2025-03-19T17:02:25.000Z",
+      "updatedAt": "2025-03-19T17:02:25.000Z",
+      "catalogThreatId": 1,
+      "projectId": 1
+    }
+  ],
+  "childThreats": [
     {
       "id": 1,
       "pointOfAttackId": "YlmYQr-24kYm8lZ-w7AZ6",
@@ -148,29 +162,11 @@
       "confidentiality": true,
       "integrity": false,
       "availability": false,
-      "doneEditing": false,
+      "status": "new",
       "createdAt": "2025-03-19T17:02:25.000Z",
       "updatedAt": "2025-03-19T17:02:25.000Z",
-      "catalogThreatId": 1,
-      "projectId": 1,
-      "componentName": "Database",
-      "componentType": "DATABASE",
-      "assets": [
-        {
-          "id": 1,
-          "name": "Test asset",
-          "description": "Asset Description",
-          "confidentiality": 1,
-          "integrity": 1,
-          "availability": 1,
-          "confidentialityJustification": "Confidentiality Justification",
-          "integrityJustification": "Integrity Justification",
-          "availabilityJustification": "",
-          "createdAt": "2025-03-19T17:00:47.000Z",
-          "updatedAt": "2025-03-19T17:00:47.000Z",
-          "projectId": 1
-        }
-      ]
+      "genericThreatId": 1,
+      "projectId": 1
     }
   ],
   "measureImpacts": [
@@ -184,7 +180,7 @@
       "damage": 1,
       "createdAt": "2025-03-19T17:03:13.000Z",
       "updatedAt": "2025-03-19T17:03:13.000Z",
-      "threatId": 1,
+      "childThreatId": 1,
       "measureId": 1
     }
   ]
