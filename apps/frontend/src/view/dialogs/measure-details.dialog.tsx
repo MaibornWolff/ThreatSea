@@ -27,7 +27,7 @@ import type { Measure } from "#api/types/measure.types.ts";
 import type { DialogValue } from "#application/reducers/dialogs.reducer.ts";
 import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
-import type { ExtendedThreat } from "#api/types/threat.types.ts";
+import type { ExtendedChildThreat } from "#api/types/child-threat.types.ts";
 
 interface FormValues {
     id: number | undefined;
@@ -111,12 +111,12 @@ const MeasureDetailsDialog = ({ project, measure, initialTab, ...props }: Measur
         setSearchValue(event.target.value);
     };
 
-    const onClickEditThreat = (event: React.MouseEvent<HTMLElement>, threat: ExtendedThreat | undefined) => {
+    const onClickEditThreat = (event: React.MouseEvent<HTMLElement>, childThreat: ExtendedChildThreat | undefined) => {
         event.preventDefault();
         event.stopPropagation();
         if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
             navigate(`/projects/${projectId}/measures/threats/edit`, {
-                state: { threat },
+                state: { childThreat },
             });
         }
     };

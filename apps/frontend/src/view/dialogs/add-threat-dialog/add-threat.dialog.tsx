@@ -20,7 +20,8 @@ import { Dialog } from "#view/components/dialog.component.tsx";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { useThreatMeasuresList } from "#application/hooks/use-threat-measures-list.hook.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
-import type { ExtendedThreat } from "#api/types/threat.types.ts";
+import type { ExtendedChildThreat } from "#api/types/child-threat.types.ts";
+import { CHILD_THREAT_STATUSES } from "#api/types/child-threat-statuses.types.ts";
 import type { ExtendedProject } from "#api/types/project.types.ts";
 import type { ThreatMeasure } from "#application/hooks/use-threat-measures-list.hook.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
@@ -36,7 +37,7 @@ export type ThreatTab = "MAIN" | "ASSETS" | "MEASURES";
 export type ThreatDialogHostRoute = "threats" | "measures" | "risk";
 
 interface AddThreatDialogProps extends DialogProps {
-    threat: ExtendedThreat;
+    threat: ExtendedChildThreat;
     project: ExtendedProject;
     userRole: USER_ROLES | undefined;
     initialTab?: ThreatTab;
@@ -51,7 +52,7 @@ const AddThreatDialog = ({
     hostRoute = "threats",
     ...props
 }: AddThreatDialogProps) => {
-    const { confirmDialog, cancelDialog } = useDialog<ThreatFormValues | null>("threats");
+    const { confirmDialog, cancelDialog } = useDialog<ThreatFormValues | null>("childThreats");
     const navigate = useNavigate();
     const location = useLocation();
     const { t } = useTranslation("threatDialogPage");
@@ -74,7 +75,7 @@ const AddThreatDialog = ({
             confidentiality: threat?.confidentiality ?? false,
             integrity: threat?.integrity ?? false,
             availability: threat?.availability ?? false,
-            doneEditing: threat?.doneEditing ?? false,
+            status: threat?.status ?? CHILD_THREAT_STATUSES.NEW,
         },
     });
 
@@ -146,7 +147,7 @@ const AddThreatDialog = ({
             // threats and risk both have a measureImpacts/edit route at their own root
             navigate(`/projects/${projectId}/${hostRoute}/measureImpacts/edit`, {
                 state: {
-                    threat: { ...threat, damage: calcDamage(threat) },
+                    childThreat: { ...threat, damage: calcDamage(threat) },
                     measureImpact,
                     project,
                 },
@@ -187,7 +188,7 @@ const AddThreatDialog = ({
         const basePath = hostRoute === "risk" ? `/projects/${projectId}/risk` : `/projects/${projectId}/threats`;
         navigate(`${basePath}/measureImpacts/edit`, {
             state: {
-                threat: { ...threat, damage: calcDamage(threat) },
+                childThreat: { ...threat, damage: calcDamage(threat) },
                 project,
             },
         });

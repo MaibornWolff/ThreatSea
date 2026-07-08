@@ -1,14 +1,13 @@
 import { Navigate, useLocation, useParams, type Location } from "react-router";
 import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
-import type { ExtendedThreat } from "#api/types/threat.types.ts";
+import type { ExtendedChildThreat } from "#api/types/child-threat.types.ts";
 import AddThreatDialog, {
     type ThreatDialogHostRoute,
     type ThreatTab,
 } from "#view/dialogs/add-threat-dialog/add-threat.dialog.tsx";
 
 interface ThreatDialogLocationState {
-    threat?: ExtendedThreat;
-    childThreat?: ExtendedThreat;
+    childThreat?: ExtendedChildThreat;
     returnToTab?: ThreatTab;
 }
 
@@ -23,7 +22,7 @@ const ThreatDialogPage = () => {
     const { projectId = "" } = useParams<{ projectId?: string }>();
     const userRole = useAppSelector((state) => state.projects.current?.role);
     const { state, pathname } = useLocation() as Location<ThreatDialogLocationState | undefined>;
-    const threat = state?.childThreat ?? state?.threat;
+    const threat = state?.childThreat;
     const project = useAppSelector((state) => state.projects.current);
 
     const hostRoute: ThreatDialogHostRoute = pathname.includes("/risk/")
