@@ -10,6 +10,7 @@
   "editThreat": "Edit Threat",
   "deleteThreat": "Delete Threat",
   "edited": "Edited",
+  "status": "Status",
   "notEdited": "Not Edited",
   "filterAll": "All",
   "threatsLoading": "Loading threats...",

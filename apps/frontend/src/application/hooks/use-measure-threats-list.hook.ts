@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from "react";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
 import type { ExtendedChildThreat } from "#api/types/child-threat.types.ts";
+import { CHILD_THREAT_STATUSES } from "#api/types/child-threat-statuses.types.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import { useChildThreats } from "./use-child-threats.hook";
 import { useMeasureImpacts } from "./use-measureImpacts.hook";
@@ -78,7 +79,9 @@ export const useMeasureThreatsList = ({ projectId, measureId }: { projectId: num
                           confidentiality: threat.confidentiality,
                           integrity: threat.integrity,
                           availability: threat.availability,
-                          doneEditing: threat.doneEditing,
+                          doneEditing:
+                              threat.status === CHILD_THREAT_STATUSES.FINALIZED ||
+                              threat.status === CHILD_THREAT_STATUSES.OUTOFSCOPE,
                           projectId: threat.projectId,
                           createdAt: new Date(threat.createdAt),
                           updatedAt: new Date(threat.updatedAt),
