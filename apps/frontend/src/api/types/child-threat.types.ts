@@ -1,6 +1,7 @@
 import type { ATTACKERS } from "#api/types/attackers.types.ts";
 import type { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import type { Asset } from "#api/types/asset.types.ts";
+import type { CHILD_THREAT_STATUSES } from "#api/types/child-threat-statuses.types.ts";
 
 export interface ChildThreat {
     id: number;
@@ -15,7 +16,7 @@ export interface ChildThreat {
     confidentiality: boolean;
     integrity: boolean;
     availability: boolean;
-    doneEditing: boolean;
+    status: CHILD_THREAT_STATUSES;
     createdAt: string;
     updatedAt: string;
 }

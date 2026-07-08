@@ -10,6 +10,7 @@
   "editThreat": "Bedrohung bearbeiten",
   "deleteThreat": "Bedrohung löschen",
   "edited": "Bearbeitet",
+  "status": "Status",
   "threatsLoading": "Bedrohungen werden geladen...",
   "deleteMessage": "Wollen Sie die Bedrohung '{{ threatName }}' wirklich löschen?",
   "probability": "EW",

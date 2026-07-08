@@ -3,6 +3,7 @@ import type { CatalogWithRole } from "#api/types/catalogs.types.ts";
 import type { ExtendedProject, ProjectReport, ThreatReport } from "#api/types/project.types.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import type { ExtendedChildThreat } from "#api/types/child-threat.types.ts";
+import { CHILD_THREAT_STATUSES } from "#api/types/child-threat-statuses.types.ts";
 import type { Measure } from "#api/types/measure.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
 import type { ThreatMeasure } from "#application/hooks/use-threat-measures-list.hook.ts";
@@ -79,7 +80,7 @@ export const createChildThreat = (overrides: Partial<ExtendedChildThreat> = {}):
     confidentiality: true,
     integrity: false,
     availability: false,
-    doneEditing: false,
+    status: CHILD_THREAT_STATUSES.NEW,
     createdAt: "2025-01-01T00:00:00.000Z",
     updatedAt: "2025-01-01T00:00:00.000Z",
     componentName: "Test Component",

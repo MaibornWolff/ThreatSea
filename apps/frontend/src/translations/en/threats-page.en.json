@@ -10,6 +10,7 @@
   "editThreat": "Edit Threat",
   "deleteThreat": "Delete Threat",
   "edited": "Edited",
+  "status": "Status",
   "threatsLoading": "Loading threats...",
   "fullExport": "Export Assets, Threats and Measures",
   "catalogMeasures": "Catalog Measures",
