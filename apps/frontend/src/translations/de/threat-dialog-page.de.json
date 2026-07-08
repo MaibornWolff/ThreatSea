@@ -8,7 +8,7 @@
   "netProbability": "Netto EW",
   "netDamage": "Netto Schaden",
   "pointOfAttack": "Angriffspunkt",
-  "doneEditing": "Bearbeitung abgeschlossen",
+  "status": "Status",
   "scheduledAt": "Geplant für",
   "tab": {
     "threat": "Bedrohung",
