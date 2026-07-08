@@ -1,4 +1,4 @@
-import { Check, ChevronRight, Clear, ContentCopy, Delete, Edit, ExpandMore } from "@mui/icons-material";
+import { ChevronRight, ContentCopy, Delete, Edit, ExpandMore } from "@mui/icons-material";
 import { Box, LinearProgress, Popper, Typography } from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -28,6 +28,7 @@ import AddMeasureDialogPage from "./add-measure-dialog.page";
 import { withProject } from "#view/components/with-project.hoc.tsx";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import type { ChildThreat, ExtendedChildThreat } from "#api/types/child-threat.types.ts";
+import { CHILD_THREAT_STATUSES } from "#api/types/child-threat-statuses.types.ts";
 
 /**
  * on this page all threats are listed
@@ -116,7 +117,7 @@ const ThreatsPageBody = () => {
                         confidentiality: childThreat.confidentiality,
                         integrity: childThreat.integrity,
                         availability: childThreat.availability,
-                        status: "new",
+                        status: CHILD_THREAT_STATUSES.NEW,
                         pointOfAttackId: childThreat.pointOfAttackId,
                         pointOfAttack: childThreat.pointOfAttack,
                         attacker: childThreat.attacker,
@@ -295,7 +296,7 @@ const ThreatsPageBody = () => {
                                         <CustomTableHeaderCell>Probability</CustomTableHeaderCell>
                                         <CustomTableHeaderCell>Damage</CustomTableHeaderCell>
                                         <CustomTableHeaderCell>Risk</CustomTableHeaderCell>
-                                        <CustomTableHeaderCell showBorder={true}>Edited</CustomTableHeaderCell>
+                                        <CustomTableHeaderCell showBorder={true}>{t("status")}</CustomTableHeaderCell>
                                         <CustomTableHeaderCell>Actions</CustomTableHeaderCell>
                                     </TableRow>
                                 </TableHead>
@@ -375,7 +376,13 @@ const ThreatsPageBody = () => {
                                                                 key={`child-${childThreat.id}`}
                                                                 sx={{
                                                                     backgroundColor: "background.defaultIntransparent",
-                                                                    opacity: childThreat.doneEditing ? 0.6 : 1,
+                                                                    opacity:
+                                                                        childThreat.status ===
+                                                                            CHILD_THREAT_STATUSES.FINALIZED ||
+                                                                        childThreat.status ===
+                                                                            CHILD_THREAT_STATUSES.OUTOFSCOPE
+                                                                            ? 0.6
+                                                                            : 1,
                                                                 }}
                                                             >
                                                                 <CustomTableCell />
@@ -415,7 +422,7 @@ const ThreatsPageBody = () => {
                                                                 <CustomTableCell>{childThreat.damage}</CustomTableCell>
                                                                 <CustomTableCell>{childThreat.risk}</CustomTableCell>
                                                                 <CustomTableCell showBorder={true}>
-                                                                    {childThreat.doneEditing ? <Check /> : <Clear />}
+                                                                    {t(`statusList.${childThreat.status}`)}
                                                                 </CustomTableCell>
                                                                 <CustomTableCell padding="none" align="right">
                                                                     <Box sx={{ display: "flex", gap: 1, pr: 1 }}>
