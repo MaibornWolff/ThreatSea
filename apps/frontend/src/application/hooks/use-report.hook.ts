@@ -112,6 +112,9 @@ export const useReport = ({ projectId }: { projectId: number }) => {
         try {
             const report = await ProjectsAPI.getReport({ projectId });
             setData(report);
+        } catch (error) {
+            console.error("Failed to fetch report", error);
+            showErrorMessage({ message: t("errorMessages.reportFetchFailed") });
         } finally {
             isFetchingRef.current = false;
         }

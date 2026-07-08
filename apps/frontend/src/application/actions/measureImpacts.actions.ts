@@ -9,6 +9,7 @@ import type {
     MeasureImpact,
     UpdateMeasureImpactRequest,
 } from "#api/types/measure-impact.types.ts";
+import type { RootState } from "#application/store.types.ts";
 
 /**
  * Wrapper class to expose the actions through
@@ -24,15 +25,18 @@ export class MeasureImpactsActions {
      *      to fetch the measures.
      * @returns Action function for getting the measures.
      */
-    static getMeasureImpacts = createAsyncThunk(
+    static getMeasureImpacts = createAsyncThunk<
+        ReturnType<typeof MeasureImpactsApi.getMeasureImpacts>,
+        { projectId: number },
+        { state: RootState }
+    >(
         "[measureImpacts] get measureImpacts",
         async (data: { projectId: number }) => {
             return await MeasureImpactsApi.getMeasureImpacts(data);
         },
         {
             condition: (_, { getState }) => {
-                const state = getState() as { measureImpacts: { isPending: boolean } };
-                return !state.measureImpacts.isPending;
+                return !getState().measureImpacts.isPending;
             },
         }
     );
