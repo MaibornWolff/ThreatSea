@@ -3,6 +3,7 @@ import { Link, View } from "@react-pdf/renderer";
 import type { Style } from "@react-pdf/types";
 import { s1, fontColor, backgroundColor, s2, s4 } from "#view/report/report.style.ts";
 import { Page } from "#view/report/components/page.report.component.tsx";
+import { threatCardFitsOnOnePage } from "#view/report/pages/threat-card-page-fit.ts";
 import { useTranslation } from "react-i18next";
 import { Text } from "#view/report/components/text.report.component.tsx";
 import { MATRIX_COLOR } from "#view/colors/matrix.ts";
@@ -161,21 +162,7 @@ const ThreatCard = ({
     netRisk,
     ...props
 }: ThreatCardProps) => {
-    const APPROX_LINE_HEIGHT = 15;
-    const APPROX_CHARS_PER_LINE = 42;
-    const HEADER_AND_CHROME_HEIGHT = 120;
-    const PAGE_CONTENT_HEIGHT = 750;
-    const descriptionLines = Math.ceil((description?.length ?? 0) / APPROX_CHARS_PER_LINE);
-    const informationLines = 8 + assets.length;
-    // Count each measure's name line plus its description length, so a card with a few
-    // long-described measures is not underestimated (which would wrongly mark it atomic).
-    const measureLines = measures.reduce(
-        (lines, measure) => lines + 1 + Math.ceil((measure.description?.length ?? 0) / APPROX_CHARS_PER_LINE),
-        0
-    );
-    const estimatedCardHeight =
-        HEADER_AND_CHROME_HEIGHT + (Math.max(descriptionLines, informationLines) + measureLines) * APPROX_LINE_HEIGHT;
-    const fitsOnOnePage = estimatedCardHeight < PAGE_CONTENT_HEIGHT * 0.8;
+    const fitsOnOnePage = threatCardFitsOnOnePage({ description, assets, measures });
     return (
         <View
             id={`threat-${reportId}`}
