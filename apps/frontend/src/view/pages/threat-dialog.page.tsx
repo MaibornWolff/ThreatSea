@@ -7,7 +7,8 @@ import AddThreatDialog, {
 } from "#view/dialogs/add-threat-dialog/add-threat.dialog.tsx";
 
 interface ThreatDialogLocationState {
-    threat: ExtendedThreat | undefined;
+    threat?: ExtendedThreat;
+    childThreat?: ExtendedThreat;
     returnToTab?: ThreatTab;
 }
 
@@ -22,7 +23,7 @@ const ThreatDialogPage = () => {
     const { projectId = "" } = useParams<{ projectId?: string }>();
     const userRole = useAppSelector((state) => state.projects.current?.role);
     const { state, pathname } = useLocation() as Location<ThreatDialogLocationState | undefined>;
-    const threat = state?.threat;
+    const threat = state?.childThreat ?? state?.threat;
     const project = useAppSelector((state) => state.projects.current);
 
     const hostRoute: ThreatDialogHostRoute = pathname.includes("/risk/")

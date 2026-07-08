@@ -12,7 +12,8 @@ import MeasureImpactByMeasureDialog, { type ApplyMeasureThreat } from "#view/dia
  * @return {JSX.Element}
  */
 interface MeasureImpactByMeasureDialogLocationState {
-    threat: ApplyMeasureThreat;
+    threat?: ApplyMeasureThreat;
+    childThreat?: ApplyMeasureThreat;
     project: Project;
     measureImpact?: MeasureImpact | null;
 }
@@ -25,8 +26,10 @@ export const MeasureImpactByMeasureDialogPage = () => {
     // parent dialog retains its original threat/project/measureImpact data.
     const [state] = useState(locationState);
 
-    if (state?.threat) {
-        const { threat, project, measureImpact } = state;
+    const threat = state?.childThreat ?? state?.threat;
+
+    if (state && threat) {
+        const { project, measureImpact } = state;
 
         return (
             <>

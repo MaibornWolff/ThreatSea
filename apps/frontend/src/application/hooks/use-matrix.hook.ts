@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { ExtendedThreat } from "#api/types/threat.types.ts";
+import type { ExtendedChildThreat } from "#api/types/child-threat.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
 import { calcNetRisk } from "#utils/calcRisk.ts";
 import { createRiskMatrixDesign, addThreatsToRiskMatrix, dayNumberFromDateString } from "#utils/riskMatrix.ts";
 import { useCatalogMeasures } from "./use-catalog-measures.hook.ts";
+import { useChildThreats } from "./use-child-threats.hook.ts";
 import { useMeasureImpacts } from "./use-measureImpacts.hook.ts";
 import { useMeasures } from "./use-measures.hook.ts";
-import { useThreats } from "./use-threats.hook.ts";
 import { useAppSelector } from "./use-app-redux.hook.ts";
 import { projectsSelectors } from "#application/selectors/projects.selectors.ts";
 import type { SortDirection } from "#application/actions/list.actions.ts";
@@ -24,7 +24,7 @@ export interface ThreatMeasure {
     measureImpact: MeasureImpact | undefined;
 }
 
-export type ThreatWithMetrics = ExtendedThreat & {
+export type ThreatWithMetrics = ExtendedChildThreat & {
     risk: number;
     damage: number;
     measures: ThreatMeasure[];
@@ -81,7 +81,7 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
     const defaultGreen = project?.lineOfToleranceGreen ?? 6;
     const defaultRed = project?.lineOfToleranceRed ?? 15;
 
-    const { items: threatsRaw, loadThreats } = useThreats({ projectId });
+    const { items: childThreatsRaw, loadChildThreats } = useChildThreats({ projectId });
     const { loadCatalogMeasures } = useCatalogMeasures({ catalogId });
     const { items: measureImpacts, loadMeasureImpacts, deleteMeasureImpact } = useMeasureImpacts({ projectId });
     const { items: measures, loadMeasures, deleteMeasure } = useMeasures({ projectId });
@@ -94,25 +94,28 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
     const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
     const [sortBy, setSortBy] = useState<"name" | "newProbability" | "newRisk" | "componentName">("name");
 
-    const threats: ThreatWithMetrics[] = useMemo(
+    const childThreats: ThreatWithMetrics[] = useMemo(
         () =>
-            threatsRaw
-                .map((item) => {
-                    const damage = calcDamage(item);
-                    const risk = item.probability * damage;
+            childThreatsRaw
+                .map((childThreat) => {
+                    const damage = calcDamage(childThreat);
+                    const risk = childThreat.probability * damage;
                     return {
-                        ...item,
+                        ...childThreat,
                         risk,
                         damage,
                     };
                 })
-                .map((threat) => {
+                .map((childThreat) => {
                     return {
-                        ...threat,
+                        ...childThreat,
                         measures: measures
                             .filter((measure) => {
                                 return measureImpacts.some((measureImpact) => {
-                                    return measureImpact.measureId == measure.id && measureImpact.threatId == threat.id;
+                                    return (
+                                        measureImpact.measureId == measure.id &&
+                                        measureImpact.childThreatId == childThreat.id
+                                    );
                                 });
                             })
                             .map((measure) => {
@@ -129,15 +132,16 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
                                     scheduledAt: measure.scheduledAt,
                                     measureImpact: measureImpacts.find((measureImpact) => {
                                         return (
-                                            measureImpact.measureId == measure.id && measureImpact.threatId == threat.id
+                                            measureImpact.measureId == measure.id &&
+                                            measureImpact.childThreatId == childThreat.id
                                         );
                                     }),
                                 };
                             }),
                     };
                 })
-                .map((threat) => {
-                    const { measures, probability, damage } = threat;
+                .map((childThreat) => {
+                    const { measures, probability, damage } = childThreat;
                     const activeMeasureImpacts = measures
                         .filter((measure) => measure.active)
                         .map((measure) => measure.measureImpact);
@@ -156,7 +160,7 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
                     const measuresDone =
                         activeMeasures === measures.length || (newDamage === 1 && newProbability === 1);
                     return {
-                        ...threat,
+                        ...childThreat,
                         risk,
                         newRisk,
                         newProbability,
@@ -165,7 +169,7 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
                         measuresDone,
                     };
                 }),
-        [threatsRaw, measures, timelineDate, measureImpacts]
+        [childThreatsRaw, measures, timelineDate, measureImpacts]
     );
 
     const matrixDesign: MatrixGrid = useMemo(() => {
@@ -173,32 +177,32 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
     }, [currentGreenValue, currentRedValue]);
 
     const matrix: MatrixGrid = useMemo(() => {
-        return addThreatsToRiskMatrix(matrixDesign, threats, (threat) => ({
-            probability: threat.newProbability,
-            damage: threat.newDamage,
+        return addThreatsToRiskMatrix(matrixDesign, childThreats, (childThreat) => ({
+            probability: childThreat.newProbability,
+            damage: childThreat.newDamage,
         }));
-    }, [threats, matrixDesign]);
+    }, [childThreats, matrixDesign]);
 
-    const filteredThreats: ThreatWithMetrics[] = useMemo(() => {
+    const filteredChildThreats: ThreatWithMetrics[] = useMemo(() => {
         const lowerCaseSearchValue = threatSearchValue.toLowerCase();
-        return threats.filter((threat) => {
+        return childThreats.filter((childThreat) => {
             const searchableValues = [
-                ...searchableThreatFields.map((searchField) => threat[searchField]?.replace(/_/g, " ") ?? ""),
-                t(`attackerList.${threat.attacker}`),
-                t(`pointsOfAttackList.${threat.pointOfAttack}`),
+                ...searchableThreatFields.map((searchField) => childThreat[searchField]?.replace(/_/g, " ") ?? ""),
+                t(`attackerList.${childThreat.attacker}`),
+                t(`pointsOfAttackList.${childThreat.pointOfAttack}`),
             ];
 
             return (
                 ((selectedCell === null ||
-                    (threat.newProbability === selectedCell?.probability &&
-                        threat.newDamage === selectedCell?.damage)) &&
+                    (childThreat.newProbability === selectedCell?.probability &&
+                        childThreat.newDamage === selectedCell?.damage)) &&
                     searchableValues.some((searchableValue) =>
                         searchableValue.toLowerCase().includes(lowerCaseSearchValue)
                     )) ||
-                `${threat.id}` == threatSearchValue
+                `${childThreat.id}` == threatSearchValue
             );
         });
-    }, [threats, selectedCell, threatSearchValue, t]);
+    }, [childThreats, selectedCell, threatSearchValue, t]);
 
     const matrixSelected = useMemo<MatrixGrid>(() => {
         return matrix.map((row, y) =>
@@ -258,9 +262,9 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
         };
     }, [measures]);
 
-    const sortedThreats: ThreatWithMetrics[] = useMemo(
+    const sortedChildThreats: ThreatWithMetrics[] = useMemo(
         () =>
-            filteredThreats.sort((a, b) => {
+            filteredChildThreats.sort((a, b) => {
                 if (sortDirection === "asc") {
                     if (typeof a[sortBy] === "string" && typeof b[sortBy] === "string") {
                         return a[sortBy].toLowerCase() < b[sortBy].toLowerCase() ? -1 : 1;
@@ -275,8 +279,12 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
                     }
                 }
             }),
-        [filteredThreats, sortBy, sortDirection]
+        [filteredChildThreats, sortBy, sortDirection]
     );
+
+    useEffect(() => {
+        loadChildThreats();
+    }, [projectId, loadChildThreats]);
 
     useEffect(() => {
         loadCatalogMeasures();
@@ -301,7 +309,7 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
         setCurrentGreenValue,
         setCurrentRedValue,
         loadMeasures,
-        loadThreats,
+        loadThreats: loadChildThreats,
         loadCatalogMeasures,
         currentRedValue,
         currentGreenValue,
@@ -309,7 +317,7 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
         sortDirection,
         matrix: matrixSelected,
         selectedCell,
-        threats: sortedThreats,
+        threats: sortedChildThreats,
         timeline: {
             ...timeline,
             currentDate: timelineDate,

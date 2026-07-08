@@ -1,5 +1,5 @@
 {
-  "datamodelVersion": 3,
+  "datamodelVersion": 4,
   "project": {
     "id": 1,
     "name": "Test Project",
@@ -85,6 +85,7 @@
   ],
   "componentTypes": [],
   "measures": [],
-  "threats": [],
+  "genericThreats": [],
+  "childThreats": [],
   "measureImpacts": []
 }

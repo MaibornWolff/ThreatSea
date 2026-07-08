@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import type { Measure } from "#api/types/measure.types.ts";
-import type { ExtendedThreat } from "#api/types/threat.types.ts";
-import { useThreats } from "./use-threats.hook";
+import type { ExtendedChildThreat } from "#api/types/child-threat.types.ts";
+import { useChildThreats } from "./use-child-threats.hook";
 import { useMeasureImpacts } from "./use-measureImpacts.hook";
 import { useMeasures } from "./use-measures.hook";
 
@@ -12,7 +12,7 @@ export const useThreatSuggestions = ({
     selectedMeasure: Measure;
     projectId: number;
 }) => {
-    const { items: threats, loadThreats } = useThreats({
+    const { items: childThreats, loadChildThreats } = useChildThreats({
         projectId,
     });
     const { loadMeasures } = useMeasures({ projectId });
@@ -20,55 +20,55 @@ export const useThreatSuggestions = ({
         projectId,
     });
 
-    const impactedThreats: ExtendedThreat[] = useMemo(() => {
-        return threats.filter((threat) => {
+    const impactedThreats: ExtendedChildThreat[] = useMemo(() => {
+        return childThreats.filter((threat) => {
             return measureImpacts.some((measureImpact) => {
-                return measureImpact.measureId === selectedMeasure.id && measureImpact.threatId === threat.id;
+                return measureImpact.measureId === selectedMeasure.id && measureImpact.childThreatId === threat.id;
             });
         });
-    }, [selectedMeasure, threats, measureImpacts]);
+    }, [selectedMeasure, childThreats, measureImpacts]);
 
     //All Threats that have the same PointOfAttacks and Attackers
-    const suggestedThreats: ExtendedThreat[] = useMemo(() => {
-        const matchingViaAttackPoints = threats.filter((threat) => {
+    const suggestedThreats: ExtendedChildThreat[] = useMemo(() => {
+        const matchingViaAttackPoints = childThreats.filter((threat) => {
             return (
                 !impactedThreats.includes(threat) &&
-                threats.some((otherThreat) => {
+                childThreats.some((otherThreat) => {
                     return (
                         otherThreat.attacker === threat.attacker &&
                         otherThreat.pointOfAttack === threat.pointOfAttack &&
                         measureImpacts.some((measureImpact) => {
                             return (
                                 measureImpact.measureId === selectedMeasure.id &&
-                                measureImpact.threatId === otherThreat.id
+                                measureImpact.childThreatId === otherThreat.id
                             );
                         })
                     );
                 })
             );
         });
-        const matchingViaCatalogThreats = threats.filter((threat) => {
+        const matchingViaGenericThreats = childThreats.filter((threat) => {
             return (
                 !impactedThreats.includes(threat) &&
-                threats.some(
+                childThreats.some(
                     (otherThreat) =>
-                        otherThreat.catalogThreatId === threat.catalogThreatId &&
+                        otherThreat.genericThreatId === threat.genericThreatId &&
                         measureImpacts.some(
                             (measureImpact) =>
                                 measureImpact.measureId === selectedMeasure.id &&
-                                measureImpact.threatId === otherThreat.id
+                                measureImpact.childThreatId === otherThreat.id
                         )
                 )
             );
         });
-        return [...new Set([...matchingViaCatalogThreats, ...matchingViaAttackPoints])].sort((a, b) =>
+        return [...new Set([...matchingViaGenericThreats, ...matchingViaAttackPoints])].sort((a, b) =>
             a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1
         );
-    }, [selectedMeasure, threats, measureImpacts, impactedThreats]);
+    }, [selectedMeasure, childThreats, measureImpacts, impactedThreats]);
 
-    const remainingThreats: ExtendedThreat[] = useMemo(
+    const remainingThreats: ExtendedChildThreat[] = useMemo(
         () =>
-            threats
+            childThreats
                 .filter((threat) => {
                     return (
                         !impactedThreats.some((iThreat) => {
@@ -80,12 +80,12 @@ export const useThreatSuggestions = ({
                     );
                 })
                 .sort((a, b) => (a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1)),
-        [suggestedThreats, impactedThreats, threats]
+        [suggestedThreats, impactedThreats, childThreats]
     );
 
     useEffect(() => {
-        loadThreats();
-    }, [projectId, loadThreats]);
+        loadChildThreats();
+    }, [projectId, loadChildThreats]);
 
     useEffect(() => {
         loadMeasureImpacts();

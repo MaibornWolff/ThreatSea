@@ -5,12 +5,13 @@ import { FoldersActions } from "#application/actions/folders.actions.ts";
 import { DialogsActions } from "#application/actions/dialogs.actions.ts";
 import { CatalogsActions } from "#application/actions/catalogs.actions.ts";
 import { CatalogThreatsActions } from "#application/actions/catalog-threats.actions.ts";
-import { ThreatsActions } from "#application/actions/threats.actions.ts";
 import { CatalogMeasuresActions } from "#application/actions/catalog-measures.actions.ts";
 import { MeasuresActions } from "#application/actions/measures.actions.ts";
 import { MeasureImpactsActions } from "#application/actions/measureImpacts.actions.ts";
 import { EditorActions } from "#application/actions/editor.actions.ts";
 import { MemberActions } from "#application/actions/members.actions.ts";
+import { GenericThreatsActions } from "#application/actions/genericThreats.actions.ts";
+import { ChildThreatsActions } from "#application/actions/childThreats.actions.ts";
 
 const handleConfirmDialog: AppMiddleware =
     ({ dispatch }) =>
@@ -57,8 +58,18 @@ const handleConfirmDialog: AppMiddleware =
                         );
                         break;
                     case "threats":
+                    case "genericThreats":
                         dispatch(
-                            ThreatsActions.updateThreat(data as Parameters<typeof ThreatsActions.updateThreat>[0])
+                            GenericThreatsActions.updateGenericThreat(
+                                data as Parameters<typeof GenericThreatsActions.updateGenericThreat>[0]
+                            )
+                        );
+                        break;
+                    case "childThreats":
+                        dispatch(
+                            ChildThreatsActions.updateChildThreat(
+                                data as Parameters<typeof ChildThreatsActions.updateChildThreat>[0]
+                            )
                         );
                         break;
                     case "measures":
@@ -130,9 +141,19 @@ const handleConfirmDialog: AppMiddleware =
                             )
                         );
                         break;
+                    case "genericThreats":
                     case "threats":
                         dispatch(
-                            ThreatsActions.createThreat(data as Parameters<typeof ThreatsActions.createThreat>[0])
+                            GenericThreatsActions.createGenericThreat(
+                                data as Parameters<typeof GenericThreatsActions.createGenericThreat>[0]
+                            )
+                        );
+                        break;
+                    case "childThreats":
+                        dispatch(
+                            ChildThreatsActions.createChildThreat(
+                                data as Parameters<typeof ChildThreatsActions.createChildThreat>[0]
+                            )
                         );
                         break;
                     case "measures":

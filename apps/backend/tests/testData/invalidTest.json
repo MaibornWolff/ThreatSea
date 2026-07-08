@@ -27,6 +27,7 @@
   "catalogMeasures": [],
   "componentTypes": [],
   "measures": [],
-  "threats": [],
+  "genericThreats": [],
+  "childThreats": [],
   "measureImpacts": []
 }
