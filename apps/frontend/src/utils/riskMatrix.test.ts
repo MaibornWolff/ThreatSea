@@ -1,6 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
 import { createRiskMatrixDesign, addThreatsToRiskMatrix, type RiskMatrixCellBase } from "#utils/riskMatrix.ts";
-import * as calcRiskModule from "#utils/calcRisk.ts";
+import { calcRiskColour } from "#utils/calcRisk.ts";
 
 describe("createRiskMatrixDesign", () => {
     it("creates a 5x5 matrix", () => {
@@ -9,30 +8,16 @@ describe("createRiskMatrixDesign", () => {
         matrix.forEach((row) => expect(row).toHaveLength(5));
     });
 
-    it("calls calcRiskColour with the correct coordinates (x+1, 5-y)", () => {
-        const spy = vi.spyOn(calcRiskModule, "calcRiskColour");
-        createRiskMatrixDesign(6, 15);
-
-        // first row (y=0) => probability = 5
-        expect(spy).toHaveBeenCalledWith(1, 5, 6, 15); // x=0,y=0 -> damage=1, probability=5
-        // last row (y=4) => probability = 1
-        expect(spy).toHaveBeenCalledWith(5, 1, 6, 15); // x=4,y=4 -> damage=5, probability=1
-
-        spy.mockRestore();
-    });
-
-    it("assigns the correct coordinates to all 25 cells", () => {
-        const spy = vi.spyOn(calcRiskModule, "calcRiskColour");
-        createRiskMatrixDesign(6, 15);
+    it("maps each cell position to the correct risk coordinates (damage=x+1, probability=5-y)", () => {
+        const green = 6,
+            red = 15;
+        const matrix = createRiskMatrixDesign(green, red);
 
         for (let y = 0; y < 5; y++) {
             for (let x = 0; x < 5; x++) {
-                expect(spy).toHaveBeenCalledWith(x + 1, 5 - y, 6, 15);
+                expect(matrix[y]![x]!.color).toBe(calcRiskColour(x + 1, 5 - y, green, red));
             }
         }
-        expect(spy).toHaveBeenCalledTimes(25);
-
-        spy.mockRestore();
     });
 
     it("returns only the color for each cell, no amount", () => {
@@ -276,5 +261,11 @@ describe("addThreatsToRiskMatrix", () => {
                 damage: t.damage,
             }))
         ).not.toThrow();
+
+        const result = addThreatsToRiskMatrix(design, threats, (t) => ({
+            probability: t.probability,
+            damage: t.damage,
+        }));
+        result.flat().forEach((cell) => expect(cell.amount).toBeUndefined());
     });
 });
