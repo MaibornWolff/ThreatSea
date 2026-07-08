@@ -6,7 +6,7 @@ import {
     createAsset,
     createMeasureImpact,
     createProject,
-    createThreat,
+    createChildThreat,
     createThreatMeasure,
 } from "#test-utils/builders.ts";
 import { mockUseConfirm, mockUseDialog, mockUseThreatMeasuresList } from "#test-utils/mock-hooks.ts";
@@ -24,7 +24,7 @@ vi.mock("react-router", async (importOriginal) => {
 
 const setup = (userRole: USER_ROLES = USER_ROLES.EDITOR, hostRoute: ThreatDialogHostRoute = "threats") => {
     const project = createProject({ id: 7 });
-    const threat = createThreat({
+    const threat = createChildThreat({
         id: 42,
         assets: [createAsset({ confidentiality: 4, integrity: 2, availability: 1 })],
     });
@@ -65,7 +65,7 @@ describe("AddThreatDialog — Apply Measure button", () => {
         expect(navigate).toHaveBeenCalledTimes(2);
         expect(navigate).toHaveBeenLastCalledWith(`/projects/${project.id}/threats/measureImpacts/edit`, {
             state: {
-                threat: { ...threat, damage: 4 },
+                childThreat: { ...threat, damage: 4 },
                 project,
             },
         });
@@ -80,7 +80,7 @@ describe("AddThreatDialog — Apply Measure button", () => {
         expect(navigate).toHaveBeenCalledTimes(2);
         expect(navigate).toHaveBeenLastCalledWith(`/projects/${project.id}/risk/measureImpacts/edit`, {
             state: {
-                threat: { ...threat, damage: 4 },
+                childThreat: { ...threat, damage: 4 },
                 project,
             },
         });
@@ -95,7 +95,7 @@ describe("AddThreatDialog — Apply Measure button", () => {
         expect(navigate).toHaveBeenCalledTimes(2);
         expect(navigate).toHaveBeenLastCalledWith(`/projects/${project.id}/threats/measureImpacts/edit`, {
             state: {
-                threat: { ...threat, damage: 4 },
+                childThreat: { ...threat, damage: 4 },
                 project,
             },
         });
@@ -118,7 +118,7 @@ describe("AddThreatDialog — Edit Measure Impact routing", () => {
 
         expect(navigate).toHaveBeenLastCalledWith(`/projects/${project.id}/threats/measureImpacts/edit`, {
             state: {
-                threat: { ...threat, damage: 4 },
+                childThreat: { ...threat, damage: 4 },
                 measureImpact: threatMeasure.measureImpact,
                 project,
             },
@@ -151,7 +151,7 @@ describe("AddThreatDialog — Edit Measure Impact routing", () => {
 
         expect(navigate).toHaveBeenLastCalledWith(`/projects/${project.id}/risk/measureImpacts/edit`, {
             state: {
-                threat: { ...threat, damage: 4 },
+                childThreat: { ...threat, damage: 4 },
                 measureImpact: threatMeasure.measureImpact,
                 project,
             },

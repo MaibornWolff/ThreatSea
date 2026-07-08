@@ -89,9 +89,12 @@ const ThreatsPageBody = () => {
         setAssetAnchorEl(event.currentTarget);
     };
 
-    const onClickEditChildThreat = (event: React.MouseEvent<HTMLElement>, childThreat: ChildThreat | undefined) => {
+    const onClickEditChildThreat = (
+        event: React.MouseEvent<HTMLElement>,
+        childThreat: ExtendedChildThreat | undefined
+    ) => {
         event.preventDefault();
-        if (!event.isDefaultPrevented() && childThreat) {
+        if (childThreat) {
             navigate(`/projects/${projectId}/threats/edit`, { state: { childThreat } });
         }
     };

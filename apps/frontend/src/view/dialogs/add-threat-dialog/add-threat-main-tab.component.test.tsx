@@ -7,6 +7,7 @@ import type { Asset } from "#api/types/asset.types.ts";
 import type { ThreatMeasure } from "#application/hooks/use-threat-measures-list.hook.ts";
 import { AddThreatMainTab } from "./add-threat-main-tab.component";
 import type { ThreatFormValues } from "./add-threat-form.types.ts";
+import { CHILD_THREAT_STATUSES } from "#api/types/child-threat-statuses.types.ts";
 
 interface RenderMainTabOptions {
     assets?: Asset[];
@@ -38,7 +39,7 @@ const renderMainTab = ({
                 confidentiality: false,
                 integrity: false,
                 availability: false,
-                doneEditing: false,
+                status: CHILD_THREAT_STATUSES.NEW,
                 ...defaultValues,
             },
         });
@@ -70,12 +71,21 @@ describe("AddThreatMainTab", () => {
         expect(screen.getByText(/ID:\s*99/)).toBeInTheDocument();
     });
 
-    it("renders the C/I/A protection-goal switches, the done-editing checkbox and the probability field", () => {
+    it("renders the C/I/A protection-goal switches, the status select and the probability field", () => {
         renderMainTab();
 
         expect(screen.getAllByRole("switch")).toHaveLength(3);
-        expect(screen.getAllByRole("checkbox")).toHaveLength(1);
+        expect(screen.getByRole("combobox")).toBeInTheDocument();
         expect(screen.getByRole("spinbutton")).toBeInTheDocument();
+    });
+
+    it("lets the user change the status", async () => {
+        const { user } = renderMainTab({ defaultValues: { status: CHILD_THREAT_STATUSES.NEW } });
+
+        await user.click(screen.getByRole("combobox"));
+        await user.click(screen.getByRole("option", { name: "In progress" }));
+
+        expect(screen.getByRole("combobox")).toHaveTextContent("In progress");
     });
 
     it("shows the gross risk as the clamped probability times the gross damage", () => {
