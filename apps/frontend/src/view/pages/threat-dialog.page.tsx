@@ -11,6 +11,10 @@ interface ThreatDialogLocationState {
     returnToTab?: ThreatTab;
 }
 
+interface ThreatDialogPageProps {
+    onSaved?: () => void;
+}
+
 /**
  * on this page a threat can be created or edited
  *
@@ -18,7 +22,7 @@ interface ThreatDialogLocationState {
  * @category Pages
  * @return {JSX.Element}
  */
-const ThreatDialogPage = () => {
+const ThreatDialogPage = ({ onSaved }: ThreatDialogPageProps) => {
     const { projectId = "" } = useParams<{ projectId?: string }>();
     const userRole = useAppSelector((state) => state.projects.current?.role);
     const { state, pathname } = useLocation() as Location<ThreatDialogLocationState | undefined>;
@@ -40,6 +44,7 @@ const ThreatDialogPage = () => {
                 project={project}
                 userRole={userRole}
                 hostRoute={hostRoute}
+                {...(onSaved !== undefined ? { onSaved } : {})}
                 {...(returnToTab !== undefined ? { initialTab: returnToTab } : {})}
             />
         );

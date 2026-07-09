@@ -11,7 +11,6 @@ import { MeasureImpactsActions } from "#application/actions/measureImpacts.actio
 import { EditorActions } from "#application/actions/editor.actions.ts";
 import { MemberActions } from "#application/actions/members.actions.ts";
 import { GenericThreatsActions } from "#application/actions/genericThreats.actions.ts";
-import { ChildThreatsActions } from "#application/actions/childThreats.actions.ts";
 
 const handleConfirmDialog: AppMiddleware =
     ({ dispatch }) =>
@@ -62,13 +61,6 @@ const handleConfirmDialog: AppMiddleware =
                         dispatch(
                             GenericThreatsActions.updateGenericThreat(
                                 data as Parameters<typeof GenericThreatsActions.updateGenericThreat>[0]
-                            )
-                        );
-                        break;
-                    case "childThreats":
-                        dispatch(
-                            ChildThreatsActions.updateChildThreat(
-                                data as Parameters<typeof ChildThreatsActions.updateChildThreat>[0]
                             )
                         );
                         break;
@@ -146,13 +138,6 @@ const handleConfirmDialog: AppMiddleware =
                         dispatch(
                             GenericThreatsActions.createGenericThreat(
                                 data as Parameters<typeof GenericThreatsActions.createGenericThreat>[0]
-                            )
-                        );
-                        break;
-                    case "childThreats":
-                        dispatch(
-                            ChildThreatsActions.createChildThreat(
-                                data as Parameters<typeof ChildThreatsActions.createChildThreat>[0]
                             )
                         );
                         break;
