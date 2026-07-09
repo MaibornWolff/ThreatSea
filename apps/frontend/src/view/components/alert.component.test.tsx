@@ -80,10 +80,9 @@ describe("Alert — error side effects", () => {
     });
 
     it("redirects to /projects on a project/catalog existence error", () => {
-        const { showErrorMessage } = setupError(
-            { type: ERR_TYPE_PROJECT_CATALOG_EXISTANCE, message: "Gone" },
-            ["/projects/1"]
-        );
+        const { showErrorMessage } = setupError({ type: ERR_TYPE_PROJECT_CATALOG_EXISTANCE, message: "Gone" }, [
+            "/projects/1",
+        ]);
 
         expect(navigate).toHaveBeenCalledWith("/projects", { replace: true });
         expect(showErrorMessage).toHaveBeenCalledWith({ message: "Gone" });
