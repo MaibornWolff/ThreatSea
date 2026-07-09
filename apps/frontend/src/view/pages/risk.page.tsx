@@ -853,7 +853,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                     <Route path="measureImpacts/edit" element={<MeasureImpactByMeasureDialogPage />}>
                         <Route path="measures/add" element={<AddMeasureDialogPage />} />
                     </Route>
-                    <Route path="threats/edit" element={<ThreatDialogPage />} />
+                    <Route path="threats/edit" element={<ThreatDialogPage onSaved={() => void loadChildThreats()} />} />
                     <Route path="appliedMeasure/edit" element={<MeasureDetailsDialogPage />} />
                 </Routes>
             )}

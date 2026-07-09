@@ -14,7 +14,8 @@ import { useRef, useState, type ChangeEvent, type MouseEvent, type SyntheticEven
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useLocation } from "react-router";
-import { useDialog } from "#application/hooks/use-dialog.hook.ts";
+import { useAppDispatch } from "#application/hooks/use-app-redux.hook.ts";
+import { ChildThreatsActions } from "#application/actions/childThreats.actions.ts";
 import { Button } from "#view/components/button.component.tsx";
 import { Dialog } from "#view/components/dialog.component.tsx";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
@@ -42,6 +43,7 @@ interface AddThreatDialogProps extends DialogProps {
     userRole: USER_ROLES | undefined;
     initialTab?: ThreatTab;
     hostRoute?: ThreatDialogHostRoute;
+    onSaved?: () => void;
 }
 
 const AddThreatDialog = ({
@@ -50,9 +52,10 @@ const AddThreatDialog = ({
     userRole,
     initialTab,
     hostRoute = "threats",
+    onSaved,
     ...props
 }: AddThreatDialogProps) => {
-    const { confirmDialog, cancelDialog } = useDialog<ThreatFormValues | null>("childThreats");
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const location = useLocation();
     const { t } = useTranslation("threatDialogPage");
@@ -64,7 +67,7 @@ const AddThreatDialog = ({
         control,
         register,
         handleSubmit,
-        formState: { errors },
+        formState: { errors, isSubmitting },
     } = useForm<ThreatFormValues>({
         defaultValues: {
             ...threat,
@@ -84,13 +87,17 @@ const AddThreatDialog = ({
      * @event Button#onClick
      */
     const handleCancelDialog = () => {
-        cancelDialog();
         closeDialog();
     };
 
-    const handleConfirmDialog = (data: ThreatFormValues) => {
-        confirmDialog(data);
-        closeDialog();
+    const handleConfirmDialog = async (data: ThreatFormValues) => {
+        try {
+            await dispatch(ChildThreatsActions.updateChildThreat({ ...data, id: threatId, projectId })).unwrap();
+            onSaved?.();
+            closeDialog();
+        } catch {
+            // handled globally; keep the dialog open so the user can retry
+        }
     };
 
     const { openConfirm } = useConfirm<ThreatMeasure | null>();
@@ -332,7 +339,7 @@ const AddThreatDialog = ({
                             color="success"
                             sx={{ marginRight: 0 }}
                             data-testid="EditEssetsSave"
-                            disabled={!checkUserRole(userRole, USER_ROLES.EDITOR)}
+                            disabled={isSubmitting || !checkUserRole(userRole, USER_ROLES.EDITOR)}
                         >
                             {t("saveBtn")}
                         </Button>
@@ -344,7 +351,7 @@ const AddThreatDialog = ({
                             sx={{ marginRight: 0 }}
                             id="submitBtn"
                             data-testid="EditThreatSave"
-                            disabled={!checkUserRole(userRole, USER_ROLES.EDITOR)}
+                            disabled={isSubmitting || !checkUserRole(userRole, USER_ROLES.EDITOR)}
                         >
                             {t("saveBtn")}
                         </Button>

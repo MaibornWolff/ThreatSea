@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import AddThreatDialog, { type ThreatDialogHostRoute } from "./add-threat.dialog";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
@@ -9,12 +9,17 @@ import {
     createChildThreat,
     createThreatMeasure,
 } from "#test-utils/builders.ts";
-import { mockUseConfirm, mockUseDialog, mockUseThreatMeasuresList } from "#test-utils/mock-hooks.ts";
+import { mockUseConfirm, mockUseThreatMeasuresList } from "#test-utils/mock-hooks.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
+import { ChildThreatsAPI } from "#api/child-threats.api.ts";
+import { CHILD_THREAT_STATUSES } from "#api/types/child-threat-statuses.types.ts";
 
-mockUseDialog();
 mockUseConfirm();
 mockUseThreatMeasuresList();
+
+vi.mock("#api/child-threats.api.ts", () => ({
+    ChildThreatsAPI: { updateChildThreat: vi.fn() },
+}));
 
 const navigate = vi.fn();
 vi.mock("react-router", async (importOriginal) => {
@@ -22,7 +27,11 @@ vi.mock("react-router", async (importOriginal) => {
     return { ...actual, useNavigate: () => navigate };
 });
 
-const setup = (userRole: USER_ROLES = USER_ROLES.EDITOR, hostRoute: ThreatDialogHostRoute = "threats") => {
+const setup = (
+    userRole: USER_ROLES = USER_ROLES.EDITOR,
+    hostRoute: ThreatDialogHostRoute = "threats",
+    onSaved?: () => void
+) => {
     const project = createProject({ id: 7 });
     const threat = createChildThreat({
         id: 42,
@@ -30,7 +39,14 @@ const setup = (userRole: USER_ROLES = USER_ROLES.EDITOR, hostRoute: ThreatDialog
     });
     const user = userEvent.setup();
     renderWithProviders(
-        <AddThreatDialog threat={threat} project={project} userRole={userRole} open={true} hostRoute={hostRoute} />
+        <AddThreatDialog
+            threat={threat}
+            project={project}
+            userRole={userRole}
+            open={true}
+            hostRoute={hostRoute}
+            {...(onSaved !== undefined ? { onSaved } : {})}
+        />
     );
     return { project, threat, user };
 };
@@ -195,5 +211,38 @@ describe("AddThreatDialog — Risk preview", () => {
         expect(grossRisk).toHaveTextContent("12");
         expect(netRisk).toHaveTextContent("4");
         expect(netRisk).not.toHaveTextContent("12");
+    });
+});
+
+describe("AddThreatDialog — Save", () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        mockUseThreatMeasuresList();
+    });
+
+    it("persists the child threat, notifies the host, and closes on success", async () => {
+        vi.mocked(ChildThreatsAPI.updateChildThreat).mockResolvedValue(createChildThreat({ id: 42 }));
+        const onSaved = vi.fn();
+        const { user } = setup(USER_ROLES.EDITOR, "threats", onSaved);
+
+        await user.click(screen.getByTestId("EditThreatSave"));
+
+        await waitFor(() => expect(navigate).toHaveBeenCalledWith(-1));
+        expect(ChildThreatsAPI.updateChildThreat).toHaveBeenCalledWith(
+            expect.objectContaining({ id: 42, projectId: 7, status: CHILD_THREAT_STATUSES.NEW })
+        );
+        expect(onSaved).toHaveBeenCalledTimes(1);
+    });
+
+    it("keeps the dialog open and does not notify the host when the update fails", async () => {
+        vi.mocked(ChildThreatsAPI.updateChildThreat).mockRejectedValue(new Error("update failed"));
+        const onSaved = vi.fn();
+        const { user } = setup(USER_ROLES.EDITOR, "threats", onSaved);
+
+        await user.click(screen.getByTestId("EditThreatSave"));
+
+        await waitFor(() => expect(ChildThreatsAPI.updateChildThreat).toHaveBeenCalled());
+        expect(onSaved).not.toHaveBeenCalled();
+        expect(navigate).not.toHaveBeenCalled();
     });
 });
