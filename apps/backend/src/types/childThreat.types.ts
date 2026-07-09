@@ -2,7 +2,18 @@ import { ProjectIdParam } from "#types/project.types.js";
 import { POINTS_OF_ATTACK } from "./points-of-attack.types.js";
 import { ATTACKERS } from "./attackers.types.js";
 import { CHILD_THREAT_STATUSES } from "./child-threat-statuses.types.js";
-import { IsBoolean, IsDefined, IsEnum, IsInt, IsNotEmpty, IsString, Length, Max, Min } from "class-validator";
+import {
+    IsBoolean,
+    IsDefined,
+    IsEnum,
+    IsInt,
+    IsNotEmpty,
+    IsOptional,
+    IsString,
+    Length,
+    Max,
+    Min,
+} from "class-validator";
 import {
     FIELD_MUST_BE_BOOLEAN_MESSAGE,
     FIELD_MUST_BE_INT_MESSAGE,
@@ -73,6 +84,55 @@ export class UpdateChildThreatRequest {
         message: FIELD_MUST_BE_ONE_OF_MESSAGE("status", Object.values(CHILD_THREAT_STATUSES)),
     })
     status!: CHILD_THREAT_STATUSES;
+}
+
+/**
+ * Body of the create endpoint: every field is an optional refinement override.
+ * Missing fields default to the immutable parent's identity text and the
+ * catalogue threat's assessment values.
+ */
+export class CreateChildThreatRequest {
+    @IsOptional()
+    @IsString({ message: FIELD_MUST_BE_STRING_MESSAGE("name") })
+    @Trim()
+    @IsNotEmpty({ message: STRING_MUST_NOT_BE_EMPTY_MESSAGE("name") })
+    @Length(1, MAX_NAME_LENGTH, { message: STRING_TOO_LONG_MESSAGE("name", MAX_NAME_LENGTH) })
+    name?: string;
+
+    @IsOptional()
+    @IsString({ message: FIELD_MUST_BE_STRING_MESSAGE("description") })
+    @Trim()
+    @Length(0, MAX_DESCRIPTION_LENGTH, { message: STRING_TOO_LONG_MESSAGE("description", MAX_DESCRIPTION_LENGTH) })
+    description?: string;
+
+    @IsOptional()
+    @IsInt({ message: FIELD_MUST_BE_INT_MESSAGE("probability") })
+    @Min(PROBABILITY_VALUE_MIN, {
+        message: INT_MUST_BE_BETWEEN_MESSAGE("probability", PROBABILITY_VALUE_MIN, PROBABILITY_VALUE_MAX),
+    })
+    @Max(PROBABILITY_VALUE_MAX, {
+        message: INT_MUST_BE_BETWEEN_MESSAGE("probability", PROBABILITY_VALUE_MIN, PROBABILITY_VALUE_MAX),
+    })
+    probability?: number;
+
+    @IsOptional()
+    @IsBoolean({ message: FIELD_MUST_BE_BOOLEAN_MESSAGE("confidentiality") })
+    confidentiality?: boolean;
+
+    @IsOptional()
+    @IsBoolean({ message: FIELD_MUST_BE_BOOLEAN_MESSAGE("integrity") })
+    integrity?: boolean;
+
+    @IsOptional()
+    @IsBoolean({ message: FIELD_MUST_BE_BOOLEAN_MESSAGE("availability") })
+    availability?: boolean;
+
+    @IsOptional()
+    @IsString({ message: FIELD_MUST_BE_STRING_MESSAGE("status") })
+    @IsEnum(CHILD_THREAT_STATUSES, {
+        message: FIELD_MUST_BE_ONE_OF_MESSAGE("status", Object.values(CHILD_THREAT_STATUSES)),
+    })
+    status?: CHILD_THREAT_STATUSES;
 }
 
 export interface ChildThreatResponse extends UpdateChildThreatRequest {

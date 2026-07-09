@@ -189,6 +189,27 @@ describe("get or create threats", () => {
         expect(Array.isArray(res.body[0].children)).toBe(true);
     });
 
+    it("should return an empty list for a generic threat without children", async () => {
+        const childlessGenericThreat = (
+            await db
+                .insert(genericThreats)
+                .values({
+                    ...VALID_GENERIC_THREAT_1,
+                    pointOfAttackId: nanoid(),
+                    catalogThreatId,
+                    projectId,
+                })
+                .returning()
+        ).at(0)!;
+
+        const res = await request(app)
+            .get(`/api/projects/${projectId}/system/childThreats/${childlessGenericThreat.id}/list`)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toEqual([]);
+    });
+
     it("should create a threat inheriting identity from its parent", async () => {
         const res = await request(app)
             .post(`/api/projects/${projectId}/system/childThreats/${genericThreatId}`)
@@ -228,10 +249,45 @@ describe("get or create threats", () => {
         expect(res.body.attacker).toBe(VALID_GENERIC_THREAT_1.attacker);
     });
 
-    it("should not create a threat (name missing)", async () => {
+    it("should create a threat from parent and catalog defaults when the body is empty", async () => {
         const res = await request(app)
             .post(`/api/projects/${projectId}/system/childThreats/${genericThreatId}`)
-            .send(INVALID_CHILD_THREAT_NAME_MISSING)
+            .send({})
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(201);
+
+        // Identity text defaults to the parent generic threat
+        expect(res.body.name).toBe(VALID_GENERIC_THREAT_1.name);
+        expect(res.body.description).toBe(VALID_GENERIC_THREAT_1.description);
+        expect(res.body.pointOfAttack).toBe(VALID_GENERIC_THREAT_1.pointOfAttack);
+        expect(res.body.pointOfAttackId).toBe(VALID_GENERIC_THREAT_1.pointOfAttackId);
+        expect(res.body.attacker).toBe(VALID_GENERIC_THREAT_1.attacker);
+        // Assessment defaults to the catalogue threat
+        expect(res.body.probability).toBe(VALID_CATALOG_THREAT_1.probability);
+        expect(res.body.confidentiality).toBe(VALID_CATALOG_THREAT_1.confidentiality);
+        expect(res.body.integrity).toBe(VALID_CATALOG_THREAT_1.integrity);
+        expect(res.body.availability).toBe(VALID_CATALOG_THREAT_1.availability);
+        expect(res.body.status).toBe(CHILD_THREAT_STATUSES.NEW);
+    });
+
+    it("should apply partial refinement overrides on top of the defaults", async () => {
+        const res = await request(app)
+            .post(`/api/projects/${projectId}/system/childThreats/${genericThreatId}`)
+            .send({ name: "Generic Threat 1 (new)" })
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(201);
+
+        expect(res.body.name).toBe("Generic Threat 1 (new)");
+        expect(res.body.description).toBe(VALID_GENERIC_THREAT_1.description);
+        expect(res.body.probability).toBe(VALID_CATALOG_THREAT_1.probability);
+    });
+
+    it("should not create a threat (name present but empty)", async () => {
+        const res = await request(app)
+            .post(`/api/projects/${projectId}/system/childThreats/${genericThreatId}`)
+            .send({ ...INVALID_CHILD_THREAT_NAME_MISSING, name: "   " })
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(400);

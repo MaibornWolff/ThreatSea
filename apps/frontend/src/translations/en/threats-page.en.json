@@ -7,6 +7,8 @@
   "duplicateMessage": "Do you really want to duplicate the threat '{{ threatName }}'?",
   "duplicate": "Duplicate",
   "duplicateThreat": "Duplicate Threat",
+  "addChildThreat": "Add Child Threat",
+  "newChildThreatSuffix": "new",
   "editThreat": "Edit Threat",
   "deleteThreat": "Delete Threat",
   "edited": "Edited",
