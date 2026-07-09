@@ -452,3 +452,109 @@ describe("measures impacts (invalid data)", () => {
         expect(res.statusCode).toEqual(400);
     });
 });
+
+describe("out-of-scope measure impacts drive the child threat status", () => {
+    const getChildStatus = async (id: number) =>
+        (await db.query.childThreats.findFirst({ where: eq(childThreats.id, id) }))!.status;
+
+    const setChildStatus = async (id: number, status: CHILD_THREAT_STATUSES) =>
+        await db.update(childThreats).set({ status }).where(eq(childThreats.id, id));
+
+    const createSecondMeasure = async () =>
+        (
+            await db
+                .insert(measures)
+                .values({ ...JSON.parse(JSON.stringify(VALID_MEASURE_1)), catalogMeasureId, projectId })
+                .returning()
+        ).at(0)!.id;
+
+    const postImpact = async (
+        body: Omit<InstanceType<typeof CreateMeasureImpactRequest>, "measureId" | "childThreatId">,
+        forMeasureId: number = measureId
+    ) =>
+        await request(app)
+            .post(`/api/projects/${projectId}/system/measureImpacts`)
+            .send({ ...body, childThreatId, measureId: forMeasureId })
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+
+    it("sets the child threat out of scope when an out-of-scope impact is created", async () => {
+        const res = await postImpact(VALID_MEASURE_IMPACT_2);
+        expect(res.statusCode).toEqual(200);
+        expect(await getChildStatus(childThreatId)).toBe(CHILD_THREAT_STATUSES.OUTOFSCOPE);
+    });
+
+    it("does not change the status when an ordinary impact is created", async () => {
+        const res = await postImpact(VALID_MEASURE_IMPACT_1);
+        expect(res.statusCode).toEqual(200);
+        expect(await getChildStatus(childThreatId)).toBe(CHILD_THREAT_STATUSES.NEW);
+    });
+
+    it("reverts to in progress when the only out-of-scope impact is deleted", async () => {
+        const created = await postImpact(VALID_MEASURE_IMPACT_2);
+        expect(await getChildStatus(childThreatId)).toBe(CHILD_THREAT_STATUSES.OUTOFSCOPE);
+
+        const res = await request(app)
+            .delete(`/api/projects/${projectId}/system/measureImpacts/${created.body.id}`)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(204);
+        expect(await getChildStatus(childThreatId)).toBe(CHILD_THREAT_STATUSES.IN_PROGRESS);
+    });
+
+    it("stays out of scope while another out-of-scope impact remains", async () => {
+        const secondMeasureId = await createSecondMeasure();
+        const first = await postImpact(VALID_MEASURE_IMPACT_2);
+        await postImpact(VALID_MEASURE_IMPACT_2, secondMeasureId);
+        expect(await getChildStatus(childThreatId)).toBe(CHILD_THREAT_STATUSES.OUTOFSCOPE);
+
+        await request(app)
+            .delete(`/api/projects/${projectId}/system/measureImpacts/${first.body.id}`)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(await getChildStatus(childThreatId)).toBe(CHILD_THREAT_STATUSES.OUTOFSCOPE);
+    });
+
+    it("reverts when an out-of-scope impact is flipped off, and sets again when flipped on", async () => {
+        const created = await postImpact(VALID_MEASURE_IMPACT_2);
+        expect(await getChildStatus(childThreatId)).toBe(CHILD_THREAT_STATUSES.OUTOFSCOPE);
+
+        await request(app)
+            .put(`/api/projects/${projectId}/system/measureImpacts/${created.body.id}`)
+            .send({ ...VALID_MEASURE_IMPACT_1, childThreatId, measureId })
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(await getChildStatus(childThreatId)).toBe(CHILD_THREAT_STATUSES.IN_PROGRESS);
+
+        await request(app)
+            .put(`/api/projects/${projectId}/system/measureImpacts/${created.body.id}`)
+            .send({ ...VALID_MEASURE_IMPACT_2, childThreatId, measureId })
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(await getChildStatus(childThreatId)).toBe(CHILD_THREAT_STATUSES.OUTOFSCOPE);
+    });
+
+    it("leaves a manually set status untouched when ordinary impacts are added or removed", async () => {
+        await setChildStatus(childThreatId, CHILD_THREAT_STATUSES.FINALIZED);
+
+        const created = await postImpact(VALID_MEASURE_IMPACT_1);
+        expect(await getChildStatus(childThreatId)).toBe(CHILD_THREAT_STATUSES.FINALIZED);
+
+        await request(app)
+            .delete(`/api/projects/${projectId}/system/measureImpacts/${created.body.id}`)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(await getChildStatus(childThreatId)).toBe(CHILD_THREAT_STATUSES.FINALIZED);
+    });
+
+    it("does not revert a manually set out-of-scope status when an ordinary impact is removed", async () => {
+        await setChildStatus(childThreatId, CHILD_THREAT_STATUSES.OUTOFSCOPE);
+
+        const created = await postImpact(VALID_MEASURE_IMPACT_1);
+        await request(app)
+            .delete(`/api/projects/${projectId}/system/measureImpacts/${created.body.id}`)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(await getChildStatus(childThreatId)).toBe(CHILD_THREAT_STATUSES.OUTOFSCOPE);
+    });
+});
