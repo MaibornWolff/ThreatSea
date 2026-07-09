@@ -44,7 +44,6 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
                 a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
             );
             setGenericThreats(sortedThreats);
-            setExpandedGenericThreatIds({});
 
             if (sortedThreats.length === 0) {
                 setChildThreatsByGenericThreatId({});

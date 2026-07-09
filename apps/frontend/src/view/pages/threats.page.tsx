@@ -392,7 +392,28 @@ const ThreatsPageBody = () => {
                                                                 <CustomTableCell
                                                                     showBorder={true}
                                                                     align="left"
-                                                                    sx={{ pl: 4 }}
+                                                                    sx={{
+                                                                        pl: 4,
+                                                                        ...(checkUserRole(userRole, USER_ROLES.EDITOR)
+                                                                            ? {
+                                                                                  "&:hover": {
+                                                                                      cursor: "pointer",
+                                                                                      textDecoration: "underline",
+                                                                                  },
+                                                                              }
+                                                                            : {}),
+                                                                    }}
+                                                                    {...(checkUserRole(userRole, USER_ROLES.EDITOR)
+                                                                        ? {
+                                                                              onClick: (
+                                                                                  event: React.MouseEvent<HTMLElement>
+                                                                              ) =>
+                                                                                  onClickEditChildThreat(
+                                                                                      event,
+                                                                                      childThreat
+                                                                                  ),
+                                                                          }
+                                                                        : {})}
                                                                 >
                                                                     {childThreat.name}
                                                                 </CustomTableCell>
@@ -505,7 +526,7 @@ const ThreatsPageBody = () => {
                 </Box>
 
                 <Routes>
-                    <Route path="edit" element={<ThreatDialogPage />} />
+                    <Route path="edit" element={<ThreatDialogPage onSaved={() => void loadGenericThreats()} />} />
                     <Route path="measureImpacts/edit" element={<MeasureImpactByMeasureDialogPage />}>
                         <Route path="measures/add" element={<AddMeasureDialogPage />} />
                     </Route>
