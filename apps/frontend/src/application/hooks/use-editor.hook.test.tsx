@@ -17,6 +17,12 @@ import {
     createConnectionPoint,
     createPointOfAttack,
 } from "#test-utils/builders.ts";
+import {
+    expectNoTransversalCrossings,
+    isOnComponentPerimeter,
+    routeCoversPoint,
+    toPoints,
+} from "#test-utils/connection-routing-helpers.ts";
 import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 
@@ -469,6 +475,336 @@ describe("useEditor", () => {
                 );
             });
             expect(store.getState().system.pointsOfAttack.entities["poa-1"]?.assets).toEqual([5]);
+        });
+    });
+
+    describe("sequential connection routing", () => {
+        // comp-1 connected to two others on separate grid cells — smallest layout
+        // where sibling routes can interact.
+        const seedHubWithTwoConnections = (store: EditorStore): void => {
+            store.dispatch(SystemActions.createComponent(createComponentPayload({ id: "comp-1", gridX: 0, gridY: 0 })));
+            store.dispatch(
+                SystemActions.createComponent(createComponentPayload({ id: "comp-2", gridX: 40, gridY: 0 }))
+            );
+            store.dispatch(
+                SystemActions.createComponent(createComponentPayload({ id: "comp-3", gridX: 40, gridY: 20 }))
+            );
+            store.dispatch(
+                SystemActions.createConnection(
+                    createConnection({
+                        id: "conn-1",
+                        from: createConnectionAnchor({ id: "comp-1" }),
+                        to: createConnectionAnchor({ id: "comp-2" }),
+                    })
+                )
+            );
+            store.dispatch(
+                SystemActions.createConnection(
+                    createConnection({
+                        id: "conn-2",
+                        from: createConnectionAnchor({ id: "comp-1" }),
+                        to: createConnectionAnchor({ id: "comp-3" }),
+                    })
+                )
+            );
+            store.dispatch(EditorActions.selectComponent("comp-1"));
+        };
+
+        const connectionFromStore = (store: EditorStore, connectionId: string) =>
+            store.getState().system.connections.entities[connectionId];
+
+        // A routed connection has one end on each component's box (waypoint order is not
+        // guaranteed to follow the from/to direction).
+        const expectRoutedBetween = (
+            waypoints: number[],
+            first: { gridX: number; gridY: number },
+            second: { gridX: number; gridY: number }
+        ): void => {
+            const points = toPoints(waypoints);
+            expect(points.length).toBeGreaterThanOrEqual(2);
+            const start = points[0]!;
+            const end = points[points.length - 1]!;
+            const connectsBoth =
+                (isOnComponentPerimeter(first.gridX, first.gridY, start) &&
+                    isOnComponentPerimeter(second.gridX, second.gridY, end)) ||
+                (isOnComponentPerimeter(second.gridX, second.gridY, start) &&
+                    isOnComponentPerimeter(first.gridX, first.gridY, end));
+            expect(connectsBoth).toBe(true);
+        };
+
+        it("routes every connection of the moved component and clears the recalculate flags", () => {
+            const { result, store } = renderUseEditor(seedHubWithTwoConnections);
+
+            act(() => {
+                result.current.updateConnectionsOfComponent();
+            });
+
+            const first = connectionFromStore(store, "conn-1");
+            expectRoutedBetween(first!.waypoints, { gridX: 0, gridY: 0 }, { gridX: 40, gridY: 0 });
+            expect(first?.recalculate).toBe(false);
+            const second = connectionFromStore(store, "conn-2");
+            expectRoutedBetween(second!.waypoints, { gridX: 0, gridY: 0 }, { gridX: 40, gridY: 20 });
+            expect(second?.recalculate).toBe(false);
+        });
+
+        it("keeps a neighbour's established line and routes the moved component's connection last", () => {
+            const storedStableWaypoints = [240, 80, 240, 100];
+            const { result, store } = renderUseEditor((store) => {
+                store.dispatch(
+                    SystemActions.createComponent(createComponentPayload({ id: "comp-1", gridX: 0, gridY: 0 }))
+                );
+                store.dispatch(
+                    SystemActions.createComponent(createComponentPayload({ id: "comp-2", gridX: 40, gridY: 0 }))
+                );
+                store.dispatch(
+                    SystemActions.createComponent(createComponentPayload({ id: "comp-3", gridX: 40, gridY: 20 }))
+                );
+                // conn-stable does not touch the moved component and already has its line.
+                store.dispatch(
+                    SystemActions.createConnection(
+                        createConnection({
+                            id: "conn-stable",
+                            from: createConnectionAnchor({ id: "comp-2" }),
+                            to: createConnectionAnchor({ id: "comp-3" }),
+                            waypoints: storedStableWaypoints,
+                        })
+                    )
+                );
+                store.dispatch(
+                    SystemActions.createConnection(
+                        createConnection({
+                            id: "conn-moved",
+                            from: createConnectionAnchor({ id: "comp-1" }),
+                            to: createConnectionAnchor({ id: "comp-2" }),
+                        })
+                    )
+                );
+                store.dispatch(EditorActions.selectComponent("comp-1"));
+            });
+
+            act(() => {
+                result.current.updateConnectionsOfComponent();
+            });
+
+            expect(connectionFromStore(store, "conn-stable")?.waypoints).toEqual(storedStableWaypoints);
+            expectRoutedBetween(
+                connectionFromStore(store, "conn-moved")!.waypoints,
+                { gridX: 0, gridY: 0 },
+                { gridX: 40, gridY: 0 }
+            );
+        });
+
+        it("routes sibling connections without transversal crossings", () => {
+            const { result, store } = renderUseEditor(seedHubWithTwoConnections);
+
+            act(() => {
+                result.current.updateConnectionsOfComponent();
+            });
+
+            expectNoTransversalCrossings(
+                connectionFromStore(store, "conn-1")!.waypoints,
+                connectionFromStore(store, "conn-2")!.waypoints
+            );
+        });
+
+        it("routes a connection immediately when it is created", () => {
+            const { result, store } = renderUseEditor((store) => {
+                store.dispatch(
+                    SystemActions.createComponent(
+                        createComponentPayload({ id: "users-1", type: STANDARD_COMPONENT_TYPES.USERS, gridX: 0 })
+                    )
+                );
+                store.dispatch(
+                    SystemActions.createComponent(
+                        createComponentPayload({ id: "client-1", type: STANDARD_COMPONENT_TYPES.CLIENT, gridX: 40 })
+                    )
+                );
+            });
+
+            act(() =>
+                result.current.selectConnector(
+                    createConnectionAnchor({ id: "users-1", type: STANDARD_COMPONENT_TYPES.USERS })
+                )
+            );
+            act(() =>
+                result.current.selectConnector(
+                    createConnectionAnchor({ id: "client-1", type: STANDARD_COMPONENT_TYPES.CLIENT })
+                )
+            );
+
+            const created = Object.values(store.getState().system.connections.entities)[0];
+            expectRoutedBetween(created!.waypoints, { gridX: 0, gridY: 0 }, { gridX: 40, gridY: 0 });
+            expect(created?.recalculate).toBe(false);
+        });
+
+        it("routes a duplicate connection between the same pair off the first one's line", () => {
+            const firstWaypoints = [80, 40, 200, 40];
+            const { result, store } = renderUseEditor((store) => {
+                store.dispatch(
+                    SystemActions.createComponent(
+                        createComponentPayload({ id: "users-1", type: STANDARD_COMPONENT_TYPES.USERS, gridX: 0 })
+                    )
+                );
+                store.dispatch(
+                    SystemActions.createComponent(
+                        createComponentPayload({ id: "client-1", type: STANDARD_COMPONENT_TYPES.CLIENT, gridX: 40 })
+                    )
+                );
+                store.dispatch(
+                    SystemActions.createConnection(
+                        createConnection({
+                            id: "conn-first",
+                            from: createConnectionAnchor({ id: "users-1", type: STANDARD_COMPONENT_TYPES.USERS }),
+                            to: createConnectionAnchor({ id: "client-1", type: STANDARD_COMPONENT_TYPES.CLIENT }),
+                            waypoints: firstWaypoints,
+                        })
+                    )
+                );
+            });
+
+            act(() =>
+                result.current.selectConnector(
+                    createConnectionAnchor({ id: "users-1", type: STANDARD_COMPONENT_TYPES.USERS })
+                )
+            );
+            act(() =>
+                result.current.selectConnector(
+                    createConnectionAnchor({ id: "client-1", type: STANDARD_COMPONENT_TYPES.CLIENT })
+                )
+            );
+
+            const { entities } = store.getState().system.connections;
+            expect(Object.keys(entities)).toHaveLength(2);
+            const duplicate = Object.values(entities).find((connection) => connection?.id !== "conn-first");
+            expect(connectionFromStore(store, "conn-first")?.waypoints).toEqual(firstWaypoints);
+            expectRoutedBetween(duplicate!.waypoints, { gridX: 0, gridY: 0 }, { gridX: 40, gridY: 0 });
+            expect(duplicate!.waypoints).not.toEqual(firstWaypoints);
+        });
+
+        it("re-routes the surviving connections when one is removed", () => {
+            const { result, store } = renderUseEditor(seedHubWithTwoConnections);
+
+            act(() => {
+                result.current.removeConnection(connectionFromStore(store, "conn-1"));
+            });
+
+            expect(connectionFromStore(store, "conn-1")).toBeUndefined();
+            const survivor = connectionFromStore(store, "conn-2");
+            expectRoutedBetween(survivor!.waypoints, { gridX: 0, gridY: 0 }, { gridX: 40, gridY: 20 });
+            expect(survivor?.recalculate).toBe(false);
+        });
+
+        it("routes the neighbours' remaining connections through the removed component's space", () => {
+            const { result, store } = renderUseEditor((store) => {
+                // comp-middle sits directly between comp-left and comp-right, which are connected.
+                store.dispatch(
+                    SystemActions.createComponent(createComponentPayload({ id: "comp-left", gridX: 0, gridY: 0 }))
+                );
+                store.dispatch(
+                    SystemActions.createComponent(createComponentPayload({ id: "comp-middle", gridX: 40, gridY: 0 }))
+                );
+                store.dispatch(
+                    SystemActions.createComponent(createComponentPayload({ id: "comp-right", gridX: 80, gridY: 0 }))
+                );
+                store.dispatch(
+                    SystemActions.createConnection(
+                        createConnection({
+                            id: "conn-across",
+                            from: createConnectionAnchor({ id: "comp-left" }),
+                            to: createConnectionAnchor({ id: "comp-right" }),
+                        })
+                    )
+                );
+                store.dispatch(
+                    SystemActions.createConnection(
+                        createConnection({
+                            id: "conn-doomed",
+                            from: createConnectionAnchor({ id: "comp-left" }),
+                            to: createConnectionAnchor({ id: "comp-middle" }),
+                        })
+                    )
+                );
+                store.dispatch(EditorActions.selectComponent("comp-middle"));
+            });
+
+            act(() => {
+                result.current.removeComponent();
+            });
+
+            expect(store.getState().system.components.entities["comp-middle"]).toBeUndefined();
+            expect(connectionFromStore(store, "conn-doomed")).toBeUndefined();
+            // The surviving route must ignore the removed component: the straight line between
+            // comp-left and comp-right runs through comp-middle's old cell.
+            const survivor = connectionFromStore(store, "conn-across");
+            expect(routeCoversPoint(survivor!.waypoints, { x: 240, y: 40 })).toBe(true);
+        });
+
+        it("routes connections that load without a line and leaves stored routes untouched", () => {
+            const storedWaypoints = [40, 90, 40, 300, 500, 300];
+            const { store } = renderUseEditor((store) => {
+                seedHubWithTwoConnections(store);
+                store.dispatch(SystemActions.setConnection({ id: "conn-2", changes: { waypoints: storedWaypoints } }));
+                store.dispatch(SystemActions.setLoadedProjectId(1));
+            });
+
+            // Only conn-1 loaded without waypoints, so only conn-1 gets routed.
+            expectRoutedBetween(
+                connectionFromStore(store, "conn-1")!.waypoints,
+                { gridX: 0, gridY: 0 },
+                { gridX: 40, gridY: 0 }
+            );
+            expect(connectionFromStore(store, "conn-2")?.waypoints).toEqual(storedWaypoints);
+        });
+
+        it("routes loaded connections even when the system data arrives after mount", () => {
+            // Simulates switching projects: the hook is already mounted when the new
+            // project's connections land in the store.
+            const { store } = renderUseEditor();
+
+            act(() => {
+                seedHubWithTwoConnections(store);
+                store.dispatch(SystemActions.setLoadedProjectId(1));
+            });
+
+            expectRoutedBetween(
+                connectionFromStore(store, "conn-1")!.waypoints,
+                { gridX: 0, gridY: 0 },
+                { gridX: 40, gridY: 0 }
+            );
+        });
+
+        it("keeps the stored line when no route is possible", () => {
+            // Both endpoints sit on the same grid cell, so the router returns no route.
+            const storedWaypoints = [40, 90, 240, 90];
+            const { result, store } = renderUseEditor((store) => {
+                store.dispatch(
+                    SystemActions.createComponent(createComponentPayload({ id: "comp-1", gridX: 0, gridY: 0 }))
+                );
+                store.dispatch(
+                    SystemActions.createComponent(createComponentPayload({ id: "comp-2", gridX: 0, gridY: 0 }))
+                );
+                store.dispatch(
+                    SystemActions.createConnection(
+                        createConnection({
+                            id: "conn-1",
+                            from: createConnectionAnchor({ id: "comp-1" }),
+                            to: createConnectionAnchor({ id: "comp-2" }),
+                            waypoints: storedWaypoints,
+                            recalculate: true,
+                        })
+                    )
+                );
+                store.dispatch(EditorActions.selectComponent("comp-1"));
+            });
+
+            act(() => {
+                result.current.updateConnectionsOfComponent();
+            });
+
+            // No route found: the stored line stays and the recalculate flag is left as-is.
+            const connection = connectionFromStore(store, "conn-1");
+            expect(connection?.waypoints).toEqual(storedWaypoints);
+            expect(connection?.recalculate).toBe(true);
         });
     });
 

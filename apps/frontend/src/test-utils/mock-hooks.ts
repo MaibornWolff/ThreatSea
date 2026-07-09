@@ -103,7 +103,6 @@ export const mockUseEditor = (config?: Partial<UseEditorResult>): MockInstance =
         addAssetToSelectedPointOfAttack: vi.fn(),
         removeAssetToSelectedPointOfAttack: vi.fn(),
         updateConnectionsOfComponent: vi.fn(),
-        connectionRecalculated: vi.fn(),
         selectConnectionPoint: vi.fn(),
         deselectConnectionPoint: vi.fn(),
         setMousePointers: vi.fn(),
