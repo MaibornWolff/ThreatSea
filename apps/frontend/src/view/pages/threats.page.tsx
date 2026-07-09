@@ -1,4 +1,4 @@
-import { ChevronRight, ContentCopy, Delete, Edit, ExpandMore } from "@mui/icons-material";
+import { Add, ChevronRight, ContentCopy, Delete, Edit, ExpandMore } from "@mui/icons-material";
 import { Box, LinearProgress, Popper, Typography } from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -28,6 +28,7 @@ import AddMeasureDialogPage from "./add-measure-dialog.page";
 import { withProject } from "#view/components/with-project.hoc.tsx";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import type { ChildThreat, ExtendedChildThreat } from "#api/types/child-threat.types.ts";
+import type { GenericThreatWithExtendedChildren } from "#api/types/generic-threat.types.ts";
 import { CHILD_THREAT_STATUSES } from "#api/types/child-threat-statuses.types.ts";
 
 /**
@@ -99,6 +100,30 @@ const ThreatsPageBody = () => {
         }
     };
 
+    const handleAddChildThreat = async (
+        event: React.MouseEvent<HTMLElement>,
+        genericThreat: GenericThreatWithExtendedChildren
+    ) => {
+        event.preventDefault();
+        try {
+            // Only the name is overridden; identity and assessment defaults come
+            // from the parent and its catalogue threat on the backend.
+            await dispatch(
+                ChildThreatsActions.createChildThreat({
+                    projectId: Number(projectId),
+                    genericThreatId: genericThreat.id,
+                    name: `${genericThreat.name} (${t("newChildThreatSuffix")})`,
+                })
+            ).unwrap();
+            if (!expandedGenericThreatIds[genericThreat.id]) {
+                toggleGenericThreat(genericThreat.id);
+            }
+            void loadGenericThreats();
+        } catch {
+            // handled globally
+        }
+    };
+
     const handleDuplicateChildThreat = (event: React.MouseEvent<HTMLElement>, childThreat: ChildThreat) => {
         event.preventDefault();
         openConfirm({
@@ -121,9 +146,6 @@ const ThreatsPageBody = () => {
                         integrity: childThreat.integrity,
                         availability: childThreat.availability,
                         status: CHILD_THREAT_STATUSES.NEW,
-                        pointOfAttackId: childThreat.pointOfAttackId,
-                        pointOfAttack: childThreat.pointOfAttack,
-                        attacker: childThreat.attacker,
                     };
 
                     await dispatch(ChildThreatsActions.createChildThreat(payload)).unwrap();
@@ -367,9 +389,32 @@ const ThreatsPageBody = () => {
                                                         <CustomTableCell>-</CustomTableCell>
                                                         <CustomTableCell showBorder={true}>-</CustomTableCell>
                                                         <CustomTableCell align="left">
-                                                            {isLoadingChildren
-                                                                ? "Loading children..."
-                                                                : `${childThreats.length} child threats`}
+                                                            <Box
+                                                                sx={{
+                                                                    display: "flex",
+                                                                    alignItems: "center",
+                                                                    gap: 1,
+                                                                }}
+                                                            >
+                                                                <span>
+                                                                    {isLoadingChildren
+                                                                        ? "Loading children..."
+                                                                        : `${childThreats.length} child threats`}
+                                                                </span>
+                                                                {checkUserRole(userRole, USER_ROLES.EDITOR) && (
+                                                                    <IconButton
+                                                                        title={t("addChildThreat")}
+                                                                        onClick={(event) =>
+                                                                            void handleAddChildThreat(
+                                                                                event,
+                                                                                genericThreat
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        <Add sx={{ fontSize: 18 }} />
+                                                                    </IconButton>
+                                                                )}
+                                                            </Box>
                                                         </CustomTableCell>
                                                     </TableRow>
                                                     {isExpanded &&
