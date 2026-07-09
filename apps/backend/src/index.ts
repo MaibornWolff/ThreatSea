@@ -8,13 +8,16 @@ import { runMigrations } from "#db/index.js";
  */
 const PORT = 8000;
 
-// Initializing the server on the given port and creating the database tables
-app.listen(PORT, async () => {
-    // Injects the defined models into the database if they don't exist already.
-    await runMigrations();
+// Run migrations before binding the port so no requests are served against
+// an un-migrated schema, and migration failures abort startup cleanly.
+await runMigrations();
+
+const server = app.listen(PORT, () => {
     Logger.info(`server is running (port=${PORT})...`);
 });
 
 process.on("SIGTERM", () => {
-    process.exit(0);
+    server.close(() => {
+        process.exit(0);
+    });
 });
