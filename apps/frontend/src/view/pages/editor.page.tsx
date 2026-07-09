@@ -379,7 +379,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         });
     };
 
-    const handleComponentDragEnd = (event: KonvaEventObject<DragEvent>, componentId: string): void => {
+    const handleComponentDragEnd = (_event: KonvaEventObject<DragEvent>, componentId: string): void => {
         removeInUseComponent(componentId);
         setShowHelpLines(false);
         updateConnectionsOfComponent();
