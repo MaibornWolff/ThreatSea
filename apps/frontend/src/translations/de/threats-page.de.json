@@ -7,6 +7,8 @@
   "duplicateMessage": "Wollen Sie die Bedrohung '{{ threatName }}' wirklich duplizieren?",
   "duplicate": "Duplizieren",
   "duplicateThreat": "Bedrohung duplizieren",
+  "addChildThreat": "Bedrohung hinzufügen",
+  "newChildThreatSuffix": "neu",
   "editThreat": "Bedrohung bearbeiten",
   "deleteThreat": "Bedrohung löschen",
   "edited": "Bearbeitet",

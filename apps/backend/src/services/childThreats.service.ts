@@ -77,8 +77,17 @@ export async function createChildThreat(
     return childthreat;
 }
 
+/** The user-editable subset of a child threat; identity fields are excluded on purpose. */
+export type ChildThreatRefinement = Partial<
+    Pick<
+        CreateChildThreat,
+        "name" | "description" | "probability" | "confidentiality" | "integrity" | "availability" | "status"
+    >
+>;
+
 export async function createThreatForGenericThreat(
     genericThreatId: number,
+    refinement: ChildThreatRefinement = {},
     transaction: TransactionType | undefined = undefined
 ): Promise<ChildThreat> {
     const genericThreat = await getGenericThreat(genericThreatId, transaction);
@@ -95,16 +104,16 @@ export async function createThreatForGenericThreat(
 
     const createThreatData: CreateChildThreat = {
         attacker: genericThreat.attacker,
-        name: genericThreat.name,
-        description: genericThreat.description,
-        confidentiality: catalogThreat?.confidentiality,
-        integrity: catalogThreat.integrity,
-        availability: catalogThreat.availability,
+        name: refinement.name ?? genericThreat.name,
+        description: refinement.description ?? genericThreat.description,
+        confidentiality: refinement.confidentiality ?? catalogThreat.confidentiality,
+        integrity: refinement.integrity ?? catalogThreat.integrity,
+        availability: refinement.availability ?? catalogThreat.availability,
         projectId: genericThreat.projectId,
         pointOfAttack: genericThreat.pointOfAttack,
-        probability: catalogThreat.probability,
+        probability: refinement.probability ?? catalogThreat.probability,
         pointOfAttackId: genericThreat.pointOfAttackId,
-        status: CHILD_THREAT_STATUSES.NEW,
+        status: refinement.status ?? CHILD_THREAT_STATUSES.NEW,
         genericThreatId: genericThreatId,
     };
 
