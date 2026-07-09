@@ -4,7 +4,15 @@
  */
 import { eq, getTableColumns, inArray } from "drizzle-orm";
 import { db, TransactionType } from "#db/index.js";
-import { CreateMeasureImpact, MeasureImpact, measureImpacts, measures, UpdateMeasureImpact } from "#db/schema.js";
+import {
+    childThreats,
+    CreateMeasureImpact,
+    MeasureImpact,
+    measureImpacts,
+    measures,
+    UpdateMeasureImpact,
+} from "#db/schema.js";
+import { CHILD_THREAT_STATUSES } from "#types/child-threat-statuses.types.js";
 
 /**
  * Gets all measure impacts of the specified project.
@@ -100,9 +108,10 @@ export async function createMeasureImpact(
  */
 export async function updateMeasureImpact(
     measureId: number,
-    updateMeasureImpactData: UpdateMeasureImpact
+    updateMeasureImpactData: UpdateMeasureImpact,
+    transaction: TransactionType | undefined = undefined
 ): Promise<MeasureImpact> {
-    const [measureImpact] = await db
+    const [measureImpact] = await (transaction ?? db)
         .update(measureImpacts)
         .set(updateMeasureImpactData)
         .where(eq(measureImpacts.id, measureId))
@@ -116,13 +125,56 @@ export async function updateMeasureImpact(
 }
 
 /**
+ * Aligns a child threat's status with its measure impacts: if any impact sets the threat out of
+ * scope the status becomes "out of scope"; once none do, an out-of-scope status reverts to
+ * "in progress". Callers only invoke this when an operation actually adds or removes an
+ * out-of-scope impact, so ordinary measure impacts never disturb the status. A status the user set
+ * out of scope by hand is only affected in the edge case where a redundant out-of-scope measure is
+ * later removed (accepted trade-off; no provenance is tracked).
+ *
+ * @param {number} childThreatId - The id of the child threat to reconcile.
+ * @param {TransactionType} transaction - drizzle transaction.
+ */
+export async function syncChildThreatStatusFromMeasureImpacts(
+    childThreatId: number,
+    transaction: TransactionType | undefined = undefined
+): Promise<void> {
+    const runner = transaction ?? db;
+
+    const impacts = await runner.query.measureImpacts.findMany({
+        where: eq(measureImpacts.childThreatId, childThreatId),
+    });
+    const hasOutOfScope = impacts.some((impact) => impact.setsOutOfScope);
+
+    const childThreat = await runner.query.childThreats.findFirst({ where: eq(childThreats.id, childThreatId) });
+    if (!childThreat) {
+        return;
+    }
+
+    if (hasOutOfScope && childThreat.status !== CHILD_THREAT_STATUSES.OUTOFSCOPE) {
+        await runner
+            .update(childThreats)
+            .set({ status: CHILD_THREAT_STATUSES.OUTOFSCOPE })
+            .where(eq(childThreats.id, childThreatId));
+    } else if (!hasOutOfScope && childThreat.status === CHILD_THREAT_STATUSES.OUTOFSCOPE) {
+        await runner
+            .update(childThreats)
+            .set({ status: CHILD_THREAT_STATUSES.IN_PROGRESS })
+            .where(eq(childThreats.id, childThreatId));
+    }
+}
+
+/**
  * Deletes a measure impact with the specified id.
  *
  * @param {number} measureImpactId - The id of the measure impact to delete.
  * @returns {Promise<void>} A promise that resolves when the measure impact is deleted.
  */
-export async function deleteMeasureImpact(measureImpactId: number): Promise<void> {
-    await db.delete(measureImpacts).where(eq(measureImpacts.id, measureImpactId));
+export async function deleteMeasureImpact(
+    measureImpactId: number,
+    transaction: TransactionType | undefined = undefined
+): Promise<void> {
+    await (transaction ?? db).delete(measureImpacts).where(eq(measureImpacts.id, measureImpactId));
 }
 
 /**
