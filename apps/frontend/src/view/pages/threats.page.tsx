@@ -572,7 +572,10 @@ const ThreatsPageBody = () => {
 
                 <Routes>
                     <Route path="edit" element={<ThreatDialogPage onSaved={() => void loadGenericThreats()} />} />
-                    <Route path="measureImpacts/edit" element={<MeasureImpactByMeasureDialogPage />}>
+                    <Route
+                        path="measureImpacts/edit"
+                        element={<MeasureImpactByMeasureDialogPage onApplied={() => void loadGenericThreats()} />}
+                    >
                         <Route path="measures/add" element={<AddMeasureDialogPage />} />
                     </Route>
                 </Routes>
