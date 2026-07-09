@@ -320,45 +320,6 @@ export const systems = pgTable(
     (table) => [unique("project_id").on(table.projectId)]
 );
 
-export type Threat = typeof threats.$inferSelect;
-export type CreateThreat = Omit<typeof threats.$inferInsert, DefaultFields>;
-export type UpdateThreat = Omit<CreateThreat, "pointOfAttackId" | "pointOfAttack" | "attacker" | "catalogThreatId">;
-
-export const threats = pgTable(
-    "threats",
-    {
-        id: integer().notNull().primaryKey().generatedByDefaultAsIdentity(),
-        pointOfAttackId: varchar({ length: 21 }).notNull(),
-        name: varchar({ length: 255 }).notNull(),
-        description: text().notNull(),
-        pointOfAttack: PointsOfAttackEnum().notNull(),
-        attacker: AttackersEnum().notNull(),
-        probability: integer().notNull(),
-        confidentiality: boolean().notNull(),
-        integrity: boolean().notNull(),
-        availability: boolean().notNull(),
-        doneEditing: boolean().notNull(),
-        createdAt: timestamp({ mode: "string", withTimezone: true })
-            .notNull()
-            .default(sql`now()`),
-        updatedAt: timestamp({ mode: "string", withTimezone: true })
-            .notNull()
-            .default(sql`now()`),
-        catalogThreatId: integer()
-            .notNull()
-            .references(() => catalogThreats.id, { onDelete: "cascade", onUpdate: "cascade" }),
-        projectId: integer()
-            .notNull()
-            .references(() => projects.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    },
-    (table) => [
-        check("threats_name_not_empty", sql`${table.name} <> ''`),
-        check("threats_probability_min_max", sql`${table.probability} between 1 and 5`),
-        index("threats_catalog_threat_id").on(table.catalogThreatId),
-        index("threats_project_id").on(table.projectId),
-    ]
-);
-
 export type GenericThreat = typeof genericThreats.$inferSelect;
 export type CreateGenericThreat = Omit<typeof genericThreats.$inferInsert, DefaultFields>;
 export type UpdateGenericThreat = Omit<
@@ -396,7 +357,7 @@ export const genericThreats = pgTable(
 );
 
 /*
- *   The child threats need to be renamed to just "threats" and the old "threats" table needs to be deleted.
+ *   The child threats still need to be renamed to just "threats".
  */
 
 export type ChildThreat = typeof childThreats.$inferSelect;
