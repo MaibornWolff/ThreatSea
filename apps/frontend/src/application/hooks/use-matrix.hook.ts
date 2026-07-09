@@ -126,7 +126,7 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
                                 return {
                                     measureId: measure.id,
                                     active: active,
-                                    catalogMeasureId: null,
+                                    catalogMeasureId: measure.catalogMeasureId,
                                     name: measure.name,
                                     description: measure.description,
                                     scheduledAt: measure.scheduledAt,
