@@ -2,6 +2,7 @@ import { View } from "@react-pdf/renderer";
 import type { IndexCallback, Project, ProjectReport } from "#api/types/project.types.ts";
 import { backgroundColor, s1 } from "#view/report/report.style.ts";
 import { Page } from "#view/report/components/page.report.component.tsx";
+import { componentCardFitsOnOnePage } from "#view/report/pages/report-card-page-fit.ts";
 import { useTranslation } from "react-i18next";
 import { Text } from "#view/report/components/text.report.component.tsx";
 import { colors } from "#view/wrappers/color-tokens.ts";
@@ -62,10 +63,11 @@ export const ComponentsDetailsPage = ({
 
 const ComponentCard = ({ name, description, reportId, language }: ComponentCardProps) => {
     const { t } = useTranslation("report", { lng: language });
+    const fitsOnOnePage = componentCardFitsOnOnePage({ name, description });
     return (
         <View
             id={reportId}
-            wrap={false}
+            wrap={!fitsOnOnePage}
             style={{
                 backgroundColor,
                 padding: s1,

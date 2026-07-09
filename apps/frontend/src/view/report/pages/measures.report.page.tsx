@@ -3,12 +3,11 @@ import { Link, View } from "@react-pdf/renderer";
 import type { Style } from "@react-pdf/types";
 import { useTranslation } from "react-i18next";
 import { Page } from "#view/report/components/page.report.component.tsx";
+import { measureCardFitsOnOnePage } from "#view/report/pages/report-card-page-fit.ts";
 import { Text } from "#view/report/components/text.report.component.tsx";
 import { backgroundColor, s1 } from "#view/report/report.style.ts";
 import type { IndexCallback, ProjectReport } from "#api/types/project.types.ts";
 import { colors } from "#view/wrappers/color-tokens.ts";
-
-const LIST_BREAKPOINT = 30;
 
 type ReportMeasure = Omit<ProjectReport["measures"][number], "scheduledAt"> & {
     scheduledAt: string | Date;
@@ -82,11 +81,11 @@ export const MeasuresDetailsPage = ({
 
 const MeasureCard = ({ language, reportId, id, name, description, scheduledAt, threats }: MeasureCardProps) => {
     const scheduledAtDate = typeof scheduledAt === "string" ? new Date(scheduledAt) : new Date(scheduledAt.getTime());
+    const fitsOnOnePage = measureCardFitsOnOnePage({ name, description, threats });
     return (
         <View
             id={`measure-${reportId}`}
-            //conditional Wrap
-            wrap={threats.length > LIST_BREAKPOINT}
+            wrap={!fitsOnOnePage}
             style={{
                 backgroundColor,
                 padding: s1,
