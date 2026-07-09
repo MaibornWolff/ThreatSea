@@ -17,7 +17,11 @@ interface MeasureImpactByMeasureDialogLocationState {
     measureImpact?: MeasureImpact | null;
 }
 
-export const MeasureImpactByMeasureDialogPage = () => {
+interface MeasureImpactByMeasureDialogPageProps {
+    onApplied?: () => void;
+}
+
+export const MeasureImpactByMeasureDialogPage = ({ onApplied }: MeasureImpactByMeasureDialogPageProps = {}) => {
     const { projectId = "" } = useParams<{ projectId: string }>();
     const { state: locationState } = useLocation() as Location<MeasureImpactByMeasureDialogLocationState | undefined>;
     // Capture the initial location state at mount time so that when the child route
@@ -37,6 +41,7 @@ export const MeasureImpactByMeasureDialogPage = () => {
                     open={true}
                     threat={threat}
                     measureImpact={measureImpact ?? null}
+                    {...(onApplied !== undefined ? { onApplied } : {})}
                 />
                 <Outlet />
             </>

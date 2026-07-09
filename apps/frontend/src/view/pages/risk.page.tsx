@@ -850,7 +850,10 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
             </Box>
             {checkUserRole(userRole, USER_ROLES.EDITOR) && (
                 <Routes>
-                    <Route path="measureImpacts/edit" element={<MeasureImpactByMeasureDialogPage />}>
+                    <Route
+                        path="measureImpacts/edit"
+                        element={<MeasureImpactByMeasureDialogPage onApplied={() => void loadChildThreats()} />}
+                    >
                         <Route path="measures/add" element={<AddMeasureDialogPage />} />
                     </Route>
                     <Route path="threats/edit" element={<ThreatDialogPage onSaved={() => void loadChildThreats()} />} />
