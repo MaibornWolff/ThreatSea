@@ -2,7 +2,6 @@ import { isFulfilled, isRejected } from "@reduxjs/toolkit";
 import type { AppMiddleware } from "#application/middlewares/types.ts";
 import { AlertActions } from "#application/actions/alert.actions.ts";
 import { ThreatsActions } from "#application/actions/threats.actions.ts";
-import { socket } from "#api/system-socket.api.ts";
 
 const asyncThunks = [
     ThreatsActions.updateThreat,
@@ -24,7 +23,6 @@ const handleSuccessfulRequest: AppMiddleware =
             if (ThreatsActions.deleteThreat.fulfilled.match(action)) {
                 const { payload: threat } = action;
                 dispatch(ThreatsActions.removeThreat(threat));
-                socket.emit("remove_threat", JSON.stringify(threat));
                 dispatch(
                     AlertActions.openSuccessAlert({
                         text: `Threat '${threat.name}' was deleted successfully`,
@@ -33,8 +31,6 @@ const handleSuccessfulRequest: AppMiddleware =
             } else {
                 const { payload: threat } = action;
                 dispatch(ThreatsActions.setThreat(threat));
-
-                socket.emit("set_threat", JSON.stringify(threat));
                 dispatch(
                     AlertActions.openSuccessAlert({
                         text: `Threat '${threat.name}' was saved successfully`,

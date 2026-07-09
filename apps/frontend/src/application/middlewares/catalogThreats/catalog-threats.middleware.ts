@@ -2,7 +2,6 @@ import { isFulfilled, isRejected } from "@reduxjs/toolkit";
 import type { AppMiddleware } from "#application/middlewares/types.ts";
 import { AlertActions } from "#application/actions/alert.actions.ts";
 import { CatalogThreatsActions } from "#application/actions/catalog-threats.actions.ts";
-import { socket } from "#api/system-socket.api.ts";
 import { translationUtil } from "#utils/translations.ts";
 
 const asyncThunks = [
@@ -25,7 +24,6 @@ const handleSuccessfulRequest: AppMiddleware =
             if (CatalogThreatsActions.deleteCatalogThreat.fulfilled.match(action)) {
                 const { payload } = action;
                 dispatch(CatalogThreatsActions.removeCatalogThreat(payload));
-                socket.emit("remove_catalog_threat", JSON.stringify(payload));
                 dispatch(
                     AlertActions.openSuccessAlert({
                         text: translationUtil.t("catalogPage:catalogThreats.alert.deleted", { name: payload.name }),
@@ -35,7 +33,6 @@ const handleSuccessfulRequest: AppMiddleware =
                 const { payload } = action;
                 payload.forEach((item) => {
                     dispatch(CatalogThreatsActions.setCatalogThreat(item));
-                    socket.emit("set_catalog_threat", JSON.stringify(item));
                 });
                 dispatch(
                     AlertActions.openSuccessAlert({
@@ -47,7 +44,6 @@ const handleSuccessfulRequest: AppMiddleware =
             } else {
                 const { payload } = action;
                 dispatch(CatalogThreatsActions.setCatalogThreat(payload));
-                socket.emit("set_catalog_threat", JSON.stringify(payload));
                 dispatch(
                     AlertActions.openSuccessAlert({
                         text: translationUtil.t("catalogPage:catalogThreats.alert.saved", { name: payload.name }),

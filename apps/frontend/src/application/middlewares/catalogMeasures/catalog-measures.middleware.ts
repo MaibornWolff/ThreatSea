@@ -2,7 +2,6 @@ import { isFulfilled, isRejected } from "@reduxjs/toolkit";
 import type { AppMiddleware } from "#application/middlewares/types.ts";
 import { AlertActions } from "#application/actions/alert.actions.ts";
 import { CatalogMeasuresActions } from "#application/actions/catalog-measures.actions.ts";
-import { socket } from "#api/system-socket.api.ts";
 import { translationUtil } from "#utils/translations.ts";
 
 const asyncThunks = [
@@ -25,7 +24,6 @@ const handleSuccessfulRequest: AppMiddleware =
             if (CatalogMeasuresActions.deleteCatalogMeasure.fulfilled.match(action)) {
                 const { payload } = action;
                 dispatch(CatalogMeasuresActions.removeCatalogMeasure(payload));
-                socket.emit("remove_catalog_measure", JSON.stringify(payload));
                 dispatch(
                     AlertActions.openSuccessAlert({
                         text: translationUtil.t("catalogPage:catalogMeasures.alert.deleted", { name: payload.name }),
@@ -35,7 +33,6 @@ const handleSuccessfulRequest: AppMiddleware =
                 const { payload } = action;
                 payload.forEach((item) => {
                     dispatch(CatalogMeasuresActions.setCatalogMeasure(item));
-                    socket.emit("set_catalog_measure", JSON.stringify(item));
                 });
                 dispatch(
                     AlertActions.openSuccessAlert({
@@ -47,7 +44,6 @@ const handleSuccessfulRequest: AppMiddleware =
             } else {
                 const { payload } = action;
                 dispatch(CatalogMeasuresActions.setCatalogMeasure(payload));
-                socket.emit("set_catalog_measure", JSON.stringify(payload));
                 dispatch(
                     AlertActions.openSuccessAlert({
                         text: translationUtil.t("catalogPage:catalogMeasures.alert.saved", { name: payload.name }),

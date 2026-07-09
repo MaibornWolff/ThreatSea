@@ -40,8 +40,7 @@
     "nocache": "4.0.0",
     "openid-client": "6.8.4",
     "pg": "8.22.0",
-    "reflect-metadata": "0.2.2",
-    "socket.io": "4.8.3"
+    "reflect-metadata": "0.2.2"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",

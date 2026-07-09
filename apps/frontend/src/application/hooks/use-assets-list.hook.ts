@@ -1,8 +1,5 @@
 import { useEffect, useMemo } from "react";
 import type { Asset } from "#api/types/asset.types.ts";
-import { socket } from "#api/system-socket.api.ts";
-import { AssetsActions } from "#application/actions/assets.actions.ts";
-import { useAppDispatch } from "./use-app-redux.hook";
 import { useAssets } from "./use-assets.hook";
 import { useList } from "./use-list.hooks";
 
@@ -14,7 +11,6 @@ const sortableAssetFields: (keyof Pick<
 type AssetSortField = (typeof sortableAssetFields)[number];
 
 export const useAssetsList = ({ projectId }: { projectId: number }) => {
-    const dispatch = useAppDispatch();
     const { isPending, items, loadAssets, deleteAsset } = useAssets({
         projectId,
     });
@@ -23,18 +19,6 @@ export const useAssetsList = ({ projectId }: { projectId: number }) => {
     useEffect(() => {
         loadAssets();
     }, [projectId, loadAssets]);
-
-    useEffect(() => {
-        socket.emit(
-            "change_project",
-            JSON.stringify({
-                projectId: projectId,
-            })
-        );
-        return () => {
-            socket.emit("leave_project", JSON.stringify({}));
-        };
-    }, [projectId]);
 
     const filteredItems = useMemo(
         () =>
@@ -70,21 +54,6 @@ export const useAssetsList = ({ projectId }: { projectId: number }) => {
             }
         });
     }, [filteredItems, sortBy, sortDirection]);
-
-    useEffect(() => {
-        const handleSet = (data: string) => {
-            dispatch(AssetsActions.setAsset(JSON.parse(data)));
-        };
-        const handleRemove = (data: string) => {
-            dispatch(AssetsActions.removeAsset(JSON.parse(data)));
-        };
-        socket.on("set_asset", handleSet);
-        socket.on("remove_asset", handleRemove);
-        return () => {
-            socket.off("set_asset", handleSet);
-            socket.off("remove_asset", handleRemove);
-        };
-    }, [dispatch]);
 
     return {
         setSortDirection,

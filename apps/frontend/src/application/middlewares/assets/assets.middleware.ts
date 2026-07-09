@@ -1,6 +1,5 @@
 import { isFulfilled, isRejected } from "@reduxjs/toolkit";
 import type { AppMiddleware } from "#application/middlewares/types.ts";
-import { socket } from "#api/system-socket.api.ts";
 import { AlertActions } from "#application/actions/alert.actions.ts";
 import { AssetsActions } from "#application/actions/assets.actions.ts";
 import { EditorActions } from "#application/actions/editor.actions.ts";
@@ -19,8 +18,6 @@ const handleSuccessfulRequest: AppMiddleware =
         if (isFullfiledAction(action)) {
             if (AssetsActions.deleteAsset.fulfilled.match(action)) {
                 const { payload } = action;
-                socket.emit("remove_asset", JSON.stringify(payload));
-
                 dispatch(AssetsActions.removeAsset(payload));
                 dispatch(EditorActions.setAutoSaveStatus("upToDate"));
                 dispatch(
@@ -30,7 +27,6 @@ const handleSuccessfulRequest: AppMiddleware =
                 );
             } else {
                 const { payload } = action;
-                socket.emit("set_asset", JSON.stringify(payload));
                 dispatch(AssetsActions.setAsset(payload));
                 dispatch(EditorActions.setAutoSaveStatus("upToDate"));
                 dispatch(

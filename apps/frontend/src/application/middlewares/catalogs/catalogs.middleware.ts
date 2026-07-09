@@ -1,6 +1,5 @@
 import { isFulfilled, isRejected } from "@reduxjs/toolkit";
 import type { AppMiddleware } from "#application/middlewares/types.ts";
-import { socket } from "#api/system-socket.api.ts";
 import { AlertActions } from "#application/actions/alert.actions.ts";
 import { CatalogsActions } from "#application/actions/catalogs.actions.ts";
 import { translationUtil } from "#utils/translations.ts";
@@ -22,7 +21,6 @@ const handleSuccessfulRequest: AppMiddleware =
         if (isFulfilledAction(action)) {
             if (CatalogsActions.deleteCatalog.fulfilled.match(action)) {
                 const { payload: catalog } = action;
-                socket.emit("remove_catalog", JSON.stringify(catalog));
                 dispatch(CatalogsActions.removeCatalog(catalog));
                 dispatch(
                     AlertActions.openSuccessAlert({
@@ -31,7 +29,6 @@ const handleSuccessfulRequest: AppMiddleware =
                 );
             } else {
                 const { payload: catalog } = action;
-                socket.emit("set_catalog", JSON.stringify(catalog));
                 dispatch(CatalogsActions.setCatalog(catalog));
                 dispatch(
                     AlertActions.openSuccessAlert({

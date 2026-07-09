@@ -1,6 +1,5 @@
 import { useEffect, useMemo } from "react";
 import type { Measure } from "#api/types/measure.types.ts";
-import { socket } from "#api/system-socket.api.ts";
 import { useMeasures } from "./use-measures.hook";
 import { useList } from "./use-list.hooks";
 
@@ -17,18 +16,6 @@ export const useMeasuresList = ({ projectId }: { projectId: number }) => {
     useEffect(() => {
         loadMeasures();
     }, [projectId, loadMeasures]);
-
-    useEffect(() => {
-        socket.emit(
-            "change_project",
-            JSON.stringify({
-                projectId: projectId,
-            })
-        );
-        return () => {
-            socket.emit("leave_project", JSON.stringify({}));
-        };
-    }, [projectId]);
 
     const filteredItems: Measure[] = useMemo(
         () =>
