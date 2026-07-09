@@ -175,7 +175,7 @@ async function createChildThreatsForAssetAssignedPointsOfAttack(
                 continue;
             }
 
-            await createThreatForGenericThreat(genericThreat.id, transaction);
+            await createThreatForGenericThreat(genericThreat.id, {}, transaction);
         }
     }
 }

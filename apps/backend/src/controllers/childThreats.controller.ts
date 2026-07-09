@@ -5,7 +5,12 @@
 import { NextFunction, Request, Response } from "express";
 import { BadRequestError } from "#errors/bad-request.error.js";
 import { NotFoundError } from "#errors/not-found.error.js";
-import { ChildThreatIdParam, ChildThreatResponse, UpdateChildThreatRequest } from "#types/childThreat.types.js";
+import {
+    ChildThreatIdParam,
+    ChildThreatResponse,
+    CreateChildThreatRequest,
+    UpdateChildThreatRequest,
+} from "#types/childThreat.types.js";
 import { GenericThreatIdParam } from "#types/genericThreat.types.js";
 import * as childThreatsService from "#services/childThreats.service.js";
 import * as genericThreatsService from "#services/genericThreats.service.js";
@@ -34,13 +39,6 @@ export async function getChildThreatsByGenericThreatId(
 
     if (genericThreat.projectId !== genericThreatProjectId) {
         next(new BadRequestError("Generic threat does not belong to this project"));
-        return;
-    }
-
-    // TODO: Is this check necessary? If so, is this the right error to throw?
-    // Copilot suggests empty list with 200 as response
-    if (childThreats.length === 0) {
-        next(new NotFoundError("Child threats not found"));
         return;
     }
 
@@ -81,7 +79,7 @@ export async function getChildThreat(
  * Creates a new child threat.
  */
 export async function createChildThreat(
-    request: Request<GenericThreatIdParam, ChildThreatResponse, UpdateChildThreatRequest>,
+    request: Request<GenericThreatIdParam, ChildThreatResponse, CreateChildThreatRequest>,
     response: Response<ChildThreatResponse>,
     next: NextFunction
 ): Promise<void> {
@@ -102,22 +100,10 @@ export async function createChildThreat(
             return;
         }
 
-        // The body carries only the user's refinement; identity is inherited
-        // from the immutable parent and cannot be chosen by the client.
-        const created = await childThreatsService.createChildThreat({
-            name: createBody.name,
-            description: createBody.description,
-            probability: createBody.probability,
-            confidentiality: createBody.confidentiality,
-            integrity: createBody.integrity,
-            availability: createBody.availability,
-            status: createBody.status,
-            genericThreatId,
-            projectId,
-            pointOfAttackId: genericThreat.pointOfAttackId,
-            pointOfAttack: genericThreat.pointOfAttack,
-            attacker: genericThreat.attacker,
-        });
+        // The body carries only optional refinement overrides; identity is inherited
+        // from the immutable parent (and assessment defaults from the catalogue threat)
+        // and cannot be chosen by the client.
+        const created = await childThreatsService.createThreatForGenericThreat(genericThreatId, createBody);
 
         response.status(201).json(created);
     } catch (err) {

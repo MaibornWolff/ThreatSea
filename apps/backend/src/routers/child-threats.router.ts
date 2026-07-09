@@ -10,7 +10,12 @@ import {
     updateChildThreat,
 } from "#controllers/childThreats.controller.js";
 import { CheckProjectRoleHandler } from "#guards/authorisation.guard.js";
-import { ChildThreatIdParam, ChildThreatResponse, UpdateChildThreatRequest } from "#types/childThreat.types.js";
+import {
+    ChildThreatIdParam,
+    ChildThreatResponse,
+    CreateChildThreatRequest,
+    UpdateChildThreatRequest,
+} from "#types/childThreat.types.js";
 import { GenericThreatIdParam } from "#types/genericThreat.types.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
 import {
@@ -35,10 +40,10 @@ childThreatsRouter.get<ChildThreatIdParam, ChildThreatResponse, void>(
     getChildThreat
 );
 
-childThreatsRouter.post<GenericThreatIdParam, ChildThreatResponse, UpdateChildThreatRequest>(
+childThreatsRouter.post<GenericThreatIdParam, ChildThreatResponse, CreateChildThreatRequest>(
     "/:genericThreatId",
     ValidateParamHandler(GenericThreatIdParam),
-    ValidateBodyHandler(UpdateChildThreatRequest),
+    ValidateBodyHandler(CreateChildThreatRequest),
     CheckProjectRoleHandler(USER_ROLES.EDITOR),
     createChildThreat
 );
