@@ -3,7 +3,7 @@ import { Link, View } from "@react-pdf/renderer";
 import type { Style } from "@react-pdf/types";
 import { s1, fontColor, backgroundColor, s2, s4 } from "#view/report/report.style.ts";
 import { Page } from "#view/report/components/page.report.component.tsx";
-import { threatCardFitsOnOnePage } from "#view/report/pages/threat-card-page-fit.ts";
+import { threatCardFitsOnOnePage } from "#view/report/pages/report-card-page-fit.ts";
 import { useTranslation } from "react-i18next";
 import { Text } from "#view/report/components/text.report.component.tsx";
 import { MATRIX_COLOR } from "#view/colors/matrix.ts";
@@ -162,11 +162,10 @@ const ThreatCard = ({
     netRisk,
     ...props
 }: ThreatCardProps) => {
-    const fitsOnOnePage = threatCardFitsOnOnePage({ description, assets, measures });
+    const fitsOnOnePage = threatCardFitsOnOnePage({ name, description, assets, measures });
     return (
         <View
             id={`threat-${reportId}`}
-            // Keep a card that fits on a page together, otherwise allow it to break across pages
             wrap={!fitsOnOnePage}
             style={{
                 backgroundColor,
@@ -272,15 +271,16 @@ const RiskInfo = ({
     const { t } = useTranslation("report", { lng: language });
     return (
         <View
+            wrap={false}
             style={{
+                flex: 1,
                 display: "flex",
                 flexDirection: "column",
-                alignItems: "stretch",
+                alignItems: "flex-end",
             }}
         >
             <View
                 style={{
-                    flex: 1,
                     display: "flex",
                     flexDirection: "row",
                     alignItems: "center",
@@ -398,6 +398,7 @@ const Header = ({ language, reportId, id, name, confidentiality, integrity, avai
     return (
         <View
             style={{
+                flex: 1,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "stretch",
@@ -597,9 +598,11 @@ const MeasuresList = ({ measures, style, language, showMeasuresPage }: MeasuresL
                         ) : (
                             label
                         )}
-                        <Text size="small" style={{ marginLeft: s2, fontStyle: "italic" }}>
-                            {description}
-                        </Text>
+                        {description && (
+                            <Text size="small" style={{ marginLeft: s2, fontStyle: "italic" }}>
+                                {description}
+                            </Text>
+                        )}
                     </View>
                 );
             })}
