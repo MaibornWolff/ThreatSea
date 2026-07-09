@@ -185,10 +185,16 @@ const AddThreatDialog = ({
         });
     };
 
-    const handleDeleteMeasureThreat = (measureThreat: ThreatMeasure) => {
+    const handleDeleteMeasureThreat = async (measureThreat: ThreatMeasure) => {
         const { measureImpact } = measureThreat;
         const data = { ...measureImpact, projectId };
-        deleteMeasureImpact(data);
+        try {
+            await deleteMeasureImpact(data).unwrap();
+            // Removing the impact may revert the threat's out-of-scope status, so refresh the host list.
+            onSaved?.();
+        } catch {
+            // handled globally
+        }
     };
 
     const onClickApplyMeasure = () => {
