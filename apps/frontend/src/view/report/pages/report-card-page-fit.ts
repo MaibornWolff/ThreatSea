@@ -110,3 +110,28 @@ export const measureCardFitsOnOnePage = ({ name, description, threats }: Measure
     const estimatedHeight = CARD_CHROME_HEIGHT + (headerLines + descriptionLines + threatLines) * LINE_HEIGHT;
     return estimatedHeight < ATOMIC_LIMIT;
 };
+
+// Groups items so that consecutive small (atomic) items share one page and each large
+// (wrappable) item gets its own dedicated page.
+export const buildGroups = <T>(items: T[], fitsOnOnePage: (item: T) => boolean): T[][] => {
+    if (items.length === 0) {
+        return [[]];
+    }
+    const groups: T[][] = [];
+    let current: T[] = [];
+    for (const item of items) {
+        if (fitsOnOnePage(item)) {
+            current.push(item);
+        } else {
+            if (current.length > 0) {
+                groups.push(current);
+                current = [];
+            }
+            groups.push([item]);
+        }
+    }
+    if (current.length > 0) {
+        groups.push(current);
+    }
+    return groups;
+};

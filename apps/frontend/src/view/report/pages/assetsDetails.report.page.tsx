@@ -4,8 +4,8 @@ import type { Style } from "@react-pdf/types";
 import type { Asset } from "#api/types/asset.types.ts";
 import type { IndexCallback, Project } from "#api/types/project.types.ts";
 import { backgroundColor, s1 } from "#view/report/report.style.ts";
-import { Page } from "#view/report/components/page.report.component.tsx";
-import { assetCardFitsOnOnePage } from "#view/report/pages/report-card-page-fit.ts";
+import { ChapterPages } from "#view/report/components/chapter-pages.report.component.tsx";
+import { assetCardFitsOnOnePage, buildGroups } from "#view/report/pages/report-card-page-fit.ts";
 import { useTranslation } from "react-i18next";
 import { Text } from "#view/report/components/text.report.component.tsx";
 import { colors } from "#view/wrappers/color-tokens.ts";
@@ -48,62 +48,20 @@ interface JustificationsProps {
     availabilityJustification: string;
 }
 
-const buildAssetGroups = (assets: AssetWithReportId[]): AssetWithReportId[][] => {
-    if (assets.length === 0) {
-        return [[]];
-    }
-    const groups: AssetWithReportId[][] = [];
-    let current: AssetWithReportId[] = [];
-    for (const asset of assets) {
-        if (assetCardFitsOnOnePage(asset)) {
-            current.push(asset);
-        } else {
-            if (current.length > 0) {
-                groups.push(current);
-                current = [];
-            }
-            groups.push([asset]);
-        }
-    }
-    if (current.length > 0) {
-        groups.push(current);
-    }
-    return groups;
-};
-
 export const AssetsDetailsPage = ({ indexCallback, language, project, logo, date, assets }: AssetsDetailsPageProps) => {
-    const linkId = "assetsDetails";
     const { t } = useTranslation("report", { lng: language });
-    const groups = buildAssetGroups(assets);
-    const pageProps = {
-        logo,
-        projectName: project.name,
-        date,
-        confidentialityLevel: t("confidentialityLevels." + project.confidentialityLevel),
-    };
     return (
-        <>
-            {groups.map((group, groupIdx) => (
-                <Page key={groupIdx} {...pageProps}>
-                    {groupIdx === 0 && (
-                        <>
-                            <View
-                                render={({ pageNumber }) => {
-                                    indexCallback(pageNumber, t("assets"), linkId);
-                                    return null;
-                                }}
-                            />
-                            <Text id={`chapter-${linkId}`} size="header" style={{ marginBottom: s1 }}>
-                                Assets
-                            </Text>
-                        </>
-                    )}
-                    {group.map((asset) => (
-                        <AssetCard key={asset.id} language={language} {...asset} />
-                    ))}
-                </Page>
-            ))}
-        </>
+        <ChapterPages
+            groups={buildGroups(assets, assetCardFitsOnOnePage)}
+            logo={logo}
+            projectName={project.name}
+            date={date}
+            confidentialityLevel={t("confidentialityLevels." + project.confidentialityLevel)}
+            chapterId="assetsDetails"
+            chapterTitle={t("assets")}
+            indexCallback={indexCallback}
+            renderCard={(asset) => <AssetCard key={asset.id} language={language} {...asset} />}
+        />
     );
 };
 

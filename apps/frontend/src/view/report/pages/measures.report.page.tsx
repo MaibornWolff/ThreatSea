@@ -2,8 +2,8 @@ import { type ReactNode } from "react";
 import { Link, View } from "@react-pdf/renderer";
 import type { Style } from "@react-pdf/types";
 import { useTranslation } from "react-i18next";
-import { Page } from "#view/report/components/page.report.component.tsx";
-import { measureCardFitsOnOnePage } from "#view/report/pages/report-card-page-fit.ts";
+import { ChapterPages } from "#view/report/components/chapter-pages.report.component.tsx";
+import { measureCardFitsOnOnePage, buildGroups } from "#view/report/pages/report-card-page-fit.ts";
 import { Text } from "#view/report/components/text.report.component.tsx";
 import { backgroundColor, s1 } from "#view/report/report.style.ts";
 import type { IndexCallback, ProjectReport } from "#api/types/project.types.ts";
@@ -40,29 +40,6 @@ interface ThreatsListProps {
     language: string;
 }
 
-const buildMeasureGroups = (measures: ReportMeasure[]): ReportMeasure[][] => {
-    if (measures.length === 0) {
-        return [[]];
-    }
-    const groups: ReportMeasure[][] = [];
-    let current: ReportMeasure[] = [];
-    for (const measure of measures) {
-        if (measureCardFitsOnOnePage(measure)) {
-            current.push(measure);
-        } else {
-            if (current.length > 0) {
-                groups.push(current);
-                current = [];
-            }
-            groups.push([measure]);
-        }
-    }
-    if (current.length > 0) {
-        groups.push(current);
-    }
-    return groups;
-};
-
 export const MeasuresDetailsPage = ({
     indexCallback,
     language,
@@ -71,38 +48,19 @@ export const MeasuresDetailsPage = ({
     date,
     measures,
 }: MeasuresDetailsPageProps) => {
-    const linkId = "measuresDetails";
     const { t } = useTranslation("report", { lng: language });
-    const groups = buildMeasureGroups(measures);
-    const pageProps = {
-        logo,
-        projectName: project.name,
-        date,
-        confidentialityLevel: t("confidentialityLevels." + project.confidentialityLevel),
-    };
     return (
-        <>
-            {groups.map((group, groupIdx) => (
-                <Page key={groupIdx} {...pageProps}>
-                    {groupIdx === 0 && (
-                        <>
-                            <View
-                                render={({ pageNumber }) => {
-                                    indexCallback(pageNumber, t("measures"), linkId);
-                                    return null;
-                                }}
-                            />
-                            <Text id={`chapter-${linkId}`} size="header" style={{ marginBottom: s1 }}>
-                                {t("measures")}
-                            </Text>
-                        </>
-                    )}
-                    {group.map((measure) => (
-                        <MeasureCard key={measure.id} language={language} {...measure} />
-                    ))}
-                </Page>
-            ))}
-        </>
+        <ChapterPages
+            groups={buildGroups(measures, measureCardFitsOnOnePage)}
+            logo={logo}
+            projectName={project.name}
+            date={date}
+            confidentialityLevel={t("confidentialityLevels." + project.confidentialityLevel)}
+            chapterId="measuresDetails"
+            chapterTitle={t("measures")}
+            indexCallback={indexCallback}
+            renderCard={(measure) => <MeasureCard key={measure.id} language={language} {...measure} />}
+        />
     );
 };
 
