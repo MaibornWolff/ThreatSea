@@ -9,7 +9,6 @@ import TableRow from "@mui/material/TableRow";
 import { Fragment, memo, useEffect, useLayoutEffect, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router";
-import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { ChildThreatsActions } from "#application/actions/childThreats.actions.ts";
@@ -39,7 +38,7 @@ import { CHILD_THREAT_STATUSES } from "#api/types/child-threat-statuses.types.ts
 const ThreatsPageBody = () => {
     const { projectId: projectIdParam = "0" } = useParams<{ projectId?: string }>();
     const projectId = Number.parseInt(projectIdParam, 10);
-    const { openConfirm } = useConfirm<ExtendedThreat | ChildThreat>();
+    const { openConfirm } = useConfirm<ChildThreat>();
     const navigate = useNavigate();
     const { t } = useTranslation("threatsPage");
 
