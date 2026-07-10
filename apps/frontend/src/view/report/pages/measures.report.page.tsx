@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import { Link, View } from "@react-pdf/renderer";
 import type { Style } from "@react-pdf/types";
 import { useTranslation } from "react-i18next";
@@ -26,7 +26,6 @@ interface MeasuresDetailsPageProps {
 }
 
 interface MeasureCardProps extends ReportMeasure {
-    isFirstCard: boolean;
     language: string;
 }
 
@@ -74,29 +73,25 @@ export const MeasuresDetailsPage = ({
                 {t("measures")}
             </Text>
             {measures.map((measure, i) => {
-                return <MeasureCard key={i} isFirstCard={i === 0} language={language} {...measure} />;
+                return (
+                    <Fragment key={i}>
+                        {/* Never start a card as a squashed sliver at the page bottom */}
+                        <View minPresenceAhead={120} />
+                        <MeasureCard language={language} {...measure} />
+                    </Fragment>
+                );
             })}
         </Page>
     );
 };
 
-const MeasureCard = ({
-    isFirstCard,
-    language,
-    reportId,
-    id,
-    name,
-    description,
-    scheduledAt,
-    threats,
-}: MeasureCardProps) => {
+const MeasureCard = ({ language, reportId, id, name, description, scheduledAt, threats }: MeasureCardProps) => {
     const scheduledAtDate = typeof scheduledAt === "string" ? new Date(scheduledAt) : new Date(scheduledAt.getTime());
     const fitsOnOnePage = measureCardFitsOnOnePage({ name, description, threats });
     return (
         <View
             id={`measure-${reportId}`}
             wrap={!fitsOnOnePage}
-            break={!fitsOnOnePage && !isFirstCard}
             style={{
                 backgroundColor,
                 padding: s1,

@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { View } from "@react-pdf/renderer";
 import type { IndexCallback, Project, ProjectReport } from "#api/types/project.types.ts";
 import { backgroundColor, s1 } from "#view/report/report.style.ts";
@@ -19,7 +20,6 @@ interface ComponentsDetailsPageProps {
 }
 
 interface ComponentCardProps extends ComponentWithReportId {
-    isFirstCard: boolean;
     language: string;
 }
 
@@ -56,20 +56,25 @@ export const ComponentsDetailsPage = ({
                 {t("components")}
             </Text>
             {components.map((component, i) => {
-                return <ComponentCard key={i} isFirstCard={i === 0} language={language} {...component} />;
+                return (
+                    <Fragment key={i}>
+                        {/* Never start a card as a squashed sliver at the page bottom */}
+                        <View minPresenceAhead={80} />
+                        <ComponentCard language={language} {...component} />
+                    </Fragment>
+                );
             })}
         </Page>
     );
 };
 
-const ComponentCard = ({ isFirstCard, name, description, reportId, language }: ComponentCardProps) => {
+const ComponentCard = ({ name, description, reportId, language }: ComponentCardProps) => {
     const { t } = useTranslation("report", { lng: language });
     const fitsOnOnePage = componentCardFitsOnOnePage({ name, description });
     return (
         <View
             id={reportId}
             wrap={!fitsOnOnePage}
-            break={!fitsOnOnePage && !isFirstCard}
             style={{
                 backgroundColor,
                 padding: s1,

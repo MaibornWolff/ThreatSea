@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import { Link, View } from "@react-pdf/renderer";
 import type { Style } from "@react-pdf/types";
 import { s1, fontColor, backgroundColor, s2, s4 } from "#view/report/report.style.ts";
@@ -28,7 +28,6 @@ interface ThreatsDetailsPageProps {
 }
 
 interface ThreatCardProps extends ThreatReport {
-    isFirstCard: boolean;
     language: string;
     showComponentsPage: boolean;
     showAssetsPage: boolean;
@@ -121,15 +120,18 @@ export const ThreatsDetailsPage = ({
             </Text>
             {threats.map((threat, i) => {
                 return (
-                    <ThreatCard
-                        key={i}
-                        isFirstCard={i === 0}
-                        language={language}
-                        showComponentsPage={showComponentsPage}
-                        showAssetsPage={showAssetsPage}
-                        showMeasuresPage={showMeasuresPage}
-                        {...threat}
-                    />
+                    <Fragment key={i}>
+                        {/* Pushes the card to the next page when less than a header's height
+                            remains, so a card never starts as a squashed sliver at the bottom. */}
+                        <View minPresenceAhead={180} />
+                        <ThreatCard
+                            language={language}
+                            showComponentsPage={showComponentsPage}
+                            showAssetsPage={showAssetsPage}
+                            showMeasuresPage={showMeasuresPage}
+                            {...threat}
+                        />
+                    </Fragment>
                 );
             })}
         </Page>
@@ -137,7 +139,6 @@ export const ThreatsDetailsPage = ({
 };
 
 const ThreatCard = ({
-    isFirstCard,
     reportId,
     id,
     name,
@@ -170,7 +171,6 @@ const ThreatCard = ({
         <View
             id={`threat-${reportId}`}
             wrap={!fitsOnOnePage}
-            break={!fitsOnOnePage && !isFirstCard}
             style={{
                 backgroundColor,
                 padding: s1,
@@ -275,7 +275,6 @@ const RiskInfo = ({
     const { t } = useTranslation("report", { lng: language });
     return (
         <View
-            wrap={false}
             style={{
                 flex: 1,
                 display: "flex",

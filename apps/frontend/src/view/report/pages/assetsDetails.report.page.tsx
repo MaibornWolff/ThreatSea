@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import { View } from "@react-pdf/renderer";
 import type { Style } from "@react-pdf/types";
 import type { Asset } from "#api/types/asset.types.ts";
@@ -22,7 +22,6 @@ interface AssetsDetailsPageProps {
 }
 
 interface AssetCardProps extends AssetWithReportId {
-    isFirstCard: boolean;
     language: string;
 }
 
@@ -75,14 +74,19 @@ export const AssetsDetailsPage = ({ indexCallback, language, project, logo, date
                 Assets
             </Text>
             {assets.map((asset, i) => {
-                return <AssetCard key={i} isFirstCard={i === 0} language={language} {...asset} />;
+                return (
+                    <Fragment key={i}>
+                        {/* Never start a card as a squashed sliver at the page bottom */}
+                        <View minPresenceAhead={120} />
+                        <AssetCard language={language} {...asset} />
+                    </Fragment>
+                );
             })}
         </Page>
     );
 };
 
 const AssetCard = ({
-    isFirstCard,
     name,
     id,
     description,
@@ -106,7 +110,6 @@ const AssetCard = ({
         <View
             id={reportId}
             wrap={!fitsOnOnePage}
-            break={!fitsOnOnePage && !isFirstCard}
             style={{
                 backgroundColor,
                 padding: s1,
