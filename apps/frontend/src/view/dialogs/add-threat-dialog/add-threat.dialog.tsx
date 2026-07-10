@@ -92,7 +92,19 @@ const AddThreatDialog = ({
 
     const handleConfirmDialog = async (data: ThreatFormValues) => {
         try {
-            await dispatch(ChildThreatsActions.updateChildThreat({ ...data, id: threatId, projectId })).unwrap();
+            await dispatch(
+                ChildThreatsActions.updateChildThreat({
+                    name: data.name,
+                    description: data.description,
+                    ...(data.probability === "" ? {} : { probability: data.probability }),
+                    confidentiality: data.confidentiality,
+                    integrity: data.integrity,
+                    availability: data.availability,
+                    status: data.status,
+                    id: threatId,
+                    projectId,
+                })
+            ).unwrap();
             onSaved?.();
             closeDialog();
         } catch {
