@@ -1,5 +1,12 @@
 import { AnchorOrientation, type AugmentedSystemComponent } from "#api/types/system.types.ts";
 
+export interface Point {
+    x: number;
+    y: number;
+}
+
+export const GEOMETRY_TOLERANCE = 1e-6; // coordinates closer than this count as equal (absorbs float rounding)
+
 /**
  * Grid size for snapping waypoints to a grid.
  * Helps keep connections aligned and readable.
@@ -26,6 +33,61 @@ export const GRID = 5;
 export function snapToGrid(value: number, grid: number = GRID): number {
     return Math.round(value / grid) * grid;
 }
+
+/** Reads a flat [x, y, x, y, …] waypoint array back into points. */
+export const pointsFromWaypoints = (waypoints: number[]): Point[] => {
+    const points: Point[] = [];
+    for (let index = 0; index + 1 < waypoints.length; index += 2) {
+        points.push({ x: waypoints[index]!, y: waypoints[index + 1]! });
+    }
+    return points;
+};
+
+/** Turns [{x,y}, …] into the flat [x, y, x, y, …] array Konva's <Line> expects. */
+export const flattenPoints = (points: Point[]): number[] => {
+    const result: number[] = [];
+    for (const point of points) {
+        result.push(point.x, point.y);
+    }
+    return result;
+};
+
+/** Removes duplicate points and points sitting in the middle of a straight line — keeps only real corners. */
+export const simplifyPolyline = (points: Point[]): Point[] => {
+    const deduped: Point[] = [];
+    for (const point of points) {
+        const last = deduped[deduped.length - 1];
+        if (
+            !last ||
+            Math.abs(last.x - point.x) > GEOMETRY_TOLERANCE ||
+            Math.abs(last.y - point.y) > GEOMETRY_TOLERANCE
+        ) {
+            deduped.push(point);
+        }
+    }
+
+    const simplified: Point[] = [];
+    for (let index = 0; index < deduped.length; index++) {
+        const current = deduped[index];
+        const previous = simplified[simplified.length - 1];
+        const next = deduped[index + 1];
+        if (current && previous && next) {
+            const collinearVertical =
+                Math.abs(previous.x - current.x) < GEOMETRY_TOLERANCE &&
+                Math.abs(current.x - next.x) < GEOMETRY_TOLERANCE;
+            const collinearHorizontal =
+                Math.abs(previous.y - current.y) < GEOMETRY_TOLERANCE &&
+                Math.abs(current.y - next.y) < GEOMETRY_TOLERANCE;
+            if (collinearVertical || collinearHorizontal) {
+                continue;
+            }
+        }
+        if (current) {
+            simplified.push(current);
+        }
+    }
+    return simplified;
+};
 
 /**
  * Converts a flat array of numbers (x1, y1, x2, y2, ...) to an array of points.

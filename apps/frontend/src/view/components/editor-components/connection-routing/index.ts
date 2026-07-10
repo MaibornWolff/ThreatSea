@@ -4,13 +4,14 @@ import {
     buildRouteScoringContext,
     compareRouteDefects,
     countRouteDefects,
-    pointsFromWaypoints,
 } from "./shared.ts";
+import { pointsFromWaypoints } from "#utils/connection-waypoints.ts";
 import { routeFishbone } from "./fishbone.ts";
 import { routeDeterministic } from "./deterministic.ts";
 
 export type { ConnectionRoutingInput, ConnectionRoutingResult } from "./shared.ts";
-export { rectangleOf, segmentHitsRectangle, simplifyPolyline, hasDrawableLine } from "./shared.ts";
+export { rectangleOf, segmentHitsRectangle, hasDrawableLine } from "./shared.ts";
+export { simplifyPolyline } from "#utils/connection-waypoints.ts";
 
 export function computeConnectionRouting(input: ConnectionRoutingInput): ConnectionRoutingResult | null {
     const fishbone = routeFishbone(input);

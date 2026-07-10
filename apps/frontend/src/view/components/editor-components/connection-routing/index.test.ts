@@ -1,7 +1,8 @@
 import { computeConnectionRouting } from "./index.ts";
 import { routeFishbone } from "./fishbone.ts";
 import { routeDeterministic } from "./deterministic.ts";
-import { buildRouteScoringContext, countRouteDefects, pointsFromWaypoints } from "./shared.ts";
+import { buildRouteScoringContext, countRouteDefects } from "./shared.ts";
+import { pointsFromWaypoints } from "#utils/connection-waypoints.ts";
 import { crossesTransversally, segmentsOf } from "#test-utils/connection-routing-helpers.ts";
 import { createAugmentedConnection, createSystemComponent } from "#test-utils/builders.ts";
 

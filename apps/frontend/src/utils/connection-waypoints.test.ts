@@ -8,6 +8,8 @@ import {
     anchorPointForComponent,
     reanchorEndpoint,
     cursorForSegment,
+    flattenPoints,
+    simplifyPolyline,
 } from "./connection-waypoints";
 import { AnchorOrientation } from "#api/types/system.types.ts";
 import { createSystemComponent } from "#test-utils/builders.ts";
@@ -266,5 +268,59 @@ describe("reanchorEndpoint", () => {
         expect(out.slice(0, 2)).toEqual([0, -20]);
         expect(out.slice(-2)).toEqual([40, 0]);
         assertOrthogonal(out);
+    });
+});
+
+describe("simplifyPolyline", () => {
+    it("collapses a straight run to its endpoints", () => {
+        const simplified = simplifyPolyline([
+            { x: 0, y: 0 },
+            { x: 10, y: 0 },
+            { x: 20, y: 0 },
+        ]);
+
+        expect(simplified).toEqual([
+            { x: 0, y: 0 },
+            { x: 20, y: 0 },
+        ]);
+    });
+
+    it("keeps the corner of an L-shaped path", () => {
+        const simplified = simplifyPolyline([
+            { x: 0, y: 0 },
+            { x: 10, y: 0 },
+            { x: 10, y: 10 },
+        ]);
+
+        expect(simplified).toEqual([
+            { x: 0, y: 0 },
+            { x: 10, y: 0 },
+            { x: 10, y: 10 },
+        ]);
+    });
+
+    it("drops consecutive duplicate points", () => {
+        const simplified = simplifyPolyline([
+            { x: 0, y: 0 },
+            { x: 0, y: 0 },
+            { x: 10, y: 0 },
+        ]);
+
+        expect(simplified).toEqual([
+            { x: 0, y: 0 },
+            { x: 10, y: 0 },
+        ]);
+    });
+});
+
+describe("flattenPoints", () => {
+    it("turns points into the flat array Konva's Line expects", () => {
+        expect(
+            flattenPoints([
+                { x: 0, y: 0 },
+                { x: 10, y: 20 },
+                { x: 10, y: 50 },
+            ])
+        ).toEqual([0, 0, 10, 20, 10, 50]);
     });
 });

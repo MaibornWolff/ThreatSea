@@ -15,12 +15,11 @@
  */
 import { AnchorOrientation, type AugmentedSystemComponent, type ConnectionPointMeta } from "#api/types/system.types.ts";
 import type { AugmentedSystemConnection } from "#application/selectors/system.selectors.ts";
-import { findBestAnchor } from "#utils/connection-waypoints.ts";
+import { type Point, findBestAnchor, flattenPoints, simplifyPolyline } from "#utils/connection-waypoints.ts";
 import {
     type ConnectionRoutingInput,
     type ConnectionRoutingResult,
     type Face,
-    type Point,
     allFinite,
     buildAnchorMeta,
     buildDegreeMap,
@@ -28,7 +27,6 @@ import {
     countObstacleHits,
     crossesTransversally,
     faceMidpoint,
-    flattenPoints,
     isHorizontalFace,
     isOrthogonal,
     outwardUnit,
@@ -37,7 +35,6 @@ import {
     sameDirection,
     segmentHitsRectangle,
     shrinkRectangle,
-    simplifyPolyline,
     stepDirection,
 } from "./shared.ts";
 
