@@ -136,8 +136,6 @@ export async function deleteGenericThreat(genericThreatId: number): Promise<void
     await db.delete(genericThreats).where(eq(genericThreats.id, genericThreatId));
 }
 
-// used to delete obsolete generic threats, maybe it should not only check for pointOfAttackId but also for projectId to be more precise
-
 export async function deleteGenericThreatsByPointOfAttackId(
     pointOfAttackId: string,
     projectId: number,
