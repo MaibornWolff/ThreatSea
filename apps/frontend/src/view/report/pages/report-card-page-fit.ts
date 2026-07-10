@@ -22,15 +22,25 @@ const textLines = (text: string | null | undefined, charsPerLine: number): numbe
 interface ThreatCardShape {
     name: string | null | undefined;
     description: string | null | undefined;
+    componentName: string | null | undefined;
     assets: readonly { name?: string | null | undefined }[];
     measures: readonly { name?: string | null | undefined; description?: string | null | undefined }[];
 }
 
-export const threatCardFitsOnOnePage = ({ name, description, assets, measures }: ThreatCardShape): boolean => {
+export const threatCardFitsOnOnePage = ({
+    name,
+    description,
+    componentName,
+    assets,
+    measures,
+}: ThreatCardShape): boolean => {
     // header row: title (narrow, wrapping) + id + CIA labels, at least as tall as the risk matrix
     const headerLines = Math.max(textLines(name, TITLE_CHARS_PER_LINE) + 3, 8);
-    // two-column body: informations (component/attacker/point of attack + assets) beside description
-    const informationLines = 8 + assets.reduce((sum, asset) => sum + textLines(asset.name, COLUMN_CHARS_PER_LINE), 0);
+    // two-column body: informations (component name/attacker/point of attack + assets) beside description
+    const informationLines =
+        8 +
+        textLines(componentName, COLUMN_CHARS_PER_LINE) +
+        assets.reduce((sum, asset) => sum + textLines(asset.name, COLUMN_CHARS_PER_LINE), 0);
     const descriptionLines = textLines(description, COLUMN_CHARS_PER_LINE);
     const bodyLines = Math.max(informationLines, descriptionLines);
     // measures: section title, then per measure its full-width name, indented description and spacing

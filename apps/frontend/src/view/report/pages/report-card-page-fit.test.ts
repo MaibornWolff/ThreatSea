@@ -11,6 +11,7 @@ describe("threatCardFitsOnOnePage", () => {
     const card = (overrides: Partial<Parameters<typeof threatCardFitsOnOnePage>[0]> = {}) => ({
         name: "detremental access",
         description: "An attacker gains access to stored contents.",
+        componentName: "Client",
         assets: [{ name: "test asset1" }],
         measures: [],
         ...overrides,
@@ -41,6 +42,13 @@ describe("threatCardFitsOnOnePage", () => {
     it("wraps a card whose description is many short newline-separated lines despite a low character count", () => {
         const listDescription = Array.from({ length: 45 }, (_unused, index) => `- item ${index}`).join("\n");
         expect(threatCardFitsOnOnePage(card({ description: listDescription }))).toBe(false);
+    });
+
+    it("counts a long component name towards the informations column", () => {
+        const measures = Array.from({ length: 4 }, () => ({ name: "measure", description: "Applied." }));
+        const base = card({ measures });
+        expect(threatCardFitsOnOnePage(base)).toBe(true);
+        expect(threatCardFitsOnOnePage({ ...base, componentName: "N".repeat(255) })).toBe(false);
     });
 });
 

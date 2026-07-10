@@ -68,6 +68,7 @@ const ComponentCard = ({ name, description, reportId, language }: ComponentCardP
         <View
             id={reportId}
             wrap={!fitsOnOnePage}
+            break={!fitsOnOnePage}
             style={{
                 backgroundColor,
                 padding: s1,

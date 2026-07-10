@@ -104,6 +104,7 @@ const AssetCard = ({
         <View
             id={reportId}
             wrap={!fitsOnOnePage}
+            break={!fitsOnOnePage}
             style={{
                 backgroundColor,
                 padding: s1,
