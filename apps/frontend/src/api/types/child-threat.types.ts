@@ -27,3 +27,19 @@ export interface ExtendedChildThreat extends ChildThreat {
     interfaceName: string | null;
     assets: Asset[];
 }
+
+// The user-editable subset of a child threat; identity fields are derived from the
+// parent generic threat on the backend and cannot be set by the client.
+export interface ChildThreatRefinement {
+    name?: string;
+    description?: string;
+    probability?: number;
+    confidentiality?: boolean;
+    integrity?: boolean;
+    availability?: boolean;
+    status?: CHILD_THREAT_STATUSES;
+}
+
+export type CreateChildThreatRequest = ChildThreatRefinement & { projectId: number; genericThreatId: number };
+
+export type UpdateChildThreatRequest = ChildThreatRefinement & { id: number; projectId: number };

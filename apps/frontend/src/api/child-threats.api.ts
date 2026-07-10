@@ -1,5 +1,5 @@
 import { fetchAPI } from "#api/utils.ts";
-import type { ChildThreat } from "#api/types/child-threat.types.ts";
+import type { ChildThreat, CreateChildThreatRequest, UpdateChildThreatRequest } from "#api/types/child-threat.types.ts";
 
 export class ChildThreatsAPI {
     static async getChildThreatsByGenericThreat({
@@ -16,11 +16,7 @@ export class ChildThreatsAPI {
         return await fetchAPI(`/projects/${projectId}/system/childThreats/${id}`);
     }
 
-    static async createChildThreat(data: {
-        projectId: number;
-        genericThreatId: number;
-        [key: string]: unknown;
-    }): Promise<ChildThreat> {
+    static async createChildThreat(data: CreateChildThreatRequest): Promise<ChildThreat> {
         const { projectId, genericThreatId, ...body } = data;
 
         return await fetchAPI(`/projects/${projectId}/system/childThreats/${genericThreatId}`, {
@@ -28,15 +24,11 @@ export class ChildThreatsAPI {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ ...body, genericThreatId }),
+            body: JSON.stringify(body),
         });
     }
 
-    static async updateChildThreat(data: {
-        id: number;
-        projectId: number;
-        [key: string]: unknown;
-    }): Promise<ChildThreat> {
+    static async updateChildThreat(data: UpdateChildThreatRequest): Promise<ChildThreat> {
         const { id, projectId, ...body } = data;
 
         return await fetchAPI(`/projects/${projectId}/system/childThreats/${id}`, {
@@ -56,5 +48,3 @@ export class ChildThreatsAPI {
         });
     }
 }
-
-export default ChildThreatsAPI;
