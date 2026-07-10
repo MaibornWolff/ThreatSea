@@ -12,7 +12,12 @@ import {
     type PointOfAttack,
 } from "#api/types/system.types.ts";
 import type { AugmentedSystemConnection } from "#application/selectors/system.selectors.ts";
-import { type Point, GEOMETRY_TOLERANCE, pointsFromWaypoints } from "#utils/connection-waypoints.ts";
+import {
+    type Point,
+    GEOMETRY_TOLERANCE,
+    anchorPointForComponent,
+    pointsFromWaypoints,
+} from "#utils/connection-waypoints.ts";
 
 const COMPONENT_SIZE = 80; // a component box is always 80 px square
 const HALF_COMPONENT_SIZE = COMPONENT_SIZE / 2;
@@ -56,22 +61,6 @@ export const centerOf = (component: AugmentedSystemComponent): Point => ({
     x: component.gridX * 5 + HALF_COMPONENT_SIZE,
     y: component.gridY * 5 + HALF_COMPONENT_SIZE,
 });
-
-/** The pixel point at the middle of one of a component's four edges — where a connection attaches. */
-export const faceMidpoint = (component: AugmentedSystemComponent, face: Face): Point => {
-    const rectangle = rectangleOf(component);
-    const center = centerOf(component);
-    switch (face) {
-        case AnchorOrientation.left:
-            return { x: rectangle.minX, y: center.y };
-        case AnchorOrientation.right:
-            return { x: rectangle.maxX, y: center.y };
-        case AnchorOrientation.top:
-            return { x: center.x, y: rectangle.minY };
-        case AnchorOrientation.bottom:
-            return { x: center.x, y: rectangle.maxY };
-    }
-};
 
 /** A unit arrow pointing straight out of a face (right → {x:1,y:0}, top → {x:0,y:-1}). */
 export const outwardUnit = (face: Face): Point => {
@@ -365,7 +354,7 @@ export const buildAnchorMeta = (
 ): ConnectionPointMeta => {
     const reportedAnchor = isFace(anchor) ? anchor : face;
     return {
-        position: faceMidpoint(component, face),
+        position: anchorPointForComponent(component, face),
         goesHorizontal: reportedAnchor === AnchorOrientation.left || reportedAnchor === AnchorOrientation.right,
         goesLeft: reportedAnchor === AnchorOrientation.left,
         goesUp: reportedAnchor === AnchorOrientation.top,

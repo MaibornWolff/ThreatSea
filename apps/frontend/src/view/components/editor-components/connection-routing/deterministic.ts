@@ -6,6 +6,7 @@ import { AnchorOrientation, type AugmentedSystemComponent, type ConnectionPointM
 import {
     type Point,
     GEOMETRY_TOLERANCE,
+    anchorPointForComponent,
     findBestAnchor,
     flattenPoints,
     simplifyPolyline,
@@ -22,7 +23,6 @@ import {
     buildRouteScoringContext,
     compareRouteDefects,
     countRouteDefects,
-    faceMidpoint,
     isHorizontalFace,
     isOrthogonal,
     outwardUnit,
@@ -178,11 +178,11 @@ export function routeDeterministic(input: ConnectionRoutingInput): ConnectionRou
         let best: ScoredRoute | null = null;
 
         for (const [sourceIndex, sourceFace] of sourceFaces.entries()) {
-            const sourceAttach = faceMidpoint(fromComponent, sourceFace);
+            const sourceAttach = anchorPointForComponent(fromComponent, sourceFace);
             const sourceOutward = outwardUnit(sourceFace);
 
             for (const [targetIndex, targetFace] of targetFaces.entries()) {
-                const targetAttach = faceMidpoint(toComponent, targetFace);
+                const targetAttach = anchorPointForComponent(toComponent, targetFace);
                 const targetOutward = outwardUnit(targetFace);
                 const targetInward = { x: -targetOutward.x, y: -targetOutward.y };
                 const facePairRank = sourceIndex * targetFaces.length + targetIndex;

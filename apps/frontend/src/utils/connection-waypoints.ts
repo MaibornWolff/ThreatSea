@@ -441,32 +441,31 @@ export function findBestAnchor(
     return deltaY > 0 ? AnchorOrientation.bottom : AnchorOrientation.top;
 }
 
+const COMPONENT_SIZE = 80; // components are a fixed 80x80 px box
+
 /**
- * Returns the { x, y } pixel coordinate of the anchor point on the boundary
- * of `component` for the given orientation. Uses component.x/component.y (the
- * pixel-space top-left, equal to gridX*5 / gridY*5) and width/height — the same
- * pixel space waypoints live in.
+ * Returns the pixel-space midpoint of the given edge of `component` (or the box
+ * centre for `center`). Derives coordinates from the grid (gridX*5 / gridY*5)
+ * and the fixed 80x80 component size — the same pixel space waypoints live in.
  *
  * @param component - The component to compute the anchor point for
  * @param orientation - Which side of the component to anchor to
  * @returns The { x, y } pixel coordinate of the anchor point
  */
-export function anchorPointForComponent(
-    component: AugmentedSystemComponent,
-    orientation: AnchorOrientation
-): { x: number; y: number } {
-    const centerX = component.x + component.width / 2;
-    const centerY = component.y + component.height / 2;
-
+export function anchorPointForComponent(component: AugmentedSystemComponent, orientation: AnchorOrientation): Point {
+    const minX = component.gridX * 5;
+    const minY = component.gridY * 5;
+    const centerX = minX + COMPONENT_SIZE / 2;
+    const centerY = minY + COMPONENT_SIZE / 2;
     switch (orientation) {
         case AnchorOrientation.top:
-            return { x: centerX, y: component.y };
+            return { x: centerX, y: minY };
         case AnchorOrientation.bottom:
-            return { x: centerX, y: component.y + component.height };
+            return { x: centerX, y: minY + COMPONENT_SIZE };
         case AnchorOrientation.left:
-            return { x: component.x, y: centerY };
+            return { x: minX, y: centerY };
         case AnchorOrientation.right:
-            return { x: component.x + component.width, y: centerY };
+            return { x: minX + COMPONENT_SIZE, y: centerY };
         case AnchorOrientation.center:
         default:
             return { x: centerX, y: centerY };

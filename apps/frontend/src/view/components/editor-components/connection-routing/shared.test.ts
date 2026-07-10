@@ -2,7 +2,6 @@ import {
     buildAnchorMeta,
     compareRouteDefects,
     countObstacleHits,
-    faceMidpoint,
     rectangleOf,
     routeLength,
     segmentHitsRectangle,
@@ -29,17 +28,6 @@ describe("rectangleOf", () => {
             maxX: 80,
             maxY: 80,
         });
-    });
-});
-
-describe("faceMidpoint", () => {
-    const component = createSystemComponent({ gridX: 10, gridY: 20 }); // box 50..130 x 100..180, centre (90,140)
-
-    it("returns the middle of each requested edge", () => {
-        expect(faceMidpoint(component, AnchorOrientation.left)).toEqual({ x: 50, y: 140 });
-        expect(faceMidpoint(component, AnchorOrientation.right)).toEqual({ x: 130, y: 140 });
-        expect(faceMidpoint(component, AnchorOrientation.top)).toEqual({ x: 90, y: 100 });
-        expect(faceMidpoint(component, AnchorOrientation.bottom)).toEqual({ x: 90, y: 180 });
     });
 });
 
