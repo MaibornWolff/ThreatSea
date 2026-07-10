@@ -88,7 +88,6 @@ export async function createChildThreat(
     const genericThreatId = request.params.genericThreatId;
 
     try {
-        // Ensure generic threat exists and belongs to project
         const genericThreat = await genericThreatsService.getGenericThreat(genericThreatId);
         if (genericThreat === null) {
             next(new NotFoundError("Generic threat not found"));
