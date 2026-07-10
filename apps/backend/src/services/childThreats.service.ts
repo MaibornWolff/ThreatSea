@@ -160,10 +160,7 @@ export async function deleteChildThreatsByPointOfAttackId(
     projectId: number,
     transaction: TransactionType | undefined = undefined
 ): Promise<void> {
-    const whereCondition =
-        projectId === undefined
-            ? eq(childThreats.pointOfAttackId, pointOfAttackId)
-            : and(eq(childThreats.pointOfAttackId, pointOfAttackId), eq(childThreats.projectId, projectId));
-
-    await (transaction ?? db).delete(childThreats).where(whereCondition);
+    await (transaction ?? db)
+        .delete(childThreats)
+        .where(and(eq(childThreats.pointOfAttackId, pointOfAttackId), eq(childThreats.projectId, projectId)));
 }

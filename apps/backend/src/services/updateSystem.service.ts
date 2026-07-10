@@ -19,13 +19,6 @@ import {
 import * as systemService from "#services/system.service.js";
 
 /**
- * Update system edge cases which are probably not covered
- *  only oldAssetCount === 0 and newAssetCount > 0 is the logic in place for generating child threats, this does not take following cases into account:
- * - asset is removed and a new asset is added to the same point of attack (oldAssetCount > 0 and newAssetCount > 0)
- *  - all assets are removed and new assets are added to the same point of attack (oldAssetCount > 0 and newAssetCount > 0)
- */
-
-/**
  * Updates a system and synchronizes related threat data.
  *
  * @param {number} projectId - The id of the current project.
@@ -52,7 +45,7 @@ export async function updateSystem(projectId: number, updateSystemData: UpdateSy
         );
 
         await createChildThreatsForAssetAssignedPointsOfAttack(
-            getPointsOfAttackWithNewAssets(oldSystem, updatedSystem),
+            getPointsOfAttackWithAssets(updatedSystem),
             await getGenericThreatsByProjectId(projectId, tx),
             projectId,
             tx
@@ -80,17 +73,13 @@ function getCreatedPointsOfAttack(oldSystem: System | undefined, newSystem: Syst
     });
 }
 
-function getPointsOfAttackWithNewAssets(oldSystem: System | undefined, newSystem: System): PointOfAttack[] {
-    const oldPointsOfAttack = oldSystem?.data?.pointsOfAttack || [];
+// Returns every point of attack that currently has assets. Child-threat creation is deduplicated
+// downstream by an existing-children check, so re-checking asset-bearing points on each update is
+// safe and covers points that retain assets but have lost all their children (e.g. remove-then-re-add).
+function getPointsOfAttackWithAssets(newSystem: System): PointOfAttack[] {
     const newPointsOfAttack = newSystem.data?.pointsOfAttack || [];
 
-    return newPointsOfAttack.filter((newPointOfAttack) => {
-        const oldPointOfAttack = oldPointsOfAttack.find((pointOfAttack) => pointOfAttack.id === newPointOfAttack.id);
-        const oldAssetCount = oldPointOfAttack?.assets?.length ?? 0;
-        const newAssetCount = newPointOfAttack.assets?.length ?? 0;
-
-        return oldAssetCount === 0 && newAssetCount > 0;
-    });
+    return newPointsOfAttack.filter((pointOfAttack) => (pointOfAttack.assets?.length ?? 0) > 0);
 }
 
 async function deleteThreatsByPointsOfAttack(
