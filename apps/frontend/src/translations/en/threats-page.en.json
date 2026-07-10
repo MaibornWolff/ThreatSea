@@ -17,6 +17,7 @@
   "fullExport": "Export Assets, Threats and Measures",
   "catalogMeasures": "Catalog Measures",
   "deleteMessage": "Do you really want to delete the threat '{{ threatName }}'?",
+  "cannotDeleteOnlyChildThreat": "You cannot delete the only threat '{{ threatName }}'.",
   "noThreatsFound": "No Threats found",
   "heading": "Threats"
 }

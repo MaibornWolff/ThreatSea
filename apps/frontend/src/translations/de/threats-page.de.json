@@ -15,6 +15,7 @@
   "status": "Status",
   "threatsLoading": "Bedrohungen werden geladen...",
   "deleteMessage": "Wollen Sie die Bedrohung '{{ threatName }}' wirklich löschen?",
+  "cannotDeleteOnlyChildThreat": "Sie können die einzige Bedrohung '{{ threatName }}' nicht löschen.",
   "probability": "EW",
   "heading": "Bedrohungen",
   "noThreatsFound": "Keine Bedrohungen gefunden"
