@@ -9,7 +9,6 @@ import { MeasuresActions } from "#application/actions/measures.actions.ts";
 import { MeasureImpactsActions } from "#application/actions/measureImpacts.actions.ts";
 import { EditorActions } from "#application/actions/editor.actions.ts";
 import { MemberActions } from "#application/actions/members.actions.ts";
-import { GenericThreatsActions } from "#application/actions/genericThreats.actions.ts";
 
 const handleConfirmDialog: AppMiddleware =
     ({ dispatch }) =>
@@ -47,14 +46,6 @@ const handleConfirmDialog: AppMiddleware =
                         dispatch(
                             CatalogMeasuresActions.updateCatalogMeasure(
                                 data as Parameters<typeof CatalogMeasuresActions.updateCatalogMeasure>[0]
-                            )
-                        );
-                        break;
-                    case "threats":
-                    case "genericThreats":
-                        dispatch(
-                            GenericThreatsActions.updateGenericThreat(
-                                data as Parameters<typeof GenericThreatsActions.updateGenericThreat>[0]
                             )
                         );
                         break;
@@ -119,14 +110,6 @@ const handleConfirmDialog: AppMiddleware =
                         dispatch(
                             CatalogMeasuresActions.createCatalogMeasure(
                                 data as Parameters<typeof CatalogMeasuresActions.createCatalogMeasure>[0]
-                            )
-                        );
-                        break;
-                    case "genericThreats":
-                    case "threats":
-                        dispatch(
-                            GenericThreatsActions.createGenericThreat(
-                                data as Parameters<typeof GenericThreatsActions.createGenericThreat>[0]
                             )
                         );
                         break;
