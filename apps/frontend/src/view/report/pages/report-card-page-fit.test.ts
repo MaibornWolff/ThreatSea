@@ -37,6 +37,11 @@ describe("threatCardFitsOnOnePage", () => {
     it("treats missing texts as empty and stays atomic when otherwise small", () => {
         expect(threatCardFitsOnOnePage(card({ name: null, description: undefined }))).toBe(true);
     });
+
+    it("wraps a card whose description is many short newline-separated lines despite a low character count", () => {
+        const listDescription = Array.from({ length: 45 }, (_unused, index) => `- item ${index}`).join("\n");
+        expect(threatCardFitsOnOnePage(card({ description: listDescription }))).toBe(false);
+    });
 });
 
 describe("assetCardFitsOnOnePage", () => {
