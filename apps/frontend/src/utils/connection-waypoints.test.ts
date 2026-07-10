@@ -1,6 +1,5 @@
 import {
     snapToGrid,
-    simplifyCollinear,
     moveSegment,
     moveVertex,
     deleteVertex,
@@ -50,25 +49,6 @@ describe("snapToGrid", () => {
     it("handles negatives and a custom grid", () => {
         expect(snapToGrid(-3)).toBe(-5);
         expect(snapToGrid(13, 10)).toBe(10);
-    });
-});
-
-describe("simplifyCollinear", () => {
-    it("merges a horizontal run", () => {
-        expect(simplifyCollinear([0, 0, 10, 0, 20, 0])).toEqual([0, 0, 20, 0]);
-    });
-    it("merges a vertical run", () => {
-        expect(simplifyCollinear([0, 0, 0, 10, 0, 20])).toEqual([0, 0, 0, 20]);
-    });
-    it("drops duplicate points", () => {
-        expect(simplifyCollinear([0, 0, 0, 0, 10, 0])).toEqual([0, 0, 10, 0]);
-    });
-    it("preserves real corners", () => {
-        expect(simplifyCollinear([0, 0, 0, 20, 40, 20])).toEqual([0, 0, 0, 20, 40, 20]);
-    });
-    it("returns short/odd arrays unchanged", () => {
-        expect(simplifyCollinear([0, 0])).toEqual([0, 0]);
-        expect(simplifyCollinear([0, 0, 5])).toEqual([0, 0, 5]);
     });
 });
 

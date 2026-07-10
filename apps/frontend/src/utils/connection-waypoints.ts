@@ -90,107 +90,6 @@ export const simplifyPolyline = (points: Point[]): Point[] => {
 };
 
 /**
- * Converts a flat array of numbers (x1, y1, x2, y2, ...) to an array of points.
- * Internal helper for simplifyCollinear.
- *
- * @param flatCoordinates - Flat array of coordinates
- * @returns Array of [x, y] points
- */
-function flatToPoints(flatCoordinates: number[]): [number, number][] {
-    const points: [number, number][] = [];
-    for (let i = 0; i < flatCoordinates.length; i += 2) {
-        points.push([flatCoordinates[i]!, flatCoordinates[i + 1]!]);
-    }
-    return points;
-}
-
-/**
- * Converts an array of points back to a flat array of numbers.
- * Internal helper for simplifyCollinear.
- *
- * @param points - Array of [x, y] points
- * @returns Flat array of coordinates
- */
-function pointsToFlat(points: [number, number][]): number[] {
-    const flatCoordinates: number[] = [];
-    for (const [x, y] of points) {
-        flatCoordinates.push(x, y);
-    }
-    return flatCoordinates;
-}
-
-/**
- * Simplifies a waypoint array by removing collinear points.
- * Merges consecutive points that lie on the same horizontal or vertical line.
- * Also removes duplicate consecutive points.
- *
- * Preserves short arrays (< 4 elements) unchanged.
- * Returns a new array (does not mutate the input).
- *
- * @param waypoints - Flat array of coordinates [x1, y1, x2, y2, ...]
- * @returns Simplified flat array with collinear points merged
- *
- * @example
- * simplifyCollinear([0, 0, 10, 0, 20, 0]) // => [0, 0, 20, 0]
- * simplifyCollinear([0, 0, 0, 10, 0, 20]) // => [0, 0, 0, 20]
- * simplifyCollinear([0, 0, 0, 0, 10, 0]) // => [0, 0, 10, 0] (removes duplicate)
- * simplifyCollinear([0, 0, 0, 20, 40, 20]) // => [0, 0, 0, 20, 40, 20] (preserves corner)
- */
-export function simplifyCollinear(waypoints: number[]): number[] {
-    // Guard: short or odd-length arrays are returned unchanged (copy).
-    // An odd-length array ≥ 5 would cause flatToPoints to produce a trailing point
-    // with undefined y, matching the same parity guard used by moveSegment,
-    // moveVertex, and deleteVertex.
-    if (waypoints.length < 4 || waypoints.length % 2 !== 0) {
-        return [...waypoints];
-    }
-
-    const points = flatToPoints(waypoints);
-    const result: [number, number][] = [points[0]!];
-
-    for (let i = 1; i < points.length; i++) {
-        const prev = result[result.length - 1]!;
-        const curr = points[i]!;
-        const next = points[i + 1];
-
-        // Check if current point is a duplicate of the previous point
-        const isDuplicate = prev[0] === curr[0] && prev[1] === curr[1];
-
-        if (isDuplicate) {
-            // Skip duplicates
-            continue;
-        }
-
-        // Check if we can merge curr into prev by checking collinearity
-        // A point is collinear if prev->curr and curr->next share the same orientation
-        if (next !== undefined) {
-            // Vector from prev to curr
-            const prevToCurr = [curr[0] - prev[0], curr[1] - prev[1]] as const;
-            // Vector from curr to next
-            const currToNext = [next[0] - curr[0], next[1] - curr[1]] as const;
-
-            // Check if they're collinear: same orientation means
-            // both horizontal (y-component 0) or both vertical (x-component 0)
-            const prevToCurrHoriz = prevToCurr[1] === 0;
-            const prevToCurrVert = prevToCurr[0] === 0;
-            const currToNextHoriz = currToNext[1] === 0;
-            const currToNextVert = currToNext[0] === 0;
-
-            // If both are horizontal or both are vertical, they're collinear
-            if ((prevToCurrHoriz && currToNextHoriz) || (prevToCurrVert && currToNextVert)) {
-                // Skip this point - it's collinear, we'll extend to the next point instead
-                continue;
-            }
-        }
-
-        // Point is not collinear with neighbors, so keep it
-        result.push(curr);
-    }
-
-    return pointsToFlat(result);
-}
-
-/**
  * Moves a segment in a waypoint array to a new position.
  *
  * For interior segments (not terminal): adjusts the shared coordinate of both endpoints.
@@ -231,13 +130,13 @@ export function moveSegment(waypoints: number[], segmentIndex: number, pointer: 
     }
 
     // Extract points
-    const points = flatToPoints(waypoints);
+    const points = pointsFromWaypoints(waypoints);
     const startPoint = points[segmentIndex]!;
     const endPoint = points[segmentIndex + 1]!;
 
     // Determine if segment is horizontal or vertical
-    const isHorizontal = startPoint[1] === endPoint[1]; // same y
-    const isVertical = startPoint[0] === endPoint[0]; // same x
+    const isHorizontal = startPoint.y === endPoint.y; // same y
+    const isVertical = startPoint.x === endPoint.x; // same x
 
     // Guard: segment not orthogonal
     if (!isHorizontal && !isVertical) {
@@ -248,37 +147,37 @@ export function moveSegment(waypoints: number[], segmentIndex: number, pointer: 
 
     if (!isTerminal) {
         // Interior segment: adjust the shared coordinate of both endpoints
-        const newPoints = points.map((point) => [...point] as [number, number]);
+        const newPoints = points.map((p) => ({ x: p.x, y: p.y }));
 
         if (isHorizontal) {
             // Horizontal segment: adjust y
             const newY = snapToGrid(pointer.y);
-            newPoints[segmentIndex]![1] = newY;
-            newPoints[segmentIndex + 1]![1] = newY;
+            newPoints[segmentIndex]!.y = newY;
+            newPoints[segmentIndex + 1]!.y = newY;
         } else {
             // Vertical segment: adjust x
             const newX = snapToGrid(pointer.x);
-            newPoints[segmentIndex]![0] = newX;
-            newPoints[segmentIndex + 1]![0] = newX;
+            newPoints[segmentIndex]!.x = newX;
+            newPoints[segmentIndex + 1]!.x = newX;
         }
 
-        return simplifyCollinear(pointsToFlat(newPoints));
+        return flattenPoints(simplifyPolyline(newPoints));
     } else {
         // Terminal segment: insert a jog so the anchored endpoint stays fixed.
         // segmentIndex 0 inserts after point 0; the last segment inserts before
         // the final point — the jog points are identical, only the index differs.
-        const newPoints = points.map((point) => [...point] as [number, number]);
+        const newPoints = points.map((p) => ({ x: p.x, y: p.y }));
         const insertIndex = segmentIndex === 0 ? 1 : newPoints.length - 1;
 
         if (isHorizontal) {
             const newY = snapToGrid(pointer.y);
-            newPoints.splice(insertIndex, 0, [startPoint[0], newY], [endPoint[0], newY]);
+            newPoints.splice(insertIndex, 0, { x: startPoint.x, y: newY }, { x: endPoint.x, y: newY });
         } else {
             const newX = snapToGrid(pointer.x);
-            newPoints.splice(insertIndex, 0, [newX, startPoint[1]], [newX, endPoint[1]]);
+            newPoints.splice(insertIndex, 0, { x: newX, y: startPoint.y }, { x: newX, y: endPoint.y });
         }
 
-        return simplifyCollinear(pointsToFlat(newPoints));
+        return flattenPoints(simplifyPolyline(newPoints));
     }
 }
 
@@ -292,7 +191,7 @@ export function moveSegment(waypoints: number[], segmentIndex: number, pointer: 
  * preserves orthogonality with the terminal endpoint without moving it.
  *
  * Snaps the new position to grid. Rejects terminal indices (k=0 or k=pointCount-1).
- * Always ends with simplifyCollinear.
+ * Always ends with simplifyPolyline.
  *
  * Returns a new array (does not mutate input). Guards against malformed input.
  *
@@ -324,16 +223,16 @@ export function moveVertex(waypoints: number[], pointIndex: number, pointer: { x
     }
 
     // Extract points
-    const points = flatToPoints(waypoints);
+    const points = pointsFromWaypoints(waypoints);
     const previousPoint = points[pointIndex - 1]!; // previous point
     const currentPoint = points[pointIndex]!; // current point to move
     const nextPoint = points[pointIndex + 1]!; // next point
 
     // Determine orientation of adjacent segments
-    const previousSegmentIsHorizontal = previousPoint[1] === currentPoint[1]; // segment k-1→k is horizontal
-    const previousSegmentIsVertical = previousPoint[0] === currentPoint[0]; // segment k-1→k is vertical
-    const nextSegmentIsHorizontal = currentPoint[1] === nextPoint[1]; // segment k→k+1 is horizontal
-    const nextSegmentIsVertical = currentPoint[0] === nextPoint[0]; // segment k→k+1 is vertical
+    const previousSegmentIsHorizontal = previousPoint.y === currentPoint.y; // segment k-1→k is horizontal
+    const previousSegmentIsVertical = previousPoint.x === currentPoint.x; // segment k-1→k is vertical
+    const nextSegmentIsHorizontal = currentPoint.y === nextPoint.y; // segment k→k+1 is horizontal
+    const nextSegmentIsVertical = currentPoint.x === nextPoint.x; // segment k→k+1 is vertical
 
     // Check if neighbors are terminal
     const leftTerminal = pointIndex - 1 === 0;
@@ -348,19 +247,19 @@ export function moveVertex(waypoints: number[], pointIndex: number, pointer: { x
         // Left neighbor is terminal (p[0]): constrain based on segment 0→k orientation
         if (previousSegmentIsHorizontal) {
             // Segment 0→k is horizontal: can only move in x, keep y = p[0].y
-            snappedY = previousPoint[1];
+            snappedY = previousPoint.y;
         } else if (previousSegmentIsVertical) {
             // Segment 0→k is vertical: can only move in y, keep x = p[0].x
-            snappedX = previousPoint[0];
+            snappedX = previousPoint.x;
         }
     } else if (!leftTerminal && rightTerminal) {
         // Right neighbor is terminal (p[n]): constrain based on segment k→n orientation
         if (nextSegmentIsHorizontal) {
             // Segment k→n is horizontal: can only move in x, keep y = p[n].y
-            snappedY = nextPoint[1];
+            snappedY = nextPoint.y;
         } else if (nextSegmentIsVertical) {
             // Segment k→n is vertical: can only move in y, keep x = p[n].x
-            snappedX = nextPoint[0];
+            snappedX = nextPoint.x;
         }
     } else if (leftTerminal && rightTerminal) {
         // Both neighbors are terminal (3-point L). Keep both terminals fixed and
@@ -368,41 +267,41 @@ export function moveVertex(waypoints: number[], pointIndex: number, pointer: { x
         if (previousSegmentIsVertical) {
             // previous->corner vertical, corner->next horizontal:
             // start -> (start.x, dragY) -> (dragX, dragY) -> (dragX, next.y) -> next
-            const reshaped: [number, number][] = [
-                [previousPoint[0], previousPoint[1]],
-                [previousPoint[0], snappedY],
-                [snappedX, snappedY],
-                [snappedX, nextPoint[1]],
-                [nextPoint[0], nextPoint[1]],
+            const reshaped: Point[] = [
+                { x: previousPoint.x, y: previousPoint.y },
+                { x: previousPoint.x, y: snappedY },
+                { x: snappedX, y: snappedY },
+                { x: snappedX, y: nextPoint.y },
+                { x: nextPoint.x, y: nextPoint.y },
             ];
-            return simplifyCollinear(pointsToFlat(reshaped));
+            return flattenPoints(simplifyPolyline(reshaped));
         }
         // previous->corner horizontal, corner->next vertical:
         // start -> (dragX, start.y) -> (dragX, dragY) -> (next.x, dragY) -> next
-        const reshaped: [number, number][] = [
-            [previousPoint[0], previousPoint[1]],
-            [snappedX, previousPoint[1]],
-            [snappedX, snappedY],
-            [nextPoint[0], snappedY],
-            [nextPoint[0], nextPoint[1]],
+        const reshaped: Point[] = [
+            { x: previousPoint.x, y: previousPoint.y },
+            { x: snappedX, y: previousPoint.y },
+            { x: snappedX, y: snappedY },
+            { x: nextPoint.x, y: snappedY },
+            { x: nextPoint.x, y: nextPoint.y },
         ];
-        return simplifyCollinear(pointsToFlat(reshaped));
+        return flattenPoints(simplifyPolyline(reshaped));
     }
     // If neither is terminal, full interior motion is allowed
 
     // Move the vertex
-    const newPoints = points.map((point) => [...point] as [number, number]);
-    newPoints[pointIndex] = [snappedX, snappedY];
+    const newPoints = points.map((p) => ({ x: p.x, y: p.y }));
+    newPoints[pointIndex] = { x: snappedX, y: snappedY };
 
     // Slide neighbor coordinates to maintain segment orientations
     if (!leftTerminal) {
         // Adjust previous point to keep segment k-1→k orientation
         if (previousSegmentIsHorizontal) {
             // Horizontal: slide prev point's y to match new vertex y
-            newPoints[pointIndex - 1]![1] = snappedY;
+            newPoints[pointIndex - 1]!.y = snappedY;
         } else if (previousSegmentIsVertical) {
             // Vertical: slide prev point's x to match new vertex x
-            newPoints[pointIndex - 1]![0] = snappedX;
+            newPoints[pointIndex - 1]!.x = snappedX;
         }
     }
 
@@ -410,14 +309,14 @@ export function moveVertex(waypoints: number[], pointIndex: number, pointer: { x
         // Adjust next point to keep segment k→k+1 orientation
         if (nextSegmentIsHorizontal) {
             // Horizontal: slide next point's y to match new vertex y
-            newPoints[pointIndex + 1]![1] = snappedY;
+            newPoints[pointIndex + 1]!.y = snappedY;
         } else if (nextSegmentIsVertical) {
             // Vertical: slide next point's x to match new vertex x
-            newPoints[pointIndex + 1]![0] = snappedX;
+            newPoints[pointIndex + 1]!.x = snappedX;
         }
     }
 
-    return simplifyCollinear(pointsToFlat(newPoints));
+    return flattenPoints(simplifyPolyline(newPoints));
 }
 
 /**
@@ -428,10 +327,10 @@ export function moveVertex(waypoints: number[], pointIndex: number, pointer: { x
  * one of two possible axis-aligned positions, chosen to never recreate the removed
  * point's coordinates.
  *
- * If neighbors are already axis-aligned after deletion, simplifyCollinear handles
+ * If neighbors are already axis-aligned after deletion, simplifyPolyline handles
  * the collinear merging naturally.
  *
- * Always ends with simplifyCollinear. Rejects terminal indices (k=0 or k=pointCount-1)
+ * Always ends with simplifyPolyline. Rejects terminal indices (k=0 or k=pointCount-1)
  * and paths with fewer than 3 interior points (pointCount <= 2).
  *
  * Returns a new array (does not mutate input). Guards against malformed input.
@@ -463,7 +362,7 @@ export function deleteVertex(waypoints: number[], pointIndex: number): number[] 
     }
 
     // Extract points
-    const points = flatToPoints(waypoints);
+    const points = pointsFromWaypoints(waypoints);
     const previousPoint = points[pointIndex - 1]!; // point before the one to delete
     const currentPoint = points[pointIndex]!; // point to delete
     const nextPoint = points[pointIndex + 1]!; // point after the one to delete
@@ -476,8 +375,8 @@ export function deleteVertex(waypoints: number[], pointIndex: number): number[] 
     const newNeighborPrev = newPoints[pointIndex - 1]!;
     const newNeighborNext = newPoints[pointIndex]!;
 
-    const shareX = newNeighborPrev[0] === newNeighborNext[0];
-    const shareY = newNeighborPrev[1] === newNeighborNext[1];
+    const shareX = newNeighborPrev.x === newNeighborNext.x;
+    const shareY = newNeighborPrev.y === newNeighborNext.y;
     const areAxisAligned = shareX || shareY;
 
     if (!areAxisAligned) {
@@ -487,21 +386,21 @@ export function deleteVertex(waypoints: number[], pointIndex: number): number[] 
         // Option B: {x: nextPoint.x, y: previousPoint.y}
         // Pick the one that doesn't recreate currentPoint
 
-        const cornerA: [number, number] = [previousPoint[0], nextPoint[1]];
-        const cornerB: [number, number] = [nextPoint[0], previousPoint[1]];
+        const cornerA: Point = { x: previousPoint.x, y: nextPoint.y };
+        const cornerB: Point = { x: nextPoint.x, y: previousPoint.y };
 
         // Check which corner would NOT recreate the removed point
-        const cornerARecreates = cornerA[0] === currentPoint[0] && cornerA[1] === currentPoint[1];
+        const cornerARecreates = cornerA.x === currentPoint.x && cornerA.y === currentPoint.y;
 
         // For diagonal neighbors exactly one corner recreates the deleted point;
         // pick the other. cornerA is the valid choice unless it recreates currentPoint.
-        const chosenCorner: [number, number] = cornerARecreates ? cornerB : cornerA;
+        const chosenCorner: Point = cornerARecreates ? cornerB : cornerA;
 
         // Insert the corner at the position of the deleted vertex
         newPoints.splice(pointIndex, 0, chosenCorner);
     }
 
-    return simplifyCollinear(pointsToFlat(newPoints));
+    return flattenPoints(simplifyPolyline(newPoints));
 }
 
 /**
@@ -584,7 +483,7 @@ export function anchorPointForComponent(
  * - top/bottom (vertical exit): horizontal first, then vertical to new point
  * - left/right (horizontal exit): vertical first, then horizontal to new point
  *
- * The result is always run through `simplifyCollinear` to remove any redundant
+ * The result is always run through `simplifyPolyline` to remove any redundant
  * collinear points that arise from the reshape.
  *
  * @param waypoints - Flat coordinate array [x1,y1,...,xN,yN] (at least 4 values)
@@ -603,7 +502,7 @@ export function reanchorEndpoint(
         return [...waypoints];
     }
 
-    const points = flatToPoints(waypoints);
+    const points = pointsFromWaypoints(waypoints);
 
     // Determine the horizontal exit flag:
     // left/right = horizontal exit; top/bottom = vertical exit
@@ -617,17 +516,17 @@ export function reanchorEndpoint(
         const newAnchorX = newAnchorPoint.x;
         const newAnchorY = newAnchorPoint.y;
 
-        let junction: [number, number];
+        let junction: Point;
         if (horizontalExit) {
             // Horizontal exit: connect vertically from interior, then horizontally
-            junction = [prev[0], newAnchorY];
+            junction = { x: prev.x, y: newAnchorY };
         } else {
             // Vertical exit: connect horizontally from interior, then vertically
-            junction = [newAnchorX, prev[1]];
+            junction = { x: newAnchorX, y: prev.y };
         }
 
-        const newPoints: [number, number][] = [...interiorPts, junction, [newAnchorX, newAnchorY]];
-        return simplifyCollinear(pointsToFlat(newPoints));
+        const newPoints: Point[] = [...interiorPts, junction, { x: newAnchorX, y: newAnchorY }];
+        return flattenPoints(simplifyPolyline(newPoints));
     } else {
         // "start": keep all points except the first; build a jog from new terminal
         // to the second interior point.
@@ -636,16 +535,16 @@ export function reanchorEndpoint(
         const newAnchorX = newAnchorPoint.x;
         const newAnchorY = newAnchorPoint.y;
 
-        let junction: [number, number];
+        let junction: Point;
         if (horizontalExit) {
             // Horizontal exit: first go horizontal from new anchor, then vertical to interior
-            junction = [next[0], newAnchorY];
+            junction = { x: next.x, y: newAnchorY };
         } else {
             // Vertical exit: first go vertical from new anchor, then horizontal to interior
-            junction = [newAnchorX, next[1]];
+            junction = { x: newAnchorX, y: next.y };
         }
 
-        const newPoints: [number, number][] = [[newAnchorX, newAnchorY], junction, ...interiorPts];
-        return simplifyCollinear(pointsToFlat(newPoints));
+        const newPoints: Point[] = [{ x: newAnchorX, y: newAnchorY }, junction, ...interiorPts];
+        return flattenPoints(simplifyPolyline(newPoints));
     }
 }
