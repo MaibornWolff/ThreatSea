@@ -149,7 +149,6 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         updateConnectionsOfComponent,
         selectConnectionPoint,
         deselectConnectionPoint,
-        setMousePointers,
         addAssetToPointOfAttack,
         removeAssetFromPointOfAttack,
         setAssetSearchValue,
@@ -172,7 +171,6 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         selectedConnection,
         selectedConnectionId,
         selectedPointOfAttack,
-        mousePointers,
         newConnection,
         pointsOfAttackOfSelectedComponent,
         assetSearchValue,
@@ -360,11 +358,6 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         deselectPointOfAttack();
         closeSideBar();
 
-        setMousePointers({
-            x: -20000,
-            y: -20000,
-        });
-
         const theConnectionsOfTheComponent = connections.filter(
             (connection) => connection.from.id === componentId || connection.to.id === componentId
         );
@@ -386,19 +379,11 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         });
     };
 
-    const handleComponentDragEnd = (event: KonvaEventObject<DragEvent>, componentId: string): void => {
+    const handleComponentDragEnd = (_event: KonvaEventObject<DragEvent>, componentId: string): void => {
         removeInUseComponent(componentId);
         setShowHelpLines(false);
         updateConnectionsOfComponent();
         deselectComponent();
-
-        // event.evt is undefined when Konva fires dragend programmatically during unmount.
-        if (event.evt) {
-            setMousePointers({
-                x: event.evt.x,
-                y: event.evt.y,
-            });
-        }
 
         const theConnectionsOfTheComponent = connections.filter(
             (connection) => connection.from.id === componentId || connection.to.id === componentId
@@ -655,13 +640,6 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
 
         const { layerX, layerY, movementX, movementY } = pending;
 
-        // Skip the collaborative-cursor dispatch while an annotation is being
-        // dragged — it would otherwise trigger a Redux update + page re-render
-        // on every pointer move, swamping the drag.
-        if (!isAnnotationDraggingRef.current) {
-            setMousePointers({ x: layerX, y: layerY });
-        }
-
         if (updateDrawingPreview()) {
             return;
         }
@@ -722,11 +700,6 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                 stageRef.current.content.style.cursor = "default";
             }
         }
-
-        setMousePointers({
-            x: -20000,
-            y: -20000,
-        });
     };
 
     const handleMouseUp = ({ evt }: KonvaEventObject<MouseEvent>): void => {
@@ -1258,7 +1231,6 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                         onContextMenuAction={handleContextMenuAction}
                         onMouseLeave={handleMouseOut}
                         onKeyUp={handleKeyUp}
-                        mousePointers={mousePointers}
                         onScale={onStageScale}
                         scale={stageScale}
                         position={stagePosition}

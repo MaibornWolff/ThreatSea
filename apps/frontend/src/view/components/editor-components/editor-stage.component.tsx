@@ -24,7 +24,6 @@ interface EditorStageProps {
     scale: number;
     position: Coordinate;
     userRole: USER_ROLES | undefined;
-    mousePointers?: unknown;
     ref?: Ref<KonvaStage>;
 }
 

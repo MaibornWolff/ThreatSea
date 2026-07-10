@@ -3,9 +3,6 @@ import type { CatalogThreat } from "#api/types/catalog-threat.types.ts";
 import type { ATTACKERS } from "#api/types/attackers.types.ts";
 import type { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import type { SortDirection } from "#application/actions/list.actions.ts";
-import { socket } from "#api/system-socket.api.ts";
-import { CatalogThreatsActions } from "#application/actions/catalog-threats.actions.ts";
-import { useAppDispatch } from "./use-app-redux.hook";
 import { useCatalogThreats } from "./use-catalog-threats.hook";
 import { useList } from "./use-list.hooks";
 
@@ -28,7 +25,6 @@ export const useCatalogThreatsList = ({
     sortDirection,
     searchValue,
 }: UseCatalogThreatsListArgs) => {
-    const dispatch = useAppDispatch();
     const { setSortDirection, setSearchValue, setSortBy } = useList("catalogThreats");
 
     const { isPending, items, loadCatalogThreats, deleteCatalogThreat } = useCatalogThreats({
@@ -38,18 +34,6 @@ export const useCatalogThreatsList = ({
     useEffect(() => {
         loadCatalogThreats();
     }, [loadCatalogThreats]);
-
-    useEffect(() => {
-        socket.emit(
-            "change_catalog",
-            JSON.stringify({
-                catalogId: catalogId,
-            })
-        );
-        return () => {
-            socket.emit("leave_catalog");
-        };
-    }, [catalogId]);
 
     const filteredItems = useMemo(
         () =>
@@ -79,21 +63,6 @@ export const useCatalogThreatsList = ({
             }),
         [filteredItems, sortBy, sortDirection]
     );
-
-    useEffect(() => {
-        const handleSet = (data: string) => {
-            dispatch(CatalogThreatsActions.setCatalogThreat(JSON.parse(data)));
-        };
-        const handleRemove = (data: string) => {
-            dispatch(CatalogThreatsActions.removeCatalogThreat(JSON.parse(data)));
-        };
-        socket.on("set_catalog_threat", handleSet);
-        socket.on("remove_catalog_threat", handleRemove);
-        return () => {
-            socket.off("set_catalog_threat", handleSet);
-            socket.off("remove_catalog_threat", handleRemove);
-        };
-    }, [dispatch]);
 
     return {
         setSortDirection,

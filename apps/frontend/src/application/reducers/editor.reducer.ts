@@ -3,7 +3,6 @@ import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
 import { EditorActions } from "#application/actions/editor.actions.ts";
 import { SystemActions } from "#application/actions/system.actions.ts";
-import { editorMousePointersAdapter } from "#application/adapters/editor-mouse-pointers.adapter.ts";
 import { editorComponentConnectionLinesAdapter } from "#application/adapters/editor-component-connection-lines.adapter.ts";
 import {
     editorComponentTypeAdapter,
@@ -22,7 +21,6 @@ export interface EditorConnection {
     };
 }
 
-type MousePointersState = ReturnType<typeof editorMousePointersAdapter.getInitialState>;
 type ComponentConnectionLinesState = ReturnType<typeof editorComponentConnectionLinesAdapter.getInitialState>;
 type ComponentTypesAdapterState = ReturnType<typeof editorComponentTypeAdapter.getInitialState>;
 
@@ -40,7 +38,6 @@ export interface EditorState {
     layerPosition: Coordinate;
     stageScale: number;
     stagePosition: Coordinate;
-    mousePointers: MousePointersState;
     showHelpLines: boolean;
     selectedPointOfAttack: string | null;
     selectedConnectionPoint: string | null;
@@ -144,7 +141,6 @@ const defaultState: EditorState = {
         x: 0,
         y: 0,
     },
-    mousePointers: editorMousePointersAdapter.getInitialState(),
     showHelpLines: false,
     selectedPointOfAttack: null,
     selectedConnectionPoint: null,
@@ -222,19 +218,6 @@ const editorReducer = createReducer(defaultState, (builder) => {
 
     builder.addCase(EditorActions.deselectConnectionPoint, (state) => {
         state.selectedConnectionPoint = null;
-    });
-
-    builder.addCase(EditorActions.userJoined, (state, action) => {
-        console.log("user joined ", action.payload);
-        editorMousePointersAdapter.addOne(state.mousePointers, {
-            id: action.payload.id,
-            name: action.payload.name,
-        });
-    });
-
-    builder.addCase(EditorActions.userLeft, (state, action) => {
-        console.log("user left: ", action.payload);
-        editorMousePointersAdapter.removeOne(state.mousePointers, action.payload.id);
     });
 
     builder.addCase(EditorActions.deselectConnector, (state) => {

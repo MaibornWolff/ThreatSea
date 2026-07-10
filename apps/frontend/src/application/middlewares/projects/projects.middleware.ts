@@ -1,6 +1,5 @@
 import { isFulfilled, isRejected } from "@reduxjs/toolkit";
 import type { AppMiddleware } from "#application/middlewares/types.ts";
-import { socket } from "#api/system-socket.api.ts";
 import { AlertActions } from "#application/actions/alert.actions.ts";
 import { ProjectsActions } from "#application/actions/projects.actions.ts";
 
@@ -22,7 +21,6 @@ const handleSuccessfulRequest: AppMiddleware =
         if (isFullfiledAction(action)) {
             if (ProjectsActions.deleteProject.fulfilled.match(action)) {
                 const { payload: project } = action;
-                socket.emit("remove_project", JSON.stringify(project));
                 dispatch(ProjectsActions.removeProject(project));
                 dispatch(
                     AlertActions.openSuccessAlert({
@@ -31,7 +29,6 @@ const handleSuccessfulRequest: AppMiddleware =
                 );
             } else {
                 const { payload: project } = action;
-                socket.emit("set_project", JSON.stringify(project));
                 dispatch(ProjectsActions.setProject(project));
                 dispatch(
                     AlertActions.openSuccessAlert({

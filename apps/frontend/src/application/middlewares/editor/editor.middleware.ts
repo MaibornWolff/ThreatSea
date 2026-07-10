@@ -2,7 +2,6 @@ import { isFulfilled, isRejected } from "@reduxjs/toolkit";
 import type { AppMiddleware } from "#application/middlewares/types.ts";
 import { EditorActions } from "#application/actions/editor.actions.ts";
 import { AlertActions } from "#application/actions/alert.actions.ts";
-import { socket } from "#api/system-socket.api.ts";
 
 const asyncThunks = [
     EditorActions.createComponentType,
@@ -23,7 +22,6 @@ const handleSuccessfulRequest: AppMiddleware =
             if (EditorActions.deleteComponentType.fulfilled.match(action)) {
                 const { payload: componentType } = action;
                 dispatch(EditorActions.removeComponentType(componentType));
-                socket.emit("delete_component_type", JSON.stringify(componentType));
                 dispatch(
                     AlertActions.openSuccessAlert({
                         text: `Component Type '${componentType.name}' was deleted successfully`,
@@ -32,7 +30,6 @@ const handleSuccessfulRequest: AppMiddleware =
             } else if (EditorActions.createComponentType.fulfilled.match(action)) {
                 const { payload: componentType } = action;
                 dispatch(EditorActions.addComponentType(componentType));
-                socket.emit("create_component_type", JSON.stringify(componentType));
                 dispatch(
                     AlertActions.openSuccessAlert({
                         text: `Component Type '${componentType.name}' was saved successfully`,
@@ -46,7 +43,6 @@ const handleSuccessfulRequest: AppMiddleware =
                         changes: componentType,
                     })
                 );
-                socket.emit("update_component_type", JSON.stringify(componentType));
                 dispatch(
                     AlertActions.openSuccessAlert({
                         text: `Component Type '${componentType.name}' was updated successfully`,

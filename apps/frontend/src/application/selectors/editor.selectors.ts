@@ -6,7 +6,6 @@ import {
     editorComponentTypeAdapter,
     type EditorComponentType,
 } from "#application/adapters/editor-component-type.adapter.ts";
-import { editorMousePointersAdapter } from "#application/adapters/editor-mouse-pointers.adapter.ts";
 
 type ExtendedEditorState = EditorState & {
     startAnchor?: unknown;
@@ -14,10 +13,6 @@ type ExtendedEditorState = EditorState & {
 };
 
 const selectEditorState = (state: RootState): ExtendedEditorState => state.editor;
-
-const { selectAll: selectAllMousePointers } = editorMousePointersAdapter.getSelectors(
-    (state: RootState) => selectEditorState(state).mousePointers
-);
 
 const { selectAll: selectAllComponentTypes } = editorComponentTypeAdapter.getSelectors(
     (state: RootState) => selectEditorState(state).componentTypes
@@ -84,13 +79,6 @@ export const editorSelectors = {
         [selectEditorState],
         (editor): ExtendedEditorState["assetSearchValue"] => editor.assetSearchValue
     ),
-
-    /**
-     * The adapter's `selectAll` is already memoized, so we expose it directly
-     * rather than wrapping it in an identity selector.
-     * @returns An array of mouse cursors.
-     */
-    selectMousePointers: selectAllMousePointers,
 
     /**
      * Gets the standard components.

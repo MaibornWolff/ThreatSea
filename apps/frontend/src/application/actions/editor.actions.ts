@@ -10,7 +10,6 @@ import type {
     UpdateComponentTypeRequest,
 } from "#api/types/component-types.types.ts";
 import type { EditorConnection, EditorEntityId } from "#application/reducers/editor.reducer.ts";
-import type { EditorMousePointer } from "#application/adapters/editor-mouse-pointers.adapter.ts";
 import type { EditorComponentType } from "#application/adapters/editor-component-type.adapter.ts";
 import type { EditorComponentConnectionLine } from "#application/adapters/editor-component-connection-lines.adapter.ts";
 import type { AnnotationType, Coordinate } from "#api/types/system.types.ts";
@@ -135,8 +134,6 @@ export class EditorActions {
      */
     static deselectConnectionPoint = createAction<void>("[editor] deselect connection point");
 
-    static setMousePointer = createAction<EditorMousePointer>("[editor] set mouse pointer");
-
     /**
      * Action for searching for an asset at a component.
      * @function setAssetSearchValue
@@ -144,22 +141,6 @@ export class EditorActions {
      * @returns Action function for searching an asset inside of a component.
      */
     static setAssetSearchValue = createAction<string>("[editor] set asset search value");
-
-    /**
-     * Action when a user joins.
-     * @function userJoined
-     * @param {string} type - Action type.
-     * @returns Action function for letting a user join.
-     */
-    static userJoined = createAction<EditorMousePointer>("[editor] user joined");
-
-    /**
-     * Action when a user leaves.
-     * @function userLeft
-     * @param {string} type - Action type.
-     * @returns Action function for letting a user leave.
-     */
-    static userLeft = createAction<Pick<EditorMousePointer, "id">>("[editor] user left");
 
     /**
      * Action when a user opens the context menu of a component.

@@ -34,8 +34,6 @@ import { enhanceComponents } from "#utils/enhance-components.ts";
 import { buildPointOfAttackPayload } from "#utils/build-point-of-attack-payload.ts";
 import type { CreatePointOfAttackArgs } from "#utils/build-point-of-attack-payload.ts";
 
-let lastMousePointerUpdate = 0;
-
 type EditorConnectionPreview = EditorConnection & {
     from: EditorConnectionAnchor;
     to?: EditorConnectionAnchor;
@@ -127,8 +125,6 @@ export const useEditor = ({
 
     const assetSearchValue = useAppSelector(editorSelectors.selectAssetSearchValue);
 
-    const mousePointers = useAppSelector(editorSelectors.selectMousePointers);
-
     /**
      * Holds the scaling factor of the stage.
      */
@@ -154,15 +150,6 @@ export const useEditor = ({
      * Flag to indicate that a screenshot is necessary.
      */
     const makeScreenshot = useAppSelector(editorSelectors.selectMakeScreenshot);
-
-    /**
-     * Effect that emits that a user left the current project.
-     */
-    useEffect(() => {
-        return () => {
-            /* empty */
-        };
-    }, [projectId]);
 
     const saveCurrentSystem = ({ image }: { image: string | null | undefined }): void => {
         const saveDate = new Date().toLocaleString(i18n.language);
@@ -860,14 +847,6 @@ export const useEditor = ({
         dispatch(EditorActions.deselectConnectionPoint());
     };
 
-    const setMousePointers = (_position: Coordinate): void => {
-        const now = performance.now();
-        const diff = now - lastMousePointerUpdate;
-        if (diff > 0) {
-            lastMousePointerUpdate = now;
-        }
-    };
-
     const addAssetToPointOfAttack = (asset: Asset, pointOfAttack: SystemPointOfAttack): void => {
         const newAssets = [...pointOfAttack.assets];
         if (newAssets.includes(asset.id)) {
@@ -991,7 +970,6 @@ export const useEditor = ({
         updateConnectionsOfComponent,
         selectConnectionPoint,
         deselectConnectionPoint,
-        setMousePointers,
         addAssetToPointOfAttack,
         removeAssetFromPointOfAttack,
         setAssetSearchValue,
@@ -1019,7 +997,6 @@ export const useEditor = ({
         selectedPointOfAttack,
         selectedConnection,
         selectedConnectionPointId,
-        mousePointers,
         stageScale,
         stagePosition,
         newConnection,

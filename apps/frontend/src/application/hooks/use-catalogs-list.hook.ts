@@ -1,8 +1,5 @@
 import { useEffect, useMemo } from "react";
 import type { CatalogWithRole } from "#api/types/catalogs.types.ts";
-import { socket } from "#api/system-socket.api.ts";
-import { CatalogsActions } from "#application/actions/catalogs.actions.ts";
-import { useAppDispatch } from "./use-app-redux.hook";
 import { useCatalogs } from "./use-catalogs.hook";
 import { useList } from "./use-list.hooks";
 
@@ -10,7 +7,6 @@ const sortableCatalogFields: (keyof Pick<CatalogWithRole, "name" | "createdAt">)
 type CatalogSortField = (typeof sortableCatalogFields)[number];
 
 export const useCatalogsList = () => {
-    const dispatch = useAppDispatch();
     const { isPending, items, loadCatalogs } = useCatalogs();
     const { setSortDirection, setSearchValue, setSortBy, sortDirection, searchValue, sortBy } = useList("catalogs");
 
@@ -48,21 +44,6 @@ export const useCatalogsList = () => {
             }
         });
     }, [filteredItems, sortBy, sortDirection]);
-
-    useEffect(() => {
-        const handleSet = (data: string) => {
-            dispatch(CatalogsActions.setCatalog(JSON.parse(data)));
-        };
-        const handleRemove = (data: string) => {
-            dispatch(CatalogsActions.removeCatalog(JSON.parse(data)));
-        };
-        socket.on("set_catalog", handleSet);
-        socket.on("remove_catalog", handleRemove);
-        return () => {
-            socket.off("set_catalog", handleSet);
-            socket.off("remove_catalog", handleRemove);
-        };
-    }, [dispatch]);
 
     return {
         setSortDirection,

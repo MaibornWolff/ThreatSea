@@ -1,8 +1,5 @@
 import { useEffect, useMemo } from "react";
 import type { ExtendedProject } from "#api/types/project.types.ts";
-import { socket } from "#api/system-socket.api.ts";
-import { ProjectsActions } from "#application/actions/projects.actions.ts";
-import { useAppDispatch } from "./use-app-redux.hook";
 import { useList } from "./use-list.hooks";
 import { useProjects } from "./use-projects.hook";
 
@@ -12,7 +9,6 @@ type ProjectSortField = (typeof sortableFields)[number];
 const searchableFields: (keyof Pick<ExtendedProject, "name" | "description">)[] = ["name", "description"];
 
 export const useProjectsList = () => {
-    const dispatch = useAppDispatch();
     const { isPending, items, deleteProject, loadProjects } = useProjects();
     const { setSortDirection, setSearchValue, setSortBy, sortDirection, searchValue, sortBy } = useList("projects");
 
@@ -51,21 +47,6 @@ export const useProjectsList = () => {
             }
         });
     }, [filteredItems, sortBy, sortDirection]);
-
-    useEffect(() => {
-        const handleSet = (data: string) => {
-            dispatch(ProjectsActions.setProject(JSON.parse(data)));
-        };
-        const handleRemove = (data: string) => {
-            dispatch(ProjectsActions.removeProject(JSON.parse(data)));
-        };
-        socket.on("set_project", handleSet);
-        socket.on("remove_project", handleRemove);
-        return () => {
-            socket.off("set_project", handleSet);
-            socket.off("remove_project", handleRemove);
-        };
-    }, [dispatch]);
 
     return {
         /**
