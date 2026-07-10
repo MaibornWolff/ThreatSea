@@ -28,7 +28,6 @@ interface ThreatsDetailsPageProps {
 }
 
 interface ThreatCardProps extends ThreatReport {
-    isFirstCard: boolean;
     language: string;
     showComponentsPage: boolean;
     showAssetsPage: boolean;
@@ -84,6 +83,33 @@ interface MeasuresListProps {
     showMeasuresPage: boolean;
 }
 
+// Groups threats so that consecutive small (atomic) cards share one Page and each large
+// (wrappable) card gets its own dedicated Page. This prevents react-pdf from handling
+// multiple break={true} nodes inside a single PdfPage, which causes O(N²) re-layout work
+// for N large cards and is the primary driver of the slowdown on big projects.
+const buildThreatGroups = (threats: ThreatReport[]): ThreatReport[][] => {
+    if (threats.length === 0) {
+        return [[]];
+    }
+    const groups: ThreatReport[][] = [];
+    let current: ThreatReport[] = [];
+    for (const threat of threats) {
+        if (threatCardFitsOnOnePage(threat)) {
+            current.push(threat);
+        } else {
+            if (current.length > 0) {
+                groups.push(current);
+                current = [];
+            }
+            groups.push([threat]);
+        }
+    }
+    if (current.length > 0) {
+        groups.push(current);
+    }
+    return groups;
+};
+
 export const ThreatsDetailsPage = ({
     indexCallback,
     language,
@@ -97,47 +123,47 @@ export const ThreatsDetailsPage = ({
 }: ThreatsDetailsPageProps) => {
     const linkId = "riskDetails";
     const { t } = useTranslation("report", { lng: language });
+    const groups = buildThreatGroups(threats);
+    const pageProps = {
+        logo,
+        projectName: project.name,
+        date,
+        confidentialityLevel: t("confidentialityLevels." + project.confidentialityLevel),
+    };
     return (
-        <Page
-            logo={logo}
-            projectName={project.name}
-            date={date}
-            confidentialityLevel={t("confidentialityLevels." + project.confidentialityLevel)}
-        >
-            <View
-                render={({ pageNumber }) => {
-                    indexCallback(pageNumber, t("threats"), linkId);
-                    return null;
-                }}
-            />
-            <Text
-                id={`chapter-${linkId}`}
-                size="header"
-                style={{
-                    marginBottom: s1,
-                }}
-            >
-                {t("threats")}
-            </Text>
-            {threats.map((threat, i) => {
-                return (
-                    <ThreatCard
-                        key={i}
-                        isFirstCard={i === 0}
-                        language={language}
-                        showComponentsPage={showComponentsPage}
-                        showAssetsPage={showAssetsPage}
-                        showMeasuresPage={showMeasuresPage}
-                        {...threat}
-                    />
-                );
-            })}
-        </Page>
+        <>
+            {groups.map((group, groupIdx) => (
+                <Page key={groupIdx} {...pageProps}>
+                    {groupIdx === 0 && (
+                        <>
+                            <View
+                                render={({ pageNumber }) => {
+                                    indexCallback(pageNumber, t("threats"), linkId);
+                                    return null;
+                                }}
+                            />
+                            <Text id={`chapter-${linkId}`} size="header" style={{ marginBottom: s1 }}>
+                                {t("threats")}
+                            </Text>
+                        </>
+                    )}
+                    {group.map((threat) => (
+                        <ThreatCard
+                            key={threat.reportId}
+                            language={language}
+                            showComponentsPage={showComponentsPage}
+                            showAssetsPage={showAssetsPage}
+                            showMeasuresPage={showMeasuresPage}
+                            {...threat}
+                        />
+                    ))}
+                </Page>
+            ))}
+        </>
     );
 };
 
 const ThreatCard = ({
-    isFirstCard,
     reportId,
     id,
     name,
@@ -170,7 +196,6 @@ const ThreatCard = ({
         <View
             id={`threat-${reportId}`}
             wrap={!fitsOnOnePage}
-            break={!fitsOnOnePage && !isFirstCard}
             style={{
                 backgroundColor,
                 padding: s1,

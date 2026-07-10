@@ -26,7 +26,6 @@ interface MeasuresDetailsPageProps {
 }
 
 interface MeasureCardProps extends ReportMeasure {
-    isFirstCard: boolean;
     language: string;
 }
 
@@ -41,6 +40,29 @@ interface ThreatsListProps {
     language: string;
 }
 
+const buildMeasureGroups = (measures: ReportMeasure[]): ReportMeasure[][] => {
+    if (measures.length === 0) {
+        return [[]];
+    }
+    const groups: ReportMeasure[][] = [];
+    let current: ReportMeasure[] = [];
+    for (const measure of measures) {
+        if (measureCardFitsOnOnePage(measure)) {
+            current.push(measure);
+        } else {
+            if (current.length > 0) {
+                groups.push(current);
+                current = [];
+            }
+            groups.push([measure]);
+        }
+    }
+    if (current.length > 0) {
+        groups.push(current);
+    }
+    return groups;
+};
+
 export const MeasuresDetailsPage = ({
     indexCallback,
     language,
@@ -51,52 +73,46 @@ export const MeasuresDetailsPage = ({
 }: MeasuresDetailsPageProps) => {
     const linkId = "measuresDetails";
     const { t } = useTranslation("report", { lng: language });
+    const groups = buildMeasureGroups(measures);
+    const pageProps = {
+        logo,
+        projectName: project.name,
+        date,
+        confidentialityLevel: t("confidentialityLevels." + project.confidentialityLevel),
+    };
     return (
-        <Page
-            logo={logo}
-            projectName={project.name}
-            date={date}
-            confidentialityLevel={t("confidentialityLevels." + project.confidentialityLevel)}
-        >
-            <View
-                render={({ pageNumber }) => {
-                    indexCallback(pageNumber, t("measures"), linkId);
-                    return null;
-                }}
-            />
-            <Text
-                id={`chapter-${linkId}`}
-                size="header"
-                style={{
-                    marginBottom: s1,
-                }}
-            >
-                {t("measures")}
-            </Text>
-            {measures.map((measure, i) => {
-                return <MeasureCard key={i} isFirstCard={i === 0} language={language} {...measure} />;
-            })}
-        </Page>
+        <>
+            {groups.map((group, groupIdx) => (
+                <Page key={groupIdx} {...pageProps}>
+                    {groupIdx === 0 && (
+                        <>
+                            <View
+                                render={({ pageNumber }) => {
+                                    indexCallback(pageNumber, t("measures"), linkId);
+                                    return null;
+                                }}
+                            />
+                            <Text id={`chapter-${linkId}`} size="header" style={{ marginBottom: s1 }}>
+                                {t("measures")}
+                            </Text>
+                        </>
+                    )}
+                    {group.map((measure) => (
+                        <MeasureCard key={measure.id} language={language} {...measure} />
+                    ))}
+                </Page>
+            ))}
+        </>
     );
 };
 
-const MeasureCard = ({
-    isFirstCard,
-    language,
-    reportId,
-    id,
-    name,
-    description,
-    scheduledAt,
-    threats,
-}: MeasureCardProps) => {
+const MeasureCard = ({ language, reportId, id, name, description, scheduledAt, threats }: MeasureCardProps) => {
     const scheduledAtDate = typeof scheduledAt === "string" ? new Date(scheduledAt) : new Date(scheduledAt.getTime());
     const fitsOnOnePage = measureCardFitsOnOnePage({ name, description, threats });
     return (
         <View
             id={`measure-${reportId}`}
             wrap={!fitsOnOnePage}
-            break={!fitsOnOnePage && !isFirstCard}
             style={{
                 backgroundColor,
                 padding: s1,

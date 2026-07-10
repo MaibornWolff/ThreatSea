@@ -1,4 +1,4 @@
-import { useState, type FC } from "react";
+import { useState, useRef, useCallback, type FC } from "react";
 import { Document, Font } from "@react-pdf/renderer";
 import { CoverPage } from "./pages/cover.report.page";
 import { SystemImagePage } from "./pages/system-image.report.page";
@@ -99,23 +99,33 @@ export const Report: FC<ReportProps> = ({
 }) => {
     const date = new Date().toISOString().split("T")[0]!;
     const [index, setIndex] = useState<Index>({});
-    const newIndex: Index = {};
-    let chapterCount = 0; //wrapping phase
-    let secondCount = 0; //render phase
+    // Accumulates page numbers across all react-pdf layout passes. Using a ref keeps the
+    // reference stable across React renders so that stale closures are never an issue.
+    const pendingIndexRef = useRef<Index>({});
+    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const addToIndex = (pageNumber: number, chapterName: string, chapterId: string): void => {
-        if (!newIndex[chapterId]) {
-            newIndex[chapterId] = { chapterName, chapterId, pageNumber };
-            chapterCount++;
-        } else {
-            secondCount++;
+    // react-pdf calls render-prop callbacks on every internal layout pass (wrapping pass,
+    // render pass, and any extra passes for complex documents). We always store the *latest*
+    // page number for each chapter (last write wins) and debounce the React state update so
+    // it fires exactly once after the final pass — no matter how many passes react-pdf needs.
+    // This guarantees exactly two React renders per PDF generation (capture + verify) instead
+    // of the 2-∞ that the old pass-counting heuristic could produce for large documents.
+    const addToIndex = useCallback((pageNumber: number, chapterName: string, chapterId: string): void => {
+        pendingIndexRef.current = {
+            ...pendingIndexRef.current,
+            [chapterId]: { chapterName, chapterId, pageNumber },
+        };
+        if (timerRef.current !== null) {
+            clearTimeout(timerRef.current);
         }
-        //only update the index on the last render of the last chapter
-        if (secondCount === chapterCount && JSON.stringify(index) !== JSON.stringify(newIndex)) {
-            // SET NEW INDEX
-            setIndex(newIndex);
-        }
-    };
+        timerRef.current = setTimeout(() => {
+            timerRef.current = null;
+            setIndex((prev) => {
+                const next = pendingIndexRef.current;
+                return JSON.stringify(prev) === JSON.stringify(next) ? prev : next;
+            });
+        }, 0);
+    }, []);
 
     return (
         <Translations>

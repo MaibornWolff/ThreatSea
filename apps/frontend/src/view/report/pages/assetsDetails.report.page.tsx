@@ -22,7 +22,6 @@ interface AssetsDetailsPageProps {
 }
 
 interface AssetCardProps extends AssetWithReportId {
-    isFirstCard: boolean;
     language: string;
 }
 
@@ -49,40 +48,66 @@ interface JustificationsProps {
     availabilityJustification: string;
 }
 
+const buildAssetGroups = (assets: AssetWithReportId[]): AssetWithReportId[][] => {
+    if (assets.length === 0) {
+        return [[]];
+    }
+    const groups: AssetWithReportId[][] = [];
+    let current: AssetWithReportId[] = [];
+    for (const asset of assets) {
+        if (assetCardFitsOnOnePage(asset)) {
+            current.push(asset);
+        } else {
+            if (current.length > 0) {
+                groups.push(current);
+                current = [];
+            }
+            groups.push([asset]);
+        }
+    }
+    if (current.length > 0) {
+        groups.push(current);
+    }
+    return groups;
+};
+
 export const AssetsDetailsPage = ({ indexCallback, language, project, logo, date, assets }: AssetsDetailsPageProps) => {
     const linkId = "assetsDetails";
     const { t } = useTranslation("report", { lng: language });
+    const groups = buildAssetGroups(assets);
+    const pageProps = {
+        logo,
+        projectName: project.name,
+        date,
+        confidentialityLevel: t("confidentialityLevels." + project.confidentialityLevel),
+    };
     return (
-        <Page
-            logo={logo}
-            projectName={project.name}
-            date={date}
-            confidentialityLevel={t("confidentialityLevels." + project.confidentialityLevel)}
-        >
-            <View
-                render={({ pageNumber }) => {
-                    indexCallback(pageNumber, t("assets"), linkId);
-                    return null;
-                }}
-            />
-            <Text
-                id={`chapter-${linkId}`}
-                size="header"
-                style={{
-                    marginBottom: s1,
-                }}
-            >
-                Assets
-            </Text>
-            {assets.map((asset, i) => {
-                return <AssetCard key={i} isFirstCard={i === 0} language={language} {...asset} />;
-            })}
-        </Page>
+        <>
+            {groups.map((group, groupIdx) => (
+                <Page key={groupIdx} {...pageProps}>
+                    {groupIdx === 0 && (
+                        <>
+                            <View
+                                render={({ pageNumber }) => {
+                                    indexCallback(pageNumber, t("assets"), linkId);
+                                    return null;
+                                }}
+                            />
+                            <Text id={`chapter-${linkId}`} size="header" style={{ marginBottom: s1 }}>
+                                Assets
+                            </Text>
+                        </>
+                    )}
+                    {group.map((asset) => (
+                        <AssetCard key={asset.id} language={language} {...asset} />
+                    ))}
+                </Page>
+            ))}
+        </>
     );
 };
 
 const AssetCard = ({
-    isFirstCard,
     name,
     id,
     description,
@@ -106,7 +131,6 @@ const AssetCard = ({
         <View
             id={reportId}
             wrap={!fitsOnOnePage}
-            break={!fitsOnOnePage && !isFirstCard}
             style={{
                 backgroundColor,
                 padding: s1,

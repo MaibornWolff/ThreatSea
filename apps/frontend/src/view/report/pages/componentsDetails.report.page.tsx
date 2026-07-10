@@ -19,9 +19,31 @@ interface ComponentsDetailsPageProps {
 }
 
 interface ComponentCardProps extends ComponentWithReportId {
-    isFirstCard: boolean;
     language: string;
 }
+
+const buildComponentGroups = (components: ComponentWithReportId[]): ComponentWithReportId[][] => {
+    if (components.length === 0) {
+        return [[]];
+    }
+    const groups: ComponentWithReportId[][] = [];
+    let current: ComponentWithReportId[] = [];
+    for (const component of components) {
+        if (componentCardFitsOnOnePage(component)) {
+            current.push(component);
+        } else {
+            if (current.length > 0) {
+                groups.push(current);
+                current = [];
+            }
+            groups.push([component]);
+        }
+    }
+    if (current.length > 0) {
+        groups.push(current);
+    }
+    return groups;
+};
 
 export const ComponentsDetailsPage = ({
     indexCallback,
@@ -33,43 +55,46 @@ export const ComponentsDetailsPage = ({
 }: ComponentsDetailsPageProps) => {
     const linkId = "componentsDetails";
     const { t } = useTranslation("report", { lng: language });
+    const groups = buildComponentGroups(components);
+    const pageProps = {
+        logo,
+        projectName: project.name,
+        date,
+        confidentialityLevel: t("confidentialityLevels." + project.confidentialityLevel),
+    };
     return (
-        <Page
-            logo={logo}
-            projectName={project.name}
-            date={date}
-            confidentialityLevel={t("confidentialityLevels." + project.confidentialityLevel)}
-        >
-            <View
-                render={({ pageNumber }) => {
-                    indexCallback(pageNumber, t("components"), linkId);
-                    return null;
-                }}
-            />
-            <Text
-                id={`chapter-${linkId}`}
-                size="header"
-                style={{
-                    marginBottom: s1,
-                }}
-            >
-                {t("components")}
-            </Text>
-            {components.map((component, i) => {
-                return <ComponentCard key={i} isFirstCard={i === 0} language={language} {...component} />;
-            })}
-        </Page>
+        <>
+            {groups.map((group, groupIdx) => (
+                <Page key={groupIdx} {...pageProps}>
+                    {groupIdx === 0 && (
+                        <>
+                            <View
+                                render={({ pageNumber }) => {
+                                    indexCallback(pageNumber, t("components"), linkId);
+                                    return null;
+                                }}
+                            />
+                            <Text id={`chapter-${linkId}`} size="header" style={{ marginBottom: s1 }}>
+                                {t("components")}
+                            </Text>
+                        </>
+                    )}
+                    {group.map((component) => (
+                        <ComponentCard key={component.reportId} language={language} {...component} />
+                    ))}
+                </Page>
+            ))}
+        </>
     );
 };
 
-const ComponentCard = ({ isFirstCard, name, description, reportId, language }: ComponentCardProps) => {
+const ComponentCard = ({ name, description, reportId, language }: ComponentCardProps) => {
     const { t } = useTranslation("report", { lng: language });
     const fitsOnOnePage = componentCardFitsOnOnePage({ name, description });
     return (
         <View
             id={reportId}
             wrap={!fitsOnOnePage}
-            break={!fitsOnOnePage && !isFirstCard}
             style={{
                 backgroundColor,
                 padding: s1,
