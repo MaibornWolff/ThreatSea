@@ -86,6 +86,7 @@ const MeasureCard = ({ language, reportId, id, name, description, scheduledAt, t
         <View
             id={`measure-${reportId}`}
             wrap={!fitsOnOnePage}
+            break={!fitsOnOnePage}
             style={{
                 backgroundColor,
                 padding: s1,

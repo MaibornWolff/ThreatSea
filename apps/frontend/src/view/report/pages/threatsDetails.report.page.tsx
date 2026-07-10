@@ -162,11 +162,12 @@ const ThreatCard = ({
     netRisk,
     ...props
 }: ThreatCardProps) => {
-    const fitsOnOnePage = threatCardFitsOnOnePage({ name, description, assets, measures });
+    const fitsOnOnePage = threatCardFitsOnOnePage({ name, description, componentName, assets, measures });
     return (
         <View
             id={`threat-${reportId}`}
             wrap={!fitsOnOnePage}
+            break={!fitsOnOnePage}
             style={{
                 backgroundColor,
                 padding: s1,
