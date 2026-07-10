@@ -13,8 +13,11 @@ const CARD_CHROME_HEIGHT = 60;
 const PAGE_CONTENT_HEIGHT = 754;
 const ATOMIC_LIMIT = PAGE_CONTENT_HEIGHT * 0.75;
 
+// Every newline forces a rendered line break, so count each segment separately
 const textLines = (text: string | null | undefined, charsPerLine: number): number =>
-    text ? Math.ceil(text.length / charsPerLine) : 0;
+    text
+        ? text.split("\n").reduce((sum, segment) => sum + Math.max(1, Math.ceil(segment.length / charsPerLine)), 0)
+        : 0;
 
 interface ThreatCardShape {
     name: string | null | undefined;
