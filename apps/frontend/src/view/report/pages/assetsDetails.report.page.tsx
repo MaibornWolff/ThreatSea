@@ -22,6 +22,7 @@ interface AssetsDetailsPageProps {
 }
 
 interface AssetCardProps extends AssetWithReportId {
+    isFirstCard: boolean;
     language: string;
 }
 
@@ -74,13 +75,14 @@ export const AssetsDetailsPage = ({ indexCallback, language, project, logo, date
                 Assets
             </Text>
             {assets.map((asset, i) => {
-                return <AssetCard key={i} language={language} {...asset} />;
+                return <AssetCard key={i} isFirstCard={i === 0} language={language} {...asset} />;
             })}
         </Page>
     );
 };
 
 const AssetCard = ({
+    isFirstCard,
     name,
     id,
     description,
@@ -104,7 +106,7 @@ const AssetCard = ({
         <View
             id={reportId}
             wrap={!fitsOnOnePage}
-            break={!fitsOnOnePage}
+            break={!fitsOnOnePage && !isFirstCard}
             style={{
                 backgroundColor,
                 padding: s1,

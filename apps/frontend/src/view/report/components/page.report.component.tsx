@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactNode } from "react";
 import { Page as PdfPage, View } from "@react-pdf/renderer";
-import { s2, s5, s6 } from "#view/report/report.style.ts";
+import { s1, s2, s6 } from "#view/report/report.style.ts";
 import { Text } from "./text.report.component";
 import { colors } from "#view/wrappers/color-tokens.ts";
 
@@ -29,9 +29,11 @@ export const Page = ({ logo, projectName, date, children, confidentialityLevel, 
                 flexDirection: "column",
                 alignItems: "stretch",
                 backgroundColor: colors.surface.paperWhite,
-                // Reserve vertical space for the fixed header/footer
+                // Reserve vertical space for the fixed header/footer. The bottom band is two
+                // text lines wider than the footer needs: react-pdf's split relayout can drift
+                // content a line or two downwards, and the slack keeps it off the footer.
                 paddingTop: s6,
-                paddingBottom: s5,
+                paddingBottom: s6 + s2,
                 paddingLeft: s6,
                 paddingRight: s6,
             }}
@@ -78,7 +80,7 @@ const Footer = ({ confidentialityLevel }: FooterProps) => {
         <View
             style={{
                 position: "absolute",
-                bottom: s2,
+                bottom: s1,
                 left: s6,
                 right: s6,
                 display: "flex",

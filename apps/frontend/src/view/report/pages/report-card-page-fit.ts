@@ -10,7 +10,7 @@ const COLUMN_CHARS_PER_LINE = 32;
 // full-width texts: measure/component names, asset descriptions
 const FULL_WIDTH_CHARS_PER_LINE = 55;
 const CARD_CHROME_HEIGHT = 60;
-const PAGE_CONTENT_HEIGHT = 754;
+const PAGE_CONTENT_HEIGHT = 730;
 const ATOMIC_LIMIT = PAGE_CONTENT_HEIGHT * 0.75;
 
 // Every newline forces a rendered line break, so count each segment separately
