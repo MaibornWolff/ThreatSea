@@ -19,6 +19,7 @@ interface ComponentsDetailsPageProps {
 }
 
 interface ComponentCardProps extends ComponentWithReportId {
+    isFirstCard: boolean;
     language: string;
 }
 
@@ -55,20 +56,20 @@ export const ComponentsDetailsPage = ({
                 {t("components")}
             </Text>
             {components.map((component, i) => {
-                return <ComponentCard key={i} language={language} {...component} />;
+                return <ComponentCard key={i} isFirstCard={i === 0} language={language} {...component} />;
             })}
         </Page>
     );
 };
 
-const ComponentCard = ({ name, description, reportId, language }: ComponentCardProps) => {
+const ComponentCard = ({ isFirstCard, name, description, reportId, language }: ComponentCardProps) => {
     const { t } = useTranslation("report", { lng: language });
     const fitsOnOnePage = componentCardFitsOnOnePage({ name, description });
     return (
         <View
             id={reportId}
             wrap={!fitsOnOnePage}
-            break={!fitsOnOnePage}
+            break={!fitsOnOnePage && !isFirstCard}
             style={{
                 backgroundColor,
                 padding: s1,

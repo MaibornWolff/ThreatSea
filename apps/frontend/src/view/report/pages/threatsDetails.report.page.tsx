@@ -28,6 +28,7 @@ interface ThreatsDetailsPageProps {
 }
 
 interface ThreatCardProps extends ThreatReport {
+    isFirstCard: boolean;
     language: string;
     showComponentsPage: boolean;
     showAssetsPage: boolean;
@@ -122,6 +123,7 @@ export const ThreatsDetailsPage = ({
                 return (
                     <ThreatCard
                         key={i}
+                        isFirstCard={i === 0}
                         language={language}
                         showComponentsPage={showComponentsPage}
                         showAssetsPage={showAssetsPage}
@@ -135,6 +137,7 @@ export const ThreatsDetailsPage = ({
 };
 
 const ThreatCard = ({
+    isFirstCard,
     reportId,
     id,
     name,
@@ -167,7 +170,7 @@ const ThreatCard = ({
         <View
             id={`threat-${reportId}`}
             wrap={!fitsOnOnePage}
-            break={!fitsOnOnePage}
+            break={!fitsOnOnePage && !isFirstCard}
             style={{
                 backgroundColor,
                 padding: s1,

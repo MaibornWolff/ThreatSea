@@ -26,6 +26,7 @@ interface MeasuresDetailsPageProps {
 }
 
 interface MeasureCardProps extends ReportMeasure {
+    isFirstCard: boolean;
     language: string;
 }
 
@@ -73,20 +74,29 @@ export const MeasuresDetailsPage = ({
                 {t("measures")}
             </Text>
             {measures.map((measure, i) => {
-                return <MeasureCard key={i} language={language} {...measure} />;
+                return <MeasureCard key={i} isFirstCard={i === 0} language={language} {...measure} />;
             })}
         </Page>
     );
 };
 
-const MeasureCard = ({ language, reportId, id, name, description, scheduledAt, threats }: MeasureCardProps) => {
+const MeasureCard = ({
+    isFirstCard,
+    language,
+    reportId,
+    id,
+    name,
+    description,
+    scheduledAt,
+    threats,
+}: MeasureCardProps) => {
     const scheduledAtDate = typeof scheduledAt === "string" ? new Date(scheduledAt) : new Date(scheduledAt.getTime());
     const fitsOnOnePage = measureCardFitsOnOnePage({ name, description, threats });
     return (
         <View
             id={`measure-${reportId}`}
             wrap={!fitsOnOnePage}
-            break={!fitsOnOnePage}
+            break={!fitsOnOnePage && !isFirstCard}
             style={{
                 backgroundColor,
                 padding: s1,
