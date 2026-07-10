@@ -450,7 +450,7 @@ const COMPONENT_SIZE = 80; // components are a fixed 80x80 px box
  *
  * @param component - The component to compute the anchor point for
  * @param orientation - Which side of the component to anchor to
- * @returns The { x, y } pixel coordinate of the anchor point
+ * @returns The Point (pixel coordinate) of the anchor point
  */
 export function anchorPointForComponent(component: AugmentedSystemComponent, orientation: AnchorOrientation): Point {
     const minX = component.gridX * 5;

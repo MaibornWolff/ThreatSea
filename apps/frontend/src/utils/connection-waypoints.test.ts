@@ -138,7 +138,7 @@ describe("deleteVertex", () => {
     it("deletes an interior vertex when neighbors become axis-aligned", () => {
         // Points: (0,0)(0,20)(0,40)(20,40); delete vertex 1 (0,20)
         // After removal: (0,0)(0,40)(20,40); neighbors are axis-aligned (vertical then horizontal)
-        // No corner insertion needed; simplifyCollinear handles it
+        // No corner insertion needed; simplifyPolyline handles it
         // Result: (0,0)(0,40)(20,40) — already orthogonal
         expect(deleteVertex([0, 0, 0, 20, 0, 40, 20, 40], 1)).toEqual([0, 0, 0, 40, 20, 40]);
         assertOrthogonal(deleteVertex([0, 0, 0, 20, 0, 40, 20, 40], 1));
