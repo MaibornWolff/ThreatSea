@@ -1,6 +1,6 @@
 import type { Asset } from "#api/types/asset.types.ts";
 import type { CatalogWithRole } from "#api/types/catalogs.types.ts";
-import type { ExtendedProject } from "#api/types/project.types.ts";
+import type { ExtendedProject, ProjectReport, ThreatReport } from "#api/types/project.types.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import type { Measure } from "#api/types/measure.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
@@ -233,6 +233,67 @@ export const createThreatMeasure = (overrides: Partial<ThreatMeasure> = {}): Thr
     threatName: "Test Threat",
     measure: createMeasure(),
     measureImpact: createMeasureImpact(),
+    ...overrides,
+});
+
+type ReportThreatMeasure = ThreatReport["measures"][number];
+type ReportMeasure = ProjectReport["measures"][number];
+
+export const createReportThreatMeasure = (overrides: Partial<ReportThreatMeasure> = {}): ReportThreatMeasure => ({
+    ...createMeasureImpact(),
+    reportId: "M-01",
+    name: "Test Measure",
+    scheduledAt: "2025-01-01T00:00:00.000Z",
+    ...overrides,
+});
+
+export const createReportThreat = (overrides: Partial<ThreatReport> = {}): ThreatReport => ({
+    id: 1,
+    pointOfAttackId: "poa-1",
+    catalogThreatId: 1,
+    name: "Test Threat",
+    description: "",
+    pointOfAttack: POINTS_OF_ATTACK.USER_INTERFACE,
+    attacker: ATTACKERS.UNAUTHORISED_PARTIES,
+    probability: 4,
+    confidentiality: false,
+    integrity: false,
+    availability: false,
+    doneEditing: true,
+    projectId: 1,
+    createdAt: new Date("2025-01-01"),
+    updatedAt: new Date("2025-01-01"),
+    componentName: null,
+    componentType: null,
+    componentReportId: null,
+    interfaceName: null,
+    damage: 5,
+    risk: 20,
+    assets: [],
+    measures: [],
+    netProbability: 4,
+    netDamage: 5,
+    netRisk: 20,
+    reportId: "T-01",
+    bruttoColor: "red",
+    nettoColor: "red",
+    ...overrides,
+});
+
+export const createReportMeasure = (overrides: Partial<ReportMeasure> = {}): ReportMeasure => ({
+    ...createMeasure(),
+    threats: [],
+    ...overrides,
+});
+
+export const createProjectReport = (overrides: Partial<ProjectReport> = {}): ProjectReport => ({
+    systemImage: null,
+    project: createProject(),
+    components: [],
+    assets: [],
+    threats: [],
+    measures: [],
+    measureImpacts: [],
     ...overrides,
 });
 
