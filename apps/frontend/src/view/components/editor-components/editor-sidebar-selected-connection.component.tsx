@@ -1,5 +1,5 @@
 import { Delete, Autorenew } from "@mui/icons-material";
-import { IconButton } from "@mui/material";
+import { IconButton, Tooltip } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { Box } from "@mui/system";
 import type { ChangeEvent } from "react";
@@ -71,18 +71,20 @@ export const EditorSidebarSelectedConnection = ({
                     }}
                 />
                 {isEditor && selectedConnection?.pinned && (
-                    <IconButton
-                        onClick={handleResetConnectionRouting}
-                        aria-label={t("sidebar.connection.resetRouting")}
-                        sx={{
-                            "&:hover": {
-                                backgroundColor: "background.paperIntransparent",
-                            },
-                            marginTop: -1,
-                        }}
-                    >
-                        <Autorenew sx={{ fontSize: 18 }} />
-                    </IconButton>
+                    <Tooltip title={t("sidebar.connection.resetRouting")}>
+                        <IconButton
+                            onClick={handleResetConnectionRouting}
+                            aria-label={t("sidebar.connection.resetRouting")}
+                            sx={{
+                                "&:hover": {
+                                    backgroundColor: "background.paperIntransparent",
+                                },
+                                marginTop: -1,
+                            }}
+                        >
+                            <Autorenew sx={{ fontSize: 18 }} />
+                        </IconButton>
+                    </Tooltip>
                 )}
                 {isEditor && (
                     <IconButton
