@@ -3,25 +3,25 @@ import { Provider } from "react-redux";
 import type { ReactNode } from "react";
 import { useMatrix } from "./use-matrix.hook";
 import { createStore } from "#application/store.ts";
-import { createChildThreat, createMeasure, createMeasureImpact } from "#test-utils/builders.ts";
+import { createThreat, createMeasure, createMeasureImpact } from "#test-utils/builders.ts";
 import {
     mockUseCatalogMeasures,
-    mockUseChildThreats,
+    mockUseThreats,
     mockUseMeasureImpacts,
     mockUseMeasures,
 } from "#test-utils/mock-hooks.ts";
 import type { Measure } from "#api/types/measure.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
-import type { ExtendedChildThreat } from "#api/types/child-threat.types.ts";
+import type { ExtendedThreat } from "#api/types/threat.types.ts";
 
 interface SetupArgs {
-    threats?: ExtendedChildThreat[];
+    threats?: ExtendedThreat[];
     measures?: Measure[];
     measureImpacts?: MeasureImpact[];
 }
 
 const renderUseMatrix = ({ threats = [], measures = [], measureImpacts = [] }: SetupArgs = {}) => {
-    mockUseChildThreats({ items: threats });
+    mockUseThreats({ items: threats });
     mockUseMeasures({ items: measures });
     mockUseMeasureImpacts({ items: measureImpacts });
     mockUseCatalogMeasures();
@@ -34,9 +34,9 @@ const renderUseMatrix = ({ threats = [], measures = [], measureImpacts = [] }: S
 // A threat wired to a single measure through a measure impact, so the threat's
 // derived `measures[0].active` flag reflects the timeline-date comparison.
 const linkedSetup = (scheduledAt: Date): SetupArgs => ({
-    threats: [createChildThreat({ id: 1 })],
+    threats: [createThreat({ id: 1 })],
     measures: [createMeasure({ id: 10, scheduledAt })],
-    measureImpacts: [createMeasureImpact({ id: 1, measureId: 10, childThreatId: 1 })],
+    measureImpacts: [createMeasureImpact({ id: 1, measureId: 10, threatId: 1 })],
 });
 
 describe("useMatrix", () => {

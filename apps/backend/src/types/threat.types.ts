@@ -1,7 +1,7 @@
 import { ProjectIdParam } from "#types/project.types.js";
 import { POINTS_OF_ATTACK } from "./points-of-attack.types.js";
 import { ATTACKERS } from "./attackers.types.js";
-import { CHILD_THREAT_STATUSES } from "./child-threat-statuses.types.js";
+import { THREAT_STATUSES } from "./threat-statuses.types.js";
 import {
     IsBoolean,
     IsDefined,
@@ -35,14 +35,14 @@ import { Trim } from "#middlewares/input-validations/trim.decorator.js";
 import { ComponentType } from "./system.types.js";
 import { AssetResponse } from "./asset.types.js";
 
-export class ChildThreatIdParam extends ProjectIdParam {
-    @IsDefined({ message: PARAM_MUST_EXIST_MESSAGE("childThreatId") })
+export class ThreatIdParam extends ProjectIdParam {
+    @IsDefined({ message: PARAM_MUST_EXIST_MESSAGE("threatId") })
     @Type(() => Number)
-    @IsInt({ message: PARAM_MUST_BE_INT_MESSAGE("childThreatId") })
-    childThreatId!: number;
+    @IsInt({ message: PARAM_MUST_BE_INT_MESSAGE("threatId") })
+    threatId!: number;
 }
 
-export class UpdateChildThreatRequest {
+export class UpdateThreatRequest {
     @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("name") })
     @IsString({ message: FIELD_MUST_BE_STRING_MESSAGE("name") })
     @Trim()
@@ -80,10 +80,10 @@ export class UpdateChildThreatRequest {
 
     @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("status") })
     @IsString({ message: FIELD_MUST_BE_STRING_MESSAGE("status") })
-    @IsEnum(CHILD_THREAT_STATUSES, {
-        message: FIELD_MUST_BE_ONE_OF_MESSAGE("status", Object.values(CHILD_THREAT_STATUSES)),
+    @IsEnum(THREAT_STATUSES, {
+        message: FIELD_MUST_BE_ONE_OF_MESSAGE("status", Object.values(THREAT_STATUSES)),
     })
-    status!: CHILD_THREAT_STATUSES;
+    status!: THREAT_STATUSES;
 }
 
 /**
@@ -91,7 +91,7 @@ export class UpdateChildThreatRequest {
  * Missing fields default to the immutable parent's identity text and the
  * catalogue threat's assessment values.
  */
-export class CreateChildThreatRequest {
+export class CreateThreatRequest {
     @IsOptional()
     @IsString({ message: FIELD_MUST_BE_STRING_MESSAGE("name") })
     @Trim()
@@ -129,13 +129,13 @@ export class CreateChildThreatRequest {
 
     @IsOptional()
     @IsString({ message: FIELD_MUST_BE_STRING_MESSAGE("status") })
-    @IsEnum(CHILD_THREAT_STATUSES, {
-        message: FIELD_MUST_BE_ONE_OF_MESSAGE("status", Object.values(CHILD_THREAT_STATUSES)),
+    @IsEnum(THREAT_STATUSES, {
+        message: FIELD_MUST_BE_ONE_OF_MESSAGE("status", Object.values(THREAT_STATUSES)),
     })
-    status?: CHILD_THREAT_STATUSES;
+    status?: THREAT_STATUSES;
 }
 
-export interface ChildThreatResponse extends UpdateChildThreatRequest {
+export interface ThreatResponse extends UpdateThreatRequest {
     id: number;
     projectId: number;
     genericThreatId: number;
@@ -146,7 +146,7 @@ export interface ChildThreatResponse extends UpdateChildThreatRequest {
     updatedAt: string;
 }
 
-export interface ExtendedChildThreatResponse extends ChildThreatResponse {
+export interface ExtendedThreatResponse extends ThreatResponse {
     componentName: string | null;
     componentType: number | ComponentType | null;
     interfaceName: string | null;

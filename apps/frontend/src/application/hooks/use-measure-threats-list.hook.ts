@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
-import type { ExtendedChildThreat } from "#api/types/child-threat.types.ts";
-import { useChildThreats } from "./use-child-threats.hook";
+import type { ExtendedThreat } from "#api/types/threat.types.ts";
+import { useThreats } from "./use-threats.hook";
 import { useMeasureImpacts } from "./use-measureImpacts.hook";
 import { useList } from "./use-list.hooks";
 
@@ -10,11 +10,11 @@ export interface MeasureThreat {
     setsOutOfScope: boolean;
     netProbability: number | null;
     netDamage: number | null;
-    childThreatId: number | undefined;
+    threatId: number | undefined;
     threatName: string | undefined;
     threatDescription: string | undefined;
     componentName: string | null;
-    threat: ExtendedChildThreat | undefined;
+    threat: ExtendedThreat | undefined;
     measureImpact: MeasureImpact;
 }
 
@@ -36,11 +36,11 @@ export const useMeasureThreatsList = ({ projectId, measureId }: { projectId: num
         useList("measureThreats");
 
     //necessary data
-    const { items: childThreats, loadChildThreats, isPending: childThreatsPending } = useChildThreats({ projectId });
+    const { items: threats, loadThreats, isPending: threatsPending } = useThreats({ projectId });
 
     useEffect(() => {
-        loadChildThreats();
-    }, [projectId, loadChildThreats]);
+        loadThreats();
+    }, [projectId, loadThreats]);
 
     const {
         items: measureImpacts,
@@ -54,21 +54,21 @@ export const useMeasureThreatsList = ({ projectId, measureId }: { projectId: num
     }, [projectId, loadMeasureImpacts]);
 
     const items: MeasureThreat[] = useMemo(() => {
-        if (childThreatsPending || measureImpactsPending) {
+        if (threatsPending || measureImpactsPending) {
             //wait until all data is loaded
             return [];
         }
         return measureImpacts
             .filter((measureImpact) => measureImpact.measureId === measureId)
             .map((measureImpact) => {
-                const threat = childThreats.find((item) => item.id === measureImpact.childThreatId);
+                const threat = threats.find((item) => item.id === measureImpact.threatId);
 
                 return {
                     measureImpactId: measureImpact.id,
                     setsOutOfScope: measureImpact.setsOutOfScope,
                     netProbability: measureImpact.probability,
                     netDamage: measureImpact.damage,
-                    childThreatId: threat?.id,
+                    threatId: threat?.id,
                     threatName: threat?.name,
                     threatDescription: threat?.description,
                     componentName: threat?.componentName ?? null,
@@ -76,7 +76,7 @@ export const useMeasureThreatsList = ({ projectId, measureId }: { projectId: num
                     measureImpact,
                 };
             });
-    }, [measureImpacts, childThreats, childThreatsPending, measureImpactsPending, measureId]);
+    }, [measureImpacts, threats, threatsPending, measureImpactsPending, measureId]);
 
     const filteredItems = useMemo(() => {
         return items.filter((item) =>

@@ -9,9 +9,9 @@ import {
     GenericThreatWithExtendedChildrenResponse,
     GenericThreatIdParam,
     GenericThreatResponse,
-} from "#types/genericThreat.types.js";
+} from "#types/generic-threat.types.js";
 import { ProjectIdParam } from "#types/project.types.js";
-import * as genericThreatsService from "#services/genericThreats.service.js";
+import * as genericThreatsService from "#services/generic-threats.service.js";
 
 /**
  * Gets all generic threats of the current project.

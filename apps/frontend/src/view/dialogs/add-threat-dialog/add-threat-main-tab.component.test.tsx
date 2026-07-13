@@ -7,7 +7,7 @@ import type { Asset } from "#api/types/asset.types.ts";
 import type { ThreatMeasure } from "#application/hooks/use-threat-measures-list.hook.ts";
 import { AddThreatMainTab } from "./add-threat-main-tab.component";
 import type { ThreatFormValues } from "./add-threat-form.types.ts";
-import { CHILD_THREAT_STATUSES } from "#api/types/child-threat-statuses.types.ts";
+import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 
 interface RenderMainTabOptions {
     assets?: Asset[];
@@ -39,7 +39,7 @@ const renderMainTab = ({
                 confidentiality: false,
                 integrity: false,
                 availability: false,
-                status: CHILD_THREAT_STATUSES.NEW,
+                status: THREAT_STATUSES.NEW,
                 ...defaultValues,
             },
         });
@@ -80,7 +80,7 @@ describe("AddThreatMainTab", () => {
     });
 
     it("lets the user change the status", async () => {
-        const { user } = renderMainTab({ defaultValues: { status: CHILD_THREAT_STATUSES.NEW } });
+        const { user } = renderMainTab({ defaultValues: { status: THREAT_STATUSES.NEW } });
 
         await user.click(screen.getByRole("combobox"));
         await user.click(screen.getByRole("option", { name: "In progress" }));

@@ -40,7 +40,7 @@ import type { DialogValue } from "#application/reducers/dialogs.reducer.ts";
 
 interface FormValues {
     id: number | undefined;
-    childThreatId: number | "";
+    threatId: number | "";
     description: string;
     setsOutOfScope: boolean;
     impactsProbability: boolean;
@@ -79,15 +79,15 @@ const MeasureImpactByThreatDialog = ({
         projectId,
     });
 
-    const { setCurrentChildThreatId, damagePlaceholder, probabilityPlaceholder } = useMeasureImpactPlaceholder({
+    const { setCurrentThreatId, damagePlaceholder, probabilityPlaceholder } = useMeasureImpactPlaceholder({
         projectId,
     });
 
     useEffect(() => {
         if (measureImpact) {
-            setCurrentChildThreatId(measureImpact.childThreatId);
+            setCurrentThreatId(measureImpact.threatId);
         }
-    }, [measureImpact, setCurrentChildThreatId]);
+    }, [measureImpact, setCurrentThreatId]);
 
     const disableSelect = !!measureImpact;
 
@@ -102,7 +102,7 @@ const MeasureImpactByThreatDialog = ({
         defaultValues: {
             ...measureImpact,
             id: measureImpact?.id ?? undefined,
-            childThreatId: measureImpact?.childThreatId ?? "",
+            threatId: measureImpact?.threatId ?? "",
             description: measureImpact?.description ?? "",
             setsOutOfScope: measureImpact?.setsOutOfScope ?? false,
             impactsProbability: measureImpact?.impactsProbability ?? false,
@@ -180,12 +180,12 @@ const MeasureImpactByThreatDialog = ({
                 onSubmit={handleSubmit(handleConfirmDialog)}
             >
                 <Box sx={{ display: "flex", alignItems: "center", mt: 2, mb: 1 }}>
-                    <FormControl fullWidth error={!!errors?.childThreatId} data-testid="childThreatIdError">
-                        <InputLabel shrink sx={{ marginLeft: 1, fontSize: "1rem" }} id="select-childThreatId-label">
+                    <FormControl fullWidth error={!!errors?.threatId} data-testid="threatIdError">
+                        <InputLabel shrink sx={{ marginLeft: 1, fontSize: "1rem" }} id="select-threatId-label">
                             {t("threat")}
                         </InputLabel>
                         <Controller
-                            name="childThreatId"
+                            name="threatId"
                             control={control}
                             rules={{
                                 required: t("errorMessages.threatRequired"),
@@ -193,18 +193,18 @@ const MeasureImpactByThreatDialog = ({
                             render={({ field: { value, onChange: fieldOnChange } }) => (
                                 <Select
                                     disabled={disableSelect}
-                                    labelId="select-childThreatId-label"
+                                    labelId="select-threatId-label"
                                     id="select-threat"
                                     label={t("threat")}
                                     value={value ?? ""}
                                     multiple={false}
-                                    {...register("childThreatId", {
+                                    {...register("threatId", {
                                         validate: (value) => value != null,
                                         valueAsNumber: true,
                                     })}
                                     onChange={(event: SelectChangeEvent<number | string>) => {
                                         const selectedValue = Number(event.target.value);
-                                        setCurrentChildThreatId(selectedValue);
+                                        setCurrentThreatId(selectedValue);
                                         fieldOnChange(selectedValue);
                                     }}
                                     MenuProps={{
@@ -281,7 +281,7 @@ const MeasureImpactByThreatDialog = ({
                                 </Select>
                             )}
                         />
-                        <FormHelperText>{errors?.childThreatId?.message}</FormHelperText>
+                        <FormHelperText>{errors?.threatId?.message}</FormHelperText>
                     </FormControl>
                 </Box>
 

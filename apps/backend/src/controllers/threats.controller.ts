@@ -5,15 +5,10 @@
 import { NextFunction, Request, Response } from "express";
 import { BadRequestError } from "#errors/bad-request.error.js";
 import { NotFoundError } from "#errors/not-found.error.js";
-import {
-    ChildThreatIdParam,
-    ChildThreatResponse,
-    CreateChildThreatRequest,
-    UpdateChildThreatRequest,
-} from "#types/childThreat.types.js";
-import { GenericThreatIdParam } from "#types/genericThreat.types.js";
-import * as childThreatsService from "#services/childThreats.service.js";
-import * as genericThreatsService from "#services/genericThreats.service.js";
+import { ThreatIdParam, ThreatResponse, CreateThreatRequest, UpdateThreatRequest } from "#types/threat.types.js";
+import { GenericThreatIdParam } from "#types/generic-threat.types.js";
+import * as threatsService from "#services/threats.service.js";
+import * as genericThreatsService from "#services/generic-threats.service.js";
 
 /**
  * Gets all child threats for the specified generic threat.
@@ -22,14 +17,14 @@ import * as genericThreatsService from "#services/genericThreats.service.js";
  * @param {Response} response - The http response.
  * @param {NextFunction} next - The next middleware function.
  */
-export async function getChildThreatsByGenericThreatId(
-    request: Request<GenericThreatIdParam, ChildThreatResponse[], void>,
-    response: Response<ChildThreatResponse[]>,
+export async function getThreatsByGenericThreatId(
+    request: Request<GenericThreatIdParam, ThreatResponse[], void>,
+    response: Response<ThreatResponse[]>,
     next: NextFunction
 ): Promise<void> {
     const genericThreatProjectId = request.params.projectId;
     const genericThreatId = request.params.genericThreatId;
-    const childThreats = await childThreatsService.getChildThreatsByGenericThreatId(genericThreatId);
+    const threats = await threatsService.getThreatsByGenericThreatId(genericThreatId);
     const genericThreat = await genericThreatsService.getGenericThreat(genericThreatId);
 
     if (genericThreat === null) {
@@ -42,7 +37,7 @@ export async function getChildThreatsByGenericThreatId(
         return;
     }
 
-    response.json(childThreats);
+    response.json(threats);
 }
 
 /**
@@ -52,35 +47,35 @@ export async function getChildThreatsByGenericThreatId(
  * @param {Response} response - The http response.
  * @param {NextFunction} next - The next middleware function.
  */
-export async function getChildThreat(
-    request: Request<ChildThreatIdParam, ChildThreatResponse, void>,
-    response: Response<ChildThreatResponse>,
+export async function getThreat(
+    request: Request<ThreatIdParam, ThreatResponse, void>,
+    response: Response<ThreatResponse>,
     next: NextFunction
 ): Promise<void> {
-    const childThreatId = request.params.childThreatId;
-    const childThreatProjectId = request.params.projectId;
+    const threatId = request.params.threatId;
+    const threatProjectId = request.params.projectId;
 
-    const childThreat = await childThreatsService.getChildThreat(childThreatId);
+    const threat = await threatsService.getThreat(threatId);
 
-    if (childThreat === null) {
+    if (threat === null) {
         next(new NotFoundError("Child threat not found"));
         return;
     }
 
-    if (childThreat.projectId !== childThreatProjectId) {
+    if (threat.projectId !== threatProjectId) {
         next(new BadRequestError("Child threat does not belong to this project"));
         return;
     }
 
-    response.json(childThreat);
+    response.json(threat);
 }
 
 /**
  * Creates a new child threat.
  */
-export async function createChildThreat(
-    request: Request<GenericThreatIdParam, ChildThreatResponse, CreateChildThreatRequest>,
-    response: Response<ChildThreatResponse>,
+export async function createThreat(
+    request: Request<GenericThreatIdParam, ThreatResponse, CreateThreatRequest>,
+    response: Response<ThreatResponse>,
     next: NextFunction
 ): Promise<void> {
     const projectId = request.params.projectId;
@@ -102,7 +97,7 @@ export async function createChildThreat(
         // The body carries only optional refinement overrides; identity is inherited
         // from the immutable parent (and assessment defaults from the catalogue threat)
         // and cannot be chosen by the client.
-        const created = await childThreatsService.createThreatForGenericThreat(genericThreatId, createBody);
+        const created = await threatsService.createThreatForGenericThreat(genericThreatId, createBody);
 
         response.status(201).json(created);
     } catch (err) {
@@ -113,17 +108,17 @@ export async function createChildThreat(
 /**
  * Updates an existing child threat.
  */
-export async function updateChildThreat(
-    request: Request<ChildThreatIdParam, ChildThreatResponse, UpdateChildThreatRequest>,
-    response: Response<ChildThreatResponse>,
+export async function updateThreat(
+    request: Request<ThreatIdParam, ThreatResponse, UpdateThreatRequest>,
+    response: Response<ThreatResponse>,
     next: NextFunction
 ): Promise<void> {
-    const childThreatId = request.params.childThreatId;
+    const threatId = request.params.threatId;
     const projectId = request.params.projectId;
     const updateBody = request.body;
 
     try {
-        const existing = await childThreatsService.getChildThreat(childThreatId);
+        const existing = await threatsService.getThreat(threatId);
         if (existing === null) {
             next(new NotFoundError("Child threat not found"));
             return;
@@ -136,7 +131,7 @@ export async function updateChildThreat(
 
         // Pass only the refinement fields; anything else in the body (e.g. identity
         // fields) must not reach the database update.
-        const updated = await childThreatsService.updateChildThreat(childThreatId, {
+        const updated = await threatsService.updateThreat(threatId, {
             name: updateBody.name,
             description: updateBody.description,
             probability: updateBody.probability,
@@ -155,16 +150,16 @@ export async function updateChildThreat(
 /**
  * Deletes a child threat.
  */
-export async function deleteChildThreat(
-    request: Request<ChildThreatIdParam, void, void>,
+export async function deleteThreat(
+    request: Request<ThreatIdParam, void, void>,
     response: Response<void>,
     next: NextFunction
 ): Promise<void> {
-    const childThreatId = request.params.childThreatId;
+    const threatId = request.params.threatId;
     const projectId = request.params.projectId;
 
     try {
-        const existing = await childThreatsService.getChildThreat(childThreatId);
+        const existing = await threatsService.getThreat(threatId);
         if (existing === null) {
             next(new NotFoundError("Child threat not found"));
             return;
@@ -175,7 +170,7 @@ export async function deleteChildThreat(
             return;
         }
 
-        await childThreatsService.deleteChildThreat(childThreatId);
+        await threatsService.deleteThreat(threatId);
 
         response.status(204).end();
     } catch (err) {
