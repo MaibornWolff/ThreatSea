@@ -35,6 +35,7 @@ import { Page } from "#view/components/page.component.tsx";
 import { SearchField } from "#view/components/search-field.component.tsx";
 import { Tooltip } from "#view/components/tooltip.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
+import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
 import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
 import { withProject } from "#view/components/with-project.hoc.tsx";
 import { MeasureImpactByMeasureDialogPage } from "./measure-impact-by-measure-dialog.page";
@@ -61,6 +62,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
         t,
         i18n: { language },
     } = useTranslation("riskPage");
+    usePageTitle(t("risk", { ns: "common" }));
     const {
         timeline,
         matrix,

@@ -1,4 +1,5 @@
 import type { Asset } from "#api/types/asset.types.ts";
+import type { CatalogWithRole } from "#api/types/catalogs.types.ts";
 import type { ExtendedProject } from "#api/types/project.types.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import type { Measure } from "#api/types/measure.types.ts";
@@ -144,6 +145,16 @@ export const createProject = (overrides: Partial<ExtendedProject> = {}): Extende
     updatedAt: new Date("2025-01-01"),
     role: USER_ROLES.EDITOR,
     image: null,
+    ...overrides,
+});
+
+export const createCatalog = (overrides: Partial<CatalogWithRole> = {}): CatalogWithRole => ({
+    id: 1,
+    name: "Test Catalog",
+    language: "EN",
+    createdAt: new Date("2025-01-01"),
+    updatedAt: new Date("2025-01-01"),
+    role: USER_ROLES.EDITOR,
     ...overrides,
 });
 

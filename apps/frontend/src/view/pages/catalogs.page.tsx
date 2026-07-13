@@ -29,6 +29,7 @@ import { Page } from "#view/components/page.component.tsx";
 import { SearchField } from "#view/components/search-field.component.tsx";
 import { ToggleButtons } from "#view/components/toggle-buttons.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
+import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
 import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import CatalogDialogPage from "./catalog-dialog.page";
@@ -53,6 +54,7 @@ const CatalogsPageBody = () => {
         t,
         i18n: { language },
     } = useTranslation("catalogsPage");
+    usePageTitle(t("catalogs", { ns: "common" }));
 
     const { setSortDirection, setSearchValue, setSortBy, isPending, sortDirection, sortBy, catalogs } =
         useCatalogsList();

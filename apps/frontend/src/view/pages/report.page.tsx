@@ -17,6 +17,7 @@ import { DialogTextField } from "#view/components/dialog.textfield.component.tsx
 import { Page } from "#view/components/page.component.tsx";
 import { ToggleButtons } from "#view/components/toggle-buttons.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
+import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
 import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
 import { Report } from "#view/report/report.tsx";
 import { downloadMarkdownReport } from "#view/report/download-markdown-report.ts";
@@ -64,6 +65,7 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
         t,
         i18n: { language },
     } = useTranslation("reportPage");
+    usePageTitle(t("report", { ns: "common" }));
 
     const projectId = project.id;
 

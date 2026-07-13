@@ -108,7 +108,7 @@ const renderEditorPage = ({
         {
             initialEntries,
             preloadedState: {
-                projects: { current: { role } } as never,
+                projects: { ids: [], entities: {}, current: { role } } as never,
                 editor: { stageScale: 1, stagePosition: { x: 0, y: 0 } } as never,
             },
         }

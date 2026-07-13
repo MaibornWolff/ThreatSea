@@ -19,6 +19,7 @@ import { useEditor, type EditorConnectionAnchor } from "#application/hooks/use-e
 import { useKeyboardComponentMove, type HelpLines } from "#application/hooks/use-keyboard-component-move.hook.ts";
 import { useEditorAnnotations } from "#application/hooks/use-editor-annotations.hook.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
+import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
 import { DEFAULT_ANNOTATION_COLOR } from "#view/colors/annotation.colors.ts";
 import { AnnotationDrawingPreview } from "#view/components/editor-components/annotation-drawing-preview.component.tsx";
 import { ConnectionPreview } from "#view/components/editor-components/connection-preview.component.tsx";
@@ -182,6 +183,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         showErrorMessage,
     });
     const { t } = useTranslation("editorPage");
+    usePageTitle(t("system", { ns: "common" }));
 
     const { loadAssets, items } = useAssets({
         projectId,

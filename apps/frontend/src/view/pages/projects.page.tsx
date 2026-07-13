@@ -14,6 +14,7 @@ import { ProjectsGridComponent } from "#view/components/projects-grid.component.
 import { SearchField } from "#view/components/search-field.component.tsx";
 import { ToggleButtons } from "#view/components/toggle-buttons.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
+import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
 import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
 import ProjectDialogPage from "./project-dialog.page";
 import { ImportIconButton } from "#view/components/import-icon-button.component.tsx";
@@ -34,6 +35,7 @@ import { IconButton } from "#view/components/icon-button.component.tsx";
 export const ProjectsPage = CreatePage(HeaderUtilityControls, () => {
     const navigate = useNavigate();
     const { t } = useTranslation("projectsPage");
+    usePageTitle(t("projects", { ns: "common" }));
     const { setSortDirection, setSearchValue, setSortBy, deleteProject, sortDirection, sortBy, isPending, projects } =
         useProjectsList();
 
