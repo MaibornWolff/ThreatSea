@@ -9,6 +9,7 @@ import type { ExtendedProject } from "#api/types/project.types.ts";
 import type { SortDirection } from "#application/actions/list.actions.ts";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { useReport } from "#application/hooks/use-report.hook.ts";
+import { useReportExcelExport } from "#application/hooks/use-export.hook.ts";
 import { useAppDispatch } from "#application/hooks/use-app-redux.hook.ts";
 import logo from "#images/logo_large.png";
 import companyLogo from "#images/MaibornWolff_Logo.png";
@@ -113,10 +114,11 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
         setShowThreatsPage,
         setSystemImageOnSeparatePage,
         setReportLanguage,
-        fullExportAsExcel,
     } = useReport({
         projectId,
     });
+
+    const { exportReportAsExcel } = useReportExcelExport();
 
     const dispatch = useAppDispatch();
 
@@ -238,7 +240,7 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
     };
 
     const handleExport = () => {
-        fullExportAsExcel(project, data);
+        exportReportAsExcel(project, data);
     };
 
     const handleDownloadMarkdown = () => {

@@ -1,12 +1,12 @@
 import writeXlsxFile, { getSheetData, type Cell } from "write-excel-file/browser";
 import { hasOwnProperty } from "./helpers";
 
-interface TabHeader {
+export interface TabHeader {
     label: string;
     property: string;
 }
 
-interface Tab {
+export interface Tab {
     name: string;
     items: object[];
     header: TabHeader[];
