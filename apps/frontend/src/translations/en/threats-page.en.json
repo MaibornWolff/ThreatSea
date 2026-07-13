@@ -6,6 +6,7 @@
   "newDamage": "New Damage",
   "duplicateMessage": "Do you really want to duplicate the threat '{{ threatName }}'?",
   "duplicate": "Duplicate",
+  "duplicateSuffix": "Copy",
   "duplicateThreat": "Duplicate Threat",
   "addChildThreat": "Add Child Threat",
   "newChildThreatSuffix": "new",
