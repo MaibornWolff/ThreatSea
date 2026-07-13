@@ -1,8 +1,9 @@
-import { type ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import { Link, View } from "@react-pdf/renderer";
 import type { Style } from "@react-pdf/types";
 import { s1, fontColor, backgroundColor, s2, s4 } from "#view/report/report.style.ts";
 import { Page } from "#view/report/components/page.report.component.tsx";
+import { threatCardFitsOnOnePage } from "#view/report/pages/report-card-page-fit.ts";
 import { useTranslation } from "react-i18next";
 import { Text } from "#view/report/components/text.report.component.tsx";
 import { MATRIX_COLOR } from "#view/colors/matrix.ts";
@@ -82,8 +83,6 @@ interface MeasuresListProps {
     showMeasuresPage: boolean;
 }
 
-const LIST_BREAKPOINT = 30;
-
 export const ThreatsDetailsPage = ({
     indexCallback,
     language,
@@ -121,14 +120,18 @@ export const ThreatsDetailsPage = ({
             </Text>
             {threats.map((threat, i) => {
                 return (
-                    <ThreatCard
-                        key={i}
-                        language={language}
-                        showComponentsPage={showComponentsPage}
-                        showAssetsPage={showAssetsPage}
-                        showMeasuresPage={showMeasuresPage}
-                        {...threat}
-                    />
+                    <Fragment key={i}>
+                        {/* Pushes the card to the next page when less than a header's height
+                            remains, so a card never starts as a squashed sliver at the bottom. */}
+                        <View minPresenceAhead={180} />
+                        <ThreatCard
+                            language={language}
+                            showComponentsPage={showComponentsPage}
+                            showAssetsPage={showAssetsPage}
+                            showMeasuresPage={showMeasuresPage}
+                            {...threat}
+                        />
+                    </Fragment>
                 );
             })}
         </Page>
@@ -163,12 +166,11 @@ const ThreatCard = ({
     netRisk,
     ...props
 }: ThreatCardProps) => {
-    const desc_lines = description.length / 40; // estimate on line count
+    const fitsOnOnePage = threatCardFitsOnOnePage({ name, description, componentName, assets, measures });
     return (
         <View
             id={`threat-${reportId}`}
-            //conditional Wrap
-            wrap={Math.max(desc_lines, assets.length) + 2.5 * measures.length > LIST_BREAKPOINT} // measures take at least two lines
+            wrap={!fitsOnOnePage}
             style={{
                 backgroundColor,
                 padding: s1,
@@ -274,14 +276,14 @@ const RiskInfo = ({
     return (
         <View
             style={{
+                flex: 1,
                 display: "flex",
                 flexDirection: "column",
-                alignItems: "stretch",
+                alignItems: "flex-end",
             }}
         >
             <View
                 style={{
-                    flex: 1,
                     display: "flex",
                     flexDirection: "row",
                     alignItems: "center",
@@ -399,6 +401,7 @@ const Header = ({ language, reportId, id, name, confidentiality, integrity, avai
     return (
         <View
             style={{
+                flex: 1,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "stretch",
@@ -598,9 +601,11 @@ const MeasuresList = ({ measures, style, language, showMeasuresPage }: MeasuresL
                         ) : (
                             label
                         )}
-                        <Text size="small" style={{ marginLeft: s2, fontStyle: "italic" }}>
-                            {description}
-                        </Text>
+                        {description && (
+                            <Text size="small" style={{ marginLeft: s2, fontStyle: "italic" }}>
+                                {description}
+                            </Text>
+                        )}
                     </View>
                 );
             })}
