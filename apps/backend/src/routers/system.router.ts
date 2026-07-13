@@ -15,7 +15,7 @@ import {
     ValidateBodyHandler,
     ValidateParamHandler,
 } from "#middlewares/input-validations/input-validation.middleware.js";
-import childThreatsRouter from "./child-threats.router.js";
+import threatsRouter from "./threats.router.js";
 
 export const systemRouter = express.Router({ mergeParams: true });
 
@@ -38,4 +38,4 @@ systemRouter.put<ProjectIdParam, SystemResponse, UpdateSystemRequest>(
 systemRouter.use("/genericThreats", genericThreatsRouter);
 systemRouter.use("/measures", measuresRouter);
 systemRouter.use("/measureImpacts", measureImpactRouter);
-systemRouter.use("/childThreats", childThreatsRouter);
+systemRouter.use("/threats", threatsRouter);

@@ -69,7 +69,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
     const {
         timeline,
         matrix,
-        threats: childThreats,
+        threats: threats,
         sortDirection,
         sortBy,
         setThreatSearchValue,
@@ -81,7 +81,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
         setSortBy,
         setSelectedCell,
         setTimelineDate,
-        loadThreats: loadChildThreats,
+        loadThreats: loadThreats,
         deleteMeasureImpact,
     } = useMatrix({
         projectId: project.id,
@@ -144,11 +144,11 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
         }
     };
 
-    const onClickApplyMeasure = (childThreat: ThreatWithMetrics | undefined) => {
-        if (childThreat != null) {
+    const onClickApplyMeasure = (threat: ThreatWithMetrics | undefined) => {
+        if (threat != null) {
             navigate(`/projects/${projectId}/risk/measureImpacts/edit`, {
                 state: {
-                    childThreat,
+                    threat,
                     project,
                 },
             });
@@ -156,12 +156,12 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
     };
 
     const onCLickEditMeasureImpact = (
-        childThreat: ThreatWithMetrics | undefined,
+        threat: ThreatWithMetrics | undefined,
         measureImpact: MeasureImpact | undefined
     ) => {
         navigate(`/projects/${projectId}/risk/measureImpacts/edit`, {
             state: {
-                childThreat,
+                threat,
                 measureImpact,
                 project,
             },
@@ -247,12 +247,12 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
         setSelectedThreat(threatIndex);
     };
 
-    const handleEditThreat = (childThreatIndex: number, childThreat: ThreatWithMetrics | undefined) => {
-        setSelectedThreat(childThreatIndex);
+    const handleEditThreat = (threatIndex: number, threat: ThreatWithMetrics | undefined) => {
+        setSelectedThreat(threatIndex);
         if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
             navigate(`/projects/${projectId}/risk/threats/edit`, {
                 state: {
-                    childThreat,
+                    threat,
                 },
             });
         }
@@ -260,9 +260,9 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
 
     useEffect(() => {
         if (autoSaveStatus === "upToDate") {
-            loadChildThreats();
+            loadThreats();
         }
-    }, [autoSaveStatus, loadChildThreats]);
+    }, [autoSaveStatus, loadThreats]);
 
     return (
         <Page sx={{ boxSizing: "border-box" }}>
@@ -374,11 +374,11 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                             >
                                 {t("measures")}
                             </Typography>
-                            {checkUserRole(userRole, USER_ROLES.EDITOR) && childThreats[selectedThreat] && (
+                            {checkUserRole(userRole, USER_ROLES.EDITOR) && threats[selectedThreat] && (
                                 <IconButton
                                     title={t("applyMeasure")}
                                     sx={{ boxSizing: "border-box" }}
-                                    onClick={() => onClickApplyMeasure(childThreats[selectedThreat])}
+                                    onClick={() => onClickApplyMeasure(threats[selectedThreat])}
                                 >
                                     <Add sx={{ fontSize: 18 }} />
                                 </IconButton>
@@ -487,7 +487,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                 </TableRow>
                                             </TableHead>
                                             <TableBody>
-                                                {childThreats.map((threat, i) => {
+                                                {threats.map((threat, i) => {
                                                     const isSelected = i === selectedThreat;
                                                     let matrixColor: string | undefined;
                                                     let hoverColor: string | undefined;
@@ -595,7 +595,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                 </Box>
                             </Box>
 
-                            {selectedThreat >= 0 && selectedThreat < childThreats.length && (
+                            {selectedThreat >= 0 && selectedThreat < threats.length && (
                                 <Box
                                     sx={{
                                         marginLeft: 4,
@@ -672,7 +672,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                     </TableRow>
                                                 </TableHead>
                                                 <TableBody>
-                                                    {childThreats[selectedThreat]?.measures
+                                                    {threats[selectedThreat]?.measures
                                                         .sort((a, b) => {
                                                             const threatMeasureSortBy =
                                                                 measureSortBy as keyof ThreatMeasure;
@@ -725,7 +725,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                                     }}
                                                                     onClick={() =>
                                                                         onCLickEditMeasureImpact(
-                                                                            childThreats[selectedThreat],
+                                                                            threats[selectedThreat],
                                                                             measureImpact
                                                                         )
                                                                     }
@@ -812,17 +812,15 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                                                     title={t("unapplyMeasure")}
                                                                                     onClick={(e) => {
                                                                                         if (
-                                                                                            childThreats?.[
-                                                                                                selectedThreat
-                                                                                            ]?.name &&
+                                                                                            threats?.[selectedThreat]
+                                                                                                ?.name &&
                                                                                             measureImpact
                                                                                         ) {
                                                                                             onClickDeleteMeasureImpact(
                                                                                                 e,
                                                                                                 name,
-                                                                                                childThreats[
-                                                                                                    selectedThreat
-                                                                                                ].name,
+                                                                                                threats[selectedThreat]
+                                                                                                    .name,
                                                                                                 measureImpact
                                                                                             );
                                                                                         }
@@ -855,11 +853,11 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                 <Routes>
                     <Route
                         path="measureImpacts/edit"
-                        element={<MeasureImpactByMeasureDialogPage onApplied={() => void loadChildThreats()} />}
+                        element={<MeasureImpactByMeasureDialogPage onApplied={() => void loadThreats()} />}
                     >
                         <Route path="measures/add" element={<AddMeasureDialogPage />} />
                     </Route>
-                    <Route path="threats/edit" element={<ThreatDialogPage onSaved={() => void loadChildThreats()} />} />
+                    <Route path="threats/edit" element={<ThreatDialogPage onSaved={() => void loadThreats()} />} />
                     <Route path="appliedMeasure/edit" element={<MeasureDetailsDialogPage />} />
                 </Routes>
             )}

@@ -3,7 +3,7 @@ import type { CatalogMeasure } from "#api/types/catalog-measure.types.ts";
 import type { CatalogThreat } from "#api/types/catalog-threat.types.ts";
 import type { CatalogWithRole } from "#api/types/catalogs.types.ts";
 import type { ComponentType } from "#api/types/component-types.types.ts";
-import type { ChildThreat } from "#api/types/child-threat.types.ts";
+import type { Threat } from "#api/types/threat.types.ts";
 import type { GenericThreat } from "#api/types/generic-threat.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
 import type { Measure } from "#api/types/measure.types.ts";
@@ -21,6 +21,6 @@ export interface ProjectExport {
     componentTypes: ComponentType[];
     measures: Measure[];
     genericThreats: GenericThreat[];
-    childThreats: ChildThreat[];
+    threats: Threat[];
     measureImpacts: MeasureImpact[];
 }

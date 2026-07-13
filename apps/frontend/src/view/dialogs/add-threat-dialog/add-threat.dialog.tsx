@@ -15,14 +15,14 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useLocation } from "react-router";
 import { useAppDispatch } from "#application/hooks/use-app-redux.hook.ts";
-import { ChildThreatsActions } from "#application/actions/childThreats.actions.ts";
+import { ThreatsActions } from "#application/actions/threats.actions.ts";
 import { Button } from "#view/components/button.component.tsx";
 import { Dialog } from "#view/components/dialog.component.tsx";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { useThreatMeasuresList } from "#application/hooks/use-threat-measures-list.hook.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
-import type { ExtendedChildThreat } from "#api/types/child-threat.types.ts";
-import { CHILD_THREAT_STATUSES } from "#api/types/child-threat-statuses.types.ts";
+import type { ExtendedThreat } from "#api/types/threat.types.ts";
+import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import type { ExtendedProject } from "#api/types/project.types.ts";
 import type { ThreatMeasure } from "#application/hooks/use-threat-measures-list.hook.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
@@ -38,7 +38,7 @@ export type ThreatTab = "MAIN" | "ASSETS" | "MEASURES";
 export type ThreatDialogHostRoute = "threats" | "measures" | "risk";
 
 interface AddThreatDialogProps extends DialogProps {
-    threat: ExtendedChildThreat;
+    threat: ExtendedThreat;
     project: ExtendedProject;
     userRole: USER_ROLES | undefined;
     initialTab?: ThreatTab;
@@ -78,7 +78,7 @@ const AddThreatDialog = ({
             confidentiality: threat?.confidentiality ?? false,
             integrity: threat?.integrity ?? false,
             availability: threat?.availability ?? false,
-            status: threat?.status ?? CHILD_THREAT_STATUSES.NEW,
+            status: threat?.status ?? THREAT_STATUSES.NEW,
         },
     });
 
@@ -93,7 +93,7 @@ const AddThreatDialog = ({
     const handleConfirmDialog = async (data: ThreatFormValues) => {
         try {
             await dispatch(
-                ChildThreatsActions.updateChildThreat({
+                ThreatsActions.updateThreat({
                     name: data.name,
                     description: data.description,
                     ...(data.probability === "" ? {} : { probability: data.probability }),
@@ -127,7 +127,7 @@ const AddThreatDialog = ({
         sortBy,
         threatMeasures,
         allThreatMeasures,
-    } = useThreatMeasuresList({ projectId, childThreatId: threatId });
+    } = useThreatMeasuresList({ projectId, threatId: threatId });
 
     const onChangeSortBy = (_event: SyntheticEvent, newSortBy: string | null) => {
         // If the attribute is clicked again, the order is changed.
@@ -166,7 +166,7 @@ const AddThreatDialog = ({
             // threats and risk both have a measureImpacts/edit route at their own root
             navigate(`/projects/${projectId}/${hostRoute}/measureImpacts/edit`, {
                 state: {
-                    childThreat: { ...threat, damage: calcDamage(threat) },
+                    threat: { ...threat, damage: calcDamage(threat) },
                     measureImpact,
                     project,
                 },
@@ -213,7 +213,7 @@ const AddThreatDialog = ({
         const basePath = hostRoute === "risk" ? `/projects/${projectId}/risk` : `/projects/${projectId}/threats`;
         navigate(`${basePath}/measureImpacts/edit`, {
             state: {
-                childThreat: { ...threat, damage: calcDamage(threat) },
+                threat: { ...threat, damage: calcDamage(threat) },
                 project,
             },
         });

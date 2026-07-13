@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
-import { ChildThreatsActions } from "#application/actions/childThreats.actions.ts";
+import { ThreatsActions } from "#application/actions/threats.actions.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { useEditor } from "#application/hooks/use-editor.hook.ts";
 import { useGenericThreatsList } from "#application/hooks/use-generic-threats-list.hook.ts";
@@ -26,9 +26,9 @@ import { MeasureImpactByMeasureDialogPage } from "./measure-impact-by-measure-di
 import AddMeasureDialogPage from "./add-measure-dialog.page";
 import { withProject } from "#view/components/with-project.hoc.tsx";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
-import type { ChildThreat, ExtendedChildThreat } from "#api/types/child-threat.types.ts";
+import type { Threat, ExtendedThreat } from "#api/types/threat.types.ts";
 import type { GenericThreatWithExtendedChildren } from "#api/types/generic-threat.types.ts";
-import { CHILD_THREAT_STATUSES } from "#api/types/child-threat-statuses.types.ts";
+import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 
 /**
  * on this page all threats are listed
@@ -38,7 +38,7 @@ import { CHILD_THREAT_STATUSES } from "#api/types/child-threat-statuses.types.ts
 const ThreatsPageBody = () => {
     const { projectId: projectIdParam = "0" } = useParams<{ projectId?: string }>();
     const projectId = Number.parseInt(projectIdParam, 10);
-    const { openConfirm } = useConfirm<ChildThreat>();
+    const { openConfirm } = useConfirm<Threat>();
     const navigate = useNavigate();
     const { t } = useTranslation("threatsPage");
 
@@ -51,7 +51,7 @@ const ThreatsPageBody = () => {
         searchValue: genericThreatSearchValue,
         genericThreats,
         expandedGenericThreatIds,
-        childThreatsByGenericThreatId,
+        threatsByGenericThreatId,
         loadingChildrenByGenericThreatId,
         toggleGenericThreat,
     } = useGenericThreatsList({ projectId });
@@ -82,24 +82,21 @@ const ThreatsPageBody = () => {
     }, [autoSaveStatus, loadGenericThreats]);
 
     const [assetAnchorEl, setAssetAnchorEl] = useState<HTMLElement | null>(null);
-    const [currentAssetList, setCurrentAssetList] = useState<ExtendedChildThreat["assets"] | null>(null);
+    const [currentAssetList, setCurrentAssetList] = useState<ExtendedThreat["assets"] | null>(null);
 
-    const handleAssetHover = (event: React.MouseEvent<HTMLElement>, assets: ExtendedChildThreat["assets"]) => {
+    const handleAssetHover = (event: React.MouseEvent<HTMLElement>, assets: ExtendedThreat["assets"]) => {
         setCurrentAssetList(assets);
         setAssetAnchorEl(event.currentTarget);
     };
 
-    const onClickEditChildThreat = (
-        event: React.MouseEvent<HTMLElement>,
-        childThreat: ExtendedChildThreat | undefined
-    ) => {
+    const onClickEditThreat = (event: React.MouseEvent<HTMLElement>, threat: ExtendedThreat | undefined) => {
         event.preventDefault();
-        if (childThreat) {
-            navigate(`/projects/${projectId}/threats/edit`, { state: { childThreat } });
+        if (threat) {
+            navigate(`/projects/${projectId}/threats/edit`, { state: { threat } });
         }
     };
 
-    const handleAddChildThreat = async (
+    const handleAddThreat = async (
         event: React.MouseEvent<HTMLElement>,
         genericThreat: GenericThreatWithExtendedChildren
     ) => {
@@ -108,10 +105,10 @@ const ThreatsPageBody = () => {
             // Only the name is overridden; identity and assessment defaults come
             // from the parent and its catalogue threat on the backend.
             await dispatch(
-                ChildThreatsActions.createChildThreat({
+                ThreatsActions.createThreat({
                     projectId: Number(projectId),
                     genericThreatId: genericThreat.id,
-                    name: `${genericThreat.name} (${t("newChildThreatSuffix")})`,
+                    name: `${genericThreat.name} (${t("newThreatSuffix")})`,
                 })
             ).unwrap();
             if (!expandedGenericThreatIds[genericThreat.id]) {
@@ -123,31 +120,29 @@ const ThreatsPageBody = () => {
         }
     };
 
-    const handleDuplicateChildThreat = (event: React.MouseEvent<HTMLElement>, childThreat: ChildThreat) => {
+    const handleDuplicateThreat = (event: React.MouseEvent<HTMLElement>, threat: Threat) => {
         event.preventDefault();
         openConfirm({
-            state: childThreat,
-            message: t("duplicateMessage", { threatName: childThreat.name }),
+            state: threat,
+            message: t("duplicateMessage", { threatName: threat.name }),
             acceptText: t("duplicate"),
             cancelText: t("cancel"),
             acceptColor: "secondary",
             onAccept: async (threat) => {
                 try {
-                    const childThreat = threat as ChildThreat;
-
                     const payload = {
                         projectId: Number(projectId),
-                        genericThreatId: childThreat.genericThreatId,
-                        name: `${childThreat.name} (${t("duplicateSuffix")})`,
-                        description: childThreat.description,
-                        probability: childThreat.probability,
-                        confidentiality: childThreat.confidentiality,
-                        integrity: childThreat.integrity,
-                        availability: childThreat.availability,
-                        status: CHILD_THREAT_STATUSES.NEW,
+                        genericThreatId: threat.genericThreatId,
+                        name: `${threat.name} (${t("duplicateSuffix")})`,
+                        description: threat.description,
+                        probability: threat.probability,
+                        confidentiality: threat.confidentiality,
+                        integrity: threat.integrity,
+                        availability: threat.availability,
+                        status: THREAT_STATUSES.NEW,
                     };
 
-                    await dispatch(ChildThreatsActions.createChildThreat(payload)).unwrap();
+                    await dispatch(ThreatsActions.createThreat(payload)).unwrap();
                     void loadGenericThreats();
                 } catch {
                     // swallow; error handling via global error handler
@@ -156,14 +151,14 @@ const ThreatsPageBody = () => {
         });
     };
 
-    const handleDeleteChildThreat = (event: React.MouseEvent<HTMLElement>, childThreat: ChildThreat) => {
+    const handleDeleteThreat = (event: React.MouseEvent<HTMLElement>, threat: Threat) => {
         event.preventDefault();
         // Prevent deleting the only child threat for a generic threat
-        const siblings = childThreatsByGenericThreatId[childThreat.genericThreatId] ?? [];
+        const siblings = threatsByGenericThreatId[threat.genericThreatId] ?? [];
         if (siblings.length <= 1) {
             openConfirm({
-                state: childThreat,
-                message: t("cannotDeleteOnlyChildThreat", { threatName: childThreat.name }),
+                state: threat,
+                message: t("cannotDeleteOnlyThreat", { threatName: threat.name }),
                 acceptText: t("ok"),
                 cancelText: t("cancel"),
             });
@@ -171,14 +166,14 @@ const ThreatsPageBody = () => {
         }
 
         openConfirm({
-            state: childThreat,
-            message: t("deleteMessage", { threatName: childThreat.name }),
+            state: threat,
+            message: t("deleteMessage", { threatName: threat.name }),
             acceptText: t("delete"),
             cancelText: t("cancel"),
-            onAccept: async (childThreat) => {
+            onAccept: async (threat) => {
                 try {
                     await dispatch(
-                        ChildThreatsActions.deleteChildThreat({ id: childThreat.id, projectId: Number(projectId) })
+                        ThreatsActions.deleteThreat({ id: threat.id, projectId: Number(projectId) })
                     ).unwrap();
                     void loadGenericThreats();
                 } catch {
@@ -342,7 +337,7 @@ const ThreatsPageBody = () => {
                                     {!isGenericThreatsPending &&
                                         genericThreats.map((genericThreat) => {
                                             const isExpanded = expandedGenericThreatIds[genericThreat.id] ?? false;
-                                            const childThreats = childThreatsByGenericThreatId[genericThreat.id] ?? [];
+                                            const threats = threatsByGenericThreatId[genericThreat.id] ?? [];
                                             const isLoadingChildren =
                                                 loadingChildrenByGenericThreatId[genericThreat.id] ?? false;
 
@@ -398,16 +393,13 @@ const ThreatsPageBody = () => {
                                                                 <span>
                                                                     {isLoadingChildren
                                                                         ? "Loading children..."
-                                                                        : `${childThreats.length} child threats`}
+                                                                        : `${threats.length} child threats`}
                                                                 </span>
                                                                 {checkUserRole(userRole, USER_ROLES.EDITOR) && (
                                                                     <IconButton
-                                                                        title={t("addChildThreat")}
+                                                                        title={t("addThreat")}
                                                                         onClick={(event) =>
-                                                                            void handleAddChildThreat(
-                                                                                event,
-                                                                                genericThreat
-                                                                            )
+                                                                            void handleAddThreat(event, genericThreat)
                                                                         }
                                                                     >
                                                                         <Add sx={{ fontSize: 18 }} />
@@ -418,16 +410,14 @@ const ThreatsPageBody = () => {
                                                     </TableRow>
                                                     {isExpanded &&
                                                         !isLoadingChildren &&
-                                                        childThreats.map((childThreat) => (
+                                                        threats.map((threat) => (
                                                             <TableRow
-                                                                key={`child-${childThreat.id}`}
+                                                                key={`child-${threat.id}`}
                                                                 sx={{
                                                                     backgroundColor: "background.defaultIntransparent",
                                                                     opacity:
-                                                                        childThreat.status ===
-                                                                            CHILD_THREAT_STATUSES.FINALIZED ||
-                                                                        childThreat.status ===
-                                                                            CHILD_THREAT_STATUSES.OUTOFSCOPE
+                                                                        threat.status === THREAT_STATUSES.FINALIZED ||
+                                                                        threat.status === THREAT_STATUSES.OUTOFSCOPE
                                                                             ? 0.6
                                                                             : 1,
                                                                 }}
@@ -451,46 +441,37 @@ const ThreatsPageBody = () => {
                                                                         ? {
                                                                               onClick: (
                                                                                   event: React.MouseEvent<HTMLElement>
-                                                                              ) =>
-                                                                                  onClickEditChildThreat(
-                                                                                      event,
-                                                                                      childThreat
-                                                                                  ),
+                                                                              ) => onClickEditThreat(event, threat),
                                                                           }
                                                                         : {})}
                                                                 >
-                                                                    {childThreat.name}
+                                                                    {threat.name}
                                                                 </CustomTableCell>
                                                                 <CustomTableCell
                                                                     showBorder={true}
                                                                     onMouseEnter={(event) =>
-                                                                        handleAssetHover(event, childThreat.assets)
+                                                                        handleAssetHover(event, threat.assets)
                                                                     }
                                                                     onMouseLeave={() => setAssetAnchorEl(null)}
                                                                 >
-                                                                    {childThreat.assets.length}
+                                                                    {threat.assets.length}
                                                                 </CustomTableCell>
                                                                 <CustomTableCell>
-                                                                    {childThreat.pointOfAttack ===
-                                                                    "COMMUNICATION_INTERFACES"
-                                                                        ? `${childThreat.componentName || t("unknown")}${childThreat.interfaceName ? ` > ${childThreat.interfaceName}` : ""}`
-                                                                        : childThreat.componentName}
+                                                                    {threat.pointOfAttack === "COMMUNICATION_INTERFACES"
+                                                                        ? `${threat.componentName || t("unknown")}${threat.interfaceName ? ` > ${threat.interfaceName}` : ""}`
+                                                                        : threat.componentName}
                                                                 </CustomTableCell>
                                                                 <CustomTableCell>
-                                                                    {t(
-                                                                        `pointsOfAttackList.${childThreat.pointOfAttack}`
-                                                                    )}
+                                                                    {t(`pointsOfAttackList.${threat.pointOfAttack}`)}
                                                                 </CustomTableCell>
                                                                 <CustomTableCell showBorder={true}>
-                                                                    {t(`attackerList.${childThreat.attacker}`)}
+                                                                    {t(`attackerList.${threat.attacker}`)}
                                                                 </CustomTableCell>
-                                                                <CustomTableCell>
-                                                                    {childThreat.probability}
-                                                                </CustomTableCell>
-                                                                <CustomTableCell>{childThreat.damage}</CustomTableCell>
-                                                                <CustomTableCell>{childThreat.risk}</CustomTableCell>
+                                                                <CustomTableCell>{threat.probability}</CustomTableCell>
+                                                                <CustomTableCell>{threat.damage}</CustomTableCell>
+                                                                <CustomTableCell>{threat.risk}</CustomTableCell>
                                                                 <CustomTableCell showBorder={true}>
-                                                                    {t(`statusList.${childThreat.status}`)}
+                                                                    {t(`statusList.${threat.status}`)}
                                                                 </CustomTableCell>
                                                                 <CustomTableCell padding="none" align="right">
                                                                     <Box sx={{ display: "flex", gap: 1, pr: 1 }}>
@@ -499,10 +480,7 @@ const ThreatsPageBody = () => {
                                                                                 <IconButton
                                                                                     title={t("editThreat")}
                                                                                     onClick={(e) =>
-                                                                                        onClickEditChildThreat(
-                                                                                            e,
-                                                                                            childThreat
-                                                                                        )
+                                                                                        onClickEditThreat(e, threat)
                                                                                     }
                                                                                 >
                                                                                     <Edit sx={{ fontSize: 18 }} />
@@ -510,10 +488,7 @@ const ThreatsPageBody = () => {
                                                                                 <IconButton
                                                                                     title={t("duplicateThreat")}
                                                                                     onClick={(e) =>
-                                                                                        handleDuplicateChildThreat(
-                                                                                            e,
-                                                                                            childThreat
-                                                                                        )
+                                                                                        handleDuplicateThreat(e, threat)
                                                                                     }
                                                                                 >
                                                                                     <ContentCopy
@@ -524,10 +499,7 @@ const ThreatsPageBody = () => {
                                                                                     title={t("deleteThreat")}
                                                                                     hoverColor="error"
                                                                                     onClick={(e) =>
-                                                                                        handleDeleteChildThreat(
-                                                                                            e,
-                                                                                            childThreat
-                                                                                        )
+                                                                                        handleDeleteThreat(e, threat)
                                                                                     }
                                                                                 >
                                                                                     <Delete sx={{ fontSize: 18 }} />
@@ -538,7 +510,7 @@ const ThreatsPageBody = () => {
                                                                 </CustomTableCell>
                                                             </TableRow>
                                                         ))}
-                                                    {isExpanded && !isLoadingChildren && childThreats.length === 0 && (
+                                                    {isExpanded && !isLoadingChildren && threats.length === 0 && (
                                                         <TableRow key={`child-empty-${genericThreat.id}`}>
                                                             <CustomTableCell colSpan={11} align="left" sx={{ pl: 6 }}>
                                                                 No child threats for this generic threat.

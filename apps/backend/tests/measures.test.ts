@@ -7,8 +7,8 @@ import { nanoid } from "nanoid";
 import { db } from "#db/index.js";
 import {
     catalogs,
-    childThreats,
-    CreateChildThreat,
+    threats,
+    CreateThreat,
     genericThreats,
     measureImpacts,
     measures,
@@ -23,8 +23,8 @@ import { USER_ROLES } from "#types/user-roles.types.js";
 import { CreateProjectRequest } from "#types/project.types.js";
 import { CreateMeasureRequest } from "#types/measure.types.js";
 import { CreateMeasureImpactRequest } from "#types/measure-impact.types.js";
-import { CreateGenericThreatRequest } from "#types/genericThreat.types.js";
-import { CHILD_THREAT_STATUSES } from "#types/child-threat-statuses.types.js";
+import { CreateGenericThreatRequest } from "#types/generic-threat.types.js";
+import { THREAT_STATUSES } from "#types/threat-statuses.types.js";
 import { CreateCatalogThreatRequest } from "#types/catalog-threat.types.js";
 import { CreateCatalogMeasureRequest } from "#types/catalog-measure.types.js";
 
@@ -54,7 +54,7 @@ const VALID_MEASURE_3: InstanceType<typeof CreateMeasureRequest> = {
     catalogMeasureId: null,
 };
 
-const VALID_MEASURE_IMPACT_1: Omit<InstanceType<typeof CreateMeasureImpactRequest>, "measureId" | "childThreatId"> = {
+const VALID_MEASURE_IMPACT_1: Omit<InstanceType<typeof CreateMeasureImpactRequest>, "measureId" | "threatId"> = {
     probability: 2,
     description: "",
     damage: 2,
@@ -83,7 +83,7 @@ const VALID_GENERIC_THREAT_1: Omit<InstanceType<typeof CreateGenericThreatReques
     attacker: ATTACKERS.ADMINISTRATORS,
 };
 
-const VALID_CHILD_THREAT_1: Omit<CreateChildThreat, "genericThreatId" | "projectId"> = {
+const VALID_THREAT_1: Omit<CreateThreat, "genericThreatId" | "projectId"> = {
     pointOfAttackId: nanoid(),
     name: "valid threat",
     description: "valid description test test",
@@ -93,7 +93,7 @@ const VALID_CHILD_THREAT_1: Omit<CreateChildThreat, "genericThreatId" | "project
     confidentiality: true,
     integrity: true,
     availability: false,
-    status: CHILD_THREAT_STATUSES.NEW,
+    status: THREAT_STATUSES.NEW,
 };
 
 const VALID_CATALOG_THREAT_1: InstanceType<typeof CreateCatalogThreatRequest> = {
@@ -122,7 +122,7 @@ let projectId: number;
 let catalogThreatId: number;
 let catalogMeasureId: number;
 let genericThreatId: number;
-let childThreatId: number;
+let threatId: number;
 
 let cookies: string[];
 let csrfToken: string;
@@ -199,17 +199,17 @@ beforeEach(async () => {
     ).at(0);
     genericThreatId = genericThreat!.id;
 
-    const childThreat = (
+    const threat = (
         await db
-            .insert(childThreats)
+            .insert(threats)
             .values({
-                ...VALID_CHILD_THREAT_1,
+                ...VALID_THREAT_1,
                 genericThreatId,
                 projectId,
             })
             .returning()
     ).at(0);
-    childThreatId = childThreat!.id;
+    threatId = threat!.id;
 });
 
 describe("get or create measures", () => {
@@ -325,7 +325,7 @@ describe("get, delete or update a single measure", () => {
                 .returning()
         ).at(0);
         measureId = measure!.id;
-        await db.insert(measureImpacts).values({ ...VALID_MEASURE_IMPACT_1, childThreatId, measureId });
+        await db.insert(measureImpacts).values({ ...VALID_MEASURE_IMPACT_1, threatId, measureId });
     });
 
     it("should update a measure", async () => {
@@ -396,7 +396,7 @@ describe("measures impacts (invalid data)", () => {
                 .returning()
         ).at(0);
         measureId = measure!.id;
-        await db.insert(measureImpacts).values({ ...VALID_MEASURE_IMPACT_1, childThreatId, measureId });
+        await db.insert(measureImpacts).values({ ...VALID_MEASURE_IMPACT_1, threatId, measureId });
     });
 
     it("should not update a single measure impact (invalid projectId)", async () => {

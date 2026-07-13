@@ -8,8 +8,8 @@
   "duplicate": "Duplicate",
   "duplicateSuffix": "Copy",
   "duplicateThreat": "Duplicate Threat",
-  "addChildThreat": "Add Child Threat",
-  "newChildThreatSuffix": "new",
+  "addThreat": "Add Child Threat",
+  "newThreatSuffix": "new",
   "editThreat": "Edit Threat",
   "deleteThreat": "Delete Threat",
   "edited": "Edited",
@@ -18,7 +18,7 @@
   "fullExport": "Export Assets, Threats and Measures",
   "catalogMeasures": "Catalog Measures",
   "deleteMessage": "Do you really want to delete the threat '{{ threatName }}'?",
-  "cannotDeleteOnlyChildThreat": "You cannot delete the only threat '{{ threatName }}'.",
+  "cannotDeleteOnlyThreat": "You cannot delete the only threat '{{ threatName }}'.",
   "noThreatsFound": "No Threats found",
   "heading": "Threats"
 }

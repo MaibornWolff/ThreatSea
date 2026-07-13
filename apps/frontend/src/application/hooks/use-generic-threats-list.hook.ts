@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { GenericThreatsAPI } from "#api/generic-threats.api.ts";
 import type { GenericThreatWithExtendedChildren } from "#api/types/generic-threat.types.ts";
-import type { ExtendedChildThreat } from "#api/types/child-threat.types.ts";
+import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import { calcDamage } from "#utils/helpers.ts";
 
-export type ExtendedChildThreatWithMetrics = ExtendedChildThreat & {
+export type ExtendedThreatWithMetrics = ExtendedThreat & {
     damage: number;
     risk: number;
 };
@@ -15,8 +15,8 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
     const [searchValue, setSearchValue] = useState<string>("");
 
     const [expandedGenericThreatIds, setExpandedGenericThreatIds] = useState<Record<number, boolean>>({});
-    const [childThreatsByGenericThreatId, setChildThreatsByGenericThreatId] = useState<
-        Record<number, ExtendedChildThreatWithMetrics[]>
+    const [threatsByGenericThreatId, setThreatsByGenericThreatId] = useState<
+        Record<number, ExtendedThreatWithMetrics[]>
     >({});
     const [loadingChildrenByGenericThreatId, setLoadingChildrenByGenericThreatId] = useState<Record<number, boolean>>(
         {}
@@ -32,26 +32,23 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
             setGenericThreats(sortedThreats);
 
             if (sortedThreats.length === 0) {
-                setChildThreatsByGenericThreatId({});
+                setThreatsByGenericThreatId({});
                 setLoadingChildrenByGenericThreatId({});
                 return;
             }
 
-            const childThreatsMap = sortedThreats.reduce<Record<number, ExtendedChildThreatWithMetrics[]>>(
-                (result, threat) => {
-                    result[threat.id] = threat.children.map((childThreat) => {
-                        const damage = calcDamage(childThreat);
-                        return {
-                            ...childThreat,
-                            damage,
-                            risk: childThreat.probability * damage,
-                        };
-                    });
-                    return result;
-                },
-                {}
-            );
-            setChildThreatsByGenericThreatId(childThreatsMap);
+            const threatsMap = sortedThreats.reduce<Record<number, ExtendedThreatWithMetrics[]>>((result, threat) => {
+                result[threat.id] = threat.children.map((threat) => {
+                    const damage = calcDamage(threat);
+                    return {
+                        ...threat,
+                        damage,
+                        risk: threat.probability * damage,
+                    };
+                });
+                return result;
+            }, {});
+            setThreatsByGenericThreatId(threatsMap);
 
             const loadedState = sortedThreats.reduce<Record<number, boolean>>((result, threat) => {
                 result[threat.id] = false;
@@ -97,14 +94,14 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
                 return true;
             }
 
-            const childThreats = childThreatsByGenericThreatId[genericThreat.id] ?? [];
-            return childThreats.some(
-                (childThreat) =>
-                    childThreat.name.toLowerCase().includes(normalizedSearch) ||
-                    childThreat.description.toLowerCase().includes(normalizedSearch)
+            const threats = threatsByGenericThreatId[genericThreat.id] ?? [];
+            return threats.some(
+                (threat) =>
+                    threat.name.toLowerCase().includes(normalizedSearch) ||
+                    threat.description.toLowerCase().includes(normalizedSearch)
             );
         });
-    }, [childThreatsByGenericThreatId, genericThreats, searchValue]);
+    }, [threatsByGenericThreatId, genericThreats, searchValue]);
 
     return {
         isPending,
@@ -113,7 +110,7 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
         loadGenericThreats,
         genericThreats: filteredGenericThreats,
         expandedGenericThreatIds,
-        childThreatsByGenericThreatId,
+        threatsByGenericThreatId,
         loadingChildrenByGenericThreatId,
         toggleGenericThreat,
     };

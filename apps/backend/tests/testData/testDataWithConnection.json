@@ -214,7 +214,7 @@
       "projectId": 1
     }
   ],
-  "childThreats": [
+  "threats": [
     {
       "id": 1,
       "pointOfAttackId": "YlmYQr-24kYm8lZ-w7AZ6",
@@ -244,7 +244,7 @@
       "damage": 1,
       "createdAt": "2025-03-20T14:00:11.000Z",
       "updatedAt": "2025-03-20T14:00:11.000Z",
-      "childThreatId": 1,
+      "threatId": 1,
       "measureId": 1
     }
   ]
