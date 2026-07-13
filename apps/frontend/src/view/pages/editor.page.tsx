@@ -1416,16 +1416,18 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                             hovered={hoveredConnectionId === connection.id}
                                             onHoverChange={handleConnectionHoverChange}
                                         />
-                                        {connection.waypoints != null && connection.waypoints.length >= 4 && (
-                                            <ConnectionEditHandles
-                                                connectionId={connection.id}
-                                                waypoints={connection.waypoints}
-                                                onCommit={connectionEdited}
-                                                selected={selectedConnectionId === connection.id}
-                                                onSelect={(event) => handleSelectConnection(event, connection.id)}
-                                                onHoverChange={handleConnectionHoverChange}
-                                            />
-                                        )}
+                                        {isEditor &&
+                                            connection.waypoints != null &&
+                                            connection.waypoints.length >= 4 && (
+                                                <ConnectionEditHandles
+                                                    connectionId={connection.id}
+                                                    waypoints={connection.waypoints}
+                                                    onCommit={connectionEdited}
+                                                    selected={selectedConnectionId === connection.id}
+                                                    onSelect={(event) => handleSelectConnection(event, connection.id)}
+                                                    onHoverChange={handleConnectionHoverChange}
+                                                />
+                                            )}
                                     </Group>
                                 );
                             })}

@@ -371,6 +371,53 @@ describe("EditorPage", () => {
                 selected: false,
             });
         });
+
+        it("does not render ConnectionEditHandles for a viewer", () => {
+            const connection = {
+                id: "conn-1",
+                name: "Test Connection",
+                from: { id: "comp-1", anchor: "right" as const, type: 1, name: "Comp 1" },
+                to: { id: "comp-2", anchor: "left" as const, type: 1, name: "Comp 2" },
+                connectionPoints: [],
+                connectionPointsMeta: [],
+                waypoints: [0, 0, 100, 0, 100, 100],
+                recalculate: false,
+                projectId: 1,
+                visible: true,
+            };
+            const component1 = {
+                id: "comp-1",
+                name: "Comp 1",
+                x: 0,
+                y: 0,
+                type: 1,
+                projectId: 1,
+                pointsOfAttack: [],
+                description: "",
+            };
+            const component2 = {
+                id: "comp-2",
+                name: "Comp 2",
+                x: 200,
+                y: 0,
+                type: 1,
+                projectId: 1,
+                pointsOfAttack: [],
+                description: "",
+            };
+
+            mockUseEditor({
+                connections: [connection] as never,
+                components: [component1, component2] as never,
+                selectedConnectionId: "conn-1",
+                connectionEdited: vi.fn() as never,
+                resetConnectionRouting: vi.fn() as never,
+            });
+
+            renderEditorPage({ role: USER_ROLES.VIEWER });
+
+            expect(vi.mocked(ConnectionEditHandles)).not.toHaveBeenCalled();
+        });
     });
 
     describe("handleComponentDragEnd", () => {
