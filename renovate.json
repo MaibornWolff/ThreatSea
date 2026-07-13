@@ -10,5 +10,12 @@
     "enabled": true
   },
   "minimumReleaseAge": "72 hours",
-  "rebaseWhen": "behind-base-branch"
+  "rebaseWhen": "behind-base-branch",
+  "packageRules": [
+    {
+      "description": "minimumReleaseAge cannot be enforced for these update types (the package manager performs the resolution); without this they would be filtered as permanently pending and never raised as PRs",
+      "matchUpdateTypes": ["lockFileMaintenance", "pin", "replacement"],
+      "minimumReleaseAge": null
+    }
+  ]
 }
