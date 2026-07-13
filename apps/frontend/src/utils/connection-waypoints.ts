@@ -147,7 +147,7 @@ export function moveSegment(waypoints: number[], segmentIndex: number, pointer: 
 
     if (!isTerminal) {
         // Interior segment: adjust the shared coordinate of both endpoints
-        const newPoints = points.map((p) => ({ x: p.x, y: p.y }));
+        const newPoints = points.map((point) => ({ x: point.x, y: point.y }));
 
         if (isHorizontal) {
             // Horizontal segment: adjust y
@@ -166,7 +166,7 @@ export function moveSegment(waypoints: number[], segmentIndex: number, pointer: 
         // Terminal segment: insert a jog so the anchored endpoint stays fixed.
         // segmentIndex 0 inserts after point 0; the last segment inserts before
         // the final point — the jog points are identical, only the index differs.
-        const newPoints = points.map((p) => ({ x: p.x, y: p.y }));
+        const newPoints = points.map((point) => ({ x: point.x, y: point.y }));
         const insertIndex = segmentIndex === 0 ? 1 : newPoints.length - 1;
 
         if (isHorizontal) {
@@ -290,17 +290,17 @@ export function moveVertex(waypoints: number[], pointIndex: number, pointer: { x
     // If neither is terminal, full interior motion is allowed
 
     // Move the vertex
-    const newPoints = points.map((p) => ({ x: p.x, y: p.y }));
+    const newPoints = points.map((point) => ({ x: point.x, y: point.y }));
     newPoints[pointIndex] = { x: snappedX, y: snappedY };
 
     // Slide neighbor coordinates to maintain segment orientations
     if (!leftTerminal) {
         // Adjust previous point to keep segment k-1→k orientation
         if (previousSegmentIsHorizontal) {
-            // Horizontal: slide prev point's y to match new vertex y
+            // Horizontal: slide previous point's y to match new vertex y
             newPoints[pointIndex - 1]!.y = snappedY;
         } else if (previousSegmentIsVertical) {
-            // Vertical: slide prev point's x to match new vertex x
+            // Vertical: slide previous point's x to match new vertex x
             newPoints[pointIndex - 1]!.x = snappedX;
         }
     }
@@ -372,29 +372,30 @@ export function deleteVertex(waypoints: number[], pointIndex: number): number[] 
 
     // After deletion, check if new neighbors are axis-aligned
     // New neighbors are at indices (pointIndex - 1) and pointIndex (after removal shift)
-    const newNeighborPrev = newPoints[pointIndex - 1]!;
+    const newNeighborPrevious = newPoints[pointIndex - 1]!;
     const newNeighborNext = newPoints[pointIndex]!;
 
-    const shareX = newNeighborPrev.x === newNeighborNext.x;
-    const shareY = newNeighborPrev.y === newNeighborNext.y;
+    const shareX = newNeighborPrevious.x === newNeighborNext.x;
+    const shareY = newNeighborPrevious.y === newNeighborNext.y;
     const areAxisAligned = shareX || shareY;
 
     if (!areAxisAligned) {
         // Neighbors are diagonal: need to insert a corner to maintain orthogonality
-        // Two possible corner positions:
-        // Option A: {x: previousPoint.x, y: nextPoint.y}
-        // Option B: {x: nextPoint.x, y: previousPoint.y}
+        // Two possible corner positions, named for the point whose x they keep:
+        //   cornerKeepingPreviousX: {x: previousPoint.x, y: nextPoint.y}
+        //   cornerKeepingNextX:     {x: nextPoint.x, y: previousPoint.y}
         // Pick the one that doesn't recreate currentPoint
 
-        const cornerA: Point = { x: previousPoint.x, y: nextPoint.y };
-        const cornerB: Point = { x: nextPoint.x, y: previousPoint.y };
+        const cornerKeepingPreviousX: Point = { x: previousPoint.x, y: nextPoint.y };
+        const cornerKeepingNextX: Point = { x: nextPoint.x, y: previousPoint.y };
 
         // Check which corner would NOT recreate the removed point
-        const cornerARecreates = cornerA.x === currentPoint.x && cornerA.y === currentPoint.y;
+        const cornerKeepingPreviousXRecreates =
+            cornerKeepingPreviousX.x === currentPoint.x && cornerKeepingPreviousX.y === currentPoint.y;
 
-        // For diagonal neighbors exactly one corner recreates the deleted point;
-        // pick the other. cornerA is the valid choice unless it recreates currentPoint.
-        const chosenCorner: Point = cornerARecreates ? cornerB : cornerA;
+        // For diagonal neighbors exactly one corner recreates the deleted point; pick the other.
+        // cornerKeepingPreviousX is the valid choice unless it recreates currentPoint.
+        const chosenCorner: Point = cornerKeepingPreviousXRecreates ? cornerKeepingNextX : cornerKeepingPreviousX;
 
         // Insert the corner at the position of the deleted vertex
         newPoints.splice(pointIndex, 0, chosenCorner);
@@ -523,51 +524,51 @@ export function reanchorEndpoint(
     if (which === "end") {
         // Keep all points except the last; build a jog from the second-to-last interior
         // point to the new terminal.
-        const interiorPts = points.slice(0, points.length - 1);
+        const interiorPoints = points.slice(0, points.length - 1);
         const exitAxis: "x" | "y" = horizontalExit ? "x" : "y";
         // Drop trailing interior points left over from a changed exit direction: while the
         // second-to-last interior point overshoots the last one on the exit axis (a backtrack
         // toward the box), the last one is a stale stub vertex — remove it.
         while (
-            interiorPts.length >= 2 &&
+            interiorPoints.length >= 2 &&
             overshoots(
-                interiorPts[interiorPts.length - 2]![exitAxis],
-                interiorPts[interiorPts.length - 1]![exitAxis],
+                interiorPoints[interiorPoints.length - 2]![exitAxis],
+                interiorPoints[interiorPoints.length - 1]![exitAxis],
                 newAnchorPoint[exitAxis]
             )
         ) {
-            interiorPts.pop();
+            interiorPoints.pop();
         }
-        const prev = interiorPts[interiorPts.length - 1]!;
+        const previous = interiorPoints[interiorPoints.length - 1]!;
         const newAnchorX = newAnchorPoint.x;
         const newAnchorY = newAnchorPoint.y;
 
         let junction: Point;
         if (horizontalExit) {
             // Horizontal exit: connect vertically from interior, then horizontally
-            junction = { x: prev.x, y: newAnchorY };
+            junction = { x: previous.x, y: newAnchorY };
         } else {
             // Vertical exit: connect horizontally from interior, then vertically
-            junction = { x: newAnchorX, y: prev.y };
+            junction = { x: newAnchorX, y: previous.y };
         }
 
-        const newPoints: Point[] = [...interiorPts, junction, { x: newAnchorX, y: newAnchorY }];
+        const newPoints: Point[] = [...interiorPoints, junction, { x: newAnchorX, y: newAnchorY }];
         return flattenPoints(simplifyPolyline(newPoints));
     } else {
         // "start": keep all points except the first; build a jog from new terminal
         // to the second interior point.
-        const interiorPts = points.slice(1);
+        const interiorPoints = points.slice(1);
         const exitAxis: "x" | "y" = horizontalExit ? "x" : "y";
         // Drop leading interior points left over from a changed exit direction: while the
         // second interior point overshoots the first one on the exit axis (a backtrack toward
         // the box), the first one is a stale stub vertex — remove it.
         while (
-            interiorPts.length >= 2 &&
-            overshoots(interiorPts[1]![exitAxis], interiorPts[0]![exitAxis], newAnchorPoint[exitAxis])
+            interiorPoints.length >= 2 &&
+            overshoots(interiorPoints[1]![exitAxis], interiorPoints[0]![exitAxis], newAnchorPoint[exitAxis])
         ) {
-            interiorPts.shift();
+            interiorPoints.shift();
         }
-        const next = interiorPts[0]!;
+        const next = interiorPoints[0]!;
         const newAnchorX = newAnchorPoint.x;
         const newAnchorY = newAnchorPoint.y;
 
@@ -580,7 +581,7 @@ export function reanchorEndpoint(
             junction = { x: newAnchorX, y: next.y };
         }
 
-        const newPoints: Point[] = [{ x: newAnchorX, y: newAnchorY }, junction, ...interiorPts];
+        const newPoints: Point[] = [{ x: newAnchorX, y: newAnchorY }, junction, ...interiorPoints];
         return flattenPoints(simplifyPolyline(newPoints));
     }
 }

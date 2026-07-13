@@ -167,7 +167,7 @@ function ConnectionEditHandlesInner({
             }
         };
 
-    const handleVertexDblClick = (pointIndex: number) => (): void => {
+    const handleVertexDoubleClick = (pointIndex: number) => (): void => {
         const next = deleteVertex(waypoints, pointIndex);
         onCommit(connectionId, next);
     };
@@ -179,7 +179,7 @@ function ConnectionEditHandlesInner({
             const pointer = computeVertexPointer(target.x(), target.y());
             const preview = moveVertex(waypoints, pointIndex, pointer);
 
-            const prevLine = segmentRefs.current[pointIndex - 1];
+            const previousLine = segmentRefs.current[pointIndex - 1];
             const nextLine = segmentRefs.current[pointIndex];
 
             // The moved vertex lands on the snapped pointer; find it in the committed path so each
@@ -201,11 +201,11 @@ function ConnectionEditHandlesInner({
                 ? [movedVertex.x, movedVertex.y, preview[(vertexIndex + 1) * 2]!, preview[(vertexIndex + 1) * 2 + 1]!]
                 : preview;
 
-            if (prevLine) {
-                prevLine.points(previousSegmentPoints);
-                prevLine.stroke(SEGMENT_PREVIEW_STROKE);
-                prevLine.strokeWidth(SEGMENT_PREVIEW_STROKE_WIDTH);
-                prevLine.getLayer()?.batchDraw();
+            if (previousLine) {
+                previousLine.points(previousSegmentPoints);
+                previousLine.stroke(SEGMENT_PREVIEW_STROKE);
+                previousLine.strokeWidth(SEGMENT_PREVIEW_STROKE_WIDTH);
+                previousLine.getLayer()?.batchDraw();
             }
             if (nextLine) {
                 nextLine.points(nextSegmentPoints);
@@ -308,7 +308,7 @@ function ConnectionEditHandlesInner({
                             {...(!isTerminal && {
                                 onDragMove: handleVertexDragMove(pointIndex),
                                 onDragEnd: handleVertexDragEnd(pointIndex),
-                                onDblClick: handleVertexDblClick(pointIndex),
+                                onDblClick: handleVertexDoubleClick(pointIndex),
                                 onMouseEnter: (event: KonvaEventObject<MouseEvent>) => setCursor(event, "move"),
                                 onMouseLeave: (event: KonvaEventObject<MouseEvent>) => setCursor(event, "default"),
                             })}
@@ -325,8 +325,8 @@ function ConnectionEditHandlesInner({
 // closures from its last data-changing render, the same trade-off the connection renderer accepts.
 export const ConnectionEditHandles = memo(
     ConnectionEditHandlesInner,
-    (prevProps, nextProps) =>
-        prevProps.connectionId === nextProps.connectionId &&
-        prevProps.waypoints === nextProps.waypoints &&
-        prevProps.selected === nextProps.selected
+    (previousProps, nextProps) =>
+        previousProps.connectionId === nextProps.connectionId &&
+        previousProps.waypoints === nextProps.waypoints &&
+        previousProps.selected === nextProps.selected
 );
