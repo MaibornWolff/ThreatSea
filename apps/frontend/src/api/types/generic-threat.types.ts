@@ -1,6 +1,6 @@
 import type { ATTACKERS } from "#api/types/attackers.types.ts";
 import type { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
-import type { ExtendedChildThreat } from "#api/types/child-threat.types.ts";
+import type { ExtendedThreat } from "#api/types/threat.types.ts";
 
 export interface GenericThreat {
     id: number;
@@ -16,5 +16,5 @@ export interface GenericThreat {
 }
 
 export interface GenericThreatWithExtendedChildren extends GenericThreat {
-    children: ExtendedChildThreat[];
+    children: ExtendedThreat[];
 }

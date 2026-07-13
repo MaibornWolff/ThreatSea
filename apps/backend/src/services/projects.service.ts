@@ -5,8 +5,8 @@ import { and, eq, getTableColumns } from "drizzle-orm";
 import { db, TransactionType } from "#db/index.js";
 import {
     Asset,
-    ChildThreat,
-    ChildThreatMeasureImpact,
+    Threat,
+    ThreatMeasureImpact,
     CreateProject,
     Measure,
     Project,
@@ -14,7 +14,7 @@ import {
     UpdateProject,
     usersProjects,
 } from "#db/schema.js";
-import { getGenericThreatsWithExtendedChildren } from "#services/genericThreats.service.js";
+import { getGenericThreatsWithExtendedChildren } from "#services/generic-threats.service.js";
 import { findSystem } from "#services/system.service.js";
 import { getAssets } from "#services/assets.service.js";
 import { getMeasures } from "#services/measures.service.js";
@@ -60,7 +60,7 @@ function transformThreats(
     threats: ReportThreat[],
     measuresWithIds: ExtendedMeasure[],
     assetsWithId: ExtendedAsset[],
-    measureImpacts: ChildThreatMeasureImpact[]
+    measureImpacts: ThreatMeasureImpact[]
 ) {
     return threats
         .map((threat) => {
@@ -73,9 +73,7 @@ function transformThreats(
                     reportId: matchingAsset?.reportId,
                 };
             });
-            const threatMeasureImpacts = measureImpacts.filter(
-                (measureImpact) => measureImpact.childThreatId === threat.id
-            );
+            const threatMeasureImpacts = measureImpacts.filter((measureImpact) => measureImpact.threatId === threat.id);
             const measures = threatMeasureImpacts.map((measureImpact) => {
                 const measure = measuresWithIds.find((measure) => measure.id === measureImpact.measureId);
                 return {
@@ -135,13 +133,13 @@ type TransformedMeasure = Measure & {
 
 function transformMeasures(
     measures: Measure[],
-    threats: (ChildThreat & { reportId: string })[],
-    measureImpacts: ChildThreatMeasureImpact[]
+    threats: (Threat & { reportId: string })[],
+    measureImpacts: ThreatMeasureImpact[]
 ): TransformedMeasure[] {
     return measures.map((measure) => {
         const measureMeasureImpacts = measureImpacts.filter((measureImpact) => measureImpact.measureId === measure.id);
         const measureThreats = measureMeasureImpacts.map((measureImpact) => {
-            const matchingThreat = threats.find((threat) => threat.id === measureImpact.childThreatId);
+            const matchingThreat = threats.find((threat) => threat.id === measureImpact.threatId);
             return {
                 id: matchingThreat?.id,
                 reportId: matchingThreat?.reportId,
@@ -157,7 +155,7 @@ function transformMeasures(
 
 type ExtendedAsset = Asset & { reportId: string };
 type ExtendedMeasure = Measure & { reportId: string };
-type ReportThreat = ChildThreat & {
+type ReportThreat = Threat & {
     assets: Asset[];
     componentName: string | null;
     componentType: number | ComponentType | null;
@@ -184,35 +182,25 @@ export async function getReportData(projectId: number) {
     // Gets the images of the parsed system.
     const { image = null } = system || {};
 
-    // Gets the components of the parsed system, sorted and tagged with report ids.
-    const componentReportIdsDict = new Map<string, string>();
-    const components = (system?.data?.components ?? [])
-        .slice()
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .map((component, index) => {
-            const reportId = "C." + (index + 1);
-            componentReportIdsDict.set(component.id, reportId);
-            return {
-                ...component,
-                reportId,
-            };
-        });
+    // Get all generic (parent) threats of the project with their child threats.
+    const genericThreatsWithChildren = await getGenericThreatsWithExtendedChildren(projectId);
 
-    // Get all child threats of the project through generic threats.
-    const threats: ReportThreat[] = (await getGenericThreatsWithExtendedChildren(projectId))
+    // For communication-interface points of attack the displayed component name
+    // includes the interface name.
+    const withInterfaceComponentName = <T extends ReportThreat>(threat: T): T =>
+        threat.pointOfAttack === "COMMUNICATION_INTERFACES" && threat.interfaceName
+            ? {
+                  ...threat,
+                  componentName: threat.componentName
+                      ? `${threat.componentName} > ${threat.interfaceName}`
+                      : threat.interfaceName,
+              }
+            : threat;
+
+    // Flat list of all child threats (needed for measure-impact filtering and transforms).
+    const threats: ReportThreat[] = genericThreatsWithChildren
         .flatMap((genericThreat) => genericThreat.children)
-        .map((threat) => {
-            if (threat.pointOfAttack === "COMMUNICATION_INTERFACES" && threat.interfaceName) {
-                return {
-                    ...threat,
-                    componentName: threat.componentName
-                        ? `${threat.componentName} > ${threat.interfaceName}`
-                        : threat.interfaceName,
-                };
-            }
-
-            return threat;
-        });
+        .map(withInterfaceComponentName);
 
     //Get all the assets of the project
     const assets = await getAssets(projectId);
@@ -240,33 +228,67 @@ export async function getReportData(projectId: number) {
 
     let measureImpacts = await getMeasureImpactsByProject(projectId);
     measureImpacts = measureImpacts.filter((measureImpact) =>
-        threats.some((threat) => threat.id === measureImpact.childThreatId)
+        threats.some((threat) => threat.id === measureImpact.threatId)
     );
 
-    const threatsWithIds = transformThreats(threats, measuresWithIds, assetsWithIds, measureImpacts)
-        .sort((a, b) => b.netRisk - a.netRisk)
-        .map((threat, index) => {
-            threatReportIdsDict.set(threat.id, "T." + (index + 1));
-            return {
-                ...threat,
-                reportId: threatReportIdsDict.get(threat.id)!,
-            };
+    const transformedThreats = transformThreats(threats, measuresWithIds, assetsWithIds, measureImpacts);
+    const transformedThreatsById = new Map(transformedThreats.map((threat) => [threat.id, threat]));
+
+    // Group children under their parent generic threat. Parents are ordered by their
+    // top child's net risk, children by net risk within a parent (both descending). Report
+    // ids follow this canonical order — parent "T.p", child "T.p.c" — and stay stable
+    // regardless of any display sorting the client applies. Cross-references point at children.
+    const orderedGroups = genericThreatsWithChildren
+        .map((genericThreat) => {
+            const children = genericThreat.children
+                .map((child) => transformedThreatsById.get(child.id))
+                .filter((child): child is (typeof transformedThreats)[number] => child !== undefined)
+                .sort((a, b) => b.netRisk - a.netRisk);
+            const topNetRisk = children.reduce((max, child) => Math.max(max, child.netRisk), 0);
+            return { genericThreat, children, topNetRisk };
+        })
+        .filter((group) => group.children.length > 0)
+        .sort((a, b) => b.topNetRisk - a.topNetRisk);
+
+    const threatsWithIds: ((typeof transformedThreats)[number] & { reportId: string })[] = [];
+    const threatGroups = orderedGroups.map((group, parentIndex) => {
+        const parentReportId = "T." + (parentIndex + 1);
+        const threatIds: number[] = [];
+        group.children.forEach((child, childIndex) => {
+            const reportId = parentReportId + "." + (childIndex + 1);
+            threatReportIdsDict.set(child.id, reportId);
+            threatsWithIds.push({ ...child, reportId });
+            threatIds.push(child.id);
         });
+        const firstChild = group.children[0];
+        return {
+            reportId: parentReportId,
+            genericThreatId: group.genericThreat.id,
+            name: group.genericThreat.name,
+            description: group.genericThreat.description,
+            componentName: firstChild?.componentName ?? null,
+            componentType: firstChild?.componentType ?? null,
+            interfaceName: firstChild?.interfaceName ?? null,
+            pointOfAttack: group.genericThreat.pointOfAttack,
+            attacker: group.genericThreat.attacker,
+            threatIds,
+        };
+    });
 
     const measureImpactsWithIds = measureImpacts.map((measureImpact) => {
         return {
             ...measureImpact,
             measureReportId: measureReportIdsDict.get(measureImpact.measureId),
-            threatReportId: threatReportIdsDict.get(measureImpact.childThreatId),
+            threatReportId: threatReportIdsDict.get(measureImpact.threatId),
         };
     });
 
     return {
         systemImage: image,
         project: project,
-        components: components,
         assets: assetsWithIds,
         threats: threatsWithIds,
+        threatGroups,
         measures: transformMeasures(measuresWithIds, threatsWithIds, measureImpacts),
         measureImpacts: measureImpactsWithIds,
     };

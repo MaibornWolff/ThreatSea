@@ -7,8 +7,8 @@ import { beforeAll, describe, expect, it } from "vitest";
 import request from "supertest";
 import { app } from "#server.js";
 import { db } from "#db/index.js";
-import { childThreats, genericThreats, projects } from "#db/schema.js";
-import { getGenericThreatsWithExtendedChildren } from "#services/genericThreats.service.js";
+import { threats, genericThreats, projects } from "#db/schema.js";
+import { getGenericThreatsWithExtendedChildren } from "#services/generic-threats.service.js";
 import { eq } from "drizzle-orm";
 import VALID_TEST_PROJECT from "./testData/testData.json" with { type: "json" };
 
@@ -44,7 +44,7 @@ interface MeasureRow {
 }
 interface MeasureImpactRow {
     id: number;
-    childThreatId: number;
+    threatId: number;
     measureId: number;
     probability: number;
     damage: number;
@@ -57,7 +57,7 @@ interface MeasureImpactRow {
 interface ExportBody {
     project: { name: string };
     genericThreats: ThreatRow[];
-    childThreats: ThreatRow[];
+    threats: ThreatRow[];
     measures: MeasureRow[];
     measureImpacts: MeasureImpactRow[];
 }
@@ -104,11 +104,11 @@ const normalizeChild = (c: ThreatRow) => ({
 // A measure impact keyed by the *names* it links rather than the remapped ids, so the same link is
 // comparable across two imports.
 const resolveImpactLinks = (exp: ExportBody) => {
-    const childById = new Map(exp.childThreats.map((c) => [c.id, c]));
+    const childById = new Map(exp.threats.map((c) => [c.id, c]));
     const measureById = new Map(exp.measures.map((m) => [m.id, m]));
     return exp.measureImpacts
         .map((mi) => ({
-            childName: childById.get(mi.childThreatId)?.name,
+            childName: childById.get(mi.threatId)?.name,
             measureName: measureById.get(mi.measureId)?.name,
             probability: mi.probability,
             damage: mi.damage,
@@ -134,9 +134,9 @@ describe("import/export round-trip fidelity", () => {
 
         // Parent + child actually landed.
         expect(exp.genericThreats).toHaveLength(VALID_TEST_PROJECT.genericThreats.length);
-        expect(exp.childThreats).toHaveLength(VALID_TEST_PROJECT.childThreats.length);
+        expect(exp.threats).toHaveLength(VALID_TEST_PROJECT.threats.length);
 
-        const child = exp.childThreats[0]!;
+        const child = exp.threats[0]!;
         expect(child.name).toBe("Test");
         expect(child.status).toBe("new");
         expect(child.confidentiality).toBe(true);
@@ -150,7 +150,7 @@ describe("import/export round-trip fidelity", () => {
         // The measure impact still connects the imported child and measure after id remapping.
         expect(exp.measureImpacts).toHaveLength(1);
         const impact = exp.measureImpacts[0]!;
-        expect(exp.childThreats.some((c) => c.id === impact.childThreatId)).toBe(true);
+        expect(exp.threats.some((c) => c.id === impact.threatId)).toBe(true);
         expect(exp.measures.some((m) => m.id === impact.measureId)).toBe(true);
         expect(impact.impactsProbability).toBe(true);
         expect(impact.impactsDamage).toBe(true);
@@ -161,10 +161,10 @@ describe("import/export round-trip fidelity", () => {
         const NAME = "multichild-source";
         const body = structuredClone(VALID_TEST_PROJECT) as unknown as ExportBody;
         body.project.name = NAME;
-        const second = structuredClone(body.childThreats[0]!);
+        const second = structuredClone(body.threats[0]!);
         second.id = 987654;
         second.name = "Second Child";
-        body.childThreats.push(second);
+        body.threats.push(second);
 
         await importProject(body);
 
@@ -172,8 +172,8 @@ describe("import/export round-trip fidelity", () => {
         expect(project).toBeTruthy();
 
         // Ground truth: both children are actually in the DB, under a single generic threat.
-        const dbChildren = await db.query.childThreats.findMany({
-            where: eq(childThreats.projectId, project!.id),
+        const dbChildren = await db.query.threats.findMany({
+            where: eq(threats.projectId, project!.id),
         });
         const dbGenerics = await db.query.genericThreats.findMany({
             where: eq(genericThreats.projectId, project!.id),
@@ -184,7 +184,7 @@ describe("import/export round-trip fidelity", () => {
 
         // Export reflects both children too.
         const exp = await exportByName(NAME);
-        expect(exp.childThreats).toHaveLength(2);
+        expect(exp.threats).toHaveLength(2);
 
         // The display path (threats page + report both consume this) returns both children.
         const grouped = await getGenericThreatsWithExtendedChildren(project!.id);
@@ -213,9 +213,7 @@ describe("import/export round-trip fidelity", () => {
         expect(second.genericThreats.map(normalizeGeneric).sort(byName)).toEqual(
             first.genericThreats.map(normalizeGeneric).sort(byName)
         );
-        expect(second.childThreats.map(normalizeChild).sort(byName)).toEqual(
-            first.childThreats.map(normalizeChild).sort(byName)
-        );
+        expect(second.threats.map(normalizeChild).sort(byName)).toEqual(first.threats.map(normalizeChild).sort(byName));
         expect(resolveImpactLinks(second)).toEqual(resolveImpactLinks(first));
     });
 });

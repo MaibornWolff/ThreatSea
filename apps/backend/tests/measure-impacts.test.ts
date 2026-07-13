@@ -9,9 +9,9 @@ import {
     catalogMeasures,
     catalogs,
     catalogThreats,
-    CreateChildThreat,
+    CreateThreat,
     CreateMeasure,
-    childThreats,
+    threats,
     genericThreats,
     measureImpacts,
     measures,
@@ -24,8 +24,8 @@ import { app } from "#server.js";
 import { LANGUAGES } from "#types/languages.type.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
 import { CreateProjectRequest } from "#types/project.types.js";
-import { CreateGenericThreatRequest } from "#types/genericThreat.types.js";
-import { CHILD_THREAT_STATUSES } from "#types/child-threat-statuses.types.js";
+import { CreateGenericThreatRequest } from "#types/generic-threat.types.js";
+import { THREAT_STATUSES } from "#types/threat-statuses.types.js";
 import { CreateMeasureRequest } from "#types/measure.types.js";
 import { CreateCatalogThreatRequest } from "#types/catalog-threat.types.js";
 import { CreateCatalogMeasureRequest } from "#types/catalog-measure.types.js";
@@ -38,7 +38,7 @@ let catalogThreatId: number;
 let catalogMeasureId: number;
 let measureId: number;
 let genericThreatId: number;
-let childThreatId: number;
+let threatId: number;
 let cookies: string[];
 let csrfToken: string;
 
@@ -56,7 +56,7 @@ const VALID_GENERIC_THREAT_1: Omit<InstanceType<typeof CreateGenericThreatReques
     attacker: ATTACKERS.ADMINISTRATORS,
 };
 
-const VALID_CHILD_THREAT_1: Omit<CreateChildThreat, "genericThreatId" | "projectId"> = {
+const VALID_THREAT_1: Omit<CreateThreat, "genericThreatId" | "projectId"> = {
     pointOfAttackId: nanoid(),
     name: "valid threat",
     description: "valid description test test",
@@ -66,7 +66,7 @@ const VALID_CHILD_THREAT_1: Omit<CreateChildThreat, "genericThreatId" | "project
     confidentiality: true,
     integrity: true,
     availability: false,
-    status: CHILD_THREAT_STATUSES.NEW,
+    status: THREAT_STATUSES.NEW,
 };
 
 const VALID_MEASURE_1: InstanceType<typeof CreateMeasureRequest> = {
@@ -98,7 +98,7 @@ const VALID_CATALOG_MEASURE_1: InstanceType<typeof CreateCatalogMeasureRequest> 
     availability: true,
 };
 
-const VALID_MEASURE_IMPACT_1: Omit<InstanceType<typeof CreateMeasureImpactRequest>, "measureId" | "childThreatId"> = {
+const VALID_MEASURE_IMPACT_1: Omit<InstanceType<typeof CreateMeasureImpactRequest>, "measureId" | "threatId"> = {
     description: "Description 1",
     setsOutOfScope: false,
     impactsProbability: true,
@@ -107,7 +107,7 @@ const VALID_MEASURE_IMPACT_1: Omit<InstanceType<typeof CreateMeasureImpactReques
     damage: 1,
 };
 
-const VALID_MEASURE_IMPACT_2: Omit<InstanceType<typeof CreateMeasureImpactRequest>, "measureId" | "childThreatId"> = {
+const VALID_MEASURE_IMPACT_2: Omit<InstanceType<typeof CreateMeasureImpactRequest>, "measureId" | "threatId"> = {
     description: "Description 2",
     setsOutOfScope: true,
     impactsProbability: false,
@@ -118,7 +118,7 @@ const VALID_MEASURE_IMPACT_2: Omit<InstanceType<typeof CreateMeasureImpactReques
 
 const INVALID_MEASURE_IMPACT_PROBABILITY_NULL: Omit<
     InstanceType<typeof CreateMeasureImpactRequest>,
-    "measureId" | "childThreatId"
+    "measureId" | "threatId"
 > = {
     description: "Description 1",
     setsOutOfScope: false,
@@ -130,7 +130,7 @@ const INVALID_MEASURE_IMPACT_PROBABILITY_NULL: Omit<
 
 const INVALID_MEASURE_IMPACT_DAMAGE_NULL: Omit<
     InstanceType<typeof CreateMeasureImpactRequest>,
-    "measureId" | "childThreatId"
+    "measureId" | "threatId"
 > = {
     description: "Description 1",
     setsOutOfScope: false,
@@ -215,17 +215,17 @@ beforeEach(async () => {
     ).at(0);
     genericThreatId = genericThreat!.id;
 
-    const childThreat = (
+    const threat = (
         await db
-            .insert(childThreats)
+            .insert(threats)
             .values({
-                ...VALID_CHILD_THREAT_1,
+                ...VALID_THREAT_1,
                 genericThreatId,
                 projectId,
             })
             .returning()
     ).at(0);
-    childThreatId = childThreat!.id;
+    threatId = threat!.id;
 
     // Deep-cloning VALID_MEASURE_1 to avoid mutation issues
     const clonedValidMeasure: CreateMeasure = JSON.parse(JSON.stringify(VALID_MEASURE_1));
@@ -256,14 +256,14 @@ describe("get or create measure impacts", () => {
             .post(`/api/projects/${projectId}/system/measureImpacts`)
             .send({
                 ...VALID_MEASURE_IMPACT_1,
-                childThreatId,
+                threatId,
                 measureId,
             })
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(200);
         expect(res.body.measureId).toBe(measureId);
-        expect(res.body.childThreatId).toBe(childThreatId);
+        expect(res.body.threatId).toBe(threatId);
         expect(res.body.description).toBe(VALID_MEASURE_IMPACT_1.description);
         expect(res.body.setsOutOfScope).toBe(VALID_MEASURE_IMPACT_1.setsOutOfScope);
         expect(res.body.impactsProbability).toBe(VALID_MEASURE_IMPACT_1.impactsProbability);
@@ -277,7 +277,7 @@ describe("get or create measure impacts", () => {
             .post(`/api/projects/${projectId}/system/measureImpacts`)
             .send({
                 ...INVALID_MEASURE_IMPACT_PROBABILITY_NULL,
-                childThreatId,
+                threatId,
                 measureId,
             })
             .set("X-CSRF-TOKEN", csrfToken)
@@ -291,7 +291,7 @@ describe("get or create measure impacts", () => {
             .post(`/api/projects/${projectId}/system/measureImpacts`)
             .send({
                 ...INVALID_MEASURE_IMPACT_DAMAGE_NULL,
-                childThreatId,
+                threatId,
                 measureId,
             })
             .set("X-CSRF-TOKEN", csrfToken)
@@ -310,7 +310,7 @@ describe("get, delete or update a single measure Impact", () => {
                 .insert(measureImpacts)
                 .values({
                     ...VALID_MEASURE_IMPACT_1,
-                    childThreatId,
+                    threatId,
                     measureId,
                 })
                 .returning()
@@ -325,7 +325,7 @@ describe("get, delete or update a single measure Impact", () => {
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(200);
         expect(res.body.measureId).toBe(measureId);
-        expect(res.body.childThreatId).toBe(childThreatId);
+        expect(res.body.threatId).toBe(threatId);
         expect(res.body.description).toBe(VALID_MEASURE_IMPACT_1.description);
         expect(res.body.setsOutOfScope).toBe(VALID_MEASURE_IMPACT_1.setsOutOfScope);
         expect(res.body.impactsProbability).toBe(VALID_MEASURE_IMPACT_1.impactsProbability);
@@ -348,14 +348,14 @@ describe("get, delete or update a single measure Impact", () => {
             .put(`/api/projects/${projectId}/system/measureImpacts/${measureImpactId}`)
             .send({
                 ...VALID_MEASURE_IMPACT_2,
-                childThreatId,
+                threatId,
                 measureId,
             })
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(200);
         expect(res.body.measureId).toBe(measureId);
-        expect(res.body.childThreatId).toBe(childThreatId);
+        expect(res.body.threatId).toBe(threatId);
         expect(res.body.description).toBe(VALID_MEASURE_IMPACT_2.description);
         expect(res.body.setsOutOfScope).toBe(VALID_MEASURE_IMPACT_2.setsOutOfScope);
         expect(res.body.impactsProbability).toBe(VALID_MEASURE_IMPACT_2.impactsProbability);
@@ -375,7 +375,7 @@ describe("get, delete or update a single measure Impact", () => {
     it("should not delete a measure (non exist)", async () => {
         await db
             .delete(measureImpacts)
-            .where(and(eq(measureImpacts.childThreatId, childThreatId), eq(measureImpacts.measureId, measureId)));
+            .where(and(eq(measureImpacts.threatId, threatId), eq(measureImpacts.measureId, measureId)));
 
         const res = await request(app)
             .delete("/api/projects/" + projectId + "/system/measureImpacts/" + measureImpactId)
@@ -402,7 +402,7 @@ describe("measures impacts (invalid data)", () => {
                 .insert(measureImpacts)
                 .values({
                     ...VALID_MEASURE_IMPACT_1,
-                    childThreatId,
+                    threatId,
                     measureId,
                 })
                 .returning()
@@ -423,7 +423,7 @@ describe("measures impacts (invalid data)", () => {
             .post(`/api/projects/${otherProjectId}/system/measureImpacts`)
             .send({
                 ...VALID_MEASURE_IMPACT_1,
-                childThreatId,
+                threatId,
                 measureId,
             })
             .set("X-CSRF-TOKEN", csrfToken)
@@ -436,7 +436,7 @@ describe("measures impacts (invalid data)", () => {
             .put(`/api/projects/${otherProjectId}/system/measureImpacts/${measureImpactId}`)
             .send({
                 ...VALID_MEASURE_IMPACT_1,
-                childThreatId,
+                threatId,
                 measureId,
             })
             .set("X-CSRF-TOKEN", csrfToken)
@@ -455,10 +455,10 @@ describe("measures impacts (invalid data)", () => {
 
 describe("out-of-scope measure impacts drive the child threat status", () => {
     const getChildStatus = async (id: number) =>
-        (await db.query.childThreats.findFirst({ where: eq(childThreats.id, id) }))!.status;
+        (await db.query.threats.findFirst({ where: eq(threats.id, id) }))!.status;
 
-    const setChildStatus = async (id: number, status: CHILD_THREAT_STATUSES) =>
-        await db.update(childThreats).set({ status }).where(eq(childThreats.id, id));
+    const setChildStatus = async (id: number, status: THREAT_STATUSES) =>
+        await db.update(threats).set({ status }).where(eq(threats.id, id));
 
     const createSecondMeasure = async () =>
         (
@@ -469,92 +469,92 @@ describe("out-of-scope measure impacts drive the child threat status", () => {
         ).at(0)!.id;
 
     const postImpact = async (
-        body: Omit<InstanceType<typeof CreateMeasureImpactRequest>, "measureId" | "childThreatId">,
+        body: Omit<InstanceType<typeof CreateMeasureImpactRequest>, "measureId" | "threatId">,
         forMeasureId: number = measureId
     ) =>
         await request(app)
             .post(`/api/projects/${projectId}/system/measureImpacts`)
-            .send({ ...body, childThreatId, measureId: forMeasureId })
+            .send({ ...body, threatId, measureId: forMeasureId })
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
 
     it("sets the child threat out of scope when an out-of-scope impact is created", async () => {
         const res = await postImpact(VALID_MEASURE_IMPACT_2);
         expect(res.statusCode).toEqual(200);
-        expect(await getChildStatus(childThreatId)).toBe(CHILD_THREAT_STATUSES.OUTOFSCOPE);
+        expect(await getChildStatus(threatId)).toBe(THREAT_STATUSES.OUTOFSCOPE);
     });
 
     it("does not change the status when an ordinary impact is created", async () => {
         const res = await postImpact(VALID_MEASURE_IMPACT_1);
         expect(res.statusCode).toEqual(200);
-        expect(await getChildStatus(childThreatId)).toBe(CHILD_THREAT_STATUSES.NEW);
+        expect(await getChildStatus(threatId)).toBe(THREAT_STATUSES.NEW);
     });
 
     it("reverts to in progress when the only out-of-scope impact is deleted", async () => {
         const created = await postImpact(VALID_MEASURE_IMPACT_2);
-        expect(await getChildStatus(childThreatId)).toBe(CHILD_THREAT_STATUSES.OUTOFSCOPE);
+        expect(await getChildStatus(threatId)).toBe(THREAT_STATUSES.OUTOFSCOPE);
 
         const res = await request(app)
             .delete(`/api/projects/${projectId}/system/measureImpacts/${created.body.id}`)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(204);
-        expect(await getChildStatus(childThreatId)).toBe(CHILD_THREAT_STATUSES.IN_PROGRESS);
+        expect(await getChildStatus(threatId)).toBe(THREAT_STATUSES.IN_PROGRESS);
     });
 
     it("stays out of scope while another out-of-scope impact remains", async () => {
         const secondMeasureId = await createSecondMeasure();
         const first = await postImpact(VALID_MEASURE_IMPACT_2);
         await postImpact(VALID_MEASURE_IMPACT_2, secondMeasureId);
-        expect(await getChildStatus(childThreatId)).toBe(CHILD_THREAT_STATUSES.OUTOFSCOPE);
+        expect(await getChildStatus(threatId)).toBe(THREAT_STATUSES.OUTOFSCOPE);
 
         await request(app)
             .delete(`/api/projects/${projectId}/system/measureImpacts/${first.body.id}`)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
-        expect(await getChildStatus(childThreatId)).toBe(CHILD_THREAT_STATUSES.OUTOFSCOPE);
+        expect(await getChildStatus(threatId)).toBe(THREAT_STATUSES.OUTOFSCOPE);
     });
 
     it("reverts when an out-of-scope impact is flipped off, and sets again when flipped on", async () => {
         const created = await postImpact(VALID_MEASURE_IMPACT_2);
-        expect(await getChildStatus(childThreatId)).toBe(CHILD_THREAT_STATUSES.OUTOFSCOPE);
+        expect(await getChildStatus(threatId)).toBe(THREAT_STATUSES.OUTOFSCOPE);
 
         await request(app)
             .put(`/api/projects/${projectId}/system/measureImpacts/${created.body.id}`)
-            .send({ ...VALID_MEASURE_IMPACT_1, childThreatId, measureId })
+            .send({ ...VALID_MEASURE_IMPACT_1, threatId, measureId })
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
-        expect(await getChildStatus(childThreatId)).toBe(CHILD_THREAT_STATUSES.IN_PROGRESS);
+        expect(await getChildStatus(threatId)).toBe(THREAT_STATUSES.IN_PROGRESS);
 
         await request(app)
             .put(`/api/projects/${projectId}/system/measureImpacts/${created.body.id}`)
-            .send({ ...VALID_MEASURE_IMPACT_2, childThreatId, measureId })
+            .send({ ...VALID_MEASURE_IMPACT_2, threatId, measureId })
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
-        expect(await getChildStatus(childThreatId)).toBe(CHILD_THREAT_STATUSES.OUTOFSCOPE);
+        expect(await getChildStatus(threatId)).toBe(THREAT_STATUSES.OUTOFSCOPE);
     });
 
     it("leaves a manually set status untouched when ordinary impacts are added or removed", async () => {
-        await setChildStatus(childThreatId, CHILD_THREAT_STATUSES.FINALIZED);
+        await setChildStatus(threatId, THREAT_STATUSES.FINALIZED);
 
         const created = await postImpact(VALID_MEASURE_IMPACT_1);
-        expect(await getChildStatus(childThreatId)).toBe(CHILD_THREAT_STATUSES.FINALIZED);
+        expect(await getChildStatus(threatId)).toBe(THREAT_STATUSES.FINALIZED);
 
         await request(app)
             .delete(`/api/projects/${projectId}/system/measureImpacts/${created.body.id}`)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
-        expect(await getChildStatus(childThreatId)).toBe(CHILD_THREAT_STATUSES.FINALIZED);
+        expect(await getChildStatus(threatId)).toBe(THREAT_STATUSES.FINALIZED);
     });
 
     it("does not revert a manually set out-of-scope status when an ordinary impact is removed", async () => {
-        await setChildStatus(childThreatId, CHILD_THREAT_STATUSES.OUTOFSCOPE);
+        await setChildStatus(threatId, THREAT_STATUSES.OUTOFSCOPE);
 
         const created = await postImpact(VALID_MEASURE_IMPACT_1);
         await request(app)
             .delete(`/api/projects/${projectId}/system/measureImpacts/${created.body.id}`)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
-        expect(await getChildStatus(childThreatId)).toBe(CHILD_THREAT_STATUSES.OUTOFSCOPE);
+        expect(await getChildStatus(threatId)).toBe(THREAT_STATUSES.OUTOFSCOPE);
     });
 });

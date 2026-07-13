@@ -6,19 +6,19 @@ import {
     createAsset,
     createMeasureImpact,
     createProject,
-    createChildThreat,
+    createThreat,
     createThreatMeasure,
 } from "#test-utils/builders.ts";
 import { mockUseConfirm, mockUseThreatMeasuresList } from "#test-utils/mock-hooks.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
-import { ChildThreatsAPI } from "#api/child-threats.api.ts";
-import { CHILD_THREAT_STATUSES } from "#api/types/child-threat-statuses.types.ts";
+import { ThreatsAPI } from "#api/threats.api.ts";
+import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 
 mockUseConfirm();
 mockUseThreatMeasuresList();
 
-vi.mock("#api/child-threats.api.ts", () => ({
-    ChildThreatsAPI: { updateChildThreat: vi.fn() },
+vi.mock("#api/threats.api.ts", () => ({
+    ThreatsAPI: { updateThreat: vi.fn() },
 }));
 
 const navigate = vi.fn();
@@ -33,7 +33,7 @@ const setup = (
     onSaved?: () => void
 ) => {
     const project = createProject({ id: 7 });
-    const threat = createChildThreat({
+    const threat = createThreat({
         id: 42,
         assets: [createAsset({ confidentiality: 4, integrity: 2, availability: 1 })],
     });
@@ -81,7 +81,7 @@ describe("AddThreatDialog — Apply Measure button", () => {
         expect(navigate).toHaveBeenCalledTimes(2);
         expect(navigate).toHaveBeenLastCalledWith(`/projects/${project.id}/threats/measureImpacts/edit`, {
             state: {
-                childThreat: { ...threat, damage: 4 },
+                threat: { ...threat, damage: 4 },
                 project,
             },
         });
@@ -96,7 +96,7 @@ describe("AddThreatDialog — Apply Measure button", () => {
         expect(navigate).toHaveBeenCalledTimes(2);
         expect(navigate).toHaveBeenLastCalledWith(`/projects/${project.id}/risk/measureImpacts/edit`, {
             state: {
-                childThreat: { ...threat, damage: 4 },
+                threat: { ...threat, damage: 4 },
                 project,
             },
         });
@@ -111,7 +111,7 @@ describe("AddThreatDialog — Apply Measure button", () => {
         expect(navigate).toHaveBeenCalledTimes(2);
         expect(navigate).toHaveBeenLastCalledWith(`/projects/${project.id}/threats/measureImpacts/edit`, {
             state: {
-                childThreat: { ...threat, damage: 4 },
+                threat: { ...threat, damage: 4 },
                 project,
             },
         });
@@ -134,7 +134,7 @@ describe("AddThreatDialog — Edit Measure Impact routing", () => {
 
         expect(navigate).toHaveBeenLastCalledWith(`/projects/${project.id}/threats/measureImpacts/edit`, {
             state: {
-                childThreat: { ...threat, damage: 4 },
+                threat: { ...threat, damage: 4 },
                 measureImpact: threatMeasure.measureImpact,
                 project,
             },
@@ -167,7 +167,7 @@ describe("AddThreatDialog — Edit Measure Impact routing", () => {
 
         expect(navigate).toHaveBeenLastCalledWith(`/projects/${project.id}/risk/measureImpacts/edit`, {
             state: {
-                childThreat: { ...threat, damage: 4 },
+                threat: { ...threat, damage: 4 },
                 measureImpact: threatMeasure.measureImpact,
                 project,
             },
@@ -221,27 +221,27 @@ describe("AddThreatDialog — Save", () => {
     });
 
     it("persists the child threat, notifies the host, and closes on success", async () => {
-        vi.mocked(ChildThreatsAPI.updateChildThreat).mockResolvedValue(createChildThreat({ id: 42 }));
+        vi.mocked(ThreatsAPI.updateThreat).mockResolvedValue(createThreat({ id: 42 }));
         const onSaved = vi.fn();
         const { user } = setup(USER_ROLES.EDITOR, "threats", onSaved);
 
         await user.click(screen.getByTestId("EditThreatSave"));
 
         await waitFor(() => expect(navigate).toHaveBeenCalledWith(-1));
-        expect(ChildThreatsAPI.updateChildThreat).toHaveBeenCalledWith(
-            expect.objectContaining({ id: 42, projectId: 7, status: CHILD_THREAT_STATUSES.NEW })
+        expect(ThreatsAPI.updateThreat).toHaveBeenCalledWith(
+            expect.objectContaining({ id: 42, projectId: 7, status: THREAT_STATUSES.NEW })
         );
         expect(onSaved).toHaveBeenCalledTimes(1);
     });
 
     it("keeps the dialog open and does not notify the host when the update fails", async () => {
-        vi.mocked(ChildThreatsAPI.updateChildThreat).mockRejectedValue(new Error("update failed"));
+        vi.mocked(ThreatsAPI.updateThreat).mockRejectedValue(new Error("update failed"));
         const onSaved = vi.fn();
         const { user } = setup(USER_ROLES.EDITOR, "threats", onSaved);
 
         await user.click(screen.getByTestId("EditThreatSave"));
 
-        await waitFor(() => expect(ChildThreatsAPI.updateChildThreat).toHaveBeenCalled());
+        await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled());
         expect(onSaved).not.toHaveBeenCalled();
         expect(navigate).not.toHaveBeenCalled();
     });

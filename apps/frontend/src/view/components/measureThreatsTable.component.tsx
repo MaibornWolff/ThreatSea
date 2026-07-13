@@ -5,7 +5,7 @@ import Delete from "@mui/icons-material/Delete";
 import Edit from "@mui/icons-material/Edit";
 import { useTranslation } from "react-i18next";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
-import type { ExtendedChildThreat } from "#api/types/child-threat.types.ts";
+import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import { CustomTableHeaderCell } from "#view/components/table-header.component.tsx";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { IconButton } from "./icon-button.component";
@@ -20,7 +20,7 @@ interface MeasureThreatsTableProps {
     userRole: USER_ROLES | undefined;
     onClickDeleteMeasureThreat: (event: React.MouseEvent<HTMLElement>, measureThreat: MeasureThreat) => void;
     onClickEditMeasureImpact: (event: React.MouseEvent<HTMLElement>, measureImpact: MeasureImpact) => void;
-    onClickEditThreat: (event: React.MouseEvent<HTMLElement>, threat: ExtendedChildThreat | undefined) => void;
+    onClickEditThreat: (event: React.MouseEvent<HTMLElement>, threat: ExtendedThreat | undefined) => void;
 }
 
 export const MeasureThreatsTable = ({
@@ -154,7 +154,7 @@ interface MeasureThreatTableRowProps {
     onClickDeleteMeasureThreat: (event: React.MouseEvent<HTMLElement>, measureThreat: MeasureThreat) => void;
     onClickEditMeasureImpact: (event: React.MouseEvent<HTMLElement>, measureImpact: MeasureImpact) => void;
     userRole: USER_ROLES | undefined;
-    onClickEditThreat: (event: React.MouseEvent<HTMLElement>, threat: ExtendedChildThreat | undefined) => void;
+    onClickEditThreat: (event: React.MouseEvent<HTMLElement>, threat: ExtendedThreat | undefined) => void;
 }
 
 const MeasureThreatTableRow = ({

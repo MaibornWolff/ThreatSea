@@ -5,7 +5,7 @@ import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import { nanoid } from "nanoid";
 import { db } from "#db/index.js";
-import { catalogs, childThreats, CreateChildThreat, genericThreats, usersCatalogs } from "#db/schema.js";
+import { catalogs, threats, CreateThreat, genericThreats, usersCatalogs } from "#db/schema.js";
 import { POINTS_OF_ATTACK } from "#types/points-of-attack.types.js";
 import { ATTACKERS } from "#types/attackers.types.js";
 import { CONFIDENTIALITY_LEVELS } from "#types/confidentiality-levels.types.js";
@@ -13,9 +13,9 @@ import { app } from "#server.js";
 import { LANGUAGES } from "#types/languages.type.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
 import { CreateCatalogThreatRequest } from "#types/catalog-threat.types.js";
-import { CreateGenericThreatRequest } from "#types/genericThreat.types.js";
-import { UpdateChildThreatRequest } from "#types/childThreat.types.js";
-import { CHILD_THREAT_STATUSES } from "#types/child-threat-statuses.types.js";
+import { CreateGenericThreatRequest } from "#types/generic-threat.types.js";
+import { UpdateThreatRequest } from "#types/threat.types.js";
+import { THREAT_STATUSES } from "#types/threat-statuses.types.js";
 
 const VALID_CATALOG_THREAT_1: InstanceType<typeof CreateCatalogThreatRequest> = {
     name: "Catalog Threat 1",
@@ -37,7 +37,7 @@ const VALID_GENERIC_THREAT_1: Omit<InstanceType<typeof CreateGenericThreatReques
 };
 
 // Seed data for direct db inserts; the create endpoint itself only accepts refinement fields.
-const VALID_CHILD_THREAT_1: Omit<CreateChildThreat, "genericThreatId" | "projectId"> = {
+const VALID_THREAT_1: Omit<CreateThreat, "genericThreatId" | "projectId"> = {
     pointOfAttackId: nanoid(),
     name: "Valid child threat 1",
     description: "Valid description test 1",
@@ -47,56 +47,56 @@ const VALID_CHILD_THREAT_1: Omit<CreateChildThreat, "genericThreatId" | "project
     confidentiality: true,
     integrity: true,
     availability: false,
-    status: CHILD_THREAT_STATUSES.NEW,
+    status: THREAT_STATUSES.NEW,
 };
 
-const CREATE_CHILD_THREAT_BODY: InstanceType<typeof UpdateChildThreatRequest> = {
+const CREATE_THREAT_BODY: InstanceType<typeof UpdateThreatRequest> = {
     name: "Refined child threat",
     description: "Refined description",
     probability: 4,
     confidentiality: false,
     integrity: true,
     availability: true,
-    status: CHILD_THREAT_STATUSES.NEW,
+    status: THREAT_STATUSES.NEW,
 };
 
-const VALID_UPDATE_CHILD_THREAT: InstanceType<typeof UpdateChildThreatRequest> = {
+const VALID_UPDATE_THREAT: InstanceType<typeof UpdateThreatRequest> = {
     name: "Valid child threat 2",
     description: "Valid description test 2",
     probability: 3,
     confidentiality: false,
     integrity: false,
     availability: true,
-    status: CHILD_THREAT_STATUSES.IN_PROGRESS,
+    status: THREAT_STATUSES.IN_PROGRESS,
 };
 
-const INVALID_CHILD_THREAT_NAME_MISSING: Omit<InstanceType<typeof UpdateChildThreatRequest>, "name"> = {
+const INVALID_THREAT_NAME_MISSING: Omit<InstanceType<typeof UpdateThreatRequest>, "name"> = {
     description: "Valid description test test",
     probability: 3,
     confidentiality: false,
     integrity: true,
     availability: false,
-    status: CHILD_THREAT_STATUSES.NEW,
+    status: THREAT_STATUSES.NEW,
 };
 
-const INVALID_CHILD_THREAT_PROB_TOO_HIGH: InstanceType<typeof UpdateChildThreatRequest> = {
+const INVALID_THREAT_PROB_TOO_HIGH: InstanceType<typeof UpdateThreatRequest> = {
     name: "Valid child threat",
     description: "Valid description test test",
     probability: 6,
     confidentiality: true,
     integrity: true,
     availability: false,
-    status: CHILD_THREAT_STATUSES.NEW,
+    status: THREAT_STATUSES.NEW,
 };
 
-const INVALID_CHILD_THREAT_PROB_TOO_LOW: InstanceType<typeof UpdateChildThreatRequest> = {
+const INVALID_THREAT_PROB_TOO_LOW: InstanceType<typeof UpdateThreatRequest> = {
     name: "Valid child threat",
     description: "Valid description test test",
     probability: 0,
     confidentiality: true,
     integrity: true,
     availability: false,
-    status: CHILD_THREAT_STATUSES.NEW,
+    status: THREAT_STATUSES.NEW,
 };
 
 let projectId: number;
@@ -170,8 +170,8 @@ beforeEach(async () => {
     ).at(0)!;
     genericThreatId = genericThreat.id;
 
-    await db.insert(childThreats).values({
-        ...VALID_CHILD_THREAT_1,
+    await db.insert(threats).values({
+        ...VALID_THREAT_1,
         genericThreatId,
         projectId,
     });
@@ -203,7 +203,7 @@ describe("get or create threats", () => {
         ).at(0)!;
 
         const res = await request(app)
-            .get(`/api/projects/${projectId}/system/childThreats/${childlessGenericThreat.id}/list`)
+            .get(`/api/projects/${projectId}/system/threats/${childlessGenericThreat.id}/list`)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(200);
@@ -212,16 +212,16 @@ describe("get or create threats", () => {
 
     it("should create a threat inheriting identity from its parent", async () => {
         const res = await request(app)
-            .post(`/api/projects/${projectId}/system/childThreats/${genericThreatId}`)
-            .send(CREATE_CHILD_THREAT_BODY)
+            .post(`/api/projects/${projectId}/system/threats/${genericThreatId}`)
+            .send(CREATE_THREAT_BODY)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(201);
 
-        expect(res.body.name).toBe(CREATE_CHILD_THREAT_BODY.name);
-        expect(res.body.description).toBe(CREATE_CHILD_THREAT_BODY.description);
-        expect(res.body.confidentiality).toBe(CREATE_CHILD_THREAT_BODY.confidentiality);
-        expect(res.body.status).toBe(CREATE_CHILD_THREAT_BODY.status);
+        expect(res.body.name).toBe(CREATE_THREAT_BODY.name);
+        expect(res.body.description).toBe(CREATE_THREAT_BODY.description);
+        expect(res.body.confidentiality).toBe(CREATE_THREAT_BODY.confidentiality);
+        expect(res.body.status).toBe(CREATE_THREAT_BODY.status);
         expect(res.body.genericThreatId).toBe(genericThreatId);
         // Identity comes from the parent generic threat, not the request
         expect(res.body.pointOfAttack).toBe(VALID_GENERIC_THREAT_1.pointOfAttack);
@@ -231,9 +231,9 @@ describe("get or create threats", () => {
 
     it("should ignore client-supplied identity fields on create", async () => {
         const res = await request(app)
-            .post(`/api/projects/${projectId}/system/childThreats/${genericThreatId}`)
+            .post(`/api/projects/${projectId}/system/threats/${genericThreatId}`)
             .send({
-                ...CREATE_CHILD_THREAT_BODY,
+                ...CREATE_THREAT_BODY,
                 pointOfAttackId: "spoofed-poa-id",
                 pointOfAttack: POINTS_OF_ATTACK.DATA_STORAGE_INFRASTRUCTURE,
                 attacker: ATTACKERS.SYSTEM_USERS,
@@ -251,7 +251,7 @@ describe("get or create threats", () => {
 
     it("should create a threat from parent and catalog defaults when the body is empty", async () => {
         const res = await request(app)
-            .post(`/api/projects/${projectId}/system/childThreats/${genericThreatId}`)
+            .post(`/api/projects/${projectId}/system/threats/${genericThreatId}`)
             .send({})
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -268,12 +268,12 @@ describe("get or create threats", () => {
         expect(res.body.confidentiality).toBe(VALID_CATALOG_THREAT_1.confidentiality);
         expect(res.body.integrity).toBe(VALID_CATALOG_THREAT_1.integrity);
         expect(res.body.availability).toBe(VALID_CATALOG_THREAT_1.availability);
-        expect(res.body.status).toBe(CHILD_THREAT_STATUSES.NEW);
+        expect(res.body.status).toBe(THREAT_STATUSES.NEW);
     });
 
     it("should apply partial refinement overrides on top of the defaults", async () => {
         const res = await request(app)
-            .post(`/api/projects/${projectId}/system/childThreats/${genericThreatId}`)
+            .post(`/api/projects/${projectId}/system/threats/${genericThreatId}`)
             .send({ name: "Generic Threat 1 (new)" })
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
@@ -286,8 +286,8 @@ describe("get or create threats", () => {
 
     it("should not create a threat (name present but empty)", async () => {
         const res = await request(app)
-            .post(`/api/projects/${projectId}/system/childThreats/${genericThreatId}`)
-            .send({ ...INVALID_CHILD_THREAT_NAME_MISSING, name: "   " })
+            .post(`/api/projects/${projectId}/system/threats/${genericThreatId}`)
+            .send({ ...INVALID_THREAT_NAME_MISSING, name: "   " })
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(400);
@@ -296,8 +296,8 @@ describe("get or create threats", () => {
 
     it("should not create a threat (probability too high)", async () => {
         const res = await request(app)
-            .post(`/api/projects/${projectId}/system/childThreats/${genericThreatId}`)
-            .send(INVALID_CHILD_THREAT_PROB_TOO_HIGH)
+            .post(`/api/projects/${projectId}/system/threats/${genericThreatId}`)
+            .send(INVALID_THREAT_PROB_TOO_HIGH)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(400);
@@ -306,8 +306,8 @@ describe("get or create threats", () => {
 
     it("should not create a threat (probability too low)", async () => {
         const res = await request(app)
-            .post(`/api/projects/${projectId}/system/childThreats/${genericThreatId}`)
-            .send(INVALID_CHILD_THREAT_PROB_TOO_LOW)
+            .post(`/api/projects/${projectId}/system/threats/${genericThreatId}`)
+            .send(INVALID_THREAT_PROB_TOO_LOW)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(400);
@@ -316,50 +316,50 @@ describe("get or create threats", () => {
 });
 
 describe("get, delete or update a single threat", () => {
-    let childThreatId: number;
+    let threatId: number;
     beforeEach(async () => {
         const threat = (
             await db
-                .insert(childThreats)
+                .insert(threats)
                 .values({
-                    ...VALID_CHILD_THREAT_1,
+                    ...VALID_THREAT_1,
                     genericThreatId,
                     projectId,
                 })
                 .returning()
         ).at(0);
-        childThreatId = threat!.id;
+        threatId = threat!.id;
     });
 
     it("should get a single threat", async () => {
         const res = await request(app)
-            .get(`/api/projects/${projectId}/system/childThreats/${childThreatId}`)
+            .get(`/api/projects/${projectId}/system/threats/${threatId}`)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(200);
-        expect(res.body.name).toBe(VALID_CHILD_THREAT_1.name);
+        expect(res.body.name).toBe(VALID_THREAT_1.name);
     });
 
     it("should update a threat", async () => {
         const res = await request(app)
-            .put("/api/projects/" + projectId + "/system/childThreats/" + childThreatId)
-            .send(VALID_UPDATE_CHILD_THREAT)
+            .put("/api/projects/" + projectId + "/system/threats/" + threatId)
+            .send(VALID_UPDATE_THREAT)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(200);
-        expect(res.body.name).toBe(VALID_UPDATE_CHILD_THREAT.name);
-        expect(res.body.description).toBe(VALID_UPDATE_CHILD_THREAT.description);
-        expect(res.body.attacker).toBe(VALID_CHILD_THREAT_1.attacker);
-        expect(res.body.pointOfAttack).toBe(VALID_CHILD_THREAT_1.pointOfAttack);
-        expect(res.body.probability).toBe(VALID_UPDATE_CHILD_THREAT.probability);
-        expect(res.body.status).toBe(VALID_UPDATE_CHILD_THREAT.status);
+        expect(res.body.name).toBe(VALID_UPDATE_THREAT.name);
+        expect(res.body.description).toBe(VALID_UPDATE_THREAT.description);
+        expect(res.body.attacker).toBe(VALID_THREAT_1.attacker);
+        expect(res.body.pointOfAttack).toBe(VALID_THREAT_1.pointOfAttack);
+        expect(res.body.probability).toBe(VALID_UPDATE_THREAT.probability);
+        expect(res.body.status).toBe(VALID_UPDATE_THREAT.status);
     });
 
     it("should ignore client-supplied identity fields on update", async () => {
         const res = await request(app)
-            .put("/api/projects/" + projectId + "/system/childThreats/" + childThreatId)
+            .put("/api/projects/" + projectId + "/system/threats/" + threatId)
             .send({
-                ...VALID_UPDATE_CHILD_THREAT,
+                ...VALID_UPDATE_THREAT,
                 pointOfAttackId: "spoofed-poa-id",
                 pointOfAttack: POINTS_OF_ATTACK.DATA_STORAGE_INFRASTRUCTURE,
                 attacker: ATTACKERS.SYSTEM_USERS,
@@ -369,16 +369,16 @@ describe("get, delete or update a single threat", () => {
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(200);
 
-        expect(res.body.name).toBe(VALID_UPDATE_CHILD_THREAT.name);
+        expect(res.body.name).toBe(VALID_UPDATE_THREAT.name);
         expect(res.body.genericThreatId).toBe(genericThreatId);
-        expect(res.body.pointOfAttack).toBe(VALID_CHILD_THREAT_1.pointOfAttack);
-        expect(res.body.pointOfAttackId).toBe(VALID_CHILD_THREAT_1.pointOfAttackId);
-        expect(res.body.attacker).toBe(VALID_CHILD_THREAT_1.attacker);
+        expect(res.body.pointOfAttack).toBe(VALID_THREAT_1.pointOfAttack);
+        expect(res.body.pointOfAttackId).toBe(VALID_THREAT_1.pointOfAttackId);
+        expect(res.body.attacker).toBe(VALID_THREAT_1.attacker);
     });
 
     it("should delete a threat", async () => {
         const res = await request(app)
-            .delete("/api/projects/" + projectId + "/system/childThreats/" + childThreatId)
+            .delete("/api/projects/" + projectId + "/system/threats/" + threatId)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(204);

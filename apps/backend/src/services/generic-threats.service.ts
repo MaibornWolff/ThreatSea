@@ -5,7 +5,7 @@
 import { and, eq, getTableColumns } from "drizzle-orm";
 import { db, TransactionType } from "#db/index.js";
 import { genericThreats, GenericThreat, CreateGenericThreat, UpdateGenericThreat } from "#db/schema.js";
-import { GenericThreatWithExtendedChildrenResponse } from "#types/genericThreat.types.js";
+import { GenericThreatWithExtendedChildrenResponse } from "#types/generic-threat.types.js";
 import { getPointsOfAttack } from "#services/points-of-attack.service.js";
 import { POINTS_OF_ATTACK } from "#types/points-of-attack.types.js";
 
@@ -48,7 +48,7 @@ export async function getGenericThreatsWithExtendedChildren(
     const genericThreatsWithExtendedChildren = await db.query.genericThreats.findMany({
         where: eq(genericThreats.projectId, projectId),
         with: {
-            childThreats: true,
+            threats: true,
         },
     });
 
@@ -56,18 +56,18 @@ export async function getGenericThreatsWithExtendedChildren(
     const pointsOfAttackById = new Map(pointsOfAttack.map((pointOfAttack) => [pointOfAttack.id, pointOfAttack]));
 
     return genericThreatsWithExtendedChildren
-        .filter((genericThreat) => genericThreat.childThreats.length > 0)
-        .map(({ childThreats, ...genericThreat }) => ({
+        .filter((genericThreat) => genericThreat.threats.length > 0)
+        .map(({ threats, ...genericThreat }) => ({
             ...genericThreat,
-            children: childThreats.map((childThreat) => {
-                const pointOfAttack = pointsOfAttackById.get(childThreat.pointOfAttackId);
+            children: threats.map((threat) => {
+                const pointOfAttack = pointsOfAttackById.get(threat.pointOfAttackId);
                 const interfaceName =
                     pointOfAttack?.type === POINTS_OF_ATTACK.COMMUNICATION_INTERFACES
                         ? (pointOfAttack.name ?? null)
                         : null;
 
                 return {
-                    ...childThreat,
+                    ...threat,
                     componentName: pointOfAttack?.componentName ?? null,
                     componentType: pointOfAttack?.componentType ?? null,
                     interfaceName,

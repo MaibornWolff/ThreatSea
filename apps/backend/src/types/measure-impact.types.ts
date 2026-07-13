@@ -55,9 +55,9 @@ export class CreateMeasureImpactRequest extends UpdateMeasureImpactRequest {
     @IsInt({ message: FIELD_MUST_BE_INT_MESSAGE("measureId") })
     measureId!: number;
 
-    @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("childThreatId") })
-    @IsInt({ message: FIELD_MUST_BE_INT_MESSAGE("childThreatId") })
-    childThreatId!: number;
+    @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("threatId") })
+    @IsInt({ message: FIELD_MUST_BE_INT_MESSAGE("threatId") })
+    threatId!: number;
 }
 
 export interface MeasureImpactResponse extends CreateMeasureImpactRequest {
@@ -66,10 +66,10 @@ export interface MeasureImpactResponse extends CreateMeasureImpactRequest {
     updatedAt: string;
 }
 
-export interface ChildThreatMeasureImpactResponse extends UpdateMeasureImpactRequest {
+export interface ThreatMeasureImpactResponse extends UpdateMeasureImpactRequest {
     id: number;
     measureId: number;
-    childThreatId: number;
+    threatId: number;
     createdAt: string;
     updatedAt: string;
 }

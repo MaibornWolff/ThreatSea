@@ -3,7 +3,7 @@
  * for each project.
  */
 import express from "express";
-import { getGenericThreatsWithExtendedChildren } from "#controllers/genericThreats.controller.js";
+import { getGenericThreatsWithExtendedChildren } from "#controllers/generic-threats.controller.js";
 import { CheckProjectRoleHandler } from "#guards/authorisation.guard.js";
 import { ValidateParamHandler } from "#middlewares/input-validations/input-validation.middleware.js";
 import { ProjectIdParam } from "#types/project.types.js";
