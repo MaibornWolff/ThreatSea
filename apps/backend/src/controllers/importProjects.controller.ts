@@ -31,6 +31,7 @@ import { createComponentType } from "#services/component-types.service.js";
 import { createGenericThreat } from "#services/generic-threats.service.js";
 import { createThreat } from "#services/threats.service.js";
 import { createMeasureImpact } from "#services/measureImpacts.service.js";
+import { upgradeImportBodyToCurrent } from "#controllers/import-migrations.js";
 import { createMeasure } from "#services/measures.service.js";
 import { createEmptySystem, updateSystem } from "#services/system.service.js";
 import { BadRequestError } from "#errors/bad-request.error.js";
@@ -58,6 +59,9 @@ export async function importProject(request: Request<void>, response: Response, 
         await db.transaction(async (tx) => {
             const { body, user } = request;
             const oldProject = body.project as Project;
+
+            // Upgrade older export shapes (e.g. v3 flat threats) to the current data model in place.
+            upgradeImportBodyToCurrent(body);
 
             if (body.datamodelVersion !== DATAMODEL_VERSION) {
                 next(new BadRequestError("Invalid data model version"));

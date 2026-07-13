@@ -217,3 +217,62 @@ describe("import/export round-trip fidelity", () => {
         expect(resolveImpactLinks(second)).toEqual(resolveImpactLinks(first));
     });
 });
+
+describe("import upgrades legacy exports", () => {
+    it("imports a v3 flat-threat export by rebuilding generic + child threats", async () => {
+        const NAME = "legacy-v3-source";
+
+        // Down-convert the current fixture to the old flat shape the shim must accept: a single
+        // `threats` array carrying catalogThreatId + doneEditing, and no `genericThreats`.
+        const genericById = new Map(VALID_TEST_PROJECT.genericThreats.map((g) => [g.id, g]));
+        const flatThreats = VALID_TEST_PROJECT.threats.map((t) => ({
+            id: t.id,
+            pointOfAttackId: t.pointOfAttackId,
+            name: t.name,
+            description: t.description,
+            pointOfAttack: t.pointOfAttack,
+            attacker: t.attacker,
+            probability: t.probability,
+            confidentiality: t.confidentiality,
+            integrity: t.integrity,
+            availability: t.availability,
+            doneEditing: t.status === "finalized",
+            catalogThreatId: genericById.get(t.genericThreatId)!.catalogThreatId,
+            projectId: t.projectId,
+        }));
+
+        const body = structuredClone(VALID_TEST_PROJECT) as unknown as {
+            datamodelVersion: number;
+            project: { name: string };
+            threats: unknown;
+            genericThreats?: unknown;
+        };
+        body.datamodelVersion = 3;
+        body.threats = flatThreats;
+        delete body.genericThreats;
+        body.project.name = NAME;
+
+        await importProject(body as unknown as ExportBody);
+
+        const project = await db.query.projects.findFirst({ where: eq(projects.name, NAME) });
+        expect(project).toBeTruthy();
+
+        const dbGenerics = await db.query.genericThreats.findMany({
+            where: eq(genericThreats.projectId, project!.id),
+        });
+        const dbChildren = await db.query.threats.findMany({ where: eq(threats.projectId, project!.id) });
+        // One generic per (catalogThreatId, pointOfAttackId); one child per flat threat.
+        expect(dbGenerics).toHaveLength(VALID_TEST_PROJECT.genericThreats.length);
+        expect(dbChildren).toHaveLength(VALID_TEST_PROJECT.threats.length);
+        expect(new Set(dbChildren.map((c) => c.genericThreatId))).toEqual(new Set(dbGenerics.map((g) => g.id)));
+
+        const exp = await exportByName(NAME);
+        const child = exp.threats[0]!;
+        expect(child.name).toBe("Test");
+        expect(child.status).toBe("new"); // derived from doneEditing = false
+        expect(exp.genericThreats.some((g) => g.id === child.genericThreatId)).toBe(true);
+        // The measure impact still links through the flat -> child id mapping.
+        expect(exp.measureImpacts).toHaveLength(1);
+        expect(exp.threats.some((c) => c.id === exp.measureImpacts[0]!.threatId)).toBe(true);
+    });
+});
