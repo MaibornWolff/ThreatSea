@@ -2,6 +2,7 @@ import { memo, useRef } from "react";
 import { Circle, Line } from "react-konva";
 import type { KonvaEventObject } from "konva/lib/Node";
 import type { Line as KonvaLineNode } from "konva/lib/shapes/Line";
+import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import { moveSegment, moveVertex, deleteVertex, cursorForSegment } from "#utils/connection-waypoints.ts";
 
 interface ConnectionEditHandlesProps {
@@ -83,7 +84,7 @@ function waypointsEqual(a: number[], b: number[]): boolean {
  * - Segment hit-lines are always rendered so the connection can be dragged without being
  *   selected; a plain click on one forwards to `onSelect`, and pointer enter/leave forwards
  *   to `onHoverChange` so the connection keeps its hover highlight.
- * - Vertex circles render only when `selected` is true.
+ * - Vertex circles render only when the connection is selected and the editor is not capturing an image.
  * - Segment drag: imperatively mutates a preview Line during drag; calls onCommit on drag end.
  * - Vertex double-click: calls onCommit with the vertex deleted.
  * - Terminal vertices (index 0 and N-1) are not draggable.
@@ -98,6 +99,9 @@ function ConnectionEditHandlesInner({
 }: ConnectionEditHandlesProps) {
     const pointCount = waypoints.length / 2;
     const segmentCount = pointCount - 1;
+
+    const isCapturing = useAppSelector((state) => state.editor.isCapturing);
+    const visualSelected = selected && !isCapturing;
 
     // Refs to the preview Line nodes for each segment (for imperative batchDraw updates)
     const segmentRefs = useRef<(KonvaLineNode | null)[]>([]);
@@ -270,8 +274,8 @@ function ConnectionEditHandlesInner({
                 );
             })}
 
-            {/* Vertex circles — only while the connection is selected */}
-            {selected &&
+            {/* Vertex circles — only while the connection is selected and not capturing */}
+            {visualSelected &&
                 Array.from({ length: pointCount }, (_, pointIndex) => {
                     const x = waypoints[pointIndex * 2]!;
                     const y = waypoints[pointIndex * 2 + 1]!;

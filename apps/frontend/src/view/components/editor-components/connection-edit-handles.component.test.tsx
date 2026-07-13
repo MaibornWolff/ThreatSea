@@ -1,6 +1,10 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { screen, fireEvent } from "@testing-library/react";
+import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { moveSegment, deleteVertex } from "#utils/connection-waypoints.ts";
+import editorReducer from "#application/reducers/editor.reducer.ts";
 import { ConnectionEditHandles } from "./connection-edit-handles.component";
+
+const defaultEditorState = editorReducer(undefined, { type: "@@INIT" });
 
 // 3-point path: [0,0, 0,40, 40,40]
 // N=3 points → 2 segments, 3 circles
@@ -10,7 +14,7 @@ const CONNECTION_ID = "conn-1";
 describe("ConnectionEditHandles", () => {
     it("renders N-1 segment hit-lines and N vertex circles for an N-point path", () => {
         const onCommit = vi.fn();
-        render(
+        renderWithProviders(
             <ConnectionEditHandles
                 connectionId={CONNECTION_ID}
                 waypoints={WAYPOINTS}
@@ -30,7 +34,7 @@ describe("ConnectionEditHandles", () => {
 
     it("terminal circles are not draggable, interior circles are draggable", () => {
         const onCommit = vi.fn();
-        render(
+        renderWithProviders(
             <ConnectionEditHandles
                 connectionId={CONNECTION_ID}
                 waypoints={WAYPOINTS}
@@ -50,7 +54,7 @@ describe("ConnectionEditHandles", () => {
 
     it("interior circle onDblClick calls onCommit with deleteVertex result", () => {
         const onCommit = vi.fn();
-        render(
+        renderWithProviders(
             <ConnectionEditHandles
                 connectionId={CONNECTION_ID}
                 waypoints={WAYPOINTS}
@@ -70,7 +74,7 @@ describe("ConnectionEditHandles", () => {
 
     it("segment onDragEnd calls onCommit with moveSegment result; onDragMove does NOT call onCommit", () => {
         const onCommit = vi.fn();
-        render(
+        renderWithProviders(
             <ConnectionEditHandles
                 connectionId={CONNECTION_ID}
                 waypoints={WAYPOINTS}
@@ -122,7 +126,7 @@ describe("ConnectionEditHandles", () => {
 
     it("preserves the drag offset through onDragMove so onDragEnd commits the moved path", () => {
         const onCommit = vi.fn();
-        render(
+        renderWithProviders(
             <ConnectionEditHandles
                 connectionId={CONNECTION_ID}
                 waypoints={WAYPOINTS}
@@ -168,7 +172,7 @@ describe("ConnectionEditHandles", () => {
 
     it("interior circle onDragEnd calls onCommit with moveVertex result", () => {
         const onCommit = vi.fn();
-        render(
+        renderWithProviders(
             <ConnectionEditHandles
                 connectionId={CONNECTION_ID}
                 waypoints={WAYPOINTS}
@@ -209,7 +213,7 @@ describe("ConnectionEditHandles", () => {
     });
 
     it("hides vertex circles when not selected but still renders segment hit-lines", () => {
-        render(
+        renderWithProviders(
             <ConnectionEditHandles
                 connectionId={CONNECTION_ID}
                 waypoints={WAYPOINTS}
@@ -225,9 +229,43 @@ describe("ConnectionEditHandles", () => {
         expect(screen.queryAllByTestId("konva-circle")).toHaveLength(0);
     });
 
+    it("hides vertex circles during image capture even when selected", () => {
+        renderWithProviders(
+            <ConnectionEditHandles
+                connectionId={CONNECTION_ID}
+                waypoints={WAYPOINTS}
+                onCommit={vi.fn()}
+                selected={true}
+                onSelect={vi.fn()}
+            />,
+            { preloadedState: { editor: { ...defaultEditorState, isCapturing: true } } }
+        );
+
+        // Segment hit-lines still render — they are transparent, so harmless in a capture.
+        expect(screen.getAllByTestId("konva-line")).toHaveLength(2);
+        // Vertex handles must not bake into the thumbnail.
+        expect(screen.queryAllByTestId("konva-circle")).toHaveLength(0);
+    });
+
+    it("renders vertex circles when selected and not capturing", () => {
+        renderWithProviders(
+            <ConnectionEditHandles
+                connectionId={CONNECTION_ID}
+                waypoints={WAYPOINTS}
+                onCommit={vi.fn()}
+                selected={true}
+                onSelect={vi.fn()}
+            />,
+            { preloadedState: { editor: { ...defaultEditorState, isCapturing: false } } }
+        );
+
+        // 3-point path → 3 vertex handles when selected outside a capture.
+        expect(screen.getAllByTestId("konva-circle")).toHaveLength(3);
+    });
+
     it("clicking a segment hit-line calls onSelect", () => {
         const onSelect = vi.fn();
-        render(
+        renderWithProviders(
             <ConnectionEditHandles
                 connectionId={CONNECTION_ID}
                 waypoints={WAYPOINTS}
@@ -244,7 +282,7 @@ describe("ConnectionEditHandles", () => {
     });
 
     it("renders segment hit-lines with a drag-distance threshold so small drifts stay clicks", () => {
-        render(
+        renderWithProviders(
             <ConnectionEditHandles
                 connectionId={CONNECTION_ID}
                 waypoints={WAYPOINTS}
@@ -261,7 +299,7 @@ describe("ConnectionEditHandles", () => {
 
     it("does NOT call onCommit when a segment drag leaves the path unchanged", () => {
         const onCommit = vi.fn();
-        render(
+        renderWithProviders(
             <ConnectionEditHandles
                 connectionId={CONNECTION_ID}
                 waypoints={WAYPOINTS}
@@ -288,7 +326,7 @@ describe("ConnectionEditHandles", () => {
 
     it("does NOT call onCommit when an interior vertex is dropped on its own position", () => {
         const onCommit = vi.fn();
-        render(
+        renderWithProviders(
             <ConnectionEditHandles
                 connectionId={CONNECTION_ID}
                 waypoints={WAYPOINTS}
