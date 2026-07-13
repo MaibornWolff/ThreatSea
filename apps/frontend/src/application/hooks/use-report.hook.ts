@@ -150,22 +150,33 @@ export const useReport = ({ projectId }: { projectId: number }) => {
         if (!fromScheduledAt && !tillScheduledAt) {
             return threats;
         }
-        const from = fromScheduledAt ? new Date(fromScheduledAt) : null;
-        const till = tillScheduledAt ? new Date(tillScheduledAt) : null;
+        const fromDay = fromScheduledAt ? toDayNumber(new Date(fromScheduledAt)) : null;
+        const tillDay = tillScheduledAt ? toDayNumber(new Date(tillScheduledAt)) : null;
         return threats.map((threat) => {
+            const filteredMeasures = threat.measures.filter((measure) => {
+                const scheduledAtTime = measure.scheduledAt ? toDayNumber(new Date(measure.scheduledAt)) : NaN;
+                if (Number.isNaN(scheduledAtTime)) {
+                    return false;
+                }
+                if (fromDay !== null && fromDay > scheduledAtTime) {
+                    return false;
+                }
+                if (tillDay !== null && tillDay < scheduledAtTime) {
+                    return false;
+                }
+                return true;
+            });
+            const { netProbability, netDamage, netRisk } = calcNetRisk(
+                threat.probability,
+                threat.damage,
+                filteredMeasures
+            );
             return {
                 ...threat,
-                measures: threat.measures.filter((measure) => {
-                    let result = true;
-                    const scheduledAtTime = measure.scheduledAt ? toDayNumber(new Date(measure.scheduledAt)) : NaN;
-                    if (from && toDayNumber(from) > scheduledAtTime) {
-                        result = false;
-                    }
-                    if (till && toDayNumber(till) < scheduledAtTime) {
-                        result = false;
-                    }
-                    return result;
-                }),
+                measures: filteredMeasures,
+                netProbability,
+                netDamage,
+                netRisk,
             };
         });
     }, [threats, fromScheduledAt, tillScheduledAt]);
@@ -211,15 +222,17 @@ export const useReport = ({ projectId }: { projectId: number }) => {
         const from = fromScheduledAt ? toDayNumber(new Date(fromScheduledAt)) : null;
         const till = tillScheduledAt ? toDayNumber(new Date(tillScheduledAt)) : null;
         return measures.filter((measure) => {
-            let result = true;
             const scheduledAt = measure.scheduledAt ? toDayNumber(new Date(measure.scheduledAt)) : NaN;
-            if (from && from > scheduledAt) {
-                result = false;
+            if (Number.isNaN(scheduledAt)) {
+                return false;
             }
-            if (till && till < scheduledAt) {
-                result = false;
+            if (from !== null && from > scheduledAt) {
+                return false;
             }
-            return result;
+            if (till !== null && till < scheduledAt) {
+                return false;
+            }
+            return true;
         });
     }, [measures, fromScheduledAt, tillScheduledAt]);
 
