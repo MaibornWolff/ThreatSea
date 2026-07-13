@@ -5,7 +5,7 @@ import * as alertHook from "#application/hooks/use-alert.hook.ts";
 import * as editorHook from "#application/hooks/use-editor.hook.ts";
 import * as assetsHook from "#application/hooks/use-assets.hook.ts";
 import * as threatMeasuresListHook from "#application/hooks/use-threat-measures-list.hook.ts";
-import * as childThreatsHook from "#application/hooks/use-child-threats.hook.ts";
+import * as threatsHook from "#application/hooks/use-threats.hook.ts";
 import * as measuresHook from "#application/hooks/use-measures.hook.ts";
 import * as measureImpactsHook from "#application/hooks/use-measureImpacts.hook.ts";
 import * as catalogMeasuresHook from "#application/hooks/use-catalog-measures.hook.ts";
@@ -30,7 +30,7 @@ type UseAlertResult = ReturnType<typeof alertHook.useAlert>;
 type UseEditorResult = ReturnType<typeof editorHook.useEditor>;
 type UseAssetsResult = ReturnType<typeof assetsHook.useAssets>;
 type UseThreatMeasuresListResult = ReturnType<typeof threatMeasuresListHook.useThreatMeasuresList>;
-type UseChildThreatsResult = ReturnType<typeof childThreatsHook.useChildThreats>;
+type UseThreatsResult = ReturnType<typeof threatsHook.useThreats>;
 type UseMeasuresResult = ReturnType<typeof measuresHook.useMeasures>;
 type UseMeasureImpactsResult = ReturnType<typeof measureImpactsHook.useMeasureImpacts>;
 type UseCatalogMeasuresResult = ReturnType<typeof catalogMeasuresHook.useCatalogMeasures>;
@@ -178,11 +178,11 @@ export const mockUseThreatMeasuresList = (config?: Partial<UseThreatMeasuresList
     }));
 };
 
-export const mockUseChildThreats = (config?: Partial<UseChildThreatsResult>): MockInstance => {
-    return vi.spyOn(childThreatsHook, "useChildThreats").mockImplementation(() => ({
+export const mockUseThreats = (config?: Partial<UseThreatsResult>): MockInstance => {
+    return vi.spyOn(threatsHook, "useThreats").mockImplementation(() => ({
         items: [],
         isPending: false,
-        loadChildThreats: vi.fn(),
+        loadThreats: vi.fn(),
         ...config,
     }));
 };

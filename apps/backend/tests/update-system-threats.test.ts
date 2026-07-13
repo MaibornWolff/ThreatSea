@@ -8,7 +8,7 @@ import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import { nanoid } from "nanoid";
 import { db } from "#db/index.js";
-import { catalogs, childThreats, usersCatalogs } from "#db/schema.js";
+import { catalogs, threats, usersCatalogs } from "#db/schema.js";
 import { app } from "#server.js";
 import { eq } from "drizzle-orm";
 import { LANGUAGES } from "#types/languages.type.js";
@@ -18,8 +18,8 @@ import { ATTACKERS } from "#types/attackers.types.js";
 import { CONFIDENTIALITY_LEVELS } from "#types/confidentiality-levels.types.js";
 import type { PointOfAttack, SystemData } from "#types/system.types.js";
 import { updateSystem } from "#services/updateSystem.service.js";
-import { getGenericThreatsByProjectId } from "#services/genericThreats.service.js";
-import { getChildThreatsByGenericThreatId } from "#services/childThreats.service.js";
+import { getGenericThreatsByProjectId } from "#services/generic-threats.service.js";
+import { getThreatsByGenericThreatId } from "#services/threats.service.js";
 
 const POA_TYPE = POINTS_OF_ATTACK.COMMUNICATION_INTERFACES;
 
@@ -106,7 +106,7 @@ describe("updateSystem parent/child threat generation", () => {
         expect(generics).toHaveLength(1);
         expect(generics[0]!.pointOfAttackId).toBe(poaId);
 
-        const children = await getChildThreatsByGenericThreatId(generics[0]!.id);
+        const children = await getThreatsByGenericThreatId(generics[0]!.id);
         expect(children).toEqual([]);
     });
 
@@ -118,7 +118,7 @@ describe("updateSystem parent/child threat generation", () => {
         const generics = await getGenericThreatsByProjectId(projectId);
         expect(generics).toHaveLength(1);
 
-        const children = await getChildThreatsByGenericThreatId(generics[0]!.id);
+        const children = await getThreatsByGenericThreatId(generics[0]!.id);
         expect(children).toHaveLength(1);
         expect(children[0]!.pointOfAttackId).toBe(poaId);
         expect(children[0]!.name).toBe(generics[0]!.name);
@@ -132,7 +132,7 @@ describe("updateSystem parent/child threat generation", () => {
         await saveSystem([makePoA(poaId, [1])]);
 
         const generics = await getGenericThreatsByProjectId(projectId);
-        const children = await getChildThreatsByGenericThreatId(generics[0]!.id);
+        const children = await getThreatsByGenericThreatId(generics[0]!.id);
         expect(children).toHaveLength(1);
     });
 
@@ -142,12 +142,12 @@ describe("updateSystem parent/child threat generation", () => {
         await saveSystem([makePoA(poaId, [1])]);
 
         // Simulate a point of attack that still has assets but ended up with zero children.
-        await db.delete(childThreats).where(eq(childThreats.projectId, projectId));
+        await db.delete(threats).where(eq(threats.projectId, projectId));
 
         await saveSystem([makePoA(poaId, [1])]);
 
         const generics = await getGenericThreatsByProjectId(projectId);
-        const children = await getChildThreatsByGenericThreatId(generics[0]!.id);
+        const children = await getThreatsByGenericThreatId(generics[0]!.id);
         expect(children).toHaveLength(1);
     });
 
@@ -159,8 +159,8 @@ describe("updateSystem parent/child threat generation", () => {
         await saveSystem([]);
 
         expect(await getGenericThreatsByProjectId(projectId)).toEqual([]);
-        const remainingChildren = await db.query.childThreats.findMany({
-            where: eq(childThreats.projectId, projectId),
+        const remainingChildren = await db.query.threats.findMany({
+            where: eq(threats.projectId, projectId),
         });
         expect(remainingChildren).toEqual([]);
     });

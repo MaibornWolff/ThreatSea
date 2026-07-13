@@ -1,6 +1,6 @@
 export interface CreateMeasureImpactRequest {
     measureId: number;
-    childThreatId: number;
+    threatId: number;
     description: string;
     setsOutOfScope: boolean;
     impactsProbability: boolean;
@@ -10,7 +10,7 @@ export interface CreateMeasureImpactRequest {
     projectId: number;
 }
 
-export type UpdateMeasureImpactRequest = Partial<Omit<CreateMeasureImpactRequest, "measureId" | "childThreatId">> & {
+export type UpdateMeasureImpactRequest = Partial<Omit<CreateMeasureImpactRequest, "measureId" | "threatId">> & {
     id: number;
     projectId: number;
 };
@@ -18,7 +18,7 @@ export type UpdateMeasureImpactRequest = Partial<Omit<CreateMeasureImpactRequest
 export interface MeasureImpact {
     id: number;
     measureId: number;
-    childThreatId: number;
+    threatId: number;
     description: string;
     setsOutOfScope: boolean;
     impactsProbability: boolean;

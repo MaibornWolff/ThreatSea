@@ -7,7 +7,7 @@ import {
     catalogThreats,
     componentTypes,
     genericThreats,
-    childThreats,
+    threats,
     measureImpacts,
     measures,
     systems,
@@ -33,7 +33,7 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
     }),
     systems: one(systems),
     genericThreats: many(genericThreats),
-    childThreats: many(childThreats),
+    threats: many(threats),
     usersProjects: many(usersProjects),
 }));
 
@@ -69,16 +69,16 @@ export const genericThreatsRelations = relations(genericThreats, ({ one, many })
         fields: [genericThreats.projectId],
         references: [projects.id],
     }),
-    childThreats: many(childThreats),
+    threats: many(threats),
 }));
 
-export const childThreatsRelations = relations(childThreats, ({ one, many }) => ({
+export const threatsRelations = relations(threats, ({ one, many }) => ({
     genericThreat: one(genericThreats, {
-        fields: [childThreats.genericThreatId],
+        fields: [threats.genericThreatId],
         references: [genericThreats.id],
     }),
     project: one(projects, {
-        fields: [childThreats.projectId],
+        fields: [threats.projectId],
         references: [projects.id],
     }),
     measureImpacts: many(measureImpacts),
@@ -92,9 +92,9 @@ export const componentTypesRelations = relations(componentTypes, ({ one }) => ({
 }));
 
 export const measureImpactsRelations = relations(measureImpacts, ({ one }) => ({
-    childThreat: one(childThreats, {
-        fields: [measureImpacts.childThreatId],
-        references: [childThreats.id],
+    threat: one(threats, {
+        fields: [measureImpacts.threatId],
+        references: [threats.id],
     }),
     measure: one(measures, {
         fields: [measureImpacts.measureId],

@@ -12,8 +12,8 @@ import {
     CreateCatalog,
     CreateCatalogMeasure,
     CreateCatalogThreat,
-    CreateChildThreat,
-    ChildThreat,
+    CreateThreat,
+    Threat,
     CreateGenericThreat,
     GenericThreat,
     CreateProject,
@@ -28,14 +28,14 @@ import { createCustomCatalog, getCatalogsByUserId } from "#services/catalogs.ser
 import { getCatalogThreatsByCatalogId } from "#services/catalog-threats.service.js";
 import { getCatalogMeasuresByCatalogId } from "#services/catalog-measures.service.js";
 import { createComponentType } from "#services/component-types.service.js";
-import { createGenericThreat } from "#services/genericThreats.service.js";
-import { createChildThreat } from "#services/childThreats.service.js";
+import { createGenericThreat } from "#services/generic-threats.service.js";
+import { createThreat } from "#services/threats.service.js";
 import { createMeasureImpact } from "#services/measureImpacts.service.js";
 import { createMeasure } from "#services/measures.service.js";
 import { createEmptySystem, updateSystem } from "#services/system.service.js";
 import { BadRequestError } from "#errors/bad-request.error.js";
 import { Logger } from "#logging/index.js";
-import { CHILD_THREAT_STATUSES } from "#types/child-threat-statuses.types.js";
+import { THREAT_STATUSES } from "#types/threat-statuses.types.js";
 
 /**
  * Imports the specified project and all associated data.
@@ -48,7 +48,7 @@ export async function importProject(request: Request<void>, response: Response, 
     Logger.debug("call import project");
 
     const genericThreatIdsDict = new Map<number, number>();
-    const childThreatIdsDict = new Map<number, number>();
+    const threatIdsDict = new Map<number, number>();
     const measureIdsDict = new Map<number, number>();
     const assetsIdsDict = new Map<number, number>();
     const catalogThreatsDict = new Map<number, number>();
@@ -226,30 +226,30 @@ export async function importProject(request: Request<void>, response: Response, 
             }
             Logger.debug("imported generic threats");
 
-            for (const oldChildThreat of body.childThreats as ChildThreat[]) {
-                oldChildThreat.projectId = newProjectId;
-                oldChildThreat.genericThreatId = genericThreatIdsDict.get(oldChildThreat.genericThreatId)!;
+            for (const oldThreat of body.threats as Threat[]) {
+                oldThreat.projectId = newProjectId;
+                oldThreat.genericThreatId = genericThreatIdsDict.get(oldThreat.genericThreatId)!;
 
-                const oldChildThreatId = oldChildThreat.id;
-                const trimmedChildThreat = removeAttributesFromObject(oldChildThreat, [
+                const oldThreatId = oldThreat.id;
+                const trimmedThreat = removeAttributesFromObject(oldThreat, [
                     "id",
                     "createdAt",
                     "updatedAt",
-                ]) as CreateChildThreat;
+                ]) as CreateThreat;
 
-                trimmedChildThreat.projectId = newProjectId;
-                if (trimmedChildThreat.status === undefined || trimmedChildThreat.status === null) {
-                    trimmedChildThreat.status = CHILD_THREAT_STATUSES.NEW;
+                trimmedThreat.projectId = newProjectId;
+                if (trimmedThreat.status === undefined || trimmedThreat.status === null) {
+                    trimmedThreat.status = THREAT_STATUSES.NEW;
                 }
 
-                const createdChildThreat = await createChildThreat(trimmedChildThreat, tx);
+                const createdThreat = await createThreat(trimmedThreat, tx);
 
-                childThreatIdsDict.set(oldChildThreatId, createdChildThreat.id);
+                threatIdsDict.set(oldThreatId, createdThreat.id);
             }
             Logger.debug("imported child threats");
 
             for (const oldMeasureImpact of body.measureImpacts as MeasureImpact[]) {
-                oldMeasureImpact.childThreatId = childThreatIdsDict.get(oldMeasureImpact.childThreatId)!;
+                oldMeasureImpact.threatId = threatIdsDict.get(oldMeasureImpact.threatId)!;
                 oldMeasureImpact.measureId = measureIdsDict.get(oldMeasureImpact.measureId)!;
 
                 const { id: _id, ...insertMeasureImpact } = oldMeasureImpact;

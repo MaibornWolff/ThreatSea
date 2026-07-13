@@ -1,20 +1,20 @@
 import { useEffect, useMemo } from "react";
 import type { Measure } from "#api/types/measure.types.ts";
-import type { ExtendedChildThreat } from "#api/types/child-threat.types.ts";
-import { useChildThreats } from "./use-child-threats.hook";
+import type { ExtendedThreat } from "#api/types/threat.types.ts";
+import { useThreats } from "./use-threats.hook";
 import { useCatalogMeasures } from "./use-catalog-measures.hook";
 import { useMeasureImpacts } from "./use-measureImpacts.hook";
 import { useMeasures } from "./use-measures.hook";
 import type { CatalogMeasure } from "#api/types/catalog-measure.types.ts";
 
 interface UseMeasureSuggestionsArgs {
-    selectedThreat: ExtendedChildThreat;
+    selectedThreat: ExtendedThreat;
     projectId: number;
     catalogId: number;
 }
 
 export const useMeasureSuggestions = ({ selectedThreat, projectId, catalogId }: UseMeasureSuggestionsArgs) => {
-    const { items: threats, loadChildThreats } = useChildThreats({
+    const { items: threats, loadThreats } = useThreats({
         projectId,
     });
     const { items: measures, loadMeasures } = useMeasures({ projectId });
@@ -29,7 +29,7 @@ export const useMeasureSuggestions = ({ selectedThreat, projectId, catalogId }: 
         () =>
             measures.filter((measure) => {
                 return measureImpacts.some((measureImpact) => {
-                    return measureImpact.measureId === measure.id && measureImpact.childThreatId === selectedThreat.id;
+                    return measureImpact.measureId === measure.id && measureImpact.threatId === selectedThreat.id;
                 });
             }),
         [selectedThreat, measures, measureImpacts]
@@ -46,7 +46,7 @@ export const useMeasureSuggestions = ({ selectedThreat, projectId, catalogId }: 
                         measureImpact.measureId === measure.id &&
                         threats.some((threat) => {
                             return (
-                                measureImpact.childThreatId === threat.id &&
+                                measureImpact.threatId === threat.id &&
                                 threat.attacker === selectedThreat.attacker &&
                                 threat.pointOfAttack === selectedThreat.pointOfAttack
                             );
@@ -92,8 +92,8 @@ export const useMeasureSuggestions = ({ selectedThreat, projectId, catalogId }: 
     );
 
     useEffect(() => {
-        loadChildThreats();
-    }, [projectId, loadChildThreats]);
+        loadThreats();
+    }, [projectId, loadThreats]);
 
     useEffect(() => {
         loadCatalogMeasures();

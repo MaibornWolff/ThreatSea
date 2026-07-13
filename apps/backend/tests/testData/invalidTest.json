@@ -28,6 +28,6 @@
   "componentTypes": [],
   "measures": [],
   "genericThreats": [],
-  "childThreats": [],
+  "threats": [],
   "measureImpacts": []
 }

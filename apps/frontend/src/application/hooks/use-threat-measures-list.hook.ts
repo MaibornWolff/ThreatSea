@@ -28,19 +28,19 @@ type SortableField = "measureName" | "measureScheduleAt" | "netProbability" | "n
 
 interface UseThreatMeasuresListParams {
     projectId: number;
-    childThreatId: number;
+    threatId: number;
 }
 
 /**
  * Creates a Custom Hook for the list of measures for a threat.
  * @param {number} projectId - id of the current project.
- * @param {number} childThreatId - id of the current child threat
+ * @param {number} threatId - id of the current child threat
  * @returns {{threatMeasures: {
  *                     measureId,
  *                     measureName,
  *                     scheduleDate}}[]} list of measures that impact the threat
  */
-export const useThreatMeasuresList = ({ projectId, childThreatId }: UseThreatMeasuresListParams) => {
+export const useThreatMeasuresList = ({ projectId, threatId }: UseThreatMeasuresListParams) => {
     const { setSortDirection, setSearchValue, setSortBy, sortDirection, searchValue, sortBy } =
         useList("threatMeasures");
 
@@ -69,7 +69,7 @@ export const useThreatMeasuresList = ({ projectId, childThreatId }: UseThreatMea
         }
 
         return measureImpacts.reduce<ThreatMeasure[]>((acc, measureImpact) => {
-            if (measureImpact.childThreatId !== childThreatId) {
+            if (measureImpact.threatId !== threatId) {
                 return acc;
             }
 
@@ -92,7 +92,7 @@ export const useThreatMeasuresList = ({ projectId, childThreatId }: UseThreatMea
 
             return acc;
         }, []);
-    }, [measureImpacts, measures, measuresPending, measureImpactsPending, childThreatId]);
+    }, [measureImpacts, measures, measuresPending, measureImpactsPending, threatId]);
 
     /**
      * Filters the measures by the given search value.

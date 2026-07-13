@@ -4,11 +4,11 @@
  */
 import { and, eq } from "drizzle-orm";
 import { db, TransactionType } from "#db/index.js";
-import { childThreats, ChildThreat, CreateChildThreat, UpdateChildThreat } from "#db/schema.js";
-import { getGenericThreat } from "./genericThreats.service.js";
+import { threats, Threat, CreateThreat, UpdateThreat } from "#db/schema.js";
+import { getGenericThreat } from "./generic-threats.service.js";
 import { getCatalogThreatById } from "./catalog-threats.service.js";
 import { NotFoundError } from "#errors/not-found.error.js";
-import { CHILD_THREAT_STATUSES } from "#types/child-threat-statuses.types.js";
+import { THREAT_STATUSES } from "#types/threat-statuses.types.js";
 
 // ------------------------------------------------------------------------------
 // TODO: RENAMING TO THREAT INSTEAD OF CHILD THREAT LATER ON
@@ -18,14 +18,14 @@ import { CHILD_THREAT_STATUSES } from "#types/child-threat-statuses.types.js";
  * Gets all child threats of a generic threat.
  *
  * @param {number} genericThreatId - The id of the generic threat.
- * @returns {Promise<ChildThreat[]>} A promise that resolves to an array of child threats.
+ * @returns {Promise<Threat[]>} A promise that resolves to an array of child threats.
  */
-export async function getChildThreatsByGenericThreatId(
+export async function getThreatsByGenericThreatId(
     genericThreatId: number,
     transaction: TransactionType | undefined = undefined
-): Promise<ChildThreat[]> {
-    return await (transaction ?? db).query.childThreats.findMany({
-        where: eq(childThreats.genericThreatId, genericThreatId),
+): Promise<Threat[]> {
+    return await (transaction ?? db).query.threats.findMany({
+        where: eq(threats.genericThreatId, genericThreatId),
     });
 }
 
@@ -33,14 +33,14 @@ export async function getChildThreatsByGenericThreatId(
  * Gets all child threats of a project.
  *
  * @param {number} projectId - The id of the project.
- * @returns {Promise<ChildThreat[]>} A promise that resolves to an array of child threats.
+ * @returns {Promise<Threat[]>} A promise that resolves to an array of child threats.
  */
-export async function getChildThreatsByProjectId(
+export async function getThreatsByProjectId(
     projectId: number,
     transaction: TransactionType | undefined = undefined
-): Promise<ChildThreat[]> {
-    return await (transaction ?? db).query.childThreats.findMany({
-        where: eq(childThreats.projectId, projectId),
+): Promise<Threat[]> {
+    return await (transaction ?? db).query.threats.findMany({
+        where: eq(threats.projectId, projectId),
     });
 }
 
@@ -48,10 +48,10 @@ export async function getChildThreatsByProjectId(
  * Gets a specific child threat by its id.
  *
  * @param {number} threatId - The id of the threat.
- * @returns {Promise<ChildThreat | null>} A promise that resolves to the child threat or null if not found.
+ * @returns {Promise<Threat | null>} A promise that resolves to the child threat or null if not found.
  */
-export async function getChildThreat(childThreatId: number): Promise<ChildThreat | null> {
-    const threat = await db.query.childThreats.findFirst({ where: eq(childThreats.id, childThreatId) });
+export async function getThreat(threatId: number): Promise<Threat | null> {
+    const threat = await db.query.threats.findFirst({ where: eq(threats.id, threatId) });
 
     return threat ?? null;
 }
@@ -59,16 +59,16 @@ export async function getChildThreat(childThreatId: number): Promise<ChildThreat
 /**
  * Creates a child threat.
  *
- * @param {CreateChildThreat} createChildThreatData - The data of the child threat.
+ * @param {CreateThreat} createThreatData - The data of the child threat.
  * @param {TransactionType} transaction - drizzle transaction.
- * @returns {Promise<ChildThreat>} A promise that resolves to the created child threat.
+ * @returns {Promise<Threat>} A promise that resolves to the created child threat.
  * @throws {Error} If the child threat could not be created.
  */
-export async function createChildThreat(
-    createChildThreatData: CreateChildThreat,
+export async function createThreat(
+    createThreatData: CreateThreat,
     transaction: TransactionType | undefined = undefined
-): Promise<ChildThreat> {
-    const [childthreat] = await (transaction ?? db).insert(childThreats).values(createChildThreatData).returning();
+): Promise<Threat> {
+    const [childthreat] = await (transaction ?? db).insert(threats).values(createThreatData).returning();
 
     if (!childthreat) {
         throw new Error("Failed to create child threat");
@@ -78,18 +78,18 @@ export async function createChildThreat(
 }
 
 /** The user-editable subset of a child threat; identity fields are excluded on purpose. */
-export type ChildThreatRefinement = Partial<
+export type ThreatRefinement = Partial<
     Pick<
-        CreateChildThreat,
+        CreateThreat,
         "name" | "description" | "probability" | "confidentiality" | "integrity" | "availability" | "status"
     >
 >;
 
 export async function createThreatForGenericThreat(
     genericThreatId: number,
-    refinement: ChildThreatRefinement = {},
+    refinement: ThreatRefinement = {},
     transaction: TransactionType | undefined = undefined
-): Promise<ChildThreat> {
+): Promise<Threat> {
     const genericThreat = await getGenericThreat(genericThreatId, transaction);
 
     if (!genericThreat) {
@@ -102,7 +102,7 @@ export async function createThreatForGenericThreat(
         throw new NotFoundError("Catalog threat not found");
     }
 
-    const createThreatData: CreateChildThreat = {
+    const createThreatData: CreateThreat = {
         attacker: genericThreat.attacker,
         name: refinement.name ?? genericThreat.name,
         description: refinement.description ?? genericThreat.description,
@@ -113,30 +113,23 @@ export async function createThreatForGenericThreat(
         pointOfAttack: genericThreat.pointOfAttack,
         probability: refinement.probability ?? catalogThreat.probability,
         pointOfAttackId: genericThreat.pointOfAttackId,
-        status: refinement.status ?? CHILD_THREAT_STATUSES.NEW,
+        status: refinement.status ?? THREAT_STATUSES.NEW,
         genericThreatId: genericThreatId,
     };
 
-    return await createChildThreat(createThreatData, transaction);
+    return await createThreat(createThreatData, transaction);
 }
 
 /**
  * Updates the child threat with the specified id.
  *
- * @param {number} childThreatId - The id of the child threat.
- * @param {UpdateChildThreat} updateChildThreatData - The data of the child threat.
- * @returns {Promise<ChildThreat>} A promise that resolves to the updated child threat.
+ * @param {number} threatId - The id of the child threat.
+ * @param {UpdateThreat} updateThreatData - The data of the child threat.
+ * @returns {Promise<Threat>} A promise that resolves to the updated child threat.
  * @throws {Error} If the child threat could not be updated.
  */
-export async function updateChildThreat(
-    childThreatId: number,
-    updateChildThreatData: UpdateChildThreat
-): Promise<ChildThreat> {
-    const [childthreat] = await db
-        .update(childThreats)
-        .set(updateChildThreatData)
-        .where(eq(childThreats.id, childThreatId))
-        .returning();
+export async function updateThreat(threatId: number, updateThreatData: UpdateThreat): Promise<Threat> {
+    const [childthreat] = await db.update(threats).set(updateThreatData).where(eq(threats.id, threatId)).returning();
 
     if (!childthreat) {
         throw new Error("Failed to update child threat");
@@ -148,19 +141,19 @@ export async function updateChildThreat(
 /**
  * Deletes the child threat with the specified id.
  *
- * @param {number} childThreatId - The id of the child threat.
+ * @param {number} threatId - The id of the child threat.
  * @returns {Promise<void>} A promise that resolves when the child threat is deleted.
  */
-export async function deleteChildThreat(childThreatId: number): Promise<void> {
-    await db.delete(childThreats).where(eq(childThreats.id, childThreatId));
+export async function deleteThreat(threatId: number): Promise<void> {
+    await db.delete(threats).where(eq(threats.id, threatId));
 }
 
-export async function deleteChildThreatsByPointOfAttackId(
+export async function deleteThreatsByPointOfAttackId(
     pointOfAttackId: string,
     projectId: number,
     transaction: TransactionType | undefined = undefined
 ): Promise<void> {
     await (transaction ?? db)
-        .delete(childThreats)
-        .where(and(eq(childThreats.pointOfAttackId, pointOfAttackId), eq(childThreats.projectId, projectId)));
+        .delete(threats)
+        .where(and(eq(threats.pointOfAttackId, pointOfAttackId), eq(threats.projectId, projectId)));
 }

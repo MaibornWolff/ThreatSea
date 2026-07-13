@@ -8,14 +8,14 @@ import { PointOfAttack, UpdateSystemRequest } from "#types/system.types.js";
 import { getCatalogThreatsByProjectId } from "#services/catalog-threats.service.js";
 import {
     createThreatForGenericThreat,
-    deleteChildThreatsByPointOfAttackId,
-    getChildThreatsByGenericThreatId,
-} from "#services/childThreats.service.js";
+    deleteThreatsByPointOfAttackId,
+    getThreatsByGenericThreatId,
+} from "#services/threats.service.js";
 import {
     createGenericThreat,
     deleteGenericThreatsByPointOfAttackId,
     getGenericThreatsByProjectId,
-} from "#services/genericThreats.service.js";
+} from "#services/generic-threats.service.js";
 import * as systemService from "#services/system.service.js";
 
 /**
@@ -44,7 +44,7 @@ export async function updateSystem(projectId: number, updateSystemData: UpdateSy
             tx
         );
 
-        await createChildThreatsForAssetAssignedPointsOfAttack(
+        await createThreatsForAssetAssignedPointsOfAttack(
             getPointsOfAttackWithAssets(updatedSystem),
             await getGenericThreatsByProjectId(projectId, tx),
             projectId,
@@ -89,7 +89,7 @@ async function deleteThreatsByPointsOfAttack(
     for (const pointOfAttack of pointsOfAttack) {
         await deleteGenericThreatsByPointOfAttackId(pointOfAttack.id, pointOfAttack.projectId, transaction);
 
-        await deleteChildThreatsByPointOfAttackId(pointOfAttack.id, pointOfAttack.projectId, transaction);
+        await deleteThreatsByPointOfAttackId(pointOfAttack.id, pointOfAttack.projectId, transaction);
     }
 }
 
@@ -141,7 +141,7 @@ async function createThreatsByPointsOfAttack(
     }
 }
 
-async function createChildThreatsForAssetAssignedPointsOfAttack(
+async function createThreatsForAssetAssignedPointsOfAttack(
     pointsOfAttack: PointOfAttack[],
     genericThreats: GenericThreat[],
     projectId: number,
@@ -158,9 +158,9 @@ async function createChildThreatsForAssetAssignedPointsOfAttack(
         );
 
         for (const genericThreat of applicableGenericThreats) {
-            const existingChildThreats = await getChildThreatsByGenericThreatId(genericThreat.id, transaction);
+            const existingThreats = await getThreatsByGenericThreatId(genericThreat.id, transaction);
 
-            if (existingChildThreats.length > 0) {
+            if (existingThreats.length > 0) {
                 continue;
             }
 

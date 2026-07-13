@@ -6,19 +6,19 @@ import { NextFunction, Request, Response } from "express";
 import { db } from "#db/index.js";
 import * as MeasureImpactsService from "#services/measureImpacts.service.js";
 import { getMeasure } from "#services/measures.service.js";
-import { getChildThreat } from "#services/childThreats.service.js";
+import { getThreat } from "#services/threats.service.js";
 import { NotFoundError } from "#errors/not-found.error.js";
 import { BadRequestError } from "#errors/bad-request.error.js";
 import { ProjectIdParam } from "#types/project.types.js";
 import {
-    ChildThreatMeasureImpactResponse,
+    ThreatMeasureImpactResponse,
     CreateMeasureImpactRequest,
     MeasureImpactIdParam,
     MeasureImpactResponse,
     UpdateMeasureImpactRequest,
 } from "#types/measure-impact.types.js";
 import { MeasureResponse } from "#types/measure.types.js";
-import { ChildThreatIdParam, ChildThreatResponse } from "#types/childThreat.types.js";
+import { ThreatIdParam, ThreatResponse } from "#types/threat.types.js";
 
 /**
  * Gets all measure impacts of a project.
@@ -38,33 +38,33 @@ export async function getMeasureImpacts(
 }
 
 /**
- * Gets all child-threat-linked measure impacts of a specific child threat.
+ * Gets all threat-linked measure impacts of a specific child threat.
  *
  * @param {object} request - The http request.
  * @param {object} response - The http response.
  * @param {NextFunction} next - The next middleware function.
  */
-export async function getMeasureImpactsByChildThreat(
-    request: Request<ChildThreatIdParam, ChildThreatMeasureImpactResponse[], void>,
-    response: Response<ChildThreatMeasureImpactResponse[]>,
+export async function getMeasureImpactsByThreat(
+    request: Request<ThreatIdParam, ThreatMeasureImpactResponse[], void>,
+    response: Response<ThreatMeasureImpactResponse[]>,
     next: NextFunction
 ): Promise<void> {
     const projectId = request.params.projectId;
-    const childThreatId = request.params.childThreatId;
+    const threatId = request.params.threatId;
 
-    const childThreat: ChildThreatResponse | null = await getChildThreat(childThreatId);
-    if (childThreat === null) {
+    const threat: ThreatResponse | null = await getThreat(threatId);
+    if (threat === null) {
         next(new NotFoundError("Child Threat not found"));
         return;
     }
 
-    if (childThreat.projectId !== projectId) {
+    if (threat.projectId !== projectId) {
         next(new BadRequestError("Child Threat is not part of this project"));
         return;
     }
 
-    const measureImpacts: ChildThreatMeasureImpactResponse[] =
-        await MeasureImpactsService.getMeasureImpactsByThreat(childThreatId);
+    const measureImpacts: ThreatMeasureImpactResponse[] =
+        await MeasureImpactsService.getMeasureImpactsByThreat(threatId);
 
     response.json(measureImpacts);
 }
@@ -91,8 +91,8 @@ export async function getMeasureImpact(
     }
 
     const measure: MeasureResponse | null = await getMeasure(measureImpact.measureId);
-    const childThreat: ChildThreatResponse | null = await getChildThreat(measureImpact.childThreatId!);
-    if (measure?.projectId !== projectId || childThreat?.projectId !== projectId) {
+    const threat: ThreatResponse | null = await getThreat(measureImpact.threatId!);
+    if (measure?.projectId !== projectId || threat?.projectId !== projectId) {
         next(new BadRequestError("Measure Impact is not part of this project"));
         return;
     }
@@ -114,16 +114,16 @@ export async function createMeasureImpact(
 ): Promise<void> {
     const projectId = request.params.projectId;
     const measureId = request.body.measureId;
-    const childThreatId = request.body.childThreatId;
+    const threatId = request.body.threatId;
 
     const measure: MeasureResponse | null = await getMeasure(measureId);
-    const childThreat: ChildThreatResponse | null = await getChildThreat(childThreatId);
+    const threat: ThreatResponse | null = await getThreat(threatId);
 
     if (measure === null) {
         next(new NotFoundError("Measure not found"));
         return;
     }
-    if (childThreat === null) {
+    if (threat === null) {
         next(new NotFoundError("Child Threat not found"));
         return;
     }
@@ -131,7 +131,7 @@ export async function createMeasureImpact(
         next(new BadRequestError("Measure is not part of this project"));
         return;
     }
-    if (childThreat.projectId !== projectId) {
+    if (threat.projectId !== projectId) {
         next(new BadRequestError("Child Threat is not part of this project"));
         return;
     }
@@ -140,8 +140,8 @@ export async function createMeasureImpact(
         const measureImpact = await db.transaction(async (tx) => {
             const created = await MeasureImpactsService.createMeasureImpact(request.body, tx);
             // Only an out-of-scope impact can change the child threat's status.
-            if (created.setsOutOfScope && created.childThreatId != null) {
-                await MeasureImpactsService.syncChildThreatStatusFromMeasureImpacts(created.childThreatId, tx);
+            if (created.setsOutOfScope && created.threatId != null) {
+                await MeasureImpactsService.syncThreatStatusFromMeasureImpacts(created.threatId, tx);
             }
             return created;
         });
@@ -174,8 +174,8 @@ export async function updateMeasureImpact(
     }
 
     const measure: MeasureResponse | null = await getMeasure(measureImpact.measureId);
-    const childThreat: ChildThreatResponse | null = await getChildThreat(measureImpact.childThreatId!);
-    if (measure?.projectId !== projectId || childThreat?.projectId !== projectId) {
+    const threat: ThreatResponse | null = await getThreat(measureImpact.threatId!);
+    if (measure?.projectId !== projectId || threat?.projectId !== projectId) {
         next(new BadRequestError("Measure Impact is not part of this project"));
         return;
     }
@@ -185,8 +185,8 @@ export async function updateMeasureImpact(
         const updatedMeasureImpact: MeasureImpactResponse = await db.transaction(async (tx) => {
             const updated = await MeasureImpactsService.updateMeasureImpact(measureImpactId, data, tx);
             // Reconcile only when this update flipped the out-of-scope flag.
-            if (measureImpact.setsOutOfScope !== updated.setsOutOfScope && updated.childThreatId != null) {
-                await MeasureImpactsService.syncChildThreatStatusFromMeasureImpacts(updated.childThreatId, tx);
+            if (measureImpact.setsOutOfScope !== updated.setsOutOfScope && updated.threatId != null) {
+                await MeasureImpactsService.syncThreatStatusFromMeasureImpacts(updated.threatId, tx);
             }
             return updated;
         });
@@ -219,8 +219,8 @@ export async function deleteMeasureImpact(
     }
 
     const measure = await getMeasure(measureImpact.measureId);
-    const childThreat = await getChildThreat(measureImpact.childThreatId!);
-    if (measure?.projectId !== projectId || childThreat?.projectId !== projectId) {
+    const threat = await getThreat(measureImpact.threatId!);
+    if (measure?.projectId !== projectId || threat?.projectId !== projectId) {
         next(new BadRequestError("Measure Impact is not part of this project"));
         return;
     }
@@ -228,8 +228,8 @@ export async function deleteMeasureImpact(
     await db.transaction(async (tx) => {
         await MeasureImpactsService.deleteMeasureImpact(measureImpactId, tx);
         // Removing an out-of-scope impact may free the child threat from "out of scope".
-        if (measureImpact.setsOutOfScope && measureImpact.childThreatId != null) {
-            await MeasureImpactsService.syncChildThreatStatusFromMeasureImpacts(measureImpact.childThreatId, tx);
+        if (measureImpact.setsOutOfScope && measureImpact.threatId != null) {
+            await MeasureImpactsService.syncThreatStatusFromMeasureImpacts(measureImpact.threatId, tx);
         }
     });
 

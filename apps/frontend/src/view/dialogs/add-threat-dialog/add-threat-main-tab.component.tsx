@@ -24,7 +24,7 @@ import { calcNetRisk, calcRiskColour } from "#utils/calcRisk.ts";
 import type { Asset } from "#api/types/asset.types.ts";
 import type { ThreatMeasure } from "#application/hooks/use-threat-measures-list.hook.ts";
 import type { ThreatFormValues } from "./add-threat-form.types.ts";
-import { CHILD_THREAT_STATUSES } from "#api/types/child-threat-statuses.types.ts";
+import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 
 interface AddThreatMainTabProps {
     active: boolean;
@@ -224,18 +224,18 @@ export const AddThreatMainTab = ({
                         }}
                     />
                     <FormControl size="small" sx={{ minWidth: 180 }}>
-                        <InputLabel id="child-threat-status-label">{t("status")}</InputLabel>
+                        <InputLabel id="threat-status-label">{t("status")}</InputLabel>
                         <Controller
                             control={control}
                             name="status"
                             render={({ field }) => (
                                 <Select
                                     {...field}
-                                    labelId="child-threat-status-label"
+                                    labelId="threat-status-label"
                                     label={t("status")}
                                     data-testid="ThreatStatusSelect"
                                 >
-                                    {Object.values(CHILD_THREAT_STATUSES).map((status) => (
+                                    {Object.values(THREAT_STATUSES).map((status) => (
                                         <MenuItem key={status} value={status}>
                                             {t(`statusList.${status}`)}
                                         </MenuItem>

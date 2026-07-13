@@ -38,9 +38,9 @@ import type { Project } from "#api/types/project.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
 import type { DialogValue } from "#application/reducers/dialogs.reducer.ts";
 import type { CatalogMeasure } from "#api/types/catalog-measure.types.ts";
-import type { ExtendedChildThreat } from "#api/types/child-threat.types.ts";
+import type { ExtendedThreat } from "#api/types/threat.types.ts";
 
-export type ApplyMeasureThreat = ExtendedChildThreat & { damage: number };
+export type ApplyMeasureThreat = ExtendedThreat & { damage: number };
 
 interface FormValues {
     id: number | undefined;
@@ -144,7 +144,7 @@ const MeasureImpactByMeasureDialog = ({
             ...data,
             probability: data.setsOutOfScope || !data.impactsProbability ? null : data.probability,
             damage: data.setsOutOfScope || !data.impactsDamage ? null : data.damage,
-            childThreatId: threat.id,
+            threatId: threat.id,
             projectId: project.id,
         };
         try {
