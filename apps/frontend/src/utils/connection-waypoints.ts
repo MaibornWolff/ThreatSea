@@ -473,6 +473,19 @@ export function anchorPointForComponent(component: AugmentedSystemComponent, ori
 }
 
 /**
+ * True when the terminal-adjacent interior point (`far`) overshoots past the next interior
+ * point (`near`) relative to the re-anchor point (`anchor`) on the exit axis — i.e. `far` is a
+ * stale stub vertex. `near` and `far` must sit on the same side of `anchor` (or `near` may sit
+ * exactly on it), and `far` must reach strictly past `near`. A `near`/`far` pair with the same
+ * coordinate (a perpendicular continuation) never overshoots, so real bends are preserved.
+ */
+const overshoots = (near: number, far: number, anchor: number): boolean => {
+    const nearDelta = near - anchor;
+    const farDelta = far - anchor;
+    return nearDelta * farDelta >= 0 && Math.abs(nearDelta) < Math.abs(farDelta);
+};
+
+/**
  * Moves one terminal of a waypoint path to a new anchor point while keeping
  * interior bends intact and preserving orthogonality throughout.
  *
@@ -511,6 +524,20 @@ export function reanchorEndpoint(
         // Keep all points except the last; build a jog from the second-to-last interior
         // point to the new terminal.
         const interiorPts = points.slice(0, points.length - 1);
+        const exitAxis: "x" | "y" = horizontalExit ? "x" : "y";
+        // Drop trailing interior points left over from a changed exit direction: while the
+        // second-to-last interior point overshoots the last one on the exit axis (a backtrack
+        // toward the box), the last one is a stale stub vertex — remove it.
+        while (
+            interiorPts.length >= 2 &&
+            overshoots(
+                interiorPts[interiorPts.length - 2]![exitAxis],
+                interiorPts[interiorPts.length - 1]![exitAxis],
+                newAnchorPoint[exitAxis]
+            )
+        ) {
+            interiorPts.pop();
+        }
         const prev = interiorPts[interiorPts.length - 1]!;
         const newAnchorX = newAnchorPoint.x;
         const newAnchorY = newAnchorPoint.y;
@@ -530,6 +557,16 @@ export function reanchorEndpoint(
         // "start": keep all points except the first; build a jog from new terminal
         // to the second interior point.
         const interiorPts = points.slice(1);
+        const exitAxis: "x" | "y" = horizontalExit ? "x" : "y";
+        // Drop leading interior points left over from a changed exit direction: while the
+        // second interior point overshoots the first one on the exit axis (a backtrack toward
+        // the box), the first one is a stale stub vertex — remove it.
+        while (
+            interiorPts.length >= 2 &&
+            overshoots(interiorPts[1]![exitAxis], interiorPts[0]![exitAxis], newAnchorPoint[exitAxis])
+        ) {
+            interiorPts.shift();
+        }
         const next = interiorPts[0]!;
         const newAnchorX = newAnchorPoint.x;
         const newAnchorY = newAnchorPoint.y;

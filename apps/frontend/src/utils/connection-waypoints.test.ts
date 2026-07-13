@@ -249,6 +249,107 @@ describe("reanchorEndpoint", () => {
         expect(out.slice(-2)).toEqual([40, 0]);
         assertOrthogonal(out);
     });
+    it("trims a stale exit stub when the start terminal changes face", () => {
+        // Old path exited upward from the moved component: (40,0)→(40,-60)→(200,-60)→(200,-120).
+        // The component moved right, so the best face flips to left; the new anchor is (400,40).
+        // Keeping the old (40,·) exit elbow would overshoot left to x=40 then come back to x=200.
+        const out = reanchorEndpoint(
+            [40, 0, 40, -60, 200, -60, 200, -120],
+            "start",
+            { x: 400, y: 40 },
+            AnchorOrientation.left
+        );
+        // Stub removed: leaves left anchor, straight across to x=200, up to the kept tail endpoint.
+        expect(out).toEqual([400, 40, 200, 40, 200, -120]);
+        assertOrthogonal(out);
+    });
+    it("trims a stale exit stub when the end terminal changes face", () => {
+        // Mirror of the start case on the end terminal: old path arrived from above at (40,0),
+        // end terminal re-anchors to the left face at (400,40); the (40,·) column is stale.
+        const out = reanchorEndpoint(
+            [200, -120, 200, -60, 40, -60, 40, 0],
+            "end",
+            { x: 400, y: 40 },
+            AnchorOrientation.left
+        );
+        expect(out).toEqual([200, -120, 200, 40, 400, 40]);
+        assertOrthogonal(out);
+    });
+    it("trims a stale exit stub for a vertical (top) exit", () => {
+        // Old path exited right then went up; component moved up so the face flips to top.
+        // New anchor (100,-160); the y=40 leg is the stale stub.
+        const out = reanchorEndpoint(
+            [80, 40, 140, 40, 140, -100, 220, -100],
+            "start",
+            { x: 100, y: -160 },
+            AnchorOrientation.top
+        );
+        expect(out).toEqual([100, -160, 100, -100, 220, -100]);
+        assertOrthogonal(out);
+    });
+    it("trims a multi-point overshoot down to the first stable vertex", () => {
+        // Deliberately non-simplified input (three collinear x-points) so the trim loop runs
+        // more than once. Stored paths are simplified and trim at most once, but the loop must
+        // stay correct if a caller ever passes a denser path.
+        const out = reanchorEndpoint(
+            [40, 0, 40, -60, 120, -60, 200, -60, 200, -120],
+            "start",
+            { x: 400, y: 40 },
+            AnchorOrientation.left
+        );
+        expect(out).toEqual([400, 40, 200, 40, 200, -120]);
+        assertOrthogonal(out);
+    });
+
+    it("trims the boundary stub when the anchor lines up with the kept bend column", () => {
+        // Left exit, new anchor x=200 exactly equal to the meaningful bend column. The old
+        // strict-between reading left the x=40 stub; same-side-and-closer trims it.
+        const out = reanchorEndpoint(
+            [40, 0, 40, -60, 200, -60, 200, -120],
+            "start",
+            { x: 200, y: 40 },
+            AnchorOrientation.left
+        );
+        expect(out).toEqual([200, 40, 200, -120]);
+        assertOrthogonal(out);
+    });
+
+    it("trims a stale exit stub for a vertical (bottom) exit", () => {
+        // Component moved down so the face flips to bottom; the y=-40 leg is the stale stub.
+        const out = reanchorEndpoint(
+            [80, -40, 140, -40, 140, 100, 220, 100],
+            "start",
+            { x: 100, y: 160 },
+            AnchorOrientation.bottom
+        );
+        expect(out).toEqual([100, 160, 100, 100, 220, 100]);
+        assertOrthogonal(out);
+    });
+
+    it("trims a stale exit stub on the end terminal with a vertical (top) exit", () => {
+        // End-terminal mirror of the vertical (top) start case.
+        const out = reanchorEndpoint(
+            [220, -100, 140, -100, 140, 40, 80, 40],
+            "end",
+            { x: 100, y: -160 },
+            AnchorOrientation.top
+        );
+        expect(out).toEqual([220, -100, 100, -100, 100, -160]);
+        assertOrthogonal(out);
+    });
+
+    it("does not trim a legitimate same-face outward bend", () => {
+        // Small same-face (left) move: the first interior point heads further out (x=-40),
+        // so nothing is between the anchor and it — the bend is preserved.
+        const out = reanchorEndpoint(
+            [0, 40, -40, 40, -40, 120, 100, 120],
+            "start",
+            { x: -20, y: 40 },
+            AnchorOrientation.left
+        );
+        expect(out).toEqual([-20, 40, -40, 40, -40, 120, 100, 120]);
+        assertOrthogonal(out);
+    });
 });
 
 describe("simplifyPolyline", () => {
