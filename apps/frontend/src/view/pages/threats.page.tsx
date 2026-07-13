@@ -138,7 +138,7 @@ const ThreatsPageBody = () => {
                     const payload = {
                         projectId: Number(projectId),
                         genericThreatId: childThreat.genericThreatId,
-                        name: `${childThreat.name} (${t("copy")})`,
+                        name: `${childThreat.name} (${t("duplicateSuffix")})`,
                         description: childThreat.description,
                         probability: childThreat.probability,
                         confidentiality: childThreat.confidentiality,

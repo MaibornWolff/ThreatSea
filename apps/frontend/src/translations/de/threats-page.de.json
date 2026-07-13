@@ -6,6 +6,7 @@
   "newDamage": "Neuer Schaden",
   "duplicateMessage": "Wollen Sie die Bedrohung '{{ threatName }}' wirklich duplizieren?",
   "duplicate": "Duplizieren",
+  "duplicateSuffix": "Kopie",
   "duplicateThreat": "Bedrohung duplizieren",
   "addChildThreat": "Bedrohung hinzufügen",
   "newChildThreatSuffix": "neu",
