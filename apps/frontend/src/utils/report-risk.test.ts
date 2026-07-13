@@ -4,7 +4,7 @@ import {
     filterMeasuresByScheduledRange,
     filterThreatsByScheduledRange,
     type RiskMatrix,
-} from "#application/hooks/report.utils.ts";
+} from "#utils/report-risk.ts";
 import { createReportMeasure, createReportThreat, createReportThreatMeasure } from "#test-utils/builders.ts";
 
 describe("filterThreatsByScheduledRange", () => {

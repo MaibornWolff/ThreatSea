@@ -11,10 +11,10 @@ import {
     calcRiskBarGraph,
     filterMeasuresByScheduledRange,
     filterThreatsByScheduledRange,
-} from "#application/hooks/report.utils.ts";
-import type { Milestone, RiskMatrix } from "#application/hooks/report.utils.ts";
+} from "#utils/report-risk.ts";
+import type { Milestone, RiskMatrix } from "#utils/report-risk.ts";
 
-export type { Milestone, RiskMatrix } from "#application/hooks/report.utils.ts";
+export type { Milestone, RiskMatrix } from "#utils/report-risk.ts";
 
 type ReportThreat = ProjectReport["threats"][number];
 type ReportMeasure = ProjectReport["measures"][number];
