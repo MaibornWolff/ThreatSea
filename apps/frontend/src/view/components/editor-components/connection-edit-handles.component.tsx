@@ -3,6 +3,7 @@ import { Circle, Line } from "react-konva";
 import type { KonvaEventObject } from "konva/lib/Node";
 import type { Line as KonvaLineNode } from "konva/lib/shapes/Line";
 import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
+import { editorSelectors } from "#application/selectors/editor.selectors.ts";
 import { moveSegment, moveVertex, deleteVertex, cursorForSegment } from "#utils/connection-waypoints.ts";
 
 interface ConnectionEditHandlesProps {
@@ -101,7 +102,9 @@ function ConnectionEditHandlesInner({
     const segmentCount = pointCount - 1;
 
     const isCapturing = useAppSelector((state) => state.editor.isCapturing);
-    const visualSelected = selected && !isCapturing;
+    const annotationTool = useAppSelector(editorSelectors.selectAnnotationTool);
+    const isDrawing = annotationTool !== null;
+    const visualSelected = selected && !isCapturing && !isDrawing;
 
     // Refs to the preview Line nodes for each segment (for imperative batchDraw updates)
     const segmentRefs = useRef<(KonvaLineNode | null)[]>([]);
@@ -257,18 +260,29 @@ function ConnectionEditHandlesInner({
                         stroke={SEGMENT_STROKE}
                         strokeWidth={0}
                         hitStrokeWidth={SEGMENT_HIT_STROKE_WIDTH}
-                        draggable={true}
+                        draggable={!isDrawing}
                         dragDistance={DRAG_THRESHOLD}
                         onDragMove={handleSegmentDragMove(segmentIndex)}
                         onDragEnd={handleSegmentDragEnd(segmentIndex)}
-                        onClick={(event) => onSelect(event)}
+                        onClick={(event) => {
+                            if (isDrawing) {
+                                return;
+                            }
+                            onSelect(event);
+                        }}
                         onMouseEnter={(event) => {
+                            if (isDrawing) {
+                                return;
+                            }
                             setCursor(event, cursorForSegment(waypoints, segmentIndex));
                             onHoverChange?.(connectionId, true);
                         }}
                         onMouseLeave={(event) => {
-                            setCursor(event, "default");
                             onHoverChange?.(connectionId, false);
+                            if (isDrawing) {
+                                return;
+                            }
+                            setCursor(event, "default");
                         }}
                     />
                 );

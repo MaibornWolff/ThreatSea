@@ -343,4 +343,57 @@ describe("ConnectionEditHandles", () => {
         fireEvent.dragEnd(interiorCircle, { target: stubTarget });
         expect(onCommit).not.toHaveBeenCalled();
     });
+
+    it("makes segment hit-lines non-draggable while an annotation tool is active", () => {
+        renderWithProviders(
+            <ConnectionEditHandles
+                connectionId={CONNECTION_ID}
+                waypoints={WAYPOINTS}
+                onCommit={vi.fn()}
+                selected={false}
+                onSelect={vi.fn()}
+            />,
+            { preloadedState: { editor: { ...defaultEditorState, annotationTool: "rect" } } }
+        );
+
+        for (const line of screen.getAllByTestId("konva-line")) {
+            expect(line).toHaveAttribute("data-draggable", "false");
+        }
+    });
+
+    it("does NOT call onSelect when a segment is clicked while an annotation tool is active", () => {
+        const onSelect = vi.fn();
+        renderWithProviders(
+            <ConnectionEditHandles
+                connectionId={CONNECTION_ID}
+                waypoints={WAYPOINTS}
+                onCommit={vi.fn()}
+                selected={false}
+                onSelect={onSelect}
+            />,
+            { preloadedState: { editor: { ...defaultEditorState, annotationTool: "rect" } } }
+        );
+
+        fireEvent.click(screen.getAllByTestId("konva-line")[0]!);
+
+        expect(onSelect).not.toHaveBeenCalled();
+    });
+
+    it("hides vertex circles while an annotation tool is active even when selected", () => {
+        renderWithProviders(
+            <ConnectionEditHandles
+                connectionId={CONNECTION_ID}
+                waypoints={WAYPOINTS}
+                onCommit={vi.fn()}
+                selected={true}
+                onSelect={vi.fn()}
+            />,
+            { preloadedState: { editor: { ...defaultEditorState, annotationTool: "rect" } } }
+        );
+
+        // Segment hit-lines still render (transparent, harmless), but the draggable vertex
+        // handles must be gone so they cannot be moved while a drawing tool is active.
+        expect(screen.getAllByTestId("konva-line")).toHaveLength(2);
+        expect(screen.queryAllByTestId("konva-circle")).toHaveLength(0);
+    });
 });
