@@ -393,7 +393,7 @@ const ThreatsPageBody = () => {
                                                                 <span>
                                                                     {isLoadingChildren
                                                                         ? "Loading children..."
-                                                                        : `${threats.length} child threats`}
+                                                                        : `${threats.length} threats`}
                                                                 </span>
                                                                 {checkUserRole(userRole, USER_ROLES.EDITOR) && (
                                                                     <IconButton
@@ -513,7 +513,7 @@ const ThreatsPageBody = () => {
                                                     {isExpanded && !isLoadingChildren && threats.length === 0 && (
                                                         <TableRow key={`child-empty-${genericThreat.id}`}>
                                                             <CustomTableCell colSpan={11} align="left" sx={{ pl: 6 }}>
-                                                                No child threats for this generic threat.
+                                                                No threats for this generic threat.
                                                             </CustomTableCell>
                                                         </TableRow>
                                                     )}
