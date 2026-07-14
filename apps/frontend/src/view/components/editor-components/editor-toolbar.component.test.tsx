@@ -43,6 +43,26 @@ describe("EditorToolbar", () => {
         });
     });
 
+    describe("backing panel", () => {
+        it("renders an opaque panel behind the button column so canvas elements cannot show or be clicked through", () => {
+            setup();
+
+            expect(screen.getByTestId("editor-toolbar-backing-panel")).toBeInTheDocument();
+        });
+
+        it("extends the panel further down when the annotation tools are shown", () => {
+            setup({ showAnnotationTools: false });
+            const withoutTools = screen.getByTestId("editor-toolbar-backing-panel");
+            const heightWithoutTools = Number.parseInt(withoutTools.style.height, 10);
+
+            setup({ showAnnotationTools: true });
+            const withTools = screen.getAllByTestId("editor-toolbar-backing-panel").at(-1)!;
+            const heightWithTools = Number.parseInt(withTools.style.height, 10);
+
+            expect(heightWithTools).toBeGreaterThan(heightWithoutTools);
+        });
+    });
+
     describe("annotation tools visibility", () => {
         it("hides the shapes button when showAnnotationTools is false", () => {
             setup({ showAnnotationTools: false });

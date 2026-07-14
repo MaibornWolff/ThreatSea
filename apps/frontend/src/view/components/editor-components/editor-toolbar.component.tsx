@@ -35,12 +35,34 @@ export interface EditorToolbarProps {
     onSetAnnotationColor: (color: string) => void;
 }
 
+const TOOLBAR_BUTTON_LEFT = 8;
+
 const buttonContainerSx = {
     position: "absolute",
-    left: 8,
+    left: TOOLBAR_BUTTON_LEFT,
     width: "38px",
     marginLeft: "auto",
     marginRight: "auto",
+};
+
+// Footprint of a single IconButton (30px icon + padding)
+const TOOLBAR_BUTTON_SIZE = 46;
+
+// Padding between the button column and the edges of the backing panel.
+const BACKING_PANEL_PADDING = 4;
+
+// Top offset of the last button in each layout
+const LAST_BUTTON_TOP_WITHOUT_TOOLS = 60;
+const LAST_BUTTON_TOP_WITH_TOOLS = 240;
+
+const backingPanelSx = {
+    position: "absolute",
+    left: TOOLBAR_BUTTON_LEFT - BACKING_PANEL_PADDING,
+    top: 8 - BACKING_PANEL_PADDING,
+    width: TOOLBAR_BUTTON_SIZE + 2 * BACKING_PANEL_PADDING,
+    borderRadius: "12px",
+    backgroundColor: "background.paperIntransparent",
+    boxShadow: 3,
 };
 
 const iconSx = { fontSize: 30, color: "primary.main" };
@@ -109,8 +131,16 @@ export const EditorToolbar = ({
         return shapesButton;
     })();
 
+    const lastButtonTop = showAnnotationTools ? LAST_BUTTON_TOP_WITH_TOOLS : LAST_BUTTON_TOP_WITHOUT_TOOLS;
+    const backingPanelHeight = lastButtonTop + TOOLBAR_BUTTON_SIZE;
+
     return (
         <>
+            <Box
+                sx={backingPanelSx}
+                style={{ height: backingPanelHeight }}
+                data-testid="editor-toolbar-backing-panel"
+            />
             <Box sx={{ ...buttonContainerSx, top: 8 }}>
                 <Tooltip title={t("canvas.centerEditor")}>
                     <IconButton onClick={onCenterEditor} aria-label={t("canvas.centerEditor")} sx={iconButtonSx}>
