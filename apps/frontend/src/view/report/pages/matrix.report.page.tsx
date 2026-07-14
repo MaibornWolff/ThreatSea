@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Matrix } from "#view/report/components/matrix.report.component.tsx";
 import { s1, s2, backgroundColor } from "#view/report/report.style.ts";
 import type { IndexCallback, ProjectReport } from "#api/types/project.types.ts";
-import type { Milestone, RiskMatrix } from "#application/hooks/use-report.hook.ts";
+import type { Milestone, RiskMatrix } from "#utils/report-risk.ts";
 
 type ProjectDataProps = Partial<ProjectReport> & { project: ProjectReport["project"] };
 

@@ -20,7 +20,7 @@ import { ComponentsDetailsPage } from "./pages/componentsDetails.report.page";
 import { MeasuresDetailsPage } from "./pages/measures.report.page";
 import { Translations } from "#view/wrappers/translations.wrapper.tsx";
 import type { Index, ProjectReport } from "#api/types/project.types.ts";
-import type { Milestone, RiskMatrix } from "#application/hooks/use-report.hook.ts";
+import type { Milestone, RiskMatrix } from "#utils/report-risk.ts";
 
 Font.register({
     family: "Poppins",

@@ -1,7 +1,7 @@
 import writeXlsxFile, { getSheetData, type Cell } from "write-excel-file/browser";
 import { hasOwnProperty } from "./helpers";
 
-export interface TabHeader {
+interface TabHeader {
     label: string;
     property: string;
 }
