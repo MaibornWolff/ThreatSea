@@ -585,3 +585,98 @@ export function reanchorEndpoint(
         return flattenPoints(simplifyPolyline(newPoints));
     }
 }
+
+interface ComponentBox {
+    minX: number;
+    minY: number;
+    maxX: number;
+    maxY: number;
+}
+
+type Face = AnchorOrientation.left | AnchorOrientation.right | AnchorOrientation.top | AnchorOrientation.bottom;
+
+/** Pixel-space bounding box of a component's fixed 80x80 footprint (same coordinates waypoints use). */
+const componentBox = (component: AugmentedSystemComponent): ComponentBox => {
+    const minX = component.gridX * 5;
+    const minY = component.gridY * 5;
+    return { minX, minY, maxX: minX + COMPONENT_SIZE, maxY: minY + COMPONENT_SIZE };
+};
+
+/** True when a point lies inside the box or on its edge (edge counts, absorbing float rounding). */
+const pointWithinBox = (point: Point, box: ComponentBox): boolean =>
+    point.x >= box.minX - GEOMETRY_TOLERANCE &&
+    point.x <= box.maxX + GEOMETRY_TOLERANCE &&
+    point.y >= box.minY - GEOMETRY_TOLERANCE &&
+    point.y <= box.maxY + GEOMETRY_TOLERANCE;
+
+/** True when a point lies strictly inside the box — not on any edge. */
+const pointStrictlyInsideBox = (point: Point, box: ComponentBox): boolean =>
+    point.x > box.minX + GEOMETRY_TOLERANCE &&
+    point.x < box.maxX - GEOMETRY_TOLERANCE &&
+    point.y > box.minY + GEOMETRY_TOLERANCE &&
+    point.y < box.maxY - GEOMETRY_TOLERANCE;
+
+/**
+ * The face a dragged line pierces on its own terminal `component`, or null when the line already
+ * stops cleanly at the boundary. A crossing is present when a vertex other than the terminal lands
+ * strictly inside the box: the leg reaching that vertex dives through the interior instead of
+ * meeting an edge. The direction of the orthogonal segment that first re-enters the box from
+ * outside names the entry face.
+ */
+function entryFaceOfCrossingTerminal(points: Point[], which: "start" | "end", box: ComponentBox): Face | null {
+    // Order the vertices from the terminal inward so index 0 is always the moved terminal.
+    const ordered = which === "end" ? [...points].reverse() : points;
+    let index = 1;
+    let hasInteriorVertex = false;
+    while (index < ordered.length && pointWithinBox(ordered[index]!, box)) {
+        if (pointStrictlyInsideBox(ordered[index]!, box)) {
+            hasInteriorVertex = true;
+        }
+        index += 1;
+    }
+    // No vertex strayed inside (clean approach), or every vertex sits inside (degenerate): leave it.
+    if (!hasInteriorVertex || index >= ordered.length) {
+        return null;
+    }
+    const outside = ordered[index]!; // first vertex outside the box, walking in from the terminal
+    const inside = ordered[index - 1]!; // its neighbour toward the terminal (inside or on the box)
+    // The orthogonal segment outside→inside crosses exactly one face; its travel direction names it.
+    if (Math.abs(outside.x - inside.x) <= GEOMETRY_TOLERANCE) {
+        return inside.y > outside.y ? AnchorOrientation.top : AnchorOrientation.bottom;
+    }
+    return inside.x > outside.x ? AnchorOrientation.left : AnchorOrientation.right;
+}
+
+/**
+ * After a connection line is dragged, re-anchors any terminal whose line now dives into its own
+ * component to the face the line enters through — so it stops cleanly at the nearest entry point
+ * instead of crossing the box interior (the "moved line pierces the component" bug). Terminals that
+ * already approach cleanly are left untouched, including ones hand-placed off the face midpoint.
+ *
+ * @param waypoints - Flat coordinate array [x1,y1,...,xN,yN]
+ * @param startComponent - The component the start terminal (waypoints[0]) belongs to
+ * @param endComponent - The component the end terminal (waypoints[last]) belongs to
+ * @returns A new flat waypoint array with crossing terminals re-anchored (input unchanged if none)
+ */
+export function reanchorCrossingTerminals(
+    waypoints: number[],
+    startComponent: AugmentedSystemComponent,
+    endComponent: AugmentedSystemComponent
+): number[] {
+    if (waypoints.length < 4 || waypoints.length % 2 !== 0) {
+        return [...waypoints];
+    }
+    let result = waypoints;
+    for (const [which, component] of [
+        ["start", startComponent],
+        ["end", endComponent],
+    ] as const) {
+        const face = entryFaceOfCrossingTerminal(pointsFromWaypoints(result), which, componentBox(component));
+        if (face === null) {
+            continue;
+        }
+        const rawAnchor = anchorPointForComponent(component, face);
+        result = reanchorEndpoint(result, which, { x: snapToGrid(rawAnchor.x), y: snapToGrid(rawAnchor.y) }, face);
+    }
+    return result;
+}

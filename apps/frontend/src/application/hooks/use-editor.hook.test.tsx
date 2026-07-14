@@ -1082,6 +1082,45 @@ describe("useEditor", () => {
             expect(updated?.recalculate).toBe(false);
         });
 
+        it("trims the stationary terminal's stale stub when the moved component crosses to its side", () => {
+            // Communication Infrastructure sits above Server; the pinned line enters Server's top face
+            // (1340,760) from above. Moving Communication Infrastructure down into Server's row means
+            // the line should now enter Server from the LEFT — otherwise the glued moved terminal
+            // leaves the stationary Server terminal piercing its own box with a stub above it.
+            const { result, store } = renderUseEditor((store) => {
+                seedComponent(store, {
+                    id: "comp-a",
+                    type: STANDARD_COMPONENT_TYPES.COMMUNICATION_INFRASTRUCTURE,
+                    x: 700,
+                    y: 100,
+                    gridX: 140,
+                    gridY: 20,
+                });
+                seedComponent(store, {
+                    id: "comp-b",
+                    type: STANDARD_COMPONENT_TYPES.SERVER,
+                    x: 1300,
+                    y: 760,
+                    gridX: 260,
+                    gridY: 152,
+                });
+                seedPinnedConnection(store, [780, 140, 1340, 140, 1340, 760]);
+            });
+
+            act(() => {
+                store.dispatch(
+                    SystemActions.setComponent({ id: "comp-a", changes: { x: 700, y: 760, gridX: 140, gridY: 152 } })
+                );
+                result.current.updateConnectionsOfComponent("comp-a");
+            });
+
+            const updated = getConnection(store, "conn-pin");
+            // Clean horizontal line: Communication Infrastructure right edge (780,800) to Server's
+            // left edge (1300,800). No vertex inside Server, no stub.
+            expect(updated!.waypoints).toEqual([780, 800, 1300, 800]);
+            expect(updated?.recalculate).toBe(false);
+        });
+
         it("unpins and marks for recalculation a pinned connection whose waypoints are empty", () => {
             const { result, store } = renderUseEditor((store) => {
                 seedComponent(store, {
@@ -1144,6 +1183,67 @@ describe("useEditor", () => {
             expect(updated?.pinned).toBe(false);
             expect(updated?.recalculate).toBe(true);
             expect(updated!.waypoints).toEqual([0, 40]);
+        });
+    });
+
+    describe("connectionEdited re-anchoring on line drag", () => {
+        // Communication Infrastructure box [700,780]x[100,180] → grid (140,20), bottom anchor (740,180).
+        // Server box [1300,1380]x[760,840] → grid (260,152), left anchor (1300,800).
+        const seedLineDragScene = (store: EditorStore) => {
+            seedComponent(store, {
+                id: "comp-a",
+                type: STANDARD_COMPONENT_TYPES.COMMUNICATION_INFRASTRUCTURE,
+                x: 700,
+                y: 100,
+                gridX: 140,
+                gridY: 20,
+            });
+            seedComponent(store, {
+                id: "comp-b",
+                type: STANDARD_COMPONENT_TYPES.SERVER,
+                x: 1300,
+                y: 760,
+                gridX: 260,
+                gridY: 152,
+            });
+            store.dispatch(
+                SystemActions.createConnection(
+                    createConnection({
+                        id: "conn-edit",
+                        from: createConnectionAnchor({ id: "comp-a" }),
+                        to: createConnectionAnchor({ id: "comp-b" }),
+                        waypoints: [740, 180, 1300, 800],
+                    })
+                )
+            );
+        };
+
+        it("re-anchors a dragged terminal that dives into its own component and pins the connection", () => {
+            const { result, store } = renderUseEditor(seedLineDragScene);
+
+            // The waypoints a segment drag would commit: the descending leg at x=1340 pierces Server's
+            // interior before reaching the stale left-edge terminal (1300,800).
+            act(() => {
+                result.current.connectionEdited("conn-edit", [740, 180, 1340, 180, 1340, 800, 1300, 800]);
+            });
+
+            const updated = getConnection(store, "conn-edit");
+            // Server's terminal snaps to its top-face midpoint (1340,760); the line descends cleanly.
+            expect(updated!.waypoints).toEqual([740, 180, 1340, 180, 1340, 760]);
+            expect(updated?.pinned).toBe(true);
+            expect(updated?.recalculate).toBe(false);
+        });
+
+        it("stores a cleanly-approaching dragged line unchanged", () => {
+            const { result, store } = renderUseEditor(seedLineDragScene);
+
+            act(() => {
+                result.current.connectionEdited("conn-edit", [740, 180, 740, 800, 1300, 800]);
+            });
+
+            const updated = getConnection(store, "conn-edit");
+            expect(updated!.waypoints).toEqual([740, 180, 740, 800, 1300, 800]);
+            expect(updated?.pinned).toBe(true);
         });
     });
 });

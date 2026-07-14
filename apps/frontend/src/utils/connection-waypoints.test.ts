@@ -6,6 +6,7 @@ import {
     findBestAnchor,
     anchorPointForComponent,
     reanchorEndpoint,
+    reanchorCrossingTerminals,
     cursorForSegment,
     flattenPoints,
     simplifyPolyline,
@@ -349,6 +350,48 @@ describe("reanchorEndpoint", () => {
         );
         expect(out).toEqual([-20, 40, -40, 40, -40, 120, 100, 120]);
         assertOrthogonal(out);
+    });
+});
+
+describe("reanchorCrossingTerminals", () => {
+    // Reproduces "moved the lower connection line to the right" from the debugging screenshots.
+    // Communication Infrastructure box [700,780]x[100,180] → grid (140,20), bottom anchor (740,180).
+    // Server box [1300,1380]x[760,840] → grid (260,152), left anchor (1300,800).
+    const commInfra = createSystemComponent({ gridX: 140, gridY: 20 });
+    const server = createSystemComponent({ gridX: 260, gridY: 152 });
+
+    it("re-anchors a terminal whose line dives into its own component to the entry face", () => {
+        // After dragging the vertical segment right to x=1340, the descending leg pierces Server's
+        // interior (x=1340 ∈ [1300,1380]) before reaching the stale left-edge terminal (1300,800).
+        const out = reanchorCrossingTerminals([740, 180, 1340, 180, 1340, 800, 1300, 800], commInfra, server);
+        // Server's terminal snaps to its top-face midpoint (1340,760); the line now descends cleanly
+        // to the boundary. Communication Infrastructure's terminal only grazes its bottom edge, so it
+        // is left where it is.
+        expect(out).toEqual([740, 180, 1340, 180, 1340, 760]);
+        assertOrthogonal(out);
+    });
+
+    it("leaves a terminal that already approaches its component cleanly untouched", () => {
+        // A plain L into Server's left face at a non-midpoint (y=800): no interior crossing, so the
+        // hand-placed anchor must not be yanked to the face midpoint.
+        const clean = [740, 800, 1300, 800];
+        expect(reanchorCrossingTerminals(clean, commInfra, server)).toEqual(clean);
+    });
+
+    it("re-anchors the start terminal too (mirror of the end case)", () => {
+        // The dragged leg dives into Communication Infrastructure from the left at y=140: the vertex
+        // (740,140) sits strictly inside its box before the stale bottom terminal (740,180).
+        const out = reanchorCrossingTerminals([740, 180, 740, 140, 200, 140, 200, 800, 1300, 800], commInfra, server);
+        // Start snaps to Communication Infrastructure's left-face midpoint (700,140); the far end still
+        // reaches Server's left edge cleanly, so it is untouched.
+        expect(out).toEqual([700, 140, 200, 140, 200, 800, 1300, 800]);
+        assertOrthogonal(out);
+    });
+
+    it("does not disturb a connection between two components neither terminal crosses", () => {
+        // Both terminals approach their own boxes from outside — a normal down-then-right L.
+        const path = [740, 180, 740, 800, 1300, 800];
+        expect(reanchorCrossingTerminals(path, commInfra, server)).toEqual(path);
     });
 });
 

@@ -15,7 +15,13 @@ import type {
     SystemConnection,
     SystemPointOfAttack,
 } from "#api/types/system.types.ts";
-import { findBestAnchor, anchorPointForComponent, reanchorEndpoint, snapToGrid } from "#utils/connection-waypoints.ts";
+import {
+    findBestAnchor,
+    anchorPointForComponent,
+    reanchorEndpoint,
+    reanchorCrossingTerminals,
+    snapToGrid,
+} from "#utils/connection-waypoints.ts";
 import type { EditorConnection, EditorEntityId } from "#application/reducers/editor.reducer.ts";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { EditorActions } from "#application/actions/editor.actions.ts";
@@ -463,11 +469,32 @@ export const useEditor = ({
     };
 
     const connectionEdited = (connectionId: string, waypoints: number[]): void => {
+        // A drag can leave a terminal's line diving through its own component (the moved segment now
+        // approaches from a different side). Snap any such terminal to the face it enters through so
+        // the line stops cleanly at the boundary instead of piercing the box.
+        let nextWaypoints = waypoints;
+        const state = store.getState();
+        const connection = systemSelectors.selectConnections(state, projectId).find((item) => item.id === connectionId);
+        if (connection && waypoints.length >= 4) {
+            const components = systemSelectors.selectComponents(state, projectId);
+            const fromComponent = components.find((component) => component.id === connection.from.id);
+            const toComponent = components.find((component) => component.id === connection.to.id);
+            if (fromComponent && toComponent) {
+                // Waypoint order is not tied to from/to identity, so match each terminal to the
+                // component it sits nearest before re-anchoring (see updateConnectionsOfComponent).
+                const distanceToCenter = (component: typeof fromComponent): number =>
+                    Math.hypot(waypoints[0]! - (component.gridX * 5 + 40), waypoints[1]! - (component.gridY * 5 + 40));
+                const startNearFrom = distanceToCenter(fromComponent) <= distanceToCenter(toComponent);
+                const startComponent = startNearFrom ? fromComponent : toComponent;
+                const endComponent = startNearFrom ? toComponent : fromComponent;
+                nextWaypoints = reanchorCrossingTerminals(waypoints, startComponent, endComponent);
+            }
+        }
         // connectionPointsMeta intentionally left stale: the connector renderer reads only `waypoints` for pinned paths.
         dispatch(
             SystemActions.setConnection({
                 id: connectionId,
-                changes: { waypoints, pinned: true, recalculate: false },
+                changes: { waypoints: nextWaypoints, pinned: true, recalculate: false },
             })
         );
     };
@@ -911,7 +938,14 @@ export const useEditor = ({
                     waypoints[waypoints.length - 1]! - otherCenterY
                 );
                 const which = startToOther < endToOther ? "end" : "start";
-                const newWaypoints = reanchorEndpoint(waypoints, which, snapped, orientation);
+                const gluedWaypoints = reanchorEndpoint(waypoints, which, snapped, orientation);
+                // Gluing only the moved terminal can leave the stationary one anchored to a face the
+                // line no longer approaches cleanly — the moved component crossed to a new side, so the
+                // path now dives into the stationary box and leaves a stub. Re-anchor any such pierced
+                // terminal to the face it now enters through.
+                const startComponent = which === "start" ? movedComponent : otherComponent;
+                const endComponent = which === "start" ? otherComponent : movedComponent;
+                const newWaypoints = reanchorCrossingTerminals(gluedWaypoints, startComponent, endComponent);
                 // connectionPointsMeta intentionally left stale: the connector renderer reads only `waypoints` for pinned paths.
                 dispatch(
                     SystemActions.setConnection({
