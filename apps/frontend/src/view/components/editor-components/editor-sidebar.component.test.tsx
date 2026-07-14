@@ -43,6 +43,7 @@ const setup = (propsOverride: Partial<EditorSidebarProps> = {}) => {
         selectedConnection: undefined,
         handleDeleteConnection: vi.fn(),
         handleOnConnectionNameChange: vi.fn(),
+        handleResetConnectionRouting: vi.fn(),
         handleOnAssetChanged: vi.fn(),
         selectedConnectionPoint: undefined,
         userRole: USER_ROLES.EDITOR,

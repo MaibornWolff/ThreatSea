@@ -116,6 +116,7 @@ export interface Connection {
     // persisted project relies on it.
     recalculate: boolean;
     projectId: number;
+    pinned?: boolean;
 }
 
 export interface SystemConnection extends Connection {

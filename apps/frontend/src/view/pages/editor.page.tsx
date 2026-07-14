@@ -37,6 +37,7 @@ import { EditorToolbar } from "#view/components/editor-components/editor-toolbar
 import { TextEditingToolbarLayer } from "#view/components/editor-components/text-editing-toolbar-layer.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
 import { SystemComponentConnection } from "#view/components/editor-components/system-component-connection.component.tsx";
+import { ConnectionEditHandles } from "#view/components/editor-components/connection-edit-handles.component.tsx";
 import { SystemComponent } from "#view/components/editor-components/system-component.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
 import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
@@ -46,6 +47,7 @@ import { CommunicationContextMenu } from "#view/components/editor-components/edi
 import { useAlert } from "#application/hooks/use-alert.hook.ts";
 import CommunicationInterfaceDialog from "#view/dialogs/add-communication-interface.dialog.tsx";
 import { LineDrawingProvider } from "#view/components/editor-components/contexts/LineDrawingProvider.tsx";
+import { GRID } from "#utils/connection-waypoints.ts";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import { SystemActions } from "#application/actions/system.actions.ts";
 import { systemSelectors } from "#application/selectors/system.selectors.ts";
@@ -68,8 +70,8 @@ import type { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 // Move these outside the component to avoid recreating on each render
 const GRID_CONFIG = {
     speed: 1.5,
-    gridSizeX: 5,
-    gridSizeY: 5,
+    gridSizeX: GRID,
+    gridSizeY: GRID,
     renderedGridSizeX: 20,
     renderedGridSizeY: 20,
 };
@@ -142,6 +144,8 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         addAssetToSelectedPointOfAttack,
         removeAssetToSelectedPointOfAttack,
         updateConnectionsOfComponent,
+        connectionEdited,
+        resetConnectionRouting,
         selectConnectionPoint,
         deselectConnectionPoint,
         addAssetToPointOfAttack,
@@ -262,6 +266,12 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         : null;
     const handleRequestEdit = useCallback((id: string) => {
         setEditingAnnotationId(id);
+    }, []);
+
+    const [hoveredConnectionId, setHoveredConnectionId] = useState<string | null>(null);
+
+    const handleConnectionHoverChange = useCallback((connectionId: string, hovering: boolean): void => {
+        setHoveredConnectionId((current) => (hovering ? connectionId : current === connectionId ? null : current));
     }, []);
 
     // Idempotent exit; discards the annotation if it was never typed in.
@@ -393,7 +403,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     const handleComponentDragEnd = (_event: KonvaEventObject<DragEvent>, componentId: string): void => {
         removeInUseComponent(componentId);
         setShowHelpLines(false);
-        updateConnectionsOfComponent();
+        updateConnectionsOfComponent(componentId);
         deselectComponent();
 
         const theConnectionsOfTheComponent = connections.filter(
@@ -1396,14 +1406,29 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                 }
 
                                 return (
-                                    <SystemComponentConnection
-                                        key={i}
-                                        {...connection}
-                                        onClick={handleSelectConnection}
-                                        onPointOfAttackClicked={handleOnPointOfAttackClicked}
-                                        selected={selectedConnectionId === connection.id}
-                                        stageRef={stageRef}
-                                    />
+                                    <Group key={i}>
+                                        <SystemComponentConnection
+                                            {...connection}
+                                            onClick={handleSelectConnection}
+                                            onPointOfAttackClicked={handleOnPointOfAttackClicked}
+                                            selected={selectedConnectionId === connection.id}
+                                            stageRef={stageRef}
+                                            hovered={hoveredConnectionId === connection.id}
+                                            onHoverChange={handleConnectionHoverChange}
+                                        />
+                                        {isEditor &&
+                                            connection.waypoints != null &&
+                                            connection.waypoints.length >= 4 && (
+                                                <ConnectionEditHandles
+                                                    connectionId={connection.id}
+                                                    waypoints={connection.waypoints}
+                                                    onCommit={connectionEdited}
+                                                    selected={selectedConnectionId === connection.id}
+                                                    onSelect={(event) => handleSelectConnection(event, connection.id)}
+                                                    onHoverChange={handleConnectionHoverChange}
+                                                />
+                                            )}
+                                    </Group>
                                 );
                             })}
                             <AnnotationsCanvasLayer
@@ -1500,6 +1525,11 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                     selectedConnection={selectedConnection}
                     handleDeleteConnection={handleDeleteConnection}
                     handleOnConnectionNameChange={handleConnectionNameChange}
+                    handleResetConnectionRouting={() => {
+                        if (selectedConnection) {
+                            resetConnectionRouting(selectedConnection.id);
+                        }
+                    }}
                     handleOnAssetChanged={handleOnAssetChanged}
                     selectedConnectionPoint={selectedConnectionPoint}
                     userRole={userRole}

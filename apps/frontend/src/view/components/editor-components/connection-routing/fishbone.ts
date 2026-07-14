@@ -16,19 +16,22 @@
 import { AnchorOrientation, type AugmentedSystemComponent, type ConnectionPointMeta } from "#api/types/system.types.ts";
 import type { AugmentedSystemConnection } from "#application/selectors/system.selectors.ts";
 import {
+    type Point,
+    anchorPointForComponent,
+    findBestAnchor,
+    flattenPoints,
+    simplifyPolyline,
+} from "#utils/connection-waypoints.ts";
+import {
     type ConnectionRoutingInput,
     type ConnectionRoutingResult,
     type Face,
-    type Point,
     allFinite,
     buildAnchorMeta,
     buildDegreeMap,
     centerOf,
     countObstacleHits,
     crossesTransversally,
-    faceMidpoint,
-    findBestAnchor,
-    flattenPoints,
     isHorizontalFace,
     isOrthogonal,
     outwardUnit,
@@ -37,7 +40,6 @@ import {
     sameDirection,
     segmentHitsRectangle,
     shrinkRectangle,
-    simplifyPolyline,
     stepDirection,
 } from "./shared.ts";
 
@@ -176,7 +178,7 @@ const fishbonePath = (
     hubFace: Face,
     trunkPosition: number
 ): FishbonePath | null => {
-    const hubMidpoint = faceMidpoint(hub, hubFace);
+    const hubMidpoint = anchorPointForComponent(hub, hubFace);
     const hubRectangle = rectangleOf(hub);
     const leafRectangle = rectangleOf(leaf);
     const leafCenter = centerOf(leaf);

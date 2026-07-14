@@ -124,6 +124,21 @@ describe("SystemComponentConnection", () => {
             expect(visibleLine).toHaveAttribute("data-stroke", POA_COLORS[POINTS_OF_ATTACK.USER_BEHAVIOUR].hover);
         });
 
+        it("applies hover color and strokeWidth 5 when hovered={true}", () => {
+            renderWithProviders(
+                <SystemComponentConnection
+                    {...defaultProps}
+                    hovered={true}
+                    from={connectionAnchor({ type: STANDARD_COMPONENT_TYPES.USERS })}
+                    to={connectionAnchor({ id: "comp-2" })}
+                />
+            );
+
+            const visibleLine = screen.getAllByTestId("konva-line").find((el) => el.dataset["listening"] === "false");
+            expect(visibleLine).toHaveAttribute("data-stroke", POA_COLORS[POINTS_OF_ATTACK.USER_BEHAVIOUR].hover);
+            expect(visibleLine).toHaveAttribute("data-stroke-width", "5");
+        });
+
         it("masks selected styling when state.editor.isCapturing is true", () => {
             renderWithProviders(
                 <SystemComponentConnection

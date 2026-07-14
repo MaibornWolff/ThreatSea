@@ -1,8 +1,9 @@
-import { Delete } from "@mui/icons-material";
-import { IconButton } from "@mui/material";
+import { Delete, Autorenew } from "@mui/icons-material";
+import { IconButton, Tooltip } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { Box } from "@mui/system";
 import type { ChangeEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { TextField } from "#view/components/textfield.component.tsx";
 import type { SystemConnection } from "#api/types/system.types.ts";
@@ -11,6 +12,7 @@ interface EditorSidebarSelectedConnectionProps {
     selectedConnection: SystemConnection | undefined;
     handleDeleteConnection: () => void;
     handleOnConnectionNameChange: (event: ChangeEvent<HTMLInputElement>) => void;
+    handleResetConnectionRouting: () => void;
     userRole: USER_ROLES | undefined;
 }
 
@@ -18,9 +20,12 @@ export const EditorSidebarSelectedConnection = ({
     selectedConnection,
     handleDeleteConnection,
     handleOnConnectionNameChange,
+    handleResetConnectionRouting,
     userRole,
 }: EditorSidebarSelectedConnectionProps) => {
     const theme = useTheme();
+    const { t } = useTranslation("editorPage");
+    const isEditor = checkUserRole(userRole, USER_ROLES.EDITOR);
     return (
         <Box>
             <Box
@@ -65,7 +70,23 @@ export const EditorSidebarSelectedConnection = ({
                         padding: "0 !important",
                     }}
                 />
-                {checkUserRole(userRole, USER_ROLES.EDITOR) && (
+                {isEditor && selectedConnection?.pinned && (
+                    <Tooltip title={t("sidebar.connection.resetRouting")}>
+                        <IconButton
+                            onClick={handleResetConnectionRouting}
+                            aria-label={t("sidebar.connection.resetRouting")}
+                            sx={{
+                                "&:hover": {
+                                    backgroundColor: "background.paperIntransparent",
+                                },
+                                marginTop: -1,
+                            }}
+                        >
+                            <Autorenew sx={{ fontSize: 18 }} />
+                        </IconButton>
+                    </Tooltip>
+                )}
+                {isEditor && (
                     <IconButton
                         onClick={handleDeleteConnection}
                         sx={{

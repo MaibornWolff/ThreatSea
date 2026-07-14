@@ -12,17 +12,17 @@ import {
     type PointOfAttack,
 } from "#api/types/system.types.ts";
 import type { AugmentedSystemConnection } from "#application/selectors/system.selectors.ts";
+import {
+    type Point,
+    GEOMETRY_TOLERANCE,
+    anchorPointForComponent,
+    pointsFromWaypoints,
+} from "#utils/connection-waypoints.ts";
 
 const COMPONENT_SIZE = 80; // a component box is always 80 px square
 const HALF_COMPONENT_SIZE = COMPONENT_SIZE / 2;
-export const GEOMETRY_TOLERANCE = 1e-6; // coordinates closer than this count as equal (absorbs float rounding)
 
 export type Face = AnchorOrientation.left | AnchorOrientation.right | AnchorOrientation.top | AnchorOrientation.bottom;
-
-export interface Point {
-    x: number;
-    y: number;
-}
 
 export interface Rectangle {
     minX: number;
@@ -61,22 +61,6 @@ export const centerOf = (component: AugmentedSystemComponent): Point => ({
     x: component.gridX * 5 + HALF_COMPONENT_SIZE,
     y: component.gridY * 5 + HALF_COMPONENT_SIZE,
 });
-
-/** The pixel point at the middle of one of a component's four edges — where a connection attaches. */
-export const faceMidpoint = (component: AugmentedSystemComponent, face: Face): Point => {
-    const rectangle = rectangleOf(component);
-    const center = centerOf(component);
-    switch (face) {
-        case AnchorOrientation.left:
-            return { x: rectangle.minX, y: center.y };
-        case AnchorOrientation.right:
-            return { x: rectangle.maxX, y: center.y };
-        case AnchorOrientation.top:
-            return { x: center.x, y: rectangle.minY };
-        case AnchorOrientation.bottom:
-            return { x: center.x, y: rectangle.maxY };
-    }
-};
 
 /** A unit arrow pointing straight out of a face (right → {x:1,y:0}, top → {x:0,y:-1}). */
 export const outwardUnit = (face: Face): Point => {
@@ -158,43 +142,6 @@ export const crossesTransversally = (
     );
 };
 
-/** Removes duplicate points and points sitting in the middle of a straight line — keeps only real corners. */
-export const simplifyPolyline = (points: Point[]): Point[] => {
-    const deduped: Point[] = [];
-    for (const point of points) {
-        const last = deduped[deduped.length - 1];
-        if (
-            !last ||
-            Math.abs(last.x - point.x) > GEOMETRY_TOLERANCE ||
-            Math.abs(last.y - point.y) > GEOMETRY_TOLERANCE
-        ) {
-            deduped.push(point);
-        }
-    }
-
-    const simplified: Point[] = [];
-    for (let index = 0; index < deduped.length; index++) {
-        const current = deduped[index];
-        const previous = simplified[simplified.length - 1];
-        const next = deduped[index + 1];
-        if (current && previous && next) {
-            const collinearVertical =
-                Math.abs(previous.x - current.x) < GEOMETRY_TOLERANCE &&
-                Math.abs(current.x - next.x) < GEOMETRY_TOLERANCE;
-            const collinearHorizontal =
-                Math.abs(previous.y - current.y) < GEOMETRY_TOLERANCE &&
-                Math.abs(current.y - next.y) < GEOMETRY_TOLERANCE;
-            if (collinearVertical || collinearHorizontal) {
-                continue;
-            }
-        }
-        if (current) {
-            simplified.push(current);
-        }
-    }
-    return simplified;
-};
-
 /** True when every segment runs purely horizontal or vertical — no diagonal. */
 export const isOrthogonal = (points: Point[]): boolean => {
     for (let index = 1; index < points.length; index++) {
@@ -230,15 +177,6 @@ export const routeLength = (points: Point[]): number => {
     return total;
 };
 
-/** Turns [{x,y}, …] into the flat [x, y, x, y, …] array Konva's <Line> expects. */
-export const flattenPoints = (points: Point[]): number[] => {
-    const result: number[] = [];
-    for (const point of points) {
-        result.push(point.x, point.y);
-    }
-    return result;
-};
-
 /** A copy of the box pulled in by a hair, so a line grazing an edge isn't counted as crossing the interior. */
 export const shrinkRectangle = (rectangle: Rectangle): Rectangle => ({
     minX: rectangle.minX + GEOMETRY_TOLERANCE,
@@ -246,22 +184,6 @@ export const shrinkRectangle = (rectangle: Rectangle): Rectangle => ({
     maxX: rectangle.maxX - GEOMETRY_TOLERANCE,
     maxY: rectangle.maxY - GEOMETRY_TOLERANCE,
 });
-
-// ----- face selection -----
-
-/** Which face of a box points most directly at another box (left/right if it's more sideways, else top/bottom). */
-export const findBestAnchor = (
-    component: AugmentedSystemComponent,
-    otherComponent: AugmentedSystemComponent
-): AnchorOrientation => {
-    const dx = otherComponent.gridX - component.gridX;
-    const dy = otherComponent.gridY - component.gridY;
-
-    if (Math.abs(dx) > Math.abs(dy)) {
-        return dx > 0 ? AnchorOrientation.right : AnchorOrientation.left;
-    }
-    return dy > 0 ? AnchorOrientation.bottom : AnchorOrientation.top;
-};
 
 // ----- connection topology -----
 
@@ -286,15 +208,6 @@ export const buildDegreeMap = (connections: AugmentedSystemConnection[]): Map<st
 
 /** A drawable line needs at least two points (four values). Tolerates legacy data without the field. */
 export const hasDrawableLine = (waypoints: number[] | undefined): boolean => (waypoints?.length ?? 0) >= 4;
-
-/** Reads a flat [x, y, x, y, …] waypoint array back into points. */
-export const pointsFromWaypoints = (waypoints: number[]): Point[] => {
-    const points: Point[] = [];
-    for (let index = 0; index + 1 < waypoints.length; index += 2) {
-        points.push({ x: waypoints[index]!, y: waypoints[index + 1]! });
-    }
-    return points;
-};
 
 /** How many of the given boxes a route's segments run into (each box counted at most once). */
 export const countObstacleHits = (points: Point[], obstacles: Rectangle[]): number => {
@@ -441,7 +354,7 @@ export const buildAnchorMeta = (
 ): ConnectionPointMeta => {
     const reportedAnchor = isFace(anchor) ? anchor : face;
     return {
-        position: faceMidpoint(component, face),
+        position: anchorPointForComponent(component, face),
         goesHorizontal: reportedAnchor === AnchorOrientation.left || reportedAnchor === AnchorOrientation.right,
         goesLeft: reportedAnchor === AnchorOrientation.left,
         goesUp: reportedAnchor === AnchorOrientation.top,

@@ -37,7 +37,8 @@
       "title": "Assets"
     },
     "connection": {
-      "title": "Kommunikationsinfrastruktur"
+      "title": "Kommunikationsinfrastruktur",
+      "resetRouting": "Routing zurücksetzen"
     },
     "connectionPoint": {
       "title": "Kommunikationsschnittstelle"

@@ -249,6 +249,7 @@ export const createConnection = (overrides: Partial<SystemConnection> = {}): Sys
     visible: true,
     communicationInterfaceId: null,
     communicationInterface: null,
+    pinned: false,
     ...overrides,
 });
 

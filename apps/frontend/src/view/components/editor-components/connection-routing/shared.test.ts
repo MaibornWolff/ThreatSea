@@ -2,14 +2,10 @@ import {
     buildAnchorMeta,
     compareRouteDefects,
     countObstacleHits,
-    faceMidpoint,
-    findBestAnchor,
-    flattenPoints,
     rectangleOf,
     routeLength,
     segmentHitsRectangle,
     shrinkRectangle,
-    simplifyPolyline,
     stepDirection,
 } from "./shared.ts";
 import { createSystemComponent, createPointOfAttack } from "#test-utils/builders.ts";
@@ -32,83 +28,6 @@ describe("rectangleOf", () => {
             maxX: 80,
             maxY: 80,
         });
-    });
-});
-
-describe("faceMidpoint", () => {
-    const component = createSystemComponent({ gridX: 10, gridY: 20 }); // box 50..130 x 100..180, centre (90,140)
-
-    it("returns the middle of each requested edge", () => {
-        expect(faceMidpoint(component, AnchorOrientation.left)).toEqual({ x: 50, y: 140 });
-        expect(faceMidpoint(component, AnchorOrientation.right)).toEqual({ x: 130, y: 140 });
-        expect(faceMidpoint(component, AnchorOrientation.top)).toEqual({ x: 90, y: 100 });
-        expect(faceMidpoint(component, AnchorOrientation.bottom)).toEqual({ x: 90, y: 180 });
-    });
-});
-
-describe("findBestAnchor", () => {
-    const base = createSystemComponent({ gridX: 0, gridY: 0 });
-
-    it("picks the right anchor when the other component is mostly to the right", () => {
-        expect(findBestAnchor(base, createSystemComponent({ gridX: 50, gridY: 0 }))).toBe(AnchorOrientation.right);
-    });
-
-    it("picks the left anchor when the other component is mostly to the left", () => {
-        expect(findBestAnchor(base, createSystemComponent({ gridX: -50, gridY: 0 }))).toBe(AnchorOrientation.left);
-    });
-
-    it("picks the bottom anchor when the other component is mostly below", () => {
-        expect(findBestAnchor(base, createSystemComponent({ gridX: 0, gridY: 50 }))).toBe(AnchorOrientation.bottom);
-    });
-
-    it("picks the top anchor when the other component is mostly above", () => {
-        expect(findBestAnchor(base, createSystemComponent({ gridX: 0, gridY: -50 }))).toBe(AnchorOrientation.top);
-    });
-
-    it("breaks an equal horizontal/vertical offset in favour of the vertical axis", () => {
-        expect(findBestAnchor(base, createSystemComponent({ gridX: 50, gridY: 50 }))).toBe(AnchorOrientation.bottom);
-    });
-});
-
-describe("simplifyPolyline", () => {
-    it("collapses a straight run to its endpoints", () => {
-        const simplified = simplifyPolyline([
-            { x: 0, y: 0 },
-            { x: 10, y: 0 },
-            { x: 20, y: 0 },
-        ]);
-
-        expect(simplified).toEqual([
-            { x: 0, y: 0 },
-            { x: 20, y: 0 },
-        ]);
-    });
-
-    it("keeps the corner of an L-shaped path", () => {
-        const simplified = simplifyPolyline([
-            { x: 0, y: 0 },
-            { x: 10, y: 0 },
-            { x: 10, y: 10 },
-        ]);
-
-        expect(simplified).toEqual([
-            { x: 0, y: 0 },
-            { x: 10, y: 0 },
-            { x: 10, y: 10 },
-        ]);
-    });
-
-    it("drops consecutive duplicate points", () => {
-        const simplified = simplifyPolyline([
-            { x: 0, y: 0 },
-            { x: 0, y: 0 },
-            { x: 10, y: 0 },
-        ]);
-
-        expect(simplified).toEqual([
-            { x: 0, y: 0 },
-            { x: 10, y: 0 },
-        ]);
     });
 });
 
@@ -208,18 +127,6 @@ describe("stepDirection", () => {
         expect(stepDirection({ x: 0, y: 0 }, { x: 5, y: 0 })).toEqual({ x: 1, y: 0 });
         expect(stepDirection({ x: 0, y: 0 }, { x: 0, y: -5 })).toEqual({ x: 0, y: -1 });
         expect(stepDirection({ x: 5, y: 5 }, { x: 5, y: 5 })).toEqual({ x: 0, y: 0 });
-    });
-});
-
-describe("flattenPoints", () => {
-    it("turns points into the flat array Konva's Line expects", () => {
-        expect(
-            flattenPoints([
-                { x: 0, y: 0 },
-                { x: 10, y: 20 },
-                { x: 10, y: 50 },
-            ])
-        ).toEqual([0, 0, 10, 20, 10, 50]);
     });
 });
 

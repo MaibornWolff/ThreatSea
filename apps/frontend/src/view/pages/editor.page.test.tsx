@@ -6,6 +6,8 @@ import { createAsset } from "#test-utils/builders.ts";
 import { mockUseConfirm, mockUseAlert, mockUseEditor, mockUseAssets } from "#test-utils/mock-hooks.ts";
 import type { useEditor } from "#application/hooks/use-editor.hook.ts";
 import { EditorSidebar } from "#view/components/editor-components/editor-sidebar.component.tsx";
+import { SystemComponent } from "#view/components/editor-components/system-component.component.tsx";
+import { ConnectionEditHandles } from "#view/components/editor-components/connection-edit-handles.component.tsx";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 
 // --- Hook spies (module-level, persist across tests) ---
@@ -36,7 +38,11 @@ vi.mock("../components/editor-components/editor-stage.component", () => ({
 }));
 
 vi.mock("../components/editor-components/system-component.component", () => ({
-    SystemComponent: () => null,
+    SystemComponent: vi.fn(() => null),
+}));
+
+vi.mock("../components/editor-components/connection-edit-handles.component", () => ({
+    ConnectionEditHandles: vi.fn(() => null),
 }));
 
 vi.mock("../components/editor-components/system-component-connection.component", () => ({
@@ -257,6 +263,198 @@ describe("EditorPage", () => {
             renderEditorPage({ initialEntries: ["/projects/1/system/assets/5/edit"] });
 
             expect(screen.getByTestId("asset-dialog-page")).toBeInTheDocument();
+        });
+    });
+
+    describe("ConnectionEditHandles overlay", () => {
+        it("renders ConnectionEditHandles for the selected connection that has waypoints", () => {
+            const connection = {
+                id: "conn-1",
+                name: "Test Connection",
+                from: { id: "comp-1", anchor: "right" as const, type: 1, name: "Comp 1" },
+                to: { id: "comp-2", anchor: "left" as const, type: 1, name: "Comp 2" },
+                connectionPoints: [],
+                connectionPointsMeta: [],
+                waypoints: [0, 0, 100, 0, 100, 100],
+                recalculate: false,
+                projectId: 1,
+                visible: true,
+            };
+            const component1 = {
+                id: "comp-1",
+                name: "Comp 1",
+                x: 0,
+                y: 0,
+                type: 1,
+                projectId: 1,
+                pointsOfAttack: [],
+                description: "",
+            };
+            const component2 = {
+                id: "comp-2",
+                name: "Comp 2",
+                x: 200,
+                y: 0,
+                type: 1,
+                projectId: 1,
+                pointsOfAttack: [],
+                description: "",
+            };
+
+            mockUseEditor({
+                connections: [connection] as never,
+                components: [component1, component2] as never,
+                selectedConnectionId: "conn-1",
+                connectionEdited: vi.fn() as never,
+                resetConnectionRouting: vi.fn() as never,
+            });
+
+            renderEditorPage();
+
+            const calls = vi.mocked(ConnectionEditHandles).mock.calls;
+            expect(calls.length).toBeGreaterThan(0);
+            expect(calls[calls.length - 1]![0]).toMatchObject({
+                connectionId: "conn-1",
+                waypoints: [0, 0, 100, 0, 100, 100],
+                selected: true,
+            });
+        });
+
+        it("renders ConnectionEditHandles for an unselected connection that has waypoints", () => {
+            const connection = {
+                id: "conn-1",
+                name: "Test Connection",
+                from: { id: "comp-1", anchor: "right" as const, type: 1, name: "Comp 1" },
+                to: { id: "comp-2", anchor: "left" as const, type: 1, name: "Comp 2" },
+                connectionPoints: [],
+                connectionPointsMeta: [],
+                waypoints: [0, 0, 100, 0, 100, 100],
+                recalculate: false,
+                projectId: 1,
+                visible: true,
+            };
+            const component1 = {
+                id: "comp-1",
+                name: "Comp 1",
+                x: 0,
+                y: 0,
+                type: 1,
+                projectId: 1,
+                pointsOfAttack: [],
+                description: "",
+            };
+            const component2 = {
+                id: "comp-2",
+                name: "Comp 2",
+                x: 200,
+                y: 0,
+                type: 1,
+                projectId: 1,
+                pointsOfAttack: [],
+                description: "",
+            };
+
+            mockUseEditor({
+                connections: [connection] as never,
+                components: [component1, component2] as never,
+                selectedConnectionId: null,
+                connectionEdited: vi.fn() as never,
+                resetConnectionRouting: vi.fn() as never,
+            });
+
+            renderEditorPage();
+
+            const calls = vi.mocked(ConnectionEditHandles).mock.calls;
+            expect(calls.length).toBeGreaterThan(0);
+            expect(calls[calls.length - 1]![0]).toMatchObject({
+                connectionId: "conn-1",
+                selected: false,
+            });
+        });
+
+        it("does not render ConnectionEditHandles for a viewer", () => {
+            const connection = {
+                id: "conn-1",
+                name: "Test Connection",
+                from: { id: "comp-1", anchor: "right" as const, type: 1, name: "Comp 1" },
+                to: { id: "comp-2", anchor: "left" as const, type: 1, name: "Comp 2" },
+                connectionPoints: [],
+                connectionPointsMeta: [],
+                waypoints: [0, 0, 100, 0, 100, 100],
+                recalculate: false,
+                projectId: 1,
+                visible: true,
+            };
+            const component1 = {
+                id: "comp-1",
+                name: "Comp 1",
+                x: 0,
+                y: 0,
+                type: 1,
+                projectId: 1,
+                pointsOfAttack: [],
+                description: "",
+            };
+            const component2 = {
+                id: "comp-2",
+                name: "Comp 2",
+                x: 200,
+                y: 0,
+                type: 1,
+                projectId: 1,
+                pointsOfAttack: [],
+                description: "",
+            };
+
+            mockUseEditor({
+                connections: [connection] as never,
+                components: [component1, component2] as never,
+                selectedConnectionId: "conn-1",
+                connectionEdited: vi.fn() as never,
+                resetConnectionRouting: vi.fn() as never,
+            });
+
+            renderEditorPage({ role: USER_ROLES.VIEWER });
+
+            expect(vi.mocked(ConnectionEditHandles)).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("handleComponentDragEnd", () => {
+        it("calls updateConnectionsOfComponent with the component ID", () => {
+            const component = {
+                id: "comp-abc",
+                name: "My Component",
+                x: 10,
+                y: 10,
+                type: 1,
+                projectId: 1,
+                pointsOfAttack: [],
+                description: "",
+            };
+            const updateConnectionsOfComponent = vi.fn();
+
+            mockUseEditor({
+                components: [component] as never,
+                connections: [] as never,
+                updateConnectionsOfComponent,
+                connectionEdited: vi.fn() as never,
+                resetConnectionRouting: vi.fn() as never,
+            });
+
+            renderEditorPage();
+
+            // Find the onDragEnd prop passed to the SystemComponent for comp-abc
+            const systemComponentCalls = vi.mocked(SystemComponent).mock.calls;
+            const compCall = systemComponentCalls.find((call) => call[0].id === "comp-abc");
+            expect(compCall).toBeDefined();
+
+            const onDragEnd = compCall![0].onDragEnd as (e: unknown) => void;
+            act(() => {
+                onDragEnd({ evt: undefined } as never);
+            });
+
+            expect(updateConnectionsOfComponent).toHaveBeenCalledWith("comp-abc");
         });
     });
 });
