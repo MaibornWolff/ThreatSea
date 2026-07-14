@@ -63,6 +63,9 @@
   "role": "Rolle",
   "scheduledAt": "Geplant für",
   "system": "System",
+  "member": "Mitglieder",
+  "projects": "Projekte",
+  "catalogueEditor": "Katalog-Editor",
   "title": "Titel",
 
   "addBtn": "Hinzufügen",

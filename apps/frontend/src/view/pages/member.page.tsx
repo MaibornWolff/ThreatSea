@@ -20,6 +20,7 @@ import { Page } from "#view/components/page.component.tsx";
 import { SearchField } from "#view/components/search-field.component.tsx";
 import { CustomTableHeaderCell } from "#view/components/table-header.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
+import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
 import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
 import MemberDialogPage from "./member-dialog.page";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
@@ -43,6 +44,7 @@ const MemberPageBody = () => {
     const { openConfirm } = useConfirm<DeleteMemberConfirmState>();
     const navigate = useNavigate();
     const { t } = useTranslation("memberPage");
+    usePageTitle(t("member", { ns: "common" }));
     const { projectId, catalogId } = useParams<{ projectId?: string; catalogId?: string }>();
     const [memberRole, setMemberRole] = useState<USER_ROLES | null>(null);
 

@@ -60,6 +60,10 @@
   "role": "Role",
   "scheduledAt": "Scheduled at",
   "system": "System",
+  "member": "Members",
+  "projects": "Projects",
+  "catalogs": "Catalogs",
+  "catalogueEditor": "Catalogue Editor",
 
   "addBtn": "Add",
   "cancel": "Cancel",

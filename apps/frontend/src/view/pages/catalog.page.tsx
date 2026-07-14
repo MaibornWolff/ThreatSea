@@ -18,6 +18,7 @@ import { CatalogThreatsListBox } from "#view/components/catalog-threats-list-box
 import { MatrixFilterToggleButtonGroup } from "#view/components/matrix-filter-toggle-button-group.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
+import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
 import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
 import CatalogMeasureDialogPage from "#view/pages/catalog-measure-dialog.page.tsx";
 import CatalogThreatDialogPage from "#view/pages/catalog-threat-dialog.page.tsx";
@@ -32,6 +33,7 @@ const CatalogPageBody = () => {
     const [pointOfAttack, setPointOfAttack] = useState<POINTS_OF_ATTACK | null>(null);
     const navigate = useNavigate();
     const { t } = useTranslation("catalogPage");
+    usePageTitle(t("catalogueEditor", { ns: "common" }));
 
     const dispatch = useAppDispatch();
 

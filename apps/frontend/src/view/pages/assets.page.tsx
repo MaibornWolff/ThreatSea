@@ -26,6 +26,7 @@ import { Page } from "#view/components/page.component.tsx";
 import { SearchField } from "#view/components/search-field.component.tsx";
 import { CustomTableHeaderCell } from "#view/components/table-header.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
+import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
 import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
 import { withProject } from "#view/components/with-project.hoc.tsx";
 import AssetDialogPage from "./asset-dialog.page";
@@ -58,6 +59,7 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
         t,
         i18n: { language },
     } = useTranslation("assetsPage");
+    usePageTitle(t("assets", { ns: "common" }));
 
     const { setSortDirection, setSearchValue, setSortBy, deleteAsset, sortDirection, sortBy, isPending, assets } =
         useAssetsList({

@@ -11,6 +11,7 @@ import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { Page } from "#view/components/page.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
+import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
 import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
 import { withProject } from "#view/components/with-project.hoc.tsx";
 import MeasureDetailsDialogPage from "./measure-details-dialog.page";
@@ -42,6 +43,7 @@ type MeasureDialogState = Omit<Partial<Measure>, "id" | "scheduledAt"> & {
 
 const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
     const { t } = useTranslation("measuresPage");
+    usePageTitle(t("measures", { ns: "common" }));
     const { openConfirm } = useConfirm<Measure>();
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
