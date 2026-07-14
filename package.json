@@ -21,7 +21,7 @@
     "husky": "9.1.7",
     "lint-staged": "17.0.8",
     "oxfmt": "0.58.0",
-    "semantic-release": "25.0.5",
+    "semantic-release": "25.0.6",
     "turbo": "2.10.4",
     "typescript": "7.0.2"
   },
