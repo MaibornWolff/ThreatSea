@@ -5,6 +5,7 @@ import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import type { Measure } from "#api/types/measure.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
 import type { ThreatMeasure } from "#application/hooks/use-threat-measures-list.hook.ts";
+import type { Milestone } from "#application/hooks/use-report.hook.ts";
 import {
     AnchorOrientation,
     type Annotation,
@@ -203,6 +204,14 @@ export const createMeasure = (overrides: Partial<Measure> = {}): Measure => ({
     catalogMeasureId: null,
     createdAt: new Date("2025-01-01"),
     updatedAt: new Date("2025-01-01"),
+    ...overrides,
+});
+
+export const createReportMilestone = (overrides: Partial<Milestone> = {}): Milestone & { active: boolean } => ({
+    scheduledAt: new Date("2025-01-01"),
+    matrix: null,
+    barGraph: null,
+    active: false,
     ...overrides,
 });
 
