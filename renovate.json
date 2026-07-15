@@ -16,6 +16,11 @@
       "description": "minimumReleaseAge cannot be enforced for these update types (the package manager performs the resolution); without this they would be filtered as permanently pending and never raised as PRs",
       "matchUpdateTypes": ["lockFileMaintenance", "pin", "replacement"],
       "minimumReleaseAge": null
+    },
+    {
+      "description": "Pin conventional-changelog-conventionalcommits to v9. @semantic-release/release-notes-generator only devDepends on it, so we must provide it as a direct dependency, and it must match the release notes generator's template engine (conventional-changelog-writer@8 / Handlebars). v10 ships templates for writer@9, which renders empty release notes. Revisit once release-notes-generator upgrades to writer@9.",
+      "matchPackageNames": ["conventional-changelog-conventionalcommits"],
+      "allowedVersions": "<10"
     }
   ]
 }
