@@ -50,16 +50,12 @@ describe("EditorToolbar", () => {
             expect(screen.getByTestId("editor-toolbar-backing-panel")).toBeInTheDocument();
         });
 
-        it("extends the panel further down when the annotation tools are shown", () => {
-            setup({ showAnnotationTools: false });
-            const withoutTools = screen.getByTestId("editor-toolbar-backing-panel");
-            const heightWithoutTools = Number.parseInt(withoutTools.style.height, 10);
+        it("contains the toolbar buttons so it sits behind them", () => {
+            setup();
+            const panel = screen.getByTestId("editor-toolbar-backing-panel");
 
-            setup({ showAnnotationTools: true });
-            const withTools = screen.getAllByTestId("editor-toolbar-backing-panel").at(-1)!;
-            const heightWithTools = Number.parseInt(withTools.style.height, 10);
-
-            expect(heightWithTools).toBeGreaterThan(heightWithoutTools);
+            expect(panel).toContainElement(screen.getByRole("button", { name: "Center editor" }));
+            expect(panel).toContainElement(screen.getByRole("button", { name: "Shapes" }));
         });
     });
 

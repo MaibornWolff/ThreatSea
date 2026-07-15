@@ -35,31 +35,17 @@ export interface EditorToolbarProps {
     onSetAnnotationColor: (color: string) => void;
 }
 
-const TOOLBAR_BUTTON_LEFT = 8;
-
-const buttonContainerSx = {
+// Opaque panel behind the button column so canvas elements cannot show or be
+// clicked through the gaps between buttons
+const toolbarPanelSx = {
     position: "absolute",
-    left: TOOLBAR_BUTTON_LEFT,
-    width: "38px",
-    marginLeft: "auto",
-    marginRight: "auto",
-};
-
-// Footprint of a single IconButton (30px icon + padding)
-const TOOLBAR_BUTTON_SIZE = 46;
-
-// Padding between the button column and the edges of the backing panel.
-const BACKING_PANEL_PADDING = 4;
-
-// Top offset of the last button in each layout
-const LAST_BUTTON_TOP_WITHOUT_TOOLS = 60;
-const LAST_BUTTON_TOP_WITH_TOOLS = 240;
-
-const backingPanelSx = {
-    position: "absolute",
-    left: TOOLBAR_BUTTON_LEFT - BACKING_PANEL_PADDING,
-    top: 8 - BACKING_PANEL_PADDING,
-    width: TOOLBAR_BUTTON_SIZE + 2 * BACKING_PANEL_PADDING,
+    top: 8,
+    left: 8,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "6px",
+    padding: "4px",
     borderRadius: "12px",
     backgroundColor: "background.paperIntransparent",
     boxShadow: 3,
@@ -131,24 +117,14 @@ export const EditorToolbar = ({
         return shapesButton;
     })();
 
-    const lastButtonTop = showAnnotationTools ? LAST_BUTTON_TOP_WITH_TOOLS : LAST_BUTTON_TOP_WITHOUT_TOOLS;
-    const backingPanelHeight = lastButtonTop + TOOLBAR_BUTTON_SIZE;
-
     return (
         <>
-            <Box
-                sx={backingPanelSx}
-                style={{ height: backingPanelHeight }}
-                data-testid="editor-toolbar-backing-panel"
-            />
-            <Box sx={{ ...buttonContainerSx, top: 8 }}>
+            <Box sx={toolbarPanelSx} data-testid="editor-toolbar-backing-panel">
                 <Tooltip title={t("canvas.centerEditor")}>
                     <IconButton onClick={onCenterEditor} aria-label={t("canvas.centerEditor")} sx={iconButtonSx}>
                         <CenterFocusWeak sx={iconSx} />
                     </IconButton>
                 </Tooltip>
-            </Box>
-            <Box sx={{ ...buttonContainerSx, top: 60 }}>
                 <Tooltip title={t("canvas.exportSystemImage")}>
                     <IconButton
                         onClick={onDownloadSystemView}
@@ -158,14 +134,15 @@ export const EditorToolbar = ({
                         <Download sx={iconSx} />
                     </IconButton>
                 </Tooltip>
-            </Box>
-            {showAnnotationTools && (
-                <>
-                    <Box sx={{ ...buttonContainerSx, top: 120 }}>
+                {showAnnotationTools && (
+                    <>
                         <Tooltip title={t("canvas.annotation.shapes")}>
                             <IconButton
                                 ref={setShapesButton}
-                                onClick={() => setShapesOpen((open) => !open)}
+                                onClick={() => {
+                                    setShapesOpen((open) => !open);
+                                    onSetAnnotationTool(null);
+                                }}
                                 aria-label={t("canvas.annotation.shapes")}
                                 aria-pressed={isShapesActive}
                                 sx={isShapesActive ? activeIconButtonSx : iconButtonSx}
@@ -173,7 +150,32 @@ export const EditorToolbar = ({
                                 <ShapeLineOutlined sx={isShapesActive ? activeIconSx : iconSx} />
                             </IconButton>
                         </Tooltip>
-                    </Box>
+                        <Tooltip title={t("canvas.annotation.freehand")}>
+                            <IconButton
+                                ref={setFreehandButton}
+                                onClick={() => onSetAnnotationTool(annotationTool === "freehand" ? null : "freehand")}
+                                aria-label={t("canvas.annotation.freehand")}
+                                aria-pressed={annotationTool === "freehand"}
+                                sx={annotationTool === "freehand" ? activeIconButtonSx : iconButtonSx}
+                            >
+                                <CreateOutlined sx={annotationTool === "freehand" ? activeIconSx : iconSx} />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title={t("canvas.annotation.text")}>
+                            <IconButton
+                                onClick={() => onSetAnnotationTool(annotationTool === "text" ? null : "text")}
+                                aria-label={t("canvas.annotation.text")}
+                                aria-pressed={annotationTool === "text"}
+                                sx={annotationTool === "text" ? activeIconButtonSx : iconButtonSx}
+                            >
+                                <TextFields sx={annotationTool === "text" ? activeIconSx : iconSx} />
+                            </IconButton>
+                        </Tooltip>
+                    </>
+                )}
+            </Box>
+            {showAnnotationTools && (
+                <>
                     <Popover
                         open={shapesOpen}
                         anchorEl={shapesButton}
@@ -199,31 +201,6 @@ export const EditorToolbar = ({
                             );
                         })}
                     </Popover>
-                    <Box sx={{ ...buttonContainerSx, top: 180 }}>
-                        <Tooltip title={t("canvas.annotation.freehand")}>
-                            <IconButton
-                                ref={setFreehandButton}
-                                onClick={() => onSetAnnotationTool(annotationTool === "freehand" ? null : "freehand")}
-                                aria-label={t("canvas.annotation.freehand")}
-                                aria-pressed={annotationTool === "freehand"}
-                                sx={annotationTool === "freehand" ? activeIconButtonSx : iconButtonSx}
-                            >
-                                <CreateOutlined sx={annotationTool === "freehand" ? activeIconSx : iconSx} />
-                            </IconButton>
-                        </Tooltip>
-                    </Box>
-                    <Box sx={{ ...buttonContainerSx, top: 240 }}>
-                        <Tooltip title={t("canvas.annotation.text")}>
-                            <IconButton
-                                onClick={() => onSetAnnotationTool(annotationTool === "text" ? null : "text")}
-                                aria-label={t("canvas.annotation.text")}
-                                aria-pressed={annotationTool === "text"}
-                                sx={annotationTool === "text" ? activeIconButtonSx : iconButtonSx}
-                            >
-                                <TextFields sx={annotationTool === "text" ? activeIconSx : iconSx} />
-                            </IconButton>
-                        </Tooltip>
-                    </Box>
                     <Popper
                         open={toolOptionsAnchor !== null && !shapesOpen}
                         anchorEl={toolOptionsAnchor}
