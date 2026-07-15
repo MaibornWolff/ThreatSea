@@ -43,6 +43,22 @@ describe("EditorToolbar", () => {
         });
     });
 
+    describe("backing panel", () => {
+        it("renders an opaque panel behind the button column so canvas elements cannot show or be clicked through", () => {
+            setup();
+
+            expect(screen.getByTestId("editor-toolbar-backing-panel")).toBeInTheDocument();
+        });
+
+        it("contains the toolbar buttons so it sits behind them", () => {
+            setup();
+            const panel = screen.getByTestId("editor-toolbar-backing-panel");
+
+            expect(panel).toContainElement(screen.getByRole("button", { name: "Center editor" }));
+            expect(panel).toContainElement(screen.getByRole("button", { name: "Shapes" }));
+        });
+    });
+
     describe("annotation tools visibility", () => {
         it("hides the shapes button when showAnnotationTools is false", () => {
             setup({ showAnnotationTools: false });
