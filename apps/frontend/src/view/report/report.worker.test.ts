@@ -89,12 +89,29 @@ describe("report.worker", () => {
     });
 
     it("caps the number of layout passes so a never-settling document cannot loop forever", async () => {
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => {
+            /* empty */
+        });
         const instance = buildPdfInstance({ blob: new Blob(["pdf"]), dirtyPasses: 99 });
         setNextInstance(instance);
 
         await dispatch({ id: 1, props: buildProps() });
 
         expect(instance.toBlob).toHaveBeenCalledTimes(4);
+        expect(warn).toHaveBeenCalledOnce();
+        warn.mockRestore();
+    });
+
+    it("does not warn when the layout settles within the pass cap", async () => {
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => {
+            /* empty */
+        });
+        setNextInstance(buildPdfInstance({ blob: new Blob(["pdf"]), dirtyPasses: 1 }));
+
+        await dispatch({ id: 1, props: buildProps() });
+
+        expect(warn).not.toHaveBeenCalled();
+        warn.mockRestore();
     });
 
     it("posts an error response when the render produces no blob", async () => {
