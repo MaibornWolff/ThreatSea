@@ -1,8 +1,15 @@
 import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
-import { Backdrop, FormControl, FormControlLabel, LinearProgress, Switch, Typography } from "@mui/material";
+import {
+    Backdrop,
+    CircularProgress,
+    FormControl,
+    FormControlLabel,
+    LinearProgress,
+    Switch,
+    Typography,
+} from "@mui/material";
 import { Box } from "@mui/system";
-import { BlobProvider } from "@react-pdf/renderer";
-import { memo, useEffect, useLayoutEffect, type ChangeEvent, type SyntheticEvent } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, type ChangeEvent, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 
 import type { ExtendedProject } from "#api/types/project.types.ts";
@@ -10,6 +17,7 @@ import type { SortDirection } from "#application/actions/list.actions.ts";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { useReport } from "#application/hooks/use-report.hook.ts";
 import { useReportExcelExport } from "#application/hooks/use-export.hook.ts";
+import { useReportPdf } from "#application/hooks/use-report-pdf.hook.ts";
 import { useAppDispatch } from "#application/hooks/use-app-redux.hook.ts";
 import logo from "#images/logo_large.png";
 import companyLogo from "#images/MaibornWolff_Logo.png";
@@ -20,7 +28,6 @@ import { ToggleButtons } from "#view/components/toggle-buttons.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
 import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
 import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
-import { Report } from "#view/report/report.tsx";
 import { downloadMarkdownReport } from "#view/report/download-markdown-report.ts";
 import { ExportIconButton } from "#view/components/export-icon-button.component.tsx";
 import { withProject } from "#view/components/with-project.hoc.tsx";
@@ -31,35 +38,6 @@ interface ReportPageBodyProps {
 
 type ReportHookReturn = ReturnType<typeof useReport>;
 type ReportMilestone = NonNullable<ReportHookReturn["milestones"]>[number];
-
-type ReportToolbarData = NonNullable<ReportHookReturn["data"]> & {
-    milestones: ReportHookReturn["milestones"];
-    threats: ReportHookReturn["threats"];
-    measures: ReportHookReturn["measures"];
-};
-
-interface PdfDocumentToolbarProps {
-    filename: string;
-    logo: string;
-    companyLogo: string;
-    tillScheduledAt: string | null;
-    showCoverPage: boolean;
-    showTableOfContentsPage: boolean;
-    showMethodExplanation: boolean;
-    showScaleExplanation: boolean;
-    showMatrixPage: boolean;
-    showComponentsPage: boolean;
-    showAssetsPage: boolean;
-    showMeasuresPage: boolean;
-    showThreatListPage: boolean;
-    showThreatsPage: boolean;
-    systemImageOnSeparatePage: boolean;
-    language: string;
-    data: ReportToolbarData;
-    bruttoMatrix: ReportHookReturn["bruttoMatrix"];
-    nettoMatrix: ReportHookReturn["nettoMatrix"];
-    onDownloadMarkdown: () => void;
-}
 
 const ReportPageBody = ({ project }: ReportPageBodyProps) => {
     const {
@@ -121,6 +99,9 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
     const { exportReportAsExcel } = useReportExcelExport();
 
     const dispatch = useAppDispatch();
+
+    // Generates the PDF in a web worker so the main thread stays responsive
+    const { url, loading, error, generate } = useReportPdf();
 
     /**
      * Layout effect to change the header bar
@@ -211,7 +192,30 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
     };
 
     const onClickRefresh = () => {
+        if (!data) {
+            return;
+        }
         setIsChanged(false);
+        generate({
+            tillScheduledAt,
+            showCoverPage,
+            showTableOfContentsPage,
+            showMethodExplanation,
+            showScaleExplanation,
+            showMatrixPage,
+            showComponentsPage,
+            showAssetsPage,
+            showMeasuresPage,
+            showThreatListPage,
+            showThreatsPage,
+            systemImageOnSeparatePage,
+            language: reportLanguage,
+            logo,
+            companyLogo,
+            bruttoMatrix,
+            nettoMatrix,
+            data: { ...data, milestones, threats: threats ?? [], measures: measures ?? [] },
+        });
     };
 
     const onChangeSortDirection = (_event: SyntheticEvent, value: SortDirection | null) => {
@@ -243,7 +247,7 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
         exportReportAsExcel(project, data);
     };
 
-    const handleDownloadMarkdown = () => {
+    const handleDownloadMarkdown = useCallback(() => {
         downloadMarkdownReport({
             data,
             filename,
@@ -266,7 +270,28 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
             systemImageOnSeparatePage,
             language: reportLanguage,
         });
-    };
+    }, [
+        data,
+        filename,
+        milestones,
+        threats,
+        measures,
+        bruttoMatrix,
+        nettoMatrix,
+        tillScheduledAt,
+        showCoverPage,
+        showTableOfContentsPage,
+        showMethodExplanation,
+        showScaleExplanation,
+        showMatrixPage,
+        showComponentsPage,
+        showAssetsPage,
+        showMeasuresPage,
+        showThreatListPage,
+        showThreatsPage,
+        systemImageOnSeparatePage,
+        reportLanguage,
+    ]);
 
     useEffect(() => {
         setIsChanged(true);
@@ -274,6 +299,21 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
 
     return (
         <Box>
+            <Backdrop open={loading} sx={{ zIndex: 999 }}>
+                <Box
+                    sx={{
+                        p: 2,
+                        borderRadius: 5,
+                        bgcolor: "background.paperIntransparent",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 2,
+                    }}
+                >
+                    <CircularProgress size={24} />
+                    <Typography>{t("reportLoads")}</Typography>
+                </Box>
+            </Backdrop>
             {<LinearProgress sx={{ visibility: data ? "hidden" : "visible" }} />}
             <Page
                 sx={{
@@ -731,106 +771,46 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
                                     </Button>
                                 </Box>
                             ) : (
-                                <PdfDocumentToolbar
-                                    filename={filename}
-                                    logo={logo}
-                                    companyLogo={companyLogo}
-                                    tillScheduledAt={tillScheduledAt}
-                                    showCoverPage={showCoverPage}
-                                    showTableOfContentsPage={showTableOfContentsPage}
-                                    showMethodExplanation={showMethodExplanation}
-                                    showScaleExplanation={showScaleExplanation}
-                                    showMatrixPage={showMatrixPage}
-                                    showComponentsPage={showComponentsPage}
-                                    showAssetsPage={showAssetsPage}
-                                    showMeasuresPage={showMeasuresPage}
-                                    showThreatListPage={showThreatListPage}
-                                    showThreatsPage={showThreatsPage}
-                                    systemImageOnSeparatePage={systemImageOnSeparatePage}
-                                    language={reportLanguage}
-                                    data={{
-                                        ...data!,
-                                        milestones,
-                                        threats: threats ?? [],
-                                        measures: measures ?? [],
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "flex-end",
+                                        width: "100%",
+                                        marginTop: 2,
                                     }}
-                                    bruttoMatrix={bruttoMatrix}
-                                    nettoMatrix={nettoMatrix}
-                                    onDownloadMarkdown={handleDownloadMarkdown}
-                                />
+                                >
+                                    {error ? (
+                                        <Typography>{error}</Typography>
+                                    ) : url ? (
+                                        <>
+                                            <Button
+                                                component="a"
+                                                href={url}
+                                                {...{ target: "_blank" }}
+                                                rel="noreferrer"
+                                                sx={{ marginRight: 1 }}
+                                            >
+                                                {t("openInBrowserBtn")}
+                                            </Button>
+                                            <Button
+                                                component="a"
+                                                href={url}
+                                                {...{ download: `${filename}.pdf` }}
+                                                sx={{ marginRight: 1 }}
+                                            >
+                                                {t("downloadPdfBtn")}
+                                            </Button>
+                                        </>
+                                    ) : null}
+                                    <Button onClick={handleDownloadMarkdown}>{t("downloadMarkdownBtn")}</Button>
+                                </Box>
                             )}
                         </Box>
                     </Box>
                 )}
             </Page>
         </Box>
-    );
-};
-
-const PdfDocumentToolbar = ({ filename, onDownloadMarkdown, ...props }: PdfDocumentToolbarProps) => {
-    const { t } = useTranslation("reportPage");
-
-    return (
-        <BlobProvider document={<Report {...props} />}>
-            {({ url, loading, error }) => {
-                const disabled = url === null || loading;
-                return (
-                    <Box
-                        id="box"
-                        sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "flex-end",
-                            width: "100%",
-                            marginTop: 2,
-                        }}
-                    >
-                        {error ? (
-                            <Typography>{error?.message || "Ein Fehler ist augetreten"}</Typography>
-                        ) : loading ? (
-                            <Backdrop open={true} sx={{ zIndex: 999 }}>
-                                <Box
-                                    sx={{
-                                        p: 2,
-                                        borderRadius: 5,
-                                        bgcolor: "background.paperIntransparent",
-                                    }}
-                                >
-                                    <Typography>{t("reportLoads")}</Typography>
-                                </Box>
-                            </Backdrop>
-                        ) : (
-                            <>
-                                <Button
-                                    component="a"
-                                    href={url ?? ""}
-                                    {...{ target: "_blank" }}
-                                    rel="noreferrer"
-                                    disabled={disabled}
-                                    sx={{
-                                        marginRight: 1,
-                                    }}
-                                >
-                                    {t("openInBrowserBtn")}
-                                </Button>
-                                <Button
-                                    component="a"
-                                    href={url ?? ""}
-                                    {...{ download: `${filename}.pdf` }}
-                                    disabled={disabled}
-                                    sx={{
-                                        marginRight: 1,
-                                    }}
-                                >
-                                    {t("downloadPdfBtn")}
-                                </Button>
-                            </>
-                        )}
-                        <Button onClick={onDownloadMarkdown}>{t("downloadMarkdownBtn")}</Button>
-                    </Box>
-                );
-            }}
-        </BlobProvider>
     );
 };
 

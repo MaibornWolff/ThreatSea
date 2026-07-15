@@ -53,5 +53,10 @@ export default defineConfig({
     },
     optimizeDeps: {
         force: true,
+        // react-pdf is only imported from the report web worker. Pre-bundling keeps the worker fast.
+        include: ["@react-pdf/renderer"],
+    },
+    worker: {
+        format: "es",
     },
 });
