@@ -57,24 +57,35 @@ export async function getGenericThreatsWithExtendedChildren(
 
     return genericThreatsWithExtendedChildren
         .filter((genericThreat) => genericThreat.threats.length > 0)
-        .map(({ threats, ...genericThreat }) => ({
-            ...genericThreat,
-            children: threats.map((threat) => {
-                const pointOfAttack = pointsOfAttackById.get(threat.pointOfAttackId);
-                const interfaceName =
-                    pointOfAttack?.type === POINTS_OF_ATTACK.COMMUNICATION_INTERFACES
-                        ? (pointOfAttack.name ?? null)
-                        : null;
+        .map(({ threats, ...genericThreat }) => {
+            const genericPointOfAttack = pointsOfAttackById.get(genericThreat.pointOfAttackId);
+            const genericInterfaceName =
+                genericPointOfAttack?.type === POINTS_OF_ATTACK.COMMUNICATION_INTERFACES
+                    ? (genericPointOfAttack.name ?? null)
+                    : null;
 
-                return {
-                    ...threat,
-                    componentName: pointOfAttack?.componentName ?? null,
-                    componentType: pointOfAttack?.componentType ?? null,
-                    interfaceName,
-                    assets: pointOfAttack?.assets ?? [],
-                };
-            }),
-        }));
+            return {
+                ...genericThreat,
+                componentName: genericPointOfAttack?.componentName ?? null,
+                componentType: genericPointOfAttack?.componentType ?? null,
+                interfaceName: genericInterfaceName,
+                children: threats.map((threat) => {
+                    const pointOfAttack = pointsOfAttackById.get(threat.pointOfAttackId);
+                    const interfaceName =
+                        pointOfAttack?.type === POINTS_OF_ATTACK.COMMUNICATION_INTERFACES
+                            ? (pointOfAttack.name ?? null)
+                            : null;
+
+                    return {
+                        ...threat,
+                        componentName: pointOfAttack?.componentName ?? null,
+                        componentType: pointOfAttack?.componentType ?? null,
+                        interfaceName,
+                        assets: pointOfAttack?.assets ?? [],
+                    };
+                }),
+            };
+        });
 }
 
 /**
