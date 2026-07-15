@@ -347,6 +347,7 @@ const ThreatsPageBody = () => {
                                                         key={`generic-${genericThreat.id}`}
                                                         sx={{ backgroundColor: "background.mainIntransparent" }}
                                                         hover
+                                                        data-testid="threats-page_generic-threats-list-entry"
                                                     >
                                                         <CustomTableCell>
                                                             <IconButton
@@ -367,11 +368,16 @@ const ThreatsPageBody = () => {
                                                             showBorder={true}
                                                             align="left"
                                                             sx={{ fontWeight: "bold" }}
+                                                            data-testid="threats-page_generic-threats-list-entry_name"
                                                         >
                                                             {genericThreat.name}
                                                         </CustomTableCell>
                                                         <CustomTableCell showBorder={true}>-</CustomTableCell>
-                                                        <CustomTableCell>-</CustomTableCell>
+                                                        <CustomTableCell data-testid="threats-page_generic-threats-list-entry_component">
+                                                            {genericThreat.pointOfAttack === "COMMUNICATION_INTERFACES"
+                                                                ? `${genericThreat.componentName || t("unknown")}${genericThreat.interfaceName ? ` > ${genericThreat.interfaceName}` : ""}`
+                                                                : genericThreat.componentName}
+                                                        </CustomTableCell>
                                                         <CustomTableCell>
                                                             {t(`pointsOfAttackList.${genericThreat.pointOfAttack}`)}
                                                         </CustomTableCell>
@@ -413,6 +419,7 @@ const ThreatsPageBody = () => {
                                                         threats.map((threat) => (
                                                             <TableRow
                                                                 key={`child-${threat.id}`}
+                                                                data-testid="threats-page_threats-list-entry"
                                                                 sx={{
                                                                     backgroundColor: "background.defaultIntransparent",
                                                                     opacity:
@@ -444,6 +451,7 @@ const ThreatsPageBody = () => {
                                                                               ) => onClickEditThreat(event, threat),
                                                                           }
                                                                         : {})}
+                                                                    data-testid="threats-page_threats-list-entry_name"
                                                                 >
                                                                     {threat.name}
                                                                 </CustomTableCell>
@@ -456,7 +464,7 @@ const ThreatsPageBody = () => {
                                                                 >
                                                                     {threat.assets.length}
                                                                 </CustomTableCell>
-                                                                <CustomTableCell>
+                                                                <CustomTableCell data-testid="threats-page_threats-list-entry_component">
                                                                     {threat.pointOfAttack === "COMMUNICATION_INTERFACES"
                                                                         ? `${threat.componentName || t("unknown")}${threat.interfaceName ? ` > ${threat.interfaceName}` : ""}`
                                                                         : threat.componentName}

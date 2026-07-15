@@ -1,7 +1,7 @@
 {
   "project": {
     "success": true,
-    "datamodelVersion": 3,
+    "datamodelVersion": 4,
     "project": {
       "id": 3605,
       "name": "Sample Project",
@@ -1224,133 +1224,122 @@
     "threats": [
       {
         "id": 60,
-        "pointOfAttackId": "UlQaJbZDuHd8d8n3oxtsg",
-        "name": "Technically conveyed deception, social engineering",
-        "description": "Unauthorised parties trick users into triggering actions they actually don't want to have executed. To achieve this they interact directly or by technical means (e.g. by simultaneously executed rograms) with the user. Usually users are mislead about the action or are not aware of the fact that it is forbidden. Typical examples are Phising and other approaches of Social Engineering as well as technical attacks like malware, CSRF, Click-Jacking or drive-by-downloads. Please note that this kinds of attack can have impact not only on the attacked system but on its surroundings and infrastructure.",
-        "pointOfAttack": "USER_BEHAVIOUR",
+        "pointOfAttackId": "kT-GrJAuzVW9ndjRvJuvg",
+        "name": "Physical attack on the server",
+        "description": "Server chassis is physically attacked",
+        "pointOfAttack": "PROCESSING_INFRASTRUCTURE",
         "attacker": "UNAUTHORISED_PARTIES",
         "probability": 4,
         "confidentiality": true,
         "integrity": true,
         "availability": true,
-        "doneEditing": false,
-        "createdAt": "2023-10-12T08:04:35.000Z",
-        "updatedAt": "2023-10-12T08:04:35.000Z",
-        "catalogThreatId": 92255,
-        "projectId": 3605,
-        "componentName": "Users",
-        "componentType": "USERS",
-        "assets": [
-          {
-            "id": 2614,
-            "name": "Sample Asset 2",
-            "description": "Bar",
-            "confidentiality": 1,
-            "integrity": 4,
-            "availability": 5,
-            "createdAt": "2023-10-12T08:05:18.000Z",
-            "updatedAt": "2023-10-12T08:05:18.000Z",
-            "projectId": 3605
-          }
-        ]
+        "status": "new",
+        "genericThreatId": 1,
+        "projectId": 3605
       },
       {
         "id": 61,
         "pointOfAttackId": "kT-GrJAuzVW9ndjRvJuvg",
-        "name": "Physical attack",
-        "description": "Physical access to computers where programs are executed makes it possible to gain information about the executed instructions and the processed data as well as to manipulate them or to block the execution.",
+        "name": "Physical attack on the server rack",
+        "description": "Rack is opened in the data centre",
         "pointOfAttack": "PROCESSING_INFRASTRUCTURE",
         "attacker": "UNAUTHORISED_PARTIES",
         "probability": 2,
         "confidentiality": true,
         "integrity": true,
         "availability": true,
-        "doneEditing": false,
-        "createdAt": "2023-10-12T08:05:36.000Z",
-        "updatedAt": "2023-10-12T08:05:36.000Z",
-        "catalogThreatId": 92244,
-        "projectId": 3605,
-        "componentName": "Server",
-        "componentType": "SERVER",
-        "assets": [
-          {
-            "id": 2613,
-            "name": "Sample Asset 1",
-            "description": "Foo",
-            "confidentiality": 2,
-            "integrity": 2,
-            "availability": 2,
-            "createdAt": "2023-10-12T08:04:35.000Z",
-            "updatedAt": "2023-10-12T08:05:08.000Z",
-            "projectId": 3605
-          }
-        ]
+        "status": "finalized",
+        "genericThreatId": 1,
+        "projectId": 3605
       },
       {
         "id": 62,
+        "pointOfAttackId": "xdHpkPrUTIdGccwkwc0BI",
+        "name": "Physical attack on the client",
+        "description": "Client hardware is physically attacked",
+        "pointOfAttack": "PROCESSING_INFRASTRUCTURE",
+        "attacker": "UNAUTHORISED_PARTIES",
+        "probability": 3,
+        "confidentiality": true,
+        "integrity": true,
+        "availability": true,
+        "status": "new",
+        "genericThreatId": 2,
+        "projectId": 3605
+      },
+      {
+        "id": 63,
         "pointOfAttackId": "kT-GrJAuzVW9ndjRvJuvg",
-        "name": "Breach of isolation",
-        "description": "As they can execute programs on the same hardware they can interfere on the data or programs and even influence those, especially disruptive by resource overload. The technical possibilities depend on the functionality and configuration of the infrastructure and comprise simple attacks like access to parameters in process lists as well as technologically complex actions like side channel attacks.",
+        "name": "Breach of isolation on the server",
+        "description": "Isolation between tenants is broken",
         "pointOfAttack": "PROCESSING_INFRASTRUCTURE",
         "attacker": "SYSTEM_USERS",
         "probability": 3,
         "confidentiality": true,
         "integrity": true,
         "availability": true,
-        "doneEditing": false,
-        "createdAt": "2023-10-12T08:05:36.000Z",
-        "updatedAt": "2023-10-12T08:05:36.000Z",
-        "catalogThreatId": 92245,
-        "projectId": 3605,
-        "componentName": "Server",
-        "componentType": "SERVER",
-        "assets": [
-          {
-            "id": 2613,
-            "name": "Sample Asset 1",
-            "description": "Foo",
-            "confidentiality": 2,
-            "integrity": 2,
-            "availability": 2,
-            "createdAt": "2023-10-12T08:04:35.000Z",
-            "updatedAt": "2023-10-12T08:05:08.000Z",
-            "projectId": 3605
-          }
-        ]
+        "status": "new",
+        "genericThreatId": 3,
+        "projectId": 3605
       },
       {
-        "id": 63,
-        "pointOfAttackId": "kT-GrJAuzVW9ndjRvJuvg",
-        "name": "Abuse of privileges",
-        "description": "Access at least to detailed meta-information like process environment, possibly complete memory contents and internal interfaces.",
-        "pointOfAttack": "PROCESSING_INFRASTRUCTURE",
-        "attacker": "ADMINISTRATORS",
-        "probability": 3,
+        "id": 64,
+        "pointOfAttackId": "UlQaJbZDuHd8d8n3oxtsg",
+        "name": "Social engineering against users",
+        "description": "Users are deceived into disclosing secrets",
+        "pointOfAttack": "USER_BEHAVIOUR",
+        "attacker": "UNAUTHORISED_PARTIES",
+        "probability": 5,
         "confidentiality": true,
         "integrity": true,
         "availability": true,
-        "doneEditing": false,
-        "createdAt": "2023-10-12T08:05:36.000Z",
-        "updatedAt": "2023-10-12T08:05:36.000Z",
-        "catalogThreatId": 92246,
-        "projectId": 3605,
-        "componentName": "Server",
-        "componentType": "SERVER",
-        "assets": [
-          {
-            "id": 2613,
-            "name": "Sample Asset 1",
-            "description": "Foo",
-            "confidentiality": 2,
-            "integrity": 2,
-            "availability": 2,
-            "createdAt": "2023-10-12T08:04:35.000Z",
-            "updatedAt": "2023-10-12T08:05:08.000Z",
-            "projectId": 3605
-          }
-        ]
+        "status": "new",
+        "genericThreatId": 4,
+        "projectId": 3605
       }
     ],
-    "measureImpacts": []
+    "measureImpacts": [],
+    "genericThreats": [
+      {
+        "id": 1,
+        "pointOfAttackId": "kT-GrJAuzVW9ndjRvJuvg",
+        "name": "Physical attack",
+        "description": "Physical access to computers where programs are executed makes it possible to gain information about the executed instructions and the processed data as well as to manipulate them or to block the execution.",
+        "pointOfAttack": "PROCESSING_INFRASTRUCTURE",
+        "attacker": "UNAUTHORISED_PARTIES",
+        "catalogThreatId": 92244,
+        "projectId": 3605
+      },
+      {
+        "id": 2,
+        "pointOfAttackId": "xdHpkPrUTIdGccwkwc0BI",
+        "name": "Physical attack",
+        "description": "Physical access to computers where programs are executed makes it possible to gain information about the executed instructions and the processed data as well as to manipulate them or to block the execution.",
+        "pointOfAttack": "PROCESSING_INFRASTRUCTURE",
+        "attacker": "UNAUTHORISED_PARTIES",
+        "catalogThreatId": 92244,
+        "projectId": 3605
+      },
+      {
+        "id": 3,
+        "pointOfAttackId": "kT-GrJAuzVW9ndjRvJuvg",
+        "name": "Breach of isolation",
+        "description": "As they can execute programs on the same hardware they can interfere on the data or programs and even influence those, especially disruptive by resource overload. The technical possibilities depend on the functionality and configuration of the infrastructure and comprise simple attacks like access to parameters in process lists as well as technologically complex actions like side channel attacks.",
+        "pointOfAttack": "PROCESSING_INFRASTRUCTURE",
+        "attacker": "SYSTEM_USERS",
+        "catalogThreatId": 92245,
+        "projectId": 3605
+      },
+      {
+        "id": 4,
+        "pointOfAttackId": "UlQaJbZDuHd8d8n3oxtsg",
+        "name": "Technically conveyed deception, social engineering",
+        "description": "Unauthorised parties trick users into triggering actions they actually don't want to have executed. To achieve this they interact directly or by technical means (e.g. by simultaneously executed rograms) with the user. Usually users are mislead about the action or are not aware of the fact that it is forbidden. Typical examples are Phising and other approaches of Social Engineering as well as technical attacks like malware, CSRF, Click-Jacking or drive-by-downloads. Please note that this kinds of attack can have impact not only on the attacked system but on its surroundings and infrastructure.",
+        "pointOfAttack": "USER_BEHAVIOUR",
+        "attacker": "UNAUTHORISED_PARTIES",
+        "catalogThreatId": 92255,
+        "projectId": 3605
+      }
+    ]
   }
 }
