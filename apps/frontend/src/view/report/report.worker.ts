@@ -48,6 +48,10 @@ async function renderReport(props: ReportProps): Promise<Blob> {
     }
     instance.removeListener("change", markDirty);
 
+    if (dirty) {
+        console.warn(`Report layout did not settle within ${MAX_RENDER_PASSES} passes; page references may be stale.`);
+    }
+
     if (!blob) {
         throw new Error("The report produced no output");
     }
