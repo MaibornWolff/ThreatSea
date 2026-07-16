@@ -3,6 +3,7 @@ import { sql } from "drizzle-orm";
 import {
     boolean,
     check,
+    date,
     index,
     integer,
     jsonb,
@@ -237,7 +238,7 @@ export const measures = pgTable(
         id: integer().notNull().primaryKey().generatedByDefaultAsIdentity(),
         name: varchar({ length: 255 }).notNull(),
         description: text().notNull(),
-        scheduledAt: timestamp({ mode: "string", withTimezone: true }).notNull(),
+        scheduledAt: date({ mode: "string" }).notNull(),
         catalogMeasureId: integer().references(() => catalogMeasures.id, { onDelete: "set null", onUpdate: "cascade" }),
         createdAt: timestamp({ mode: "string", withTimezone: true })
             .notNull()

@@ -1,0 +1,1 @@
+ALTER TABLE "measures" ALTER COLUMN "scheduledAt" SET DATA TYPE date USING ("scheduledAt" AT TIME ZONE 'UTC')::date;

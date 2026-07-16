@@ -36,6 +36,13 @@
       "when": 1780397500794,
       "tag": "0004_add_standard_icon_to_component_types",
       "breakpoints": false
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1784216083482,
+      "tag": "0005_change_measures_scheduled_at_to_date",
+      "breakpoints": false
     }
   ]
 }
