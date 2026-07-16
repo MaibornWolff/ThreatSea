@@ -40,12 +40,48 @@ export async function startTokenRefresh(): Promise<void> {
     setCSRFToken(token);
 
     intervalId = setInterval(
-        async () => {
-            const token = await CsrfApi.getToken();
-            setCSRFToken(token);
+        () => {
+            void (async () => {
+                try {
+                    const token = await CsrfApi.getToken();
+                    setCSRFToken(token);
+                } catch {
+                    // Silently ignore – session expiry is handled by fetchAPI's
+                    // renewal mechanism on the next real API call.
+                }
+            })();
         },
         15 * 60 * 1000
     );
+}
+
+/**
+ * Coalescing promise for concurrent session renewals. All requests that hit a
+ * proxy redirect at the same time share a single renewal call.
+ */
+let sessionRefreshPromise: Promise<void> | null = null;
+
+/**
+ * Calls the backend's OIDC refresh-token endpoint to silently renew the
+ * upstream proxy session. Throws an AuthenticationError on any failure so
+ * the Redux error handler can redirect the user to login.
+ */
+async function renewSession(): Promise<void> {
+    try {
+        const response = await fetch(`${API_URI}/auth/refresh`, {
+            method: "POST",
+            credentials: "include",
+            redirect: "error",
+            headers: { "x-csrf-token": getCSRFToken() },
+        });
+        if (!response.ok) {
+            throw new Error();
+        }
+    } catch {
+        const err = new Error("Your session has expired. Please log in again.");
+        err.name = "AuthenticationError";
+        throw err;
+    }
 }
 
 /**
@@ -91,7 +127,29 @@ export async function fetchAPI<T>(
         ...config,
         headers: fetchHeaders,
         credentials: "include",
+        redirect: "manual",
     });
+
+    // An upstream proxy (e.g. Azure AD App Proxy) has redirected the request
+    // to an external auth endpoint. Following that redirect via fetch would
+    // violate CSP. Instead, attempt a silent OIDC session renewal via the
+    // backend's refresh-token endpoint and replay the original request once.
+    if (response.type === "opaqueredirect") {
+        if (!retry) {
+            const err = new Error("Your session has expired. Please log in again.");
+            err.name = "AuthenticationError";
+            throw err;
+        }
+
+        if (!sessionRefreshPromise) {
+            sessionRefreshPromise = renewSession().finally(() => {
+                sessionRefreshPromise = null;
+            });
+        }
+
+        await sessionRefreshPromise;
+        return fetchAPI(endpoint, config, fetchDataFunc, false);
+    }
 
     if (!response.ok) {
         const data = await response.json();

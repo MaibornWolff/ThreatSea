@@ -140,9 +140,12 @@ export async function finalizeAuthentication(request: Request, response: Respons
 
         const callbackUrl = new URL(oidcConfig!.callbackURL);
         callbackUrl.search = new URL(request.originalUrl, "http://localhost").search;
-        const threatSeaToken = await oidcService.handleOidcCallback(callbackUrl, oidcData);
+        const { threatSeaToken, refreshToken } = await oidcService.handleOidcCallback(callbackUrl, oidcData);
 
         delete request.session.oidc;
+        if (refreshToken) {
+            request.session.oidcRefreshToken = refreshToken;
+        }
 
         response.cookie("accessToken", threatSeaToken, {
             httpOnly: true,
@@ -158,6 +161,25 @@ export async function finalizeAuthentication(request: Request, response: Respons
         }
         response.redirect(`${appOrigin}/login?failure`);
     }
+}
+
+export async function refreshSession(request: Request, response: Response): Promise<void> {
+    if (!oidcService) {
+        response.status(204).end();
+        return;
+    }
+
+    const storedRefreshToken = request.session.oidcRefreshToken;
+    if (!storedRefreshToken) {
+        throw new UnauthorizedError("No OIDC refresh token available in session");
+    }
+
+    const newRefreshToken = await oidcService.refreshOidcSession(storedRefreshToken);
+    if (newRefreshToken) {
+        request.session.oidcRefreshToken = newRefreshToken;
+    }
+
+    response.status(204).end();
 }
 
 export async function logout(request: Request, response: Response): Promise<void> {

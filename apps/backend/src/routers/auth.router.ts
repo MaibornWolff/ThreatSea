@@ -11,7 +11,9 @@ import {
     finalizeAuthentication,
     getAuthStatus,
     logout,
+    refreshSession,
 } from "#controllers/authentication.controller.js";
+import { CheckTokenHandler } from "#middlewares/authentication.middleware.js";
 
 export const authRouter = express.Router();
 
@@ -33,3 +35,5 @@ authRouter.get("/login", authLimiter, authenticate);
 authRouter.get("/redirect", authLimiter, finalizeAuthentication);
 
 authRouter.post("/logout", authLimiter, logout);
+
+authRouter.post("/refresh", authLimiter, CheckTokenHandler, refreshSession);

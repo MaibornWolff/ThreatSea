@@ -20,8 +20,7 @@ export class CsrfApi {
             (res) => {
                 const tokenResponse = res as { token: string };
                 return tokenResponse["token"];
-            },
-            false
+            }
         );
     }
 }

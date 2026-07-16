@@ -69,7 +69,10 @@ export async function buildLoginRedirectUrl(): Promise<OidcLoginInitiation> {
     };
 }
 
-export async function handleOidcCallback(callbackUrl: URL, oidcParams: OidcCallbackParams): Promise<string> {
+export async function handleOidcCallback(
+    callbackUrl: URL,
+    oidcParams: OidcCallbackParams
+): Promise<{ threatSeaToken: string; refreshToken: string | undefined }> {
     const { state, nonce, codeVerifier } = oidcParams;
 
     const tokenSet = await client.authorizationCodeGrant(oidcClientConfig, callbackUrl, {
@@ -96,7 +99,16 @@ export async function handleOidcCallback(callbackUrl: URL, oidcParams: OidcCallb
 
     const threatSeaToken = await buildThreatSeaAccessToken(user);
 
-    return threatSeaToken;
+    return { threatSeaToken, refreshToken: tokenSet.refresh_token };
+}
+
+/**
+ * Uses the stored OIDC refresh token to silently obtain new tokens from the
+ * identity provider. Returns the rotated refresh token if the IdP issued one.
+ */
+export async function refreshOidcSession(refreshToken: string): Promise<string | undefined> {
+    const tokenSet = await client.refreshTokenGrant(oidcClientConfig, refreshToken);
+    return tokenSet.refresh_token;
 }
 
 export function buildLogoutUrl(): string | null {

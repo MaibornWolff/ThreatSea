@@ -17,5 +17,6 @@ declare module "express-session" {
             nonce: string;
             codeVerifier: string;
         };
+        oidcRefreshToken?: string;
     }
 }
