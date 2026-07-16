@@ -5,7 +5,6 @@ import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import type { Measure } from "#api/types/measure.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
 import type { ThreatMeasure } from "#application/hooks/use-threat-measures-list.hook.ts";
-import type { Milestone } from "#application/hooks/use-report.hook.ts";
 import {
     AnchorOrientation,
     type Annotation,
@@ -25,6 +24,7 @@ import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 import { CONFIDENTIALITY_LEVELS } from "#utils/confidentiality.ts";
 import { DEFAULT_ANNOTATION_COLOR } from "#view/colors/annotation.colors.ts";
+import type { Milestone } from "#utils/report-risk.ts";
 
 export const createAsset = (overrides: Partial<Asset> = {}): Asset => ({
     id: 1,

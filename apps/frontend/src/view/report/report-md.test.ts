@@ -1,7 +1,7 @@
 import "#utils/translations.ts"; // initialises i18next with all namespaces as a side effect
 import { generateMarkdownReport, type MarkdownReportOptions } from "#view/report/report-md.ts";
 import type { ProjectReport } from "#api/types/project.types.ts";
-import type { RiskMatrix } from "#application/hooks/use-report.hook.ts";
+import type { RiskMatrix } from "#utils/report-risk.ts";
 import fixtureData from "./testData/project-report.fixture.json";
 
 const report = fixtureData as unknown as ProjectReport & { milestones: null };
