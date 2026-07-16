@@ -167,6 +167,26 @@ describe("useReportPdf", () => {
         consoleError.mockRestore();
     });
 
+    it("replaces a failed worker so the next generate posts to a fresh instance", () => {
+        const consoleError = vi.spyOn(console, "error").mockImplementation(() => {
+            /* empty */
+        });
+        const { result } = renderHook(() => useReportPdf());
+
+        act(() => result.current.generate(buildProps()));
+        const failed = latestWorker();
+        act(() => failed.emitError("worker boot failed"));
+
+        act(() => result.current.generate(buildProps()));
+        const replacement = latestWorker();
+
+        expect(replacement).not.toBe(failed);
+        expect(failed.terminate).toHaveBeenCalled();
+        expect(replacement.postMessage).toHaveBeenCalledWith(expect.objectContaining({ id: 2 }));
+        expect(result.current.loading).toBe(true);
+        consoleError.mockRestore();
+    });
+
     it("reports an error when the worker delivers undecodable data", () => {
         const { result } = renderHook(() => useReportPdf());
 

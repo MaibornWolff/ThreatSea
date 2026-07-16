@@ -27,7 +27,7 @@ export function useReportPdf() {
         }
     }, []);
 
-    useEffect(() => {
+    const createWorker = useCallback(() => {
         const worker = new ReportPdfWorker();
         workerRef.current = worker;
 
@@ -47,28 +47,35 @@ export function useReportPdf() {
             setState({ url, loading: false, error: null });
         };
 
-        // Without this, a worker that fails to load or throws leaves the spinner hanging forever.
+        // A worker that fails to load cannot recover, so discard it here; otherwise the
+        // next generate() would post to a dead worker and the spinner would hang forever.
         worker.onerror = (event) => {
             console.error("Report worker failed to load", event.message);
+            worker.terminate();
+            if (workerRef.current === worker) {
+                workerRef.current = null;
+            }
             setState({ url: null, loading: false, error: event.message || "The report worker failed to load" });
         };
         worker.onmessageerror = () => {
             setState({ url: null, loading: false, error: "The report worker received invalid data" });
         };
 
+        return worker;
+    }, [revokeUrl]);
+
+    useEffect(() => {
+        createWorker();
         return () => {
-            worker.terminate();
+            workerRef.current?.terminate();
             workerRef.current = null;
             revokeUrl();
         };
-    }, [revokeUrl]);
+    }, [createWorker, revokeUrl]);
 
     const generate = useCallback(
         (props: ReportProps) => {
-            const worker = workerRef.current;
-            if (!worker) {
-                return;
-            }
+            const worker = workerRef.current ?? createWorker();
             const id = requestIdRef.current + 1;
             requestIdRef.current = id;
             revokeUrl();
@@ -82,7 +89,7 @@ export function useReportPdf() {
                 setState({ url: null, loading: false, error: message });
             }
         },
-        [revokeUrl]
+        [createWorker, revokeUrl]
     );
 
     return { ...state, generate };
