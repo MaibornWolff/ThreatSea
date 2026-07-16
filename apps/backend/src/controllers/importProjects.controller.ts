@@ -218,6 +218,7 @@ export async function importProject(request: Request<void>, response: Response, 
                 oldMeasure.projectId = newProjectId;
 
                 const { id: oldMeasureId, ...insertMeasure } = oldMeasure;
+                insertMeasure.scheduledAt = insertMeasure.scheduledAt.slice(0, 10);
                 const newMeasure = await createMeasure(insertMeasure, tx);
 
                 measureIdsDict.set(oldMeasureId, newMeasure!.id);

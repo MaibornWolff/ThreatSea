@@ -28,20 +28,20 @@ const VALID_PROJECT: Omit<InstanceType<typeof CreateProjectRequest>, "catalogId"
 const VALID_MEASURE_1: Omit<InstanceType<typeof CreateMeasureRequest>, "catalogMeasureId"> = {
     name: "valid threat from measure",
     description: "valid description test test",
-    scheduledAt: "2022-02-01 00:00:00+00",
+    scheduledAt: "2022-02-01",
 };
 
 const VALID_MEASURE_2: InstanceType<typeof CreateMeasureRequest> = {
     name: "valid threat 2",
     description: "valid description test 2",
-    scheduledAt: "2025-10-10 00:00:00+00",
+    scheduledAt: "2025-10-10",
     catalogMeasureId: null,
 };
 
 const VALID_MEASURE_3: InstanceType<typeof CreateMeasureRequest> = {
     name: "valid threat 3",
     description: "valid description test 3",
-    scheduledAt: "2025-10-10 00:00:00+00",
+    scheduledAt: "2025-10-10",
     catalogMeasureId: null,
 };
 
@@ -56,13 +56,20 @@ const VALID_MEASURE_IMPACT_1: Omit<InstanceType<typeof CreateMeasureImpactReques
 
 const INVALID_MEASURE_NAME_MISSING: Omit<InstanceType<typeof CreateMeasureRequest>, "name"> = {
     description: "valid description test test",
-    scheduledAt: "2022-02-01 00:00:00+00",
+    scheduledAt: "2022-02-01",
     catalogMeasureId: null,
 };
 
 const INVALID_MEASURE_SCHEDULED_AT_MISSING: Omit<InstanceType<typeof CreateMeasureRequest>, "scheduledAt"> = {
     name: "valid threat",
     description: "valid description test test",
+    catalogMeasureId: null,
+};
+
+const INVALID_MEASURE_SCHEDULED_AT_TIMESTAMP: InstanceType<typeof CreateMeasureRequest> = {
+    name: "valid timestamp measure",
+    description: "valid description test test",
+    scheduledAt: "2022-02-01T00:00:00Z",
     catalogMeasureId: null,
 };
 
@@ -244,6 +251,16 @@ describe("get or create measures", () => {
         const res = await request(app)
             .post(`/api/projects/${projectId}/system/measures`)
             .send({ ...INVALID_MEASURE_SCHEDULED_AT_MISSING, threatId })
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(400);
+        expect(res.body.validationErrors).toBeDefined();
+    });
+
+    it("should not create a measure (scheduled at is a full timestamp, not a date)", async () => {
+        const res = await request(app)
+            .post(`/api/projects/${projectId}/system/measures`)
+            .send({ ...INVALID_MEASURE_SCHEDULED_AT_TIMESTAMP, threatId })
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(400);
