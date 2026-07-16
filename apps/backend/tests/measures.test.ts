@@ -73,6 +73,20 @@ const INVALID_MEASURE_SCHEDULED_AT_TIMESTAMP: InstanceType<typeof CreateMeasureR
     catalogMeasureId: null,
 };
 
+const INVALID_MEASURE_SCHEDULED_AT_NONEXISTENT_DAY: InstanceType<typeof CreateMeasureRequest> = {
+    name: "valid nonexistent-day measure",
+    description: "valid description test test",
+    scheduledAt: "2026-02-30",
+    catalogMeasureId: null,
+};
+
+const INVALID_MEASURE_SCHEDULED_AT_BAD_MONTH: InstanceType<typeof CreateMeasureRequest> = {
+    name: "valid bad-month measure",
+    description: "valid description test test",
+    scheduledAt: "2026-13-45",
+    catalogMeasureId: null,
+};
+
 const VALID_THREAT_1: Omit<InstanceType<typeof CreateThreatRequest>, "catalogThreatId"> = {
     pointOfAttackId: nanoid(),
     name: "valid threat",
@@ -261,6 +275,26 @@ describe("get or create measures", () => {
         const res = await request(app)
             .post(`/api/projects/${projectId}/system/measures`)
             .send({ ...INVALID_MEASURE_SCHEDULED_AT_TIMESTAMP, threatId })
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(400);
+        expect(res.body.validationErrors).toBeDefined();
+    });
+
+    it("should not create a measure (scheduledAt is a nonexistent calendar day)", async () => {
+        const res = await request(app)
+            .post(`/api/projects/${projectId}/system/measures`)
+            .send({ ...INVALID_MEASURE_SCHEDULED_AT_NONEXISTENT_DAY, threatId })
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(400);
+        expect(res.body.validationErrors).toBeDefined();
+    });
+
+    it("should not create a measure (scheduledAt has an out-of-range month/day)", async () => {
+        const res = await request(app)
+            .post(`/api/projects/${projectId}/system/measures`)
+            .send({ ...INVALID_MEASURE_SCHEDULED_AT_BAD_MONTH, threatId })
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(400);

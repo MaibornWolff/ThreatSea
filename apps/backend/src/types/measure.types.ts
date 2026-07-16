@@ -1,5 +1,15 @@
 import { ProjectIdParam } from "#types/project.types.js";
-import { IsDefined, IsInt, IsNotEmpty, IsString, Length, Matches, MaxLength, ValidateIf } from "class-validator";
+import {
+    IsDefined,
+    IsInt,
+    IsISO8601,
+    IsNotEmpty,
+    IsString,
+    Length,
+    Matches,
+    MaxLength,
+    ValidateIf,
+} from "class-validator";
 import {
     FIELD_MUST_BE_INT_MESSAGE,
     FIELD_MUST_BE_ISO_8601_DATE,
@@ -39,6 +49,7 @@ export class UpdateMeasureRequest {
     @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("scheduledAt") })
     @IsString({ message: FIELD_MUST_BE_STRING_MESSAGE("scheduledAt") })
     @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: FIELD_MUST_BE_ISO_8601_DATE("scheduledAt") })
+    @IsISO8601({ strict: true }, { message: FIELD_MUST_BE_ISO_8601_DATE("scheduledAt") })
     scheduledAt!: string;
 }
 
