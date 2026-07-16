@@ -6,7 +6,7 @@ interface TabHeader {
     property: string;
 }
 
-interface Tab {
+export interface Tab {
     name: string;
     items: object[];
     header: TabHeader[];

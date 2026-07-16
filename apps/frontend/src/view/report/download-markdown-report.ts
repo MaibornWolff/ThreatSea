@@ -1,5 +1,5 @@
 import type { ProjectReport } from "#api/types/project.types.ts";
-import type { RiskMatrix, Milestone } from "#application/hooks/use-report.hook.ts";
+import type { Milestone, RiskMatrix } from "#utils/report-risk.ts";
 import { generateMarkdownReport } from "./report-md";
 
 /**

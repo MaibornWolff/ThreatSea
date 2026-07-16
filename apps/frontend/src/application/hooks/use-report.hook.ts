@@ -1,77 +1,22 @@
 import type { ProjectReport } from "#api/types/project.types.ts";
 import type { SortDirection } from "#application/actions/list.actions.ts";
-import { exportAsExcelFile } from "#utils/export.ts";
-import { toDayNumber, createRiskMatrixDesign, addThreatsToRiskMatrix } from "#utils/riskMatrix.ts";
+import { createRiskMatrixDesign, addThreatsToRiskMatrix } from "#utils/riskMatrix.ts";
 import { useAlert } from "#application/hooks/use-alert.hook.ts";
 import { useState, useMemo, useEffect, useEffectEvent, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { ProjectsAPI } from "#api/projects.api.ts";
-import { calcRiskColour, calcNetRisk } from "#utils/calcRisk.ts";
-import type { MatrixColorKey } from "#view/colors/matrix.ts";
+import { calcRiskColour } from "#utils/calcRisk.ts";
+import {
+    calcNetRiskMatrix,
+    calcRiskBarGraph,
+    filterMeasuresByScheduledRange,
+    filterThreatsByScheduledRange,
+    type Milestone,
+    type RiskMatrix,
+} from "#utils/report-risk.ts";
 
 type ReportThreat = ProjectReport["threats"][number];
 type ReportMeasure = ProjectReport["measures"][number];
-export interface RiskMatrixCell {
-    color: MatrixColorKey;
-    amount?: number;
-}
-export type RiskMatrix = RiskMatrixCell[][];
-interface RiskBarGraph {
-    green: number;
-    yellow: number;
-    red: number;
-}
-
-export interface Milestone {
-    scheduledAt: Date;
-    matrix: RiskMatrix | null;
-    barGraph: RiskBarGraph | null;
-    measures?: ReportMeasure[];
-    active?: boolean;
-}
-
-const calcActiveMeasureNetRisk = (threat: ReportThreat, scheduledAt: Date) => {
-    const activeMeasures = threat.measures.filter((measure) => {
-        if (!measure.scheduledAt) {
-            return false;
-        }
-        const measureScheduledAt = toDayNumber(new Date(measure.scheduledAt));
-        return !Number.isNaN(measureScheduledAt) && measureScheduledAt <= toDayNumber(scheduledAt);
-    });
-    return calcNetRisk(threat.probability, threat.damage, activeMeasures);
-};
-
-const calcNetRiskMatrix = (
-    threats: ReportThreat[] | null | undefined,
-    matrix: RiskMatrix | null,
-    scheduledAt: Date
-): RiskMatrix | null => {
-    if (!threats || !matrix) {
-        return null;
-    }
-    return addThreatsToRiskMatrix(matrix, threats, (threat) => {
-        const { netProbability, netDamage } = calcActiveMeasureNetRisk(threat, scheduledAt);
-        return { probability: netProbability, damage: netDamage };
-    });
-};
-
-const calcRiskBarGraph = (matrix: RiskMatrix | null): RiskBarGraph | null => {
-    if (!matrix) {
-        return null;
-    }
-    return matrix.reduce(
-        (summary, row) => {
-            row.forEach((cell) => {
-                const { color, amount } = cell;
-                if (typeof amount === "number" && (color === "green" || color === "yellow" || color === "red")) {
-                    summary[color] += amount;
-                }
-            });
-            return summary;
-        },
-        { green: 0, yellow: 0, red: 0 } as RiskBarGraph
-    );
-};
 
 export const useReport = ({ projectId }: { projectId: number }) => {
     const {
@@ -147,27 +92,7 @@ export const useReport = ({ projectId }: { projectId: number }) => {
         if (!threats) {
             return null;
         }
-        if (!fromScheduledAt && !tillScheduledAt) {
-            return threats;
-        }
-        const from = fromScheduledAt ? new Date(fromScheduledAt) : null;
-        const till = tillScheduledAt ? new Date(tillScheduledAt) : null;
-        return threats.map((threat) => {
-            return {
-                ...threat,
-                measures: threat.measures.filter((measure) => {
-                    let result = true;
-                    const scheduledAtTime = measure.scheduledAt ? toDayNumber(new Date(measure.scheduledAt)) : NaN;
-                    if (from && toDayNumber(from) > scheduledAtTime) {
-                        result = false;
-                    }
-                    if (till && toDayNumber(till) < scheduledAtTime) {
-                        result = false;
-                    }
-                    return result;
-                }),
-            };
-        });
+        return filterThreatsByScheduledRange(threats, fromScheduledAt, tillScheduledAt);
     }, [threats, fromScheduledAt, tillScheduledAt]);
 
     const transformedThreats: (ReportThreat & { bruttoColor: string; nettoColor: string })[] | null = useMemo(() => {
@@ -205,22 +130,7 @@ export const useReport = ({ projectId }: { projectId: number }) => {
         if (!measures) {
             return null;
         }
-        if (!fromScheduledAt && !tillScheduledAt) {
-            return measures;
-        }
-        const from = fromScheduledAt ? toDayNumber(new Date(fromScheduledAt)) : null;
-        const till = tillScheduledAt ? toDayNumber(new Date(tillScheduledAt)) : null;
-        return measures.filter((measure) => {
-            let result = true;
-            const scheduledAt = measure.scheduledAt ? toDayNumber(new Date(measure.scheduledAt)) : NaN;
-            if (from && from > scheduledAt) {
-                result = false;
-            }
-            if (till && till < scheduledAt) {
-                result = false;
-            }
-            return result;
-        });
+        return filterMeasuresByScheduledRange(measures, fromScheduledAt, tillScheduledAt);
     }, [measures, fromScheduledAt, tillScheduledAt]);
 
     const bruttoMatrix: RiskMatrix | null = useMemo(() => {
@@ -311,272 +221,6 @@ export const useReport = ({ projectId }: { projectId: number }) => {
         return threatsCopy;
     }, [transformedThreats, sortBy, sortDirection]);
 
-    const fullExportAsExcel = (
-        project: { name: string; confidentialityLevel: unknown },
-        reportData: ProjectReport | null
-    ) => {
-        if (!reportData) {
-            return;
-        }
-
-        const { threats, measures, assets, measureImpacts } = reportData;
-
-        const finalThreats = threats
-            .map((threat) => {
-                const assetIds = threat.assets.map((a) => a.id).join(", ");
-                const assetNames = threat.assets.map((a) => a.name ?? "").join(", ");
-                if (threat.measures.length > 0) {
-                    const relevantMeasures = threat.measures.map((measure) => measure.measureId).join(", ");
-                    const relevantMeasureNames = threat.measures.map((measure) => measure.name ?? "").join(", ");
-                    return {
-                        ...threat,
-                        assetIds,
-                        assetNames,
-                        relevantMeasures,
-                        relevantMeasureNames,
-                    };
-                } else {
-                    return {
-                        ...threat,
-                        assetIds,
-                        assetNames,
-                        relevantMeasures: "",
-                        relevantMeasureNames: "",
-                    };
-                }
-            })
-            .sort((a, b) => a.id - b.id);
-
-        const modifiedMeasures = measures.map((measure) => {
-            const impactedThreatIds = measure.threats.map((threat) => threat.id).join(", ");
-            const impactedThreatNames = measure.threats.map((threat) => threat.name ?? "").join(", ");
-
-            return {
-                ...measure,
-                impactedThreatIds,
-                impactedThreatNames,
-                description: "description" in measure && measure.description ? measure.description : "",
-            };
-        });
-
-        const modifiedMeasureImpacts = measureImpacts.map((measureImpact) => {
-            return {
-                ...measureImpact,
-                damage: measureImpact.damage === null ? "no Impact" : measureImpact.damage,
-                probability: measureImpact.probability === null ? "no Impact" : measureImpact.probability,
-            };
-        });
-
-        const fileName =
-            Date.now() +
-            "_" +
-            project.name +
-            "-" +
-            String(project.confidentialityLevel ?? "").toUpperCase() +
-            "_export.xlsx";
-
-        exportAsExcelFile(
-            [
-                {
-                    items: assets,
-                    name: "Assets",
-                    header: [
-                        {
-                            label: "ID",
-                            property: "id",
-                        },
-                        {
-                            label: "Name",
-                            property: "name",
-                        },
-                        {
-                            label: "Description",
-                            property: "description",
-                        },
-                        {
-                            label: "Confidentiality",
-                            property: "confidentiality",
-                        },
-                        {
-                            label: "Integrity",
-                            property: "integrity",
-                        },
-                        {
-                            label: "Availability",
-                            property: "availability",
-                        },
-                        {
-                            label: "Justification for Confidentiality",
-                            property: "confidentialityJustification",
-                        },
-                        {
-                            label: "Justification for Integrity",
-                            property: "integrityJustification",
-                        },
-                        {
-                            label: "Justification for Availability",
-                            property: "availabilityJustification",
-                        },
-                    ],
-                },
-                {
-                    items: finalThreats,
-                    name: "Threats",
-                    header: [
-                        {
-                            label: "ID",
-                            property: "id",
-                        },
-                        {
-                            label: "Name",
-                            property: "name",
-                        },
-                        {
-                            label: "Asset IDs",
-                            property: "assetIds",
-                        },
-                        {
-                            label: "Asset Names",
-                            property: "assetNames",
-                        },
-                        {
-                            label: "Component",
-                            property: "componentName",
-                        },
-                        {
-                            label: "Point of Attack",
-                            property: "pointOfAttack",
-                        },
-                        {
-                            label: "Attacker",
-                            property: "attacker",
-                        },
-                        {
-                            label: "Description",
-                            property: "description",
-                        },
-                        {
-                            label: "Confidentiality",
-                            property: "confidentiality",
-                        },
-                        {
-                            label: "Integrity",
-                            property: "integrity",
-                        },
-                        {
-                            label: "Availability",
-                            property: "availability",
-                        },
-                        {
-                            label: "Probability",
-                            property: "probability",
-                        },
-                        {
-                            label: "Damage",
-                            property: "damage",
-                        },
-                        {
-                            label: "Risk",
-                            property: "risk",
-                        },
-                        {
-                            label: "Net Probability",
-                            property: "netProbability",
-                        },
-                        {
-                            label: "Net Damage",
-                            property: "netDamage",
-                        },
-                        {
-                            label: "Net Risk",
-                            property: "netRisk",
-                        },
-                        {
-                            label: "Relevant Measures",
-                            property: "relevantMeasures",
-                        },
-                        {
-                            label: "Relevant Measure Names",
-                            property: "relevantMeasureNames",
-                        },
-                    ],
-                },
-                {
-                    items: modifiedMeasures,
-                    name: "Measures",
-                    header: [
-                        {
-                            label: "ID",
-                            property: "id",
-                        },
-                        {
-                            label: "Name",
-                            property: "name",
-                        },
-                        {
-                            label: "Description",
-                            property: "description",
-                        },
-                        {
-                            label: "ScheduledAt",
-                            property: "scheduledAt",
-                        },
-                        {
-                            label: "Impacted Threats IDs",
-                            property: "impactedThreatIds",
-                        },
-                        {
-                            label: "Impacted Threats Names",
-                            property: "impactedThreatNames",
-                        },
-                    ],
-                },
-                {
-                    items: modifiedMeasureImpacts,
-                    name: "Measure Impacts",
-                    header: [
-                        {
-                            label: "MeasureID",
-                            property: "measureId",
-                        },
-                        {
-                            label: "ThreatID",
-                            property: "threatId",
-                        },
-                        {
-                            label: "Description",
-                            property: "description",
-                        },
-                        {
-                            label: "Sets the threat out of scope",
-                            property: "setsOutOfScope",
-                        },
-                        {
-                            label: "Impacts the Probability of the Threat",
-                            property: "impactsProbability",
-                        },
-                        {
-                            label: "Impacts the Damage of the Threat",
-                            property: "impactsDamage",
-                        },
-                        {
-                            label: "Probability After",
-                            property: "probability",
-                        },
-                        {
-                            label: "Damage After",
-                            property: "damage",
-                        },
-                    ],
-                },
-            ],
-            fileName
-        ).catch((error) => {
-            console.error("Excel export failed", error);
-            showErrorMessage({ message: t("errorMessages.excelExportFailed") });
-        });
-    };
-
     return {
         riskMatrixMeasures,
         data,
@@ -621,6 +265,5 @@ export const useReport = ({ projectId }: { projectId: number }) => {
         setShowThreatsPage,
         setSystemImageOnSeparatePage,
         setReportLanguage,
-        fullExportAsExcel,
     };
 };
