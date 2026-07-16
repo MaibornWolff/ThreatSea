@@ -199,7 +199,7 @@ export const createMeasure = (overrides: Partial<Measure> = {}): Measure => ({
     id: 1,
     name: "Test Measure",
     description: "",
-    scheduledAt: new Date("2025-01-01"),
+    scheduledAt: "2025-01-01",
     projectId: 1,
     catalogMeasureId: null,
     createdAt: new Date("2025-01-01"),
@@ -208,7 +208,7 @@ export const createMeasure = (overrides: Partial<Measure> = {}): Measure => ({
 });
 
 export const createReportMilestone = (overrides: Partial<Milestone> = {}): Milestone & { active: boolean } => ({
-    scheduledAt: new Date("2025-01-01"),
+    scheduledAt: "2025-01-01",
     matrix: null,
     barGraph: null,
     active: false,
@@ -238,7 +238,7 @@ export const createThreatMeasure = (overrides: Partial<ThreatMeasure> = {}): Thr
     netDamage: null,
     measureId: 1,
     measureName: "Test Measure",
-    measureScheduleAt: new Date("2025-01-01"),
+    measureScheduleAt: "2025-01-01",
     threatName: "Test Threat",
     measure: createMeasure(),
     measureImpact: createMeasureImpact(),

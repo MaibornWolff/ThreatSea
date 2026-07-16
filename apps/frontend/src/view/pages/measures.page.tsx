@@ -37,7 +37,7 @@ interface MeasuresPageBodyProps {
  */
 type MeasureDialogState = Omit<Partial<Measure>, "id" | "scheduledAt"> & {
     id?: number | undefined;
-    scheduledAt?: Date | undefined;
+    scheduledAt?: string | undefined;
     active?: boolean;
 };
 
@@ -121,13 +121,7 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
 
     const onClickEditMeasure = (event: React.MouseEvent<HTMLElement>, measure: Measure) => {
         event.preventDefault();
-        const scheduledAt = new Date(
-            measure.scheduledAt.getTime() - measure.scheduledAt.getTimezoneOffset() * 60 * 1000
-        );
-        const measureState: MeasureDialogState = {
-            ...measure,
-            scheduledAt,
-        };
+        const measureState: MeasureDialogState = { ...measure };
         navigate(`/projects/${projectIdParam}/measures/edit`, {
             state: {
                 project,
@@ -378,9 +372,7 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                                                                     fontSize: "0.875rem",
                                                                 }}
                                                             >
-                                                                {scheduledAt
-                                                                    ? scheduledAt.toISOString().split("T")[0]
-                                                                    : t("notScheduledYet")}
+                                                                {scheduledAt ? scheduledAt : t("notScheduledYet")}
                                                             </Typography>
                                                         </CustomTableCell>
                                                         <CustomTableCell

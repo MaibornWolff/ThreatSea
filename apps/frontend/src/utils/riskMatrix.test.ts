@@ -1,4 +1,9 @@
-import { createRiskMatrixDesign, addThreatsToRiskMatrix, type RiskMatrixCellBase } from "#utils/riskMatrix.ts";
+import {
+    createRiskMatrixDesign,
+    addThreatsToRiskMatrix,
+    dayNumberFromDateString,
+    type RiskMatrixCellBase,
+} from "#utils/riskMatrix.ts";
 import { calcRiskColour } from "#utils/calcRisk.ts";
 
 describe("createRiskMatrixDesign", () => {
@@ -267,5 +272,21 @@ describe("addThreatsToRiskMatrix", () => {
             damage: t.damage,
         }));
         result.flat().forEach((cell) => expect(cell.amount).toBeUndefined());
+    });
+});
+
+describe("dayNumberFromDateString", () => {
+    it("maps known dates to their exact UTC day-number", () => {
+        expect(dayNumberFromDateString("1970-01-01")).toBe(0);
+        expect(dayNumberFromDateString("1970-01-11")).toBe(10);
+        expect(dayNumberFromDateString("2026-03-15")).toBe(Math.floor(Date.UTC(2026, 2, 15) / 86_400_000));
+    });
+
+    it("increments by exactly 1 for consecutive days", () => {
+        expect(dayNumberFromDateString("2026-03-16") - dayNumberFromDateString("2026-03-15")).toBe(1);
+    });
+
+    it("orders dates chronologically", () => {
+        expect(dayNumberFromDateString("2025-12-31")).toBeLessThan(dayNumberFromDateString("2026-01-01"));
     });
 });

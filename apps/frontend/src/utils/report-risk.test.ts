@@ -14,25 +14,25 @@ describe("filterThreatsByScheduledRange", () => {
     });
 
     it("keeps only the measures scheduled inside the range", () => {
-        const january = createReportThreatMeasure({ scheduledAt: "2025-01-15T00:00:00.000Z" });
-        const june = createReportThreatMeasure({ scheduledAt: "2025-06-15T00:00:00.000Z" });
+        const january = createReportThreatMeasure({ scheduledAt: "2025-01-15" });
+        const june = createReportThreatMeasure({ scheduledAt: "2025-06-15" });
         const threat = createReportThreat({ measures: [january, june] });
 
         const filtered = filterThreatsByScheduledRange([threat], "2025-01-01", "2025-01-31")[0]!;
 
         expect(filtered.measures).toHaveLength(1);
-        expect(filtered.measures[0]!.scheduledAt).toBe("2025-01-15T00:00:00.000Z");
+        expect(filtered.measures[0]!.scheduledAt).toBe("2025-01-15");
     });
 
     it("recomputes the net values from the surviving measures only (issue #877)", () => {
         // Gross 4 x 5 = 20. January measure lowers probability to 2, June measure lowers damage to 3.
         const january = createReportThreatMeasure({
-            scheduledAt: "2025-01-15T00:00:00.000Z",
+            scheduledAt: "2025-01-15",
             impactsProbability: true,
             probability: 2,
         });
         const june = createReportThreatMeasure({
-            scheduledAt: "2025-06-15T00:00:00.000Z",
+            scheduledAt: "2025-06-15",
             impactsDamage: true,
             damage: 3,
         });
@@ -55,7 +55,7 @@ describe("filterThreatsByScheduledRange", () => {
 
     it("restores the gross net values when the range excludes every measure", () => {
         const measure = createReportThreatMeasure({
-            scheduledAt: "2025-06-15T00:00:00.000Z",
+            scheduledAt: "2025-06-15",
             impactsProbability: true,
             probability: 1,
         });
@@ -77,7 +77,7 @@ describe("filterThreatsByScheduledRange", () => {
     });
 
     it("excludes measures without a scheduledAt", () => {
-        const dated = createReportThreatMeasure({ scheduledAt: "2025-01-15T00:00:00.000Z" });
+        const dated = createReportThreatMeasure({ scheduledAt: "2025-01-15" });
         const undatedMeasure = createReportThreatMeasure({ scheduledAt: undefined });
         const threat = createReportThreat({ measures: [dated, undatedMeasure] });
 
@@ -88,8 +88,8 @@ describe("filterThreatsByScheduledRange", () => {
     });
 
     it("treats both range bounds as inclusive", () => {
-        const onFrom = createReportThreatMeasure({ scheduledAt: "2025-01-01T00:00:00.000Z" });
-        const onTill = createReportThreatMeasure({ scheduledAt: "2025-01-31T00:00:00.000Z" });
+        const onFrom = createReportThreatMeasure({ scheduledAt: "2025-01-01" });
+        const onTill = createReportThreatMeasure({ scheduledAt: "2025-01-31" });
         const threat = createReportThreat({ measures: [onFrom, onTill] });
 
         const filtered = filterThreatsByScheduledRange([threat], "2025-01-01", "2025-01-31")[0]!;
@@ -105,8 +105,8 @@ describe("filterMeasuresByScheduledRange", () => {
     });
 
     it("keeps only the measures scheduled inside the range", () => {
-        const january = createReportMeasure({ id: 1, scheduledAt: new Date("2025-01-15") });
-        const june = createReportMeasure({ id: 2, scheduledAt: new Date("2025-06-15") });
+        const january = createReportMeasure({ id: 1, scheduledAt: "2025-01-15" });
+        const june = createReportMeasure({ id: 2, scheduledAt: "2025-06-15" });
 
         const filtered = filterMeasuresByScheduledRange([january, june], "2025-01-01", "2025-01-31");
 
@@ -115,8 +115,8 @@ describe("filterMeasuresByScheduledRange", () => {
     });
 
     it("applies only the lower bound when the upper bound is absent", () => {
-        const january = createReportMeasure({ id: 1, scheduledAt: new Date("2025-01-15") });
-        const june = createReportMeasure({ id: 2, scheduledAt: new Date("2025-06-15") });
+        const january = createReportMeasure({ id: 1, scheduledAt: "2025-01-15" });
+        const june = createReportMeasure({ id: 2, scheduledAt: "2025-06-15" });
 
         const filtered = filterMeasuresByScheduledRange([january, june], "2025-03-01", null);
 
@@ -127,18 +127,18 @@ describe("filterMeasuresByScheduledRange", () => {
 describe("calcActiveMeasureNetRisk", () => {
     it("applies only the measures scheduled on or before the given date", () => {
         const early = createReportThreatMeasure({
-            scheduledAt: "2025-01-15T00:00:00.000Z",
+            scheduledAt: "2025-01-15",
             impactsProbability: true,
             probability: 2,
         });
         const late = createReportThreatMeasure({
-            scheduledAt: "2025-06-15T00:00:00.000Z",
+            scheduledAt: "2025-06-15",
             impactsDamage: true,
             damage: 1,
         });
         const threat = createReportThreat({ probability: 4, damage: 5, measures: [early, late] });
 
-        const { netProbability, netDamage, netRisk } = calcActiveMeasureNetRisk(threat, new Date("2025-03-01"));
+        const { netProbability, netDamage, netRisk } = calcActiveMeasureNetRisk(threat, "2025-03-01");
 
         expect(netProbability).toBe(2);
         expect(netDamage).toBe(5);

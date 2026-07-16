@@ -1,7 +1,7 @@
 export interface CreateMeasureRequest {
     name: string;
     description: string;
-    scheduledAt: Date;
+    scheduledAt: string;
     projectId: number;
     catalogMeasureId?: number;
 }
@@ -15,7 +15,7 @@ export interface Measure {
     id: number;
     name: string;
     description: string;
-    scheduledAt: Date;
+    scheduledAt: string;
     projectId: number;
     catalogMeasureId: number | null;
     createdAt: Date;

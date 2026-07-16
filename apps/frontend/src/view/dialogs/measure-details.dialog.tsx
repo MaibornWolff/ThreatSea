@@ -74,7 +74,7 @@ const MeasureDetailsDialog = ({ project, measure, initialTab, ...props }: Measur
             id: measure?.id,
             name: measure?.name ?? "",
             description: measure?.description ?? "",
-            scheduledAt: measure?.scheduledAt?.toISOString()?.split("T")[0] ?? null,
+            scheduledAt: measure?.scheduledAt ?? null,
             catalogMeasureId: measure?.catalogMeasureId ?? null,
         },
     });

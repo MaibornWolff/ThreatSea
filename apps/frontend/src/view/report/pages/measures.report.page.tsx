@@ -10,7 +10,7 @@ import type { IndexCallback, ProjectReport } from "#api/types/project.types.ts";
 import { colors } from "#view/wrappers/color-tokens.ts";
 
 type ReportMeasure = Omit<ProjectReport["measures"][number], "scheduledAt"> & {
-    scheduledAt: string | Date;
+    scheduledAt: string;
     reportId?: string;
 };
 
@@ -86,7 +86,6 @@ export const MeasuresDetailsPage = ({
 };
 
 const MeasureCard = ({ language, reportId, id, name, description, scheduledAt, threats }: MeasureCardProps) => {
-    const scheduledAtDate = typeof scheduledAt === "string" ? new Date(scheduledAt) : new Date(scheduledAt.getTime());
     const fitsOnOnePage = measureCardFitsOnOnePage({ name, description, threats });
     return (
         <View
@@ -135,7 +134,7 @@ const MeasureCard = ({ language, reportId, id, name, description, scheduledAt, t
                         fontStyle: "italic",
                     }}
                 >
-                    {scheduledAtDate.toISOString().split("T")[0]}
+                    {scheduledAt}
                 </Text>
                 <View
                     style={{

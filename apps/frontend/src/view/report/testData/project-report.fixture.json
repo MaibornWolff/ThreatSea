@@ -125,7 +125,7 @@
                     "projectId": 1,
                     "reportId": "M-01",
                     "name": "Input Validation",
-                    "scheduledAt": "2024-06-01T00:00:00.000Z",
+                    "scheduledAt": "2024-06-01",
                     "createdAt": "2024-01-01T00:00:00.000Z",
                     "updatedAt": "2024-01-01T00:00:00.000Z"
                 }
@@ -177,7 +177,7 @@
             "id": 1,
             "name": "Input Validation",
             "description": "Use parameterised queries and input sanitisation to prevent injection attacks.",
-            "scheduledAt": "2024-06-01T00:00:00.000Z",
+            "scheduledAt": "2024-06-01",
             "projectId": 1,
             "catalogMeasureId": null,
             "reportId": "M-01",

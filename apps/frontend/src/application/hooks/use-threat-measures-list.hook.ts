@@ -17,7 +17,7 @@ export interface ThreatMeasure {
     netDamage: number | null;
     measureId: number;
     measureName: string;
-    measureScheduleAt: Date | null;
+    measureScheduleAt: string | null;
     threatName?: string;
     measure: Measure;
     measureImpact: MeasureImpact;

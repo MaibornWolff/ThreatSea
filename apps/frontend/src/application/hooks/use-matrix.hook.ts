@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
 import { calcNetRisk } from "#utils/calcRisk.ts";
-import { createRiskMatrixDesign, addThreatsToRiskMatrix, toDayNumber } from "#utils/riskMatrix.ts";
+import { createRiskMatrixDesign, addThreatsToRiskMatrix, dayNumberFromDateString } from "#utils/riskMatrix.ts";
 import { useCatalogMeasures } from "./use-catalog-measures.hook.ts";
 import { useMeasureImpacts } from "./use-measureImpacts.hook.ts";
 import { useMeasures } from "./use-measures.hook.ts";
@@ -19,7 +19,7 @@ export interface ThreatMeasure {
     catalogMeasureId: number | null;
     name: string;
     description: string;
-    scheduledAt: Date;
+    scheduledAt: string;
     measureImpact: MeasureImpact | undefined;
 }
 
@@ -45,14 +45,14 @@ export type MatrixGrid = MatrixCell[][];
 interface TimelineMark {
     value: number;
     tooltipText: string;
-    date: Date | null;
+    date: string | null;
     label: string;
 }
 
 export interface TimelineData {
     marks: TimelineMark[];
-    startDate: Date;
-    endDate: Date;
+    startDate: string;
+    endDate: string;
     minValue: number;
     maxValue: number;
 }
@@ -86,7 +86,7 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
     const [currentGreenValue, setCurrentGreenValue] = useState<number>(defaultGreen);
     const [currentRedValue, setCurrentRedValue] = useState<number>(defaultRed);
     const [selectedCell, setSelectedCell] = useState<SelectedMatrixCell | null>(null);
-    const [timelineDate, setTimelineDate] = useState<Date | null>(null);
+    const [timelineDate, setTimelineDate] = useState<string | null>(null);
     const [threatSearchValue, setThreatSearchValue] = useState<string>("");
     const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
     const [sortBy, setSortBy] = useState<"name" | "newProbability" | "newRisk" | "componentName">("name");
@@ -114,7 +114,9 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
                             })
                             .map((measure) => {
                                 const active =
-                                    !!timelineDate && toDayNumber(timelineDate) >= toDayNumber(measure.scheduledAt);
+                                    !!timelineDate &&
+                                    dayNumberFromDateString(timelineDate) >=
+                                        dayNumberFromDateString(measure.scheduledAt);
                                 return {
                                     measureId: measure.id,
                                     active: active,
@@ -204,26 +206,24 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
 
     const timeline: TimelineData = useMemo(() => {
         if (measures.length === 0) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
             return {
                 marks: [],
-                startDate: today,
-                endDate: today,
+                startDate: "",
+                endDate: "",
                 minValue: -1,
                 maxValue: 0,
             };
         }
 
-        const startDate = measures[0]?.scheduledAt ?? new Date();
-        const endDate = measures[measures.length - 1]?.scheduledAt ?? new Date();
-        const maxDate = toDayNumber(endDate);
-        const minDate = toDayNumber(startDate);
+        const startDate = measures[0]?.scheduledAt ?? "";
+        const endDate = measures[measures.length - 1]?.scheduledAt ?? "";
+        const maxDate = dayNumberFromDateString(endDate);
+        const minDate = dayNumberFromDateString(startDate);
         const minValue = -1;
         const maxValue = maxDate - minDate;
         const marks: TimelineMark[] = measures.map((measure) => {
-            const value = toDayNumber(measure.scheduledAt) - minDate;
-            const tooltipText = measure.scheduledAt.toISOString().split("T")[0] ?? "";
+            const value = dayNumberFromDateString(measure.scheduledAt) - minDate;
+            const tooltipText = measure.scheduledAt;
             return {
                 value: value,
                 tooltipText: tooltipText,

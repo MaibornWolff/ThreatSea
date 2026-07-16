@@ -110,8 +110,7 @@ describe("useReport", () => {
     it("groups milestones by measure date and toggles active via riskMatrixMeasures", async () => {
         const report = createProjectReport({
             threats: [createReportThreat({ id: 1 })],
-            // report measures arrive as ISO strings over the wire, despite the Date type
-            measures: [createReportMeasure({ scheduledAt: "2025-01-01T00:00:00.000Z" as unknown as Date })],
+            measures: [createReportMeasure({ scheduledAt: "2025-01-01T00:00:00.000Z" })],
         });
         const { result } = renderUseReport(report);
 

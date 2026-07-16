@@ -69,7 +69,7 @@ const TimeSlider = styled(Slider)(({ theme }) => ({
 
 interface MeasureTimelineProps extends Omit<BoxProps, "onChange"> {
     timeline: TimelineData;
-    onChange: (event: Event, date: Date | null) => void;
+    onChange: (event: Event, date: string | null) => void;
     sx?: SxProps<Theme>;
 }
 

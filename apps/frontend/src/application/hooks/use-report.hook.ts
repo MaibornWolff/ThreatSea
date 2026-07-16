@@ -1,6 +1,6 @@
 import type { ProjectReport } from "#api/types/project.types.ts";
 import type { SortDirection } from "#application/actions/list.actions.ts";
-import { createRiskMatrixDesign, addThreatsToRiskMatrix } from "#utils/riskMatrix.ts";
+import { createRiskMatrixDesign, addThreatsToRiskMatrix, dayNumberFromDateString } from "#utils/riskMatrix.ts";
 import { useAlert } from "#application/hooks/use-alert.hook.ts";
 import { useState, useMemo, useEffect, useEffectEvent, useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -166,8 +166,8 @@ export const useReport = ({ projectId }: { projectId: number }) => {
                 if (!item.scheduledAt) {
                     return obj;
                 }
-                const scheduledAt = new Date(item.scheduledAt.toString().substring(0, 10));
-                const scheduledAtTime = scheduledAt.getTime();
+                const scheduledAt = item.scheduledAt.slice(0, 10);
+                const scheduledAtTime = dayNumberFromDateString(scheduledAt);
                 if (Number.isNaN(scheduledAtTime)) {
                     return obj;
                 }
@@ -187,7 +187,7 @@ export const useReport = ({ projectId }: { projectId: number }) => {
             },
             {} as Record<number, Milestone>
         );
-        return Object.values(map).sort((a, b) => (a.scheduledAt.getTime() < b.scheduledAt.getTime() ? -1 : 1));
+        return Object.values(map).sort((a, b) => (a.scheduledAt < b.scheduledAt ? -1 : 1));
     }, [filteredMeasures, filteredThreats, matrixDesign]);
 
     const transformedMilestones: Milestone[] | null = useMemo(() => {
@@ -196,10 +196,9 @@ export const useReport = ({ projectId }: { projectId: number }) => {
         }
         return milestones.map((milestone) => {
             const { scheduledAt } = milestone;
-            const id = scheduledAt.toISOString().substring(0, 10);
             return {
                 ...milestone,
-                active: riskMatrixMeasures.includes(id),
+                active: riskMatrixMeasures.includes(scheduledAt),
             };
         });
     }, [milestones, riskMatrixMeasures]);

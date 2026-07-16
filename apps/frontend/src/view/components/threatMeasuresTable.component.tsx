@@ -218,7 +218,7 @@ const ThreatMeasuresTableRow = ({
                     fontSize: "0.875rem",
                 }}
             >
-                {measureScheduleAt ? measureScheduleAt.toISOString().split("T")[0] : t("notScheduledYet")}
+                {measureScheduleAt ? measureScheduleAt : t("notScheduledYet")}
             </TableCell>
             {setsOutOfScope && (
                 <TableCell

@@ -11,7 +11,7 @@ import type { Milestone, RiskMatrix } from "#utils/report-risk.ts";
 
 type ThreatReport = ProjectReport["threats"][number];
 type ReportMeasure = Omit<ProjectReport["measures"][number], "scheduledAt"> & {
-    scheduledAt: string | Date;
+    scheduledAt: string;
     reportId?: string;
 };
 type AssetWithReportId = ProjectReport["assets"][number];
@@ -458,8 +458,7 @@ function matrixSection(
     if (activeMilestones && activeMilestones.length > 0) {
         activeMilestones.forEach((milestone) => {
             if (milestone.matrix) {
-                const title = milestone.scheduledAt.toISOString().split("T")[0];
-                lines.push(renderMatrix(T, milestone.matrix, title ?? ""));
+                lines.push(renderMatrix(T, milestone.matrix, milestone.scheduledAt));
                 lines.push("");
             }
         });
@@ -550,11 +549,7 @@ function measuresSection(T: Translations, measures: ReportMeasure[]): string {
         lines.push(`*ID: ${escapeInline(String(measure.id))}*`);
         lines.push("");
 
-        const scheduledAtDate =
-            typeof measure.scheduledAt === "string"
-                ? new Date(measure.scheduledAt)
-                : new Date(measure.scheduledAt.getTime());
-        lines.push(`*${scheduledAtDate.toISOString().split("T")[0]}*`);
+        lines.push(`*${measure.scheduledAt}*`);
         lines.push("");
 
         if (measure.description && measure.description.length > 0) {

@@ -208,7 +208,7 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
     };
 
     const onChangeActiveMilestone = (milestone: ReportMilestone, value: boolean) => {
-        const id = milestone.scheduledAt.toISOString().substring(0, 10);
+        const id = milestone.scheduledAt;
         if (value && !riskMatrixMeasures.includes(id)) {
             setRiskMatrixMeasures([...riskMatrixMeasures, id]);
             setIsChanged(true);

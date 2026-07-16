@@ -6,7 +6,8 @@ export interface RiskMatrixCellBase {
     amount?: number;
 }
 
-export const toDayNumber = (date: Date): number => Math.floor(date.getTime() / 1000 / 3600 / 24);
+export const dayNumberFromDateString = (date: string): number =>
+    Math.floor(Date.UTC(+date.slice(0, 4), +date.slice(5, 7) - 1, +date.slice(8, 10)) / 86_400_000);
 
 /**
  * Create empty 5x5 risk-matrix-"design" (only background)
