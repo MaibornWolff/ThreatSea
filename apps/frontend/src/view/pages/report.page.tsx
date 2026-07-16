@@ -337,8 +337,11 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
                                 justifyContent: "flex-end",
                             }}
                         >
-                            {isChanged ? (
+                            {isChanged || error ? (
                                 <Box sx={{ marginTop: 2, display: "flex", alignItems: "center" }}>
+                                    {error && (
+                                        <Typography sx={{ marginRight: 1, color: "error.main" }}>{error}</Typography>
+                                    )}
                                     <Button sx={{ marginRight: 1 }} onClick={onClickRefresh}>
                                         {t("createBtn")}
                                     </Button>
@@ -356,9 +359,7 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
                                         marginTop: 2,
                                     }}
                                 >
-                                    {error ? (
-                                        <Typography>{error}</Typography>
-                                    ) : url ? (
+                                    {url ? (
                                         <>
                                             <Button
                                                 component="a"
