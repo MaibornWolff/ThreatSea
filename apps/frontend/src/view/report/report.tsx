@@ -55,7 +55,7 @@ Font.register({
     ],
 });
 
-interface ReportProps {
+export interface ReportProps {
     tillScheduledAt?: string | null;
     showCoverPage?: boolean;
     showTableOfContentsPage?: boolean;

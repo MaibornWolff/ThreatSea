@@ -24,6 +24,7 @@ import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 import { CONFIDENTIALITY_LEVELS } from "#utils/confidentiality.ts";
 import { DEFAULT_ANNOTATION_COLOR } from "#view/colors/annotation.colors.ts";
+import type { Milestone } from "#utils/report-risk.ts";
 
 export const createAsset = (overrides: Partial<Asset> = {}): Asset => ({
     id: 1,
@@ -203,6 +204,14 @@ export const createMeasure = (overrides: Partial<Measure> = {}): Measure => ({
     catalogMeasureId: null,
     createdAt: new Date("2025-01-01"),
     updatedAt: new Date("2025-01-01"),
+    ...overrides,
+});
+
+export const createReportMilestone = (overrides: Partial<Milestone> = {}): Milestone & { active: boolean } => ({
+    scheduledAt: new Date("2025-01-01"),
+    matrix: null,
+    barGraph: null,
+    active: false,
     ...overrides,
 });
 

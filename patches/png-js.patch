@@ -1,0 +1,53 @@
+diff --git a/lib/png-js.browser.cjs b/lib/png-js.browser.cjs
+index 07a7e40f789124e5ff4c405f20139a8a78f1ca8e..cdfd346485fb690ef2e5eae95dce6905f4f3d06e 100644
+--- a/lib/png-js.browser.cjs
++++ b/lib/png-js.browser.cjs
+@@ -2,7 +2,20 @@
+ 
+ var fflate = require('fflate');
+ 
+-const inflate = fflate.unzlib ;
++// PATCH (ThreatSea): fflate's async unzlib spawns a nested Web Worker, which
++// intermittently never responds inside a Firefox worker, hanging PNG decoding
++// (and any PDF render waiting on it) forever. unzlibSync is the same codec
++// without the worker round-trip.
++const inflate = (data, callback) => {
++  let result;
++  try {
++    result = fflate.unzlibSync(data);
++  } catch (error) {
++    callback(error);
++    return;
++  }
++  callback(null, result);
++};
+ 
+ class PNG {
+   static decode(path, fn) {
+diff --git a/lib/png-js.browser.js b/lib/png-js.browser.js
+index 4c044145b32940d72585d62741096ecef718c57e..c683cb549a01ca9182bc0092bf8f379d8e9f5205 100644
+--- a/lib/png-js.browser.js
++++ b/lib/png-js.browser.js
+@@ -1,6 +1,19 @@
+-import { unzlib } from 'fflate';
+-
+-const inflate = unzlib ;
++import { unzlibSync } from 'fflate';
++
++// PATCH (ThreatSea): fflate's async unzlib spawns a nested Web Worker, which
++// intermittently never responds inside a Firefox worker, hanging PNG decoding
++// (and any PDF render waiting on it) forever. unzlibSync is the same codec
++// without the worker round-trip.
++const inflate = (data, callback) => {
++  let result;
++  try {
++    result = unzlibSync(data);
++  } catch (error) {
++    callback(error);
++    return;
++  }
++  callback(null, result);
++};
+ 
+ class PNG {
+   static decode(path, fn) {
