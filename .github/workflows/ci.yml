@@ -170,7 +170,7 @@ jobs:
         uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4
-      - uses: rlespinasse/github-slug-action@e6f261660910b273384c5c42b17a0217881b217a # v5
+      - uses: rlespinasse/github-slug-action@ef93b2ea4b6405d06fd8684fc3ff795d262ecae8 # v5
       - name: Build Container Image
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
         with:
