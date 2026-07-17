@@ -27,10 +27,14 @@ test("authenticate", async ({ page, browserName }) => {
     await page.goto(`${process.env["API_URI"]}/api/auth/login?testUser=${accountId}`);
     await page.waitForURL("http://localhost:3000/**", { timeout: 15000 });
 
-    // Navigate to /projects — initializes the app and writes csrfToken to localStorage.
+    // Navigate to /projects — initializes the app, which writes csrfToken to localStorage
+    // asynchronously (App mount effect -> startTokenRefresh). Poll for the token instead of
+    // reading once after networkidle, which can settle before that async write completes.
     await page.goto("/projects");
-    await page.waitForLoadState("networkidle");
-    const csrfToken = await page.evaluate(() => localStorage.getItem("csrfToken"));
+    const csrfTokenHandle = await page.waitForFunction(() => localStorage.getItem("csrfToken"), null, {
+        timeout: 15000,
+    });
+    const csrfToken = await csrfTokenHandle.jsonValue();
     expect(csrfToken).toBeTruthy();
 
     await page.context().storageState({ path: authFile });
