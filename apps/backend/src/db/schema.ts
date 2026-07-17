@@ -37,9 +37,7 @@ export const PointsOfAttackEnum = pgEnum("point_of_attack", POINTS_OF_ATTACK);
 
 export const StandardIconsEnum = pgEnum("standard_icon", STANDARD_ICONS);
 
-// Physical DB name kept as "child_threat_status" for now (the physical rename to threats is deferred
-// pending release strategy); the code-level symbol is already the plain Threat vocabulary.
-export const ThreatStatusesEnum = pgEnum("child_threat_status", THREAT_STATUSES);
+export const ThreatStatusesEnum = pgEnum("threat_status", THREAT_STATUSES);
 
 export type CreateAsset = Omit<typeof assets.$inferInsert, DefaultFields>;
 export type UpdateAsset = Omit<CreateAsset, "projectId">;
@@ -214,7 +212,7 @@ export const measureImpacts = pgTable(
         updatedAt: timestamp({ mode: "string", withTimezone: true })
             .notNull()
             .default(sql`now()`),
-        threatId: integer("childThreatId")
+        threatId: integer()
             .notNull()
             .references(() => threats.id, { onDelete: "cascade", onUpdate: "cascade" }),
         measureId: integer()
@@ -222,7 +220,7 @@ export const measureImpacts = pgTable(
             .references(() => measures.id, { onDelete: "cascade", onUpdate: "cascade" }),
     },
     (table) => [
-        unique("measure_impacts_measure_id_child_threat_id_unique").on(table.measureId, table.threatId),
+        unique("measure_impacts_measure_id_threat_id_unique").on(table.measureId, table.threatId),
         check("measure_impacts_probability_min_max", sql`${table.probability} between 1 and 5`),
         check(
             "measure_impacts_probability",
@@ -230,8 +228,8 @@ export const measureImpacts = pgTable(
         ),
         check("measure_impacts_damage_min_max", sql`${table.damage} between 1 and 5`),
         check("measure_impacts_damage", sql`${table.impactsDamage} = false OR ${table.damage} IS NOT NULL`),
-        index("measure_impacts_measure_id_child_threat_id").on(table.measureId, table.threatId),
-        index("measure_impacts_child_threat_id").on(table.threatId),
+        index("measure_impacts_measure_id_threat_id").on(table.measureId, table.threatId),
+        index("measure_impacts_threat_id").on(table.threatId),
         index("measure_impacts_measure_id").on(table.measureId),
     ]
 );
@@ -365,10 +363,8 @@ export type UpdateThreat = Omit<
     "pointOfAttackId" | "pointOfAttack" | "attacker" | "genericThreatId" | "projectId"
 >;
 
-// Physical DB table name kept as "child_threats" for now; the physical rename to "threats" is
-// deferred pending the release strategy (keep old flat threats -> rename -> drop across releases).
 export const threats = pgTable(
-    "child_threats",
+    "threats",
     {
         id: integer().notNull().primaryKey().generatedByDefaultAsIdentity(),
         pointOfAttackId: varchar({ length: 21 }).notNull(),
@@ -396,10 +392,10 @@ export const threats = pgTable(
             .references(() => projects.id, { onDelete: "cascade", onUpdate: "cascade" }),
     },
     (table) => [
-        check("child_threats_name_not_empty", sql`${table.name} <> ''`),
-        check("child_threats_probability_min_max", sql`${table.probability} between 1 and 5`),
-        index("child_threats_generic_threat_id").on(table.genericThreatId),
-        index("child_threats_project_id").on(table.projectId),
+        check("threats_name_not_empty", sql`${table.name} <> ''`),
+        check("threats_probability_min_max", sql`${table.probability} between 1 and 5`),
+        index("threats_generic_threat_id").on(table.genericThreatId),
+        index("threats_project_id").on(table.projectId),
     ]
 );
 
