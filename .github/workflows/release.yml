@@ -112,7 +112,7 @@ jobs:
 
       - name: Attest container image (next)
         if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'next'
-        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4
+        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4
         with:
           subject-name: ghcr.io/maibornwolff/threatsea
           subject-digest: ${{ steps.build-next.outputs.digest }}
@@ -163,7 +163,7 @@ jobs:
 
       - name: Attest Docker Hub image (main)
         if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'main'
-        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4
+        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4
         with:
           subject-name: index.docker.io/maibornwolff/threatsea
           subject-digest: ${{ steps.build-main.outputs.digest }}
@@ -171,7 +171,7 @@ jobs:
 
       - name: Attest GHCR image (main)
         if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'main'
-        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4
+        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4
         with:
           subject-name: ghcr.io/maibornwolff/threatsea
           subject-digest: ${{ steps.build-main.outputs.digest }}
