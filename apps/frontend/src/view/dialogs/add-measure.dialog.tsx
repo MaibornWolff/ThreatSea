@@ -22,7 +22,7 @@ interface FormValues {
     id: number | undefined;
     name: string;
     description: string;
-    scheduledAt: string | Date | null;
+    scheduledAt: string | null;
     catalogMeasureId: number | null;
 }
 

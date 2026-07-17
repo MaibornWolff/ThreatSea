@@ -1,7 +1,7 @@
 import type { ProjectReport } from "#api/types/project.types.ts";
 import type { MatrixColorKey } from "#view/colors/matrix.ts";
 import { calcNetRisk } from "#utils/calcRisk.ts";
-import { toDayNumber, addThreatsToRiskMatrix } from "#utils/riskMatrix.ts";
+import { dayNumberFromDateString, addThreatsToRiskMatrix } from "#utils/riskMatrix.ts";
 
 export type ReportThreat = ProjectReport["threats"][number];
 export type ReportMeasure = ProjectReport["measures"][number];
@@ -19,7 +19,7 @@ export interface RiskBarGraph {
 }
 
 export interface Milestone {
-    scheduledAt: Date;
+    scheduledAt: string;
     matrix: RiskMatrix | null;
     barGraph: RiskBarGraph | null;
     measures?: ReportMeasure[];
@@ -31,11 +31,11 @@ export interface Milestone {
  * A missing or unparseable scheduledAt is treated as out of range. A null bound means "unbounded".
  */
 const isMeasureWithinScheduledRange = (
-    measure: { scheduledAt?: string | Date | null | undefined },
+    measure: { scheduledAt?: string | null | undefined },
     fromDay: number | null,
     tillDay: number | null
 ): boolean => {
-    const scheduledAtDay = measure.scheduledAt ? toDayNumber(new Date(measure.scheduledAt)) : NaN;
+    const scheduledAtDay = measure.scheduledAt ? dayNumberFromDateString(measure.scheduledAt) : NaN;
     if (Number.isNaN(scheduledAtDay)) {
         return false;
     }
@@ -61,8 +61,8 @@ export const filterThreatsByScheduledRange = (
     if (!fromScheduledAt && !tillScheduledAt) {
         return threats;
     }
-    const fromDay = fromScheduledAt ? toDayNumber(new Date(fromScheduledAt)) : null;
-    const tillDay = tillScheduledAt ? toDayNumber(new Date(tillScheduledAt)) : null;
+    const fromDay = fromScheduledAt ? dayNumberFromDateString(fromScheduledAt) : null;
+    const tillDay = tillScheduledAt ? dayNumberFromDateString(tillScheduledAt) : null;
     return threats.map((threat) => {
         const filteredMeasures = threat.measures.filter((measure) =>
             isMeasureWithinScheduledRange(measure, fromDay, tillDay)
@@ -90,21 +90,21 @@ export const filterMeasuresByScheduledRange = (
     if (!fromScheduledAt && !tillScheduledAt) {
         return measures;
     }
-    const fromDay = fromScheduledAt ? toDayNumber(new Date(fromScheduledAt)) : null;
-    const tillDay = tillScheduledAt ? toDayNumber(new Date(tillScheduledAt)) : null;
+    const fromDay = fromScheduledAt ? dayNumberFromDateString(fromScheduledAt) : null;
+    const tillDay = tillScheduledAt ? dayNumberFromDateString(tillScheduledAt) : null;
     return measures.filter((measure) => isMeasureWithinScheduledRange(measure, fromDay, tillDay));
 };
 
 /**
  * Net risk of a threat when only the measures scheduled on or before the given date are applied.
  */
-export const calcActiveMeasureNetRisk = (threat: ReportThreat, scheduledAt: Date) => {
+export const calcActiveMeasureNetRisk = (threat: ReportThreat, scheduledAt: string) => {
     const activeMeasures = threat.measures.filter((measure) => {
         if (!measure.scheduledAt) {
             return false;
         }
-        const measureScheduledAt = toDayNumber(new Date(measure.scheduledAt));
-        return !Number.isNaN(measureScheduledAt) && measureScheduledAt <= toDayNumber(scheduledAt);
+        const measureScheduledAt = dayNumberFromDateString(measure.scheduledAt);
+        return !Number.isNaN(measureScheduledAt) && measureScheduledAt <= dayNumberFromDateString(scheduledAt);
     });
     return calcNetRisk(threat.probability, threat.damage, activeMeasures);
 };
@@ -112,7 +112,7 @@ export const calcActiveMeasureNetRisk = (threat: ReportThreat, scheduledAt: Date
 export const calcNetRiskMatrix = (
     threats: ReportThreat[] | null | undefined,
     matrix: RiskMatrix | null,
-    scheduledAt: Date
+    scheduledAt: string
 ): RiskMatrix | null => {
     if (!threats || !matrix) {
         return null;

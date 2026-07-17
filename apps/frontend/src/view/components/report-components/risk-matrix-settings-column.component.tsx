@@ -89,7 +89,7 @@ export const RiskMatrixSettingsColumn = ({
                                             onChange={(_, value) => onChangeMilestone(milestone, value)}
                                         />
                                     }
-                                    label={scheduledAt?.toISOString().split("T")[0]}
+                                    label={scheduledAt}
                                     labelPlacement="end"
                                     sx={{
                                         marginRight: 0,

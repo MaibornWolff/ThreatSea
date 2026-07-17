@@ -281,7 +281,7 @@ describe("generateMarkdownReport – matrix rendering", () => {
 
     it("renders a milestone matrix with the milestone date as title", () => {
         const milestone = {
-            scheduledAt: new Date("2025-06-01"),
+            scheduledAt: "2025-06-01",
             matrix: TEST_MATRIX,
             barGraph: null,
             active: true,

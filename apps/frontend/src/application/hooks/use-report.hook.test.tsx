@@ -83,12 +83,12 @@ describe("useReport", () => {
             netRisk: 6,
             measures: [
                 createReportThreatMeasure({
-                    scheduledAt: "2025-01-15T00:00:00.000Z",
+                    scheduledAt: "2025-01-15",
                     impactsProbability: true,
                     probability: 2,
                 }),
                 createReportThreatMeasure({
-                    scheduledAt: "2025-06-15T00:00:00.000Z",
+                    scheduledAt: "2025-06-15",
                     impactsDamage: true,
                     damage: 3,
                 }),
@@ -110,8 +110,7 @@ describe("useReport", () => {
     it("groups milestones by measure date and toggles active via riskMatrixMeasures", async () => {
         const report = createProjectReport({
             threats: [createReportThreat({ id: 1 })],
-            // report measures arrive as ISO strings over the wire, despite the Date type
-            measures: [createReportMeasure({ scheduledAt: "2025-01-01T00:00:00.000Z" as unknown as Date })],
+            measures: [createReportMeasure({ scheduledAt: "2025-01-01" })],
         });
         const { result } = renderUseReport(report);
 

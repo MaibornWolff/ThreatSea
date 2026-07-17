@@ -121,7 +121,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
         setThreatSearchValue(event.target.value);
     };
 
-    const handleChangeTimeline = (_event: unknown, date: Date | null) => {
+    const handleChangeTimeline = (_event: unknown, date: string | null) => {
         setTimelineDate(date);
     };
 
@@ -187,9 +187,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                     ...measure,
                     id: measure.measureId,
                     projectId,
-                    scheduledAt: new Date(
-                        measure.scheduledAt.getTime() - measure.scheduledAt.getTimezoneOffset() * 60 * 1000
-                    ),
+                    scheduledAt: measure.scheduledAt,
                 },
             },
         });
@@ -704,15 +702,6 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                             }
                                                         })
                                                         .map((measure, i) => {
-                                                            measure = {
-                                                                ...measure,
-                                                                scheduledAt: new Date(
-                                                                    measure.scheduledAt.getTime() -
-                                                                        measure.scheduledAt.getTimezoneOffset() *
-                                                                            60 *
-                                                                            1000
-                                                                ),
-                                                            };
                                                             const { name, scheduledAt, active, measureImpact } =
                                                                 measure;
                                                             return (
@@ -801,11 +790,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                                                 fontSize: "0.875rem",
                                                                             }}
                                                                         >
-                                                                            {scheduledAt
-                                                                                ? scheduledAt
-                                                                                      .toISOString()
-                                                                                      .split("T")[0]
-                                                                                : t("notScheduledYet")}
+                                                                            {scheduledAt || t("notScheduledYet")}
                                                                         </Typography>
                                                                     </CustomTableCell>
                                                                     <CustomTableCell

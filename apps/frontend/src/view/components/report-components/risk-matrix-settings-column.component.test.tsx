@@ -33,8 +33,8 @@ describe("RiskMatrixSettingsColumn", () => {
 
     it("renders one switch per milestone, labelled by its scheduled date", () => {
         const milestones = [
-            createReportMilestone({ scheduledAt: new Date("2025-01-01") }),
-            createReportMilestone({ scheduledAt: new Date("2025-06-15") }),
+            createReportMilestone({ scheduledAt: "2025-01-01" }),
+            createReportMilestone({ scheduledAt: "2025-06-15" }),
         ];
         renderColumn({ milestones });
 
@@ -44,8 +44,8 @@ describe("RiskMatrixSettingsColumn", () => {
 
     it("reflects each milestone's active state", () => {
         const milestones = [
-            createReportMilestone({ scheduledAt: new Date("2025-01-01"), active: true }),
-            createReportMilestone({ scheduledAt: new Date("2025-06-15"), active: false }),
+            createReportMilestone({ scheduledAt: "2025-01-01", active: true }),
+            createReportMilestone({ scheduledAt: "2025-06-15", active: false }),
         ];
         renderColumn({ milestones });
 
@@ -55,7 +55,7 @@ describe("RiskMatrixSettingsColumn", () => {
 
     it("calls onChangeMilestone with the milestone and its new checked value", async () => {
         const onChangeMilestone = vi.fn();
-        const milestone = createReportMilestone({ scheduledAt: new Date("2025-01-01"), active: false });
+        const milestone = createReportMilestone({ scheduledAt: "2025-01-01", active: false });
         renderColumn({ milestones: [milestone], onChangeMilestone });
 
         await userEvent.click(screen.getByLabelText("2025-01-01"));

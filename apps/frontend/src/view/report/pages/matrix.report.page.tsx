@@ -100,7 +100,7 @@ export const MatrixPage = ({
                             <Matrix
                                 language={language}
                                 key={i}
-                                title={scheduledAt.toISOString().split("T")[0]}
+                                title={scheduledAt}
                                 data={matrix}
                                 style={{ marginTop: s1 }}
                             />

@@ -33,7 +33,7 @@ const renderUseMatrix = ({ threats = [], measures = [], measureImpacts = [] }: S
 
 // A threat wired to a single measure through a measure impact, so the threat's
 // derived `measures[0].active` flag reflects the timeline-date comparison.
-const linkedSetup = (scheduledAt: Date): SetupArgs => ({
+const linkedSetup = (scheduledAt: string): SetupArgs => ({
     threats: [createThreat({ id: 1 })],
     measures: [createMeasure({ id: 10, scheduledAt })],
     measureImpacts: [createMeasureImpact({ id: 1, measureId: 10, threatId: 1 })],
@@ -45,21 +45,19 @@ describe("useMatrix", () => {
     });
 
     describe("timeline", () => {
-        it("anchors an empty timeline to today's midnight when there are no measures", () => {
+        it("anchors an empty timeline to an empty date string when there are no measures", () => {
             const { result } = renderUseMatrix({ measures: [] });
             const { timeline } = result.current;
 
             expect(timeline.marks).toEqual([]);
             expect(timeline.minValue).toBe(-1);
             expect(timeline.maxValue).toBe(0);
-            expect(timeline.startDate.getTime()).toBe(timeline.endDate.getTime());
-            expect(timeline.startDate.getHours()).toBe(0);
-            expect(timeline.startDate.getMinutes()).toBe(0);
-            expect(timeline.startDate.getSeconds()).toBe(0);
+            expect(timeline.startDate).toBe("");
+            expect(timeline.endDate).toBe("");
         });
 
-        it("prepends a Start mark and adds one ISO-labelled mark per measure", () => {
-            const measure = createMeasure({ id: 10, scheduledAt: new Date("2025-03-10T09:30:00Z") });
+        it("prepends a Start mark and adds one date-labelled mark per measure", () => {
+            const measure = createMeasure({ id: 10, scheduledAt: "2025-03-10" });
 
             const { result } = renderUseMatrix({ measures: [measure] });
             const { marks } = result.current.timeline;
@@ -71,24 +69,22 @@ describe("useMatrix", () => {
             expect(marks[1]?.label).toBe("2025-03-10");
         });
 
-        it("does not mutate the measure's scheduledAt while building marks", () => {
-            const scheduledAt = new Date("2025-03-10T09:30:00Z");
-            const originalTime = scheduledAt.getTime();
+        it("preserves the measure's scheduledAt string when building marks", () => {
+            const scheduledAt = "2025-03-10";
             const measure = createMeasure({ id: 10, scheduledAt });
 
             const { result } = renderUseMatrix({ measures: [measure] });
             const { marks } = result.current.timeline;
 
             expect(marks[1]?.date).toBe(scheduledAt);
-            expect(scheduledAt.getTime()).toBe(originalTime);
-            expect(measure.scheduledAt.getTime()).toBe(originalTime);
+            expect(measure.scheduledAt).toBe(scheduledAt);
         });
 
         it("maps mark values to whole-day offsets from the earliest measure", () => {
             const measures = [
-                createMeasure({ id: 1, scheduledAt: new Date("2025-03-10T08:00:00Z") }),
-                createMeasure({ id: 2, scheduledAt: new Date("2025-03-12T20:00:00Z") }),
-                createMeasure({ id: 3, scheduledAt: new Date("2025-03-15T00:00:00Z") }),
+                createMeasure({ id: 1, scheduledAt: "2025-03-10" }),
+                createMeasure({ id: 2, scheduledAt: "2025-03-12" }),
+                createMeasure({ id: 3, scheduledAt: "2025-03-15" }),
             ];
 
             const { result } = renderUseMatrix({ measures });
@@ -101,8 +97,8 @@ describe("useMatrix", () => {
 
         it("collapses measures on the same calendar day to the same mark value", () => {
             const measures = [
-                createMeasure({ id: 1, scheduledAt: new Date("2025-03-10T01:00:00Z") }),
-                createMeasure({ id: 2, scheduledAt: new Date("2025-03-10T23:00:00Z") }),
+                createMeasure({ id: 1, scheduledAt: "2025-03-10" }),
+                createMeasure({ id: 2, scheduledAt: "2025-03-10" }),
             ];
 
             const { result } = renderUseMatrix({ measures });
@@ -115,36 +111,36 @@ describe("useMatrix", () => {
 
     describe("measure active flag", () => {
         it("is inactive while no timeline date is selected", () => {
-            const { result } = renderUseMatrix(linkedSetup(new Date("2025-03-10T12:00:00Z")));
+            const { result } = renderUseMatrix(linkedSetup("2025-03-10"));
 
             expect(result.current.threats[0]?.measures[0]?.active).toBe(false);
         });
 
-        it("activates when the timeline date is the same day but an earlier clock time", () => {
-            const { result } = renderUseMatrix(linkedSetup(new Date("2025-03-10T18:00:00Z")));
+        it("activates when the timeline date is the same day as the measure", () => {
+            const { result } = renderUseMatrix(linkedSetup("2025-03-10"));
 
             act(() => {
-                result.current.setTimelineDate(new Date("2025-03-10T06:00:00Z"));
+                result.current.setTimelineDate("2025-03-10");
             });
 
             expect(result.current.threats[0]?.measures[0]?.active).toBe(true);
         });
 
         it("stays inactive when the timeline date is on an earlier day", () => {
-            const { result } = renderUseMatrix(linkedSetup(new Date("2025-03-10T12:00:00Z")));
+            const { result } = renderUseMatrix(linkedSetup("2025-03-10"));
 
             act(() => {
-                result.current.setTimelineDate(new Date("2025-03-09T23:00:00Z"));
+                result.current.setTimelineDate("2025-03-09");
             });
 
             expect(result.current.threats[0]?.measures[0]?.active).toBe(false);
         });
 
         it("activates when the timeline date is on a later day", () => {
-            const { result } = renderUseMatrix(linkedSetup(new Date("2025-03-10T12:00:00Z")));
+            const { result } = renderUseMatrix(linkedSetup("2025-03-10"));
 
             act(() => {
-                result.current.setTimelineDate(new Date("2025-03-11T01:00:00Z"));
+                result.current.setTimelineDate("2025-03-11");
             });
 
             expect(result.current.threats[0]?.measures[0]?.active).toBe(true);
