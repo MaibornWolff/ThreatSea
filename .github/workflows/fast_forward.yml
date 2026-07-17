@@ -11,6 +11,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      statuses: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
