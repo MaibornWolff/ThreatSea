@@ -20,7 +20,7 @@
     "conventional-changelog-conventionalcommits": "9.3.1",
     "husky": "9.1.7",
     "lint-staged": "17.0.8",
-    "oxfmt": "0.58.0",
+    "oxfmt": "0.59.0",
     "semantic-release": "25.0.7",
     "turbo": "2.10.5",
     "typescript": "7.0.2"
