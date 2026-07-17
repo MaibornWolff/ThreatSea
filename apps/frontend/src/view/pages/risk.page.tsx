@@ -790,9 +790,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                                                 fontSize: "0.875rem",
                                                                             }}
                                                                         >
-                                                                            {scheduledAt
-                                                                                ? scheduledAt
-                                                                                : t("notScheduledYet")}
+                                                                            {scheduledAt || t("notScheduledYet")}
                                                                         </Typography>
                                                                     </CustomTableCell>
                                                                     <CustomTableCell

@@ -252,7 +252,7 @@ export const createReportThreatMeasure = (overrides: Partial<ReportThreatMeasure
     ...createMeasureImpact(),
     reportId: "M-01",
     name: "Test Measure",
-    scheduledAt: "2025-01-01T00:00:00.000Z",
+    scheduledAt: "2025-01-01",
     ...overrides,
 });
 

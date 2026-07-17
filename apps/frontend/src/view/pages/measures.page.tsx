@@ -372,7 +372,7 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                                                                     fontSize: "0.875rem",
                                                                 }}
                                                             >
-                                                                {scheduledAt ? scheduledAt : t("notScheduledYet")}
+                                                                {scheduledAt || t("notScheduledYet")}
                                                             </Typography>
                                                         </CustomTableCell>
                                                         <CustomTableCell

@@ -19,7 +19,7 @@ export const useMeasures = ({ projectId }: { projectId: number }) => {
     };
 
     const measures: Measure[] = useMemo(
-        () => [...items].sort((a, b) => (a.scheduledAt > b.scheduledAt ? 1 : -1)),
+        () => [...items].sort((a, b) => (a.scheduledAt === b.scheduledAt ? 0 : a.scheduledAt > b.scheduledAt ? 1 : -1)),
         [items]
     );
 
