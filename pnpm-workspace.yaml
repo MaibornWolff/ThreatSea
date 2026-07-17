@@ -20,3 +20,5 @@ saveExact: true
 trustPolicy: no-downgrade
 trustPolicyExclude:
   - "semver@6.3.1"
+patchedDependencies:
+  png-js: patches/png-js.patch

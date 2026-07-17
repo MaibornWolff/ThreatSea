@@ -10,8 +10,11 @@ import { useReport } from "#application/hooks/use-report.hook.ts";
 import { useReportExcelExport } from "#application/hooks/use-export.hook.ts";
 import { useReportPdf } from "#application/hooks/use-report-pdf.hook.ts";
 import { useAppDispatch } from "#application/hooks/use-app-redux.hook.ts";
-import logo from "#images/logo_large.png";
-import companyLogo from "#images/MaibornWolff_Logo.png";
+// Inlined as data URLs: react-pdf fetches URL images with a bare fetch() during
+// every render, and a stalled request wedges the render with no error (seen
+// intermittently in Firefox). Data URLs need no network at all.
+import logo from "#images/logo_large.png?inline";
+import companyLogo from "#images/MaibornWolff_Logo.png?inline";
 import { Button } from "#view/components/button.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
