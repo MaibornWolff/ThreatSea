@@ -162,12 +162,3 @@ export async function handleOidcCallback(callbackUrl: URL, oidcParams: OidcCallb
 
     return threatSeaToken;
 }
-
-export function buildLogoutUrl(): string | null {
-    try {
-        const url = client.buildEndSessionUrl(oidcClientConfig, {});
-        return url.href;
-    } catch {
-        return null;
-    }
-}
