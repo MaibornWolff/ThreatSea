@@ -144,6 +144,37 @@ describe("purgeInactiveUsers", () => {
         expect(await userExists(boundaryUserId)).toBe(false);
     });
 
+    it("keeps both owners when a project's only two owners are both inactive", async () => {
+        const firstZombieOwnerId = await insertTestUser("purge-costale-project-first@threatsea.test", 400);
+        const secondZombieOwnerId = await insertTestUser("purge-costale-project-second@threatsea.test", 400);
+        const catalogId = await insertTestCatalog("purge-costale-project-catalog");
+        const projectId = await insertTestProject("purge-costale-project-project", catalogId);
+        await db.insert(usersProjects).values([
+            { projectId: projectId, userId: firstZombieOwnerId, role: USER_ROLES.OWNER },
+            { projectId: projectId, userId: secondZombieOwnerId, role: USER_ROLES.OWNER },
+        ]);
+
+        await purgeInactiveUsers();
+
+        expect(await userExists(firstZombieOwnerId)).toBe(true);
+        expect(await userExists(secondZombieOwnerId)).toBe(true);
+    });
+
+    it("keeps both owners when a catalog's only two owners are both inactive", async () => {
+        const firstZombieOwnerId = await insertTestUser("purge-costale-catalog-first@threatsea.test", 400);
+        const secondZombieOwnerId = await insertTestUser("purge-costale-catalog-second@threatsea.test", 400);
+        const catalogId = await insertTestCatalog("purge-costale-catalog-catalog");
+        await db.insert(usersCatalogs).values([
+            { catalogId: catalogId, userId: firstZombieOwnerId, role: USER_ROLES.OWNER },
+            { catalogId: catalogId, userId: secondZombieOwnerId, role: USER_ROLES.OWNER },
+        ]);
+
+        await purgeInactiveUsers();
+
+        expect(await userExists(firstZombieOwnerId)).toBe(true);
+        expect(await userExists(secondZombieOwnerId)).toBe(true);
+    });
+
     it("respects a custom purge threshold", async () => {
         const oldUserId = await insertTestUser("purge-custom-old@threatsea.test", 250);
         const recentUserId = await insertTestUser("purge-custom-recent@threatsea.test", 150);

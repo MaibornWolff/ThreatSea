@@ -3,7 +3,7 @@
  *     older than the purge threshold, unless they are the sole owner of a
  *     project or catalog.
  */
-import { and, eq, inArray, lte, ne, notExists, sql } from "drizzle-orm";
+import { and, eq, inArray, lte, ne, notExists, notInArray, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { userLifecycleConfig } from "#config/config.js";
 import { db } from "#db/index.js";
@@ -45,7 +45,8 @@ export async function purgeInactiveUsers(
                             and(
                                 eq(otherProjectOwner.projectId, usersProjects.projectId),
                                 eq(otherProjectOwner.role, USER_ROLES.OWNER),
-                                ne(otherProjectOwner.userId, usersProjects.userId)
+                                ne(otherProjectOwner.userId, usersProjects.userId),
+                                notInArray(otherProjectOwner.userId, candidateIds)
                             )
                         )
                 )
@@ -68,7 +69,8 @@ export async function purgeInactiveUsers(
                             and(
                                 eq(otherCatalogOwner.catalogId, usersCatalogs.catalogId),
                                 eq(otherCatalogOwner.role, USER_ROLES.OWNER),
-                                ne(otherCatalogOwner.userId, usersCatalogs.userId)
+                                ne(otherCatalogOwner.userId, usersCatalogs.userId),
+                                notInArray(otherCatalogOwner.userId, candidateIds)
                             )
                         )
                 )
