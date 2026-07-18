@@ -43,6 +43,13 @@
       "when": 1784216083482,
       "tag": "0005_change_measures_scheduled_at_to_date",
       "breakpoints": false
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1784373856712,
+      "tag": "0006_add-last-login-to-user",
+      "breakpoints": false
     }
   ]
 }

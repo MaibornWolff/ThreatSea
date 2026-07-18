@@ -51,12 +51,25 @@ export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promis
         }
 
         if (user) {
-            // Update profile if name has changed
-            if (user.firstname !== firstName || user.lastname !== lastName || user.email !== email) {
-                await tx
-                    .update(users)
-                    .set({ firstname: firstName, lastname: lastName, email: email, updatedAt: sql`now()` })
-                    .where(eq(users.id, user.id));
+            const profileChanged = user.firstname !== firstName || user.lastname !== lastName || user.email !== email;
+
+            // Fold the last-login refresh into the profile write so a login is at most one
+            // UPDATE. lastLoginAt on its own must not bump updatedAt.
+            const touchedRows = await tx
+                .update(users)
+                .set({
+                    lastLoginAt: sql`now()`,
+                    ...(profileChanged
+                        ? { firstname: firstName, lastname: lastName, email: email, updatedAt: sql`now()` }
+                        : {}),
+                })
+                .where(eq(users.id, user.id))
+                .returning({ id: users.id });
+
+            // A concurrent purge may have deleted this user between the lookup above and this
+            // UPDATE; if the row is gone we must not mint a token for an account that no longer exists.
+            if (touchedRows.length === 0) {
+                throw new UnauthorizedError("User no longer exists");
             }
             return user;
         }
