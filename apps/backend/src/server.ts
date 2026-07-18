@@ -9,6 +9,8 @@ import path from "path";
 import helmet from "helmet";
 import { corsConfig, helmetConfig, sessionConfig } from "#config/config.js";
 import nocache from "nocache";
+import connectPgSimple from "connect-pg-simple";
+import { pool } from "#db/index.js";
 
 // Routers
 import { authRouter } from "#routers/auth.router.js";
@@ -47,8 +49,15 @@ const { generateToken, csrfSynchronisedProtection } = csrfSync();
 app.use(cors(corsConfig));
 app.use(cookieParser());
 
+const PostgresSessionStore = connectPgSimple(session);
+
 // Set up express-session middleware
-app.use(session(sessionConfig));
+app.use(
+    session({
+        ...sessionConfig,
+        store: new PostgresSessionStore({ pool, createTableIfMissing: false }),
+    })
+);
 app.use(helmet(helmetConfig));
 app.use(nocache());
 app.set("etag", false);

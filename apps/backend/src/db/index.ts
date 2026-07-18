@@ -5,7 +5,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 
-const pool = new Pool(databaseConfig);
+export const pool = new Pool(databaseConfig);
 
 export const db = drizzle({ schema: { ...schema, ...relations }, client: pool });
 export type DatabaseType = typeof db;

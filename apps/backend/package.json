@@ -26,6 +26,7 @@
     "class-transformer": "0.5.1",
     "class-validator": "0.15.1",
     "compression": "1.8.1",
+    "connect-pg-simple": "10.0.0",
     "cookie-parser": "1.4.7",
     "cors": "2.8.6",
     "csrf-sync": "4.2.1",
@@ -45,6 +46,7 @@
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
     "@types/compression": "1.8.1",
+    "@types/connect-pg-simple": "7.0.3",
     "@types/cookie-parser": "1.4.10",
     "@types/cors": "2.8.19",
     "@types/express": "5.0.6",

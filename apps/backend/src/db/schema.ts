@@ -6,6 +6,7 @@ import {
     date,
     index,
     integer,
+    json,
     jsonb,
     pgEnum,
     pgTable,
@@ -285,6 +286,16 @@ export const projects = pgTable(
         index("projects_catalog_id").on(table.catalogId),
         index("projects_name").on(table.name),
     ]
+);
+
+export const sessions = pgTable(
+    "session",
+    {
+        sid: varchar().notNull().primaryKey(),
+        sess: json().notNull(),
+        expire: timestamp({ mode: "date", precision: 6 }).notNull(),
+    },
+    (table) => [index("IDX_session_expire").on(table.expire)]
 );
 
 export type System = typeof systems.$inferSelect;
