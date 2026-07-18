@@ -43,7 +43,7 @@ export const oidcConfig =
               clientSecret: getEnvironmentVariable("OIDC_CLIENT_SECRET"),
               issuerUrl: getEnvironmentVariable("OIDC_ISSUER_URL"),
               callbackURL: `${getEnvironmentVariable("ORIGIN_BACKEND")}/api/auth/redirect`,
-              scope: "openid profile email",
+              scope: process.env["OIDC_SCOPE"] ?? "openid profile email",
               allowHttp: process.env["OIDC_ALLOW_HTTP"] === "true",
           }
         : null;
