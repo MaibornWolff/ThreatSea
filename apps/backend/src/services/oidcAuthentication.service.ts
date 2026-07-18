@@ -17,6 +17,34 @@ interface OidcCallbackParams {
     codeVerifier: string;
 }
 
+interface ProfileClaims {
+    email?: string | undefined;
+    emailVerified?: boolean | undefined;
+    name?: string | undefined;
+    givenName?: string | undefined;
+    familyName?: string | undefined;
+}
+
+function readProfileClaims(claimSource: Readonly<Record<string, unknown>>): ProfileClaims {
+    return {
+        email: typeof claimSource["email"] === "string" ? claimSource["email"] : undefined,
+        emailVerified: typeof claimSource["email_verified"] === "boolean" ? claimSource["email_verified"] : undefined,
+        name: typeof claimSource["name"] === "string" ? claimSource["name"] : undefined,
+        givenName: typeof claimSource["given_name"] === "string" ? claimSource["given_name"] : undefined,
+        familyName: typeof claimSource["family_name"] === "string" ? claimSource["family_name"] : undefined,
+    };
+}
+
+function hasMissingProfileClaim(profileClaims: ProfileClaims): boolean {
+    return (
+        profileClaims.email === undefined ||
+        profileClaims.emailVerified === undefined ||
+        profileClaims.name === undefined ||
+        profileClaims.givenName === undefined ||
+        profileClaims.familyName === undefined
+    );
+}
+
 let oidcClientConfig: client.Configuration;
 
 export async function initializeOidc(): Promise<void> {
@@ -83,15 +111,28 @@ export async function handleOidcCallback(callbackUrl: URL, oidcParams: OidcCallb
         throw new UnauthorizedError("No 'sub' claim found in ID token");
     }
 
-    const accessToken = tokenSet.access_token;
-    const userInfo = await client.fetchUserInfo(oidcClientConfig, accessToken, idTokenClaims.sub);
+    let profileClaims = readProfileClaims(idTokenClaims);
+
+    const userInfoEndpoint = oidcClientConfig.serverMetadata().userinfo_endpoint;
+    if (hasMissingProfileClaim(profileClaims) && userInfoEndpoint !== undefined) {
+        const userInfo = await client.fetchUserInfo(oidcClientConfig, tokenSet.access_token, idTokenClaims.sub);
+        const userInfoClaims = readProfileClaims(userInfo);
+        profileClaims = {
+            email: userInfoClaims.email ?? profileClaims.email,
+            emailVerified: userInfoClaims.emailVerified ?? profileClaims.emailVerified,
+            name: userInfoClaims.name ?? profileClaims.name,
+            givenName: userInfoClaims.givenName ?? profileClaims.givenName,
+            familyName: userInfoClaims.familyName ?? profileClaims.familyName,
+        };
+    }
 
     const user: OidcProfile = {
         sub: idTokenClaims.sub,
-        email: userInfo.email,
-        displayName: userInfo.name,
-        firstName: userInfo.given_name,
-        lastName: userInfo.family_name,
+        email: profileClaims.email,
+        emailVerified: profileClaims.emailVerified,
+        displayName: profileClaims.name,
+        firstName: profileClaims.givenName,
+        lastName: profileClaims.familyName,
     };
 
     const threatSeaToken = await buildThreatSeaAccessToken(user);
