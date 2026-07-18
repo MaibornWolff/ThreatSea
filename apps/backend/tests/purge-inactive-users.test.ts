@@ -94,8 +94,7 @@ describe("purgeInactiveUsers", () => {
         const warningMessages = warningSpy.mock.calls.flat();
         expect(
             warningMessages.some(
-                (message) =>
-                    message.includes("purge-sole-project@threatsea.test") && message.includes(`project ${projectId}`)
+                (message) => message.includes(zombieSoleOwnerId.toString()) && message.includes(`project ${projectId}`)
             )
         ).toBe(true);
     });
@@ -114,8 +113,7 @@ describe("purgeInactiveUsers", () => {
         const warningMessages = warningSpy.mock.calls.flat();
         expect(
             warningMessages.some(
-                (message) =>
-                    message.includes("purge-sole-catalog@threatsea.test") && message.includes(`catalog ${catalogId}`)
+                (message) => message.includes(zombieSoleOwnerId.toString()) && message.includes(`catalog ${catalogId}`)
             )
         ).toBe(true);
     });
