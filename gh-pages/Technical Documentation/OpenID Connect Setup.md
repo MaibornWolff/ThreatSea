@@ -13,6 +13,7 @@ This guide explains how to setup ThreaSea to use your preferred OpenID Connect P
 - Set OIDC_ISSUER_URL to the URL given by your provider
 - Set OIDC_CLIENT_ID to the id given by your provider
 - Set OIDC_CLIENT_SECRET to the secret given by your provider
+- Optionally set OIDC_ALLOW_UNVERIFIED_EMAIL_LINKING to "true" to allow linking an existing ThreatSea account to an OIDC identity whose email the provider has not verified. Leave it unset unless your provider omits the email_verified claim and you fully trust it — with unverified linking, anyone who can register your users' email addresses at the identity provider can take over their ThreatSea accounts.
 
 ## Example with KeyCloak:
 

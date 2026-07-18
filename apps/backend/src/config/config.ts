@@ -48,6 +48,8 @@ export const oidcConfig =
           }
         : null;
 
+export const ALLOW_UNVERIFIED_EMAIL_LINKING = process.env["OIDC_ALLOW_UNVERIFIED_EMAIL_LINKING"] === "true";
+
 export const originConfig = {
     app: getEnvironmentVariable("ORIGIN_APP"),
     backend: `${getEnvironmentVariable("ORIGIN_BACKEND")}/api`,

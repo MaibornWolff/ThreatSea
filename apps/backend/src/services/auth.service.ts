@@ -3,7 +3,7 @@
  */
 
 import { SignJWT } from "jose";
-import { JWT_AUDIENCE, JWT_ISSUER, JWT_SECRET } from "#config/config.js";
+import { ALLOW_UNVERIFIED_EMAIL_LINKING, JWT_AUDIENCE, JWT_ISSUER, JWT_SECRET } from "#config/config.js";
 import { db } from "#db/index.js";
 import { users } from "#db/schema.js";
 import { and, eq, isNull, sql } from "drizzle-orm";
@@ -12,6 +12,7 @@ import { UnauthorizedError } from "#errors/unauthorized.error.js";
 export interface OidcProfile {
     sub: string;
     email?: string | undefined;
+    emailVerified?: boolean | undefined;
     firstName?: string | undefined;
     lastName?: string | undefined;
     displayName?: string | undefined;
@@ -42,6 +43,11 @@ export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promis
 
             user = emailMatches.at(0);
             if (user) {
+                if (userObject.emailVerified !== true && !ALLOW_UNVERIFIED_EMAIL_LINKING) {
+                    throw new UnauthorizedError(
+                        "Email not verified by IdP; refusing to link existing account — see OIDC_ALLOW_UNVERIFIED_EMAIL_LINKING"
+                    );
+                }
                 // Link existing email-matched user to their OIDC sub
                 await tx
                     .update(users)
