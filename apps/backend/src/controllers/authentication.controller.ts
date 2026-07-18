@@ -134,6 +134,7 @@ export async function finalizeAuthentication(request: Request, response: Respons
         }
 
         const oidcData = request.session.oidc;
+        delete request.session.oidc;
         if (!oidcData) {
             throw new UnauthorizedError("No pending OIDC login found in session");
         }
@@ -141,8 +142,6 @@ export async function finalizeAuthentication(request: Request, response: Respons
         const callbackUrl = new URL(oidcConfig!.callbackURL);
         callbackUrl.search = new URL(request.originalUrl, "http://localhost").search;
         const threatSeaToken = await oidcService.handleOidcCallback(callbackUrl, oidcData);
-
-        delete request.session.oidc;
 
         response.cookie("accessToken", threatSeaToken, {
             httpOnly: true,
