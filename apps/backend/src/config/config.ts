@@ -98,3 +98,10 @@ export const sessionConfig: SessionOptions = {
     saveUninitialized: false,
     rolling: true,
 };
+
+export const userLifecycleConfig = {
+    purgeEnabled: process.env["USER_PURGE_ENABLED"] !== "false",
+    hideThresholdDays: Number(process.env["USER_HIDE_THRESHOLD_DAYS"] ?? "90"),
+    purgeThresholdDays: Number(process.env["USER_PURGE_THRESHOLD_DAYS"] ?? "365"),
+    purgeIntervalHours: Number(process.env["USER_PURGE_INTERVAL_HOURS"] ?? "24"),
+};

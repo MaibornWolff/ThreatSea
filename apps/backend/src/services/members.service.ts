@@ -2,13 +2,34 @@
  * @module members.service - Defines services for the controlling
  *     functions of the members
  */
-import { and, eq, getTableColumns, isNull, not } from "drizzle-orm";
+import { and, eq, gt, isNull, not, sql } from "drizzle-orm";
 import { db, TransactionType } from "#db/index.js";
-import { projects, User, users, usersCatalogs, usersProjects } from "#db/schema.js";
+import { projects, users, usersCatalogs, usersProjects } from "#db/schema.js";
 import { checkRole } from "#guards/authorisation.guard.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
+import { userLifecycleConfig } from "#config/config.js";
 
-export type UserWithRole = User & { role: USER_ROLES };
+// Only non-sensitive identity fields are exposed via member endpoints; lastLoginAt,
+// oidcSub, createdAt and updatedAt must never leak to other users.
+const publicUserColumns = {
+    id: users.id,
+    firstname: users.firstname,
+    lastname: users.lastname,
+    email: users.email,
+} as const;
+
+export interface PublicUser {
+    id: number;
+    firstname: string;
+    lastname: string;
+    email: string;
+}
+
+export type UserWithRole = PublicUser & { role: USER_ROLES };
+
+// live = logged in within the hide window; long-inactive users are only filtered out of the
+// addable-member picker, never from the added-member lists (they stay visible and manageable).
+const liveUsers = gt(users.lastLoginAt, sql`now() - (${userLifecycleConfig.hideThresholdDays} * interval '1 day')`);
 
 /**
  * Gets all members of a given project.
@@ -18,7 +39,7 @@ export type UserWithRole = User & { role: USER_ROLES };
  */
 export async function getProjectAddedMembers(projectId: number): Promise<UserWithRole[]> {
     return await db
-        .select({ ...getTableColumns(users), role: usersProjects.role })
+        .select({ ...publicUserColumns, role: usersProjects.role })
         .from(users)
         .innerJoin(usersProjects, eq(users.id, usersProjects.userId))
         .where(eq(usersProjects.projectId, projectId));
@@ -32,7 +53,7 @@ export async function getProjectAddedMembers(projectId: number): Promise<UserWit
  */
 export async function getCatalogAddedMembers(catalogId: number): Promise<UserWithRole[]> {
     return await db
-        .select({ ...getTableColumns(users), role: usersCatalogs.role })
+        .select({ ...publicUserColumns, role: usersCatalogs.role })
         .from(users)
         .innerJoin(usersCatalogs, eq(users.id, usersCatalogs.userId))
         .where(eq(usersCatalogs.catalogId, catalogId));
@@ -44,12 +65,12 @@ export async function getCatalogAddedMembers(catalogId: number): Promise<UserWit
  * @param {number} projectId - The id of the project.
  * @return {Promise<User[]>} A promise that resolves to an array of users that can be added to the project.
  */
-export async function getProjectAddableMembers(projectId: number): Promise<User[]> {
+export async function getProjectAddableMembers(projectId: number): Promise<PublicUser[]> {
     return await db
-        .select({ ...getTableColumns(users) })
+        .select(publicUserColumns)
         .from(users)
         .leftJoin(usersProjects, and(eq(users.id, usersProjects.userId), eq(usersProjects.projectId, projectId)))
-        .where(isNull(usersProjects.userId));
+        .where(and(isNull(usersProjects.userId), liveUsers));
 }
 
 /**
@@ -58,12 +79,12 @@ export async function getProjectAddableMembers(projectId: number): Promise<User[
  * @param {number} catalogId - The id of the catalog.
  * @return {Promise<User[]>} A promise that resolves to an array of users that can be added to the catalog.
  */
-export async function getCatalogAddableMembers(catalogId: number): Promise<User[]> {
+export async function getCatalogAddableMembers(catalogId: number): Promise<PublicUser[]> {
     return await db
-        .select({ ...getTableColumns(users) })
+        .select(publicUserColumns)
         .from(users)
         .leftJoin(usersCatalogs, and(eq(users.id, usersCatalogs.userId), eq(usersCatalogs.catalogId, catalogId)))
-        .where(isNull(usersCatalogs.userId));
+        .where(and(isNull(usersCatalogs.userId), liveUsers));
 }
 
 /**
