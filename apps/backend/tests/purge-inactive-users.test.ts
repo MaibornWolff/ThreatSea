@@ -6,7 +6,11 @@
 import { eq, sql } from "drizzle-orm";
 import { db } from "#db/index.js";
 import { catalogs, projects, users, usersCatalogs, usersProjects } from "#db/schema.js";
-import { purgeInactiveUsers } from "#jobs/purge-inactive-users.job.js";
+import {
+    purgeInactiveUsers,
+    startInactiveUserPurgeScheduler,
+    stopInactiveUserPurgeScheduler,
+} from "#jobs/purge-inactive-users.job.js";
 import { Logger } from "#logging/index.js";
 import { LANGUAGES } from "#types/languages.type.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
@@ -175,6 +179,17 @@ describe("purgeInactiveUsers", () => {
         expect(await userExists(secondZombieOwnerId)).toBe(true);
     });
 
+    it("deletes many unrelated inactive users in a single run", async () => {
+        const inactiveUserIds = await Promise.all(
+            Array.from({ length: 40 }, (_unused, index) => insertTestUser(`purge-bulk-${index}@threatsea.test`, 400))
+        );
+
+        await purgeInactiveUsers();
+
+        const survivors = await Promise.all(inactiveUserIds.map((userId) => userExists(userId)));
+        expect(survivors.every((exists) => exists === false)).toBe(true);
+    });
+
     it("respects a custom purge threshold", async () => {
         const oldUserId = await insertTestUser("purge-custom-old@threatsea.test", 250);
         const recentUserId = await insertTestUser("purge-custom-recent@threatsea.test", 150);
@@ -183,5 +198,55 @@ describe("purgeInactiveUsers", () => {
 
         expect(await userExists(oldUserId)).toBe(false);
         expect(await userExists(recentUserId)).toBe(true);
+    });
+});
+
+describe("startInactiveUserPurgeScheduler", () => {
+    const validLifecycleConfig = {
+        purgeEnabled: true,
+        hideThresholdDays: 90,
+        purgeThresholdDays: 365,
+        purgeIntervalHours: 24,
+    };
+
+    afterEach(() => {
+        stopInactiveUserPurgeScheduler();
+    });
+
+    it("runs a purge immediately when enabled", async () => {
+        const zombieUserId = await insertTestUser("scheduler-enabled-zombie@threatsea.test", 400);
+
+        await startInactiveUserPurgeScheduler(validLifecycleConfig);
+
+        expect(await userExists(zombieUserId)).toBe(false);
+    });
+
+    it("does not purge when disabled", async () => {
+        const zombieUserId = await insertTestUser("scheduler-disabled-zombie@threatsea.test", 400);
+
+        await startInactiveUserPurgeScheduler({ ...validLifecycleConfig, purgeEnabled: false });
+
+        expect(await userExists(zombieUserId)).toBe(true);
+    });
+
+    it("ignores a duplicate start so a second interval is not leaked", async () => {
+        const warningSpy = vi.spyOn(Logger, "warning");
+
+        await startInactiveUserPurgeScheduler(validLifecycleConfig);
+        await startInactiveUserPurgeScheduler(validLifecycleConfig);
+
+        const warningMessages = warningSpy.mock.calls.flat();
+        expect(warningMessages.some((message) => message.includes("already running"))).toBe(true);
+    });
+
+    it("logs an error and refuses to start when the hide threshold is not below the purge threshold", async () => {
+        const errorSpy = vi.spyOn(Logger, "error");
+        const zombieUserId = await insertTestUser("scheduler-invalid-zombie@threatsea.test", 400);
+
+        await startInactiveUserPurgeScheduler({ ...validLifecycleConfig, hideThresholdDays: 400 });
+
+        expect(await userExists(zombieUserId)).toBe(true);
+        const errorMessages = errorSpy.mock.calls.flat();
+        expect(errorMessages.some((message) => message.includes("USER_HIDE_THRESHOLD_DAYS"))).toBe(true);
     });
 });

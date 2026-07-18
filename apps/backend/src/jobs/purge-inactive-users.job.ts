@@ -106,3 +106,47 @@ export async function purgeInactiveUsers(
 
     Logger.info(`purgeInactiveUsers: deleted ${deletedCount} users, skipped ${blockedUserIds.size} sole owners`);
 }
+
+let purgeIntervalHandle: NodeJS.Timeout | undefined;
+
+export function startInactiveUserPurgeScheduler(
+    lifecycleConfig: typeof userLifecycleConfig = userLifecycleConfig
+): Promise<void> {
+    if (purgeIntervalHandle !== undefined) {
+        Logger.warning("purgeInactiveUsers: scheduler already running; ignoring duplicate start");
+        return Promise.resolve();
+    }
+    if (!lifecycleConfig.purgeEnabled) {
+        Logger.info("purgeInactiveUsers: scheduler disabled via USER_PURGE_ENABLED");
+        return Promise.resolve();
+    }
+    if (lifecycleConfig.hideThresholdDays >= lifecycleConfig.purgeThresholdDays) {
+        Logger.error(
+            `purgeInactiveUsers: invalid configuration, USER_HIDE_THRESHOLD_DAYS (${lifecycleConfig.hideThresholdDays}) must be smaller than USER_PURGE_THRESHOLD_DAYS (${lifecycleConfig.purgeThresholdDays}); purge scheduler not started`
+        );
+        return Promise.resolve();
+    }
+
+    purgeIntervalHandle = setInterval(
+        () => void runPurgeSafely(lifecycleConfig.purgeThresholdDays),
+        lifecycleConfig.purgeIntervalHours * 60 * 60 * 1000
+    );
+    // Don't let the recurring purge keep the process alive on its own.
+    purgeIntervalHandle.unref();
+    return runPurgeSafely(lifecycleConfig.purgeThresholdDays);
+}
+
+export function stopInactiveUserPurgeScheduler(): void {
+    if (purgeIntervalHandle !== undefined) {
+        clearInterval(purgeIntervalHandle);
+        purgeIntervalHandle = undefined;
+    }
+}
+
+async function runPurgeSafely(purgeThresholdDays: number): Promise<void> {
+    try {
+        await purgeInactiveUsers(purgeThresholdDays);
+    } catch (error) {
+        Logger.error(`purgeInactiveUsers: run failed: ${String(error)}`);
+    }
+}
