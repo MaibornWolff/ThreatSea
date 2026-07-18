@@ -1,6 +1,7 @@
 import { oidcConfig } from "#config/config.js";
 import { UnauthorizedError } from "#errors/unauthorized.error.js";
 import { buildThreatSeaAccessToken, OidcProfile } from "#services/auth.service.js";
+import { Logger } from "#logging/index.js";
 import crypto from "crypto";
 import * as client from "openid-client";
 
@@ -58,12 +59,34 @@ export async function initializeOidc(): Promise<void> {
         options.execute = [client.allowInsecureRequests];
     }
 
-    oidcClientConfig = await client.discovery(
+    const discoveredConfig = await client.discovery(
         issuerUrl,
         oidcConfig.clientId,
         oidcConfig.clientSecret,
         undefined,
         options
+    );
+    const serverMetadata = discoveredConfig.serverMetadata();
+
+    const supportedAuthenticationMethods = serverMetadata.token_endpoint_auth_methods_supported;
+    const useBasicAuthentication =
+        supportedAuthenticationMethods === undefined || supportedAuthenticationMethods.includes("client_secret_basic");
+    const clientAuthentication = useBasicAuthentication
+        ? client.ClientSecretBasic(oidcConfig.clientSecret)
+        : client.ClientSecretPost(oidcConfig.clientSecret);
+
+    oidcClientConfig = new client.Configuration(
+        serverMetadata,
+        oidcConfig.clientId,
+        oidcConfig.clientSecret,
+        clientAuthentication
+    );
+    if (oidcConfig.allowHttp) {
+        client.allowInsecureRequests(oidcClientConfig);
+    }
+
+    Logger.info(
+        `OIDC token endpoint authentication method: ${useBasicAuthentication ? "client_secret_basic" : "client_secret_post"}`
     );
 }
 

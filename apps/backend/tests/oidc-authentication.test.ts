@@ -147,3 +147,48 @@ describe("handleOidcCallback profile building", () => {
         expect(buildThreatSeaAccessToken).not.toHaveBeenCalled();
     });
 });
+
+describe("initializeOidc client authentication detection", () => {
+    it("uses client_secret_basic when the IdP advertises it", async () => {
+        const basicAuthentication = { method: "client_secret_basic" };
+        vi.mocked(client.ClientSecretBasic).mockReturnValue(basicAuthentication as never);
+
+        await initializeOidcWithServerMetadata({
+            issuer: "https://idp.example.com",
+            token_endpoint_auth_methods_supported: ["client_secret_basic", "client_secret_post"],
+        });
+
+        expect(client.ClientSecretBasic).toHaveBeenCalledWith("threatsea-secret");
+        expect(client.Configuration).toHaveBeenCalledWith(
+            expect.objectContaining({ issuer: "https://idp.example.com" }),
+            "threatsea-client",
+            "threatsea-secret",
+            basicAuthentication
+        );
+    });
+
+    it("uses client_secret_basic when the metadata field is absent", async () => {
+        await initializeOidcWithServerMetadata({ issuer: "https://idp.example.com" });
+
+        expect(client.ClientSecretBasic).toHaveBeenCalledWith("threatsea-secret");
+        expect(client.ClientSecretPost).not.toHaveBeenCalled();
+    });
+
+    it("keeps client_secret_post when the IdP only supports post", async () => {
+        const postAuthentication = { method: "client_secret_post" };
+        vi.mocked(client.ClientSecretPost).mockReturnValue(postAuthentication as never);
+
+        await initializeOidcWithServerMetadata({
+            issuer: "https://idp.example.com",
+            token_endpoint_auth_methods_supported: ["client_secret_post"],
+        });
+
+        expect(client.ClientSecretBasic).not.toHaveBeenCalled();
+        expect(client.Configuration).toHaveBeenCalledWith(
+            expect.anything(),
+            "threatsea-client",
+            "threatsea-secret",
+            postAuthentication
+        );
+    });
+});
