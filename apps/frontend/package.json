@@ -67,7 +67,7 @@
     "jsdom": "29.1.1",
     "oxlint": "catalog:",
     "oxlint-tsgolint": "catalog:",
-    "vite": "8.1.4",
+    "vite": "8.1.5",
     "vite-plugin-svgr": "5.2.0",
     "vitest": "catalog:"
   },
