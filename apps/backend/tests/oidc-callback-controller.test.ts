@@ -26,8 +26,16 @@ vi.mock("#services/oidcAuthentication.service.js", () => ({
 }));
 
 function buildCallbackRequest(): Request {
+    const session: Record<string, unknown> = {
+        oidc: { state: "state-1", nonce: "nonce-1", codeVerifier: "verifier-1" },
+        regenerate(callback: (error: Error | null) => void) {
+            // Mirror express-session: regenerating drops the old session and its pending oidc data.
+            delete session["oidc"];
+            callback(null);
+        },
+    };
     return {
-        session: { oidc: { state: "state-1", nonce: "nonce-1", codeVerifier: "verifier-1" } },
+        session,
         originalUrl: "/api/auth/redirect?code=abc&state=state-1",
         cookies: {},
     } as unknown as Request;
@@ -51,6 +59,27 @@ describe("finalizeAuthentication session cleanup", () => {
         expect(request.session.oidc).toBeUndefined();
         expect(response.redirect).toHaveBeenCalledWith(`${originConfig.app}/login?failure`);
         expect(response.cookie).not.toHaveBeenCalled();
+    });
+
+    it("regenerates the session before exchanging the authorization code", async () => {
+        const callOrder: string[] = [];
+        vi.mocked(handleOidcCallback).mockImplementation(async () => {
+            callOrder.push("exchange");
+            return "threatsea-token";
+        });
+        const request = buildCallbackRequest();
+        (request.session as unknown as { regenerate: (callback: (error: Error | null) => void) => void }).regenerate = (
+            callback
+        ) => {
+            callOrder.push("regenerate");
+            delete (request.session as unknown as Record<string, unknown>)["oidc"];
+            callback(null);
+        };
+        const response = buildCallbackResponse();
+
+        await finalizeAuthentication(request, response);
+
+        expect(callOrder).toEqual(["regenerate", "exchange"]);
     });
 
     it("clears the oidc transaction and issues the cookie on success", async () => {

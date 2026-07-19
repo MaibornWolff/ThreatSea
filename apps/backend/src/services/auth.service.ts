@@ -19,7 +19,9 @@ export interface OidcProfile {
 }
 
 export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promise<string> {
-    const email = userObject.email;
+    // Normalize to lowercase so an IdP that varies email casing (ID token vs userinfo, UPN vs
+    // canonical mailbox) can't split one account into duplicates.
+    const email = userObject.email?.toLowerCase();
     if (!email) {
         throw new UnauthorizedError("No email found in user profile object.");
     }
@@ -34,7 +36,7 @@ export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promis
 
         if (!user) {
             const emailMatches = await tx.query.users.findMany({
-                where: and(eq(users.email, email), isNull(users.oidcSub)),
+                where: and(sql`lower(${users.email}) = ${email}`, isNull(users.oidcSub)),
             });
 
             if (emailMatches.length > 1) {

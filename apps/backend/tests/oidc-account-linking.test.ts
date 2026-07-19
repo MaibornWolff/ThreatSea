@@ -51,6 +51,27 @@ describe("buildThreatSeaAccessToken account linking", () => {
         expect(linkedUser?.oidcSub).toBe("sub-linkable");
     });
 
+    it("links a case-mismatched existing user and normalizes the stored email", async () => {
+        const existingUser = await createUser({
+            firstname: "Casey",
+            lastname: "Mixed",
+            email: "Casey.Mixed@Example.com",
+        });
+        const profile: OidcProfile = {
+            sub: "sub-case",
+            email: "casey.mixed@example.com",
+            emailVerified: true,
+            firstName: "Casey",
+            lastName: "Mixed",
+        };
+
+        await buildThreatSeaAccessToken(profile);
+
+        const linkedUser = await findUserById(existingUser.id);
+        expect(linkedUser?.oidcSub).toBe("sub-case");
+        expect(linkedUser?.email).toBe("casey.mixed@example.com");
+    });
+
     it("refuses to link an existing user when the email is not verified", async () => {
         const existingUser = await createUser({
             firstname: "Victor",

@@ -26,24 +26,48 @@ interface ProfileClaims {
     familyName?: string | undefined;
 }
 
+// Some IdPs (e.g. AWS Cognito) serialize email_verified as the string "true"/"false"
+// rather than a JSON boolean; honour both while treating anything else as absent.
+function parseEmailVerified(rawValue: unknown): boolean | undefined {
+    if (rawValue === true || rawValue === "true") {
+        return true;
+    }
+    if (rawValue === false || rawValue === "false") {
+        return false;
+    }
+    return undefined;
+}
+
 function readProfileClaims(claimSource: Readonly<Record<string, unknown>>): ProfileClaims {
     return {
         email: typeof claimSource["email"] === "string" ? claimSource["email"] : undefined,
-        emailVerified: typeof claimSource["email_verified"] === "boolean" ? claimSource["email_verified"] : undefined,
+        emailVerified: parseEmailVerified(claimSource["email_verified"]),
         name: typeof claimSource["name"] === "string" ? claimSource["name"] : undefined,
         givenName: typeof claimSource["given_name"] === "string" ? claimSource["given_name"] : undefined,
         familyName: typeof claimSource["family_name"] === "string" ? claimSource["family_name"] : undefined,
     };
 }
 
-function hasMissingProfileClaim(profileClaims: ProfileClaims): boolean {
-    return (
-        profileClaims.email === undefined ||
-        profileClaims.emailVerified === undefined ||
-        profileClaims.name === undefined ||
-        profileClaims.givenName === undefined ||
-        profileClaims.familyName === undefined
-    );
+// Only email and email_verified drive authorization (the account-linking gate); the name parts are
+// cosmetic. Gate the blocking userinfo round-trip on those two alone so an ID token that already
+// vouches a verified email is trusted as-is — fetching userinfo just for a display name would risk
+// dropping the verified flag (many IdPs assert it only in the ID token) and break legitimate logins.
+function hasMissingRequiredClaim(profileClaims: ProfileClaims): boolean {
+    return profileClaims.email === undefined || profileClaims.emailVerified === undefined;
+}
+
+function mergeProfileClaims(idTokenClaims: ProfileClaims, userInfoClaims: ProfileClaims): ProfileClaims {
+    // email and email_verified must be taken as an atomic pair from a single source. Mixing an
+    // (attacker-editable) userinfo email with the ID token's email_verified flag would let an
+    // unverified address inherit a verified status and bypass the account-linking gate.
+    const emailSource = userInfoClaims.email !== undefined ? userInfoClaims : idTokenClaims;
+    return {
+        email: emailSource.email,
+        emailVerified: emailSource.emailVerified,
+        name: userInfoClaims.name ?? idTokenClaims.name,
+        givenName: userInfoClaims.givenName ?? idTokenClaims.givenName,
+        familyName: userInfoClaims.familyName ?? idTokenClaims.familyName,
+    };
 }
 
 let oidcClientConfig: client.Configuration;
@@ -68,12 +92,24 @@ export async function initializeOidc(): Promise<void> {
     );
     const serverMetadata = discoveredConfig.serverMetadata();
 
+    // Prefer client_secret_post — it was the effective default before this detection existed and
+    // avoids the RFC 6749 secret percent-encoding pitfalls of Basic. Metadata that omits the field
+    // is treated as post-capable (the OIDC default). Fall back to Basic only when post is not
+    // advertised, and fail fast when the IdP supports neither secret-based method.
     const supportedAuthenticationMethods = serverMetadata.token_endpoint_auth_methods_supported;
-    const useBasicAuthentication =
-        supportedAuthenticationMethods === undefined || supportedAuthenticationMethods.includes("client_secret_basic");
-    const clientAuthentication = useBasicAuthentication
-        ? client.ClientSecretBasic(oidcConfig.clientSecret)
-        : client.ClientSecretPost(oidcConfig.clientSecret);
+    let clientAuthentication: ReturnType<typeof client.ClientSecretPost>;
+    let selectedAuthenticationMethod: string;
+    if (supportedAuthenticationMethods === undefined || supportedAuthenticationMethods.includes("client_secret_post")) {
+        clientAuthentication = client.ClientSecretPost(oidcConfig.clientSecret);
+        selectedAuthenticationMethod = "client_secret_post";
+    } else if (supportedAuthenticationMethods.includes("client_secret_basic")) {
+        clientAuthentication = client.ClientSecretBasic(oidcConfig.clientSecret);
+        selectedAuthenticationMethod = "client_secret_basic";
+    } else {
+        throw new Error(
+            `OIDC provider does not advertise a client-secret token endpoint authentication method (client_secret_post or client_secret_basic); advertised: ${supportedAuthenticationMethods.join(", ")}`
+        );
+    }
 
     oidcClientConfig = new client.Configuration(
         serverMetadata,
@@ -85,9 +121,7 @@ export async function initializeOidc(): Promise<void> {
         client.allowInsecureRequests(oidcClientConfig);
     }
 
-    Logger.info(
-        `OIDC token endpoint authentication method: ${useBasicAuthentication ? "client_secret_basic" : "client_secret_post"}`
-    );
+    Logger.info(`OIDC token endpoint authentication method: ${selectedAuthenticationMethod}`);
 }
 
 export async function buildLoginRedirectUrl(): Promise<OidcLoginInitiation> {
@@ -137,16 +171,9 @@ export async function handleOidcCallback(callbackUrl: URL, oidcParams: OidcCallb
     let profileClaims = readProfileClaims(idTokenClaims);
 
     const userInfoEndpoint = oidcClientConfig.serverMetadata().userinfo_endpoint;
-    if (hasMissingProfileClaim(profileClaims) && userInfoEndpoint !== undefined) {
+    if (hasMissingRequiredClaim(profileClaims) && userInfoEndpoint !== undefined) {
         const userInfo = await client.fetchUserInfo(oidcClientConfig, tokenSet.access_token, idTokenClaims.sub);
-        const userInfoClaims = readProfileClaims(userInfo);
-        profileClaims = {
-            email: userInfoClaims.email ?? profileClaims.email,
-            emailVerified: userInfoClaims.emailVerified ?? profileClaims.emailVerified,
-            name: userInfoClaims.name ?? profileClaims.name,
-            givenName: userInfoClaims.givenName ?? profileClaims.givenName,
-            familyName: userInfoClaims.familyName ?? profileClaims.familyName,
-        };
+        profileClaims = mergeProfileClaims(profileClaims, readProfileClaims(userInfo));
     }
 
     const user: OidcProfile = {

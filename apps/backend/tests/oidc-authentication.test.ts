@@ -146,32 +146,104 @@ describe("handleOidcCallback profile building", () => {
         await expect(handleOidcCallback(callbackUrl, callbackParameters)).rejects.toThrow(UnauthorizedError);
         expect(buildThreatSeaAccessToken).not.toHaveBeenCalled();
     });
+
+    it("keeps the ID token's verified email and skips userinfo when only a name claim is missing", async () => {
+        await initializeOidcWithServerMetadata({
+            issuer: "https://idp.example.com",
+            userinfo_endpoint: "https://idp.example.com/userinfo",
+        });
+        // ID token already carries a verified email but omits family_name — a common IdP shape where
+        // names live only in userinfo. Fetching userinfo here would drop the verified flag (userinfo
+        // rarely re-asserts email_verified) and break linking for a genuinely-verified user.
+        mockAuthorizationCodeGrant({
+            sub: "subject-1",
+            email: "alice@example.com",
+            email_verified: true,
+            given_name: "Alice",
+        });
+        // If userinfo were (wrongly) consulted, it would swap in a different email with no verification.
+        vi.mocked(client.fetchUserInfo).mockResolvedValue({
+            sub: "subject-1",
+            email: "attacker@example.com",
+            family_name: "Smith",
+        } as never);
+        vi.mocked(buildThreatSeaAccessToken).mockResolvedValue("threatsea-token");
+
+        await handleOidcCallback(callbackUrl, callbackParameters);
+
+        expect(client.fetchUserInfo).not.toHaveBeenCalled();
+        expect(buildThreatSeaAccessToken).toHaveBeenCalledWith(
+            expect.objectContaining({ email: "alice@example.com", emailVerified: true })
+        );
+    });
+
+    it("takes email and email_verified as an atomic pair from userinfo when the ID token omits verification", async () => {
+        await initializeOidcWithServerMetadata({
+            issuer: "https://idp.example.com",
+            userinfo_endpoint: "https://idp.example.com/userinfo",
+        });
+        // ID token has an email but no email_verified, so userinfo must be consulted. Its email and
+        // verification flag are taken together — never a userinfo email with a foreign verified flag.
+        mockAuthorizationCodeGrant({ sub: "subject-1", email: "stale@example.com" });
+        vi.mocked(client.fetchUserInfo).mockResolvedValue({
+            sub: "subject-1",
+            email: "attacker@example.com",
+            given_name: "Attacker",
+        } as never);
+        vi.mocked(buildThreatSeaAccessToken).mockResolvedValue("threatsea-token");
+
+        await handleOidcCallback(callbackUrl, callbackParameters);
+
+        expect(client.fetchUserInfo).toHaveBeenCalled();
+        expect(buildThreatSeaAccessToken).toHaveBeenCalledWith(
+            expect.objectContaining({ email: "attacker@example.com", emailVerified: undefined })
+        );
+    });
+
+    it("treats a string email_verified claim as verified", async () => {
+        await initializeOidcWithServerMetadata({ issuer: "https://idp.example.com" });
+        mockAuthorizationCodeGrant({
+            sub: "subject-1",
+            email: "user@example.com",
+            email_verified: "true",
+            name: "User Example",
+            given_name: "User",
+            family_name: "Example",
+        });
+        vi.mocked(buildThreatSeaAccessToken).mockResolvedValue("threatsea-token");
+
+        await handleOidcCallback(callbackUrl, callbackParameters);
+
+        expect(client.fetchUserInfo).not.toHaveBeenCalled();
+        expect(buildThreatSeaAccessToken).toHaveBeenCalledWith(expect.objectContaining({ emailVerified: true }));
+    });
 });
 
 describe("initializeOidc client authentication detection", () => {
-    it("uses client_secret_basic when the IdP advertises it", async () => {
-        const basicAuthentication = { method: "client_secret_basic" };
-        vi.mocked(client.ClientSecretBasic).mockReturnValue(basicAuthentication as never);
+    it("prefers client_secret_post when the IdP advertises both methods", async () => {
+        const postAuthentication = { method: "client_secret_post" };
+        vi.mocked(client.ClientSecretPost).mockReturnValue(postAuthentication as never);
 
         await initializeOidcWithServerMetadata({
             issuer: "https://idp.example.com",
             token_endpoint_auth_methods_supported: ["client_secret_basic", "client_secret_post"],
         });
 
-        expect(client.ClientSecretBasic).toHaveBeenCalledWith("threatsea-secret");
+        expect(client.ClientSecretBasic).not.toHaveBeenCalled();
+        expect(client.ClientSecretPost).toHaveBeenCalledWith("threatsea-secret");
         expect(client.Configuration).toHaveBeenCalledWith(
             expect.objectContaining({ issuer: "https://idp.example.com" }),
             "threatsea-client",
             "threatsea-secret",
-            basicAuthentication
+            postAuthentication
         );
     });
 
-    it("uses client_secret_basic when the metadata field is absent", async () => {
+    it("defaults to client_secret_post when the metadata field is absent", async () => {
         await initializeOidcWithServerMetadata({ issuer: "https://idp.example.com" });
 
-        expect(client.ClientSecretBasic).toHaveBeenCalledWith("threatsea-secret");
-        expect(client.ClientSecretPost).not.toHaveBeenCalled();
+        expect(client.ClientSecretPost).toHaveBeenCalledWith("threatsea-secret");
+        expect(client.ClientSecretBasic).not.toHaveBeenCalled();
     });
 
     it("keeps client_secret_post when the IdP only supports post", async () => {
@@ -190,5 +262,35 @@ describe("initializeOidc client authentication detection", () => {
             "threatsea-secret",
             postAuthentication
         );
+    });
+
+    it("falls back to client_secret_basic when the IdP only supports basic", async () => {
+        const basicAuthentication = { method: "client_secret_basic" };
+        vi.mocked(client.ClientSecretBasic).mockReturnValue(basicAuthentication as never);
+
+        await initializeOidcWithServerMetadata({
+            issuer: "https://idp.example.com",
+            token_endpoint_auth_methods_supported: ["client_secret_basic"],
+        });
+
+        expect(client.ClientSecretPost).not.toHaveBeenCalled();
+        expect(client.Configuration).toHaveBeenCalledWith(
+            expect.anything(),
+            "threatsea-client",
+            "threatsea-secret",
+            basicAuthentication
+        );
+    });
+
+    it("throws when the IdP supports no client-secret authentication method", async () => {
+        await expect(
+            initializeOidcWithServerMetadata({
+                issuer: "https://idp.example.com",
+                token_endpoint_auth_methods_supported: ["private_key_jwt"],
+            })
+        ).rejects.toThrow(/client-secret/);
+
+        expect(client.ClientSecretPost).not.toHaveBeenCalled();
+        expect(client.ClientSecretBasic).not.toHaveBeenCalled();
     });
 });

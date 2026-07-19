@@ -49,13 +49,18 @@ const { generateToken, csrfSynchronisedProtection } = csrfSync();
 app.use(cors(corsConfig));
 app.use(cookieParser());
 
+// Health check sits above the session middleware so liveness probes don't touch the shared pool.
+app.get("/api/health", (_req, res) => res.json({ ok: true, ts: Date.now() }));
+
 const PostgresSessionStore = connectPgSimple(session);
 
 // Set up express-session middleware
 app.use(
     session({
         ...sessionConfig,
-        store: new PostgresSessionStore({ pool, createTableIfMissing: false }),
+        // disableTouch avoids a per-request UPDATE from rolling sessions; the 12h cookie makes the
+        // touch low-value against the shared connection pool.
+        store: new PostgresSessionStore({ pool, disableTouch: true }),
     })
 );
 app.use(helmet(helmetConfig));
@@ -82,8 +87,6 @@ app.use("/api/catalogs", apiRateLimiter, CheckTokenHandler, catalogsRouter);
 app.use("/api/projects", apiRateLimiter, CheckTokenHandler, projectsRouter);
 app.use("/api/export", apiRateLimiter, CheckTokenHandler, exportRouter);
 app.use("/api/import", apiRateLimiter, CheckTokenHandler, express.json({ limit: "200mb" }), importRouter);
-
-app.get("/api/health", (_req, res) => res.json({ ok: true, ts: Date.now() }));
 
 app.use((_req, res) => {
     res.sendFile(path.join(PUBLIC_DIR, "index.html"));

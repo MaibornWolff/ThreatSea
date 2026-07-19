@@ -15,6 +15,12 @@ const ACCESS_TOKEN_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
 let oidcService: typeof import("#services/oidcAuthentication.service.js") | null = null;
 let fixedService: typeof import("#services/fixedAuthentication.service.js") | null = null;
 
+function regenerateSession(request: Request): Promise<void> {
+    return new Promise((resolve, reject) => {
+        request.session.regenerate((error) => (error ? reject(error) : resolve()));
+    });
+}
+
 async function loadStrategy() {
     if (AUTH_METHOD === "oidc") {
         oidcService = await import("#services/oidcAuthentication.service.js");
@@ -134,10 +140,14 @@ export async function finalizeAuthentication(request: Request, response: Respons
         }
 
         const oidcData = request.session.oidc;
-        delete request.session.oidc;
         if (!oidcData) {
             throw new UnauthorizedError("No pending OIDC login found in session");
         }
+        // Durably consume the single-use OIDC transaction before the token exchange: regenerating
+        // destroys the old session (and its pending oidc data) in the store so a concurrent or
+        // replayed callback can't reuse it, and it rotates the session id to prevent post-login
+        // session fixation.
+        await regenerateSession(request);
 
         const callbackUrl = new URL(oidcConfig!.callbackURL);
         callbackUrl.search = new URL(request.originalUrl, "http://localhost").search;
