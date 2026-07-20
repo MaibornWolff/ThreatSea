@@ -11,6 +11,7 @@
   "pointOfAttack": "Point of Attack",
   "status": "Status",
   "scheduledAt": "Scheduled at",
+  "genericThreatDescription": "Generic threat description",
   "tab": {
     "threat": "Threat",
     "assets": "Assets",
