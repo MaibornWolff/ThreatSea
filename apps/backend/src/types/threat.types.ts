@@ -147,6 +147,7 @@ export interface ThreatResponse extends UpdateThreatRequest {
 }
 
 export interface ExtendedThreatResponse extends ThreatResponse {
+    genericThreatDescription: string;
     componentName: string | null;
     componentType: number | ComponentType | null;
     interfaceName: string | null;

@@ -317,6 +317,7 @@ const AddThreatDialog = ({
                 <AddThreatMainTab
                     active={tab === "MAIN"}
                     threatId={threatId}
+                    genericThreatDescription={threat.genericThreatDescription}
                     assets={threat.assets}
                     lineOfToleranceGreen={project.lineOfToleranceGreen}
                     lineOfToleranceRed={project.lineOfToleranceRed}

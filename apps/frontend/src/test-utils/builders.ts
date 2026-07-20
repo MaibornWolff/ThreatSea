@@ -59,6 +59,7 @@ export const createThreat = (overrides: Partial<ExtendedThreat> = {}): ExtendedT
     status: THREAT_STATUSES.NEW,
     createdAt: "2025-01-01T00:00:00.000Z",
     updatedAt: "2025-01-01T00:00:00.000Z",
+    genericThreatDescription: "Test Generic Description",
     componentName: "Test Component",
     componentType: null,
     interfaceName: null,
