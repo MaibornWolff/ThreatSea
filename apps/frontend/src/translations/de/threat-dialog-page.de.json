@@ -10,6 +10,7 @@
   "pointOfAttack": "Angriffspunkt",
   "status": "Status",
   "scheduledAt": "Geplant für",
+  "genericThreatDescription": "Beschreibung der generischen Bedrohung",
   "tab": {
     "threat": "Bedrohung",
     "assets": "Assets",

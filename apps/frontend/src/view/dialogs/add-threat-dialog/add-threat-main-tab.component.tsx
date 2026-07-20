@@ -1,5 +1,7 @@
+import { useState } from "react";
 import {
     Box,
+    Collapse,
     FormControl,
     FormControlLabel,
     FormGroup,
@@ -11,7 +13,7 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import { InfoOutlined } from "@mui/icons-material";
+import { ChevronRight, ExpandMore, InfoOutlined } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import { Controller, useWatch, type Control, type FieldErrors, type UseFormRegister } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -36,6 +38,7 @@ interface AddThreatMainTabProps {
     register: UseFormRegister<ThreatFormValues>;
     control: Control<ThreatFormValues>;
     errors: FieldErrors<ThreatFormValues>;
+    genericThreatDescription: string;
 }
 
 export const AddThreatMainTab = ({
@@ -48,9 +51,11 @@ export const AddThreatMainTab = ({
     register,
     control,
     errors,
+    genericThreatDescription,
 }: AddThreatMainTabProps) => {
     const { t } = useTranslation("threatDialogPage");
     const theme = useTheme();
+    const [showGenericDescription, setShowGenericDescription] = useState(false);
 
     const watchedConfidentiality = useWatch({ control, name: "confidentiality" });
     const watchedIntegrity = useWatch({ control, name: "integrity" });
@@ -95,6 +100,52 @@ export const AddThreatMainTab = ({
             <BoxNameTextField register={register} error={errors?.name} margin="normal" data-testid="EditThreatName" />
 
             <DescriptionTextField register={register} error={errors?.description} data-testid="EditThreatDescription" />
+
+            <Box sx={{ mt: 0.5 }}>
+                <Box
+                    role="button"
+                    tabIndex={0}
+                    aria-expanded={showGenericDescription}
+                    onClick={() => setShowGenericDescription((shown) => !shown)}
+                    onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            setShowGenericDescription((shown) => !shown);
+                        }
+                    }}
+                    sx={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                        cursor: "pointer",
+                        color: "text.secondary",
+                        userSelect: "none",
+                    }}
+                    data-testid="GenericThreatDescriptionToggle"
+                >
+                    {showGenericDescription ? (
+                        <ExpandMore sx={{ fontSize: 18 }} />
+                    ) : (
+                        <ChevronRight sx={{ fontSize: 18 }} />
+                    )}
+                    <InfoOutlined sx={{ fontSize: 16 }} />
+                    <Typography sx={{ fontSize: "0.875rem" }}>{t("genericThreatDescription")}</Typography>
+                </Box>
+                <Collapse in={showGenericDescription}>
+                    <Typography
+                        data-testid="GenericThreatDescriptionText"
+                        sx={{
+                            fontSize: "0.875rem",
+                            whiteSpace: "pre-wrap",
+                            color: "text.secondary",
+                            mt: 0.5,
+                            ml: 3,
+                        }}
+                    >
+                        {genericThreatDescription}
+                    </Typography>
+                </Collapse>
+            </Box>
 
             <DialogTextField
                 sx={{

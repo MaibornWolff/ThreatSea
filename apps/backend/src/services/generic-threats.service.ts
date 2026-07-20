@@ -78,6 +78,7 @@ export async function getGenericThreatsWithExtendedChildren(
 
                     return {
                         ...threat,
+                        genericThreatDescription: genericThreat.description,
                         componentName: pointOfAttack?.componentName ?? null,
                         componentType: pointOfAttack?.componentType ?? null,
                         interfaceName,

@@ -186,7 +186,14 @@ describe("get or create threats", () => {
         expect(res.statusCode).toEqual(200);
         expect(Array.isArray(res.body)).toBe(true);
         expect(res.body.length).toBeGreaterThan(0);
-        expect(Array.isArray(res.body[0].children)).toBe(true);
+
+        const genericThreat = res.body[0];
+        expect(Array.isArray(genericThreat.children)).toBe(true);
+        expect(genericThreat.children.length).toBeGreaterThan(0);
+        // Each child carries its parent generic threat's description verbatim.
+        for (const child of genericThreat.children) {
+            expect(child.genericThreatDescription).toBe(genericThreat.description);
+        }
     });
 
     it("should return an empty list for a generic threat without children", async () => {

@@ -22,6 +22,7 @@ export interface Threat {
 }
 
 export interface ExtendedThreat extends Threat {
+    genericThreatDescription: string;
     componentName: string | null;
     componentType: number | null;
     interfaceName: string | null;
