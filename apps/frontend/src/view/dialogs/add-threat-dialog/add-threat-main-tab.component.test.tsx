@@ -15,6 +15,7 @@ interface RenderMainTabOptions {
     lineOfToleranceGreen?: number;
     lineOfToleranceRed?: number;
     threatId?: number;
+    genericThreatDescription?: string;
     defaultValues?: DefaultValues<ThreatFormValues>;
 }
 
@@ -24,6 +25,7 @@ const renderMainTab = ({
     lineOfToleranceGreen = 3,
     lineOfToleranceRed = 6,
     threatId = 42,
+    genericThreatDescription = "Default generic wording",
     defaultValues,
 }: RenderMainTabOptions = {}) => {
     const FormHost = () => {
@@ -55,6 +57,7 @@ const renderMainTab = ({
                 register={register}
                 control={control}
                 errors={errors}
+                genericThreatDescription={genericThreatDescription}
             />
         );
     };
@@ -199,5 +202,36 @@ describe("AddThreatMainTab — form fields", () => {
         await user.type(probabilityField, "5");
 
         expect(probabilityField).toHaveValue(5);
+    });
+});
+
+describe("AddThreatMainTab — generic threat description", () => {
+    it("Should render the generic description collapsed by default", () => {
+        renderMainTab({ genericThreatDescription: "Original generic wording" });
+
+        expect(screen.getByTestId("GenericThreatDescriptionToggle")).toBeInTheDocument();
+        expect(screen.queryByTestId("GenericThreatDescriptionText")).not.toBeVisible();
+    });
+
+    it("Should reveal the generic description when the toggle is clicked", async () => {
+        const { user } = renderMainTab({ genericThreatDescription: "Original generic wording" });
+
+        await user.click(screen.getByTestId("GenericThreatDescriptionToggle"));
+
+        const text = screen.getByTestId("GenericThreatDescriptionText");
+        expect(text).toBeVisible();
+        expect(text).toHaveTextContent("Original generic wording");
+    });
+
+    it("Should render the generic description as read-only, non-editable text", async () => {
+        const { user } = renderMainTab({ genericThreatDescription: "Original generic wording" });
+
+        await user.click(screen.getByTestId("GenericThreatDescriptionToggle"));
+
+        const text = screen.getByTestId("GenericThreatDescriptionText");
+        // Plain text node, not a form control.
+        expect(text.tagName).not.toBe("INPUT");
+        expect(text.tagName).not.toBe("TEXTAREA");
+        expect(text.querySelector("input, textarea")).toBeNull();
     });
 });
