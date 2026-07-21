@@ -51,10 +51,6 @@ export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promis
         throw new UnauthorizedError("No email found in user profile object.");
     }
 
-    const firstName = userObject.firstName ?? "";
-    const lastName = userObject.lastName ?? userObject.displayName ?? email;
-    const displayName = userObject.displayName ?? (`${firstName} ${lastName}`.trim() || email);
-
     const user = await db.transaction(async (tx) => {
         // Look up by OIDC sub first, fall back to email for initial account linking
         let user = await tx.query.users.findFirst({ where: eq(users.oidcSub, userObject.sub) });
@@ -84,7 +80,12 @@ export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promis
         }
 
         if (user) {
-            const profileChanged = user.firstname !== firstName || user.lastname !== lastName || user.email !== email;
+            // No-clobber: for an existing user an absent incoming name coalesces to the stored
+            // value rather than the email fallback, so a userinfo-less login can't wipe a name.
+            const nextFirstName = userObject.firstName ?? user.firstname;
+            const nextLastName = userObject.lastName ?? userObject.displayName ?? user.lastname;
+            const profileChanged =
+                user.firstname !== nextFirstName || user.lastname !== nextLastName || user.email !== email;
 
             // Fold the last-login refresh into the profile write so a login is at most one
             // UPDATE. lastLoginAt on its own must not bump updatedAt.
@@ -93,26 +94,26 @@ export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promis
                 .set({
                     lastLoginAt: sql`now()`,
                     ...(profileChanged
-                        ? { firstname: firstName, lastname: lastName, email: email, updatedAt: sql`now()` }
+                        ? { firstname: nextFirstName, lastname: nextLastName, email: email, updatedAt: sql`now()` }
                         : {}),
                 })
                 .where(eq(users.id, user.id))
-                .returning({ id: users.id });
+                .returning();
 
             // A concurrent purge may have deleted this user between the lookup above and this
             // UPDATE; if the row is gone we must not mint a token for an account that no longer exists.
             if (touchedRows.length === 0) {
                 throw new UnauthorizedError("User no longer exists");
             }
-            return user;
+            return touchedRows.at(0);
         }
 
         return (
             await tx
                 .insert(users)
                 .values({
-                    firstname: firstName,
-                    lastname: lastName,
+                    firstname: userObject.firstName ?? "",
+                    lastname: userObject.lastName ?? userObject.displayName ?? email,
                     email: email,
                     oidcSub: userObject.sub,
                 })
@@ -124,12 +125,15 @@ export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promis
         throw new Error("Failed to retrieve user from database");
     }
 
+    // Build the JWT from the persisted row so its names reflect exactly what the DB now holds.
+    const displayName = userObject.displayName ?? (`${user.firstname} ${user.lastname}`.trim() || email);
+
     const threatseaAccessToken = await new SignJWT({
         userId: user.id,
         oidcId: userObject.sub,
         email: email,
-        firstname: firstName,
-        lastname: lastName,
+        firstname: user.firstname,
+        lastname: user.lastname,
         displayName: displayName,
     })
         .setProtectedHeader({ alg: "HS256" })

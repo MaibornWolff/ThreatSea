@@ -203,6 +203,40 @@ describe("buildThreatSeaAccessToken account linking", () => {
         const updatedUser = await findUserById(existingUser.id);
         expect(updatedUser?.firstname).toBe("New");
     });
+
+    it("keeps stored names when an existing user's incoming profile omits them", async () => {
+        const existingUser = await createUser({
+            firstname: "Keep",
+            lastname: "Mename",
+            email: "keep.mename@example.com",
+            oidcSub: "sub-keep-names",
+        });
+        const profile: OidcProfile = {
+            sub: "sub-keep-names",
+            email: "keep.mename@example.com",
+            emailVerified: true,
+        };
+
+        await buildThreatSeaAccessToken(profile);
+
+        const unchangedUser = await findUserById(existingUser.id);
+        expect(unchangedUser?.firstname).toBe("Keep");
+        expect(unchangedUser?.lastname).toBe("Mename");
+    });
+
+    it("applies the email fallback for a brand-new user with no names", async () => {
+        const profile: OidcProfile = {
+            sub: "sub-new-noname",
+            email: "new.noname@example.com",
+            emailVerified: true,
+        };
+
+        await buildThreatSeaAccessToken(profile);
+
+        const createdUser = await db.query.users.findFirst({ where: eq(users.oidcSub, "sub-new-noname") });
+        expect(createdUser?.firstname).toBe("");
+        expect(createdUser?.lastname).toBe("new.noname@example.com");
+    });
 });
 
 describe("findLinkableUser", () => {
