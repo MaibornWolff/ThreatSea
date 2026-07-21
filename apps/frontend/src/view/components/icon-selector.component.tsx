@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { FormControl, FormHelperText, Grid, IconButton, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import { DynamicMuiIcon } from "#view/components/dynamic-mui-icon.component.tsx";
 import { useMuiIconNames } from "#application/hooks/use-mui-icons.hook.ts";
@@ -51,18 +51,14 @@ export const IconSelector = ({ value, onChange, label, error, helperText }: Icon
         setSelectedIcon(value || "");
     }, [value]);
 
-    const setVisibleIconsEvent = useEffectEvent((icons: readonly string[]) => {
-        setVisibleIcons(icons);
-    });
-
     useEffect(() => {
         if (searchTerm === "") {
-            setVisibleIconsEvent(preselectedIcons);
+            setVisibleIcons(preselectedIcons);
         } else {
             const filteredIcons = allIconNames
                 .filter((iconName) => iconName.toLowerCase().includes(searchTerm.toLowerCase()))
                 .slice(0, 25);
-            setVisibleIconsEvent(filteredIcons);
+            setVisibleIcons(filteredIcons);
         }
     }, [searchTerm, allIconNames]);
 
