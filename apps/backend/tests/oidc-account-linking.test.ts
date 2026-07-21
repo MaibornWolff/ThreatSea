@@ -2,7 +2,7 @@ import { decodeJwt } from "jose";
 import { eq } from "drizzle-orm";
 import { db } from "#db/index.js";
 import { users } from "#db/schema.js";
-import { buildThreatSeaAccessToken, OidcProfile } from "#services/auth.service.js";
+import { buildThreatSeaAccessToken, findLinkableUser, OidcProfile } from "#services/auth.service.js";
 import { UnauthorizedError } from "#errors/unauthorized.error.js";
 
 const configOverrides = vi.hoisted(() => ({ ALLOW_UNVERIFIED_EMAIL_LINKING: false }));
@@ -202,5 +202,51 @@ describe("buildThreatSeaAccessToken account linking", () => {
 
         const updatedUser = await findUserById(existingUser.id);
         expect(updatedUser?.firstname).toBe("New");
+    });
+});
+
+describe("findLinkableUser", () => {
+    it("returns lastLoginAt for a user matched by oidc sub", async () => {
+        await createUser({
+            firstname: "Sub",
+            lastname: "Match",
+            email: "sub.match@example.com",
+            oidcSub: "sub-findable",
+        });
+
+        const linkableUser = await findLinkableUser("sub-findable", undefined);
+
+        expect(linkableUser?.lastLoginAt).toBeTypeOf("string");
+    });
+
+    it("falls back to an unlinked email match when no sub matches, case-insensitively", async () => {
+        await createUser({
+            firstname: "Email",
+            lastname: "Match",
+            email: "email.match@example.com",
+        });
+
+        const linkableUser = await findLinkableUser("sub-not-present", "Email.Match@example.com");
+
+        expect(linkableUser?.lastLoginAt).toBeTypeOf("string");
+    });
+
+    it("ignores an email that already belongs to a linked account", async () => {
+        await createUser({
+            firstname: "Linked",
+            lastname: "Already",
+            email: "linked.already@example.com",
+            oidcSub: "sub-owns-email",
+        });
+
+        const linkableUser = await findLinkableUser("different-sub", "linked.already@example.com");
+
+        expect(linkableUser).toBeUndefined();
+    });
+
+    it("returns undefined for an unknown user", async () => {
+        const linkableUser = await findLinkableUser("sub-unknown", "unknown@example.com");
+
+        expect(linkableUser).toBeUndefined();
     });
 });

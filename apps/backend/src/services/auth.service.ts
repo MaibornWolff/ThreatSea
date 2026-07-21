@@ -18,6 +18,31 @@ export interface OidcProfile {
     displayName?: string | undefined;
 }
 
+export async function findLinkableUser(
+    oidcSub: string,
+    email: string | undefined
+): Promise<{ lastLoginAt: string } | undefined> {
+    // Read-only pre-check that only informs the userinfo-fetch decision. The authoritative
+    // resolve/link/upsert happens transactionally in buildThreatSeaAccessToken, so a stale read
+    // under a concurrent race here is benign.
+    const linkedUser = await db.query.users.findFirst({
+        where: eq(users.oidcSub, oidcSub),
+        columns: { lastLoginAt: true },
+    });
+    if (linkedUser) {
+        return linkedUser;
+    }
+
+    if (email === undefined) {
+        return undefined;
+    }
+
+    return await db.query.users.findFirst({
+        where: and(sql`lower(${users.email}) = ${email.toLowerCase()}`, isNull(users.oidcSub)),
+        columns: { lastLoginAt: true },
+    });
+}
+
 export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promise<string> {
     // Normalize to lowercase so an IdP that varies email casing (ID token vs userinfo, UPN vs
     // canonical mailbox) can't split one account into duplicates.
