@@ -441,6 +441,7 @@ const EditorSidebarSelectedComponentInner = ({
                                                 padding: 0.25,
                                                 bgcolor: "transparent",
                                                 color: "primary.main",
+                                                borderRadius: 0,
                                             }}
                                         >
                                             {communicationInterface.icon != null ? (
