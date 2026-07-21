@@ -43,11 +43,11 @@ const lookupLoadedDefinition = (iconName: string): IconDefinition | undefined =>
     loadedIconMaps.base?.[iconName] ?? loadedIconMaps.outlined?.[iconName] ?? loadedIconMaps.variants?.[iconName];
 
 export const useMuiIconDefinition = (iconName: string): IconDefinition | undefined => {
-    const [definition, setDefinition] = useState<IconDefinition | undefined>(() => lookupLoadedDefinition(iconName));
+    const loadedDefinition = lookupLoadedDefinition(iconName);
+    const [asyncDefinition, setAsyncDefinition] = useState<{ name: string; definition: IconDefinition | undefined }>();
 
     useEffect(() => {
-        if (!iconName) {
-            setDefinition(undefined);
+        if (!iconName || lookupLoadedDefinition(iconName) !== undefined) {
             return;
         }
         let cancelled = false;
@@ -57,7 +57,7 @@ export const useMuiIconDefinition = (iconName: string): IconDefinition | undefin
                 let resolved = baseIconMap[iconName];
                 resolved ??= (await loadIconMap(variantMapKindForName(iconName)))[iconName];
                 if (!cancelled) {
-                    setDefinition(resolved);
+                    setAsyncDefinition({ name: iconName, definition: resolved });
                 }
             } catch (error) {
                 // Leave it blank; the next mount retries.
@@ -70,7 +70,11 @@ export const useMuiIconDefinition = (iconName: string): IconDefinition | undefin
         };
     }, [iconName]);
 
-    return definition;
+    if (loadedDefinition !== undefined) {
+        return loadedDefinition;
+    }
+    // Only honour an async result that belongs to the currently requested name.
+    return asyncDefinition?.name === iconName ? asyncDefinition.definition : undefined;
 };
 
 /**
