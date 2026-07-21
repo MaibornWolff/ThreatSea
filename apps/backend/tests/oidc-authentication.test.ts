@@ -1,5 +1,5 @@
 import * as client from "openid-client";
-import { buildThreatSeaAccessToken } from "#services/auth.service.js";
+import { buildThreatSeaAccessToken, findLinkableUser } from "#services/auth.service.js";
 import { handleOidcCallback, initializeOidc } from "#services/oidcAuthentication.service.js";
 import { UnauthorizedError } from "#errors/unauthorized.error.js";
 
@@ -18,6 +18,7 @@ vi.mock("openid-client", () => ({
 
 vi.mock("#services/auth.service.js", () => ({
     buildThreatSeaAccessToken: vi.fn(),
+    findLinkableUser: vi.fn(),
 }));
 
 vi.mock("#config/config.js", async (importOriginal) => {
@@ -62,6 +63,10 @@ const callbackUrl = new URL("http://localhost:8000/api/auth/redirect?code=abc&st
 const callbackParameters = { state: "state-1", nonce: "nonce-1", codeVerifier: "verifier-1" };
 
 describe("handleOidcCallback profile building", () => {
+    beforeEach(() => {
+        vi.mocked(findLinkableUser).mockResolvedValue(undefined);
+    });
+
     it("builds the profile from ID token claims without calling userinfo", async () => {
         await initializeOidcWithServerMetadata({
             issuer: "https://idp.example.com",
@@ -147,34 +152,80 @@ describe("handleOidcCallback profile building", () => {
         expect(buildThreatSeaAccessToken).not.toHaveBeenCalled();
     });
 
-    it("keeps the ID token's verified email and skips userinfo when only a name claim is missing", async () => {
+    it("fetches userinfo for an unknown user when the ID token omits a name", async () => {
         await initializeOidcWithServerMetadata({
             issuer: "https://idp.example.com",
             userinfo_endpoint: "https://idp.example.com/userinfo",
         });
-        // ID token already carries a verified email but omits family_name — a common IdP shape where
-        // names live only in userinfo. Fetching userinfo here would drop the verified flag (userinfo
-        // rarely re-asserts email_verified) and break linking for a genuinely-verified user.
         mockAuthorizationCodeGrant({
             sub: "subject-1",
             email: "alice@example.com",
             email_verified: true,
             given_name: "Alice",
         });
-        // If userinfo were (wrongly) consulted, it would swap in a different email with no verification.
+        vi.mocked(findLinkableUser).mockResolvedValue(undefined);
         vi.mocked(client.fetchUserInfo).mockResolvedValue({
             sub: "subject-1",
-            email: "attacker@example.com",
+            email: "alice@example.com",
+            email_verified: true,
             family_name: "Smith",
         } as never);
         vi.mocked(buildThreatSeaAccessToken).mockResolvedValue("threatsea-token");
 
         await handleOidcCallback(callbackUrl, callbackParameters);
 
+        expect(client.fetchUserInfo).toHaveBeenCalled();
+        expect(buildThreatSeaAccessToken).toHaveBeenCalledWith(
+            expect.objectContaining({ email: "alice@example.com", lastName: "Smith" })
+        );
+    });
+
+    it("skips userinfo for a known fresh user even when a name claim is missing", async () => {
+        await initializeOidcWithServerMetadata({
+            issuer: "https://idp.example.com",
+            userinfo_endpoint: "https://idp.example.com/userinfo",
+        });
+        mockAuthorizationCodeGrant({
+            sub: "subject-1",
+            email: "alice@example.com",
+            email_verified: true,
+            given_name: "Alice",
+        });
+        vi.mocked(findLinkableUser).mockResolvedValue({ lastLoginAt: new Date().toISOString() });
+        vi.mocked(buildThreatSeaAccessToken).mockResolvedValue("threatsea-token");
+
+        await handleOidcCallback(callbackUrl, callbackParameters);
+
         expect(client.fetchUserInfo).not.toHaveBeenCalled();
         expect(buildThreatSeaAccessToken).toHaveBeenCalledWith(
-            expect.objectContaining({ email: "alice@example.com", emailVerified: true })
+            expect.objectContaining({ email: "alice@example.com", emailVerified: true, lastName: undefined })
         );
+    });
+
+    it("fetches userinfo for a known stale user when a name claim is missing", async () => {
+        await initializeOidcWithServerMetadata({
+            issuer: "https://idp.example.com",
+            userinfo_endpoint: "https://idp.example.com/userinfo",
+        });
+        mockAuthorizationCodeGrant({
+            sub: "subject-1",
+            email: "alice@example.com",
+            email_verified: true,
+            given_name: "Alice",
+        });
+        vi.mocked(findLinkableUser).mockResolvedValue({ lastLoginAt: "2000-01-01T00:00:00.000Z" });
+        vi.mocked(client.fetchUserInfo).mockResolvedValue({
+            sub: "subject-1",
+            email: "alice@example.com",
+            email_verified: true,
+            family_name: "Smith",
+        } as never);
+        vi.mocked(buildThreatSeaAccessToken).mockResolvedValue("threatsea-token");
+
+        await handleOidcCallback(callbackUrl, callbackParameters);
+
+        expect(client.fetchUserInfo).toHaveBeenCalled();
+        expect(buildThreatSeaAccessToken).toHaveBeenCalledWith(expect.objectContaining({ lastName: "Smith" }));
     });
 
     it("takes email and email_verified as an atomic pair from userinfo when the ID token omits verification", async () => {

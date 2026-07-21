@@ -1,6 +1,6 @@
 import { oidcConfig } from "#config/config.js";
 import { UnauthorizedError } from "#errors/unauthorized.error.js";
-import { buildThreatSeaAccessToken, OidcProfile } from "#services/auth.service.js";
+import { buildThreatSeaAccessToken, findLinkableUser, OidcProfile } from "#services/auth.service.js";
 import { Logger } from "#logging/index.js";
 import crypto from "crypto";
 import * as client from "openid-client";
@@ -48,12 +48,23 @@ function readProfileClaims(claimSource: Readonly<Record<string, unknown>>): Prof
     };
 }
 
-// Only email and email_verified drive authorization (the account-linking gate); the name parts are
-// cosmetic. Gate the blocking userinfo round-trip on those two alone so an ID token that already
-// vouches a verified email is trusted as-is — fetching userinfo just for a display name would risk
-// dropping the verified flag (many IdPs assert it only in the ID token) and break legitimate logins.
-function hasMissingRequiredClaim(profileClaims: ProfileClaims): boolean {
-    return profileClaims.email === undefined || profileClaims.emailVerified === undefined;
+// Any wanted field the ID token omits is worth enriching from userinfo. The fetch itself is
+// separately gated on DB state (unknown-or-stale user) so this wide trigger doesn't cause a
+// userinfo round-trip on every login.
+function hasMissingProfileClaim(profileClaims: ProfileClaims): boolean {
+    return (
+        profileClaims.email === undefined ||
+        profileClaims.emailVerified === undefined ||
+        profileClaims.name === undefined ||
+        profileClaims.givenName === undefined ||
+        profileClaims.familyName === undefined
+    );
+}
+
+const PROFILE_REFRESH_INTERVAL_MS = 24 * 60 * 60 * 1000; // equals 24 hours
+
+function isProfileStale(lastLoginAt: string): boolean {
+    return Date.now() - new Date(lastLoginAt).getTime() > PROFILE_REFRESH_INTERVAL_MS;
 }
 
 function mergeProfileClaims(idTokenClaims: ProfileClaims, userInfoClaims: ProfileClaims): ProfileClaims {
@@ -173,9 +184,12 @@ export async function handleOidcCallback(callbackUrl: URL, oidcParams: OidcCallb
     let profileClaims = readProfileClaims(idTokenClaims);
 
     const userInfoEndpoint = oidcClientConfig.serverMetadata().userinfo_endpoint;
-    if (hasMissingRequiredClaim(profileClaims) && userInfoEndpoint !== undefined) {
-        const userInfo = await client.fetchUserInfo(oidcClientConfig, tokenSet.access_token, idTokenClaims.sub);
-        profileClaims = mergeProfileClaims(profileClaims, readProfileClaims(userInfo));
+    if (userInfoEndpoint !== undefined && hasMissingProfileClaim(profileClaims)) {
+        const knownUser = await findLinkableUser(idTokenClaims.sub, profileClaims.email);
+        if (knownUser === undefined || isProfileStale(knownUser.lastLoginAt)) {
+            const userInfo = await client.fetchUserInfo(oidcClientConfig, tokenSet.access_token, idTokenClaims.sub);
+            profileClaims = mergeProfileClaims(profileClaims, readProfileClaims(userInfo));
+        }
     }
 
     const user: OidcProfile = {
