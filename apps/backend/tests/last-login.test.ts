@@ -106,6 +106,7 @@ describe("last login tracking", () => {
         await buildThreatSeaAccessToken({
             sub: "last-login-link-sub",
             email: "last-login-link@threatsea.test",
+            emailVerified: true,
             firstName: "Link",
             lastName: "Path",
         });
