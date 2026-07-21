@@ -280,6 +280,37 @@ describe("handleOidcCallback profile building", () => {
         );
     });
 
+    it("prefers the ID token's email_verified over a conflicting userinfo value for the same email", async () => {
+        await initializeOidcWithServerMetadata({
+            issuer: "https://idp.example.com",
+            userinfo_endpoint: "https://idp.example.com/userinfo",
+        });
+        // Stale existing user, so the gate fetches userinfo to enrich the missing name. Both sources
+        // agree on the email, but userinfo asserts a conflicting email_verified — the signed ID
+        // token is the authoritative assertion for this authentication event and must win.
+        mockAuthorizationCodeGrant({
+            sub: "subject-1",
+            email: "alice@example.com",
+            email_verified: true,
+            given_name: "Alice",
+        });
+        vi.mocked(findOidcUserBySub).mockResolvedValue({ lastLoginAt: "2000-01-01T00:00:00.000Z" });
+        vi.mocked(client.fetchUserInfo).mockResolvedValue({
+            sub: "subject-1",
+            email: "alice@example.com",
+            email_verified: false,
+            family_name: "Smith",
+        } as never);
+        vi.mocked(buildThreatSeaAccessToken).mockResolvedValue("threatsea-token");
+
+        await handleOidcCallback(callbackUrl, callbackParameters);
+
+        expect(client.fetchUserInfo).toHaveBeenCalled();
+        expect(buildThreatSeaAccessToken).toHaveBeenCalledWith(
+            expect.objectContaining({ email: "alice@example.com", emailVerified: true, lastName: "Smith" })
+        );
+    });
+
     it("treats a string email_verified claim as verified", async () => {
         await initializeOidcWithServerMetadata({ issuer: "https://idp.example.com" });
         mockAuthorizationCodeGrant({
