@@ -29,6 +29,7 @@ export default defineConfig({
             reporter: ["text", "lcov", "html", "cobertura"],
             reportsDirectory: path.resolve(__dirname, "coverage"),
         },
+        globalSetup: ["vitest.global-setup.ts"],
         setupFiles: ["vitest.setup.ts"],
         typecheck: {
             tsconfig: "tsconfig.test.json",
