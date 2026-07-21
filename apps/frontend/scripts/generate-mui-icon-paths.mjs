@@ -80,14 +80,16 @@ const typeDeclaration = [
     "",
 ].join("\n");
 
-const writeIconMap = (baseName, iconMap) => {
-    const moduleSource = `export default ${JSON.stringify(iconMap)};\n`;
-    const modulePath = join(outputDirectory, `${baseName}.js`);
+const writeIfChanged = (filePath, contents) => {
     // Skip identical rewrites so vite's dev watcher does not reload needlessly.
-    if (!existsSync(modulePath) || readFileSync(modulePath, "utf8") !== moduleSource) {
-        writeFileSync(modulePath, moduleSource);
+    if (!existsSync(filePath) || readFileSync(filePath, "utf8") !== contents) {
+        writeFileSync(filePath, contents);
     }
-    writeFileSync(join(outputDirectory, `${baseName}.d.ts`), typeDeclaration);
+};
+
+const writeIconMap = (baseName, iconMap) => {
+    writeIfChanged(join(outputDirectory, `${baseName}.js`), `export default ${JSON.stringify(iconMap)};\n`);
+    writeIfChanged(join(outputDirectory, `${baseName}.d.ts`), typeDeclaration);
 };
 
 writeIconMap("mui-icon-paths.base", baseIconMap);
