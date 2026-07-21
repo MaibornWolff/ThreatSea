@@ -372,6 +372,9 @@ export const users = pgTable(
         firstname: varchar({ length: 255 }).notNull(),
         lastname: varchar({ length: 255 }).notNull(),
         email: varchar({ length: 255 }).notNull(),
+        lastLoginAt: timestamp("last_login_at", { mode: "string", withTimezone: true })
+            .notNull()
+            .default(sql`now()`),
         oidcSub: varchar("oidc_sub", { length: 255 }),
         createdAt: timestamp({ mode: "string", withTimezone: true })
             .notNull()

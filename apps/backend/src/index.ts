@@ -2,6 +2,7 @@ import "reflect-metadata";
 import { app } from "#server.js";
 import { Logger } from "#logging/index.js";
 import { runMigrations } from "#db/index.js";
+import { startInactiveUserPurgeScheduler, stopInactiveUserPurgeScheduler } from "#jobs/purge-inactive-users.job.js";
 
 /**
  * Port of the backend server.
@@ -14,9 +15,11 @@ await runMigrations();
 
 const server = app.listen(PORT, () => {
     Logger.info(`server is running (port=${PORT})...`);
+    void startInactiveUserPurgeScheduler();
 });
 
 process.on("SIGTERM", () => {
+    stopInactiveUserPurgeScheduler();
     server.close(() => {
         process.exit(0);
     });

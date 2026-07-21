@@ -86,6 +86,9 @@ describe("get or add members", () => {
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(200);
         expect(Array.isArray(res.body)).toBe(true);
+        for (const member of res.body) {
+            expect(Object.keys(member).sort()).toEqual(["email", "firstname", "id", "lastname", "role"]);
+        }
     });
 
     it("should list all addable members", async () => {
@@ -96,6 +99,10 @@ describe("get or add members", () => {
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(200);
         expect(Array.isArray(res.body)).toBe(true);
+        expect(res.body.length).toBeGreaterThan(0);
+        for (const addableUser of res.body) {
+            expect(Object.keys(addableUser).sort()).toEqual(["email", "firstname", "id", "lastname"]);
+        }
     });
 
     it("should add an addable member", async () => {

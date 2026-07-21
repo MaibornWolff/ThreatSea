@@ -13,6 +13,18 @@ function getEnvironmentVariable(key: string): string {
     return value;
 }
 
+function getOptionalPositiveNumber(key: string, defaultValue: number): number {
+    const rawValue = process.env[key];
+    if (rawValue === undefined || rawValue === "") {
+        return defaultValue;
+    }
+    const parsedValue = Number(rawValue);
+    if (!Number.isFinite(parsedValue) || parsedValue <= 0) {
+        throw new Error(`Environment variable ${key} must be a positive number`);
+    }
+    return parsedValue;
+}
+
 export const JWT_SECRET = new TextEncoder().encode(getEnvironmentVariable("JWT_SECRET"));
 export const JWT_ISSUER = "threatsea";
 export const JWT_AUDIENCE = "threatsea-api";
@@ -98,3 +110,22 @@ export const sessionConfig: SessionOptions = {
     saveUninitialized: false,
     rolling: true,
 };
+
+const MAXIMUM_PURGE_INTERVAL_HOURS = 596; // setInterval delays above 2^31 - 1 ms overflow and fire every millisecond
+
+export const userLifecycleConfig = {
+    // Destructive job: opt-in only. It runs solely when explicitly enabled, so any other
+    // value (unset, "0", "off", a typo) fails safe by leaving the purge disabled.
+    purgeEnabled: process.env["USER_PURGE_ENABLED"] === "true",
+    hideThresholdDays: getOptionalPositiveNumber("USER_HIDE_THRESHOLD_DAYS", 90),
+    purgeThresholdDays: getOptionalPositiveNumber("USER_PURGE_THRESHOLD_DAYS", 365),
+    purgeIntervalHours: getOptionalPositiveNumber("USER_PURGE_INTERVAL_HOURS", 24),
+};
+
+if (userLifecycleConfig.purgeIntervalHours > MAXIMUM_PURGE_INTERVAL_HOURS) {
+    throw new Error(`Environment variable USER_PURGE_INTERVAL_HOURS must be at most ${MAXIMUM_PURGE_INTERVAL_HOURS}`);
+}
+
+if (userLifecycleConfig.hideThresholdDays >= userLifecycleConfig.purgeThresholdDays) {
+    throw new Error("Environment variable USER_HIDE_THRESHOLD_DAYS must be smaller than USER_PURGE_THRESHOLD_DAYS");
+}

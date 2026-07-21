@@ -39,9 +39,6 @@ export interface UserResponse {
     firstname: string;
     lastname: string;
     email: string;
-    oidcSub: string | null;
-    createdAt: string;
-    updatedAt: string;
 }
 
 export interface MemberResponse extends UserResponse {

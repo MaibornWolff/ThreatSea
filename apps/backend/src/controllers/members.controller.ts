@@ -3,11 +3,11 @@
  *     for the routing of the members.
  */
 import { NextFunction, Request, Response } from "express";
-import { User } from "#db/schema.js";
 import * as MembersService from "#services/members.service.js";
 import {
     isCatalogMember,
     isProjectMember,
+    PublicUser,
     removeCatalogMember,
     removeProjectMember,
     UserWithRole,
@@ -64,12 +64,12 @@ export async function getProjectAddedMembers(
  * @param {Response} response - The http response.
  */
 export async function getCatalogAddableMembers(
-    request: Request<CatalogIdParam, User[], void>,
-    response: Response<User[]>
+    request: Request<CatalogIdParam, PublicUser[], void>,
+    response: Response<PublicUser[]>
 ): Promise<void> {
     const catalogId = request.params.catalogId;
 
-    const addableMembers: User[] = await MembersService.getCatalogAddableMembers(catalogId);
+    const addableMembers: PublicUser[] = await MembersService.getCatalogAddableMembers(catalogId);
 
     response.json(addableMembers);
 }
@@ -81,12 +81,12 @@ export async function getCatalogAddableMembers(
  * @param {Response} response - The http response.
  */
 export async function getProjectAddableMembers(
-    request: Request<ProjectIdParam, User[], void>,
-    response: Response<User[]>
+    request: Request<ProjectIdParam, PublicUser[], void>,
+    response: Response<PublicUser[]>
 ): Promise<void> {
     const projectId = request.params.projectId;
 
-    const addableMembers: User[] = await MembersService.getProjectAddableMembers(projectId);
+    const addableMembers: PublicUser[] = await MembersService.getProjectAddableMembers(projectId);
 
     response.json(addableMembers);
 }
