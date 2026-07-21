@@ -575,17 +575,31 @@ function measuresSection(T: Translations, measures: ReportMeasure[]): string {
     return lines.join("\n");
 }
 
-function threatsListSection(T: Translations, threats: ThreatReport[]): string {
+function threatsListSection(
+    T: Translations,
+    threats: ThreatReport[],
+    threatGroups: ProjectReport["threatGroups"]
+): string {
     const lines: string[] = [];
     lines.push(`## ${anchor("chapter-riskList")}${T.riskList}`);
     lines.push("");
 
     lines.push(`| ID | ${T.name} | ${T.component} |`);
     lines.push(`|----|---------|-----------|`);
-    threats.forEach((threat) => {
-        const link = `[${escapeLinkText(threat.name)}](#${threatAnchorId(threat.reportId)})`;
-        const component = escapeCell(threat.componentName ?? "");
-        lines.push(`| ${escapeCell(String(threat.id))} | ${link} | ${component} |`);
+    const threatsById = new Map(threats.map((threat) => [threat.id, threat]));
+    threatGroups.forEach((group) => {
+        // Generic threat: a group heading row with no risk and no detail link.
+        lines.push(
+            `| ${escapeCell(group.reportId)} | **${escapeCell(group.name)}** | ${escapeCell(group.componentName ?? "")} |`
+        );
+        group.threatIds
+            .map((threatId) => threatsById.get(threatId))
+            .filter((threat): threat is ThreatReport => threat !== undefined)
+            .forEach((threat) => {
+                const link = `[${escapeLinkText(threat.name)}](#${threatAnchorId(threat.reportId)})`;
+                const component = escapeCell(threat.componentName ?? "");
+                lines.push(`| ${escapeCell(threat.reportId)} | ${link} | ${component} |`);
+            });
     });
     lines.push("");
 
@@ -598,96 +612,117 @@ interface ThreatLinkOptions {
     linkMeasures: boolean;
 }
 
-function threatsDetailSection(T: Translations, threats: ThreatReport[], linkOptions: ThreatLinkOptions): string {
+function threatsDetailSection(
+    T: Translations,
+    threats: ThreatReport[],
+    threatGroups: ProjectReport["threatGroups"],
+    linkOptions: ThreatLinkOptions
+): string {
     const lines: string[] = [];
     lines.push(`## ${anchor("chapter-riskDetails")}${T.threats}`);
     lines.push("");
 
-    threats.forEach((threat) => {
-        const id = threatAnchorId(threat.reportId);
-        const attackerName = T.attackers[threat.attacker]?.name ?? threat.attacker;
-        const poaName = T.pointsOfAttacks[threat.pointOfAttack]?.name ?? threat.pointOfAttack;
-        const affectedGoals = [
-            threat.confidentiality && T.confidentiality,
-            threat.integrity && T.integrity,
-            threat.availability && T.availability,
-        ]
-            .filter(Boolean)
-            .join(", ");
+    const threatsById = new Map(threats.map((threat) => [threat.id, threat]));
 
-        lines.push(`### ${anchor(id)}${escapeInline(threat.reportId)} ${escapeInline(threat.name)}`);
+    threatGroups.forEach((group) => {
+        // Generic threat heading with its catalogue description and no risk.
+        lines.push(`### ${escapeInline(group.reportId)} ${escapeInline(group.name)}`);
         lines.push("");
-        lines.push(`*ID: ${escapeInline(String(threat.id))}*`);
-        lines.push("");
-
-        if (affectedGoals) {
-            lines.push(`*${affectedGoals}*`);
+        if (group.description) {
+            lines.push(escapeBlock(group.description));
             lines.push("");
         }
 
-        // Risk table
-        lines.push(`| | ${T.probability} | ${T.damage} | ${T.risk} |`);
-        lines.push(`|---|---|---|---|`);
-        lines.push(
-            `| ${T.gross} | ${escapeCell(String(threat.probability))} | ${escapeCell(String(threat.damage))} | ${escapeCell(String(threat.risk))} |`
-        );
-        lines.push(
-            `| ${T.net} | ${escapeCell(String(threat.netProbability))} | ${escapeCell(String(threat.netDamage))} | ${escapeCell(String(threat.netRisk))} |`
-        );
-        lines.push("");
+        const children = group.threatIds
+            .map((threatId) => threatsById.get(threatId))
+            .filter((threat): threat is ThreatReport => threat !== undefined);
 
-        if (threat.componentReportId && linkOptions.linkComponents) {
-            const componentLinkText = escapeLinkText(`${threat.componentReportId} ${threat.componentName ?? ""}`);
-            const componentLink = `[${componentLinkText}](#${componentAnchorId(threat.componentReportId)})`;
-            lines.push(`**${T.component}:** ${componentLink}`);
-        } else {
-            lines.push(`**${T.component}:** ${escapeInline(threat.componentName ?? "–")}`);
-        }
-        lines.push("");
-        lines.push(`**${T.attackersHeader}:** ${attackerName}`);
-        lines.push("");
-        lines.push(`**${T.pointsOfAttackHeader}:** ${poaName}`);
-        lines.push("");
+        children.forEach((threat) => {
+            const id = threatAnchorId(threat.reportId);
+            const attackerName = T.attackers[threat.attacker]?.name ?? threat.attacker;
+            const poaName = T.pointsOfAttacks[threat.pointOfAttack]?.name ?? threat.pointOfAttack;
+            const affectedGoals = [
+                threat.confidentiality && T.confidentiality,
+                threat.integrity && T.integrity,
+                threat.availability && T.availability,
+            ]
+                .filter(Boolean)
+                .join(", ");
 
-        if (threat.description) {
-            lines.push(`**${T.description}:**`);
+            lines.push(`#### ${anchor(id)}${escapeInline(threat.reportId)} ${escapeInline(threat.name)}`);
             lines.push("");
-            lines.push(escapeBlock(threat.description));
+            lines.push(`*ID: ${escapeInline(String(threat.id))}*`);
             lines.push("");
-        }
 
-        if (threat.assets && threat.assets.length > 0) {
-            lines.push(`**${T.assets}:**`);
-            lines.push("");
-            threat.assets.forEach((asset) => {
-                const assetRid = asset.reportId ?? String(asset.id);
-                const label = `${assetRid} ${asset.name ?? ""}`;
-                if (linkOptions.linkAssets) {
-                    lines.push(`- [${escapeLinkText(label)}](#${assetAnchorId(assetRid)})`);
-                } else {
-                    lines.push(`- ${escapeInline(label)}`);
-                }
-            });
-            lines.push("");
-        }
+            if (affectedGoals) {
+                lines.push(`*${affectedGoals}*`);
+                lines.push("");
+            }
 
-        if (threat.measures && threat.measures.length > 0) {
-            lines.push(`**${T.measures}:**`);
+            // Risk table
+            lines.push(`| | ${T.probability} | ${T.damage} | ${T.risk} |`);
+            lines.push(`|---|---|---|---|`);
+            lines.push(
+                `| ${T.gross} | ${escapeCell(String(threat.probability))} | ${escapeCell(String(threat.damage))} | ${escapeCell(String(threat.risk))} |`
+            );
+            lines.push(
+                `| ${T.net} | ${escapeCell(String(threat.netProbability))} | ${escapeCell(String(threat.netDamage))} | ${escapeCell(String(threat.netRisk))} |`
+            );
             lines.push("");
-            threat.measures.forEach((measure) => {
-                const mRid = measure.reportId ?? String(measure.measureId);
-                const label = `${mRid} ${measure.name ?? ""}`;
-                const rendered = linkOptions.linkMeasures
-                    ? `[${escapeLinkText(label)}](#${measureAnchorId(mRid)})`
-                    : escapeInline(label);
-                if (measure.description) {
-                    lines.push(`- ${rendered}<br>*${escapeInline(measure.description)}*`);
-                } else {
-                    lines.push(`- ${rendered}`);
-                }
-            });
+
+            if (threat.componentReportId && linkOptions.linkComponents) {
+                const componentLinkText = escapeLinkText(`${threat.componentReportId} ${threat.componentName ?? ""}`);
+                const componentLink = `[${componentLinkText}](#${componentAnchorId(threat.componentReportId)})`;
+                lines.push(`**${T.component}:** ${componentLink}`);
+            } else {
+                lines.push(`**${T.component}:** ${escapeInline(threat.componentName ?? "–")}`);
+            }
             lines.push("");
-        }
+            lines.push(`**${T.attackersHeader}:** ${attackerName}`);
+            lines.push("");
+            lines.push(`**${T.pointsOfAttackHeader}:** ${poaName}`);
+            lines.push("");
+
+            if (threat.description) {
+                lines.push(`**${T.description}:**`);
+                lines.push("");
+                lines.push(escapeBlock(threat.description));
+                lines.push("");
+            }
+
+            if (threat.assets && threat.assets.length > 0) {
+                lines.push(`**${T.assets}:**`);
+                lines.push("");
+                threat.assets.forEach((asset) => {
+                    const assetRid = asset.reportId ?? String(asset.id);
+                    const label = `${assetRid} ${asset.name ?? ""}`;
+                    if (linkOptions.linkAssets) {
+                        lines.push(`- [${escapeLinkText(label)}](#${assetAnchorId(assetRid)})`);
+                    } else {
+                        lines.push(`- ${escapeInline(label)}`);
+                    }
+                });
+                lines.push("");
+            }
+
+            if (threat.measures && threat.measures.length > 0) {
+                lines.push(`**${T.measures}:**`);
+                lines.push("");
+                threat.measures.forEach((measure) => {
+                    const mRid = measure.reportId ?? String(measure.measureId);
+                    const label = `${mRid} ${measure.name ?? ""}`;
+                    const rendered = linkOptions.linkMeasures
+                        ? `[${escapeLinkText(label)}](#${measureAnchorId(mRid)})`
+                        : escapeInline(label);
+                    if (measure.description) {
+                        lines.push(`- ${rendered}<br>*${escapeInline(measure.description)}*`);
+                    } else {
+                        lines.push(`- ${rendered}`);
+                    }
+                });
+                lines.push("");
+            }
+        });
     });
 
     return lines.join("\n");
@@ -791,12 +826,12 @@ export function generateMarkdownReport(options: MarkdownReportOptions): string {
     }
 
     if (showThreatListPage && data.threats.length > 0) {
-        sections.push(threatsListSection(T, data.threats));
+        sections.push(threatsListSection(T, data.threats, data.threatGroups));
     }
 
     if (showThreatsPage && data.threats.length > 0) {
         sections.push(
-            threatsDetailSection(T, data.threats, {
+            threatsDetailSection(T, data.threats, data.threatGroups, {
                 linkComponents: showComponentsPage && data.components.length > 0,
                 linkAssets: showAssetsPage && data.assets.length > 0,
                 linkMeasures: showMeasuresPage && data.measures.length > 0,
