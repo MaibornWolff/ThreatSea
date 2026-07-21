@@ -224,6 +224,27 @@ describe("buildThreatSeaAccessToken account linking", () => {
         expect(unchangedUser?.lastname).toBe("Mename");
     });
 
+    it("keeps an existing user's stored lastname when the profile sends a display name but no family name", async () => {
+        const existingUser = await createUser({
+            firstname: "Dana",
+            lastname: "Storedlast",
+            email: "dana.storedlast@example.com",
+            oidcSub: "sub-displayname-only",
+        });
+        const profile: OidcProfile = {
+            sub: "sub-displayname-only",
+            email: "dana.storedlast@example.com",
+            emailVerified: true,
+            displayName: "Dana Displayname",
+        };
+
+        await buildThreatSeaAccessToken(profile);
+
+        const unchangedUser = await findUserById(existingUser.id);
+        expect(unchangedUser?.firstname).toBe("Dana");
+        expect(unchangedUser?.lastname).toBe("Storedlast");
+    });
+
     it("applies the email fallback for a brand-new user with no names", async () => {
         const profile: OidcProfile = {
             sub: "sub-new-noname",

@@ -70,7 +70,7 @@ export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promis
             // No-clobber: for an existing user an absent incoming name coalesces to the stored
             // value rather than the email fallback, so a userinfo-less login can't wipe a name.
             const nextFirstName = userObject.firstName ?? user.firstname;
-            const nextLastName = userObject.lastName ?? userObject.displayName ?? user.lastname;
+            const nextLastName = userObject.lastName ?? user.lastname;
             const profileChanged =
                 user.firstname !== nextFirstName || user.lastname !== nextLastName || user.email !== email;
 
