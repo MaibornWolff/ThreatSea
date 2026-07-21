@@ -75,6 +75,27 @@ const INVALID_MEASURE_SCHEDULED_AT_MISSING: Omit<InstanceType<typeof CreateMeasu
     catalogMeasureId: null,
 };
 
+const INVALID_MEASURE_SCHEDULED_AT_TIMESTAMP: InstanceType<typeof CreateMeasureRequest> = {
+    name: "valid timestamp measure",
+    description: "valid description test test",
+    scheduledAt: "2022-02-01T00:00:00Z",
+    catalogMeasureId: null,
+};
+
+const INVALID_MEASURE_SCHEDULED_AT_NONEXISTENT_DAY: InstanceType<typeof CreateMeasureRequest> = {
+    name: "valid nonexistent-day measure",
+    description: "valid description test test",
+    scheduledAt: "2026-02-30",
+    catalogMeasureId: null,
+};
+
+const INVALID_MEASURE_SCHEDULED_AT_BAD_MONTH: InstanceType<typeof CreateMeasureRequest> = {
+    name: "valid bad-month measure",
+    description: "valid description test test",
+    scheduledAt: "2026-13-45",
+    catalogMeasureId: null,
+};
+
 const VALID_GENERIC_THREAT_1: Omit<InstanceType<typeof CreateGenericThreatRequest>, "catalogThreatId"> = {
     pointOfAttackId: nanoid(),
     name: "Generic Threat 1",
