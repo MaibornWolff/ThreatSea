@@ -72,9 +72,18 @@ function mergeProfileClaims(idTokenClaims: ProfileClaims, userInfoClaims: Profil
     // (attacker-editable) userinfo email with the ID token's email_verified flag would let an
     // unverified address inherit a verified status and bypass the account-linking gate.
     const emailSource = userInfoClaims.email !== undefined ? userInfoClaims : idTokenClaims;
+    // Exception: when both sources assert the *same* address, the flag describes one email, so an
+    // ID-token "verified" survives a userinfo body that simply omits email_verified. This is the
+    // common shape when the gate fetches userinfo just to fill a missing name for a verified user.
+    const emailsMatch =
+        userInfoClaims.email !== undefined &&
+        idTokenClaims.email !== undefined &&
+        userInfoClaims.email.toLowerCase() === idTokenClaims.email.toLowerCase();
     return {
         email: emailSource.email,
-        emailVerified: emailSource.emailVerified,
+        emailVerified: emailsMatch
+            ? (emailSource.emailVerified ?? idTokenClaims.emailVerified)
+            : emailSource.emailVerified,
         name: userInfoClaims.name ?? idTokenClaims.name,
         givenName: userInfoClaims.givenName ?? idTokenClaims.givenName,
         familyName: userInfoClaims.familyName ?? idTokenClaims.familyName,
