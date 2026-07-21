@@ -15,6 +15,7 @@ import {
     usersProjects,
 } from "#db/schema.js";
 import { getGenericThreatsWithExtendedChildren } from "#services/generic-threats.service.js";
+import { getPointsOfAttack } from "#services/points-of-attack.service.js";
 import { findSystem } from "#services/system.service.js";
 import { getAssets } from "#services/assets.service.js";
 import { getMeasures } from "#services/measures.service.js";
@@ -159,6 +160,7 @@ type ReportThreat = Threat & {
     assets: Asset[];
     componentName: string | null;
     componentType: number | ComponentType | null;
+    componentReportId: string | null;
     interfaceName: string | null;
 };
 
@@ -182,6 +184,30 @@ export async function getReportData(projectId: number) {
     // Gets the images of the parsed system.
     const { image = null } = system || {};
 
+    // Gets the components of the parsed system, sorted and tagged with report ids.
+    const componentReportIdsDict = new Map<string, string>();
+    const components = (system?.data?.components ?? [])
+        .slice()
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((component, index) => {
+            const reportId = "C." + (index + 1);
+            componentReportIdsDict.set(component.id, reportId);
+            return {
+                ...component,
+                reportId,
+            };
+        });
+
+    // Maps each point of attack to its component's report id so a threat can link
+    // to the component it targets.
+    const pointsOfAttack = await getPointsOfAttack(projectId);
+    const componentReportIdByPointOfAttackId = new Map(
+        pointsOfAttack.map((pointOfAttack) => [
+            pointOfAttack.id,
+            pointOfAttack.componentId ? (componentReportIdsDict.get(pointOfAttack.componentId) ?? null) : null,
+        ])
+    );
+
     // Get all generic (parent) threats of the project with their child threats.
     const genericThreatsWithChildren = await getGenericThreatsWithExtendedChildren(projectId);
 
@@ -200,6 +226,10 @@ export async function getReportData(projectId: number) {
     // Flat list of all child threats (needed for measure-impact filtering and transforms).
     const threats: ReportThreat[] = genericThreatsWithChildren
         .flatMap((genericThreat) => genericThreat.children)
+        .map((child) => ({
+            ...child,
+            componentReportId: componentReportIdByPointOfAttackId.get(child.pointOfAttackId) ?? null,
+        }))
         .map(withInterfaceComponentName);
 
     //Get all the assets of the project
@@ -287,6 +317,7 @@ export async function getReportData(projectId: number) {
         systemImage: image,
         project: project,
         assets: assetsWithIds,
+        components: components,
         threats: threatsWithIds,
         threatGroups,
         measures: transformMeasures(measuresWithIds, threatsWithIds, measureImpacts),

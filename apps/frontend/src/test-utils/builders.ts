@@ -260,8 +260,9 @@ export const createReportThreatMeasure = (overrides: Partial<ReportThreatMeasure
 
 export const createReportThreat = (overrides: Partial<ThreatReport> = {}): ThreatReport => ({
     id: 1,
+    projectId: 1,
+    genericThreatId: 1,
     pointOfAttackId: "poa-1",
-    catalogThreatId: 1,
     name: "Test Threat",
     description: "",
     pointOfAttack: POINTS_OF_ATTACK.USER_INTERFACE,
@@ -270,10 +271,9 @@ export const createReportThreat = (overrides: Partial<ThreatReport> = {}): Threa
     confidentiality: false,
     integrity: false,
     availability: false,
-    doneEditing: true,
-    projectId: 1,
-    createdAt: new Date("2025-01-01"),
-    updatedAt: new Date("2025-01-01"),
+    status: THREAT_STATUSES.NEW,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z",
     componentName: null,
     componentType: null,
     componentReportId: null,
@@ -305,6 +305,7 @@ export const createProjectReport = (overrides: Partial<ProjectReport> = {}): Pro
     threats: [],
     measures: [],
     measureImpacts: [],
+    threatGroups: [],
     ...overrides,
 });
 

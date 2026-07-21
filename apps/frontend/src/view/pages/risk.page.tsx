@@ -255,11 +255,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
         }
     };
 
-    useEffect(() => {
-        if (autoSaveStatus === "upToDate") {
-            loadThreats();
-        }
-    }, [autoSaveStatus, loadThreats]);
+    useLoadThreatsOnce({ projectId, autoSaveStatus, load: loadThreats });
 
     return (
         <Page sx={{ boxSizing: "border-box" }}>

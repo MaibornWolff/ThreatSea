@@ -40,8 +40,8 @@
     {
       "idx": 5,
       "version": "7",
-      "when": 1783496169188,
-      "tag": "0005_new-model-migration",
+      "when": 1784216083482,
+      "tag": "0005_change_measures_scheduled_at_to_date",
       "breakpoints": false
     },
     {
@@ -49,6 +49,13 @@
       "version": "7",
       "when": 1784373856712,
       "tag": "0006_add-last-login-to-user",
+      "breakpoints": false
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1784373860000,
+      "tag": "0007_new-model-migration",
       "breakpoints": false
     }
   ]
