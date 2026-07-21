@@ -132,7 +132,8 @@
             ],
             "createdAt": "2024-01-01T00:00:00.000Z",
             "updatedAt": "2024-01-01T00:00:00.000Z",
-            "componentReportId": "C.1"
+            "componentReportId": "C.1",
+            "genericThreatId": 101
         },
         {
             "id": 2,
@@ -169,7 +170,8 @@
             "measures": [],
             "createdAt": "2024-01-01T00:00:00.000Z",
             "updatedAt": "2024-01-01T00:00:00.000Z",
-            "componentReportId": "C.2"
+            "componentReportId": "C.2",
+            "genericThreatId": 102
         }
     ],
     "measures": [
@@ -208,6 +210,36 @@
             "threatReportId": "T-01",
             "createdAt": "2024-01-01T00:00:00.000Z",
             "updatedAt": "2024-01-01T00:00:00.000Z"
+        }
+    ],
+    "threatGroups": [
+        {
+            "reportId": "T.1",
+            "genericThreatId": 101,
+            "name": "Injection",
+            "description": "Generic injection threats targeting stored data.",
+            "componentName": "Database Server",
+            "componentType": null,
+            "interfaceName": null,
+            "pointOfAttack": "DATA_STORAGE_INFRASTRUCTURE",
+            "attacker": "UNAUTHORISED_PARTIES",
+            "threatIds": [
+                1
+            ]
+        },
+        {
+            "reportId": "T.2",
+            "genericThreatId": 102,
+            "name": "Credential Attack",
+            "description": "Generic threats against the authentication mechanism.",
+            "componentName": "Login Form",
+            "componentType": null,
+            "interfaceName": null,
+            "pointOfAttack": "USER_INTERFACE",
+            "attacker": "UNAUTHORISED_PARTIES",
+            "threatIds": [
+                2
+            ]
         }
     ]
 }

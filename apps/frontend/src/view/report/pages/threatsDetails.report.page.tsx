@@ -22,6 +22,7 @@ interface ThreatsDetailsPageProps {
     logo: string | undefined;
     date: string;
     threats: ThreatReport[];
+    threatGroups: ProjectReport["threatGroups"];
     showComponentsPage: boolean;
     showAssetsPage: boolean;
     showMeasuresPage: boolean;
@@ -90,12 +91,14 @@ export const ThreatsDetailsPage = ({
     logo,
     date,
     threats,
+    threatGroups,
     showComponentsPage,
     showAssetsPage,
     showMeasuresPage,
 }: ThreatsDetailsPageProps) => {
     const linkId = "riskDetails";
     const { t } = useTranslation("report", { lng: language });
+    const threatsById = new Map(threats.map((threat) => [threat.id, threat]));
     return (
         <Page
             logo={logo}
@@ -118,23 +121,61 @@ export const ThreatsDetailsPage = ({
             >
                 {t("threats")}
             </Text>
-            {threats.map((threat, i) => {
+            {threatGroups.map((group) => {
+                const groupThreats = group.threatIds
+                    .map((id) => threatsById.get(id))
+                    .filter((threat): threat is ThreatReport => threat !== undefined);
                 return (
-                    <Fragment key={i}>
-                        {/* Pushes the card to the next page when less than a header's height
-                            remains, so a card never starts as a squashed sliver at the bottom. */}
-                        <View minPresenceAhead={180} />
-                        <ThreatCard
+                    <View key={group.reportId}>
+                        <GenericThreatHeader
                             language={language}
-                            showComponentsPage={showComponentsPage}
-                            showAssetsPage={showAssetsPage}
-                            showMeasuresPage={showMeasuresPage}
-                            {...threat}
+                            reportId={group.reportId}
+                            name={group.name}
+                            description={group.description}
                         />
-                    </Fragment>
+                        {groupThreats.map((threat, i) => (
+                            <Fragment key={i}>
+                                {/* Pushes the card to the next page when less than a header's height
+                                    remains, so a card never starts as a squashed sliver at the bottom. */}
+                                <View minPresenceAhead={180} />
+                                <ThreatCard
+                                    language={language}
+                                    showComponentsPage={showComponentsPage}
+                                    showAssetsPage={showAssetsPage}
+                                    showMeasuresPage={showMeasuresPage}
+                                    {...threat}
+                                />
+                            </Fragment>
+                        ))}
+                    </View>
                 );
             })}
         </Page>
+    );
+};
+
+interface GenericThreatHeaderProps {
+    reportId: string;
+    name: string;
+    description: string;
+    language: string;
+}
+
+// A generic threat rendered as a group heading: its report id, name and
+// catalogue description, with no risk of its own.
+const GenericThreatHeader = ({ reportId, name, description, language }: GenericThreatHeaderProps) => {
+    return (
+        <View wrap={false} style={{ marginTop: s2, marginBottom: s1 }}>
+            <View style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+                <Text style={{ marginRight: s1, fontSize: 8 }}>{reportId}</Text>
+                <Text style={{ fontWeight: 600 }}>{name}</Text>
+            </View>
+            {description ? (
+                <Description style={{ marginTop: 2 }} language={language}>
+                    {description}
+                </Description>
+            ) : null}
+        </View>
     );
 };
 

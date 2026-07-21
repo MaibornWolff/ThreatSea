@@ -40,8 +40,8 @@
     {
       "idx": 5,
       "version": "7",
-      "when": 1783496169188,
-      "tag": "0005_new-model-migration",
+      "when": 1784216083482,
+      "tag": "0005_change_measures_scheduled_at_to_date",
       "breakpoints": false
     },
     {
@@ -70,6 +70,13 @@
       "version": "7",
       "when": 1784904671606,
       "tag": "0009_add-project-folders",
+      "breakpoints": false
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1784904671607,
+      "tag": "0010_new-model-migration",
       "breakpoints": false
     }
   ]

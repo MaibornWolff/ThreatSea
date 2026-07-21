@@ -11,6 +11,7 @@ import { colors } from "#view/wrappers/color-tokens.ts";
 interface ThreatsListPageProps {
     indexCallback: IndexCallback;
     threats: ThreatReport[];
+    threatGroups: ProjectReport["threatGroups"];
     project: ProjectReport["project"];
     logo: string | undefined;
     language: string;
@@ -26,11 +27,20 @@ interface IndexThreatRowProps {
     number: number;
 }
 
-export const ThreatsListPage = ({ indexCallback, threats, project, logo, language, date }: ThreatsListPageProps) => {
+export const ThreatsListPage = ({
+    indexCallback,
+    threats,
+    threatGroups,
+    project,
+    logo,
+    language,
+    date,
+}: ThreatsListPageProps) => {
     const linkId = "riskList";
     const { t } = useTranslation("report", {
         lng: language,
     });
+    const threatsById = new Map(threats.map((threat) => [threat.id, threat]));
     return (
         <Page
             logo={logo}
@@ -87,10 +97,21 @@ export const ThreatsListPage = ({ indexCallback, threats, project, logo, languag
                         backgroundColor: colors.surface.paperWhite,
                     }}
                 >
-                    {threats.map((threat, i) => {
-                        const number = i + 1;
-                        return <IndexThreatRow key={i} number={number} {...threat} />;
-                    })}
+                    {threatGroups.map((group) => (
+                        <View key={group.reportId}>
+                            <IndexGenericThreatRow
+                                reportId={group.reportId}
+                                name={group.name}
+                                componentName={group.componentName}
+                            />
+                            {group.threatIds
+                                .map((id) => threatsById.get(id))
+                                .filter((threat): threat is ThreatReport => threat !== undefined)
+                                .map((threat, i) => (
+                                    <IndexThreatRow key={i} number={i + 1} {...threat} />
+                                ))}
+                        </View>
+                    ))}
                 </View>
                 <View
                     style={{
@@ -101,6 +122,63 @@ export const ThreatsListPage = ({ indexCallback, threats, project, logo, languag
                 ></View>
             </View>
         </Page>
+    );
+};
+
+// A generic threat rendered as a bold, unlinked heading row above its children.
+const IndexGenericThreatRow = ({
+    reportId,
+    name,
+    componentName,
+}: {
+    reportId: string;
+    name: string;
+    componentName: string | null;
+}) => {
+    return (
+        <View
+            style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "stretch",
+                justifyContent: "space-between",
+                borderTop: `2px solid ${colors.border.divider}`,
+                backgroundColor: backgroundColor,
+            }}
+            wrap={false}
+        >
+            <View style={{ display: "flex", flexDirection: "row", alignItems: "center", padding: s1 }}>
+                <Text size="small" style={{ textAlign: "left", width: 25 }}>
+                    {reportId}
+                </Text>
+            </View>
+            <View
+                style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    flex: 4,
+                    padding: s1,
+                    borderLeft: `2px solid ${colors.border.divider}`,
+                }}
+            >
+                <Text size="small" style={{ fontWeight: 600 }}>
+                    {name}
+                </Text>
+            </View>
+            <View
+                style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    flex: 2,
+                    padding: s1,
+                    borderLeft: `2px solid ${colors.border.divider}`,
+                }}
+            >
+                <Text size="small">{componentName}</Text>
+            </View>
+        </View>
     );
 };
 

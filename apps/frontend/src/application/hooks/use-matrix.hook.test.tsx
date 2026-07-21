@@ -33,7 +33,7 @@ const renderUseMatrix = ({ threats = [], measures = [], measureImpacts = [] }: S
 
 // A threat wired to a single measure through a measure impact, so the threat's
 // derived `measures[0].active` flag reflects the timeline-date comparison.
-const linkedSetup = (scheduledAt: Date): SetupArgs => ({
+const linkedSetup = (scheduledAt: string): SetupArgs => ({
     threats: [createThreat({ id: 1 })],
     measures: [createMeasure({ id: 10, scheduledAt })],
     measureImpacts: [createMeasureImpact({ id: 1, measureId: 10, threatId: 1 })],

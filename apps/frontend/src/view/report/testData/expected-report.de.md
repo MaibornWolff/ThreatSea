@@ -208,15 +208,21 @@ Use parameterised queries and input sanitisation to prevent injection attacks.
 
 | ID | Name | Komponente |
 |----|---------|-----------|
-| 1 | [SQL Injection](#threat-T-01) | Database Server |
-| 2 | [Brute Force Login](#threat-T-02) | Login Form |
+| T.1 | **Injection** | Database Server |
+| T-01 | [SQL Injection](#threat-T-01) | Database Server |
+| T.2 | **Credential Attack** | Login Form |
+| T-02 | [Brute Force Login](#threat-T-02) | Login Form |
 
 
 ---
 
 ## <a id="chapter-riskDetails"></a>Bedrohungen
 
-### <a id="threat-T-01"></a>T-01 SQL Injection
+### T.1 Injection
+
+Generic injection threats targeting stored data.
+
+#### <a id="threat-T-01"></a>T-01 SQL Injection
 
 *ID: 1*
 
@@ -246,7 +252,11 @@ This can lead to data exfiltration or destruction.
 
 - [M-01 Input Validation](#measure-M-01)<br>*Parameterised queries have been added to all database calls.*
 
-### <a id="threat-T-02"></a>T-02 Brute Force Login
+### T.2 Credential Attack
+
+Generic threats against the authentication mechanism.
+
+#### <a id="threat-T-02"></a>T-02 Brute Force Login
 
 *ID: 2*
 
