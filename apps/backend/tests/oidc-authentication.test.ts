@@ -220,51 +220,39 @@ describe("handleOidcCallback profile building", () => {
 });
 
 describe("initializeOidc client authentication detection", () => {
-    it("prefers client_secret_post when the IdP advertises both methods", async () => {
-        const postAuthentication = { method: "client_secret_post" };
-        vi.mocked(client.ClientSecretPost).mockReturnValue(postAuthentication as never);
-
+    it("reuses the discovered configuration for client_secret_post without rebuilding", async () => {
         await initializeOidcWithServerMetadata({
             issuer: "https://idp.example.com",
             token_endpoint_auth_methods_supported: ["client_secret_basic", "client_secret_post"],
         });
 
+        // discovery() already returns a Configuration defaulting to ClientSecretPost, so the post path
+        // must reuse it rather than re-selecting the auth method or constructing a second Configuration.
         expect(client.ClientSecretBasic).not.toHaveBeenCalled();
-        expect(client.ClientSecretPost).toHaveBeenCalledWith("threatsea-secret");
-        expect(client.Configuration).toHaveBeenCalledWith(
-            expect.objectContaining({ issuer: "https://idp.example.com" }),
-            "threatsea-client",
-            "threatsea-secret",
-            postAuthentication
-        );
+        expect(client.ClientSecretPost).not.toHaveBeenCalled();
+        expect(client.Configuration).not.toHaveBeenCalled();
     });
 
-    it("defaults to client_secret_post when the metadata field is absent", async () => {
+    it("reuses the discovered configuration when the metadata field is absent", async () => {
         await initializeOidcWithServerMetadata({ issuer: "https://idp.example.com" });
 
-        expect(client.ClientSecretPost).toHaveBeenCalledWith("threatsea-secret");
+        expect(client.ClientSecretPost).not.toHaveBeenCalled();
         expect(client.ClientSecretBasic).not.toHaveBeenCalled();
+        expect(client.Configuration).not.toHaveBeenCalled();
     });
 
-    it("keeps client_secret_post when the IdP only supports post", async () => {
-        const postAuthentication = { method: "client_secret_post" };
-        vi.mocked(client.ClientSecretPost).mockReturnValue(postAuthentication as never);
-
+    it("reuses the discovered configuration when the IdP only supports post", async () => {
         await initializeOidcWithServerMetadata({
             issuer: "https://idp.example.com",
             token_endpoint_auth_methods_supported: ["client_secret_post"],
         });
 
         expect(client.ClientSecretBasic).not.toHaveBeenCalled();
-        expect(client.Configuration).toHaveBeenCalledWith(
-            expect.anything(),
-            "threatsea-client",
-            "threatsea-secret",
-            postAuthentication
-        );
+        expect(client.ClientSecretPost).not.toHaveBeenCalled();
+        expect(client.Configuration).not.toHaveBeenCalled();
     });
 
-    it("falls back to client_secret_basic when the IdP only supports basic", async () => {
+    it("rebuilds the configuration with client_secret_basic when the IdP only supports basic", async () => {
         const basicAuthentication = { method: "client_secret_basic" };
         vi.mocked(client.ClientSecretBasic).mockReturnValue(basicAuthentication as never);
 
@@ -274,8 +262,9 @@ describe("initializeOidc client authentication detection", () => {
         });
 
         expect(client.ClientSecretPost).not.toHaveBeenCalled();
+        expect(client.ClientSecretBasic).toHaveBeenCalledWith("threatsea-secret");
         expect(client.Configuration).toHaveBeenCalledWith(
-            expect.anything(),
+            expect.objectContaining({ issuer: "https://idp.example.com" }),
             "threatsea-client",
             "threatsea-secret",
             basicAuthentication
@@ -292,5 +281,6 @@ describe("initializeOidc client authentication detection", () => {
 
         expect(client.ClientSecretPost).not.toHaveBeenCalled();
         expect(client.ClientSecretBasic).not.toHaveBeenCalled();
+        expect(client.Configuration).not.toHaveBeenCalled();
     });
 });

@@ -97,28 +97,30 @@ export async function initializeOidc(): Promise<void> {
     // is treated as post-capable (the OIDC default). Fall back to Basic only when post is not
     // advertised, and fail fast when the IdP supports neither secret-based method.
     const supportedAuthenticationMethods = serverMetadata.token_endpoint_auth_methods_supported;
-    let clientAuthentication: ReturnType<typeof client.ClientSecretPost>;
     let selectedAuthenticationMethod: string;
     if (supportedAuthenticationMethods === undefined || supportedAuthenticationMethods.includes("client_secret_post")) {
-        clientAuthentication = client.ClientSecretPost(oidcConfig.clientSecret);
+        // discovery() already defaults to ClientSecretPost and, when allowHttp is set, applied
+        // allowInsecureRequests via options.execute — so the discovered Configuration is ready to
+        // reuse as-is. Rebuilding it would duplicate both the auth selection and the insecure-request
+        // opt-in and risk the two construction paths drifting apart.
+        oidcClientConfig = discoveredConfig;
         selectedAuthenticationMethod = "client_secret_post";
     } else if (supportedAuthenticationMethods.includes("client_secret_basic")) {
-        clientAuthentication = client.ClientSecretBasic(oidcConfig.clientSecret);
+        // Only the Basic fallback needs a rebuilt Configuration to override discovery()'s post default.
+        oidcClientConfig = new client.Configuration(
+            serverMetadata,
+            oidcConfig.clientId,
+            oidcConfig.clientSecret,
+            client.ClientSecretBasic(oidcConfig.clientSecret)
+        );
+        if (oidcConfig.allowHttp) {
+            client.allowInsecureRequests(oidcClientConfig);
+        }
         selectedAuthenticationMethod = "client_secret_basic";
     } else {
         throw new Error(
             `OIDC provider does not advertise a client-secret token endpoint authentication method (client_secret_post or client_secret_basic); advertised: ${supportedAuthenticationMethods.join(", ")}`
         );
-    }
-
-    oidcClientConfig = new client.Configuration(
-        serverMetadata,
-        oidcConfig.clientId,
-        oidcConfig.clientSecret,
-        clientAuthentication
-    );
-    if (oidcConfig.allowHttp) {
-        client.allowInsecureRequests(oidcClientConfig);
     }
 
     Logger.info(`OIDC token endpoint authentication method: ${selectedAuthenticationMethod}`);
