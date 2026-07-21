@@ -16,6 +16,8 @@ interface FormValues {
     icon: string;
 }
 
+const DEFAULT_COMMUNICATION_INTERFACE_ICON = "DeviceHub";
+
 interface CommunicationInterfaceFormValues
     extends FormValues, Omit<SystemCommunicationInterface, keyof FormValues>, DialogValue {}
 
@@ -48,11 +50,13 @@ const CommunicationInterfaceDialog = ({
         defaultValues: {
             ...communicationInterface,
             name: communicationInterface?.name ?? "",
-            icon: communicationInterface?.icon ?? "",
+            icon: communicationInterface?.icon ?? DEFAULT_COMMUNICATION_INTERFACE_ICON,
         },
     });
 
-    const [selectedIcon, setSelectedIcon] = useState(communicationInterface?.icon || "");
+    const [selectedIcon, setSelectedIcon] = useState(
+        communicationInterface?.icon || DEFAULT_COMMUNICATION_INTERFACE_ICON
+    );
 
     const handleCancelDialog = () => {
         cancelDialog();
