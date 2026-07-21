@@ -1,4 +1,4 @@
-import { Add } from "@mui/icons-material";
+import Add from "@mui/icons-material/Add";
 import { IconButton, Tooltip, Box } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useEffect, useRef, useState, type MouseEvent } from "react";

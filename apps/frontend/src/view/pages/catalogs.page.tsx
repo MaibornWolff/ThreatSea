@@ -3,7 +3,11 @@
  *     overview page.
  */
 
-import { Add, ArrowDownward, ArrowUpward, Delete, Edit } from "@mui/icons-material";
+import Add from "@mui/icons-material/Add";
+import ArrowDownward from "@mui/icons-material/ArrowDownward";
+import ArrowUpward from "@mui/icons-material/ArrowUpward";
+import Delete from "@mui/icons-material/Delete";
+import Edit from "@mui/icons-material/Edit";
 import {
     Box,
     LinearProgress,

@@ -19,7 +19,7 @@ import { MeasureThreatsTable } from "#view/components/measureThreatsTable.compon
 import { SearchField } from "#view/components/search-field.component.tsx";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { IconButton } from "#view/components/icon-button.component.tsx";
-import { Add } from "@mui/icons-material";
+import Add from "@mui/icons-material/Add";
 import { BoxNameTextField } from "#view/components/name-textfield.component.tsx";
 import { DescriptionTextField } from "#view/components/description-textfield.component.tsx";
 import type { Project } from "#api/types/project.types.ts";

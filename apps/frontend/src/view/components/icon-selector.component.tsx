@@ -1,6 +1,7 @@
-import { createElement, useEffect, useEffectEvent, useState, type ReactNode } from "react";
+import { useEffect, useEffectEvent, useState, type ReactNode } from "react";
 import { FormControl, FormHelperText, Grid, IconButton, InputLabel, MenuItem, Select, TextField } from "@mui/material";
-import * as MuiIcons from "@mui/icons-material";
+import { DynamicMuiIcon } from "#view/components/dynamic-mui-icon.component.tsx";
+import { useMuiIconNames } from "#application/hooks/use-mui-icons.hook.ts";
 
 interface IconSelectorProps {
     value?: string;
@@ -10,10 +11,8 @@ interface IconSelectorProps {
     helperText?: ReactNode;
 }
 
-type MuiIconKey = keyof typeof MuiIcons;
-
 // Preselected icons suitable for communication interfaces
-const preselectedIcons: readonly MuiIconKey[] = [
+const preselectedIcons: readonly string[] = [
     "Wifi",
     "WifiTethering",
     "Bluetooth",
@@ -43,28 +42,29 @@ const preselectedIcons: readonly MuiIconKey[] = [
 
 export const IconSelector = ({ value, onChange, label, error, helperText }: IconSelectorProps) => {
     const [searchTerm, setSearchTerm] = useState("");
-    const [visibleIcons, setVisibleIcons] = useState<readonly MuiIconKey[]>(preselectedIcons);
+    const [visibleIcons, setVisibleIcons] = useState<readonly string[]>(preselectedIcons);
     const [selectedIcon, setSelectedIcon] = useState(value || "");
     const [open, setOpen] = useState(false);
+    const allIconNames = useMuiIconNames();
 
     useEffect(() => {
         setSelectedIcon(value || "");
     }, [value]);
 
-    const setVisibleIconsEvent = useEffectEvent((icons: MuiIconKey[]) => {
+    const setVisibleIconsEvent = useEffectEvent((icons: readonly string[]) => {
         setVisibleIcons(icons);
     });
 
     useEffect(() => {
         if (searchTerm === "") {
-            setVisibleIconsEvent(preselectedIcons as MuiIconKey[]);
+            setVisibleIconsEvent(preselectedIcons);
         } else {
-            const filteredIcons = Object.keys(MuiIcons)
+            const filteredIcons = allIconNames
                 .filter((iconName) => iconName.toLowerCase().includes(searchTerm.toLowerCase()))
                 .slice(0, 25);
-            setVisibleIconsEvent(filteredIcons as MuiIconKey[]);
+            setVisibleIconsEvent(filteredIcons);
         }
-    }, [searchTerm]);
+    }, [searchTerm, allIconNames]);
 
     const handleIconChange = (iconName: string) => {
         setSelectedIcon(iconName);
@@ -98,10 +98,9 @@ export const IconSelector = ({ value, onChange, label, error, helperText }: Icon
                     if (!selectedIcon) {
                         return null;
                     }
-                    const IconComponent = MuiIcons[selectedIcon as MuiIconKey] as React.ElementType | undefined;
                     return (
                         <IconButton size="small" disableRipple>
-                            {IconComponent ? createElement(IconComponent) : null}
+                            <DynamicMuiIcon iconName={selectedIcon} />
                         </IconButton>
                     );
                 }}
@@ -130,10 +129,7 @@ export const IconSelector = ({ value, onChange, label, error, helperText }: Icon
                                         backgroundColor: selectedIcon === iconName ? "action.selected" : "transparent",
                                     }}
                                 >
-                                    {(() => {
-                                        const IconComponent = MuiIcons[iconName];
-                                        return IconComponent ? createElement(IconComponent) : null;
-                                    })()}
+                                    <DynamicMuiIcon iconName={iconName} />
                                 </IconButton>
                             </Grid>
                         ))}

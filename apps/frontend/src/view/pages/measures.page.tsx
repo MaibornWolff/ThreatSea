@@ -1,4 +1,7 @@
-import { Add, ContentCopyOutlined, Delete, Replay } from "@mui/icons-material";
+import Add from "@mui/icons-material/Add";
+import ContentCopyOutlined from "@mui/icons-material/ContentCopyOutlined";
+import Delete from "@mui/icons-material/Delete";
+import Replay from "@mui/icons-material/Replay";
 import { Box, LinearProgress, Table, TableBody, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import { memo, useLayoutEffect } from "react";
 import type { ChangeEvent, SyntheticEvent } from "react";

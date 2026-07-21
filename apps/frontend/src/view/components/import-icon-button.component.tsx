@@ -1,4 +1,4 @@
-import { FileUpload } from "@mui/icons-material";
+import FileUpload from "@mui/icons-material/FileUpload";
 import { IconButton } from "./icon-button.component";
 import type { InputHTMLAttributes } from "react";
 

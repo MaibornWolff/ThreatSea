@@ -24,7 +24,7 @@ import { useNavigate } from "react-router";
 import { useCatalogMeasuresList } from "#application/hooks/use-catalog-measures-list.hook.ts";
 import { ListBoxHeader } from "./list-box-header.component";
 import { ListBoxToolbar } from "./list-box-toolbar.component";
-import { Delete } from "@mui/icons-material";
+import Delete from "@mui/icons-material/Delete";
 import { useState } from "react";
 import { CatalogMeasuresActions } from "#application/actions/catalog-measures.actions.ts";
 import { useAppDispatch } from "#application/hooks/use-app-redux.hook.ts";

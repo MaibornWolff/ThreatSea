@@ -1,5 +1,5 @@
 import { Box, Checkbox, FormControlLabel, FormGroup, InputAdornment, Switch, Tooltip, Typography } from "@mui/material";
-import { InfoOutlined } from "@mui/icons-material";
+import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import { useTheme } from "@mui/material/styles";
 import { Controller, useWatch, type Control, type FieldErrors, type UseFormRegister } from "react-hook-form";
 import { useTranslation } from "react-i18next";

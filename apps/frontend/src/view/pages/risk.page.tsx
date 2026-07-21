@@ -1,4 +1,7 @@
-import { Add, CalendarToday, Delete, EventAvailable } from "@mui/icons-material";
+import Add from "@mui/icons-material/Add";
+import CalendarToday from "@mui/icons-material/CalendarToday";
+import Delete from "@mui/icons-material/Delete";
+import EventAvailable from "@mui/icons-material/EventAvailable";
 import {
     Box,
     Table,

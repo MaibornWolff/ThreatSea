@@ -1,6 +1,8 @@
 import { Box } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { Add, ArrowDownward, ArrowUpward } from "@mui/icons-material";
+import Add from "@mui/icons-material/Add";
+import ArrowDownward from "@mui/icons-material/ArrowDownward";
+import ArrowUpward from "@mui/icons-material/ArrowUpward";
 import { SearchField } from "#view/components/search-field.component.tsx";
 import { ToggleButtons } from "./toggle-buttons.component";
 import { IconButton } from "./icon-button.component";

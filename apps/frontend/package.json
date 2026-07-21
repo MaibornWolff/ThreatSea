@@ -9,8 +9,9 @@
     "#*": "./src/*"
   },
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b tsconfig.app.json && vite build",
+    "dev": "pnpm generate:icon-paths && vite",
+    "build": "pnpm generate:icon-paths && tsc -b tsconfig.app.json && vite build",
+    "generate:icon-paths": "node scripts/generate-mui-icon-paths.mjs",
     "preview": "vite preview",
     "type-check": "tsc -b --noEmit",
     "lint": "oxlint .",

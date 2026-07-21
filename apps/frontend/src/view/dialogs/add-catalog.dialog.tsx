@@ -15,7 +15,7 @@ import { Button } from "#view/components/button.component.tsx";
 import { Dialog } from "#view/components/dialog.component.tsx";
 import { ToggleButtons } from "#view/components/toggle-buttons.component.tsx";
 import { NameTextField } from "#view/components/name-textfield.component.tsx";
-import { InfoOutlined } from "@mui/icons-material";
+import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import type { Catalog } from "#api/types/catalogs.types.ts";
 import type { DialogValue } from "#application/reducers/dialogs.reducer.ts";
 

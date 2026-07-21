@@ -20,7 +20,7 @@ import {
 import type { DialogProps } from "@mui/material/Dialog";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import { useTheme } from "@mui/material/styles";
-import { InfoOutlined } from "@mui/icons-material";
+import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import SelectBoxCategorySubHeader from "#view/components/selectBox-CategorySubHeader.tsx";
 import { useEffect, useState, type ChangeEvent } from "react";
 import { Controller, useForm } from "react-hook-form";

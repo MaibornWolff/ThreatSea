@@ -2,7 +2,9 @@
  * @module error.wrapper - Defines the clientside error boundary.
  */
 
-import { ChevronLeft, ContentCopyOutlined, ErrorOutlineOutlined } from "@mui/icons-material";
+import ChevronLeft from "@mui/icons-material/ChevronLeft";
+import ContentCopyOutlined from "@mui/icons-material/ContentCopyOutlined";
+import ErrorOutlineOutlined from "@mui/icons-material/ErrorOutlineOutlined";
 import { Alert } from "@mui/material";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";

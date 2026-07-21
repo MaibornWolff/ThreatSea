@@ -1,7 +1,8 @@
 import type { SyntheticEvent } from "react";
 import TableCell from "@mui/material/TableCell";
 import { Box, Table, TableBody, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
-import { Delete, Edit } from "@mui/icons-material";
+import Delete from "@mui/icons-material/Delete";
+import Edit from "@mui/icons-material/Edit";
 import { useTranslation } from "react-i18next";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";

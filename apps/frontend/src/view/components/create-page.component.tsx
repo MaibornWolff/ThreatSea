@@ -24,7 +24,7 @@ import { HeaderLevelOneNav } from "./header-level-one-nav.component";
 import { HeaderProjectTabs } from "./header-project-tabs.component";
 import { ProjectActionsMenu } from "./project-actions-menu.component";
 import ProjectDialogPage from "#view/pages/project-dialog.page.tsx";
-import { Edit } from "@mui/icons-material";
+import Edit from "@mui/icons-material/Edit";
 
 export const CreatePage = <P extends object>(
     HeaderRightSlot: ComponentType,

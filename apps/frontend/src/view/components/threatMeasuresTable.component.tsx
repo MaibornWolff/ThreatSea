@@ -1,5 +1,6 @@
 import { Box, Table, TableBody, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
-import { Delete, Edit } from "@mui/icons-material";
+import Delete from "@mui/icons-material/Delete";
+import Edit from "@mui/icons-material/Edit";
 import TableCell from "@mui/material/TableCell";
 import type { SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";

@@ -16,3 +16,6 @@ docs/
 # Vite related dependencies
 .vite
 .swc
+
+# Generated icon path data (see scripts/generate-mui-icon-paths.mjs)
+src/generated/

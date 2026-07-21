@@ -1,4 +1,6 @@
-import { ExpandLess, ExpandMore, GppGood } from "@mui/icons-material";
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import ExpandMore from "@mui/icons-material/ExpandMore";
+import GppGood from "@mui/icons-material/GppGood";
 import { Box, Button as MaterialButton, Collapse, Typography, type SxProps, type Theme } from "@mui/material";
 import { useState, type MouseEvent } from "react";
 import { useTranslation } from "react-i18next";

@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { Add } from "@mui/icons-material";
+import Add from "@mui/icons-material/Add";
 import type { ChangeEvent, MouseEvent, SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "#view/components/button.component.tsx";

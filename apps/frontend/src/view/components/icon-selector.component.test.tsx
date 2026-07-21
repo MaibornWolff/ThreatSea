@@ -10,10 +10,11 @@ describe("IconSelector", () => {
         expect(screen.getByText("Pick an icon")).toBeInTheDocument();
     });
 
-    it("reflects the pre-selected icon in the closed control", () => {
+    it("reflects the pre-selected icon in the closed control", async () => {
         renderWithProviders(<IconSelector label="Icon" value="Bluetooth" onChange={vi.fn()} />);
 
-        expect(screen.getByTestId("BluetoothIcon")).toBeInTheDocument();
+        // The icon drawing data is loaded lazily, so the icon appears asynchronously.
+        expect(await screen.findByTestId("BluetoothIcon")).toBeInTheDocument();
     });
 
     it("calls onChange with the chosen icon name when an icon is picked", async () => {
@@ -22,7 +23,7 @@ describe("IconSelector", () => {
         renderWithProviders(<IconSelector label="Icon" onChange={onChange} />);
 
         await user.click(screen.getByRole("combobox"));
-        await user.click(screen.getByTestId("WifiIcon"));
+        await user.click(await screen.findByTestId("WifiIcon"));
 
         expect(onChange).toHaveBeenCalledWith("Wifi");
     });
@@ -32,11 +33,21 @@ describe("IconSelector", () => {
         renderWithProviders(<IconSelector label="Icon" onChange={vi.fn()} />);
 
         await user.click(screen.getByRole("combobox"));
-        expect(screen.getByTestId("RouterIcon")).toBeInTheDocument();
+        expect(await screen.findByTestId("RouterIcon")).toBeInTheDocument();
 
         await user.type(screen.getByPlaceholderText("Search icons..."), "usb");
 
         expect(await screen.findByTestId("UsbIcon")).toBeInTheDocument();
         expect(screen.queryByTestId("RouterIcon")).not.toBeInTheDocument();
+    });
+
+    it("includes outlined-style icons in the search results", async () => {
+        const user = userEvent.setup();
+        renderWithProviders(<IconSelector label="Icon" onChange={vi.fn()} />);
+
+        await user.click(screen.getByRole("combobox"));
+        await user.type(screen.getByPlaceholderText("Search icons..."), "WifiOutlined");
+
+        expect(await screen.findByTestId("WifiOutlinedIcon")).toBeInTheDocument();
     });
 });

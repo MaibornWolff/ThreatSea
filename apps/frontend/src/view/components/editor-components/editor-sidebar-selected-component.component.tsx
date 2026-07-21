@@ -3,7 +3,8 @@ import { AssetSecurityNeedsPopper } from "./asset-security-needs-popper.componen
 import { PointOfAttackSwitch } from "./point-of-attack-switch.component";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { POA_COLORS } from "#view/colors/pointsOfAttack.colors.ts";
-import { Delete, Edit } from "@mui/icons-material";
+import Delete from "@mui/icons-material/Delete";
+import Edit from "@mui/icons-material/Edit";
 import { TextField } from "#view/components/textfield.component.tsx";
 import { SearchField } from "#view/components/search-field.component.tsx";
 import { ToggleButtons } from "#view/components/toggle-buttons.component.tsx";
@@ -11,10 +12,10 @@ import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { useState, useEffect, useEffectEvent, memo } from "react";
 import { Box, FormGroup, ListItemAvatar, Typography, IconButton, Avatar } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import * as MuiIcons from "@mui/icons-material";
+import { DynamicMuiIcon } from "#view/components/dynamic-mui-icon.component.tsx";
 import { useAssetHoverPopper } from "#application/hooks/useAssetHoverPopper.ts";
 import { useDebounce } from "#hooks/useDebounce.ts";
-import type { ChangeEvent, ElementType } from "react";
+import type { ChangeEvent } from "react";
 import type { Asset } from "#api/types/asset.types.ts";
 import type {
     AugmentedSystemComponent,
@@ -22,8 +23,6 @@ import type {
     SystemCommunicationInterface,
     SystemPointOfAttack,
 } from "#api/types/system.types.ts";
-
-const muiIconMap = MuiIcons as Record<string, ElementType>;
 
 export interface EditorSidebarSelectedComponentProps {
     selectedComponent: AugmentedSystemComponent | undefined;
@@ -417,11 +416,6 @@ const EditorSidebarSelectedComponentInner = ({
                     </Box>
                     <Box sx={{ paddingLeft: 4 }}>
                         {communicationInterfaces.map((communicationInterface, index) => {
-                            const IconComponent =
-                                communicationInterface.icon != null
-                                    ? muiIconMap[communicationInterface.icon]
-                                    : undefined;
-
                             return (
                                 <Box
                                     key={index}
@@ -449,7 +443,9 @@ const EditorSidebarSelectedComponentInner = ({
                                                 color: "primary.main",
                                             }}
                                         >
-                                            {IconComponent ? <IconComponent /> : null}
+                                            {communicationInterface.icon != null ? (
+                                                <DynamicMuiIcon iconName={communicationInterface.icon} />
+                                            ) : null}
                                         </Avatar>
                                     </ListItemAvatar>
                                     {editingInterfaceId === communicationInterface.id ? (

@@ -1,4 +1,7 @@
-import { Check, Clear, ContentCopy, Delete } from "@mui/icons-material";
+import Check from "@mui/icons-material/Check";
+import Clear from "@mui/icons-material/Clear";
+import ContentCopy from "@mui/icons-material/ContentCopy";
+import Delete from "@mui/icons-material/Delete";
 import { Box, LinearProgress, Popper, Typography } from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
