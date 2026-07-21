@@ -2,7 +2,7 @@ import { decodeJwt } from "jose";
 import { eq } from "drizzle-orm";
 import { db } from "#db/index.js";
 import { users } from "#db/schema.js";
-import { buildThreatSeaAccessToken, findLinkableUser, OidcProfile } from "#services/auth.service.js";
+import { buildThreatSeaAccessToken, findOidcUserBySub, OidcProfile } from "#services/auth.service.js";
 import { UnauthorizedError } from "#errors/unauthorized.error.js";
 
 const configOverrides = vi.hoisted(() => ({ ALLOW_UNVERIFIED_EMAIL_LINKING: false }));
@@ -239,7 +239,7 @@ describe("buildThreatSeaAccessToken account linking", () => {
     });
 });
 
-describe("findLinkableUser", () => {
+describe("findOidcUserBySub", () => {
     it("returns lastLoginAt for a user matched by oidc sub", async () => {
         await createUser({
             firstname: "Sub",
@@ -248,39 +248,26 @@ describe("findLinkableUser", () => {
             oidcSub: "sub-findable",
         });
 
-        const linkableUser = await findLinkableUser("sub-findable", undefined);
+        const knownUser = await findOidcUserBySub("sub-findable");
 
-        expect(linkableUser?.lastLoginAt).toBeTypeOf("string");
-    });
-
-    it("falls back to an unlinked email match when no sub matches, case-insensitively", async () => {
-        await createUser({
-            firstname: "Email",
-            lastname: "Match",
-            email: "email.match@example.com",
-        });
-
-        const linkableUser = await findLinkableUser("sub-not-present", "Email.Match@example.com");
-
-        expect(linkableUser?.lastLoginAt).toBeTypeOf("string");
-    });
-
-    it("ignores an email that already belongs to a linked account", async () => {
-        await createUser({
-            firstname: "Linked",
-            lastname: "Already",
-            email: "linked.already@example.com",
-            oidcSub: "sub-owns-email",
-        });
-
-        const linkableUser = await findLinkableUser("different-sub", "linked.already@example.com");
-
-        expect(linkableUser).toBeUndefined();
+        expect(knownUser?.lastLoginAt).toBeTypeOf("string");
     });
 
     it("returns undefined for an unknown user", async () => {
-        const linkableUser = await findLinkableUser("sub-unknown", "unknown@example.com");
+        const knownUser = await findOidcUserBySub("sub-unknown");
 
-        expect(linkableUser).toBeUndefined();
+        expect(knownUser).toBeUndefined();
+    });
+
+    it("returns undefined when only an unlinked email matches (never OIDC-synced, must not count as fresh)", async () => {
+        await createUser({
+            firstname: "Email",
+            lastname: "Only",
+            email: "email.only.unsynced@example.com",
+        });
+
+        const knownUser = await findOidcUserBySub("sub-never-synced-this-email");
+
+        expect(knownUser).toBeUndefined();
     });
 });

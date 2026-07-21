@@ -1,6 +1,6 @@
 import { oidcConfig } from "#config/config.js";
 import { UnauthorizedError } from "#errors/unauthorized.error.js";
-import { buildThreatSeaAccessToken, findLinkableUser, OidcProfile } from "#services/auth.service.js";
+import { buildThreatSeaAccessToken, findOidcUserBySub, OidcProfile } from "#services/auth.service.js";
 import { Logger } from "#logging/index.js";
 import crypto from "crypto";
 import * as client from "openid-client";
@@ -194,7 +194,7 @@ export async function handleOidcCallback(callbackUrl: URL, oidcParams: OidcCallb
 
     const userInfoEndpoint = oidcClientConfig.serverMetadata().userinfo_endpoint;
     if (userInfoEndpoint !== undefined && hasMissingProfileClaim(profileClaims)) {
-        const knownUser = await findLinkableUser(idTokenClaims.sub, profileClaims.email);
+        const knownUser = await findOidcUserBySub(idTokenClaims.sub);
         if (knownUser === undefined || isProfileStale(knownUser.lastLoginAt)) {
             const userInfo = await client.fetchUserInfo(oidcClientConfig, tokenSet.access_token, idTokenClaims.sub);
             profileClaims = mergeProfileClaims(profileClaims, readProfileClaims(userInfo));

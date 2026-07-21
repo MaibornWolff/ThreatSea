@@ -1,5 +1,5 @@
 import * as client from "openid-client";
-import { buildThreatSeaAccessToken, findLinkableUser } from "#services/auth.service.js";
+import { buildThreatSeaAccessToken, findOidcUserBySub } from "#services/auth.service.js";
 import { handleOidcCallback, initializeOidc } from "#services/oidcAuthentication.service.js";
 import { UnauthorizedError } from "#errors/unauthorized.error.js";
 
@@ -18,7 +18,7 @@ vi.mock("openid-client", () => ({
 
 vi.mock("#services/auth.service.js", () => ({
     buildThreatSeaAccessToken: vi.fn(),
-    findLinkableUser: vi.fn(),
+    findOidcUserBySub: vi.fn(),
 }));
 
 vi.mock("#config/config.js", async (importOriginal) => {
@@ -64,7 +64,7 @@ const callbackParameters = { state: "state-1", nonce: "nonce-1", codeVerifier: "
 
 describe("handleOidcCallback profile building", () => {
     beforeEach(() => {
-        vi.mocked(findLinkableUser).mockResolvedValue(undefined);
+        vi.mocked(findOidcUserBySub).mockResolvedValue(undefined);
     });
 
     it("builds the profile from ID token claims without calling userinfo", async () => {
@@ -163,7 +163,7 @@ describe("handleOidcCallback profile building", () => {
             email_verified: true,
             given_name: "Alice",
         });
-        vi.mocked(findLinkableUser).mockResolvedValue(undefined);
+        vi.mocked(findOidcUserBySub).mockResolvedValue(undefined);
         vi.mocked(client.fetchUserInfo).mockResolvedValue({
             sub: "subject-1",
             email: "alice@example.com",
@@ -191,7 +191,7 @@ describe("handleOidcCallback profile building", () => {
             email_verified: true,
             given_name: "Alice",
         });
-        vi.mocked(findLinkableUser).mockResolvedValue({ lastLoginAt: new Date().toISOString() });
+        vi.mocked(findOidcUserBySub).mockResolvedValue({ lastLoginAt: new Date().toISOString() });
         vi.mocked(buildThreatSeaAccessToken).mockResolvedValue("threatsea-token");
 
         await handleOidcCallback(callbackUrl, callbackParameters);
@@ -213,7 +213,7 @@ describe("handleOidcCallback profile building", () => {
             email_verified: true,
             given_name: "Alice",
         });
-        vi.mocked(findLinkableUser).mockResolvedValue({ lastLoginAt: "2000-01-01T00:00:00.000Z" });
+        vi.mocked(findOidcUserBySub).mockResolvedValue({ lastLoginAt: "2000-01-01T00:00:00.000Z" });
         vi.mocked(client.fetchUserInfo).mockResolvedValue({
             sub: "subject-1",
             email: "alice@example.com",
@@ -264,7 +264,7 @@ describe("handleOidcCallback profile building", () => {
             email_verified: true,
             given_name: "Alice",
         });
-        vi.mocked(findLinkableUser).mockResolvedValue({ lastLoginAt: "2000-01-01T00:00:00.000Z" });
+        vi.mocked(findOidcUserBySub).mockResolvedValue({ lastLoginAt: "2000-01-01T00:00:00.000Z" });
         vi.mocked(client.fetchUserInfo).mockResolvedValue({
             sub: "subject-1",
             email: "alice@example.com",
