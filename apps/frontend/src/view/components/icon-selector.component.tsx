@@ -111,7 +111,7 @@ export const IconSelector = ({ value, onChange, label, error, helperText }: Icon
                     />
                 </MenuItem>
                 <MenuItem>
-                    <Grid container spacing={1} sx={{ width: 250, height: 250, alignContent: "flex-start" }}>
+                    <Grid container spacing={1} sx={{ width: 250, height: 200, alignContent: "flex-start" }}>
                         {visibleIcons.map((iconName) => (
                             <Grid size={2.4} key={iconName}>
                                 <IconButton
