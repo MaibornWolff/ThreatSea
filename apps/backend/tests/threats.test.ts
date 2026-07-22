@@ -5,7 +5,8 @@ import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import { nanoid } from "nanoid";
 import { db } from "#db/index.js";
-import { catalogs, threats, CreateThreat, genericThreats, usersCatalogs } from "#db/schema.js";
+import { eq } from "drizzle-orm";
+import { assets, catalogs, threats, CreateThreat, genericThreats, systems, usersCatalogs } from "#db/schema.js";
 import { POINTS_OF_ATTACK } from "#types/points-of-attack.types.js";
 import { ATTACKERS } from "#types/attackers.types.js";
 import { CONFIDENTIALITY_LEVELS } from "#types/confidentiality-levels.types.js";
@@ -175,6 +176,49 @@ beforeEach(async () => {
         genericThreatId,
         projectId,
     });
+
+    // The display query derives a threat's assets from its point of attack, and only lists
+    // threats that have at least one. Give the seeded threat's point of attack a real asset.
+    const asset = (
+        await db
+            .insert(assets)
+            .values({
+                name: "Asset 1",
+                description: "d",
+                confidentiality: 3,
+                integrity: 3,
+                availability: 3,
+                confidentialityJustification: "j",
+                integrityJustification: "j",
+                availabilityJustification: "j",
+                projectId,
+            })
+            .returning()
+    ).at(0)!;
+
+    await db
+        .update(systems)
+        .set({
+            data: {
+                connections: [],
+                components: [],
+                connectionPoints: [],
+                pointsOfAttack: [
+                    {
+                        id: VALID_THREAT_1.pointOfAttackId,
+                        name: null,
+                        type: POINTS_OF_ATTACK.COMMUNICATION_INTERFACES,
+                        componentId: null,
+                        connectionId: null,
+                        connectionPointId: null,
+                        projectId,
+                        assets: [asset.id],
+                    },
+                ],
+                lastAutoSaveDate: new Date().toISOString(),
+            },
+        })
+        .where(eq(systems.projectId, projectId));
 });
 
 describe("get or create threats", () => {
