@@ -56,7 +56,6 @@ export async function getGenericThreatsWithExtendedChildren(
     const pointsOfAttackById = new Map(pointsOfAttack.map((pointOfAttack) => [pointOfAttack.id, pointOfAttack]));
 
     return genericThreatsWithExtendedChildren
-        .filter((genericThreat) => genericThreat.threats.length > 0)
         .map(({ threats, ...genericThreat }) => {
             const genericPointOfAttack = pointsOfAttackById.get(genericThreat.pointOfAttackId);
             const genericInterfaceName =
@@ -69,24 +68,29 @@ export async function getGenericThreatsWithExtendedChildren(
                 componentName: genericPointOfAttack?.componentName ?? null,
                 componentType: genericPointOfAttack?.componentType ?? null,
                 interfaceName: genericInterfaceName,
-                children: threats.map((threat) => {
-                    const pointOfAttack = pointsOfAttackById.get(threat.pointOfAttackId);
-                    const interfaceName =
-                        pointOfAttack?.type === POINTS_OF_ATTACK.COMMUNICATION_INTERFACES
-                            ? (pointOfAttack.name ?? null)
-                            : null;
+                children: threats
+                    .map((threat) => {
+                        const pointOfAttack = pointsOfAttackById.get(threat.pointOfAttackId);
+                        const interfaceName =
+                            pointOfAttack?.type === POINTS_OF_ATTACK.COMMUNICATION_INTERFACES
+                                ? (pointOfAttack.name ?? null)
+                                : null;
 
-                    return {
-                        ...threat,
-                        genericThreatDescription: genericThreat.description,
-                        componentName: pointOfAttack?.componentName ?? null,
-                        componentType: pointOfAttack?.componentType ?? null,
-                        interfaceName,
-                        assets: pointOfAttack?.assets ?? [],
-                    };
-                }),
+                        return {
+                            ...threat,
+                            genericThreatDescription: genericThreat.description,
+                            componentName: pointOfAttack?.componentName ?? null,
+                            componentType: pointOfAttack?.componentType ?? null,
+                            interfaceName,
+                            assets: pointOfAttack?.assets ?? [],
+                        };
+                    })
+                    // A threat's damage is derived from its point of attack's assets; without
+                    // assets the risk is always 0, so drop those threats instead of listing them.
+                    .filter((threat) => threat.assets.length > 0),
             };
-        });
+        })
+        .filter((genericThreat) => genericThreat.children.length > 0);
 }
 
 /**
