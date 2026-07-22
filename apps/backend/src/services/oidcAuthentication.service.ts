@@ -126,21 +126,27 @@ export async function initializeOidc(): Promise<void> {
     );
     const serverMetadata = discoveredConfig.serverMetadata();
 
-    // Prefer client_secret_post — it was the effective default before this detection existed and
-    // avoids the RFC 6749 secret percent-encoding pitfalls of Basic. Metadata that omits the field
-    // is treated as post-capable (the OIDC default). Fall back to Basic only when post is not
-    // advertised, and fail fast when the IdP supports neither secret-based method.
+    // OIDC Discovery 1.0 §3 / RFC 8414 §2 make client_secret_basic the default when the IdP omits
+    // token_endpoint_auth_methods_supported, and Basic is the RFC 6749 §2.3.1 mandatory-to-implement
+    // method — so defaulting an omitted field to Basic is both spec-compliant and secure-by-default.
+    // Prefer client_secret_post ONLY when the IdP explicitly advertises it: post sidesteps the
+    // RFC 6749 Basic secret percent-encoding ambiguity (e.g. Azure AD, which advertises post). Fall
+    // back to Basic when the field is omitted or advertises basic-without-post; fail fast otherwise.
     const supportedAuthenticationMethods = serverMetadata.token_endpoint_auth_methods_supported;
     let selectedAuthenticationMethod: string;
-    if (supportedAuthenticationMethods === undefined || supportedAuthenticationMethods.includes("client_secret_post")) {
+    if (supportedAuthenticationMethods !== undefined && supportedAuthenticationMethods.includes("client_secret_post")) {
         // discovery() already defaults to ClientSecretPost and, when allowHttp is set, applied
         // allowInsecureRequests via options.execute — so the discovered Configuration is ready to
         // reuse as-is. Rebuilding it would duplicate both the auth selection and the insecure-request
         // opt-in and risk the two construction paths drifting apart.
         oidcClientConfig = discoveredConfig;
         selectedAuthenticationMethod = "client_secret_post";
-    } else if (supportedAuthenticationMethods.includes("client_secret_basic")) {
-        // Only the Basic fallback needs a rebuilt Configuration to override discovery()'s post default.
+    } else if (
+        supportedAuthenticationMethods === undefined ||
+        supportedAuthenticationMethods.includes("client_secret_basic")
+    ) {
+        // Omitted field (spec default) or basic-only advertisement: rebuild the Configuration to
+        // override discovery()'s post default with Basic.
         oidcClientConfig = new client.Configuration(
             serverMetadata,
             oidcConfig.clientId,

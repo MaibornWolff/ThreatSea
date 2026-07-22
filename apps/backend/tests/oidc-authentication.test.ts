@@ -415,12 +415,22 @@ describe("initializeOidc client authentication detection", () => {
         expect(client.Configuration).not.toHaveBeenCalled();
     });
 
-    it("reuses the discovered configuration when the metadata field is absent", async () => {
+    it("rebuilds with client_secret_basic when the metadata field is absent (spec default)", async () => {
+        const basicAuthentication = { method: "client_secret_basic" };
+        vi.mocked(client.ClientSecretBasic).mockReturnValue(basicAuthentication as never);
+
         await initializeOidcWithServerMetadata({ issuer: "https://idp.example.com" });
 
+        // Discovery omits the field, so RFC 8414's client_secret_basic default applies — discovery()
+        // defaults the Configuration to post, so the omitted case must rebuild with basic.
         expect(client.ClientSecretPost).not.toHaveBeenCalled();
-        expect(client.ClientSecretBasic).not.toHaveBeenCalled();
-        expect(client.Configuration).not.toHaveBeenCalled();
+        expect(client.ClientSecretBasic).toHaveBeenCalledWith("threatsea-secret");
+        expect(client.Configuration).toHaveBeenCalledWith(
+            expect.objectContaining({ issuer: "https://idp.example.com" }),
+            "threatsea-client",
+            "threatsea-secret",
+            basicAuthentication
+        );
     });
 
     it("reuses the discovered configuration when the IdP only supports post", async () => {
