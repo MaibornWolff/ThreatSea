@@ -105,7 +105,7 @@ export async function createThreatForGenericThreat(
     const createThreatData: CreateThreat = {
         attacker: genericThreat.attacker,
         name: refinement.name ?? genericThreat.name,
-        description: refinement.description ?? genericThreat.description,
+        description: refinement.description ?? "",
         confidentiality: refinement.confidentiality ?? catalogThreat.confidentiality,
         integrity: refinement.integrity ?? catalogThreat.integrity,
         availability: refinement.availability ?? catalogThreat.availability,
