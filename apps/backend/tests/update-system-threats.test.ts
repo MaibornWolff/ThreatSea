@@ -8,7 +8,7 @@ import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import { nanoid } from "nanoid";
 import { db } from "#db/index.js";
-import { catalogs, threats, usersCatalogs } from "#db/schema.js";
+import { assets, catalogs, threats, usersCatalogs } from "#db/schema.js";
 import { app } from "#server.js";
 import { eq } from "drizzle-orm";
 import { LANGUAGES } from "#types/languages.type.js";
@@ -18,7 +18,10 @@ import { ATTACKERS } from "#types/attackers.types.js";
 import { CONFIDENTIALITY_LEVELS } from "#types/confidentiality-levels.types.js";
 import type { PointOfAttack, SystemData } from "#types/system.types.js";
 import { updateSystem } from "#services/updateSystem.service.js";
-import { getGenericThreatsByProjectId } from "#services/generic-threats.service.js";
+import {
+    getGenericThreatsByProjectId,
+    getGenericThreatsWithExtendedChildren,
+} from "#services/generic-threats.service.js";
 import { getThreatsByGenericThreatId } from "#services/threats.service.js";
 
 const POA_TYPE = POINTS_OF_ATTACK.COMMUNICATION_INTERFACES;
@@ -163,5 +166,41 @@ describe("updateSystem parent/child threat generation", () => {
             where: eq(threats.projectId, projectId),
         });
         expect(remainingChildren).toEqual([]);
+    });
+
+    it("omits threats from the extended-children query when their point of attack has lost all assets", async () => {
+        const asset = (
+            await db
+                .insert(assets)
+                .values({
+                    name: "Asset",
+                    description: "d",
+                    confidentiality: 3,
+                    integrity: 3,
+                    availability: 3,
+                    confidentialityJustification: "j",
+                    integrityJustification: "j",
+                    availabilityJustification: "j",
+                    projectId,
+                })
+                .returning()
+        ).at(0)!;
+
+        const poaId = nanoid();
+        await saveSystem([makePoA(poaId, [asset.id])]);
+
+        // With an asset assigned, the generated child threat surfaces in the threats-table query.
+        const withAssets = await getGenericThreatsWithExtendedChildren(projectId);
+        expect(withAssets).toHaveLength(1);
+        expect(withAssets[0]!.children).toHaveLength(1);
+
+        // Removing every asset from a kept point of attack leaves the child threat in the
+        // database, but its risk is 0, so the query must not list it.
+        await saveSystem([makePoA(poaId, [])]);
+
+        expect(await getGenericThreatsWithExtendedChildren(projectId)).toEqual([]);
+
+        const generics = await getGenericThreatsByProjectId(projectId);
+        expect(await getThreatsByGenericThreatId(generics[0]!.id)).toHaveLength(1);
     });
 });
