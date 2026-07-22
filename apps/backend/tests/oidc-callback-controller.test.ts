@@ -49,19 +49,19 @@ function buildCallbackResponse(): Response {
 }
 
 describe("finalizeAuthentication session cleanup", () => {
-    it("clears the oidc transaction when the callback fails", async () => {
+    it("preserves the oidc transaction when the callback fails so the genuine redirect can retry", async () => {
         vi.mocked(handleOidcCallback).mockRejectedValue(new Error("token exchange failed"));
         const request = buildCallbackRequest();
         const response = buildCallbackResponse();
 
         await finalizeAuthentication(request, response);
 
-        expect(request.session.oidc).toBeUndefined();
+        expect(request.session.oidc).toEqual({ state: "state-1", nonce: "nonce-1", codeVerifier: "verifier-1" });
         expect(response.redirect).toHaveBeenCalledWith(`${originConfig.app}/login?failure`);
         expect(response.cookie).not.toHaveBeenCalled();
     });
 
-    it("regenerates the session before exchanging the authorization code", async () => {
+    it("regenerates the session only after a successful exchange", async () => {
         const callOrder: string[] = [];
         vi.mocked(handleOidcCallback).mockImplementation(async () => {
             callOrder.push("exchange");
@@ -79,7 +79,7 @@ describe("finalizeAuthentication session cleanup", () => {
 
         await finalizeAuthentication(request, response);
 
-        expect(callOrder).toEqual(["regenerate", "exchange"]);
+        expect(callOrder).toEqual(["exchange", "regenerate"]);
     });
 
     it("clears the oidc transaction and issues the cookie on success", async () => {

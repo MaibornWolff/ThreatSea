@@ -143,15 +143,17 @@ export async function finalizeAuthentication(request: Request, response: Respons
         if (!oidcData) {
             throw new UnauthorizedError("No pending OIDC login found in session");
         }
-        // Durably consume the single-use OIDC transaction before the token exchange: regenerating
-        // destroys the old session (and its pending oidc data) in the store so a concurrent or
-        // replayed callback can't reuse it, and it rotates the session id to prevent post-login
-        // session fixation.
-        await regenerateSession(request);
 
         const callbackUrl = new URL(oidcConfig!.callbackURL);
         callbackUrl.search = new URL(request.originalUrl, "http://localhost").search;
+        // Validate the callback (state check + authorization-code exchange) BEFORE consuming the
+        // pending transaction. A forged, prefetched, or scanner-triggered top-level GET (sameSite:lax
+        // lets it carry the session cookie) fails validation here and leaves session.oidc intact, so
+        // the victim's genuine IdP redirect still completes. Only a successful exchange consumes the
+        // single-use transaction and rotates the session id (post-login fixation defense).
         const threatSeaToken = await oidcService.handleOidcCallback(callbackUrl, oidcData);
+
+        await regenerateSession(request);
 
         response.cookie("accessToken", threatSeaToken, {
             httpOnly: true,
