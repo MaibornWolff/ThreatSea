@@ -1,5 +1,6 @@
 import type { Asset } from "#api/types/asset.types.ts";
 import type { CatalogWithRole } from "#api/types/catalogs.types.ts";
+import type { Folder } from "#api/types/folder.types.ts";
 import type { ExtendedProject, ProjectReport, ThreatReport } from "#api/types/project.types.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import type { Measure } from "#api/types/measure.types.ts";
@@ -146,6 +147,16 @@ export const createProject = (overrides: Partial<ExtendedProject> = {}): Extende
     updatedAt: new Date("2025-01-01"),
     role: USER_ROLES.EDITOR,
     image: null,
+    folderId: null,
+    ...overrides,
+});
+
+export const createFolder = (overrides: Partial<Folder> = {}): Folder => ({
+    id: 1,
+    name: "Test Folder",
+    parentId: null,
+    createdAt: new Date("2025-01-01"),
+    updatedAt: new Date("2025-01-01"),
     ...overrides,
 });
 

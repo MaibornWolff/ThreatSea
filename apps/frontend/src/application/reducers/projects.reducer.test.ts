@@ -1,5 +1,6 @@
 import projectsReducer from "./projects.reducer";
 import { ProjectsActions } from "#application/actions/projects.actions.ts";
+import { USER_ROLES } from "#api/types/user-roles.types.ts";
 import { createProject } from "#test-utils/builders.ts";
 
 const getInitialState = () => projectsReducer(undefined, { type: "@@INIT" });
@@ -144,6 +145,26 @@ describe("projectsReducer — deletingProjectId lifecycle", () => {
             expect(next.current).toEqual(open);
             expect(next.entities[3]).toBeUndefined();
             expect(next.entities[7]).toBeDefined();
+        });
+    });
+
+    describe("setProjectFolder", () => {
+        it("updates only the folder placement, leaving the role intact", () => {
+            const state = withEntities(createProject({ id: 7, role: USER_ROLES.VIEWER, folderId: null }));
+
+            const next = projectsReducer(state, ProjectsActions.setProjectFolder({ id: 7, folderId: 4 }));
+
+            expect(next.entities[7]?.folderId).toBe(4);
+            expect(next.entities[7]?.role).toBe(USER_ROLES.VIEWER);
+        });
+
+        it("updates the current project's placement when it is the open one", () => {
+            let state = withEntities(createProject({ id: 7, folderId: null }));
+            state = projectsReducer(state, ProjectsActions.getProjectFromRedux(7));
+
+            const next = projectsReducer(state, ProjectsActions.setProjectFolder({ id: 7, folderId: 9 }));
+
+            expect(next.current?.folderId).toBe(9);
         });
     });
 });

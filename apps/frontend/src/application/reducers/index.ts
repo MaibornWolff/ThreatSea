@@ -1,5 +1,6 @@
 import { combineReducers } from "@reduxjs/toolkit";
 import projects from "./projects.reducer";
+import folders from "./folders.reducer";
 import { listReducer as list } from "./list.reducer";
 import dialogs from "./dialogs.reducer";
 import { assetsReducer as assets } from "./assets.reducer";
@@ -21,6 +22,7 @@ import { membersReducer as members } from "./members.reducer";
 const reducers = {
     assets,
     projects,
+    folders,
     catalogs,
     list,
     dialogs,
