@@ -1,6 +1,7 @@
 import type { AppMiddleware } from "#application/middlewares/types.ts";
 import { AssetsActions } from "#application/actions/assets.actions.ts";
 import { ProjectsActions } from "#application/actions/projects.actions.ts";
+import { FoldersActions } from "#application/actions/folders.actions.ts";
 import { DialogsActions } from "#application/actions/dialogs.actions.ts";
 import { CatalogsActions } from "#application/actions/catalogs.actions.ts";
 import { CatalogThreatsActions } from "#application/actions/catalog-threats.actions.ts";
@@ -25,6 +26,11 @@ const handleConfirmDialog: AppMiddleware =
                     case "projects":
                         dispatch(
                             ProjectsActions.updateProject(data as Parameters<typeof ProjectsActions.updateProject>[0])
+                        );
+                        break;
+                    case "folders":
+                        dispatch(
+                            FoldersActions.updateFolder(data as Parameters<typeof FoldersActions.updateFolder>[0])
                         );
                         break;
                     case "assets":
@@ -94,6 +100,11 @@ const handleConfirmDialog: AppMiddleware =
                     case "projects":
                         dispatch(
                             ProjectsActions.createProject(data as Parameters<typeof ProjectsActions.createProject>[0])
+                        );
+                        break;
+                    case "folders":
+                        dispatch(
+                            FoldersActions.createFolder(data as Parameters<typeof FoldersActions.createFolder>[0])
                         );
                         break;
                     case "assets":
