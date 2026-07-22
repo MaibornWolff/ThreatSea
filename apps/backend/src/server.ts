@@ -49,8 +49,10 @@ const { generateToken, csrfSynchronisedProtection } = csrfSync();
 app.use(cors(corsConfig));
 app.use(cookieParser());
 
-// Health check sits above the session middleware so liveness probes don't touch the shared pool.
-app.get("/api/health", (_req, res) => res.json({ ok: true, ts: Date.now() }));
+// Health check sits above the session middleware so liveness probes never touch the shared pool.
+// It sets no-store explicitly because it runs before nocache(): otherwise an intermediary proxy or
+// CDN could keep serving a cached 200 after the backend is down, blinding uptime checks.
+app.get("/api/health", (_req, res) => res.set("Cache-Control", "no-store").json({ ok: true, ts: Date.now() }));
 
 const PostgresSessionStore = connectPgSimple(session);
 
