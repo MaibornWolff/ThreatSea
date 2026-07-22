@@ -38,6 +38,12 @@ export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promis
         throw new UnauthorizedError("No email found in user profile object.");
     }
 
+    // An email is trustworthy only if the IdP asserts it verified, or an operator has opted into
+    // unverified linking via OIDC_ALLOW_UNVERIFIED_EMAIL_LINKING. An untrusted email is never
+    // written through: it can neither overwrite an existing account nor seed a new one, so an
+    // attacker-chosen address can't surface in member pickers as a trusted identity.
+    const emailTrusted = userObject.emailVerified === true || ALLOW_UNVERIFIED_EMAIL_LINKING;
+
     const user = await db.transaction(async (tx) => {
         // Look up by OIDC sub first, fall back to email for initial account linking
         let user = await tx.query.users.findFirst({ where: eq(users.oidcSub, userObject.sub) });
@@ -53,7 +59,7 @@ export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promis
 
             user = emailMatches.at(0);
             if (user) {
-                if (userObject.emailVerified !== true && !ALLOW_UNVERIFIED_EMAIL_LINKING) {
+                if (!emailTrusted) {
                     throw new UnauthorizedError(
                         "Email not verified by IdP; refusing to link existing account — see OIDC_ALLOW_UNVERIFIED_EMAIL_LINKING"
                     );
@@ -71,8 +77,11 @@ export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promis
             // value rather than the email fallback, so a userinfo-less login can't wipe a name.
             const nextFirstName = userObject.firstName ?? user.firstname;
             const nextLastName = userObject.lastName ?? user.lastname;
+            // An untrusted email must not overwrite the stored one; login still proceeds with the
+            // address already on file. A trusted email is allowed to propagate a change.
+            const nextEmail = emailTrusted ? email : user.email;
             const profileChanged =
-                user.firstname !== nextFirstName || user.lastname !== nextLastName || user.email !== email;
+                user.firstname !== nextFirstName || user.lastname !== nextLastName || user.email !== nextEmail;
 
             // Fold the last-login refresh into the profile write so a login is at most one
             // UPDATE. lastLoginAt on its own must not bump updatedAt.
@@ -81,7 +90,12 @@ export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promis
                 .set({
                     lastLoginAt: sql`now()`,
                     ...(profileChanged
-                        ? { firstname: nextFirstName, lastname: nextLastName, email: email, updatedAt: sql`now()` }
+                        ? {
+                              firstname: nextFirstName,
+                              lastname: nextLastName,
+                              email: nextEmail,
+                              updatedAt: sql`now()`,
+                          }
                         : {}),
                 })
                 .where(eq(users.id, user.id))
@@ -93,6 +107,14 @@ export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promis
                 throw new UnauthorizedError("User no longer exists");
             }
             return touchedRows.at(0);
+        }
+
+        // New account: an unverified, attacker-chosen email must not seed a row that member pickers
+        // would later surface as a trusted identity.
+        if (!emailTrusted) {
+            throw new UnauthorizedError(
+                "Email not verified by IdP; refusing to create a new account — see OIDC_ALLOW_UNVERIFIED_EMAIL_LINKING"
+            );
         }
 
         return (
@@ -112,13 +134,14 @@ export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promis
         throw new Error("Failed to retrieve user from database");
     }
 
-    // Build the JWT from the persisted row so its names reflect exactly what the DB now holds.
-    const displayName = userObject.displayName ?? (`${user.firstname} ${user.lastname}`.trim() || email);
+    // Build the JWT from the persisted row so its email and names reflect exactly what the DB now
+    // holds — never a rejected/untrusted incoming email.
+    const displayName = userObject.displayName ?? (`${user.firstname} ${user.lastname}`.trim() || user.email);
 
     const threatseaAccessToken = await new SignJWT({
         userId: user.id,
         oidcId: userObject.sub,
-        email: email,
+        email: user.email,
         firstname: user.firstname,
         lastname: user.lastname,
         displayName: displayName,

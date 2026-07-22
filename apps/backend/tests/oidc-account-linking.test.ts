@@ -153,22 +153,6 @@ describe("buildThreatSeaAccessToken account linking", () => {
         expect(decodeJwt(accessToken)["userId"]).toBe(existingUser.id);
     });
 
-    it("creates a fresh account even when the email is not verified", async () => {
-        const profile: OidcProfile = {
-            sub: "sub-fresh",
-            email: "fresh.account@example.com",
-            emailVerified: false,
-            firstName: "Fresh",
-            lastName: "Account",
-        };
-
-        const accessToken = await buildThreatSeaAccessToken(profile);
-
-        expect(accessToken).toBeTypeOf("string");
-        const createdUser = await db.query.users.findFirst({ where: eq(users.oidcSub, "sub-fresh") });
-        expect(createdUser?.email).toBe("fresh.account@example.com");
-    });
-
     it("rejects when two unlinked users share the email", async () => {
         await createUser({ firstname: "First", lastname: "Duplicate", email: "duplicate@example.com" });
         await createUser({ firstname: "Second", lastname: "Duplicate", email: "duplicate@example.com" });
@@ -257,6 +241,83 @@ describe("buildThreatSeaAccessToken account linking", () => {
         const createdUser = await db.query.users.findFirst({ where: eq(users.oidcSub, "sub-new-noname") });
         expect(createdUser?.firstname).toBe("");
         expect(createdUser?.lastname).toBe("new.noname@example.com");
+    });
+});
+
+describe("buildThreatSeaAccessToken verified-email enforcement", () => {
+    it("keeps a linked user's stored email when the incoming email is unverified", async () => {
+        const existing = await createUser({
+            firstname: "Linked",
+            lastname: "User",
+            email: "real@example.com",
+            oidcSub: "sub-linked-2",
+        });
+        const profile: OidcProfile = {
+            sub: "sub-linked-2",
+            email: "victim@corp.com",
+            emailVerified: false,
+            firstName: "Linked",
+            lastName: "User",
+        };
+
+        const accessToken = await buildThreatSeaAccessToken(profile);
+
+        expect(decodeJwt(accessToken)["userId"]).toBe(existing.id);
+        expect(decodeJwt(accessToken)["email"]).toBe("real@example.com");
+        const stored = await findUserById(existing.id);
+        expect(stored?.email).toBe("real@example.com");
+    });
+
+    it("overwrites a linked user's email when the incoming email is verified", async () => {
+        const existing = await createUser({
+            firstname: "Linked",
+            lastname: "User",
+            email: "old@example.com",
+            oidcSub: "sub-linked-3",
+        });
+        const profile: OidcProfile = {
+            sub: "sub-linked-3",
+            email: "new@example.com",
+            emailVerified: true,
+            firstName: "Linked",
+            lastName: "User",
+        };
+
+        await buildThreatSeaAccessToken(profile);
+
+        const stored = await findUserById(existing.id);
+        expect(stored?.email).toBe("new@example.com");
+    });
+
+    it("refuses to create a new account from an unverified email", async () => {
+        const profile: OidcProfile = {
+            sub: "sub-new-unverified",
+            email: "ceo@company.com",
+            emailVerified: false,
+            firstName: "Cee",
+            lastName: "Oh",
+        };
+
+        await expect(buildThreatSeaAccessToken(profile)).rejects.toThrow(UnauthorizedError);
+        const created = await db.query.users.findFirst({ where: eq(users.oidcSub, "sub-new-unverified") });
+        expect(created).toBeUndefined();
+    });
+
+    it("creates a new account from an unverified email when unverified linking is enabled", async () => {
+        configOverrides.ALLOW_UNVERIFIED_EMAIL_LINKING = true;
+        const profile: OidcProfile = {
+            sub: "sub-new-flag",
+            email: "flagged@example.com",
+            emailVerified: false,
+            firstName: "Flag",
+            lastName: "Ged",
+        };
+
+        const accessToken = await buildThreatSeaAccessToken(profile);
+
+        expect(decodeJwt(accessToken)["email"]).toBe("flagged@example.com");
+        const created = await db.query.users.findFirst({ where: eq(users.oidcSub, "sub-new-flag") });
+        expect(created).toBeDefined();
     });
 });
 
