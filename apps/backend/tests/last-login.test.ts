@@ -25,6 +25,7 @@ describe("last login tracking", () => {
         await buildThreatSeaAccessToken({
             sub: "last-login-insert-sub",
             email: "last-login-insert@threatsea.test",
+            emailVerified: true,
             firstName: "Insert",
             lastName: "Path",
         });
@@ -41,6 +42,7 @@ describe("last login tracking", () => {
         const profile = {
             sub: "last-login-unchanged-sub",
             email: "last-login-unchanged@threatsea.test",
+            emailVerified: true,
             firstName: "Unchanged",
             lastName: "Path",
         };
@@ -58,6 +60,7 @@ describe("last login tracking", () => {
         const profile = {
             sub: "last-login-noupdate-sub",
             email: "last-login-noupdate@threatsea.test",
+            emailVerified: true,
             firstName: "No",
             lastName: "Update",
         };
@@ -77,6 +80,7 @@ describe("last login tracking", () => {
         const profile = {
             sub: "last-login-renamed-sub",
             email: "last-login-renamed@threatsea.test",
+            emailVerified: true,
             firstName: "Original",
             lastName: "Name",
         };
