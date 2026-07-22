@@ -2,8 +2,11 @@ import { NextFunction, Request, Response } from "express";
 import { and, eq } from "drizzle-orm";
 import { db } from "#db/index.js";
 import { usersCatalogs, usersProjects } from "#db/schema.js";
+import { checkFolderExistsForUser } from "#services/folders.service.js";
 import { ForbiddenError } from "#errors/forbidden.error.js";
+import { NotFoundError } from "#errors/not-found.error.js";
 import { CatalogIdParam } from "#types/catalog.types.js";
+import { FolderIdParam } from "#types/folder.types.js";
 import { ProjectIdParam } from "#types/project.types.js";
 import { UnauthorizedError } from "#errors/unauthorized.error.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
@@ -68,6 +71,29 @@ export function CheckProjectRoleHandler<P extends ProjectIdParam>(requiredRole: 
 
         if (!checkRole(user.role, requiredRole)) {
             next(new ForbiddenError("User is not authorized to perform this action"));
+            return;
+        }
+
+        next();
+    };
+}
+
+/**
+ * Middleware function that checks that a folder exists and belongs to the requesting user.
+ * Folders are per-user, so ownership is the only authorization concept. A non-owner gets a
+ * 404 (rather than 403) so folder existence is not leaked across users.
+ */
+export function CheckFolderOwnershipHandler() {
+    return async function (request: Request<FolderIdParam>, _response: Response, next: NextFunction): Promise<void> {
+        const userId = request.user?.id;
+        if (!userId) {
+            next(new UnauthorizedError());
+            return;
+        }
+
+        const owned = await checkFolderExistsForUser(request.params.folderId, userId);
+        if (!owned) {
+            next(new NotFoundError("Folder not found"));
             return;
         }
 

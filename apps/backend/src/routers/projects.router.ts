@@ -14,8 +14,10 @@ import {
     getProjects,
     updateProject,
 } from "#controllers/projects.controller.js";
+import { moveProjectToFolder } from "#controllers/folders.controller.js";
 import { CheckProjectExistenceHandler } from "#middlewares/check-existence.middleware.js";
 import { CheckProjectRoleHandler } from "#guards/authorisation.guard.js";
+import { MoveProjectRequest } from "#types/folder.types.js";
 import {
     CreateProjectRequest,
     ExtendedProjectResponse,
@@ -73,6 +75,17 @@ projectsRouter.get<ProjectIdParam>(
     CheckProjectExistenceHandler,
     CheckProjectRoleHandler(USER_ROLES.VIEWER),
     generateReport
+);
+
+// Per-user placement of a project into a folder. Any member (viewer and up) may organize
+// their own view, so this only requires VIEWER — it changes the caller's folderId, not the project.
+projectsRouter.put<ProjectIdParam, ExtendedProjectResponse, MoveProjectRequest>(
+    `/:${idParam}/folder`,
+    ValidateParamHandler(ProjectIdParam),
+    ValidateBodyHandler(MoveProjectRequest),
+    CheckProjectExistenceHandler,
+    CheckProjectRoleHandler(USER_ROLES.VIEWER),
+    moveProjectToFolder
 );
 
 /** Assigns router middleware to the given routes */

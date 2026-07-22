@@ -3,11 +3,12 @@ import { plainToInstance } from "class-transformer";
 import { validate } from "class-validator";
 import { BadRequestError, InputValidationError } from "#errors/bad-request.error.js";
 import { CatalogIdParam } from "#types/catalog.types.js";
+import { FolderIdParam } from "#types/folder.types.js";
 import { ProjectIdParam } from "#types/project.types.js";
 
 export type CrossFieldCheck<T> = (instance: T) => string | null;
 
-export function ValidateBodyHandler<T extends object, P extends CatalogIdParam | ProjectIdParam | void>(
+export function ValidateBodyHandler<T extends object, P extends CatalogIdParam | ProjectIdParam | FolderIdParam | void>(
     type: new () => T,
     crossFieldChecks: readonly CrossFieldCheck<T>[] = []
 ) {
@@ -34,7 +35,7 @@ export function ValidateBodyHandler<T extends object, P extends CatalogIdParam |
     };
 }
 
-export function ValidateParamHandler<P extends CatalogIdParam | ProjectIdParam>(type: new () => P) {
+export function ValidateParamHandler<P extends CatalogIdParam | ProjectIdParam | FolderIdParam>(type: new () => P) {
     return async (request: Request<P>, _response: Response, next: NextFunction) => {
         const transformedParams = plainToInstance(type, request.params, { enableImplicitConversion: true });
 

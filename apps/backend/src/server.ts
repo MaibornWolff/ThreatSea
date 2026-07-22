@@ -15,6 +15,7 @@ import { pool } from "#db/index.js";
 // Routers
 import { authRouter } from "#routers/auth.router.js";
 import { projectsRouter } from "#routers/projects.router.js";
+import { foldersRouter } from "#routers/folders.router.js";
 import { catalogsRouter } from "#routers/catalogs.router.js";
 import { exportRouter } from "#routers/export.router.js";
 import { importRouter } from "#routers/import.router.js";
@@ -88,6 +89,7 @@ const apiRateLimiter = rateLimit({
 app.use("/api/auth", authRouter);
 app.use("/api/catalogs", apiRateLimiter, CheckTokenHandler, catalogsRouter);
 app.use("/api/projects", apiRateLimiter, CheckTokenHandler, projectsRouter);
+app.use("/api/folders", apiRateLimiter, CheckTokenHandler, foldersRouter);
 app.use("/api/export", apiRateLimiter, CheckTokenHandler, exportRouter);
 app.use("/api/import", apiRateLimiter, CheckTokenHandler, express.json({ limit: "200mb" }), importRouter);
 

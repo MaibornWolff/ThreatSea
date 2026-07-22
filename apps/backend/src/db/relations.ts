@@ -6,6 +6,7 @@ import {
     catalogMeasures,
     catalogThreats,
     componentTypes,
+    folders,
     threats,
     measureImpacts,
     measures,
@@ -121,6 +122,21 @@ export const usersCatalogsRelations = relations(usersCatalogs, ({ one }) => ({
 export const usersRelations = relations(users, ({ many }) => ({
     usersCatalogs: many(usersCatalogs),
     usersProjects: many(usersProjects),
+    folders: many(folders),
+}));
+
+export const foldersRelations = relations(folders, ({ one, many }) => ({
+    user: one(users, {
+        fields: [folders.userId],
+        references: [users.id],
+    }),
+    parent: one(folders, {
+        fields: [folders.parentId],
+        references: [folders.id],
+        relationName: "folderHierarchy",
+    }),
+    children: many(folders, { relationName: "folderHierarchy" }),
+    usersProjects: many(usersProjects),
 }));
 
 export const usersProjectsRelations = relations(usersProjects, ({ one }) => ({
@@ -131,5 +147,9 @@ export const usersProjectsRelations = relations(usersProjects, ({ one }) => ({
     project: one(projects, {
         fields: [usersProjects.projectId],
         references: [projects.id],
+    }),
+    folder: one(folders, {
+        fields: [usersProjects.folderId],
+        references: [folders.id],
     }),
 }));
