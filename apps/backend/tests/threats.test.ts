@@ -310,7 +310,8 @@ describe("get or create threats", () => {
 
         // Identity text defaults to the parent generic threat
         expect(res.body.name).toBe(VALID_GENERIC_THREAT_1.name);
-        expect(res.body.description).toBe(VALID_GENERIC_THREAT_1.description);
+        // The child's own description starts empty; the generic description is shown read-only instead.
+        expect(res.body.description).toBe("");
         expect(res.body.pointOfAttack).toBe(VALID_GENERIC_THREAT_1.pointOfAttack);
         expect(res.body.pointOfAttackId).toBe(VALID_GENERIC_THREAT_1.pointOfAttackId);
         expect(res.body.attacker).toBe(VALID_GENERIC_THREAT_1.attacker);
@@ -331,7 +332,7 @@ describe("get or create threats", () => {
         expect(res.statusCode).toEqual(201);
 
         expect(res.body.name).toBe("Generic Threat 1 (new)");
-        expect(res.body.description).toBe(VALID_GENERIC_THREAT_1.description);
+        expect(res.body.description).toBe("");
         expect(res.body.probability).toBe(VALID_CATALOG_THREAT_1.probability);
     });
 
