@@ -321,8 +321,42 @@ describe("buildThreatSeaAccessToken verified-email enforcement", () => {
     });
 });
 
+describe("buildThreatSeaAccessToken profile sync tracking", () => {
+    it("stamps profileSyncedAt when the login synced userinfo", async () => {
+        const profile: OidcProfile = {
+            sub: "sub-synced",
+            email: "synced@example.com",
+            emailVerified: true,
+            firstName: "Sy",
+            lastName: "Nced",
+            profileSynced: true,
+        };
+
+        await buildThreatSeaAccessToken(profile);
+
+        const created = await db.query.users.findFirst({ where: eq(users.oidcSub, "sub-synced") });
+        expect(created?.profileSyncedAt).not.toBeNull();
+    });
+
+    it("leaves profileSyncedAt null when the login did not sync userinfo", async () => {
+        const profile: OidcProfile = {
+            sub: "sub-unsynced",
+            email: "unsynced@example.com",
+            emailVerified: true,
+            firstName: "Un",
+            lastName: "Synced",
+            profileSynced: false,
+        };
+
+        await buildThreatSeaAccessToken(profile);
+
+        const created = await db.query.users.findFirst({ where: eq(users.oidcSub, "sub-unsynced") });
+        expect(created?.profileSyncedAt).toBeNull();
+    });
+});
+
 describe("findOidcUserBySub", () => {
-    it("returns lastLoginAt for a user matched by oidc sub", async () => {
+    it("returns profileSyncedAt for a user matched by oidc sub", async () => {
         await createUser({
             firstname: "Sub",
             lastname: "Match",
@@ -332,7 +366,8 @@ describe("findOidcUserBySub", () => {
 
         const knownUser = await findOidcUserBySub("sub-findable");
 
-        expect(knownUser?.lastLoginAt).toBeTypeOf("string");
+        expect(knownUser).toHaveProperty("profileSyncedAt");
+        expect(knownUser?.profileSyncedAt).toBeNull();
     });
 
     it("returns undefined for an unknown user", async () => {

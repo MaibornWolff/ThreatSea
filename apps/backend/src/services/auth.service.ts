@@ -16,17 +16,18 @@ export interface OidcProfile {
     firstName?: string | undefined;
     lastName?: string | undefined;
     displayName?: string | undefined;
+    profileSynced?: boolean | undefined;
 }
 
-export async function findOidcUserBySub(oidcSub: string): Promise<{ lastLoginAt: string } | undefined> {
-    // Read-only pre-check that only informs the userinfo-fetch decision: how recently THIS OIDC
-    // subject last logged in. It matches solely on oidcSub (uniquely indexed) — a user found only
-    // by email has never been OIDC-synced, so it is treated as unknown (fetch) by the caller, not
-    // as a "fresh" user. The authoritative resolve/link/upsert still happens transactionally in
+export async function findOidcUserBySub(oidcSub: string): Promise<{ profileSyncedAt: string | null } | undefined> {
+    // Read-only pre-check that only informs the userinfo-fetch decision: when THIS OIDC subject's
+    // profile was last synced from userinfo. It matches solely on oidcSub (uniquely indexed) — a
+    // user found only by email has never been OIDC-synced, so it is treated as unknown (fetch) by
+    // the caller. The authoritative resolve/link/upsert still happens transactionally in
     // buildThreatSeaAccessToken, so a stale read here under a concurrent race is benign.
     return await db.query.users.findFirst({
         where: eq(users.oidcSub, oidcSub),
-        columns: { lastLoginAt: true },
+        columns: { profileSyncedAt: true },
     });
 }
 
@@ -89,6 +90,10 @@ export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promis
                 .update(users)
                 .set({
                     lastLoginAt: sql`now()`,
+                    // Track when userinfo was last consulted, independent of lastLoginAt, so the
+                    // staleness gate keeps firing for users who log in more often than the refresh
+                    // window. Bumping this must not bump updatedAt.
+                    ...(userObject.profileSynced ? { profileSyncedAt: sql`now()` } : {}),
                     ...(profileChanged
                         ? {
                               firstname: nextFirstName,
@@ -125,6 +130,7 @@ export async function buildThreatSeaAccessToken(userObject: OidcProfile): Promis
                     lastname: userObject.lastName ?? userObject.displayName ?? email,
                     email: email,
                     oidcSub: userObject.sub,
+                    ...(userObject.profileSynced ? { profileSyncedAt: sql`now()` } : {}),
                 })
                 .returning()
         ).at(0);

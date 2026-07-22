@@ -57,6 +57,13 @@
       "when": 1784623830192,
       "tag": "0007_add_session_table",
       "breakpoints": false
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1784715053806,
+      "tag": "0008_add_profile_synced_at_to_user",
+      "breakpoints": false
     }
   ]
 }

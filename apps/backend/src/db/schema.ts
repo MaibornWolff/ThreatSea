@@ -386,6 +386,7 @@ export const users = pgTable(
         lastLoginAt: timestamp("last_login_at", { mode: "string", withTimezone: true })
             .notNull()
             .default(sql`now()`),
+        profileSyncedAt: timestamp("profile_synced_at", { mode: "string", withTimezone: true }),
         oidcSub: varchar("oidc_sub", { length: 255 }),
         createdAt: timestamp({ mode: "string", withTimezone: true })
             .notNull()

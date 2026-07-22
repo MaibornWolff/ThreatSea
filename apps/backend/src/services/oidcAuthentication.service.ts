@@ -74,8 +74,11 @@ function hasMissingProfileClaim(profileClaims: ProfileClaims): boolean {
 
 const PROFILE_REFRESH_INTERVAL_MS = 24 * 60 * 60 * 1000; // equals 24 hours
 
-function isProfileStale(lastLoginAt: string): boolean {
-    return Date.now() - new Date(lastLoginAt).getTime() > PROFILE_REFRESH_INTERVAL_MS;
+function isProfileStale(profileSyncedAt: string | null): boolean {
+    if (profileSyncedAt === null) {
+        return true;
+    }
+    return Date.now() - new Date(profileSyncedAt).getTime() > PROFILE_REFRESH_INTERVAL_MS;
 }
 
 function mergeProfileClaims(idTokenClaims: ProfileClaims, userInfoClaims: ProfileClaims): ProfileClaims {
@@ -202,13 +205,24 @@ export async function handleOidcCallback(callbackUrl: URL, oidcParams: OidcCallb
     }
 
     let profileClaims = readProfileClaims(idTokenClaims);
+    let profileSynced = false;
 
     const userInfoEndpoint = oidcClientConfig.serverMetadata().userinfo_endpoint;
     if (userInfoEndpoint !== undefined && hasMissingProfileClaim(profileClaims)) {
-        const knownUser = await findOidcUserBySub(idTokenClaims.sub);
-        if (knownUser === undefined || isProfileStale(knownUser.lastLoginAt)) {
+        // Email is mandatory to mint a token, so a missing email forces a fetch regardless of
+        // freshness — otherwise a repeat login inside the refresh window would skip userinfo, leave
+        // email undefined, and hard-fail token minting (at most one successful login per refresh
+        // window for IdPs that deliver email only via userinfo). Only the optional enrichment
+        // claims (names, email_verified) defer to the unknown-or-stale gate.
+        let shouldFetch = profileClaims.email === undefined;
+        if (!shouldFetch) {
+            const knownUser = await findOidcUserBySub(idTokenClaims.sub);
+            shouldFetch = knownUser === undefined || isProfileStale(knownUser.profileSyncedAt);
+        }
+        if (shouldFetch) {
             const userInfo = await client.fetchUserInfo(oidcClientConfig, tokenSet.access_token, idTokenClaims.sub);
             profileClaims = mergeProfileClaims(profileClaims, readProfileClaims(userInfo));
+            profileSynced = true;
         }
     }
 
@@ -219,6 +233,7 @@ export async function handleOidcCallback(callbackUrl: URL, oidcParams: OidcCallb
         displayName: profileClaims.name,
         firstName: profileClaims.givenName,
         lastName: profileClaims.familyName,
+        profileSynced,
     };
 
     const threatSeaToken = await buildThreatSeaAccessToken(user);

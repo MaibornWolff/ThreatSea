@@ -93,6 +93,7 @@ describe("handleOidcCallback profile building", () => {
             displayName: "User Example",
             firstName: "User",
             lastName: "Example",
+            profileSynced: false,
         });
     });
 
@@ -122,6 +123,7 @@ describe("handleOidcCallback profile building", () => {
             displayName: "Fresh Name",
             firstName: "Fresh",
             lastName: "Name",
+            profileSynced: true,
         });
     });
 
@@ -141,6 +143,7 @@ describe("handleOidcCallback profile building", () => {
             displayName: undefined,
             firstName: undefined,
             lastName: undefined,
+            profileSynced: false,
         });
     });
 
@@ -191,7 +194,7 @@ describe("handleOidcCallback profile building", () => {
             email_verified: true,
             given_name: "Alice",
         });
-        vi.mocked(findOidcUserBySub).mockResolvedValue({ lastLoginAt: new Date().toISOString() });
+        vi.mocked(findOidcUserBySub).mockResolvedValue({ profileSyncedAt: new Date().toISOString() });
         vi.mocked(buildThreatSeaAccessToken).mockResolvedValue("threatsea-token");
 
         await handleOidcCallback(callbackUrl, callbackParameters);
@@ -200,6 +203,55 @@ describe("handleOidcCallback profile building", () => {
         expect(buildThreatSeaAccessToken).toHaveBeenCalledWith(
             expect.objectContaining({ email: "alice@example.com", emailVerified: true, lastName: undefined })
         );
+    });
+
+    it("forces a userinfo fetch when the ID token omits email even for a fresh user", async () => {
+        await initializeOidcWithServerMetadata({
+            issuer: "https://idp.example.com",
+            userinfo_endpoint: "https://idp.example.com/userinfo",
+        });
+        // Fresh known user, but the ID token carries no email — the only source is userinfo.
+        mockAuthorizationCodeGrant({
+            sub: "subject-1",
+            given_name: "Alice",
+            family_name: "Smith",
+            name: "Alice Smith",
+        });
+        vi.mocked(findOidcUserBySub).mockResolvedValue({ profileSyncedAt: new Date().toISOString() });
+        vi.mocked(client.fetchUserInfo).mockResolvedValue({
+            sub: "subject-1",
+            email: "alice@example.com",
+            email_verified: true,
+        } as never);
+        vi.mocked(buildThreatSeaAccessToken).mockResolvedValue("threatsea-token");
+
+        await handleOidcCallback(callbackUrl, callbackParameters);
+
+        expect(findOidcUserBySub).not.toHaveBeenCalled(); // a missing email short-circuits the freshness check
+        expect(client.fetchUserInfo).toHaveBeenCalled();
+        expect(buildThreatSeaAccessToken).toHaveBeenCalledWith(
+            expect.objectContaining({ email: "alice@example.com", profileSynced: true })
+        );
+    });
+
+    it("marks the profile unsynced when the freshness gate skips userinfo", async () => {
+        await initializeOidcWithServerMetadata({
+            issuer: "https://idp.example.com",
+            userinfo_endpoint: "https://idp.example.com/userinfo",
+        });
+        mockAuthorizationCodeGrant({
+            sub: "subject-1",
+            email: "alice@example.com",
+            email_verified: true,
+            given_name: "Alice",
+        });
+        vi.mocked(findOidcUserBySub).mockResolvedValue({ profileSyncedAt: new Date().toISOString() });
+        vi.mocked(buildThreatSeaAccessToken).mockResolvedValue("threatsea-token");
+
+        await handleOidcCallback(callbackUrl, callbackParameters);
+
+        expect(client.fetchUserInfo).not.toHaveBeenCalled();
+        expect(buildThreatSeaAccessToken).toHaveBeenCalledWith(expect.objectContaining({ profileSynced: false }));
     });
 
     it("fetches userinfo for a known stale user when a name claim is missing", async () => {
@@ -213,7 +265,7 @@ describe("handleOidcCallback profile building", () => {
             email_verified: true,
             given_name: "Alice",
         });
-        vi.mocked(findOidcUserBySub).mockResolvedValue({ lastLoginAt: "2000-01-01T00:00:00.000Z" });
+        vi.mocked(findOidcUserBySub).mockResolvedValue({ profileSyncedAt: "2000-01-01T00:00:00.000Z" });
         vi.mocked(client.fetchUserInfo).mockResolvedValue({
             sub: "subject-1",
             email: "alice@example.com",
@@ -264,7 +316,7 @@ describe("handleOidcCallback profile building", () => {
             email_verified: true,
             given_name: "Alice",
         });
-        vi.mocked(findOidcUserBySub).mockResolvedValue({ lastLoginAt: "2000-01-01T00:00:00.000Z" });
+        vi.mocked(findOidcUserBySub).mockResolvedValue({ profileSyncedAt: "2000-01-01T00:00:00.000Z" });
         vi.mocked(client.fetchUserInfo).mockResolvedValue({
             sub: "subject-1",
             email: "alice@example.com",
@@ -294,7 +346,7 @@ describe("handleOidcCallback profile building", () => {
             email_verified: true,
             given_name: "Alice",
         });
-        vi.mocked(findOidcUserBySub).mockResolvedValue({ lastLoginAt: "2000-01-01T00:00:00.000Z" });
+        vi.mocked(findOidcUserBySub).mockResolvedValue({ profileSyncedAt: "2000-01-01T00:00:00.000Z" });
         vi.mocked(client.fetchUserInfo).mockResolvedValue({
             sub: "subject-1",
             email: "alice@example.com",
