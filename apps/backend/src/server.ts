@@ -58,8 +58,9 @@ const PostgresSessionStore = connectPgSimple(session);
 app.use(
     session({
         ...sessionConfig,
-        // disableTouch avoids a per-request UPDATE from rolling sessions; the 12h cookie makes the
-        // touch low-value against the shared connection pool.
+        // disableTouch avoids a per-request UPDATE against the shared pool. It also means `touch`
+        // cannot extend a session, so the store row and cookie share one fixed 12h lifetime from
+        // creation (no `rolling` in sessionConfig — it would only slide the cookie, not the row).
         store: new PostgresSessionStore({ pool, disableTouch: true }),
     })
 );

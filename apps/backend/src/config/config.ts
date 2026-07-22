@@ -119,7 +119,9 @@ export const sessionConfig: SessionOptions = {
     secret: getEnvironmentVariable("EXPRESS_SESSION_SECRET"),
     resave: false,
     saveUninitialized: false,
-    rolling: true,
+    // No `rolling`: the Postgres store runs with `disableTouch` (see server.ts), so `touch` cannot
+    // extend a row's `expire` and rolling would only slide the cookie while the store row still
+    // dies at creation + 12h. Keep both lifetimes consistent at a fixed 12h instead.
 };
 
 const MAXIMUM_PURGE_INTERVAL_HOURS = 596; // setInterval delays above 2^31 - 1 ms overflow and fire every millisecond
