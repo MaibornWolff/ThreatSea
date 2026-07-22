@@ -328,6 +328,25 @@ describe("handleOidcCallback profile building", () => {
         expect(client.fetchUserInfo).not.toHaveBeenCalled();
         expect(buildThreatSeaAccessToken).toHaveBeenCalledWith(expect.objectContaining({ emailVerified: true }));
     });
+
+    it("treats empty and whitespace-only name claims as absent so they can't clobber a stored name", async () => {
+        await initializeOidcWithServerMetadata({ issuer: "https://idp.example.com" });
+        mockAuthorizationCodeGrant({
+            sub: "subject-1",
+            email: "user@example.com",
+            email_verified: true,
+            given_name: "",
+            family_name: "Example",
+            name: "   ",
+        });
+        vi.mocked(buildThreatSeaAccessToken).mockResolvedValue("threatsea-token");
+
+        await handleOidcCallback(callbackUrl, callbackParameters);
+
+        expect(buildThreatSeaAccessToken).toHaveBeenCalledWith(
+            expect.objectContaining({ firstName: undefined, lastName: "Example", displayName: undefined })
+        );
+    });
 });
 
 describe("initializeOidc client authentication detection", () => {

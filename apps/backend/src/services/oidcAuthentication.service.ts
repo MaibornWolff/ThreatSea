@@ -38,13 +38,24 @@ function parseEmailVerified(rawValue: unknown): boolean | undefined {
     return undefined;
 }
 
+// Treat empty or whitespace-only string claims as absent. Some IdPs (e.g. Azure AD guest accounts)
+// send given_name: "" — passing that through would coalesce to "" and overwrite a stored real name,
+// the same clobber class commit a1a01878 fixed for undefined.
+function readStringClaim(rawValue: unknown): string | undefined {
+    if (typeof rawValue !== "string") {
+        return undefined;
+    }
+    const trimmed = rawValue.trim();
+    return trimmed === "" ? undefined : trimmed;
+}
+
 function readProfileClaims(claimSource: Readonly<Record<string, unknown>>): ProfileClaims {
     return {
-        email: typeof claimSource["email"] === "string" ? claimSource["email"] : undefined,
+        email: readStringClaim(claimSource["email"]),
         emailVerified: parseEmailVerified(claimSource["email_verified"]),
-        name: typeof claimSource["name"] === "string" ? claimSource["name"] : undefined,
-        givenName: typeof claimSource["given_name"] === "string" ? claimSource["given_name"] : undefined,
-        familyName: typeof claimSource["family_name"] === "string" ? claimSource["family_name"] : undefined,
+        name: readStringClaim(claimSource["name"]),
+        givenName: readStringClaim(claimSource["given_name"]),
+        familyName: readStringClaim(claimSource["family_name"]),
     };
 }
 
