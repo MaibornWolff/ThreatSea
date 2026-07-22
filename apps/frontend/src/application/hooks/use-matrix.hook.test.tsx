@@ -3,7 +3,8 @@ import { Provider } from "react-redux";
 import type { ReactNode } from "react";
 import { useMatrix } from "./use-matrix.hook";
 import { createStore } from "#application/store.ts";
-import { createThreat, createMeasure, createMeasureImpact } from "#test-utils/builders.ts";
+import { createThreat, createMeasure, createMeasureImpact, createAsset } from "#test-utils/builders.ts";
+import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import {
     mockUseCatalogMeasures,
     mockUseThreats,
@@ -144,6 +145,46 @@ describe("useMatrix", () => {
             });
 
             expect(result.current.threats[0]?.measures[0]?.active).toBe(true);
+        });
+    });
+
+    describe("out-of-scope status", () => {
+        // A threat with a damaging asset so its gross net values are non-zero unless out of scope.
+        const scopedSetup = (status: THREAT_STATUSES): SetupArgs => ({
+            threats: [
+                createThreat({
+                    id: 1,
+                    status,
+                    probability: 3,
+                    confidentiality: true,
+                    assets: [createAsset({ id: 1 })],
+                }),
+            ],
+        });
+
+        it("zeroes the net values of an out-of-scope threat", () => {
+            const { result } = renderUseMatrix(scopedSetup(THREAT_STATUSES.OUTOFSCOPE));
+            const threat = result.current.threats[0];
+
+            expect(threat?.newProbability).toBe(0);
+            expect(threat?.newDamage).toBe(0);
+            expect(threat?.newRisk).toBe(0);
+        });
+
+        it("keeps the net values of an in-scope threat", () => {
+            const { result } = renderUseMatrix(scopedSetup(THREAT_STATUSES.NEW));
+            const threat = result.current.threats[0];
+
+            expect(threat?.newProbability).toBe(3);
+            expect(threat?.newDamage).toBe(3);
+            expect(threat?.newRisk).toBe(9);
+        });
+
+        it("omits an out-of-scope threat from the risk matrix cells", () => {
+            const { result } = renderUseMatrix(scopedSetup(THREAT_STATUSES.OUTOFSCOPE));
+            const placed = result.current.matrix.some((row) => row.some((cell) => typeof cell.amount === "number"));
+
+            expect(placed).toBe(false);
         });
     });
 });
