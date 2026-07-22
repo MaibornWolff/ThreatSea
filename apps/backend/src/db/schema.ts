@@ -1,6 +1,7 @@
 import { SystemData } from "#types/system.types.js";
 import { sql } from "drizzle-orm";
 import {
+    type AnyPgColumn,
     boolean,
     check,
     date,
@@ -423,6 +424,40 @@ export const usersCatalogs = pgTable(
     ]
 );
 
+// Per-user folders for organizing projects. Folders belong to a single user (userId);
+// nesting is expressed via the self-referential parentId (null = root). The maximum
+// nesting depth (7) is enforced in the service layer, not the schema.
+export type Folder = typeof folders.$inferSelect;
+export type CreateFolder = Omit<typeof folders.$inferInsert, DefaultFields>;
+export type UpdateFolder = Omit<CreateFolder, "userId">;
+
+export const folders = pgTable(
+    "folders",
+    {
+        id: integer().notNull().primaryKey().generatedByDefaultAsIdentity(),
+        name: varchar({ length: 255 }).notNull(),
+        // Self-reference: deleting a folder cascades to its subtree.
+        parentId: integer().references((): AnyPgColumn => folders.id, {
+            onDelete: "cascade",
+            onUpdate: "cascade",
+        }),
+        userId: integer()
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade", onUpdate: "cascade" }),
+        createdAt: timestamp({ mode: "string", withTimezone: true })
+            .notNull()
+            .default(sql`now()`),
+        updatedAt: timestamp({ mode: "string", withTimezone: true })
+            .notNull()
+            .default(sql`now()`),
+    },
+    (table) => [
+        check("folders_name_not_empty", sql`${table.name} <> ''`),
+        index("folders_user_id").on(table.userId),
+        index("folders_parent_id").on(table.parentId),
+    ]
+);
+
 export const usersProjects = pgTable(
     "users_projects",
     {
@@ -439,9 +474,13 @@ export const usersProjects = pgTable(
         projectId: integer()
             .notNull()
             .references(() => projects.id, { onDelete: "cascade", onUpdate: "cascade" }),
+        // Per-user placement of a project into one of the user's folders (null = ungrouped).
+        // Clearing on folder deletion drops the project back to ungrouped rather than removing it.
+        folderId: integer().references(() => folders.id, { onDelete: "set null", onUpdate: "cascade" }),
     },
     (table) => [
         index("users_projects_project_id").on(table.projectId),
+        index("users_projects_folder_id").on(table.folderId),
         uniqueIndex("users_projects_user_id_project_id").on(table.userId, table.projectId),
     ]
 );
