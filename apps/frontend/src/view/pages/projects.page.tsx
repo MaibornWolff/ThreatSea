@@ -21,6 +21,7 @@ import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
 import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
 import ProjectDialogPage from "./project-dialog.page";
 import FolderDialogPage from "./folder-dialog.page";
+import MoveDialogPage from "./move-dialog.page";
 import { ImportIconButton } from "#view/components/import-icon-button.component.tsx";
 import { ProjectsActions } from "#application/actions/projects.actions.ts";
 import { useProjects } from "#application/hooks/use-projects.hook.ts";
@@ -275,6 +276,7 @@ export const ProjectsPage = CreatePage(HeaderUtilityControls, () => {
 
                 <Routes>
                     <Route path="add" element={<ProjectDialogPage />} />
+                    <Route path="move" element={<MoveDialogPage />} />
                     <Route path="folders/add" element={<FolderDialogPage />} />
                     <Route path="folders/:folderId" element={<FolderDialogPage />} />
                     <Route path=":projectId" element={<ProjectDialogPage />} />

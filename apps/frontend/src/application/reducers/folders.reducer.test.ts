@@ -90,4 +90,18 @@ describe("foldersReducer", () => {
             expect(next.isPending).toBe(false);
         });
     });
+
+    describe("toggleFolderCollapsed", () => {
+        it("starts with everything expanded (empty collapsed map)", () => {
+            expect(getInitialState().collapsed).toEqual({});
+        });
+
+        it("collapses a section, then expands it again on a second toggle", () => {
+            const collapsed = foldersReducer(getInitialState(), FoldersActions.toggleFolderCollapsed("7"));
+            expect(collapsed.collapsed["7"]).toBe(true);
+
+            const expandedAgain = foldersReducer(collapsed, FoldersActions.toggleFolderCollapsed("7"));
+            expect(expandedAgain.collapsed["7"]).toBeUndefined();
+        });
+    });
 });

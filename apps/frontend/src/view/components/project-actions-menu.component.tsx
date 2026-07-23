@@ -1,9 +1,12 @@
 import Delete from "@mui/icons-material/Delete";
 import Edit from "@mui/icons-material/Edit";
 import MoreVert from "@mui/icons-material/MoreVert";
+import DriveFileMove from "@mui/icons-material/DriveFileMove";
 import { Menu, MenuItem } from "@mui/material";
 import { useState, type MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router";
+import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { useProjectExport } from "#application/hooks/use-export.hook.ts";
 import type { ExtendedProject } from "#api/types/project.types.ts";
 import { ExportIconButton } from "./export-icon-button.component";
@@ -26,8 +29,13 @@ export const ProjectActionsMenu = ({
 }: ProjectActionsMenuProps) => {
     const isHeader = variant === "header";
     const { t } = useTranslation("projectsPage");
+    const navigate = useNavigate();
     const [anchorElement, setAnchorElement] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorElement);
+
+    // Owner-only actions (edit/export/delete). "Move to folder" is per-user placement, so it is
+    // available to any member — a viewer organizes their own view without owning the project.
+    const isOwner = checkUserRole(project.role, USER_ROLES.OWNER);
 
     const { exportProject } = useProjectExport();
 
@@ -51,6 +59,11 @@ export const ProjectActionsMenu = ({
 
     const handleExport = () => {
         exportProject(project);
+        handleClose();
+    };
+
+    const handleMoveProject = () => {
+        navigate("/projects/move", { state: { project } });
         handleClose();
     };
 
@@ -79,55 +92,78 @@ export const ProjectActionsMenu = ({
                     },
                 }}
             >
-                <MenuItem
-                    title={t("edit")}
-                    onClick={handleEditProject}
-                    sx={{
-                        "&:hover": {
-                            backgroundColor: "background.mainIntransparent",
-                            color: "secondary.light",
-                        },
-                    }}
-                    data-testid={`${testIdPrefix}_edit-project-button`}
-                >
-                    <IconButton>
-                        <Edit />
-                    </IconButton>
-                </MenuItem>
-                <MenuItem
-                    title={t("exportProject")}
-                    onClick={handleExport}
-                    sx={{
-                        "&:hover": {
-                            backgroundColor: "background.mainIntransparent",
-                            color: "secondary.light",
-                        },
-                    }}
-                    data-testid={`${testIdPrefix}_export-project-button`}
-                >
-                    <ExportIconButton />
-                </MenuItem>
-                <MenuItem
-                    title={t("delete")}
-                    onClick={handleDeleteProject}
-                    sx={{
-                        "&:hover": {
-                            backgroundColor: "background.mainIntransparent",
-                        },
-                    }}
-                    data-testid={`${testIdPrefix}_delete-project-button`}
-                >
-                    <IconButton
+                {isOwner && (
+                    <MenuItem
+                        title={t("edit")}
+                        onClick={handleEditProject}
                         sx={{
                             "&:hover": {
-                                color: "error.light",
-                                backgroundColor: "background.paperIntransparent",
+                                backgroundColor: "background.mainIntransparent",
+                                color: "secondary.light",
                             },
                         }}
+                        data-testid={`${testIdPrefix}_edit-project-button`}
                     >
-                        <Delete />
-                    </IconButton>
-                </MenuItem>
+                        <IconButton>
+                            <Edit />
+                        </IconButton>
+                    </MenuItem>
+                )}
+                {!isHeader && (
+                    <MenuItem
+                        title={t("folders.moveToFolder")}
+                        onClick={handleMoveProject}
+                        sx={{
+                            "&:hover": {
+                                backgroundColor: "background.mainIntransparent",
+                                color: "secondary.light",
+                            },
+                        }}
+                        data-testid={`${testIdPrefix}_move-project-button`}
+                    >
+                        <IconButton>
+                            <DriveFileMove />
+                        </IconButton>
+                    </MenuItem>
+                )}
+                {isOwner && (
+                    <MenuItem
+                        title={t("exportProject")}
+                        onClick={handleExport}
+                        sx={{
+                            "&:hover": {
+                                backgroundColor: "background.mainIntransparent",
+                                color: "secondary.light",
+                            },
+                        }}
+                        data-testid={`${testIdPrefix}_export-project-button`}
+                    >
+                        <ExportIconButton fontSize={"inherit"} />
+                    </MenuItem>
+                )}
+                {isOwner && (
+                    <MenuItem
+                        title={t("delete")}
+                        onClick={handleDeleteProject}
+                        sx={{
+                            "&:hover": {
+                                backgroundColor: "background.mainIntransparent",
+                            },
+                        }}
+                        data-testid={`${testIdPrefix}_delete-project-button`}
+                    >
+                        <IconButton
+                            sx={{
+                                "&:hover": {
+                                    color: "error.light",
+                                    backgroundColor: "background.paperIntransparent",
+                                },
+                            }}
+                        >
+                            <Delete />
+                        </IconButton>
+                    </MenuItem>
+                )}
             </Menu>
         </>
     );
