@@ -91,6 +91,10 @@ const AddThreatDialog = ({
     };
 
     const handleConfirmDialog = async (data: ThreatFormValues) => {
+        const status =
+            data.status === THREAT_STATUSES.FINALIZED || data.status === THREAT_STATUSES.OUTOFSCOPE
+                ? data.status
+                : THREAT_STATUSES.IN_PROGRESS;
         try {
             await dispatch(
                 ThreatsActions.updateThreat({
@@ -100,7 +104,7 @@ const AddThreatDialog = ({
                     confidentiality: data.confidentiality,
                     integrity: data.integrity,
                     availability: data.availability,
-                    status: data.status,
+                    status,
                     id: threatId,
                     projectId,
                 })
