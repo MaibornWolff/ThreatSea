@@ -21,6 +21,7 @@ import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
 import type { ThreatWithMetrics, SelectedMatrixCell, ThreatMeasure } from "#application/hooks/use-matrix.hook.ts";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
+import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { ProjectsActions } from "#application/actions/projects.actions.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
@@ -547,7 +548,11 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                                     borderRightColor: "border.divider",
                                                                 }}
                                                             >
-                                                                {threat.newProbability}
+                                                                {threat.status === THREAT_STATUSES.OUTOFSCOPE
+                                                                    ? t(`statusList.${THREAT_STATUSES.OUTOFSCOPE}`, {
+                                                                          ns: "common",
+                                                                      })
+                                                                    : threat.newProbability}
                                                             </CustomTableCell>
                                                             <CustomTableCell
                                                                 showBorder={true}
