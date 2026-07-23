@@ -548,7 +548,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                                     borderRightColor: "border.divider",
                                                                 }}
                                                             >
-                                                                {threat.status === THREAT_STATUSES.OUTOFSCOPE
+                                                                {threat.newProbability === 0
                                                                     ? t(`statusList.${THREAT_STATUSES.OUTOFSCOPE}`, {
                                                                           ns: "common",
                                                                       })

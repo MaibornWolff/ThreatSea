@@ -4,15 +4,7 @@
  */
 import { eq, getTableColumns, inArray } from "drizzle-orm";
 import { db, TransactionType } from "#db/index.js";
-import {
-    threats,
-    CreateMeasureImpact,
-    MeasureImpact,
-    measureImpacts,
-    measures,
-    UpdateMeasureImpact,
-} from "#db/schema.js";
-import { THREAT_STATUSES } from "#types/threat-statuses.types.js";
+import { CreateMeasureImpact, MeasureImpact, measureImpacts, measures, UpdateMeasureImpact } from "#db/schema.js";
 
 /**
  * Gets all measure impacts of the specified project.
@@ -122,40 +114,6 @@ export async function updateMeasureImpact(
     }
 
     return measureImpact;
-}
-
-/**
- * Aligns a child threat's status with its measure impacts: if any impact sets the threat out of
- * scope the status becomes "out of scope"; once none do, an out-of-scope status reverts to
- * "in progress". Callers only invoke this when an operation actually adds or removes an
- * out-of-scope impact, so ordinary measure impacts never disturb the status. A status the user set
- * out of scope by hand is only affected in the edge case where a redundant out-of-scope measure is
- * later removed (accepted trade-off; no provenance is tracked).
- *
- * @param {number} threatId - The id of the child threat to reconcile.
- * @param {TransactionType} transaction - drizzle transaction.
- */
-export async function syncThreatStatusFromMeasureImpacts(
-    threatId: number,
-    transaction: TransactionType | undefined = undefined
-): Promise<void> {
-    const runner = transaction ?? db;
-
-    const impacts = await runner.query.measureImpacts.findMany({
-        where: eq(measureImpacts.threatId, threatId),
-    });
-    const hasOutOfScope = impacts.some((impact) => impact.setsOutOfScope);
-
-    const threat = await runner.query.threats.findFirst({ where: eq(threats.id, threatId) });
-    if (!threat) {
-        return;
-    }
-
-    if (hasOutOfScope && threat.status !== THREAT_STATUSES.OUTOFSCOPE) {
-        await runner.update(threats).set({ status: THREAT_STATUSES.OUTOFSCOPE }).where(eq(threats.id, threatId));
-    } else if (!hasOutOfScope && threat.status === THREAT_STATUSES.OUTOFSCOPE) {
-        await runner.update(threats).set({ status: THREAT_STATUSES.IN_PROGRESS }).where(eq(threats.id, threatId));
-    }
 }
 
 /**
