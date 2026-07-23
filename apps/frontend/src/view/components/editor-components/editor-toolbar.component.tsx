@@ -1,14 +1,12 @@
-import {
-    CenterFocusWeak,
-    CreateOutlined,
-    CropSquare,
-    Download,
-    ShapeLineOutlined,
-    HorizontalRule,
-    RadioButtonUnchecked,
-    TextFields,
-    TrendingFlat,
-} from "@mui/icons-material";
+import CenterFocusWeak from "@mui/icons-material/CenterFocusWeak";
+import CreateOutlined from "@mui/icons-material/CreateOutlined";
+import CropSquare from "@mui/icons-material/CropSquare";
+import Download from "@mui/icons-material/Download";
+import ShapeLineOutlined from "@mui/icons-material/ShapeLineOutlined";
+import HorizontalRule from "@mui/icons-material/HorizontalRule";
+import RadioButtonUnchecked from "@mui/icons-material/RadioButtonUnchecked";
+import TextFields from "@mui/icons-material/TextFields";
+import TrendingFlat from "@mui/icons-material/TrendingFlat";
 import { Box, IconButton, Paper, Popover, Popper, Tooltip } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useState, type ComponentType } from "react";

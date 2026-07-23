@@ -26,11 +26,6 @@ export default defineConfig({
                             name: "mui",
                             test: /\/@mui\/material/,
                         },
-                        // MUI Icons (separate chunk as it's large)
-                        {
-                            name: "mui-icons",
-                            test: /\/@mui\/icons-material/,
-                        },
                         // Excel/Office libraries
                         {
                             name: "excel-vendor",

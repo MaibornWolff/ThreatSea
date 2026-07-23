@@ -1,5 +1,6 @@
-import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
 import { FormControl, Typography, Box } from "@mui/material";
+import ArrowDownward from "@mui/icons-material/ArrowDownward";
+import ArrowUpward from "@mui/icons-material/ArrowUpward";
 import type { SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 

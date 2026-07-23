@@ -2,7 +2,7 @@ import { screen } from "@testing-library/react";
 import { renderWithProviders as render } from "#test-utils/render-with-providers.tsx";
 import userEvent from "@testing-library/user-event";
 import { IconButton } from "./icon-button.component";
-import { Star } from "@mui/icons-material";
+import Star from "@mui/icons-material/Star";
 
 describe("IconButton", () => {
     it("should render its children", () => {

@@ -1,7 +1,7 @@
 import type { KeyboardEvent } from "react";
 
 import { Box, IconButton, InputBase } from "@mui/material";
-import { Search } from "@mui/icons-material";
+import Search from "@mui/icons-material/Search";
 import type { InputBaseProps } from "@mui/material/InputBase";
 import type { SxProps, Theme } from "@mui/material/styles";
 

@@ -3,7 +3,7 @@
  *     for the custom components.
  */
 
-import { AddPhotoAlternateOutlined } from "@mui/icons-material";
+import AddPhotoAlternateOutlined from "@mui/icons-material/AddPhotoAlternateOutlined";
 import {
     Avatar,
     Box,

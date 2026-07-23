@@ -3,7 +3,7 @@
  *     page.
  */
 
-import { ChevronLeft } from "@mui/icons-material";
+import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import { Box, IconButton, Typography } from "@mui/material";
 import { memo, useLayoutEffect, useState, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";

@@ -20,7 +20,7 @@ import { ListBox } from "./list-box.component";
 import { ListBoxToolbar } from "./list-box-toolbar.component";
 import { ListBoxHeader } from "./list-box-header.component";
 import { useState } from "react";
-import { Delete } from "@mui/icons-material";
+import Delete from "@mui/icons-material/Delete";
 import { CatalogThreatsActions } from "#application/actions/catalog-threats.actions.ts";
 import { useAppDispatch } from "#application/hooks/use-app-redux.hook.ts";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";

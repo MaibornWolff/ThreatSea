@@ -1,4 +1,6 @@
-import { Delete, Edit, MoreVert } from "@mui/icons-material";
+import Delete from "@mui/icons-material/Delete";
+import Edit from "@mui/icons-material/Edit";
+import MoreVert from "@mui/icons-material/MoreVert";
 import { Menu, MenuItem } from "@mui/material";
 import { useState, type MouseEvent } from "react";
 import { useTranslation } from "react-i18next";

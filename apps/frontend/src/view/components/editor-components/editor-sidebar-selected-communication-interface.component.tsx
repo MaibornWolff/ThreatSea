@@ -6,7 +6,7 @@ import { EditorSidebarAssetList } from "./editor-sidebar-asset-list.component";
 import { SearchField } from "#view/components/search-field.component.tsx";
 import { TextField } from "#view/components/textfield.component.tsx";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
-import { Delete } from "@mui/icons-material";
+import Delete from "@mui/icons-material/Delete";
 import { useAssetHoverPopper } from "#application/hooks/useAssetHoverPopper.ts";
 import type { ChangeEvent } from "react";
 import type { SystemConnectionPoint } from "#application/adapters/system-connection-point.adapter.ts";

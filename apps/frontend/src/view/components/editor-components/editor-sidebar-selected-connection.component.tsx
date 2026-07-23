@@ -1,4 +1,5 @@
-import { Delete, Autorenew } from "@mui/icons-material";
+import Delete from "@mui/icons-material/Delete";
+import Autorenew from "@mui/icons-material/Autorenew";
 import { IconButton, Tooltip } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { Box } from "@mui/system";

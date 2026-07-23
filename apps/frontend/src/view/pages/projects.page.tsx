@@ -1,4 +1,6 @@
-import { Add, ArrowDownward, ArrowUpward } from "@mui/icons-material";
+import Add from "@mui/icons-material/Add";
+import ArrowDownward from "@mui/icons-material/ArrowDownward";
+import ArrowUpward from "@mui/icons-material/ArrowUpward";
 import { LinearProgress, useMediaQuery } from "@mui/material";
 import { Box } from "@mui/system";
 import { useTheme } from "@mui/material/styles";

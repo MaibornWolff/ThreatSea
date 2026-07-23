@@ -20,7 +20,8 @@ import {
 } from "@mui/material";
 import type { DialogProps } from "@mui/material/Dialog";
 import { useTheme } from "@mui/material/styles";
-import { Add, InfoOutlined } from "@mui/icons-material";
+import Add from "@mui/icons-material/Add";
+import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import SelectBoxCategorySubHeader from "#view/components/selectBox-CategorySubHeader.tsx";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";

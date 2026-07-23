@@ -80,6 +80,10 @@
           {
             "name": "#view/wrappers/color-tokens.ts",
             "message": "Consume colors via theme.palette (useTheme/sx). Direct token imports are reserved for theme.wrapper and documented exceptions (editor-toolbar, system-component, view/report subtree)."
+          },
+          {
+            "name": "@mui/icons-material",
+            "message": "Import icons by deep path, e.g. `import Add from \"@mui/icons-material/Add\"`. The barrel drags ~10,750 icon modules into the module graph — slow dev startup and bundle-bloat risk."
           }
         ]
       }
@@ -200,7 +204,17 @@
         "**/src/view/report/**/*.{ts,tsx}"
       ],
       "rules": {
-        "no-restricted-imports": "off"
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "@mui/icons-material",
+                "message": "Import icons by deep path, e.g. `import Add from \"@mui/icons-material/Add\"`. The barrel drags ~10,750 icon modules into the module graph — slow dev startup and bundle-bloat risk."
+              }
+            ]
+          }
+        ]
       }
     },
     {

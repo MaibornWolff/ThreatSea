@@ -1,4 +1,4 @@
-import { FileDownload } from "@mui/icons-material";
+import FileDownload from "@mui/icons-material/FileDownload";
 import type { IconButtonProps as MuiIconButtonProps } from "@mui/material/IconButton";
 import type { ReactNode } from "react";
 

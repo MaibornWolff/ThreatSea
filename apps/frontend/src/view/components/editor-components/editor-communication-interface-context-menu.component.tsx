@@ -1,7 +1,9 @@
-import { Add, WifiTethering, WifiTetheringOff } from "@mui/icons-material";
+import Add from "@mui/icons-material/Add";
+import WifiTethering from "@mui/icons-material/WifiTethering";
+import WifiTetheringOff from "@mui/icons-material/WifiTetheringOff";
 import { Box, List, ListItem, ListItemAvatar, ListItemText, Typography, IconButton, Avatar } from "@mui/material";
-import * as MuiIcons from "@mui/icons-material";
-import { useEffect, useEffectEvent, useRef, useState, type ElementType, type RefObject } from "react";
+import { DynamicMuiIcon } from "#view/components/dynamic-mui-icon.component.tsx";
+import { useEffect, useEffectEvent, useRef, useState, type RefObject } from "react";
 import { useTranslation } from "react-i18next";
 import type { Stage } from "konva/lib/Stage";
 import type { KonvaEventObject } from "konva/lib/Node";
@@ -16,8 +18,6 @@ import {
 import type { EditorConnectionAnchor } from "#application/hooks/use-editor.hook.ts";
 
 let opened: { x: number; y: number } = { x: 0, y: 0 };
-
-const muiIconMap = MuiIcons as Record<string, ElementType>;
 
 interface CommunicationContextMenuProps {
     onSelect: (
@@ -175,8 +175,6 @@ export const CommunicationContextMenu = ({
                         const isConnected = connections.some(
                             (c) => c.from.communicationInterfaceId === communicationInterface.id
                         );
-                        const IconComponent =
-                            communicationInterface.icon != null ? muiIconMap[communicationInterface.icon] : undefined;
                         return (
                             <ListItem
                                 key={index}
@@ -208,7 +206,9 @@ export const CommunicationContextMenu = ({
                                             color: "primary.main",
                                         }}
                                     >
-                                        {IconComponent ? <IconComponent /> : null}
+                                        {communicationInterface.icon != null ? (
+                                            <DynamicMuiIcon iconName={communicationInterface.icon} />
+                                        ) : null}
                                     </Avatar>
                                 </ListItemAvatar>
                                 <ListItemText

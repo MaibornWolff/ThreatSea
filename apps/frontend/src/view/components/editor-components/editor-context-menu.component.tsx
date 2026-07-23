@@ -1,4 +1,6 @@
-import { Add, Delete, MoreVert } from "@mui/icons-material";
+import Add from "@mui/icons-material/Add";
+import Delete from "@mui/icons-material/Delete";
+import MoreVert from "@mui/icons-material/MoreVert";
 import {
     Avatar,
     Box,

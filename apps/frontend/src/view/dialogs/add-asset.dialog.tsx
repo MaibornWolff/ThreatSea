@@ -14,7 +14,9 @@ import {
     Typography,
 } from "@mui/material";
 import type { DialogProps } from "@mui/material/Dialog";
-import { ExpandLessRounded, ExpandMoreRounded, InfoOutlined } from "@mui/icons-material";
+import ExpandLessRounded from "@mui/icons-material/ExpandLessRounded";
+import ExpandMoreRounded from "@mui/icons-material/ExpandMoreRounded";
+import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import { useTheme } from "@mui/material/styles";
 import { useForm, type SubmitErrorHandler } from "react-hook-form";
 import { useTranslation } from "react-i18next";

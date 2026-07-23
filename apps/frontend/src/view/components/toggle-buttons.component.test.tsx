@@ -2,7 +2,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ToggleButtons } from "./toggle-buttons.component";
 import type { ToggleButtonConfig } from "./toggle-buttons.component";
-import { Star, Favorite } from "@mui/icons-material";
+import Star from "@mui/icons-material/Star";
+import Favorite from "@mui/icons-material/Favorite";
 
 const textButtons: ToggleButtonConfig[] = [
     { value: "option-a", text: "Option A" },

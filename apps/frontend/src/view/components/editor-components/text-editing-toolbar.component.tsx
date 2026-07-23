@@ -1,4 +1,7 @@
-import { Delete, FormatBold, FormatItalic, FormatUnderlined } from "@mui/icons-material";
+import Delete from "@mui/icons-material/Delete";
+import FormatBold from "@mui/icons-material/FormatBold";
+import FormatItalic from "@mui/icons-material/FormatItalic";
+import FormatUnderlined from "@mui/icons-material/FormatUnderlined";
 import { Box, Divider, FormControl, IconButton, MenuItem, Paper, Select, Tooltip } from "@mui/material";
 import type { MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
