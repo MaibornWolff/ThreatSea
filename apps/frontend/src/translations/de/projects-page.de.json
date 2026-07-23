@@ -19,7 +19,10 @@
   "folders.ungrouped": "Nicht gruppiert",
   "folders.addFolderTitle": "Neuer Ordner",
   "folders.editFolderTitle": "Ordner umbenennen",
-  "folders.sectionCount": "{{projects}} Projekte · {{folders}} Ordner",
+  "folders.projectCount_one": "{{count}} Projekt",
+  "folders.projectCount_other": "{{count}} Projekte",
+  "folders.folderCount_one": "{{count}} Ordner",
+  "folders.folderCount_other": "{{count}} Ordner",
   "folders.deleteEmptyMessage": "Wollen sie den Ordner '{{ folderName }}' wirklich löschen?",
   "folders.deleteNonEmptyPre": "Ordner ",
   "folders.deleteNonEmptyPost": " löschen? Unterordner werden entfernt und Projekte nach „Nicht gruppiert“ verschoben."

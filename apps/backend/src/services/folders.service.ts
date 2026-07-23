@@ -38,11 +38,17 @@ export async function checkFolderExistsForUser(folderId: number, userId: number)
     return folder !== undefined;
 }
 
+// The tree walkers below all carry a `visited` guard: a parentId cycle should be impossible
+// (updateFolder rejects it), but concurrent moves are not serialized, so corrupt data must
+// degrade into a wrong-but-finite answer rather than an unbounded walk that hangs the server.
+
 /** Depth of a folder counting from the root (root = 1). */
 function depthOf(folderId: number, byId: Map<number, Folder>): number {
+    const visited = new Set<number>();
     let depth = 0;
     let current: number | null = folderId;
-    while (current !== null) {
+    while (current !== null && !visited.has(current)) {
+        visited.add(current);
         depth++;
         const folder: Folder | undefined = byId.get(current);
         if (folder === undefined) {
@@ -54,18 +60,21 @@ function depthOf(folderId: number, byId: Map<number, Folder>): number {
 }
 
 /** Number of levels in the subtree rooted at the folder (a leaf has height 1). */
-function subtreeHeight(folderId: number, childrenOf: Map<number, number[]>): number {
-    const children = childrenOf.get(folderId) ?? [];
+function subtreeHeight(folderId: number, childrenOf: Map<number, number[]>, visited = new Set<number>()): number {
+    visited.add(folderId);
+    const children = (childrenOf.get(folderId) ?? []).filter((childId) => !visited.has(childId));
     if (children.length === 0) {
         return 1;
     }
-    return 1 + Math.max(...children.map((childId) => subtreeHeight(childId, childrenOf)));
+    return 1 + Math.max(...children.map((childId) => subtreeHeight(childId, childrenOf, visited)));
 }
 
 /** True if `maybeAncestorId` is the node itself or one of its ancestors. */
 function isAncestorOrSelf(nodeId: number, maybeAncestorId: number, byId: Map<number, Folder>): boolean {
+    const visited = new Set<number>();
     let current: number | null = nodeId;
-    while (current !== null) {
+    while (current !== null && !visited.has(current)) {
+        visited.add(current);
         if (current === maybeAncestorId) {
             return true;
         }
