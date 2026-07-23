@@ -50,7 +50,8 @@ interface ImportBody {
  *   - generic threats are grouped by (catalogThreatId, projectId, pointOfAttackId); their
  *     name/description/pointOfAttack/attacker come from the referenced catalogue threat,
  *   - each flat threat becomes a child threat keeping its own fields, its id (so measure impacts keep
- *     resolving), `status` derived from `doneEditing`, and a `genericThreatId` pointing at its parent.
+ *     resolving), `status` set to "finalized" only when it was done editing and impacts a protection
+ *     goal (otherwise "new"), and a `genericThreatId` pointing at its parent.
  *
  * Bodies already at the current version (or any unknown version) are left untouched; the caller still
  * validates `datamodelVersion` afterwards.
@@ -100,7 +101,11 @@ export function upgradeImportBodyToCurrent(body: ImportBody): void {
             confidentiality: flatThreat.confidentiality,
             integrity: flatThreat.integrity,
             availability: flatThreat.availability,
-            status: flatThreat.doneEditing ? THREAT_STATUSES.FINALIZED : THREAT_STATUSES.NEW,
+            status:
+                flatThreat.doneEditing &&
+                (flatThreat.confidentiality || flatThreat.integrity || flatThreat.availability)
+                    ? THREAT_STATUSES.FINALIZED
+                    : THREAT_STATUSES.NEW,
             genericThreatId,
             projectId: flatThreat.projectId,
         };
