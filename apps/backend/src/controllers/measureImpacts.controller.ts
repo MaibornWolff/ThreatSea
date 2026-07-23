@@ -3,7 +3,6 @@
  *     for the routing of the members.
  */
 import { NextFunction, Request, Response } from "express";
-import { db } from "#db/index.js";
 import * as MeasureImpactsService from "#services/measureImpacts.service.js";
 import { getMeasure } from "#services/measures.service.js";
 import { getThreat } from "#services/threats.service.js";
@@ -137,14 +136,7 @@ export async function createMeasureImpact(
     }
 
     try {
-        const measureImpact = await db.transaction(async (tx) => {
-            const created = await MeasureImpactsService.createMeasureImpact(request.body, tx);
-            // Only an out-of-scope impact can change the child threat's status.
-            if (created.setsOutOfScope && created.threatId != null) {
-                await MeasureImpactsService.syncThreatStatusFromMeasureImpacts(created.threatId, tx);
-            }
-            return created;
-        });
+        const measureImpact = await MeasureImpactsService.createMeasureImpact(request.body);
 
         response.json(measureImpact);
     } catch (error) {
@@ -182,14 +174,10 @@ export async function updateMeasureImpact(
 
     const data = request.body;
     try {
-        const updatedMeasureImpact: MeasureImpactResponse = await db.transaction(async (tx) => {
-            const updated = await MeasureImpactsService.updateMeasureImpact(measureImpactId, data, tx);
-            // Reconcile only when this update flipped the out-of-scope flag.
-            if (measureImpact.setsOutOfScope !== updated.setsOutOfScope && updated.threatId != null) {
-                await MeasureImpactsService.syncThreatStatusFromMeasureImpacts(updated.threatId, tx);
-            }
-            return updated;
-        });
+        const updatedMeasureImpact: MeasureImpactResponse = await MeasureImpactsService.updateMeasureImpact(
+            measureImpactId,
+            data
+        );
 
         response.json(updatedMeasureImpact);
     } catch (error) {
@@ -225,13 +213,7 @@ export async function deleteMeasureImpact(
         return;
     }
 
-    await db.transaction(async (tx) => {
-        await MeasureImpactsService.deleteMeasureImpact(measureImpactId, tx);
-        // Removing an out-of-scope impact may free the child threat from "out of scope".
-        if (measureImpact.setsOutOfScope && measureImpact.threatId != null) {
-            await MeasureImpactsService.syncThreatStatusFromMeasureImpacts(measureImpact.threatId, tx);
-        }
-    });
+    await MeasureImpactsService.deleteMeasureImpact(measureImpactId);
 
     response.sendStatus(204);
 }

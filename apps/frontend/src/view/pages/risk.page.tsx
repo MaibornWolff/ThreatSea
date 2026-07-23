@@ -562,7 +562,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                                 }}
                                                                 data-testid="risk-page_threat-list-entry_probability"
                                                             >
-                                                                {threat.status === THREAT_STATUSES.OUTOFSCOPE
+                                                                {threat.newProbability === 0
                                                                     ? t(`statusList.${THREAT_STATUSES.OUTOFSCOPE}`, {
                                                                           ns: "common",
                                                                       })
