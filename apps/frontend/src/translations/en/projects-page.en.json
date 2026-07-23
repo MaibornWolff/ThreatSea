@@ -20,7 +20,10 @@
   "folders.ungrouped": "Ungrouped",
   "folders.addFolderTitle": "New folder",
   "folders.editFolderTitle": "Rename folder",
-  "folders.sectionCount": "{{projects}} projects · {{folders}} folders",
+  "folders.projectCount_one": "{{count}} project",
+  "folders.projectCount_other": "{{count}} projects",
+  "folders.folderCount_one": "{{count}} folder",
+  "folders.folderCount_other": "{{count}} folders",
   "folders.deleteEmptyMessage": "Do you really want to delete the folder '{{ folderName }}'?",
   "folders.deleteNonEmptyPre": "Delete folder ",
   "folders.deleteNonEmptyPost": "? Its subfolders are removed and its projects move to Ungrouped."

@@ -38,9 +38,7 @@ const FolderDialog = ({ folder, parentId, ...props }: FolderDialogProps) => {
         formState: { errors },
     } = useForm<FolderFormValues>({
         defaultValues: {
-            id: folder?.id,
             name: folder?.name ?? "",
-            parentId: folder ? folder.parentId : parentId,
         },
     });
     const navigate = useNavigate();
@@ -55,7 +53,13 @@ const FolderDialog = ({ folder, parentId, ...props }: FolderDialogProps) => {
     };
 
     const handleConfirmDialog = (data: FolderFormValues) => {
-        confirmDialog(data);
+        // `id` and `parentId` are merged from props rather than form state: only `name` is a
+        // registered input, and unregistered default values must not be relied on to survive.
+        confirmDialog({
+            ...data,
+            id: folder?.id,
+            parentId: folder ? folder.parentId : parentId,
+        });
         closeDialog();
     };
 

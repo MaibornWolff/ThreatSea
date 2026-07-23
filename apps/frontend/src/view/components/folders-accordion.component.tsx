@@ -66,6 +66,11 @@ const SectionHeader = ({
         sx={sectionHeaderSx}
         onClick={onToggle}
         onKeyDown={(event) => {
+            // Only react to keys pressed on the header itself — keydown from nested controls
+            // (the kebab button) bubbles up here and must keep its native activation.
+            if (event.target !== event.currentTarget) {
+                return;
+            }
             if (event.key === "Enter" || event.key === " ") {
                 event.preventDefault();
                 onToggle();
@@ -91,7 +96,7 @@ const SectionHeader = ({
         {right && (
             <Box
                 sx={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 1 }}
-                onClick={(e) => e.stopPropagation()}
+                onClick={(event) => event.stopPropagation()}
             >
                 {right}
             </Box>
@@ -135,7 +140,7 @@ const FolderSection = ({
                 onToggle={() => onToggleCollapsed(sectionKey)}
                 icon={<FolderIcon sx={{ color: "secondary.main", fontSize: 20 }} />}
                 title={node.folder.name}
-                subtitle={t("folders.sectionCount", { projects: node.projects.length, folders: node.children.length })}
+                subtitle={`${t("folders.projectCount", { count: node.projects.length })} · ${t("folders.folderCount", { count: node.children.length })}`}
                 testId={`folder-section-${node.folder.id}_header`}
                 right={
                     <IconButton
@@ -238,7 +243,7 @@ const UngroupedSection = ({
                 onToggle={onToggleCollapsed}
                 icon={<Inbox sx={{ color: "text.subtle", fontSize: 20 }} />}
                 title={t("folders.ungrouped")}
-                subtitle={t("folders.sectionCount", { projects: projects.length, folders: 0 })}
+                subtitle={t("folders.projectCount", { count: projects.length })}
                 testId="folder-section-ungrouped_header"
             />
             <Collapse in={expanded}>

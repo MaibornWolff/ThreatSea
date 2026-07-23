@@ -23,8 +23,8 @@ describe("buildFolderTree", () => {
 
         const { roots, ungrouped } = buildFolderTree(folders, [inFolder, loose]);
 
-        expect(roots[0]?.projects.map((p) => p.id)).toEqual([10]);
-        expect(ungrouped.map((p) => p.id)).toEqual([11]);
+        expect(roots[0]?.projects.map((project) => project.id)).toEqual([10]);
+        expect(ungrouped.map((project) => project.id)).toEqual([11]);
     });
 
     it("treats a project pointing at a missing folder as ungrouped", () => {
@@ -32,7 +32,7 @@ describe("buildFolderTree", () => {
 
         const { ungrouped } = buildFolderTree([], [orphan]);
 
-        expect(ungrouped.map((p) => p.id)).toEqual([10]);
+        expect(ungrouped.map((project) => project.id)).toEqual([10]);
     });
 
     it("treats a folder whose parent no longer exists as a root", () => {

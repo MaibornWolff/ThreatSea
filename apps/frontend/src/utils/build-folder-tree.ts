@@ -80,13 +80,21 @@ export function folderDescendantIds(folderId: number, childrenOf: Map<number, nu
     return descendants;
 }
 
-/** Number of levels in the subtree rooted at the folder (a leaf has height 1). */
-export function folderSubtreeHeight(folderId: number, childrenOf: Map<number, number[]>): number {
-    const children = childrenOf.get(folderId) ?? [];
+/**
+ * Number of levels in the subtree rooted at the folder (a leaf has height 1). The `visited` set
+ * guards against a cycle in bad data, like the other walkers in this file.
+ */
+export function folderSubtreeHeight(
+    folderId: number,
+    childrenOf: Map<number, number[]>,
+    visited = new Set<number>()
+): number {
+    visited.add(folderId);
+    const children = (childrenOf.get(folderId) ?? []).filter((childId) => !visited.has(childId));
     if (children.length === 0) {
         return 1;
     }
-    return 1 + Math.max(...children.map((childId) => folderSubtreeHeight(childId, childrenOf)));
+    return 1 + Math.max(...children.map((childId) => folderSubtreeHeight(childId, childrenOf, visited)));
 }
 
 export function buildFolderTree(
