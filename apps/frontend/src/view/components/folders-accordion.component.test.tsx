@@ -9,6 +9,13 @@ const navigate = vi.fn();
 vi.mock("react-router", () => ({ useNavigate: () => navigate }));
 vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
 
+const dispatch = vi.fn();
+vi.mock("#application/hooks/use-app-redux.hook.ts", () => ({
+    useAppSelector: (selector: (state: { folders: { collapsed: Record<string, boolean> } }) => unknown) =>
+        selector({ folders: { collapsed: {} } }),
+    useAppDispatch: () => dispatch,
+}));
+
 // The accordion owns grouping and sections, not card layout — stub the grid.
 vi.mock("./projects-grid.component", () => ({
     ProjectsGridComponent: ({ projects }: { projects: ExtendedProject[] }) => (
@@ -80,6 +87,18 @@ describe("FoldersAccordion", () => {
         await userEvent.click(screen.getByTestId("folder-section-1_delete-button"));
 
         expect(openConfirm).toHaveBeenCalledTimes(1);
+    });
+
+    it("dispatches a collapse toggle when a section header is clicked", async () => {
+        const tree = buildFolderTree([createFolder({ id: 1, name: "Payments" })], []);
+        mockUseFolders();
+        mockUseConfirm();
+        dispatch.mockClear();
+
+        render(<FoldersAccordion tree={tree} {...handlers} />);
+        await userEvent.click(screen.getByTestId("folder-section-1_header"));
+
+        expect(dispatch).toHaveBeenCalledTimes(1);
     });
 
     it("disables new-subfolder once a folder is at the maximum depth", async () => {

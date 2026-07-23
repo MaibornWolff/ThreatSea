@@ -4,6 +4,7 @@ import {
     ChevronRight,
     CreateNewFolder,
     Delete,
+    DriveFileMove,
     Edit,
     Folder as FolderIcon,
     Inbox,
@@ -14,9 +15,13 @@ import { useNavigate } from "react-router";
 import type { Folder } from "#api/types/folder.types.ts";
 import type { ExtendedProject } from "#api/types/project.types.ts";
 import { MAX_FOLDER_DEPTH, type FolderTree, type FolderTreeNode } from "#utils/build-folder-tree.ts";
+import { FoldersActions } from "#application/actions/folders.actions.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { useFolders } from "#application/hooks/use-folders.hook.ts";
+import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import { ProjectsGridComponent } from "./projects-grid.component";
+
+const UNGROUPED_KEY = "ungrouped";
 
 interface ProjectHandlers {
     columnCount: number;
@@ -81,17 +86,30 @@ const SectionHeader = ({
 
 interface FolderSectionProps extends ProjectHandlers {
     node: FolderTreeNode;
+    collapsed: Record<string, boolean>;
+    onToggleCollapsed: (key: string) => void;
     onNewSubfolder: (parentId: number) => void;
     onRename: (folder: Folder) => void;
+    onMove: (folder: Folder) => void;
     onDelete: (node: FolderTreeNode) => void;
 }
 
-const FolderSection = ({ node, onNewSubfolder, onRename, onDelete, ...projectHandlers }: FolderSectionProps) => {
+const FolderSection = ({
+    node,
+    collapsed,
+    onToggleCollapsed,
+    onNewSubfolder,
+    onRename,
+    onMove,
+    onDelete,
+    ...projectHandlers
+}: FolderSectionProps) => {
     const { t } = useTranslation("projectsPage");
-    const [expanded, setExpanded] = useState(true);
     const [anchorElement, setAnchorElement] = useState<null | HTMLElement>(null);
     const menuOpen = Boolean(anchorElement);
     const canNest = node.depth < MAX_FOLDER_DEPTH;
+    const sectionKey = String(node.folder.id);
+    const expanded = !collapsed[sectionKey];
 
     const closeMenu = () => setAnchorElement(null);
 
@@ -99,7 +117,7 @@ const FolderSection = ({ node, onNewSubfolder, onRename, onDelete, ...projectHan
         <Box sx={{ marginBottom: 1 }} data-testid={`folder-section-${node.folder.id}`}>
             <SectionHeader
                 expanded={expanded}
-                onToggle={() => setExpanded((value) => !value)}
+                onToggle={() => onToggleCollapsed(sectionKey)}
                 icon={<FolderIcon sx={{ color: "secondary.main", fontSize: 20 }} />}
                 title={node.folder.name}
                 subtitle={t("folders.sectionCount", { projects: node.projects.length, folders: node.children.length })}
@@ -148,6 +166,16 @@ const FolderSection = ({ node, onNewSubfolder, onRename, onDelete, ...projectHan
                 <MenuItem
                     onClick={() => {
                         closeMenu();
+                        onMove(node.folder);
+                    }}
+                    data-testid={`folder-section-${node.folder.id}_move-button`}
+                >
+                    <DriveFileMove fontSize="small" sx={{ marginRight: 1 }} />
+                    {t("folders.moveToFolder")}
+                </MenuItem>
+                <MenuItem
+                    onClick={() => {
+                        closeMenu();
                         onDelete(node);
                     }}
                     data-testid={`folder-section-${node.folder.id}_delete-button`}
@@ -165,8 +193,11 @@ const FolderSection = ({ node, onNewSubfolder, onRename, onDelete, ...projectHan
                         <FolderSection
                             key={child.folder.id}
                             node={child}
+                            collapsed={collapsed}
+                            onToggleCollapsed={onToggleCollapsed}
                             onNewSubfolder={onNewSubfolder}
                             onRename={onRename}
+                            onMove={onMove}
                             onDelete={onDelete}
                             {...projectHandlers}
                         />
@@ -177,15 +208,19 @@ const FolderSection = ({ node, onNewSubfolder, onRename, onDelete, ...projectHan
     );
 };
 
-const UngroupedSection = ({ projects, ...projectHandlers }: ProjectHandlers & { projects: ExtendedProject[] }) => {
+const UngroupedSection = ({
+    projects,
+    expanded,
+    onToggleCollapsed,
+    ...projectHandlers
+}: ProjectHandlers & { projects: ExtendedProject[]; expanded: boolean; onToggleCollapsed: () => void }) => {
     const { t } = useTranslation("projectsPage");
-    const [expanded, setExpanded] = useState(true);
 
     return (
         <Box sx={{ marginBottom: 1 }} data-testid="folder-section-ungrouped">
             <SectionHeader
                 expanded={expanded}
-                onToggle={() => setExpanded((value) => !value)}
+                onToggle={onToggleCollapsed}
                 icon={<Inbox sx={{ color: "text.secondary", fontSize: 20 }} />}
                 title={t("folders.ungrouped")}
                 subtitle={t("folders.sectionCount", { projects: projects.length, folders: 0 })}
@@ -207,11 +242,16 @@ interface FoldersAccordionProps extends ProjectHandlers {
 export const FoldersAccordion = ({ tree, ...projectHandlers }: FoldersAccordionProps) => {
     const { t } = useTranslation("projectsPage");
     const navigate = useNavigate();
+    const dispatch = useAppDispatch();
     const { deleteFolder } = useFolders();
     const { openConfirm } = useConfirm<Folder>();
+    // Collapse state lives in redux so it survives entering and leaving a project (but not a refresh).
+    const collapsed = useAppSelector((state) => state.folders.collapsed);
+    const onToggleCollapsed = (key: string) => dispatch(FoldersActions.toggleFolderCollapsed(key));
 
     const onNewSubfolder = (parentId: number) => navigate("/projects/folders/add", { state: { parentId } });
     const onRename = (folder: Folder) => navigate(`/projects/folders/${folder.id}`, { state: { folder } });
+    const onMove = (folder: Folder) => navigate("/projects/move", { state: { folder } });
 
     const onDelete = (node: FolderTreeNode) => {
         const isNonEmpty = node.children.length > 0 || node.projects.length > 0;
@@ -236,13 +276,23 @@ export const FoldersAccordion = ({ tree, ...projectHandlers }: FoldersAccordionP
                 <FolderSection
                     key={node.folder.id}
                     node={node}
+                    collapsed={collapsed}
+                    onToggleCollapsed={onToggleCollapsed}
                     onNewSubfolder={onNewSubfolder}
                     onRename={onRename}
+                    onMove={onMove}
                     onDelete={onDelete}
                     {...projectHandlers}
                 />
             ))}
-            {tree.ungrouped.length > 0 && <UngroupedSection projects={tree.ungrouped} {...projectHandlers} />}
+            {tree.ungrouped.length > 0 && (
+                <UngroupedSection
+                    projects={tree.ungrouped}
+                    expanded={!collapsed[UNGROUPED_KEY]}
+                    onToggleCollapsed={() => onToggleCollapsed(UNGROUPED_KEY)}
+                    {...projectHandlers}
+                />
+            )}
         </Box>
     );
 };

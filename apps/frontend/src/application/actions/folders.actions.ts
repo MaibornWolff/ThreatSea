@@ -63,4 +63,10 @@ export class FoldersActions {
      * Action that removes a folder from the redux store.
      */
     static readonly removeFolder = createAction<Folder>("[folders] remove folder");
+
+    /**
+     * Action that toggles whether an accordion section is collapsed. The payload is the section key:
+     * a folder id as a string, or "ungrouped" for the ungrouped section.
+     */
+    static readonly toggleFolderCollapsed = createAction<string>("[folders] toggle folder collapsed");
 }

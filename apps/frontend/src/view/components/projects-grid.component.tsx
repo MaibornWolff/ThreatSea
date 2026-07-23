@@ -29,6 +29,7 @@ export const ProjectsGridComponent = ({
                 boxSizing: "content-box",
                 paddingRight: 2,
                 marginTop: 0,
+                marginBottom: 2,
             }}
             data-testid="ProjectsPageProjectsGrid"
         >
