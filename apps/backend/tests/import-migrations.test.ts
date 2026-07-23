@@ -65,7 +65,8 @@ describe("upgradeImportBodyToCurrent", () => {
         const [c1, c2, c3] = body.threats;
         expect(c1.genericThreatId).toBe(c2.genericThreatId);
         expect(c3.genericThreatId).not.toBe(c1.genericThreatId);
-        // status derived from doneEditing; child keeps its own (refined) name; drops catalog/doneEditing.
+        // finalized only when done editing AND a protection goal is impacted; child keeps its own
+        // (refined) name; drops catalog/doneEditing.
         expect(c1.status).toBe("finalized");
         expect(c2.status).toBe("new");
         expect(c1.name).toBe("Refined A");
@@ -74,6 +75,35 @@ describe("upgradeImportBodyToCurrent", () => {
 
         // Measure impacts are untouched (their threatId still points at the preserved child id).
         expect(body.measureImpacts).toEqual([{ id: 1, threatId: 2, measureId: 1 }]);
+    });
+
+    it("maps a done-editing threat with no impacted protection goal to new", () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const body: any = {
+            datamodelVersion: FLAT_THREAT_DATAMODEL_VERSION,
+            catalogThreats: [
+                {
+                    id: 10,
+                    name: "Catalogue name",
+                    description: "Catalogue desc",
+                    pointOfAttack: "DATA_STORAGE_INFRASTRUCTURE",
+                    attacker: "SYSTEM_USERS",
+                },
+            ],
+            threats: [
+                flatThreat({
+                    id: 1,
+                    doneEditing: true,
+                    confidentiality: false,
+                    integrity: false,
+                    availability: false,
+                }),
+            ],
+        };
+
+        upgradeImportBodyToCurrent(body);
+
+        expect(body.threats[0].status).toBe("new");
     });
 
     it("leaves a current-version body untouched", () => {

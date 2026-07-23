@@ -75,7 +75,8 @@ SELECT
     t."integrity",
     t."availability",
     CASE
-        WHEN t."doneEditing" = true THEN 'finalized'::"public"."threat_status"
+        WHEN t."doneEditing" = true AND (t."confidentiality" OR t."integrity" OR t."availability")
+        THEN 'finalized'::"public"."threat_status"
         ELSE 'new'::"public"."threat_status"
     END,
     t."createdAt",
