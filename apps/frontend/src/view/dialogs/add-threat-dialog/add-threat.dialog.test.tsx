@@ -30,12 +30,14 @@ vi.mock("react-router", async (importOriginal) => {
 const setup = (
     userRole: USER_ROLES = USER_ROLES.EDITOR,
     hostRoute: ThreatDialogHostRoute = "threats",
-    onSaved?: () => void
+    onSaved?: () => void,
+    threatOverrides: Parameters<typeof createThreat>[0] = {}
 ) => {
     const project = createProject({ id: 7 });
     const threat = createThreat({
         id: 42,
         assets: [createAsset({ confidentiality: 4, integrity: 2, availability: 1 })],
+        ...threatOverrides,
     });
     const user = userEvent.setup();
     renderWithProviders(
@@ -229,9 +231,45 @@ describe("AddThreatDialog — Save", () => {
 
         await waitFor(() => expect(navigate).toHaveBeenCalledWith(-1));
         expect(ThreatsAPI.updateThreat).toHaveBeenCalledWith(
-            expect.objectContaining({ id: 42, projectId: 7, status: THREAT_STATUSES.NEW })
+            expect.objectContaining({ id: 42, projectId: 7, status: THREAT_STATUSES.IN_PROGRESS })
         );
         expect(onSaved).toHaveBeenCalledTimes(1);
+    });
+
+    it("advances a new threat to in progress on save", async () => {
+        vi.mocked(ThreatsAPI.updateThreat).mockResolvedValue(createThreat({ id: 42 }));
+        const { user } = setup(USER_ROLES.EDITOR, "threats", undefined, { status: THREAT_STATUSES.NEW });
+
+        await user.click(screen.getByTestId("EditThreatSave"));
+
+        await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled());
+        expect(ThreatsAPI.updateThreat).toHaveBeenCalledWith(
+            expect.objectContaining({ id: 42, status: THREAT_STATUSES.IN_PROGRESS })
+        );
+    });
+
+    it("keeps a finalized threat finalized on save", async () => {
+        vi.mocked(ThreatsAPI.updateThreat).mockResolvedValue(createThreat({ id: 42 }));
+        const { user } = setup(USER_ROLES.EDITOR, "threats", undefined, { status: THREAT_STATUSES.FINALIZED });
+
+        await user.click(screen.getByTestId("EditThreatSave"));
+
+        await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled());
+        expect(ThreatsAPI.updateThreat).toHaveBeenCalledWith(
+            expect.objectContaining({ id: 42, status: THREAT_STATUSES.FINALIZED })
+        );
+    });
+
+    it("keeps an out-of-scope threat out of scope on save", async () => {
+        vi.mocked(ThreatsAPI.updateThreat).mockResolvedValue(createThreat({ id: 42 }));
+        const { user } = setup(USER_ROLES.EDITOR, "threats", undefined, { status: THREAT_STATUSES.OUTOFSCOPE });
+
+        await user.click(screen.getByTestId("EditThreatSave"));
+
+        await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled());
+        expect(ThreatsAPI.updateThreat).toHaveBeenCalledWith(
+            expect.objectContaining({ id: 42, status: THREAT_STATUSES.OUTOFSCOPE })
+        );
     });
 
     it("keeps the dialog open and does not notify the host when the update fails", async () => {
