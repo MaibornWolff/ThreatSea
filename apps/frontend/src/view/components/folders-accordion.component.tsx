@@ -29,18 +29,20 @@ interface ProjectHandlers {
     onClickDeleteProject: (event: MouseEvent<HTMLElement>, project: ExtendedProject) => void;
 }
 
+// Matches the project card surface (paper background + shadow + rounded corners) rather than a
+// border — the theme's `divider` token is white and would be invisible on the page.
 const sectionHeaderSx = {
     display: "flex",
     alignItems: "center",
     gap: 1,
-    paddingX: 1.5,
-    paddingY: 1,
-    borderRadius: 2,
-    border: 1,
-    borderColor: "divider",
+    paddingX: 2,
+    paddingY: 1.25,
+    borderRadius: 5,
+    bgcolor: "background.paper",
+    boxShadow: 1,
     cursor: "pointer",
     userSelect: "none",
-    "&:hover": { borderColor: "secondary.main" },
+    "&:hover": { bgcolor: "background.paperWhite" },
 } as const;
 
 const SectionHeader = ({
@@ -60,17 +62,30 @@ const SectionHeader = ({
     onToggle: () => void;
     testId: string;
 }) => (
-    <Box sx={sectionHeaderSx} onClick={onToggle} data-testid={testId}>
+    <Box
+        sx={sectionHeaderSx}
+        onClick={onToggle}
+        onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                onToggle();
+            }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-expanded={expanded}
+        data-testid={testId}
+    >
         <ChevronRight
             sx={{
                 transition: "transform 0.15s ease",
                 transform: expanded ? "rotate(90deg)" : "none",
-                color: "text.secondary",
+                color: "text.subtle",
             }}
         />
         {icon}
         <Typography sx={{ fontWeight: "bold", fontSize: "0.9rem" }}>{title}</Typography>
-        <Typography variant="caption" sx={{ color: "text.secondary" }}>
+        <Typography variant="caption" sx={{ color: "text.subtle" }}>
             {subtitle}
         </Typography>
         {right && (
@@ -185,7 +200,7 @@ const FolderSection = ({
                 </MenuItem>
             </Menu>
             <Collapse in={expanded}>
-                <Box sx={{ paddingLeft: 2, marginTop: 1, borderLeft: 2, borderColor: "divider" }}>
+                <Box sx={{ paddingLeft: 2, marginTop: 1 }}>
                     {node.projects.length > 0 && (
                         <ProjectsGridComponent projects={node.projects} {...projectHandlers} />
                     )}
@@ -221,7 +236,7 @@ const UngroupedSection = ({
             <SectionHeader
                 expanded={expanded}
                 onToggle={onToggleCollapsed}
-                icon={<Inbox sx={{ color: "text.secondary", fontSize: 20 }} />}
+                icon={<Inbox sx={{ color: "text.subtle", fontSize: 20 }} />}
                 title={t("folders.ungrouped")}
                 subtitle={t("folders.sectionCount", { projects: projects.length, folders: 0 })}
                 testId="folder-section-ungrouped_header"

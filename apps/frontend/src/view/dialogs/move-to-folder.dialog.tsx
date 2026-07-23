@@ -17,7 +17,14 @@ import type { ExtendedProject } from "#api/types/project.types.ts";
 import { FoldersActions } from "#application/actions/folders.actions.ts";
 import { useAppDispatch } from "#application/hooks/use-app-redux.hook.ts";
 import { useFolders } from "#application/hooks/use-folders.hook.ts";
-import { buildFolderTree, MAX_FOLDER_DEPTH, type FolderTreeNode } from "#utils/build-folder-tree.ts";
+import {
+    buildFolderTree,
+    folderChildrenMap,
+    folderDescendantIds,
+    folderSubtreeHeight,
+    MAX_FOLDER_DEPTH,
+    type FolderTreeNode,
+} from "#utils/build-folder-tree.ts";
 import { Button } from "#view/components/button.component.tsx";
 import { Dialog } from "#view/components/dialog.component.tsx";
 
@@ -28,39 +35,6 @@ interface MoveToFolderDialogProps extends DialogProps {
 
 const flatten = (nodes: FolderTreeNode[]): { folder: Folder; depth: number }[] =>
     nodes.flatMap((node) => [{ folder: node.folder, depth: node.depth }, ...flatten(node.children)]);
-
-const buildChildrenMap = (folders: Folder[]): Map<number, number[]> => {
-    const childrenOf = new Map<number, number[]>();
-    for (const folder of folders) {
-        if (folder.parentId !== null) {
-            const siblings = childrenOf.get(folder.parentId) ?? [];
-            siblings.push(folder.id);
-            childrenOf.set(folder.parentId, siblings);
-        }
-    }
-    return childrenOf;
-};
-
-const collectDescendants = (folderId: number, childrenOf: Map<number, number[]>): Set<number> => {
-    const descendants = new Set<number>();
-    const stack = [...(childrenOf.get(folderId) ?? [])];
-    while (stack.length > 0) {
-        const current = stack.pop()!;
-        if (!descendants.has(current)) {
-            descendants.add(current);
-            stack.push(...(childrenOf.get(current) ?? []));
-        }
-    }
-    return descendants;
-};
-
-const subtreeHeight = (folderId: number, childrenOf: Map<number, number[]>): number => {
-    const children = childrenOf.get(folderId) ?? [];
-    if (children.length === 0) {
-        return 1;
-    }
-    return 1 + Math.max(...children.map((childId) => subtreeHeight(childId, childrenOf)));
-};
 
 const MoveToFolderDialog = ({ project, folder, ...props }: MoveToFolderDialogProps) => {
     const { t } = useTranslation("projectsPage");
@@ -81,10 +55,10 @@ const MoveToFolderDialog = ({ project, folder, ...props }: MoveToFolderDialogPro
         if (!isFolderMode) {
             return { blockedIds: new Set<number>(), height: 0 };
         }
-        const childrenOf = buildChildrenMap(folders);
-        const blockedIds = collectDescendants(folder.id, childrenOf);
+        const childrenOf = folderChildrenMap(folders);
+        const blockedIds = folderDescendantIds(folder.id, childrenOf);
         blockedIds.add(folder.id);
-        return { blockedIds, height: subtreeHeight(folder.id, childrenOf) };
+        return { blockedIds, height: folderSubtreeHeight(folder.id, childrenOf) };
     }, [isFolderMode, folder, folders]);
 
     const isTargetDisabled = (targetId: number | null, targetDepth: number): boolean => {
@@ -133,9 +107,9 @@ const MoveToFolderDialog = ({ project, folder, ...props }: MoveToFolderDialogPro
                 >
                     <ListItemIcon sx={{ minWidth: 34 }}>
                         {isFolderMode ? (
-                            <Home sx={{ fontSize: 20, color: "text.secondary" }} />
+                            <Home sx={{ fontSize: 20, color: "text.subtle" }} />
                         ) : (
-                            <Inbox sx={{ fontSize: 20, color: "text.secondary" }} />
+                            <Inbox sx={{ fontSize: 20, color: "text.subtle" }} />
                         )}
                     </ListItemIcon>
                     <ListItemText primary={isFolderMode ? t("folders.moveRootFolder") : t("folders.ungrouped")} />

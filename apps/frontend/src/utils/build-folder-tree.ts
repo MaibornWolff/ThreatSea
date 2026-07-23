@@ -53,6 +53,42 @@ function makeComparator(sort: FolderSort) {
     };
 }
 
+/** Maps each folder id to the ids of its direct children. */
+export function folderChildrenMap(folders: Folder[]): Map<number, number[]> {
+    const childrenOf = new Map<number, number[]>();
+    for (const folder of folders) {
+        if (folder.parentId !== null) {
+            const siblings = childrenOf.get(folder.parentId) ?? [];
+            siblings.push(folder.id);
+            childrenOf.set(folder.parentId, siblings);
+        }
+    }
+    return childrenOf;
+}
+
+/** All descendant folder ids of the given folder (excludes the folder itself). */
+export function folderDescendantIds(folderId: number, childrenOf: Map<number, number[]>): Set<number> {
+    const descendants = new Set<number>();
+    const stack = [...(childrenOf.get(folderId) ?? [])];
+    while (stack.length > 0) {
+        const current = stack.pop()!;
+        if (!descendants.has(current)) {
+            descendants.add(current);
+            stack.push(...(childrenOf.get(current) ?? []));
+        }
+    }
+    return descendants;
+}
+
+/** Number of levels in the subtree rooted at the folder (a leaf has height 1). */
+export function folderSubtreeHeight(folderId: number, childrenOf: Map<number, number[]>): number {
+    const children = childrenOf.get(folderId) ?? [];
+    if (children.length === 0) {
+        return 1;
+    }
+    return 1 + Math.max(...children.map((childId) => folderSubtreeHeight(childId, childrenOf)));
+}
+
 export function buildFolderTree(
     folders: Folder[],
     projects: ExtendedProject[],
