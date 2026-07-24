@@ -15,6 +15,12 @@ const ACCESS_TOKEN_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
 let oidcService: typeof import("#services/oidcAuthentication.service.js") | null = null;
 let fixedService: typeof import("#services/fixedAuthentication.service.js") | null = null;
 
+function regenerateSession(request: Request): Promise<void> {
+    return new Promise((resolve, reject) => {
+        request.session.regenerate((error) => (error ? reject(error) : resolve()));
+    });
+}
+
 async function loadStrategy() {
     if (AUTH_METHOD === "oidc") {
         oidcService = await import("#services/oidcAuthentication.service.js");
@@ -140,9 +146,14 @@ export async function finalizeAuthentication(request: Request, response: Respons
 
         const callbackUrl = new URL(oidcConfig!.callbackURL);
         callbackUrl.search = new URL(request.originalUrl, "http://localhost").search;
+        // Validate the callback (state check + authorization-code exchange) BEFORE consuming the
+        // pending transaction. A forged, prefetched, or scanner-triggered top-level GET (sameSite:lax
+        // lets it carry the session cookie) fails validation here and leaves session.oidc intact, so
+        // the victim's genuine IdP redirect still completes. Only a successful exchange consumes the
+        // single-use transaction and rotates the session id (post-login fixation defense).
         const threatSeaToken = await oidcService.handleOidcCallback(callbackUrl, oidcData);
 
-        delete request.session.oidc;
+        await regenerateSession(request);
 
         response.cookie("accessToken", threatSeaToken, {
             httpOnly: true,

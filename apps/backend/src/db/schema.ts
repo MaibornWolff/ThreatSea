@@ -6,6 +6,7 @@ import {
     date,
     index,
     integer,
+    json,
     jsonb,
     pgEnum,
     pgTable,
@@ -287,6 +288,16 @@ export const projects = pgTable(
     ]
 );
 
+export const sessions = pgTable(
+    "session",
+    {
+        sid: varchar().notNull().primaryKey(),
+        sess: json().notNull(),
+        expire: timestamp({ mode: "date", precision: 6 }).notNull(),
+    },
+    (table) => [index("IDX_session_expire").on(table.expire)]
+);
+
 export type System = typeof systems.$inferSelect;
 export type CreateSystem = Omit<System, DefaultFields>;
 export type UpdateSystem = Omit<CreateSystem, "projectId">;
@@ -375,6 +386,7 @@ export const users = pgTable(
         lastLoginAt: timestamp("last_login_at", { mode: "string", withTimezone: true })
             .notNull()
             .default(sql`now()`),
+        profileSyncedAt: timestamp("profile_synced_at", { mode: "string", withTimezone: true }),
         oidcSub: varchar("oidc_sub", { length: 255 }),
         createdAt: timestamp({ mode: "string", withTimezone: true })
             .notNull()

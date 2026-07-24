@@ -8,24 +8,28 @@ const profiles: OidcProfile[] = [
         lastName: "testsn",
         email: "test@test.test",
         sub: "testid",
+        emailVerified: true,
     },
     {
         firstName: "E2E",
         lastName: "Testing",
         email: "test2@test.test",
         sub: "testid2",
+        emailVerified: true,
     },
     {
         firstName: "E2E",
         lastName: "Testing",
         email: "test3@test.test",
         sub: "testid3",
+        emailVerified: true,
     },
     {
         firstName: "E2E",
         lastName: "Testing",
         email: "test4@test.test",
         sub: "testid4",
+        emailVerified: true,
     },
 ];
 

@@ -19,7 +19,7 @@ Monorepo composed of a React frontend (the threat-model editor) and an Express b
 ```text
 apps/
   frontend/           React 19 + TypeScript app (Vite, react-konva canvas editor)
-  backend/            Express 5 + TypeScript API (Drizzle ORM, PostgreSQL, socket.io)
+  backend/            Express 5 + TypeScript API (Drizzle ORM, PostgreSQL)
 packages/
   typescript-config/  Shared tsconfig presets
 gh-pages/             Published documentation sources (rendered via mkdocs; see mkdocs.yml)
@@ -51,7 +51,7 @@ utils/           Utility functions
 
 ### Backend structure (`apps/backend/src/`)
 
-Express routers, Drizzle schema/migrations under `apps/backend/drizzle/`, openid-client for auth, socket.io for real-time editor sync.
+Express routers, Drizzle schema/migrations under `apps/backend/drizzle/`, openid-client for auth.
 
 ---
 
@@ -61,7 +61,7 @@ Express routers, Drizzle schema/migrations under `apps/backend/drizzle/`, openid
 | --------------- | -------------------------------------------------------------------------------------------------------- |
 | Package manager | pnpm workspaces + Turborepo                                                                              |
 | Frontend        | React 19, TypeScript, Vite 8, MUI v9, Redux Toolkit, react-konva, react-hook-form, i18next, react-router |
-| Backend         | Express 5, TypeScript, Drizzle ORM, PostgreSQL (`pg`), openid-client, socket.io                          |
+| Backend         | Express 5, TypeScript, Drizzle ORM, PostgreSQL (`pg`), openid-client                                     |
 | Lint / Format   | oxlint, oxfmt                                                                                            |
 | Tests           | Vitest (unit), Playwright (E2E, frontend only)                                                           |
 | Git hooks       | husky + lint-staged                                                                                      |

@@ -9,6 +9,8 @@ import path from "path";
 import helmet from "helmet";
 import { corsConfig, helmetConfig, sessionConfig } from "#config/config.js";
 import nocache from "nocache";
+import connectPgSimple from "connect-pg-simple";
+import { pool } from "#db/index.js";
 
 // Routers
 import { authRouter } from "#routers/auth.router.js";
@@ -47,8 +49,23 @@ const { generateToken, csrfSynchronisedProtection } = csrfSync();
 app.use(cors(corsConfig));
 app.use(cookieParser());
 
+// Health check sits above the session middleware so liveness probes never touch the shared pool.
+// It sets no-store explicitly because it runs before nocache(): otherwise an intermediary proxy or
+// CDN could keep serving a cached 200 after the backend is down, blinding uptime checks.
+app.get("/api/health", (_req, res) => res.set("Cache-Control", "no-store").json({ ok: true, ts: Date.now() }));
+
+const PostgresSessionStore = connectPgSimple(session);
+
 // Set up express-session middleware
-app.use(session(sessionConfig));
+app.use(
+    session({
+        ...sessionConfig,
+        // disableTouch avoids a per-request UPDATE against the shared pool. It also means `touch`
+        // cannot extend a session, so the store row and cookie share one fixed 12h lifetime from
+        // creation (no `rolling` in sessionConfig — it would only slide the cookie, not the row).
+        store: new PostgresSessionStore({ pool, disableTouch: true }),
+    })
+);
 app.use(helmet(helmetConfig));
 app.use(nocache());
 app.set("etag", false);
@@ -73,8 +90,6 @@ app.use("/api/catalogs", apiRateLimiter, CheckTokenHandler, catalogsRouter);
 app.use("/api/projects", apiRateLimiter, CheckTokenHandler, projectsRouter);
 app.use("/api/export", apiRateLimiter, CheckTokenHandler, exportRouter);
 app.use("/api/import", apiRateLimiter, CheckTokenHandler, express.json({ limit: "200mb" }), importRouter);
-
-app.get("/api/health", (_req, res) => res.json({ ok: true, ts: Date.now() }));
 
 app.use((_req, res) => {
     res.sendFile(path.join(PUBLIC_DIR, "index.html"));

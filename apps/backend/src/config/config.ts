@@ -25,6 +25,15 @@ function getOptionalPositiveNumber(key: string, defaultValue: number): number {
     return parsedValue;
 }
 
+// OIDC requires the "openid" scope; without it the IdP returns no ID token and every login fails
+// with a misleading "No 'sub' claim" error, so reject the misconfiguration at startup instead.
+export function validateOidcScope(scope: string): string {
+    if (!scope.split(/\s+/).includes("openid")) {
+        throw new Error('Environment variable OIDC_SCOPE must include the "openid" scope');
+    }
+    return scope;
+}
+
 export const JWT_SECRET = new TextEncoder().encode(getEnvironmentVariable("JWT_SECRET"));
 export const JWT_ISSUER = "threatsea";
 export const JWT_AUDIENCE = "threatsea-api";
@@ -43,10 +52,12 @@ export const oidcConfig =
               clientSecret: getEnvironmentVariable("OIDC_CLIENT_SECRET"),
               issuerUrl: getEnvironmentVariable("OIDC_ISSUER_URL"),
               callbackURL: `${getEnvironmentVariable("ORIGIN_BACKEND")}/api/auth/redirect`,
-              scope: "openid profile email",
+              scope: validateOidcScope(process.env["OIDC_SCOPE"] ?? "openid profile email"),
               allowHttp: process.env["OIDC_ALLOW_HTTP"] === "true",
           }
         : null;
+
+export const ALLOW_UNVERIFIED_EMAIL_LINKING = process.env["OIDC_ALLOW_UNVERIFIED_EMAIL_LINKING"] === "true";
 
 export const originConfig = {
     app: getEnvironmentVariable("ORIGIN_APP"),
@@ -108,7 +119,9 @@ export const sessionConfig: SessionOptions = {
     secret: getEnvironmentVariable("EXPRESS_SESSION_SECRET"),
     resave: false,
     saveUninitialized: false,
-    rolling: true,
+    // No `rolling`: the Postgres store runs with `disableTouch` (see server.ts), so `touch` cannot
+    // extend a row's `expire` and rolling would only slide the cookie while the store row still
+    // dies at creation + 12h. Keep both lifetimes consistent at a fixed 12h instead.
 };
 
 const MAXIMUM_PURGE_INTERVAL_HOURS = 596; // setInterval delays above 2^31 - 1 ms overflow and fire every millisecond
