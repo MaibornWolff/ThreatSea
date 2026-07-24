@@ -75,7 +75,13 @@ SELECT
     t."integrity",
     t."availability",
     CASE
-        WHEN t."doneEditing" = true AND (t."confidentiality" OR t."integrity" OR t."availability")
+        WHEN t."doneEditing" = true AND (
+            t."confidentiality" OR t."integrity" OR t."availability"
+            OR EXISTS (
+                SELECT 1 FROM "measure_impacts" mi
+                WHERE mi."threatId" = t."id" AND mi."setsOutOfScope" = true
+            )
+        )
         THEN 'finalized'::"public"."threat_status"
         ELSE 'new'::"public"."threat_status"
     END,
