@@ -15,20 +15,15 @@ concurrency:
   group: release-${{ github.repository }}
 
 jobs:
-  release:
-    name: Release
+  compute-version:
+    name: Compute Version
     runs-on: ubuntu-latest
     if: github.repository_owner == 'MaibornWolff' && github.ref_type == 'branch' && ((github.event_name == 'push' && github.ref_name == 'main') || (github.event_name == 'workflow_dispatch' && github.ref_name == 'next'))
     permissions:
-      artifact-metadata: write
-      attestations: write
       contents: write
-      id-token: write # for Sigstore-based provenance signing
-      issues: write
-      packages: write
     outputs:
-      new_release_published: ${{ steps.release.outputs.new_release_published }}
-      new_release_version: ${{ steps.release.outputs.new_release_version }}
+      new_release_published: ${{ steps.version.outputs.new_release_published }}
+      new_release_version: ${{ steps.version.outputs.new_release_version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -38,22 +33,36 @@ jobs:
       - name: Setup Repository
         uses: ./.github/actions/repository-setup
 
-      - name: Create Release
+      - name: Compute next version (dry-run)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        id: release
+        id: version
         run: |
-          pnpm exec semantic-release
+          pnpm exec semantic-release --dry-run
+
+  docker:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+    needs: compute-version
+    if: needs.compute-version.outputs.new_release_published == 'true'
+    permissions:
+      artifact-metadata: write
+      attestations: write
+      contents: read
+      id-token: write # for Sigstore-based provenance signing
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Login to Docker Hub
-        if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'main'
+        if: github.ref_name == 'main'
         uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Login to GitHub Container Registry
-        if: steps.release.outputs.new_release_published == 'true'
         uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4
         with:
           registry: ghcr.io
@@ -61,26 +70,23 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up QEMU
-        if: steps.release.outputs.new_release_published == 'true'
         uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4
 
       - name: Set up Docker Buildx
-        if: steps.release.outputs.new_release_published == 'true'
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4
 
       - name: Install cosign
-        if: steps.release.outputs.new_release_published == 'true'
         uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4
 
       - name: Extract metadata for next branch (prerelease)
-        if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'next'
+        if: github.ref_name == 'next'
         id: meta-next
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6
         with:
           images: |
             ghcr.io/maibornwolff/threatsea
           tags: |
-            type=semver,pattern={{version}},value=${{ steps.release.outputs.new_release_version }}
+            type=semver,pattern={{version}},value=${{ needs.compute-version.outputs.new_release_version }}
             type=ref,event=branch
           labels: |
             org.opencontainers.image.title=ThreatSea
@@ -89,7 +95,7 @@ jobs:
             org.opencontainers.image.licenses=BSD 3-Clause
 
       - name: Build and push for next branch (prerelease)
-        if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'next'
+        if: github.ref_name == 'next'
         id: build-next
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
         with:
@@ -105,13 +111,13 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Sign container image (next)
-        if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'next'
+        if: github.ref_name == 'next'
         env:
           COSIGN_YES: "true"
         run: cosign sign -r ghcr.io/maibornwolff/threatsea@${{ steps.build-next.outputs.digest }}
 
       - name: Attest container image (next)
-        if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'next'
+        if: github.ref_name == 'next'
         uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4
         with:
           subject-name: ghcr.io/maibornwolff/threatsea
@@ -119,7 +125,7 @@ jobs:
           push-to-registry: true
 
       - name: Extract metadata for main branch
-        if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'main'
+        if: github.ref_name == 'main'
         id: meta-main
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6
         with:
@@ -127,9 +133,9 @@ jobs:
             maibornwolff/threatsea
             ghcr.io/maibornwolff/threatsea
           tags: |
-            type=semver,pattern={{version}},value=${{ steps.release.outputs.new_release_version }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ steps.release.outputs.new_release_version }}
-            type=semver,pattern={{major}},value=${{ steps.release.outputs.new_release_version }}
+            type=semver,pattern={{version}},value=${{ needs.compute-version.outputs.new_release_version }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ needs.compute-version.outputs.new_release_version }}
+            type=semver,pattern={{major}},value=${{ needs.compute-version.outputs.new_release_version }}
             type=raw,value=latest
           labels: |
             org.opencontainers.image.title=ThreatSea
@@ -138,7 +144,7 @@ jobs:
             org.opencontainers.image.licenses=BSD 3-Clause
 
       - name: Build and push for main branch
-        if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'main'
+        if: github.ref_name == 'main'
         id: build-main
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
         with:
@@ -154,7 +160,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Sign container images (main)
-        if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'main'
+        if: github.ref_name == 'main'
         env:
           COSIGN_YES: "true"
         run: |
@@ -162,7 +168,7 @@ jobs:
           cosign sign -r ghcr.io/maibornwolff/threatsea@${{ steps.build-main.outputs.digest }}
 
       - name: Attest Docker Hub image (main)
-        if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'main'
+        if: github.ref_name == 'main'
         uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4
         with:
           subject-name: index.docker.io/maibornwolff/threatsea
@@ -170,22 +176,45 @@ jobs:
           push-to-registry: true
 
       - name: Attest GHCR image (main)
-        if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'main'
+        if: github.ref_name == 'main'
         uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4
         with:
           subject-name: ghcr.io/maibornwolff/threatsea
           subject-digest: ${{ steps.build-main.outputs.digest }}
           push-to-registry: true
 
+  github-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [compute-version, docker]
+    if: needs.compute-version.outputs.new_release_published == 'true'
+    permissions:
+      contents: write
+      issues: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup Repository
+        uses: ./.github/actions/repository-setup
+
+      - name: Create Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pnpm exec semantic-release
+
   create-sbom:
     name: Create SBOM
-    needs: release
-    if: needs.release.outputs.new_release_published == 'true'
+    needs: [compute-version, github-release]
+    if: needs.compute-version.outputs.new_release_published == 'true'
     permissions:
       contents: write
     uses: ./.github/workflows/create_sbom.yml
     with:
-      version: ${{ needs.release.outputs.new_release_version }}
-      tag: v${{ needs.release.outputs.new_release_version }}
+      version: ${{ needs.compute-version.outputs.new_release_version }}
+      tag: v${{ needs.compute-version.outputs.new_release_version }}
     secrets:
       SO_API_TOKEN: ${{ secrets.SO_API_TOKEN }}
