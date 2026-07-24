@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FoldersActions } from "#application/actions/folders.actions.ts";
@@ -13,7 +14,7 @@ vi.mock("#application/hooks/use-app-redux.hook.ts", () => ({ useAppDispatch: () 
 
 // Stub the app Dialog/Button wrappers (they read the app theme) so the picker can render plainly.
 vi.mock("#view/components/dialog.component.tsx", () => ({
-    Dialog: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    Dialog: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }));
 vi.mock("#view/components/button.component.tsx", () => ({
     Button: ({
@@ -22,7 +23,7 @@ vi.mock("#view/components/button.component.tsx", () => ({
         disabled,
         ["data-testid"]: testId,
     }: {
-        children: React.ReactNode;
+        children: ReactNode;
         onClick?: () => void;
         disabled?: boolean;
         ["data-testid"]?: string;
