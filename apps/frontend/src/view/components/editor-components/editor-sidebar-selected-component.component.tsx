@@ -20,7 +20,6 @@ import type { Asset } from "#api/types/asset.types.ts";
 import type {
     AugmentedSystemComponent,
     ConnectionEndpointWithComponent,
-    SystemCommunicationInterface,
     SystemPointOfAttack,
 } from "#api/types/system.types.ts";
 
@@ -92,7 +91,6 @@ const EditorSidebarSelectedComponentInner = ({
 }: EditorSidebarSelectedComponentProps) => {
     const { t } = useTranslation("editorPage");
     const theme = useTheme();
-    const [communicationInterfaces, setCommunicationInterfaces] = useState<SystemCommunicationInterface[]>([]);
     const [localName, setLocalName] = useState<string>("");
     const [localDescription, setLocalDescription] = useState<string>("");
     const [interfaceNames, setInterfaceNames] = useState<Record<string, string>>({});
@@ -104,7 +102,6 @@ const EditorSidebarSelectedComponentInner = ({
     const debouncedHandleCommunicationInterfaceName = useDebounce(handleChangeCommunicationInterfaceName);
 
     const setSelectedComponentValuesEvent = useEffectEvent((selectedComponent: AugmentedSystemComponent) => {
-        setCommunicationInterfaces(selectedComponent.communicationInterfaces ?? []);
         setLocalName(selectedComponent.name ?? "");
         setLocalDescription(selectedComponent.description ?? "");
         const names: Record<string, string> = {};
@@ -118,7 +115,9 @@ const EditorSidebarSelectedComponentInner = ({
         if (selectedComponent) {
             setSelectedComponentValuesEvent(selectedComponent);
         }
-        // Depend on id only — selectedComponent reference can change on unrelated re-renders without the underlying component changing.
+        // Depend on id only — this seeds the local edit buffers (name, description, per-interface name) when a
+        // different component is selected. Interface add/delete keeps the same id and is reflected live from the
+        // selectedComponent prop below, so it must not re-seed here (that would clobber an in-progress edit).
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedComponent?.id]);
 
@@ -143,6 +142,9 @@ const EditorSidebarSelectedComponentInner = ({
     if (!selectedComponent) {
         return null;
     }
+
+    // Read the interface list live from the store-backed prop so add/delete is reflected immediately.
+    const communicationInterfaces = selectedComponent.communicationInterfaces ?? [];
 
     return (
         <Box>
@@ -451,7 +453,11 @@ const EditorSidebarSelectedComponentInner = ({
                                     </ListItemAvatar>
                                     {editingInterfaceId === communicationInterface.id ? (
                                         <TextField
-                                            value={interfaceNames[communicationInterface.id] || ""}
+                                            value={
+                                                interfaceNames[communicationInterface.id] ??
+                                                communicationInterface.name ??
+                                                ""
+                                            }
                                             onChange={(event) =>
                                                 handleLocalInterfaceNameChange(
                                                     selectedComponent.id,
@@ -505,7 +511,9 @@ const EditorSidebarSelectedComponentInner = ({
                                                 "&:hover": { textDecoration: "underline" },
                                             }}
                                         >
-                                            {interfaceNames[communicationInterface.id] || ""}
+                                            {interfaceNames[communicationInterface.id] ??
+                                                communicationInterface.name ??
+                                                ""}
                                         </Typography>
                                     )}
                                     <Box sx={{ display: "flex", alignItems: "center" }}>

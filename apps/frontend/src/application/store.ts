@@ -32,7 +32,15 @@ export function createStore(preloadedState?: Partial<RootState>) {
     return configureStore({
         reducer: rootReducer,
 
-        middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(...middleware),
+        // The confirm dialog intentionally stores its onAccept callback (and the captured state
+        // snapshot) in the store, so exempt those from the serializable-state check.
+        middleware: (getDefaultMiddleware) =>
+            getDefaultMiddleware({
+                serializableCheck: {
+                    ignoredActions: ["[confirm] open confirm"],
+                    ignoredPaths: ["confirm.onAccept", "confirm.state"],
+                },
+            }).concat(...middleware),
 
         preloadedState: {
             user: userPreload,
