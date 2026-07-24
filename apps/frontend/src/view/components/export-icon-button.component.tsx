@@ -10,10 +10,10 @@ type ExportIconButtonProps = Omit<MuiIconButtonProps, "title"> & {
     fontSize?: number | "large" | "medium" | "small" | "inherit";
 };
 
-export const ExportIconButton = (props: ExportIconButtonProps) => {
+export const ExportIconButton = ({ fontSize, ...props }: ExportIconButtonProps) => {
     return (
         <IconButton {...props}>
-            <FileDownload sx={{ fontSize: props.fontSize ?? 18 }} />
+            <FileDownload sx={{ fontSize: fontSize ?? 18 }} />
         </IconButton>
     );
 };
