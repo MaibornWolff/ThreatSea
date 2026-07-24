@@ -94,14 +94,12 @@ export const ProjectCard = ({ project, onClickEditProject, onClickDeleteProject,
                     >
                         {name}
                     </Typography>
-                    {checkUserRole(project.role, USER_ROLES.OWNER) && (
-                        <ProjectActionsMenu
-                            project={project}
-                            onClickEditProject={onClickEditProject}
-                            onClickDeleteProject={onClickDeleteProject}
-                            testIdPrefix="projects-page_project-card_action-menu"
-                        />
-                    )}
+                    <ProjectActionsMenu
+                        project={project}
+                        onClickEditProject={onClickEditProject}
+                        onClickDeleteProject={onClickDeleteProject}
+                        testIdPrefix="projects-page_project-card_action-menu"
+                    />
                 </Box>
                 <Typography
                     variant="body2"

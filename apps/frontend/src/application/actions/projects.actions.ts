@@ -112,6 +112,14 @@ export class ProjectsActions {
     static removeProject = createAction<Project>("[projects] remove project");
 
     /**
+     * Action that updates only a project's folder placement (per-user), leaving its role untouched.
+     * @function setProjectFolder
+     * @param {string} type - Action type.
+     * @returns Action function for updating a project's folder id.
+     */
+    static setProjectFolder = createAction<{ id: number; folderId: number | null }>("[projects] set project folder");
+
+    /**
      * Action that changes the role of the user for the current project.
      * @function changeOwnProjectRole
      * @param {string} type - Action type.

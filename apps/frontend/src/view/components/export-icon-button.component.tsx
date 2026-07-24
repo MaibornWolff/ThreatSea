@@ -7,12 +7,13 @@ import { IconButton } from "./icon-button.component";
 type ExportIconButtonProps = Omit<MuiIconButtonProps, "title"> & {
     title?: ReactNode;
     hoverColor?: string;
+    fontSize?: number | "large" | "medium" | "small" | "inherit";
 };
 
 export const ExportIconButton = (props: ExportIconButtonProps) => {
     return (
         <IconButton {...props}>
-            <FileDownload sx={{ fontSize: 18 }} />
+            <FileDownload sx={{ fontSize: props.fontSize ?? 18 }} />
         </IconButton>
     );
 };

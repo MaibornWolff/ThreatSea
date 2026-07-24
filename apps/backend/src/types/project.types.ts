@@ -105,4 +105,5 @@ export interface ProjectResponse {
 export interface ExtendedProjectResponse extends ProjectResponse {
     role: USER_ROLES;
     image: string | null;
+    folderId: number | null;
 }

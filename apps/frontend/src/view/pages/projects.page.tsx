@@ -1,10 +1,11 @@
 import Add from "@mui/icons-material/Add";
 import ArrowDownward from "@mui/icons-material/ArrowDownward";
 import ArrowUpward from "@mui/icons-material/ArrowUpward";
+import CreateNewFolder from "@mui/icons-material/CreateNewFolder";
 import { LinearProgress, useMediaQuery } from "@mui/material";
 import { Box } from "@mui/system";
 import { useTheme } from "@mui/material/styles";
-import { useLayoutEffect, type ChangeEvent, type MouseEvent, type SyntheticEvent } from "react";
+import { useEffect, useLayoutEffect, useMemo, type ChangeEvent, type MouseEvent, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, Route, Routes } from "react-router";
 import type { ExtendedProject } from "#api/types/project.types.ts";
@@ -19,9 +20,14 @@ import { CreatePage } from "#view/components/create-page.component.tsx";
 import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
 import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
 import ProjectDialogPage from "./project-dialog.page";
+import FolderDialogPage from "./folder-dialog.page";
+import MoveDialogPage from "./move-dialog.page";
 import { ImportIconButton } from "#view/components/import-icon-button.component.tsx";
 import { ProjectsActions } from "#application/actions/projects.actions.ts";
 import { useProjects } from "#application/hooks/use-projects.hook.ts";
+import { useFolders } from "#application/hooks/use-folders.hook.ts";
+import { buildFolderTree } from "#utils/build-folder-tree.ts";
+import { FoldersAccordion } from "#view/components/folders-accordion.component.tsx";
 import { PageHeading } from "#view/components/page-heading.component.tsx";
 import type { SortDirection } from "#application/actions/list.actions.ts";
 import { useAppDispatch } from "#application/hooks/use-app-redux.hook.ts";
@@ -38,10 +44,33 @@ export const ProjectsPage = CreatePage(HeaderUtilityControls, () => {
     const navigate = useNavigate();
     const { t } = useTranslation("projectsPage");
     usePageTitle(t("projects", { ns: "common" }));
-    const { setSortDirection, setSearchValue, setSortBy, deleteProject, sortDirection, sortBy, isPending, projects } =
-        useProjectsList();
+    const {
+        setSortDirection,
+        setSearchValue,
+        setSortBy,
+        deleteProject,
+        sortDirection,
+        sortBy,
+        searchValue,
+        isPending,
+        projects,
+    } = useProjectsList();
 
     const { loadProjects } = useProjects();
+    const { items: folders, loadFolders } = useFolders();
+
+    useEffect(loadFolders, [loadFolders]);
+
+    const isSearching = searchValue.trim().length > 0;
+
+    const folderTree = useMemo(
+        () =>
+            buildFolderTree(folders, projects, {
+                sortBy: sortBy === "createdAt" ? "createdAt" : "name",
+                sortDirection: sortDirection === "desc" ? "desc" : "asc",
+            }),
+        [folders, projects, sortBy, sortDirection]
+    );
 
     const dispatch = useAppDispatch();
 
@@ -86,6 +115,10 @@ export const ProjectsPage = CreatePage(HeaderUtilityControls, () => {
 
     const onClickAddProject = () => {
         navigate("/projects/add");
+    };
+
+    const onClickAddFolder = () => {
+        navigate("/projects/folders/add", { state: { parentId: null } });
     };
 
     const onClickDeleteProject = (_event: MouseEvent<HTMLElement>, project: ExtendedProject) => {
@@ -170,6 +203,13 @@ export const ProjectsPage = CreatePage(HeaderUtilityControls, () => {
                         >
                             <Add sx={{ fontSize: 18 }} />
                         </IconButton>
+                        <IconButton
+                            onClick={onClickAddFolder}
+                            data-testid="projects-page_add-folder-button"
+                            title={t("folders.newFolder")}
+                        >
+                            <CreateNewFolder sx={{ fontSize: 18 }} />
+                        </IconButton>
                         <ImportIconButton id="import-data" tooltipTitle={t("importProject")} onChange={handleImport} />
                     </Box>
                     <Box
@@ -218,15 +258,27 @@ export const ProjectsPage = CreatePage(HeaderUtilityControls, () => {
                     </Box>
                 </Box>
 
-                <ProjectsGridComponent
-                    projects={projects}
-                    columnCount={projectsColumnCount}
-                    onClickDeleteProject={onClickDeleteProject}
-                    onClickEditProject={onClickEditProject}
-                />
+                {isSearching ? (
+                    <ProjectsGridComponent
+                        projects={projects}
+                        columnCount={projectsColumnCount}
+                        onClickDeleteProject={onClickDeleteProject}
+                        onClickEditProject={onClickEditProject}
+                    />
+                ) : (
+                    <FoldersAccordion
+                        tree={folderTree}
+                        columnCount={projectsColumnCount}
+                        onClickDeleteProject={onClickDeleteProject}
+                        onClickEditProject={onClickEditProject}
+                    />
+                )}
 
                 <Routes>
                     <Route path="add" element={<ProjectDialogPage />} />
+                    <Route path="move" element={<MoveDialogPage />} />
+                    <Route path="folders/add" element={<FolderDialogPage />} />
+                    <Route path="folders/:folderId" element={<FolderDialogPage />} />
                     <Route path=":projectId" element={<ProjectDialogPage />} />
                 </Routes>
             </Page>

@@ -85,12 +85,23 @@ const projectsReducer = createReducer(defaultState, (builder) => {
     builder.addCase(ProjectsActions.setProject, (state, action) => {
         const extendedProject: ExtendedProject = {
             image: state.entities[action.payload.id]?.image ?? null,
+            folderId: state.entities[action.payload.id]?.folderId ?? null,
             ...action.payload,
             role: USER_ROLES.OWNER,
         };
 
         projectsAdapter.upsertOne(state, extendedProject);
         state.isPending = false;
+    });
+
+    builder.addCase(ProjectsActions.setProjectFolder, (state, action) => {
+        const { id, folderId } = action.payload;
+        if (state.entities[id]) {
+            state.entities[id]!.folderId = folderId;
+        }
+        if (state.current?.id === id) {
+            state.current.folderId = folderId;
+        }
     });
 
     builder.addCase(ProjectsActions.removeProject, (state, action) => {

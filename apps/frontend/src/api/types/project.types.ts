@@ -36,6 +36,7 @@ export interface Project {
 export interface ExtendedProject extends Project {
     role: USER_ROLES;
     image: string | null;
+    folderId: number | null;
 }
 
 export interface ProjectReport {

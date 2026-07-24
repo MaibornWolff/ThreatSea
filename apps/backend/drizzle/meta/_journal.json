@@ -64,6 +64,13 @@
       "when": 1784715053806,
       "tag": "0008_add_profile_synced_at_to_user",
       "breakpoints": false
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1784904671606,
+      "tag": "0009_add-project-folders",
+      "breakpoints": false
     }
   ]
 }
