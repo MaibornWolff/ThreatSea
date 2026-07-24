@@ -34,11 +34,17 @@ interface ExportedCatalogThreat {
     attacker: string;
 }
 
+interface ImportedMeasureImpact {
+    threatId: number;
+    setsOutOfScope: boolean;
+}
+
 interface ImportBody {
     datamodelVersion?: number;
     threats?: unknown[];
     genericThreats?: unknown[];
     catalogThreats?: unknown[];
+    measureImpacts?: unknown[];
     [key: string]: unknown;
 }
 
@@ -50,8 +56,9 @@ interface ImportBody {
  *   - generic threats are grouped by (catalogThreatId, projectId, pointOfAttackId); their
  *     name/description/pointOfAttack/attacker come from the referenced catalogue threat,
  *   - each flat threat becomes a child threat keeping its own fields, its id (so measure impacts keep
- *     resolving), `status` set to "finalized" only when it was done editing and impacts a protection
- *     goal (otherwise "new"), and a `genericThreatId` pointing at its parent.
+ *     resolving), `status` set to "finalized" only when it was done editing and either impacts a
+ *     protection goal or has a measure that sets it out of scope (otherwise "new"), and a
+ *     `genericThreatId` pointing at its parent.
  *
  * Bodies already at the current version (or any unknown version) are left untouched; the caller still
  * validates `datamodelVersion` afterwards.
@@ -64,6 +71,13 @@ export function upgradeImportBodyToCurrent(body: ImportBody): void {
     const flatThreats = (body.threats ?? []) as FlatThreat[];
     const catalogThreats = (body.catalogThreats ?? []) as ExportedCatalogThreat[];
     const catalogThreatById = new Map(catalogThreats.map((catalogThreat) => [catalogThreat.id, catalogThreat]));
+
+    const measureImpacts = (body.measureImpacts ?? []) as ImportedMeasureImpact[];
+    const outOfScopeThreatIds = new Set(
+        measureImpacts
+            .filter((measureImpact) => measureImpact.setsOutOfScope)
+            .map((measureImpact) => measureImpact.threatId)
+    );
 
     const genericThreats: Record<string, unknown>[] = [];
     const genericIdByGroup = new Map<string, number>();
@@ -103,7 +117,10 @@ export function upgradeImportBodyToCurrent(body: ImportBody): void {
             availability: flatThreat.availability,
             status:
                 flatThreat.doneEditing &&
-                (flatThreat.confidentiality || flatThreat.integrity || flatThreat.availability)
+                (flatThreat.confidentiality ||
+                    flatThreat.integrity ||
+                    flatThreat.availability ||
+                    outOfScopeThreatIds.has(flatThreat.id))
                     ? THREAT_STATUSES.FINALIZED
                     : THREAT_STATUSES.NEW,
             genericThreatId,

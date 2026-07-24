@@ -137,6 +137,7 @@ export async function createMeasureImpact(
 
     try {
         const measureImpact = await MeasureImpactsService.createMeasureImpact(request.body);
+        await MeasureImpactsService.finalizeThreatWhenOutOfScopeApplied(threatId);
 
         response.json(measureImpact);
     } catch (error) {
@@ -178,6 +179,7 @@ export async function updateMeasureImpact(
             measureImpactId,
             data
         );
+        await MeasureImpactsService.finalizeThreatWhenOutOfScopeApplied(updatedMeasureImpact.threatId!);
 
         response.json(updatedMeasureImpact);
     } catch (error) {
