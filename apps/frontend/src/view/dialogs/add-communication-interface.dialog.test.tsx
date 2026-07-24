@@ -28,10 +28,10 @@ describe("CommunicationInterfaceDialog — default interface icon (#860)", () =>
         vi.clearAllMocks();
     });
 
-    it("preselects a default icon so a new interface shows one without opening the picker", () => {
+    it("preselects a default icon so a new interface shows one without opening the picker", async () => {
         setup();
 
-        expect(screen.getByTestId("DeviceHubIcon")).toBeInTheDocument();
+        expect(await screen.findByTestId("DeviceHubIcon")).toBeInTheDocument();
     });
 
     it("stores the default icon on save when the user never opens the icon picker", async () => {
