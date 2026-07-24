@@ -27,20 +27,28 @@ interface ProjectHandlers {
     onClickDeleteProject: (event: MouseEvent<HTMLElement>, project: ExtendedProject) => void;
 }
 
-// Matches the project card surface (paper background + shadow + rounded corners) rather than a
-// border — the theme's `divider` token is white and would be invisible on the page.
 const sectionHeaderSx = {
     display: "flex",
     alignItems: "center",
     gap: 1,
     paddingX: 2,
     paddingY: 1.25,
-    borderRadius: 5,
     bgcolor: "background.paper",
-    boxShadow: 1,
     cursor: "pointer",
     userSelect: "none",
     "&:hover": { bgcolor: "background.paperWhite" },
+} as const;
+
+const sectionBodySx = {
+    padding: 2,
+    bgcolor: "background.listItem",
+} as const;
+
+const sectionContainerSx = {
+    marginBottom: 1,
+    borderRadius: 5,
+    boxShadow: 1,
+    overflow: "hidden",
 } as const;
 
 const SectionHeader = ({
@@ -132,7 +140,7 @@ const FolderSection = ({
     const closeMenu = () => setAnchorElement(null);
 
     return (
-        <Box sx={{ marginBottom: 1 }} data-testid={`folder-section-${node.folder.id}`}>
+        <Box sx={sectionContainerSx} data-testid={`folder-section-${node.folder.id}`}>
             <SectionHeader
                 expanded={expanded}
                 onToggle={() => onToggleCollapsed(sectionKey)}
@@ -203,17 +211,7 @@ const FolderSection = ({
                 </MenuItem>
             </Menu>
             <Collapse in={expanded}>
-                <Box
-                    sx={{
-                        marginTop: 1,
-                        padding: 2,
-                        borderRadius: 5,
-                        // Translucent brand tint fills the folder body so its projects read as
-                        // contained, set apart from the page and the white project cards. The
-                        // alpha stacks, so nested subfolders deepen on their own and signal depth.
-                        bgcolor: "background.default",
-                    }}
-                >
+                <Box sx={sectionBodySx}>
                     {node.projects.length > 0 && (
                         <ProjectsGridComponent projects={node.projects} {...projectHandlers} />
                     )}
@@ -245,7 +243,7 @@ const UngroupedSection = ({
     const { t } = useTranslation("projectsPage");
 
     return (
-        <Box sx={{ marginBottom: 1 }} data-testid="folder-section-ungrouped">
+        <Box sx={sectionContainerSx} data-testid="folder-section-ungrouped">
             <SectionHeader
                 expanded={expanded}
                 onToggle={onToggleCollapsed}
@@ -255,7 +253,7 @@ const UngroupedSection = ({
                 testId="folder-section-ungrouped_header"
             />
             <Collapse in={expanded}>
-                <Box sx={{ marginTop: 1 }}>
+                <Box sx={sectionBodySx}>
                     <ProjectsGridComponent projects={projects} {...projectHandlers} />
                 </Box>
             </Collapse>
