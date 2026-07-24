@@ -166,5 +166,15 @@ describe("projectsReducer — deletingProjectId lifecycle", () => {
 
             expect(next.current?.folderId).toBe(9);
         });
+
+        it("clears the placement on both the entity and the open project when moved out of a folder", () => {
+            let state = withEntities(createProject({ id: 7, folderId: 4 }));
+            state = projectsReducer(state, ProjectsActions.getProjectFromRedux(7));
+
+            const next = projectsReducer(state, ProjectsActions.setProjectFolder({ id: 7, folderId: null }));
+
+            expect(next.entities[7]?.folderId).toBeNull();
+            expect(next.current?.folderId).toBeNull();
+        });
     });
 });

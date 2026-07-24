@@ -71,6 +71,25 @@ describe("folders.middleware", () => {
             expect(store.getState().projects.entities[7]?.role).toBe(USER_ROLES.VIEWER);
         });
 
+        it("clears the project's folder placement when it is moved out of a folder, preserving its role", async () => {
+            const store = createStore();
+            store.dispatch(
+                ProjectsActions.getProjects.fulfilled(
+                    [createProject({ id: 7, folderId: 4, role: USER_ROLES.VIEWER })],
+                    "req",
+                    undefined
+                )
+            );
+            vi.spyOn(FoldersAPI, "moveProject").mockResolvedValue(
+                createProject({ id: 7, folderId: null, role: USER_ROLES.VIEWER })
+            );
+
+            store.dispatch(FoldersActions.moveProject({ projectId: 7, folderId: null }));
+
+            await vi.waitFor(() => expect(store.getState().projects.entities[7]?.folderId).toBeNull());
+            expect(store.getState().projects.entities[7]?.role).toBe(USER_ROLES.VIEWER);
+        });
+
         it("shows an error alert when a move fails", async () => {
             vi.spyOn(FoldersAPI, "moveProject").mockRejectedValue(new Error("nope"));
             const store = createStore();
