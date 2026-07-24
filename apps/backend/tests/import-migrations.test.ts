@@ -106,6 +106,36 @@ describe("upgradeImportBodyToCurrent", () => {
         expect(body.threats[0].status).toBe("new");
     });
 
+    it("finalizes a done-editing threat with no protection goal but an out-of-scope measure", () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const body: any = {
+            datamodelVersion: FLAT_THREAT_DATAMODEL_VERSION,
+            catalogThreats: [
+                {
+                    id: 10,
+                    name: "Catalogue name",
+                    description: "Catalogue desc",
+                    pointOfAttack: "DATA_STORAGE_INFRASTRUCTURE",
+                    attacker: "SYSTEM_USERS",
+                },
+            ],
+            threats: [
+                flatThreat({
+                    id: 1,
+                    doneEditing: true,
+                    confidentiality: false,
+                    integrity: false,
+                    availability: false,
+                }),
+            ],
+            measureImpacts: [{ id: 1, threatId: 1, setsOutOfScope: true }],
+        };
+
+        upgradeImportBodyToCurrent(body);
+
+        expect(body.threats[0].status).toBe("finalized");
+    });
+
     it("leaves a current-version body untouched", () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const body: any = {

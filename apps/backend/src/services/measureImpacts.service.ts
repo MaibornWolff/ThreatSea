@@ -2,9 +2,17 @@
  * Module that defines the access and manipulation
  * for the MeasureImpact of a project.
  */
-import { eq, getTableColumns, inArray } from "drizzle-orm";
+import { and, eq, getTableColumns, inArray } from "drizzle-orm";
 import { db, TransactionType } from "#db/index.js";
-import { CreateMeasureImpact, MeasureImpact, measureImpacts, measures, UpdateMeasureImpact } from "#db/schema.js";
+import {
+    CreateMeasureImpact,
+    MeasureImpact,
+    measureImpacts,
+    measures,
+    threats,
+    UpdateMeasureImpact,
+} from "#db/schema.js";
+import { THREAT_STATUSES } from "#types/threat-statuses.types.js";
 
 /**
  * Gets all measure impacts of the specified project.
@@ -137,4 +145,24 @@ export async function deleteMeasureImpact(
  */
 export async function deleteMeasureImpactsByThreat(threatId: number): Promise<void> {
     await db.delete(measureImpacts).where(eq(measureImpacts.threatId, threatId));
+}
+
+/**
+ * Finalizes a threat when an out-of-scope measure has been applied to it.
+ *
+ * Applying (or editing an impact into) a measure that sets the threat out of scope marks the threat
+ * as handled, so its status becomes "finalized". This is one-way: removing the measure never reverts
+ * the status.
+ *
+ * @param {number} threatId - The id of the threat the measure impact belongs to.
+ * @returns {Promise<void>} A promise that resolves once the status has been reconciled.
+ */
+export async function finalizeThreatWhenOutOfScopeApplied(threatId: number): Promise<void> {
+    const outOfScopeImpact = await db.query.measureImpacts.findFirst({
+        where: and(eq(measureImpacts.threatId, threatId), eq(measureImpacts.setsOutOfScope, true)),
+    });
+
+    if (outOfScopeImpact) {
+        await db.update(threats).set({ status: THREAT_STATUSES.FINALIZED }).where(eq(threats.id, threatId));
+    }
 }
