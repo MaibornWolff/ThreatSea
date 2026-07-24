@@ -1,15 +1,13 @@
 import { useState, type MouseEvent } from "react";
 import { Box, Collapse, IconButton, Menu, MenuItem, Typography } from "@mui/material";
-import {
-    ChevronRight,
-    CreateNewFolder,
-    Delete,
-    DriveFileMove,
-    Edit,
-    Folder as FolderIcon,
-    Inbox,
-    MoreVert,
-} from "@mui/icons-material";
+import ChevronRight from "@mui/icons-material/ChevronRight";
+import CreateNewFolder from "@mui/icons-material/CreateNewFolder";
+import Delete from "@mui/icons-material/Delete";
+import DriveFileMove from "@mui/icons-material/DriveFileMove";
+import Edit from "@mui/icons-material/Edit";
+import FolderIcon from "@mui/icons-material/Folder";
+import Inbox from "@mui/icons-material/Inbox";
+import MoreVert from "@mui/icons-material/MoreVert";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import type { Folder } from "#api/types/folder.types.ts";
@@ -205,7 +203,17 @@ const FolderSection = ({
                 </MenuItem>
             </Menu>
             <Collapse in={expanded}>
-                <Box sx={{ paddingLeft: 2, marginTop: 1 }}>
+                <Box
+                    sx={{
+                        marginTop: 1,
+                        padding: 2,
+                        borderRadius: 5,
+                        // Translucent brand tint fills the folder body so its projects read as
+                        // contained, set apart from the page and the white project cards. The
+                        // alpha stacks, so nested subfolders deepen on their own and signal depth.
+                        bgcolor: "background.default",
+                    }}
+                >
                     {node.projects.length > 0 && (
                         <ProjectsGridComponent projects={node.projects} {...projectHandlers} />
                     )}

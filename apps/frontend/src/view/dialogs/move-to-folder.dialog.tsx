@@ -8,7 +8,9 @@
  */
 import { DialogActions, DialogTitle, List, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
 import type { DialogProps } from "@mui/material/Dialog";
-import { Folder as FolderIcon, Home, Inbox } from "@mui/icons-material";
+import FolderIcon from "@mui/icons-material/Folder";
+import Home from "@mui/icons-material/Home";
+import Inbox from "@mui/icons-material/Inbox";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
