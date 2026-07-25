@@ -22,7 +22,7 @@
     "lint-staged": "17.1.1",
     "oxfmt": "0.60.0",
     "semantic-release": "25.0.8",
-    "turbo": "2.10.5",
+    "turbo": "2.10.6",
     "typescript": "7.0.2"
   },
   "lint-staged": {
