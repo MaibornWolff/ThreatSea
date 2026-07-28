@@ -11,6 +11,7 @@ import {
     catalogThreats,
     CreateThreat,
     CreateMeasure,
+    CreateGenericThreat,
     threats,
     genericThreats,
     measureImpacts,
@@ -24,7 +25,6 @@ import { app } from "#server.js";
 import { LANGUAGES } from "#types/languages.type.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
 import { CreateProjectRequest } from "#types/project.types.js";
-import { CreateGenericThreatRequest } from "#types/generic-threat.types.js";
 import { THREAT_STATUSES } from "#types/threat-statuses.types.js";
 import { CreateMeasureRequest } from "#types/measure.types.js";
 import { CreateCatalogThreatRequest } from "#types/catalog-threat.types.js";
@@ -48,7 +48,7 @@ const VALID_PROJECT: Omit<InstanceType<typeof CreateProjectRequest>, "catalogId"
     confidentialityLevel: CONFIDENTIALITY_LEVELS.INTERNAL,
 };
 
-const VALID_GENERIC_THREAT_1: Omit<InstanceType<typeof CreateGenericThreatRequest>, "catalogThreatId"> = {
+const VALID_GENERIC_THREAT_1: Omit<CreateGenericThreat, "catalogThreatId" | "projectId"> = {
     pointOfAttackId: nanoid(),
     name: "Generic Threat 1",
     description: "Generic description 1",
