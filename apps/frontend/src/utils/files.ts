@@ -12,7 +12,7 @@ export const ACCEPTED_ICON_MIME_TYPES = "image/png,image/jpeg";
  * @param {object} file -  The file that will be converted to base64.
  * @returns A promise containing the result base64 or an error.
  */
-export function convertFileToBase64(file: Blob) {
+export function convertFileToBase64(file: Blob): Promise<string> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
 
@@ -20,7 +20,8 @@ export function convertFileToBase64(file: Blob) {
         reader.readAsDataURL(file);
 
         reader.onload = function () {
-            resolve(reader.result);
+            // readAsDataURL always yields a string result.
+            resolve(reader.result as string);
         };
 
         reader.onerror = function (error) {
@@ -29,18 +30,12 @@ export function convertFileToBase64(file: Blob) {
     });
 }
 
-/**
- * Why an uploaded icon was refused. Callers map this to a user-facing message.
- * - "type": the reported MIME type is not PNG or JPEG.
- * - "size": the file is larger than {@link MAX_ICON_BYTES}.
- * - "content": the actual file bytes do not start with a PNG or JPEG signature
- *   (guards against a non-image renamed to look like one).
- */
+/** Why an icon upload was refused: wrong MIME ("type"), too big ("size"), or bytes aren't a real PNG/JPEG ("content"). */
 export type IconRejectionReason = "type" | "size" | "content";
 
 export type IconValidationResult = { ok: true; dataUrl: string } | { ok: false; reason: IconRejectionReason };
 
-// Leading bytes that identify the accepted image formats ("magic numbers").
+// Magic bytes of the accepted formats.
 const IMAGE_SIGNATURES: readonly number[][] = [
     [0x89, 0x50, 0x4e, 0x47], // PNG
     [0xff, 0xd8, 0xff], // JPEG
@@ -51,15 +46,8 @@ function hasAcceptedImageSignature(header: Uint8Array): boolean {
 }
 
 /**
- * Validates an uploaded icon by MIME type, size, and real file signature, and —
- * when valid — converts it to a base64 data URL ready to store as a component symbol.
- *
- * The signature (magic-byte) check is the reason this exists over a bare
- * type/size check: a file's reported MIME type comes from its extension and is
- * trivially spoofed, so we confirm the bytes really are a PNG or JPEG.
- *
- * @param file - The user-selected file.
- * @returns Either the converted data URL, or the reason it was rejected.
+ * Validates an icon by MIME, size, and magic bytes (MIME alone is spoofable), then converts it to a
+ * base64 data URL. Returns the data URL, or the reason it was rejected.
  */
 export async function validateAndConvertIconFile(file: File): Promise<IconValidationResult> {
     if (!ACCEPTED_ICON_MIME_TYPES.split(",").includes(file.type)) {
@@ -74,6 +62,6 @@ export async function validateAndConvertIconFile(file: File): Promise<IconValida
         return { ok: false, reason: "content" };
     }
 
-    const dataUrl = (await convertFileToBase64(file)) as string;
+    const dataUrl = await convertFileToBase64(file);
     return { ok: true, dataUrl };
 }

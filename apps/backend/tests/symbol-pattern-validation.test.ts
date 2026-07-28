@@ -4,11 +4,8 @@ import {
 } from "#middlewares/input-validations/validator-messages.js";
 
 /**
- * These two patterns are the security boundary for stored image symbols, so their exact
- * accept/reject behaviour is asserted directly here (integration tests only exercise a couple
- * of cases). The key contract: both reject non-PNG/JPEG `data:` URLs (blocking svg/script
- * payloads), but the system pattern additionally tolerates non-`data:` reference paths so
- * existing diagrams keep saving.
+ * Security boundary for stored image symbols — assert accept/reject directly (integration tests
+ * cover only a couple of cases).
  */
 describe("IMAGE_DATA_URL_PATTERN (component types — strict)", () => {
     it("accepts base64 PNG and JPEG data URLs", () => {
@@ -50,5 +47,18 @@ describe("SYSTEM_COMPONENT_SYMBOL_PATTERN (placed components — lax on referenc
 
     it("rejects a malformed data URL with an extra parameter", () => {
         expect(SYSTEM_COMPONENT_SYMBOL_PATTERN.test("data:image/png;charset=utf-8;base64,AAAA")).toBe(false);
+    });
+
+    it("still rejects an svg data URL when the scheme is upper-cased or whitespace-padded", () => {
+        // Consumers treat the scheme case-insensitively and trim whitespace; must not bypass png/jpeg.
+        expect(SYSTEM_COMPONENT_SYMBOL_PATTERN.test("DATA:image/svg+xml;base64,PHN2Zz4=")).toBe(false);
+        expect(SYSTEM_COMPONENT_SYMBOL_PATTERN.test(" data:image/svg+xml;base64,PHN2Zz4=")).toBe(false);
+        expect(SYSTEM_COMPONENT_SYMBOL_PATTERN.test("\tdata:text/html;base64,PHNjcmlwdD4=")).toBe(false);
+    });
+
+    it("rejects remote and protocol-relative URLs — only rooted local paths are allowed", () => {
+        expect(SYSTEM_COMPONENT_SYMBOL_PATTERN.test("http://attacker.example/pixel.png")).toBe(false);
+        expect(SYSTEM_COMPONENT_SYMBOL_PATTERN.test("//attacker.example/pixel.png")).toBe(false);
+        expect(SYSTEM_COMPONENT_SYMBOL_PATTERN.test("javascript:alert(1)")).toBe(false);
     });
 });
