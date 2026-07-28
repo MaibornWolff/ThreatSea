@@ -13,7 +13,7 @@ export const STANDARD_ICON_IMAGES: Record<STANDARD_COMPONENT_TYPES, string> = {
     [STANDARD_COMPONENT_TYPES.COMMUNICATION_INFRASTRUCTURE]: communicationInfrastructureImg,
 };
 
-// Base filename (without hash/extension) of each standard icon → its component type.
+// Base filename → component type.
 const STANDARD_ICON_FILENAME_TO_TYPE: Record<string, STANDARD_COMPONENT_TYPES> = {
     user: STANDARD_COMPONENT_TYPES.USERS,
     desktop: STANDARD_COMPONENT_TYPES.CLIENT,
@@ -27,11 +27,9 @@ const STANDARD_ICON_IMAGE_TO_TYPE = new Map<string, STANDARD_COMPONENT_TYPES>(
 );
 
 /**
- * Resolves a component `symbol` to its standard icon type, or `null` when the symbol is a custom
- * image. A standard symbol can be stored in several forms depending on the build: the current
- * `?inline` base64 data URL, a hashed prod asset path (`/static/media/user.<hash>.png`), or a dev
- * asset path (`/src/images/user.png`). Use this instead of comparing a symbol directly to
- * {@link STANDARD_ICON_IMAGES}, which only matches the data-URL form.
+ * Resolves a `symbol` to its standard icon type, or null for a custom image. Handles all stored
+ * forms (inline data URL, prod hashed path, dev path) — a direct compare to STANDARD_ICON_IMAGES
+ * matches only the data-URL form.
  */
 export const standardIconTypeForSymbol = (symbol: string | null | undefined): STANDARD_COMPONENT_TYPES | null => {
     if (!symbol) {
@@ -41,7 +39,7 @@ export const standardIconTypeForSymbol = (symbol: string | null | undefined): ST
     if (byDataUrl) {
         return byDataUrl;
     }
-    // Match a trailing "/<name>.<optionalHash>.png" asset path (prod hashed or dev).
+    // Trailing "/<name>.<hash>.png" asset path.
     const filename = symbol.match(/\/([a-z-]+)(?:\.[a-f0-9]+)?\.png$/i)?.[1]?.toLowerCase();
     return filename ? (STANDARD_ICON_FILENAME_TO_TYPE[filename] ?? null) : null;
 };

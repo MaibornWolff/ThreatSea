@@ -45,14 +45,9 @@ interface ImportSymbolBody {
 }
 
 /**
- * The import route writes component types and placed system components directly (via services),
- * bypassing the route DTOs, so it must re-check their `symbol` here — otherwise an import could
- * smuggle in an unvalidated symbol (e.g. `data:image/svg+xml`, or an oversized payload).
- *
- * It applies the same rules as the routes: component types use the strict PNG/JPEG data-URL rule
- * ({@link IMAGE_DATA_URL_PATTERN}); placed system components use the laxer rule
- * ({@link SYSTEM_COMPONENT_SYMBOL_PATTERN}) that also tolerates legacy asset-path symbols. Both cap
- * the length. Returns the first error message, or null when every symbol is valid.
+ * Import writes symbols directly via services, bypassing the route DTOs, so re-check them here:
+ * component types with the strict data-URL rule, system components with the laxer one. Returns the
+ * first error, or null when all valid.
  */
 function findInvalidImportedSymbol(body: ImportSymbolBody): string | null {
     const checkSymbol = (symbol: unknown, pattern: RegExp): string | null => {

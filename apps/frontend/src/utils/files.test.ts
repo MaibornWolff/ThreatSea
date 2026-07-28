@@ -3,10 +3,7 @@ import { MAX_ICON_BYTES, validateAndConvertIconFile } from "./files";
 const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47];
 const JPEG_SIGNATURE = [0xff, 0xd8, 0xff];
 
-/**
- * Builds a File whose first bytes are `leadingBytes`, padded with zeros up to
- * `size`, carrying the given MIME `type`.
- */
+/** Builds a File with `leadingBytes` first, zero-padded to `size`, of MIME `type`. */
 function buildFile({ leadingBytes = [], size, type }: { leadingBytes?: number[]; size?: number; type: string }): File {
     const totalSize = Math.max(size ?? leadingBytes.length, leadingBytes.length);
     const bytes = new Uint8Array(totalSize);

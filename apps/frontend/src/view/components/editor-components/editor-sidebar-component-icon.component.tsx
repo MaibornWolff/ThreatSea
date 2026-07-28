@@ -10,11 +10,7 @@ interface EditorSidebarComponentIconProps {
     onChangeIcon: () => void;
 }
 
-/**
- * Sidebar section (issue #577) that shows the selected component's current icon with a control to
- * change it. The chosen icon applies to this component instance only; the component type is untouched.
- * `onChangeIcon` opens the picker dialog owned by the editor page.
- */
+/** Sidebar section (#577): the component's current icon plus a control to change it (this instance only). */
 export const EditorSidebarComponentIcon = ({ symbol, userRole, onChangeIcon }: EditorSidebarComponentIconProps) => {
     const { t } = useTranslation("editorPage");
     const isStandardIcon = isStandardIconSymbol(symbol);
@@ -50,8 +46,7 @@ export const EditorSidebarComponentIcon = ({ symbol, userRole, onChangeIcon }: E
                         width: 32,
                         height: 32,
                         backgroundColor: "transparent",
-                        // Wide icons (e.g. Communication Infrastructure) need `square` to drop the Avatar's
-                        // circular clip AND `contain` to override its default `cover`, so they show whole.
+                        // `square` drops the circular clip, `contain` overrides `cover` — wide icons show whole.
                         "& .MuiAvatar-img": { objectFit: "contain" },
                     }}
                 />

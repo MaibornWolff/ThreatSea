@@ -17,9 +17,7 @@ interface ChangeComponentIconDialogProps extends Omit<DialogProps, "component" |
     onConfirm: (symbol: string) => void;
 }
 
-// All standard icons are offered — unlike the custom-component-type dialog (which excludes
-// Communication Infrastructure because a custom type can't be one), any placed component can
-// be re-skinned with any standard icon (issue #577). Labels reuse the context-menu keys.
+// All standard icons offered (any placed component can use any). Labels reuse context-menu keys.
 const STANDARD_ICON_OPTIONS: { type: STANDARD_COMPONENT_TYPES; labelKey: string }[] = [
     { type: STANDARD_COMPONENT_TYPES.USERS, labelKey: "contextMenu.Users" },
     { type: STANDARD_COMPONENT_TYPES.CLIENT, labelKey: "contextMenu.Client" },
@@ -49,23 +47,20 @@ const iconTileSx = (selected: boolean) => ({
         outlineColor: "primary.main",
         outlineOffset: "2px",
     },
-    // Icons are wider than tall (e.g. Communication Infrastructure); contain shows them whole
-    // instead of the Avatar's default cover, which cropped them.
+    // `contain` shows wide icons whole instead of the Avatar's default cover.
     "& .MuiAvatar-img": { objectFit: "contain" },
 });
 
 /**
- * Dialog to override the icon of a single placed component (issue #577). The chosen icon — a
- * standard icon or a validated upload — is returned via `onConfirm` as a base64 data URL; the
- * caller applies it to that component instance only, leaving the shared component type untouched.
+ * Dialog to override one placed component's icon (#577). Returns the chosen icon (standard or
+ * validated upload) via `onConfirm` as a data URL; the caller applies it to that instance only.
  */
 const ChangeComponentIconDialog = ({ component, onClose, onConfirm, ...props }: ChangeComponentIconDialogProps) => {
     const { t } = useTranslation("editorPage");
     const { openConfirm } = useConfirm();
     const [selectedSymbol, setSelectedSymbol] = useState<string>(component.symbol ?? "");
 
-    // Detect standard vs custom by icon identity, not string equality: a component's symbol may be a
-    // data URL or a (hashed) asset path depending on the build, so a direct compare is unreliable.
+    // Detect custom by icon identity, not string equality (symbol form varies by build).
     const isCustomSelected = selectedSymbol !== "" && standardIconTypeForSymbol(selectedSymbol) === null;
 
     const handleSelectFile = async (event: ChangeEvent<HTMLInputElement>) => {

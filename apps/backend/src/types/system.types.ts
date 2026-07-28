@@ -15,18 +15,11 @@ export interface UpdateSystemRequest {
 }
 
 /**
- * Validation DTOs for the system PUT body.
- *
- * They deliberately validate only the security-sensitive field — each placed component's
- * uploaded `symbol` — and rely on `plainToInstance` preserving every other property
- * (connections, annotations, coordinates, …) untouched, so the controller still receives the
- * full system payload. This DTO is what turns AC #2 ("upload is checked for security") into a
- * server-side guarantee: without it the save path stores arbitrary `symbol` strings unchecked,
- * while the componentTypes path is already validated.
+ * Validates only each placed component's `symbol`; plainToInstance preserves every other system
+ * property untouched. Without it the save path stores arbitrary symbols unchecked.
  */
 export class ComponentDto {
-    // Restrict only embedded data: URLs to safe PNG/JPEG (blocking svg/script payloads); reference
-    // paths and null/empty pass through so legacy diagrams keep saving. See SYSTEM_COMPONENT_SYMBOL_PATTERN.
+    // png/jpeg data URL or legacy asset path only; null/empty skipped. See the pattern.
     @ValidateIf((_, value) => value != null && value !== "")
     @IsString({ message: FIELD_MUST_BE_STRING_MESSAGE("symbol") })
     @MaxLength(MAX_SYMBOL_LENGTH, { message: STRING_TOO_LONG_MESSAGE("symbol", MAX_SYMBOL_LENGTH) })
@@ -48,9 +41,7 @@ export class UpdateSystemRequestDto {
     @Type(() => SystemDataDto)
     data?: SystemDataDto | null;
 
-    // `image` (the full-canvas PNG snapshot) is intentionally left unvalidated here: it is a large
-    // generated data URL that can legitimately exceed MAX_SYMBOL_LENGTH, and the global
-    // express.json({ limit: "10mb" }) already bounds the request size.
+    // Unvalidated: a generated snapshot that can exceed MAX_SYMBOL_LENGTH; the 10mb body limit bounds it.
     image?: string | null;
 }
 

@@ -648,7 +648,7 @@ const systemWithComponentSymbol = (symbol: string) => ({
 });
 
 it("should reject a component whose symbol is a data:image/svg+xml URL", async () => {
-    // "<svg></svg>" — an embedded, potentially executable payload that must not be stored.
+    // "<svg></svg>" — embedded payload that must not be stored.
     const res = await request(app)
         .put(`/api/projects/${projectId}/system`)
         .send(systemWithComponentSymbol("data:image/svg+xml;base64,PHN2Zz48L3N2Zz4="))

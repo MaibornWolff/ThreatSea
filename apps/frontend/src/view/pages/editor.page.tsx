@@ -1195,7 +1195,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         setIsChangeIconDialogOpen(false);
     };
 
-    // Apply the chosen icon to the selected component instance only (issue #577).
+    // Apply the chosen icon to the selected instance only (#577).
     const handleChangeComponentIcon = (symbol: string) => {
         setSelectedComponentSymbol(symbol);
     };
