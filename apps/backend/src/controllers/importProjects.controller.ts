@@ -333,6 +333,8 @@ export async function importProject(request: Request<void>, response: Response, 
             }
         });
 
+        Logger.debug("imported");
+
         response.status(204).end();
     } catch (error) {
         const logId = Logger.error(
@@ -340,7 +342,6 @@ export async function importProject(request: Request<void>, response: Response, 
         );
         next(new BadRequestError(`Error while importing project.${logId != null ? ` (Error ID: ${logId})` : ""}`));
     }
-    Logger.debug("imported");
 }
 
 /**
