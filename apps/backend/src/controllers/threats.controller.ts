@@ -24,7 +24,6 @@ export async function getThreatsByGenericThreatId(
 ): Promise<void> {
     const genericThreatProjectId = request.params.projectId;
     const genericThreatId = request.params.genericThreatId;
-    const threats = await threatsService.getThreatsByGenericThreatId(genericThreatId);
     const genericThreat = await genericThreatsService.getGenericThreat(genericThreatId);
 
     if (genericThreat === null) {
@@ -36,6 +35,8 @@ export async function getThreatsByGenericThreatId(
         next(new BadRequestError("Generic threat does not belong to this project"));
         return;
     }
+
+    const threats = await threatsService.getThreatsByGenericThreatId(genericThreatId);
 
     response.json(threats);
 }
