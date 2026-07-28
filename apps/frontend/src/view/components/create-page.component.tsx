@@ -393,7 +393,7 @@ export const CreatePage = <P extends object>(
                                 </Box>
                             </Box>
                         )}
-                        {getCatalogInfo && catalog && (
+                        {getCatalogInfo && catalog?.id === Number(catalogId) && (
                             <Box
                                 sx={{
                                     gridArea: "title",
