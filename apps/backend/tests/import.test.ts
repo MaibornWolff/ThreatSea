@@ -80,6 +80,30 @@ describe("import a project", () => {
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(204);
     });
+
+    it("should reject an import whose component type symbol is a data:image/svg+xml URL", async () => {
+        const project = JSON.parse(JSON.stringify(VALID_TEST_PROJECT));
+        project.componentTypes[0].symbol = "data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=";
+
+        const res = await request(app)
+            .post("/api/import")
+            .send(project)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(400);
+    });
+
+    it("should reject an import whose system component symbol exceeds the size limit", async () => {
+        const project = JSON.parse(JSON.stringify(VALID_TEST_PROJECT));
+        project.system.data.components[0].symbol = `data:image/png;base64,${"A".repeat(200000)}`;
+
+        const res = await request(app)
+            .post("/api/import")
+            .send(project)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(400);
+    });
 });
 
 describe("get report from imported project", () => {

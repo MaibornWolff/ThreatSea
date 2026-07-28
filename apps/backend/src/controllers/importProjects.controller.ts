@@ -31,6 +31,62 @@ import { createMeasureImpact } from "#services/measureImpacts.service.js";
 import { createEmptySystem, updateSystem } from "#services/system.service.js";
 import { createThreat } from "#services/threats.service.js";
 import { BadRequestError } from "#errors/bad-request.error.js";
+import {
+    FIELD_MUST_BE_VALID_IMAGE_DATA,
+    IMAGE_DATA_URL_PATTERN,
+    MAX_SYMBOL_LENGTH,
+    STRING_TOO_LONG_MESSAGE,
+    SYSTEM_COMPONENT_SYMBOL_PATTERN,
+} from "#middlewares/input-validations/validator-messages.js";
+
+interface ImportSymbolBody {
+    componentTypes?: { symbol?: unknown }[];
+    system?: { data?: { components?: { symbol?: unknown }[] } };
+}
+
+/**
+ * The import route writes component types and placed system components directly (via services),
+ * bypassing the route DTOs, so it must re-check their `symbol` here — otherwise an import could
+ * smuggle in an unvalidated symbol (e.g. `data:image/svg+xml`, or an oversized payload).
+ *
+ * It applies the same rules as the routes: component types use the strict PNG/JPEG data-URL rule
+ * ({@link IMAGE_DATA_URL_PATTERN}); placed system components use the laxer rule
+ * ({@link SYSTEM_COMPONENT_SYMBOL_PATTERN}) that also tolerates legacy asset-path symbols. Both cap
+ * the length. Returns the first error message, or null when every symbol is valid.
+ */
+function findInvalidImportedSymbol(body: ImportSymbolBody): string | null {
+    const checkSymbol = (symbol: unknown, pattern: RegExp): string | null => {
+        if (symbol == null || symbol === "") {
+            return null;
+        }
+        if (typeof symbol !== "string") {
+            return FIELD_MUST_BE_VALID_IMAGE_DATA("symbol");
+        }
+        if (symbol.length > MAX_SYMBOL_LENGTH) {
+            return STRING_TOO_LONG_MESSAGE("symbol", MAX_SYMBOL_LENGTH);
+        }
+        if (!pattern.test(symbol)) {
+            return FIELD_MUST_BE_VALID_IMAGE_DATA("symbol");
+        }
+        return null;
+    };
+
+    for (const componentType of body.componentTypes ?? []) {
+        const error = checkSymbol(componentType.symbol, IMAGE_DATA_URL_PATTERN);
+        if (error != null) {
+            return error;
+        }
+    }
+
+    for (const component of body.system?.data?.components ?? []) {
+        const error = checkSymbol(component.symbol, SYSTEM_COMPONENT_SYMBOL_PATTERN);
+        if (error != null) {
+            return error;
+        }
+    }
+
+    return null;
+}
 import { Logger } from "#logging/index.js";
 
 /**
@@ -42,6 +98,12 @@ import { Logger } from "#logging/index.js";
  */
 export async function importProject(request: Request<void>, response: Response, next: NextFunction): Promise<void> {
     Logger.debug("call import project");
+
+    const symbolError = findInvalidImportedSymbol(request.body as ImportSymbolBody);
+    if (symbolError != null) {
+        next(new BadRequestError(symbolError));
+        return;
+    }
 
     const threatIdsDict = new Map<number, number>();
     const measureIdsDict = new Map<number, number>();
