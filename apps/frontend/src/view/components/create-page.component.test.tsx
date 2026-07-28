@@ -156,7 +156,7 @@ describe("CreatePage — project header actions", () => {
     });
 });
 
-describe("CreatePage — catalogue header", () => {
+describe("CreatePage — catalog header", () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mockUseConfirm({ openConfirm });
@@ -166,7 +166,7 @@ describe("CreatePage — catalogue header", () => {
         vi.restoreAllMocks();
     });
 
-    const renderOnCatalogue = (current: ReturnType<typeof createCatalog> | undefined, getCatalogInfo: boolean) => {
+    const renderOnCatalog = (current: ReturnType<typeof createCatalog> | undefined, getCatalogInfo: boolean) => {
         const Page = CreatePage(HeaderRightSlot, PageBody);
         renderWithProviders(<Page />, {
             preloadedState: {
@@ -181,14 +181,14 @@ describe("CreatePage — catalogue header", () => {
         });
     };
 
-    it("shows the current catalogue's name so the active catalogue is identifiable", () => {
-        renderOnCatalogue(createCatalog({ id: 5, name: "Threat Library" }), true);
+    it("shows the current catalog's name so the active catalog is identifiable", () => {
+        renderOnCatalog(createCatalog({ id: 5, name: "Threat Library" }), true);
 
         expect(screen.getByTestId("catalog-header_name")).toHaveTextContent("Threat Library");
     });
 
-    it("renders no catalogue title when the catalogue info is not requested", () => {
-        renderOnCatalogue(createCatalog({ id: 5, name: "Threat Library" }), false);
+    it("renders no catalog title when the catalog info is not requested", () => {
+        renderOnCatalog(createCatalog({ id: 5, name: "Threat Library" }), false);
 
         expect(screen.queryByTestId("catalog-header_name")).not.toBeInTheDocument();
     });

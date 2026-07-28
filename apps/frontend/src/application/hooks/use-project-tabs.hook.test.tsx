@@ -37,7 +37,7 @@ const projectsStateWithCurrentRole = (role: USER_ROLES): RootState["projects"] =
 
 /**
  * Renders useProjectTabs at a given URL so useParams resolves catalogId / projectId,
- * with the store pre-loaded. Route patterns mirror App.tsx so the hook's catalogue-vs-
+ * with the store pre-loaded. Route patterns mirror App.tsx so the hook's catalog-vs-
  * project branching is exercised end to end.
  */
 const renderUseProjectTabs = ({
@@ -69,8 +69,8 @@ describe("useProjectTabs", () => {
         vi.clearAllMocks();
     });
 
-    describe("catalogue inner navigation", () => {
-        it("exposes a two-way switch between the catalogue editor and members for an editor", () => {
+    describe("catalog inner navigation", () => {
+        it("exposes a two-way switch between the catalog editor and members for an editor", () => {
             const { result } = renderUseProjectTabs({
                 initialEntries: ["/catalogs/5"],
                 preloadedState: {
@@ -85,7 +85,7 @@ describe("useProjectTabs", () => {
             expect(finalButtons).toHaveLength(2);
             expect(finalButtons[0]).toMatchObject({
                 value: "/catalogs/5",
-                text: "Catalogue Editor",
+                text: "Catalog Editor",
                 "data-testid": "navigation-header_catalog-editor-button",
             });
             expect(finalButtons[1]).toMatchObject({
@@ -94,7 +94,7 @@ describe("useProjectTabs", () => {
             });
         });
 
-        it("navigates to the catalogue editor route when its button is chosen", () => {
+        it("navigates to the catalog editor route when its button is chosen", () => {
             const { result } = renderUseProjectTabs({
                 initialEntries: ["/catalogs/5/members"],
                 preloadedState: {

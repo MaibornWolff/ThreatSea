@@ -101,7 +101,7 @@ export const useProjectTabs = (): ProjectTabs => {
 
     if (showProjectCatalogueInnerNavigation) {
         if (pathname.includes("/catalogs")) {
-            // Catalog inner page exposes the catalogue editor and members buttons;
+            // Catalog inner page exposes the catalog editor and members buttons;
             // consumers render them inline alongside the primary toggle.
             if (!checkUserRole(userRole, USER_ROLES.EDITOR)) {
                 finalButtons = [];
@@ -111,7 +111,7 @@ export const useProjectTabs = (): ProjectTabs => {
                     finalButtons = [
                         {
                             value: `/catalogs/${catalogId}`,
-                            text: t("catalogueEditor"),
+                            text: t("catalogEditor"),
                             "data-testid": "navigation-header_catalog-editor-button",
                         },
                         { ...membersButton, value: `/catalogs/${catalogId}/members` },
