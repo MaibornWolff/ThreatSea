@@ -3,6 +3,7 @@
  *     for the routing of the members.
  */
 import { NextFunction, Request, Response } from "express";
+import { db } from "#db/index.js";
 import * as MeasureImpactsService from "#services/measureImpacts.service.js";
 import { getMeasure } from "#services/measures.service.js";
 import { getThreat } from "#services/threats.service.js";
@@ -136,8 +137,12 @@ export async function createMeasureImpact(
     }
 
     try {
-        const measureImpact = await MeasureImpactsService.createMeasureImpact(request.body);
-        await MeasureImpactsService.finalizeThreatWhenOutOfScopeApplied(threatId);
+        const measureImpact = await db.transaction(async (tx) => {
+            const createdMeasureImpact = await MeasureImpactsService.createMeasureImpact(request.body, tx);
+            await MeasureImpactsService.finalizeThreatWhenOutOfScopeApplied(threatId, tx);
+
+            return createdMeasureImpact;
+        });
 
         response.json(measureImpact);
     } catch (error) {
@@ -175,11 +180,12 @@ export async function updateMeasureImpact(
 
     const data = request.body;
     try {
-        const updatedMeasureImpact: MeasureImpactResponse = await MeasureImpactsService.updateMeasureImpact(
-            measureImpactId,
-            data
-        );
-        await MeasureImpactsService.finalizeThreatWhenOutOfScopeApplied(updatedMeasureImpact.threatId!);
+        const updatedMeasureImpact: MeasureImpactResponse = await db.transaction(async (tx) => {
+            const updated = await MeasureImpactsService.updateMeasureImpact(measureImpactId, data, tx);
+            await MeasureImpactsService.finalizeThreatWhenOutOfScopeApplied(updated.threatId!, tx);
+
+            return updated;
+        });
 
         response.json(updatedMeasureImpact);
     } catch (error) {
