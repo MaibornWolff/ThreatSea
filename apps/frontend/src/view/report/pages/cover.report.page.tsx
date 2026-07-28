@@ -4,7 +4,7 @@ import { SystemImage } from "#view/report/components/system-image.report.compone
 import { styles, s3, s6, s2, s1 } from "#view/report/report.style.ts";
 import { Text } from "#view/report/components/text.report.component.tsx";
 import { useTranslation } from "react-i18next";
-import { SystemImageLegend } from "#view/report/components/system-image-legend.report.compoent.tsx";
+import { SystemImageLegend } from "#view/report/components/system-image-legend.report.component.tsx";
 import type { IndexCallback, ProjectReport } from "#api/types/project.types.ts";
 
 type PdfPageProps = Omit<ComponentProps<typeof PdfPage>, "children">;

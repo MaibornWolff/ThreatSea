@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { Page } from "#view/report/components/page.report.component.tsx";
 import { SystemImage } from "#view/report/components/system-image.report.component.tsx";
-import { SystemImageLegend } from "#view/report/components/system-image-legend.report.compoent.tsx";
+import { SystemImageLegend } from "#view/report/components/system-image-legend.report.component.tsx";
 import { Text } from "#view/report/components/text.report.component.tsx";
 import { s1 } from "#view/report/report.style.ts";
 import { useTranslation } from "react-i18next";
