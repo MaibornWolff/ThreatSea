@@ -35,7 +35,7 @@ export async function updateSystem(projectId: number, updateSystemData: UpdateSy
     return await db.transaction(async (tx) => {
         const updatedSystem = await systemService.updateSystem(projectId, updateSystemData, tx);
 
-        await deleteThreatsByPointsOfAttack(getDeletedPointsOfAttack(oldSystem, updatedSystem), tx);
+        await deleteThreatsByPointsOfAttack(getDeletedPointsOfAttack(oldSystem, updatedSystem), projectId, tx);
 
         await createThreatsByPointsOfAttack(
             getCreatedPointsOfAttack(oldSystem, updatedSystem),
@@ -84,12 +84,13 @@ function getPointsOfAttackWithAssets(newSystem: System): PointOfAttack[] {
 
 async function deleteThreatsByPointsOfAttack(
     pointsOfAttack: PointOfAttack[],
+    projectId: number,
     transaction: TransactionType
 ): Promise<void> {
     for (const pointOfAttack of pointsOfAttack) {
-        await deleteGenericThreatsByPointOfAttackId(pointOfAttack.id, pointOfAttack.projectId, transaction);
+        await deleteGenericThreatsByPointOfAttackId(pointOfAttack.id, projectId, transaction);
 
-        await deleteThreatsByPointOfAttackId(pointOfAttack.id, pointOfAttack.projectId, transaction);
+        await deleteThreatsByPointOfAttackId(pointOfAttack.id, projectId, transaction);
     }
 }
 
