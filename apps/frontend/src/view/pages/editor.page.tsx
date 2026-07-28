@@ -46,6 +46,7 @@ import ComponentDialogPage from "./component-dialog.page";
 import { CommunicationContextMenu } from "#view/components/editor-components/editor-communication-interface-context-menu.component.tsx";
 import { useAlert } from "#application/hooks/use-alert.hook.ts";
 import CommunicationInterfaceDialog from "#view/dialogs/add-communication-interface.dialog.tsx";
+import ChangeComponentIconDialog from "#view/dialogs/change-component-icon.dialog.tsx";
 import { LineDrawingProvider } from "#view/components/editor-components/contexts/LineDrawingProvider.tsx";
 import { GRID } from "#utils/connection-waypoints.ts";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
@@ -134,6 +135,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         setShowHelpLines,
         setSelectedComponentName,
         setSelectedComponentDescription,
+        setSelectedComponentSymbol,
         setSelectedConnectionPointDescription,
         addPointOfAttack,
         removePointOfAttack,
@@ -305,6 +307,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     const [communicationMenuOpen, setCommunicationMenuOpen] = useState(false);
     const [communicationMenuComponent, setCommunicationMenuComponent] = useState<AugmentedSystemComponent | null>(null);
     const [isCommunicationInterfaceDialogOpen, setIsCommunicationInterfaceDialogOpen] = useState(false);
+    const [isChangeIconDialogOpen, setIsChangeIconDialogOpen] = useState(false);
 
     // Memoize line array
     const lineArray = useMemo(() => createLineArray(), []);
@@ -1184,6 +1187,19 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         setIsCommunicationInterfaceDialogOpen(false);
     };
 
+    const handleOpenChangeIconDialog = () => {
+        setIsChangeIconDialogOpen(true);
+    };
+
+    const handleCloseChangeIconDialog = () => {
+        setIsChangeIconDialogOpen(false);
+    };
+
+    // Apply the chosen icon to the selected component instance only (issue #577).
+    const handleChangeComponentIcon = (symbol: string) => {
+        setSelectedComponentSymbol(symbol);
+    };
+
     // Memoize grid rendering calculations
     const gridRenderConfig = useMemo(() => {
         let stageOffsetX = 0;
@@ -1534,6 +1550,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                     selectedConnectionPoint={selectedConnectionPoint}
                     userRole={userRole}
                     handleOnDescriptionChange={handleOnDescriptionChange}
+                    handleOpenChangeIconDialog={handleOpenChangeIconDialog}
                     connectedComponents={connectedComponentsForSelected}
                     handleDeleteConnectionBetweenComponents={handleDeleteConnectionBetweenComponents}
                     handleOnConnectionPointDescriptionChange={handleOnConnectionPointDescriptionChange}
@@ -1575,6 +1592,13 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                         open={true}
                         onClose={handleCloseCommunicationInterfaceDialog}
                         handleCreateNew={handleCreateNewCommunicationInterface}
+                    />
+                )}
+                {isChangeIconDialogOpen && selectedComponent != null && (
+                    <ChangeComponentIconDialog
+                        component={selectedComponent}
+                        onClose={handleCloseChangeIconDialog}
+                        onConfirm={handleChangeComponentIcon}
                     />
                 )}
             </Page>

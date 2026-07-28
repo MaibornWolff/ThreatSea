@@ -30,6 +30,12 @@
     "component": {
       "title": "Komponente"
     },
+    "icon": {
+      "title": "Symbol",
+      "change": "Symbol ändern",
+      "standard": "Standard-Symbol",
+      "custom": "Eigenes Symbol"
+    },
     "pointsofattack": {
       "title": "Angriffspunkte"
     },
@@ -71,6 +77,10 @@
   "setAllBtn": "Alle an",
   "unsetAllBtn": "Alle aus",
   "isProjectComponent": "nur im Projekt verfügbar",
+  "changeComponentIcon": {
+    "title": "Komponentensymbol ändern",
+    "appliesTo": "Gilt nur für \"{{name}}\" — der Komponententyp bleibt unverändert."
+  },
   "customComponent": {
     "delete": "Löschen",
     "edit": "Bearbeiten",

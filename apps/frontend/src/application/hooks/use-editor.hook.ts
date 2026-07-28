@@ -266,6 +266,18 @@ export const useEditor = ({
             })
         );
     };
+    const setSelectedComponentSymbol = (symbol: string | null): void => {
+        if (!selectedComponentId) {
+            return;
+        }
+
+        dispatch(
+            SystemActions.setComponent({
+                id: selectedComponentId,
+                changes: { symbol },
+            })
+        );
+    };
 
     const setAlwaysShowAnchorsOfComponent = (componentId: string, showAlways: boolean): void => {
         dispatch(
@@ -1092,6 +1104,7 @@ export const useEditor = ({
         setComponentsGridPosition,
         setSelectedComponentName,
         setSelectedComponentDescription,
+        setSelectedComponentSymbol,
         setSelectedConnectionPointDescription,
         addPointOfAttack,
         removePointOfAttack,
