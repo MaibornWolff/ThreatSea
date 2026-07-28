@@ -53,7 +53,7 @@ export async function getMultipleMeasureImpacts(measureImpactIds: number[]): Pro
 /**
  * Gets a measure impact from a specified measure.
  *
- * @param {number} measureId - The id of the current project.
+ * @param {number} measureId - The id of the measure.
  * @returns {Promise<MeasureImpact | null>} A promise that resolves to the measure impact or null if not found.
  */
 export async function getMeasureImpactByMeasure(measureId: number): Promise<MeasureImpact | null> {
@@ -65,7 +65,7 @@ export async function getMeasureImpactByMeasure(measureId: number): Promise<Meas
 /**
  * Gets measure impacts from a specified threat.
  *
- * @param {number} threatId - The id of the current project.
+ * @param {number} threatId - The id of the threat.
  * @returns {Promise<MeasureImpact[]>} A promise that resolves to an array of measure impacts.
  */
 export async function getMeasureImpactsByThreat(threatId: number): Promise<MeasureImpact[]> {
@@ -155,14 +155,21 @@ export async function deleteMeasureImpactsByThreat(threatId: number): Promise<vo
  * the status.
  *
  * @param {number} threatId - The id of the threat the measure impact belongs to.
+ * @param {TransactionType} [transaction] - An optional transaction to run the queries in.
  * @returns {Promise<void>} A promise that resolves once the status has been reconciled.
  */
-export async function finalizeThreatWhenOutOfScopeApplied(threatId: number): Promise<void> {
-    const outOfScopeImpact = await db.query.measureImpacts.findFirst({
+export async function finalizeThreatWhenOutOfScopeApplied(
+    threatId: number,
+    transaction: TransactionType | undefined = undefined
+): Promise<void> {
+    const outOfScopeImpact = await (transaction ?? db).query.measureImpacts.findFirst({
         where: and(eq(measureImpacts.threatId, threatId), eq(measureImpacts.setsOutOfScope, true)),
     });
 
     if (outOfScopeImpact) {
-        await db.update(threats).set({ status: THREAT_STATUSES.FINALIZED }).where(eq(threats.id, threatId));
+        await (transaction ?? db)
+            .update(threats)
+            .set({ status: THREAT_STATUSES.FINALIZED })
+            .where(eq(threats.id, threatId));
     }
 }
