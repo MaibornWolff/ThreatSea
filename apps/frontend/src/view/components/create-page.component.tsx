@@ -393,6 +393,40 @@ export const CreatePage = <P extends object>(
                                 </Box>
                             </Box>
                         )}
+                        {getCatalogInfo && catalog && (
+                            <Box
+                                sx={{
+                                    gridArea: "title",
+                                    justifySelf: "center",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    bgcolor: "primary.dark",
+                                    color: "text.primary",
+                                    borderRadius: 5,
+                                    boxShadow: 1,
+                                }}
+                            >
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        p: 1,
+                                        pl: 2,
+                                        pr: 2,
+                                    }}
+                                >
+                                    <Typography
+                                        data-testid="catalog-header_name"
+                                        sx={{
+                                            fontSize: "0.875rem",
+                                            fontWeight: "bold",
+                                        }}
+                                    >
+                                        {catalog.name}
+                                    </Typography>
+                                </Box>
+                            </Box>
+                        )}
                         <Box
                             sx={(theme) => ({
                                 display: "contents",

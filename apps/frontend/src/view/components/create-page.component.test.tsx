@@ -4,11 +4,12 @@ import type { MouseEvent } from "react";
 import type { ExtendedProject } from "#api/types/project.types.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 import { ProjectsActions } from "#application/actions/projects.actions.ts";
+import catalogsReducer from "#application/reducers/catalogs.reducer.ts";
 import projectsReducer from "#application/reducers/projects.reducer.ts";
 import { navigationReducer } from "#application/reducers/navigation.reducer.ts";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { translationUtil } from "#utils/translations.ts";
-import { createProject } from "#test-utils/builders.ts";
+import { createCatalog, createProject } from "#test-utils/builders.ts";
 import { mockUseConfirm } from "#test-utils/mock-hooks.ts";
 
 // Importing the real #main.tsx bootstraps the whole app (createStore + ReactDOM render).
@@ -152,5 +153,43 @@ describe("CreatePage — project header actions", () => {
 
         expect(deleteProject).toHaveBeenCalledWith(project);
         expect(navigate).toHaveBeenCalledWith("/projects");
+    });
+});
+
+describe("CreatePage — catalogue header", () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        mockUseConfirm({ openConfirm });
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    const renderOnCatalogue = (current: ReturnType<typeof createCatalog> | undefined, getCatalogInfo: boolean) => {
+        const Page = CreatePage(HeaderRightSlot, PageBody);
+        renderWithProviders(<Page />, {
+            preloadedState: {
+                catalogs: { ...catalogsReducer(undefined, { type: "@@INIT" }), current },
+                navigation: {
+                    ...navigationReducer(undefined, { type: "@@INIT" }),
+                    showProjectInfo: false,
+                    getCatalogInfo,
+                },
+            },
+            initialEntries: ["/catalogs/5"],
+        });
+    };
+
+    it("shows the current catalogue's name so the active catalogue is identifiable", () => {
+        renderOnCatalogue(createCatalog({ id: 5, name: "Threat Library" }), true);
+
+        expect(screen.getByTestId("catalog-header_name")).toHaveTextContent("Threat Library");
+    });
+
+    it("renders no catalogue title when the catalogue info is not requested", () => {
+        renderOnCatalogue(createCatalog({ id: 5, name: "Threat Library" }), false);
+
+        expect(screen.queryByTestId("catalog-header_name")).not.toBeInTheDocument();
     });
 });

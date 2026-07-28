@@ -55,6 +55,7 @@ export class CatalogPage extends BasePage {
     readonly backToCatalogsButton: Locator;
     readonly projectsNavButton: Locator;
     readonly catalogsNavButton: Locator;
+    readonly catalogEditorButton: Locator;
     readonly membersButton: Locator;
     readonly accountButton: Locator;
     readonly accountMenuUsername: Locator;
@@ -130,6 +131,7 @@ export class CatalogPage extends BasePage {
         this.backToCatalogsButton = page.locator('[data-testid="catalog-page_back-to-catalogs-button"]');
         this.projectsNavButton = page.locator('[data-testid="navigation-header_projects-page-button"]');
         this.catalogsNavButton = page.locator('[data-testid="navigation-header_catalogs-page-button"]');
+        this.catalogEditorButton = page.locator('[data-testid="navigation-header_catalog-editor-button"]');
         this.membersButton = page.locator('[data-testid="navigation-header_members-button"]');
         this.accountButton = page.locator('[data-testid="navigation-header_account-button"]');
         this.accountMenuUsername = page.locator('[data-testid="account-menu_username"]');
