@@ -6,7 +6,16 @@ import request from "supertest";
 import { nanoid } from "nanoid";
 import { db } from "#db/index.js";
 import { eq } from "drizzle-orm";
-import { assets, catalogs, threats, CreateThreat, genericThreats, systems, usersCatalogs } from "#db/schema.js";
+import {
+    assets,
+    catalogs,
+    threats,
+    CreateThreat,
+    CreateGenericThreat,
+    genericThreats,
+    systems,
+    usersCatalogs,
+} from "#db/schema.js";
 import { POINTS_OF_ATTACK } from "#types/points-of-attack.types.js";
 import { ATTACKERS } from "#types/attackers.types.js";
 import { CONFIDENTIALITY_LEVELS } from "#types/confidentiality-levels.types.js";
@@ -14,7 +23,6 @@ import { app } from "#server.js";
 import { LANGUAGES } from "#types/languages.type.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
 import { CreateCatalogThreatRequest } from "#types/catalog-threat.types.js";
-import { CreateGenericThreatRequest } from "#types/generic-threat.types.js";
 import { UpdateThreatRequest } from "#types/threat.types.js";
 import { THREAT_STATUSES } from "#types/threat-statuses.types.js";
 
@@ -29,7 +37,7 @@ const VALID_CATALOG_THREAT_1: InstanceType<typeof CreateCatalogThreatRequest> = 
     availability: true,
 };
 
-const VALID_GENERIC_THREAT_1: Omit<InstanceType<typeof CreateGenericThreatRequest>, "catalogThreatId"> = {
+const VALID_GENERIC_THREAT_1: Omit<CreateGenericThreat, "catalogThreatId" | "projectId"> = {
     pointOfAttackId: nanoid(),
     name: "Generic Threat 1",
     description: "Generic description 1",

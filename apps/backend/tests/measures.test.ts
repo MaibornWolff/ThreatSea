@@ -9,6 +9,7 @@ import {
     catalogs,
     threats,
     CreateThreat,
+    CreateGenericThreat,
     genericThreats,
     measureImpacts,
     measures,
@@ -23,7 +24,6 @@ import { USER_ROLES } from "#types/user-roles.types.js";
 import { CreateProjectRequest } from "#types/project.types.js";
 import { CreateMeasureRequest } from "#types/measure.types.js";
 import { CreateMeasureImpactRequest } from "#types/measure-impact.types.js";
-import { CreateGenericThreatRequest } from "#types/generic-threat.types.js";
 import { THREAT_STATUSES } from "#types/threat-statuses.types.js";
 import { CreateCatalogThreatRequest } from "#types/catalog-threat.types.js";
 import { CreateCatalogMeasureRequest } from "#types/catalog-measure.types.js";
@@ -96,7 +96,7 @@ const INVALID_MEASURE_SCHEDULED_AT_BAD_MONTH: InstanceType<typeof CreateMeasureR
     catalogMeasureId: null,
 };
 
-const VALID_GENERIC_THREAT_1: Omit<InstanceType<typeof CreateGenericThreatRequest>, "catalogThreatId"> = {
+const VALID_GENERIC_THREAT_1: Omit<CreateGenericThreat, "catalogThreatId" | "projectId"> = {
     pointOfAttackId: nanoid(),
     name: "Generic Threat 1",
     description: "Generic description 1",
