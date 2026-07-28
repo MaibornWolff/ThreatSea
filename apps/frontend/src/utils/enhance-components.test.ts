@@ -35,9 +35,22 @@ describe("enhanceComponents", () => {
         expect(result.every((c) => c.selected === false)).toBe(true);
     });
 
-    it("overrides the symbol with the matching standard component's symbol", () => {
+    it("keeps a standard component's own per-instance symbol over the standard type symbol", () => {
         const components = [
             createSystemComponent({ id: "comp-1", type: STANDARD_COMPONENT_TYPES.SERVER, symbol: "own" }),
+        ];
+        const standardComponents = [
+            createStandardComponent({ id: STANDARD_COMPONENT_TYPES.SERVER, symbol: "server-symbol" }),
+        ];
+
+        const result = enhanceComponents(components, standardComponents, null, START_ANCHOR);
+
+        expect(result[0]?.symbol).toBe("own");
+    });
+
+    it("falls back to the standard component's symbol when the instance has no symbol", () => {
+        const components = [
+            createSystemComponent({ id: "comp-1", type: STANDARD_COMPONENT_TYPES.SERVER, symbol: null }),
         ];
         const standardComponents = [
             createStandardComponent({ id: STANDARD_COMPONENT_TYPES.SERVER, symbol: "server-symbol" }),

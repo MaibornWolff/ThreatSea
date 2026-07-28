@@ -8,10 +8,10 @@ export type EnhancedComponent = AugmentedSystemComponent & {
 };
 
 /**
- * Merges each system component with its standard symbol and a `selected` flag
- * for rendering on the canvas. The component's own `symbol` is overridden by the
- * matching standard component's symbol when one exists. Pure: it derives output
- * from input only and dispatches nothing.
+ * Merges each system component with a `selected` flag and the symbol (icon) to render on the canvas.
+ * The component's own per-instance `symbol` takes precedence; the matching standard component type's
+ * symbol is used only as a fallback when the instance has none. Pure: it derives output from input
+ * only and dispatches nothing.
  */
 export const enhanceComponents = (
     components: AugmentedSystemComponent[],
@@ -19,16 +19,16 @@ export const enhanceComponents = (
     selectedComponentId: string | null,
     startAnchor: unknown
 ): EnhancedComponent[] => {
-    return components.map((c) => {
-        // Find the standard component that matches the type of c.
-        const standardComponent = standardComponents.find((sc) => sc.id === c.type);
+    return components.map((component) => {
+        // Find the standard component type whose id matches this component's type.
+        const standardComponentType = standardComponents.find((candidate) => candidate.id === component.type);
 
         return {
-            ...c,
-            selected: selectedComponentId === c.id,
+            ...component,
+            selected: selectedComponentId === component.id,
             startAnchor,
-            // Set the symbol based on the matching standard component.
-            symbol: standardComponent ? standardComponent.symbol : c.symbol,
+            // Per-instance icon wins; fall back to the standard component type's symbol only when unset.
+            symbol: component.symbol ?? standardComponentType?.symbol ?? null,
         };
     });
 };
