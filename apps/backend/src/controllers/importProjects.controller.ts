@@ -120,18 +120,19 @@ export async function importProject(request: Request<void>, response: Response, 
     const catalogThreatsDict = new Map<number, number>();
     const catalogMeasuresDict = new Map<number, number>();
 
+    const { body, user } = request;
+
+    // Upgrade older export shapes (e.g. v3 flat threats) to the current data model in place.
+    upgradeImportBodyToCurrent(body);
+
+    if (body.datamodelVersion !== DATAMODEL_VERSION) {
+        next(new BadRequestError("Invalid data model version"));
+        return;
+    }
+
     try {
         await db.transaction(async (tx) => {
-            const { body, user } = request;
             const oldProject = body.project as Project;
-
-            // Upgrade older export shapes (e.g. v3 flat threats) to the current data model in place.
-            upgradeImportBodyToCurrent(body);
-
-            if (body.datamodelVersion !== DATAMODEL_VERSION) {
-                next(new BadRequestError("Invalid data model version"));
-                return;
-            }
 
             const usedCatalog = {
                 catalog: body.catalog as Catalog,
