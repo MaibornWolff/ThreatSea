@@ -35,14 +35,16 @@ export type IconRejectionReason = "type" | "size" | "content";
 
 export type IconValidationResult = { ok: true; dataUrl: string } | { ok: false; reason: IconRejectionReason };
 
-// Magic bytes of the accepted formats.
-const IMAGE_SIGNATURES: readonly number[][] = [
-    [0x89, 0x50, 0x4e, 0x47], // PNG
-    [0xff, 0xd8, 0xff], // JPEG
-];
+// Magic bytes per accepted MIME type.
+const IMAGE_SIGNATURES: Record<string, readonly number[]> = {
+    "image/png": [0x89, 0x50, 0x4e, 0x47],
+    "image/jpeg": [0xff, 0xd8, 0xff],
+};
 
-function hasAcceptedImageSignature(header: Uint8Array): boolean {
-    return IMAGE_SIGNATURES.some((signature) => signature.every((byte, index) => header[index] === byte));
+// Check the bytes against the signature for the declared MIME type, so type and content must agree.
+function hasMatchingImageSignature(mimeType: string, header: Uint8Array): boolean {
+    const signature = IMAGE_SIGNATURES[mimeType];
+    return signature != null && signature.every((byte, index) => header[index] === byte);
 }
 
 /**
@@ -58,7 +60,7 @@ export async function validateAndConvertIconFile(file: File): Promise<IconValida
     }
 
     const header = new Uint8Array(await file.arrayBuffer());
-    if (!hasAcceptedImageSignature(header)) {
+    if (!hasMatchingImageSignature(file.type, header)) {
         return { ok: false, reason: "content" };
     }
 

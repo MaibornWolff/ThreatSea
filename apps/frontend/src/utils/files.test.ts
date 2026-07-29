@@ -38,6 +38,18 @@ describe("validateAndConvertIconFile", () => {
         expect(result).toEqual({ ok: false, reason: "type" });
     });
 
+    it("rejects PNG bytes labeled as JPEG (type and content disagree)", async () => {
+        const result = await validateAndConvertIconFile(buildFile({ leadingBytes: PNG_SIGNATURE, type: "image/jpeg" }));
+
+        expect(result).toEqual({ ok: false, reason: "content" });
+    });
+
+    it("rejects JPEG bytes labeled as PNG (type and content disagree)", async () => {
+        const result = await validateAndConvertIconFile(buildFile({ leadingBytes: JPEG_SIGNATURE, type: "image/png" }));
+
+        expect(result).toEqual({ ok: false, reason: "content" });
+    });
+
     it("rejects a file larger than the size limit", async () => {
         const result = await validateAndConvertIconFile(
             buildFile({ leadingBytes: PNG_SIGNATURE, size: MAX_ICON_BYTES + 1, type: "image/png" })
