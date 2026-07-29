@@ -72,7 +72,7 @@ const ChangeComponentIconDialog = ({ component, onClose, onConfirm, ...props }: 
         if (!result.ok) {
             openConfirm({
                 message: t("customComponent.fileUnusable"),
-                acceptText: "Okay",
+                acceptText: t("okBtn"),
                 cancelText: null,
                 onAccept: () => {
                     /* Do nothing */
