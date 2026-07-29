@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { createSystemComponent } from "#test-utils/builders.ts";
@@ -73,6 +73,28 @@ describe("ChangeComponentIconDialog", () => {
             />
         );
 
+        expect(screen.getByTestId("save-component-icon")).toBeDisabled();
+    });
+
+    it("rejects an invalid upload: raises an error and applies nothing", async () => {
+        const user = userEvent.setup();
+        const onConfirm = vi.fn();
+        const { store } = renderWithProviders(
+            <ChangeComponentIconDialog
+                component={createSystemComponent({ name: "Blank", symbol: null })}
+                onClose={vi.fn()}
+                onConfirm={onConfirm}
+            />
+        );
+
+        // The dialog renders in a portal, so query the document. image/png MIME passes the input's
+        // `accept`, but the bytes are not a PNG, so validation rejects it.
+        const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+        await user.upload(fileInput, new File(["not a png"], "icon.png", { type: "image/png" }));
+
+        // Error surfaced via the shared confirm dialog; the symbol was not applied.
+        await waitFor(() => expect(store.getState().confirm.open).toBe(true));
+        expect(onConfirm).not.toHaveBeenCalled();
         expect(screen.getByTestId("save-component-icon")).toBeDisabled();
     });
 });
