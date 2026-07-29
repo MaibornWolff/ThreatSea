@@ -104,6 +104,30 @@ describe("import a project", () => {
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(400);
     });
+
+    it("should reject an import whose componentTypes is an object instead of an array", async () => {
+        const project = JSON.parse(JSON.stringify(VALID_TEST_PROJECT));
+        project.componentTypes = {};
+
+        const res = await request(app)
+            .post("/api/import")
+            .send(project)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(400);
+    });
+
+    it("should reject an import whose system components is an object instead of an array", async () => {
+        const project = JSON.parse(JSON.stringify(VALID_TEST_PROJECT));
+        project.system.data.components = {};
+
+        const res = await request(app)
+            .post("/api/import")
+            .send(project)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(400);
+    });
 });
 
 describe("get report from imported project", () => {

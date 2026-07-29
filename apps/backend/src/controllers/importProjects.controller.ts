@@ -32,6 +32,7 @@ import { createEmptySystem, updateSystem } from "#services/system.service.js";
 import { createThreat } from "#services/threats.service.js";
 import { BadRequestError } from "#errors/bad-request.error.js";
 import {
+    FIELD_MUST_BE_ARRAY_MESSAGE,
     FIELD_MUST_BE_VALID_IMAGE_DATA,
     IMAGE_DATA_URL_PATTERN,
     MAX_SYMBOL_LENGTH,
@@ -40,8 +41,8 @@ import {
 } from "#middlewares/input-validations/validator-messages.js";
 
 interface ImportSymbolBody {
-    componentTypes?: { symbol?: unknown }[];
-    system?: { data?: { components?: { symbol?: unknown }[] } };
+    componentTypes?: unknown;
+    system?: { data?: { components?: unknown } };
 }
 
 /**
@@ -66,21 +67,28 @@ function findInvalidImportedSymbol(body: ImportSymbolBody): string | null {
         return null;
     };
 
-    for (const componentType of body.componentTypes ?? []) {
-        const error = checkSymbol(componentType.symbol, IMAGE_DATA_URL_PATTERN);
-        if (error != null) {
-            return error;
+    // A present-but-non-array value would make `for...of` throw here, before the import's try/catch,
+    // so reject it through the normal bad-request path instead.
+    const checkSymbolArray = (value: unknown, field: string, pattern: RegExp): string | null => {
+        if (value == null) {
+            return null;
         }
-    }
-
-    for (const component of body.system?.data?.components ?? []) {
-        const error = checkSymbol(component.symbol, SYSTEM_COMPONENT_SYMBOL_PATTERN);
-        if (error != null) {
-            return error;
+        if (!Array.isArray(value)) {
+            return FIELD_MUST_BE_ARRAY_MESSAGE(field);
         }
-    }
+        for (const item of value) {
+            const error = checkSymbol((item as { symbol?: unknown } | null)?.symbol, pattern);
+            if (error != null) {
+                return error;
+            }
+        }
+        return null;
+    };
 
-    return null;
+    return (
+        checkSymbolArray(body.componentTypes, "componentTypes", IMAGE_DATA_URL_PATTERN) ??
+        checkSymbolArray(body.system?.data?.components, "components", SYSTEM_COMPONENT_SYMBOL_PATTERN)
+    );
 }
 import { Logger } from "#logging/index.js";
 
