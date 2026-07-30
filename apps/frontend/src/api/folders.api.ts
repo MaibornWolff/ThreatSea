@@ -60,19 +60,23 @@ export class FoldersAPI {
     }
 
     /**
-     * Moves a project into a folder (or out of any folder when folderId is null).
-     * @param {MoveProjectRequest} data - The project id and its target folder.
+     * Files a project into a folder, or ungroups it when folderId is null. A folder owns a
+     * project via the caller's membership, so filing is a PUT to the target folder and
+     * ungrouping is a DELETE from the folder the project currently sits in.
+     * @param {MoveProjectRequest} data - The project id, target folder, and current folder.
      * @returns The updated project.
      */
     static async moveProject(data: MoveProjectRequest): Promise<ExtendedProject> {
-        const { projectId, folderId } = data;
+        const { projectId, folderId, currentFolderId } = data;
 
-        return await fetchAPI(`/projects/${projectId}/folder`, {
+        if (folderId === null) {
+            return await fetchAPI(`/folders/${currentFolderId}/projects/${projectId}`, {
+                method: "DELETE",
+            });
+        }
+
+        return await fetchAPI(`/folders/${folderId}/projects/${projectId}`, {
             method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ folderId }),
         });
     }
 }

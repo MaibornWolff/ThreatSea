@@ -157,7 +157,7 @@ describe("folder tests", () => {
 
             const parent = await post("/api/folders", { name: "To delete" });
             const child = await post("/api/folders", { name: "Nested", parentId: parent.body.id });
-            await put(`/api/projects/${projectId}/folder`, { folderId: child.body.id });
+            await put(`/api/folders/${child.body.id}/projects/${projectId}`, {});
 
             const res = await del(`/api/folders/${parent.body.id}`);
             expect(res.statusCode).toEqual(204);
@@ -181,7 +181,7 @@ describe("folder tests", () => {
             const projectId = await seedProject(catalogId);
             const folder = await post("/api/folders", { name: "Bucket" });
 
-            const moveRes = await put(`/api/projects/${projectId}/folder`, { folderId: folder.body.id });
+            const moveRes = await put(`/api/folders/${folder.body.id}/projects/${projectId}`, {});
             expect(moveRes.statusCode).toEqual(200);
             expect(moveRes.body.folderId).toBe(folder.body.id);
 
@@ -190,13 +190,13 @@ describe("folder tests", () => {
             expect(listed.folderId).toBe(folder.body.id);
         });
 
-        it("should remove a project from its folder when folderId is null", async () => {
+        it("should remove a project from its folder when deleted from it", async () => {
             const catalogId = await seedCatalog();
             const projectId = await seedProject(catalogId);
             const folder = await post("/api/folders", { name: "Temp bucket" });
-            await put(`/api/projects/${projectId}/folder`, { folderId: folder.body.id });
+            await put(`/api/folders/${folder.body.id}/projects/${projectId}`, {});
 
-            const res = await put(`/api/projects/${projectId}/folder`, { folderId: null });
+            const res = await del(`/api/folders/${folder.body.id}/projects/${projectId}`);
             expect(res.statusCode).toEqual(200);
             expect(res.body.folderId).toBeNull();
         });
@@ -214,7 +214,7 @@ describe("folder tests", () => {
                 .values({ name: "Foreign", userId: otherUser!.id })
                 .returning();
 
-            const res = await put(`/api/projects/${projectId}/folder`, { folderId: otherFolder!.id });
+            const res = await put(`/api/folders/${otherFolder!.id}/projects/${projectId}`, {});
             expect(res.statusCode).toBe(404);
         });
     });

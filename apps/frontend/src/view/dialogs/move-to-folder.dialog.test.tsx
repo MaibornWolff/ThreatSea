@@ -58,7 +58,7 @@ describe("MoveToFolderDialog", () => {
             await userEvent.click(screen.getByTestId("move-target-1"));
             await userEvent.click(screen.getByTestId("save-button"));
 
-            expect(spy).toHaveBeenCalledWith({ projectId: 5, folderId: 1 });
+            expect(spy).toHaveBeenCalledWith({ projectId: 5, folderId: 1, currentFolderId: null });
             spy.mockRestore();
         });
 

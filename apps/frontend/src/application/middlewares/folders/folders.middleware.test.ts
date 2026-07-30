@@ -64,7 +64,7 @@ describe("folders.middleware", () => {
                 createProject({ id: 7, folderId: 4, role: USER_ROLES.VIEWER })
             );
 
-            store.dispatch(FoldersActions.moveProject({ projectId: 7, folderId: 4 }));
+            store.dispatch(FoldersActions.moveProject({ projectId: 7, folderId: 4, currentFolderId: null }));
 
             await vi.waitFor(() => expect(store.getState().projects.entities[7]?.folderId).toBe(4));
             // A viewer may move a project — the placement changes but the role must not be elevated.
@@ -84,7 +84,7 @@ describe("folders.middleware", () => {
                 createProject({ id: 7, folderId: null, role: USER_ROLES.VIEWER })
             );
 
-            store.dispatch(FoldersActions.moveProject({ projectId: 7, folderId: null }));
+            store.dispatch(FoldersActions.moveProject({ projectId: 7, folderId: null, currentFolderId: 4 }));
 
             await vi.waitFor(() => expect(store.getState().projects.entities[7]?.folderId).toBeNull());
             expect(store.getState().projects.entities[7]?.role).toBe(USER_ROLES.VIEWER);
@@ -94,7 +94,7 @@ describe("folders.middleware", () => {
             vi.spyOn(FoldersAPI, "moveProject").mockRejectedValue(new Error("nope"));
             const store = createStore();
 
-            store.dispatch(FoldersActions.moveProject({ projectId: 7, folderId: 4 }));
+            store.dispatch(FoldersActions.moveProject({ projectId: 7, folderId: 4, currentFolderId: null }));
 
             await vi.waitFor(() => expect(store.getState().alert.visible).toBe(true));
             expect(store.getState().alert.text).toContain("Failed to move project");

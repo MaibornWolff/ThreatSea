@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsDefined, IsInt, IsNotEmpty, IsOptional, IsString, MaxLength, ValidateIf } from "class-validator";
+import { IsDefined, IsInt, IsNotEmpty, IsOptional, IsString, MaxLength } from "class-validator";
 import {
     FIELD_MUST_BE_INT_MESSAGE,
     FIELD_MUST_BE_STRING_MESSAGE,
@@ -48,12 +48,12 @@ export class UpdateFolderRequest {
     parentId?: number | null;
 }
 
-export class MoveProjectRequest {
-    // Target folder for the project, or null to remove it from any folder (ungrouped).
-    @ValidateIf((object: MoveProjectRequest) => object.folderId !== null)
-    @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("folderId") })
-    @IsInt({ message: FIELD_MUST_BE_INT_MESSAGE("folderId") })
-    folderId!: number | null;
+// Addresses a single project inside one of the caller's folders (folderId + projectId in the path).
+export class FolderProjectParams extends FolderIdParam {
+    @IsDefined({ message: PARAM_MUST_EXIST_MESSAGE("projectId") })
+    @Type(() => Number)
+    @IsInt({ message: PARAM_MUST_BE_INT_MESSAGE("projectId") })
+    projectId!: number;
 }
 
 export interface FolderResponse {

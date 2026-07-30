@@ -19,5 +19,8 @@ export interface UpdateFolderRequest {
 
 export interface MoveProjectRequest {
     projectId: number;
+    // Target folder, or null to ungroup.
     folderId: number | null;
+    // Where the project sits now — addresses the ungroup DELETE (/folders/:currentFolderId/projects/:id).
+    currentFolderId: number | null;
 }

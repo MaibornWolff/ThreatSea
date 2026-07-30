@@ -3,9 +3,25 @@
  * (creation / rename / move / deletion).
  */
 import express from "express";
-import { createFolder, deleteFolder, getFolders, updateFolder } from "#controllers/folders.controller.js";
-import { CheckFolderOwnershipHandler } from "#guards/authorisation.guard.js";
-import { CreateFolderRequest, FolderIdParam, FolderResponse, UpdateFolderRequest } from "#types/folder.types.js";
+import {
+    addProjectToFolder,
+    createFolder,
+    deleteFolder,
+    getFolders,
+    removeProjectFromFolder,
+    updateFolder,
+} from "#controllers/folders.controller.js";
+import { CheckFolderOwnershipHandler, CheckProjectRoleHandler } from "#guards/authorisation.guard.js";
+import { CheckProjectExistenceHandler } from "#middlewares/check-existence.middleware.js";
+import {
+    CreateFolderRequest,
+    FolderIdParam,
+    FolderProjectParams,
+    FolderResponse,
+    UpdateFolderRequest,
+} from "#types/folder.types.js";
+import { ExtendedProjectResponse } from "#types/project.types.js";
+import { USER_ROLES } from "#types/user-roles.types.js";
 import {
     ValidateBodyHandler,
     ValidateParamHandler,
@@ -36,4 +52,24 @@ foldersRouter.delete<FolderIdParam, void, void>(
     ValidateParamHandler(FolderIdParam),
     CheckFolderOwnershipHandler(),
     deleteFolder
+);
+
+// Per-user placement: a project sits in the caller's folder via their own membership row, so
+// filing (PUT) and ungrouping (DELETE) only require VIEWER on the project, plus folder ownership.
+foldersRouter.put<FolderProjectParams, ExtendedProjectResponse, void>(
+    `/:${idParam}/projects/:projectId`,
+    ValidateParamHandler(FolderProjectParams),
+    CheckFolderOwnershipHandler(),
+    CheckProjectExistenceHandler,
+    CheckProjectRoleHandler(USER_ROLES.VIEWER),
+    addProjectToFolder
+);
+
+foldersRouter.delete<FolderProjectParams, ExtendedProjectResponse, void>(
+    `/:${idParam}/projects/:projectId`,
+    ValidateParamHandler(FolderProjectParams),
+    CheckFolderOwnershipHandler(),
+    CheckProjectExistenceHandler,
+    CheckProjectRoleHandler(USER_ROLES.VIEWER),
+    removeProjectFromFolder
 );

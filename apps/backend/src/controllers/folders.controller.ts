@@ -7,11 +7,11 @@ import { NotFoundError } from "#errors/not-found.error.js";
 import {
     CreateFolderRequest,
     FolderIdParam,
+    FolderProjectParams,
     FolderResponse,
-    MoveProjectRequest,
     UpdateFolderRequest,
 } from "#types/folder.types.js";
-import { ExtendedProjectResponse, ProjectIdParam } from "#types/project.types.js";
+import { ExtendedProjectResponse } from "#types/project.types.js";
 
 /**
  * Gets all folders of the current user.
@@ -72,11 +72,11 @@ export async function deleteFolder(
 }
 
 /**
- * Moves a project into a folder (or out of any folder when folderId is null) for the
- * current user. Returns the updated project so the client can refresh its placement.
+ * Files a project into one of the caller's folders. Placement is per-user, so this only
+ * changes the caller's own membership row. Returns the updated project.
  */
-export async function moveProjectToFolder(
-    request: Request<ProjectIdParam, ExtendedProjectResponse, MoveProjectRequest>,
+export async function addProjectToFolder(
+    request: Request<FolderProjectParams, ExtendedProjectResponse, void>,
     response: Response<ExtendedProjectResponse>,
     next: NextFunction
 ): Promise<void> {
@@ -84,8 +84,30 @@ export async function moveProjectToFolder(
         const project = await FoldersService.moveProject(
             request.user!.id!,
             request.params.projectId,
-            request.body.folderId
+            request.params.folderId
         );
+        if (project === null) {
+            next(new NotFoundError("Project not found"));
+            return;
+        }
+
+        response.json(project);
+    } catch (error) {
+        next(error);
+    }
+}
+
+/**
+ * Removes a project from a folder for the caller, dropping it back to ungrouped. Returns
+ * the updated project so the client can refresh its placement.
+ */
+export async function removeProjectFromFolder(
+    request: Request<FolderProjectParams, ExtendedProjectResponse, void>,
+    response: Response<ExtendedProjectResponse>,
+    next: NextFunction
+): Promise<void> {
+    try {
+        const project = await FoldersService.moveProject(request.user!.id!, request.params.projectId, null);
         if (project === null) {
             next(new NotFoundError("Project not found"));
             return;

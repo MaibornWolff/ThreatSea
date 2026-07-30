@@ -80,7 +80,13 @@ const MoveToFolderDialog = ({ project, folder, ...props }: MoveToFolderDialogPro
         if (isFolderMode) {
             dispatch(FoldersActions.updateFolder({ id: folder.id, parentId: selected }));
         } else if (project) {
-            dispatch(FoldersActions.moveProject({ projectId: project.id, folderId: selected }));
+            dispatch(
+                FoldersActions.moveProject({
+                    projectId: project.id,
+                    folderId: selected,
+                    currentFolderId: project.folderId ?? null,
+                })
+            );
         }
         closeDialog();
     };
