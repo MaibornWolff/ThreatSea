@@ -70,6 +70,9 @@ export class FoldersAPI {
         const { projectId, folderId, currentFolderId } = data;
 
         if (folderId === null) {
+            if (currentFolderId === null) {
+                throw new Error("Project is already ungrouped");
+            }
             return await fetchAPI(`/folders/${currentFolderId}/projects/${projectId}`, {
                 method: "DELETE",
             });
