@@ -151,6 +151,7 @@ const FolderSection = ({
                 right={
                     <IconButton
                         size="small"
+                        title={t("folders.folderActions")}
                         onClick={(event) => setAnchorElement(event.currentTarget)}
                         data-testid={`folder-section-${node.folder.id}_menu-button`}
                     >

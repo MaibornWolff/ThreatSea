@@ -10,6 +10,7 @@
   "catalogs": "Catalog",
   "heading": "Projects",
   "folders.newFolder": "New folder",
+  "folders.folderActions": "Folder actions",
   "folders.newSubfolder": "New subfolder",
   "folders.renameFolder": "Rename folder",
   "folders.moveToFolder": "Move to folder",

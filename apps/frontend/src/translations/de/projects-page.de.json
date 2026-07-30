@@ -9,6 +9,7 @@
   "deleteMessage": "Wollen sie das Projekt '{{ projectName }}' wirklich löschen?",
   "heading": "Projekte",
   "folders.newFolder": "Neuer Ordner",
+  "folders.folderActions": "Ordneraktionen",
   "folders.newSubfolder": "Neuer Unterordner",
   "folders.renameFolder": "Ordner umbenennen",
   "folders.moveToFolder": "In Ordner verschieben",

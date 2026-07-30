@@ -37,6 +37,10 @@ export const ProjectActionsMenu = ({
     // available to any member — a viewer organizes their own view without owning the project.
     const isOwner = checkUserRole(project.role, USER_ROLES.OWNER);
 
+    // In the header the only actions are owner-only (move is card-only), so a non-owner would open
+    // an empty menu — render nothing rather than a trigger that reveals no items.
+    const hasMenuItems = isOwner || !isHeader;
+
     const { exportProject } = useProjectExport();
 
     const handleClick = (event: MouseEvent<HTMLElement>) => {
@@ -66,6 +70,10 @@ export const ProjectActionsMenu = ({
         navigate("/projects/move", { state: { project } });
         handleClose();
     };
+
+    if (!hasMenuItems) {
+        return null;
+    }
 
     return (
         <>

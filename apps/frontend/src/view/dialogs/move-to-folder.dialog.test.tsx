@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { FoldersActions } from "#application/actions/folders.actions.ts";
 import { createFolder, createProject } from "#test-utils/builders.ts";
 import { mockUseFolders } from "#test-utils/mock-hooks.ts";
+import { MAX_FOLDER_DEPTH } from "#utils/build-folder-tree.ts";
 
 const navigate = vi.fn();
 vi.mock("react-router", () => ({ useNavigate: () => navigate }));
@@ -82,8 +83,27 @@ describe("MoveToFolderDialog", () => {
 
             render(<MoveToFolderDialog open project={undefined} folder={parent} />);
 
-            expect(screen.getByTestId("move-target-1")).toHaveClass("Mui-disabled");
-            expect(screen.getByTestId("move-target-2")).toHaveClass("Mui-disabled");
+            expect(screen.getByTestId("move-target-1")).toHaveAttribute("aria-disabled", "true");
+            expect(screen.getByTestId("move-target-2")).toHaveAttribute("aria-disabled", "true");
+        });
+
+        it("disables a target that would push the moved folder past the maximum depth", () => {
+            // A chain of MAX_FOLDER_DEPTH folders (depths 1..7) plus a separate leaf to move. Filing
+            // the leaf under the deepest folder would reach depth 8, so that row is disabled while the
+            // one level above it stays enabled.
+            const chain = Array.from({ length: MAX_FOLDER_DEPTH }, (_, index) =>
+                createFolder({ id: index + 1, name: `Level ${index + 1}`, parentId: index === 0 ? null : index })
+            );
+            const moving = createFolder({ id: 100, name: "Movable", parentId: null });
+            mockUseFolders({ items: [...chain, moving] });
+
+            render(<MoveToFolderDialog open project={undefined} folder={moving} />);
+
+            expect(screen.getByTestId(`move-target-${MAX_FOLDER_DEPTH}`)).toHaveAttribute("aria-disabled", "true");
+            expect(screen.getByTestId(`move-target-${MAX_FOLDER_DEPTH - 1}`)).not.toHaveAttribute(
+                "aria-disabled",
+                "true"
+            );
         });
 
         it("dispatches updateFolder with the chosen parent", async () => {
