@@ -119,6 +119,12 @@ describe("folder tests", () => {
             expect(res.body.parentId).toBeNull();
         });
 
+        it("should reject a null name with 400 rather than let it reach the database", async () => {
+            const created = await post("/api/folders", { name: "Keep me" });
+            const res = await put(`/api/folders/${created.body.id}`, { name: null });
+            expect(res.statusCode).toBe(400);
+        });
+
         it("should return 404 when updating another user's folder", async () => {
             const [otherUser] = await db
                 .insert(users)

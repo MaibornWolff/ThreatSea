@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsDefined, IsInt, IsNotEmpty, IsOptional, IsString, MaxLength } from "class-validator";
+import { IsDefined, IsInt, IsNotEmpty, IsOptional, IsString, MaxLength, ValidateIf } from "class-validator";
 import {
     FIELD_MUST_BE_INT_MESSAGE,
     FIELD_MUST_BE_STRING_MESSAGE,
@@ -34,8 +34,8 @@ export class CreateFolderRequest {
 }
 
 export class UpdateFolderRequest {
-    // Rename is optional so a pure move (parentId only) is also a valid update.
-    @IsOptional()
+    // validate whenever name is present, so a present-but-null value is rejected cleanly.
+    @ValidateIf((request: UpdateFolderRequest) => request.name !== undefined)
     @IsString({ message: FIELD_MUST_BE_STRING_MESSAGE("name") })
     @Trim()
     @IsNotEmpty({ message: STRING_MUST_NOT_BE_EMPTY_MESSAGE("name") })
