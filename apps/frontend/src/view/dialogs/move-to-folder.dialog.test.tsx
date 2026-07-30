@@ -1,10 +1,14 @@
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FoldersActions } from "#application/actions/folders.actions.ts";
 import { createFolder, createProject } from "#test-utils/builders.ts";
 import { mockUseFolders } from "#test-utils/mock-hooks.ts";
 import { MAX_FOLDER_DEPTH } from "#utils/build-folder-tree.ts";
+import { Theme } from "#view/wrappers/theme.wrapper.tsx";
+
+// Wrap in the real app theme so the icons resolving theme.vars.palette.* render correctly.
+const renderDialog = (ui: ReactElement) => render(ui, { wrapper: Theme });
 
 const navigate = vi.fn();
 vi.mock("react-router", () => ({ useNavigate: () => navigate }));
@@ -44,7 +48,9 @@ describe("MoveToFolderDialog", () => {
                 items: [createFolder({ id: 1, name: "Payments" }), createFolder({ id: 2, name: "Internal" })],
             });
 
-            render(<MoveToFolderDialog open project={createProject({ id: 5, folderId: null })} folder={undefined} />);
+            renderDialog(
+                <MoveToFolderDialog open project={createProject({ id: 5, folderId: null })} folder={undefined} />
+            );
 
             expect(screen.getByTestId("move-target-root")).toBeInTheDocument();
             expect(screen.getByTestId("move-target-1")).toBeInTheDocument();
@@ -55,7 +61,9 @@ describe("MoveToFolderDialog", () => {
             const spy = vi.spyOn(FoldersActions, "moveProject");
             mockUseFolders({ items: [createFolder({ id: 1, name: "Payments" })] });
 
-            render(<MoveToFolderDialog open project={createProject({ id: 5, folderId: null })} folder={undefined} />);
+            renderDialog(
+                <MoveToFolderDialog open project={createProject({ id: 5, folderId: null })} folder={undefined} />
+            );
             await userEvent.click(screen.getByTestId("move-target-1"));
             await userEvent.click(screen.getByTestId("save-button"));
 
@@ -67,7 +75,9 @@ describe("MoveToFolderDialog", () => {
             mockUseFolders({ items: [createFolder({ id: 1, name: "Payments" })] });
 
             // Project already ungrouped, so the pre-selected target (root) is unchanged.
-            render(<MoveToFolderDialog open project={createProject({ id: 5, folderId: null })} folder={undefined} />);
+            renderDialog(
+                <MoveToFolderDialog open project={createProject({ id: 5, folderId: null })} folder={undefined} />
+            );
             expect(screen.getByTestId("save-button")).toBeDisabled();
 
             await userEvent.click(screen.getByTestId("move-target-1"));
@@ -81,7 +91,7 @@ describe("MoveToFolderDialog", () => {
             const child = createFolder({ id: 2, name: "Child", parentId: 1 });
             mockUseFolders({ items: [parent, child] });
 
-            render(<MoveToFolderDialog open project={undefined} folder={parent} />);
+            renderDialog(<MoveToFolderDialog open project={undefined} folder={parent} />);
 
             expect(screen.getByTestId("move-target-1")).toHaveAttribute("aria-disabled", "true");
             expect(screen.getByTestId("move-target-2")).toHaveAttribute("aria-disabled", "true");
@@ -97,7 +107,7 @@ describe("MoveToFolderDialog", () => {
             const moving = createFolder({ id: 100, name: "Movable", parentId: null });
             mockUseFolders({ items: [...chain, moving] });
 
-            render(<MoveToFolderDialog open project={undefined} folder={moving} />);
+            renderDialog(<MoveToFolderDialog open project={undefined} folder={moving} />);
 
             expect(screen.getByTestId(`move-target-${MAX_FOLDER_DEPTH}`)).toHaveAttribute("aria-disabled", "true");
             expect(screen.getByTestId(`move-target-${MAX_FOLDER_DEPTH - 1}`)).not.toHaveAttribute(
@@ -111,7 +121,7 @@ describe("MoveToFolderDialog", () => {
             const moving = createFolder({ id: 2, name: "Movable", parentId: null });
             mockUseFolders({ items: [createFolder({ id: 1, name: "Target" }), moving] });
 
-            render(<MoveToFolderDialog open project={undefined} folder={moving} />);
+            renderDialog(<MoveToFolderDialog open project={undefined} folder={moving} />);
             await userEvent.click(screen.getByTestId("move-target-1"));
             await userEvent.click(screen.getByTestId("save-button"));
 

@@ -115,9 +115,9 @@ const MoveToFolderDialog = ({ project, folder, ...props }: MoveToFolderDialogPro
                 >
                     <ListItemIcon sx={{ minWidth: 34 }}>
                         {isFolderMode ? (
-                            <Home sx={{ fontSize: 20, color: "text.subtle" }} />
+                            <Home sx={{ fontSize: 20, color: (theme) => theme.vars.palette.text.subtle }} />
                         ) : (
-                            <Inbox sx={{ fontSize: 20, color: "text.subtle" }} />
+                            <Inbox sx={{ fontSize: 20, color: (theme) => theme.vars.palette.text.subtle }} />
                         )}
                     </ListItemIcon>
                     <ListItemText primary={isFolderMode ? t("folders.moveRootFolder") : t("folders.ungrouped")} />
