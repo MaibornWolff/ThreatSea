@@ -8,9 +8,12 @@ export type FoldersState = FoldersAdapterState & {
     isPending: boolean;
     isLoadingAll: boolean;
     // Which accordion sections are collapsed, keyed by folder id (or "ungrouped"). Absent = expanded,
-    // so a fresh store (first load / after a refresh) shows everything expanded. Lives in redux — not
-    // localStorage — so it survives navigating in and out of a project but resets on a page refresh.
+    // true = collapsed. Lives in redux — not localStorage — so it survives navigating in and out of a
+    // project but resets on a page refresh.
     collapsed: Record<string, boolean>;
+    // Guards the one-time seeding of `collapsed` on first load, so manual toggles aren't overwritten
+    // when folders refetch.
+    collapsedInitialized: boolean;
 };
 
 const defaultState: FoldersState = {
@@ -18,6 +21,7 @@ const defaultState: FoldersState = {
     isPending: false,
     isLoadingAll: false,
     collapsed: {},
+    collapsedInitialized: false,
 };
 
 const foldersReducer = createReducer(defaultState, (builder) => {
@@ -30,6 +34,13 @@ const foldersReducer = createReducer(defaultState, (builder) => {
         foldersAdapter.setAll(state, action);
         state.isPending = false;
         state.isLoadingAll = false;
+        // Open the page tidy: every folder starts collapsed, ungrouped stays expanded (absent = expanded).
+        if (!state.collapsedInitialized) {
+            for (const folder of action.payload) {
+                state.collapsed[String(folder.id)] = true;
+            }
+            state.collapsedInitialized = true;
+        }
     });
 
     builder.addCase(FoldersActions.getFolders.rejected, (state) => {

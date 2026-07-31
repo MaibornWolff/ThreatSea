@@ -129,7 +129,7 @@ const MoveToFolderDialog = ({ project, folder, ...props }: MoveToFolderDialogPro
                         disabled={isTargetDisabled(targetFolder.id, depth)}
                         selected={selected === targetFolder.id}
                         onClick={() => setSelected(targetFolder.id)}
-                        sx={{ paddingLeft: 2 + depth * 2 }}
+                        sx={{ paddingLeft: 2 + (depth - (isFolderMode ? 0 : 1)) * 2 }}
                         data-testid={`move-target-${targetFolder.id}`}
                     >
                         <ListItemIcon sx={{ minWidth: 34 }}>

@@ -91,6 +91,32 @@ describe("foldersReducer", () => {
         });
     });
 
+    describe("collapse seeding on first load", () => {
+        it("collapses every folder on the first fulfilled load, leaving ungrouped expanded", () => {
+            const next = withEntities(createFolder({ id: 1 }), createFolder({ id: 2, parentId: 1 }));
+
+            expect(next.collapsed).toEqual({ "1": true, "2": true });
+            expect(next.collapsed["ungrouped"]).toBeUndefined();
+        });
+
+        it("does not re-collapse a manually expanded folder on a later load", () => {
+            const seeded = withEntities(createFolder({ id: 1 }), createFolder({ id: 2 }));
+            const expanded = foldersReducer(seeded, FoldersActions.toggleFolderCollapsed("1"));
+            expect(expanded.collapsed["1"]).toBeUndefined();
+
+            const reloaded = foldersReducer(
+                expanded,
+                FoldersActions.getFolders.fulfilled(
+                    [createFolder({ id: 1 }), createFolder({ id: 2 })],
+                    "req",
+                    undefined
+                )
+            );
+
+            expect(reloaded.collapsed["1"]).toBeUndefined();
+        });
+    });
+
     describe("toggleFolderCollapsed", () => {
         it("starts with everything expanded (empty collapsed map)", () => {
             expect(getInitialState().collapsed).toEqual({});
