@@ -2,7 +2,7 @@ import { TextField } from "@mui/material";
 import type { TextFieldProps } from "@mui/material/TextField";
 import type { JSX } from "react";
 
-export const DialogTextField = ({ sx, ...props }: TextFieldProps): JSX.Element => {
+export const DialogTextField = ({ sx, slotProps, ...props }: TextFieldProps): JSX.Element => {
     let paddingLeft = 3;
     if (props.multiline) {
         paddingLeft = 1;
@@ -11,8 +11,10 @@ export const DialogTextField = ({ sx, ...props }: TextFieldProps): JSX.Element =
     return (
         <TextField
             slotProps={{
+                ...slotProps,
                 inputLabel: {
                     shrink: true,
+                    ...slotProps?.inputLabel,
                 },
             }}
             sx={{
