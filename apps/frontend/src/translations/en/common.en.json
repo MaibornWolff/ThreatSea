@@ -76,6 +76,7 @@
   "duplicateName": "Copy of {{ name }}",
   "edit": "Edit",
   "editProject": "Edit Project",
+  "okBtn": "Okay",
   "resetText": "Reset",
   "saveBtn": "Save",
 

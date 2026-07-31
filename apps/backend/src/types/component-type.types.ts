@@ -21,6 +21,7 @@ import {
     FIELD_MUST_BE_STRING_MESSAGE,
     FIELD_MUST_BE_VALID_IMAGE_DATA,
     FIELD_MUST_EXIST_MESSAGE,
+    IMAGE_DATA_URL_PATTERN,
     MAX_NAME_LENGTH,
     MAX_SYMBOL_LENGTH,
     PARAM_MUST_BE_INT_MESSAGE,
@@ -59,7 +60,7 @@ export class CreateComponentTypeRequest {
     @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("symbol") })
     @IsString({ message: FIELD_MUST_BE_STRING_MESSAGE("symbol", "or null") })
     @MaxLength(MAX_SYMBOL_LENGTH, { message: STRING_TOO_LONG_MESSAGE("symbol", MAX_SYMBOL_LENGTH) })
-    @Matches(/^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/, {
+    @Matches(IMAGE_DATA_URL_PATTERN, {
         message: FIELD_MUST_BE_VALID_IMAGE_DATA("symbol"),
     })
     symbol!: string | null;

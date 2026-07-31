@@ -30,6 +30,12 @@
     "component": {
       "title": "Component"
     },
+    "icon": {
+      "title": "Icon",
+      "change": "Change icon",
+      "standard": "Standard icon",
+      "custom": "Custom icon"
+    },
     "pointsofattack": {
       "title": "Points of Attack"
     },
@@ -71,6 +77,10 @@
   "setAllBtn": "Set All",
   "unsetAllBtn": "Unset All",
   "isProjectComponent": "only available in project",
+  "changeComponentIcon": {
+    "title": "Change component icon",
+    "appliesTo": "Applies to \"{{name}}\" only — the component type is unchanged."
+  },
   "customComponent": {
     "delete": "Delete",
     "edit": "Edit",

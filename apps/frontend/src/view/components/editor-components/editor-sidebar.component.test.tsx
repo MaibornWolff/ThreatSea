@@ -48,6 +48,7 @@ const setup = (propsOverride: Partial<EditorSidebarProps> = {}) => {
         selectedConnectionPoint: undefined,
         userRole: USER_ROLES.EDITOR,
         handleOnDescriptionChange: vi.fn(),
+        handleOpenChangeIconDialog: vi.fn(),
         connectedComponents: [],
         handleDeleteConnectionBetweenComponents: vi.fn(),
         handleOnConnectionPointDescriptionChange: vi.fn(),

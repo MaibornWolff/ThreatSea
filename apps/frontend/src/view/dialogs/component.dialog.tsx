@@ -29,7 +29,7 @@ import {
     STANDARD_ICON_LABEL_KEYS,
 } from "#view/icons/standard-icons.ts";
 import { useDialog } from "#application/hooks/use-dialog.hook.ts";
-import { ACCEPTED_ICON_MIME_TYPES, MAX_ICON_BYTES, convertFileToBase64 } from "#utils/files.ts";
+import { ACCEPTED_ICON_MIME_TYPES, validateAndConvertIconFile } from "#utils/files.ts";
 import { Button } from "#view/components/button.component.tsx";
 import { Dialog } from "#view/components/dialog.component.tsx";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
@@ -202,8 +202,8 @@ const ComponentDialog = ({ component, ...props }: ComponentDialogProps) => {
         if (!file) {
             return;
         }
-        const isAcceptedType = ACCEPTED_ICON_MIME_TYPES.split(",").includes(file.type);
-        if (!isAcceptedType || file.size > MAX_ICON_BYTES) {
+        const result = await validateAndConvertIconFile(file);
+        if (!result.ok) {
             openConfirm({
                 message: t("customComponent.fileUnusable"),
                 acceptText: "Okay",
@@ -212,12 +212,11 @@ const ComponentDialog = ({ component, ...props }: ComponentDialogProps) => {
                     /* Do nothing */
                 },
             });
-        } else {
-            const symbol = (await convertFileToBase64(file)) as string | undefined;
-            setValue("symbol", symbol ?? "", { shouldValidate: true });
-            setValue("standardIcon", null);
-            setNoIconError(false);
+            return;
         }
+        setValue("symbol", result.dataUrl, { shouldValidate: true });
+        setValue("standardIcon", null);
+        setNoIconError(false);
     };
 
     const handleSelectStandardIcon = (icon: StandardIcon) => {

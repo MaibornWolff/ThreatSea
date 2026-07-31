@@ -18,6 +18,14 @@ export const MAX_NAME_LENGTH = 255;
 export const MAX_DESCRIPTION_LENGTH = 65535;
 // Allows ~100 kB binary after base64 inflation (~33%) plus the `data:image/...;base64,` prefix.
 export const MAX_SYMBOL_LENGTH = 150_000;
+// Uploaded icon (component type): a base64 PNG or JPEG data URL only.
+export const IMAGE_DATA_URL_PATTERN = /^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/;
+
+// Placed component: a rooted local asset path (bundled standard icons) or a PNG/JPEG data URL.
+// Anchored + case-insensitive so an embedded image can only ever be PNG/JPEG — blocks
+// data:image/svg+xml (incl. upper-cased/whitespace-padded schemes) and remote/`javascript:` URLs.
+export const SYSTEM_COMPONENT_SYMBOL_PATTERN =
+    /^(?:\/[\w.-][\w./-]*\.(?:png|jpe?g|webp|svg)|data:image\/(?:png|jpeg);base64,[A-Za-z0-9+/=]+)$/i;
 export const CIA_VALUE_MIN = 1;
 export const CIA_VALUE_MAX = 5;
 export const PROBABILITY_VALUE_MIN = 1;

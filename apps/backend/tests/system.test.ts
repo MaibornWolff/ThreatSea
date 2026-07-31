@@ -635,3 +635,33 @@ it("should update a system", async () => {
     expect(res.body.data.connectionPoints).toEqual(VALID_UPDATE_SYSTEM.data.connectionPoints);
     expect(res.body.data.connectionPoints).toEqual(VALID_UPDATE_SYSTEM.data.connectionPoints);
 });
+
+const systemWithComponentSymbol = (symbol: string) => ({
+    data: {
+        components: [{ id: "c1", name: "Component", symbol }],
+        connections: [],
+        pointsOfAttack: [],
+        connectionPoints: [],
+        lastAutoSaveDate: new Date(0).toISOString(),
+    },
+    image: null,
+});
+
+it("should reject a component whose symbol is a data:image/svg+xml URL", async () => {
+    // "<svg></svg>" — embedded payload that must not be stored.
+    const res = await request(app)
+        .put(`/api/projects/${projectId}/system`)
+        .send(systemWithComponentSymbol("data:image/svg+xml;base64,PHN2Zz48L3N2Zz4="))
+        .set("X-CSRF-TOKEN", csrfToken)
+        .set("Cookie", cookies);
+    expect(res.statusCode).toEqual(400);
+});
+
+it("should reject a component whose symbol data URL exceeds the size limit", async () => {
+    const res = await request(app)
+        .put(`/api/projects/${projectId}/system`)
+        .send(systemWithComponentSymbol(`data:image/png;base64,${"A".repeat(200000)}`))
+        .set("X-CSRF-TOKEN", csrfToken)
+        .set("Cookie", cookies);
+    expect(res.statusCode).toEqual(400);
+});

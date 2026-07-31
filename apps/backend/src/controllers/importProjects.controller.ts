@@ -31,6 +31,65 @@ import { createMeasureImpact } from "#services/measureImpacts.service.js";
 import { createEmptySystem, updateSystem } from "#services/system.service.js";
 import { createThreat } from "#services/threats.service.js";
 import { BadRequestError } from "#errors/bad-request.error.js";
+import {
+    FIELD_MUST_BE_ARRAY_MESSAGE,
+    FIELD_MUST_BE_VALID_IMAGE_DATA,
+    IMAGE_DATA_URL_PATTERN,
+    MAX_SYMBOL_LENGTH,
+    STRING_TOO_LONG_MESSAGE,
+    SYSTEM_COMPONENT_SYMBOL_PATTERN,
+} from "#middlewares/input-validations/validator-messages.js";
+
+interface ImportSymbolBody {
+    componentTypes?: unknown;
+    system?: { data?: { components?: unknown } };
+}
+
+/**
+ * Import writes symbols directly via services, bypassing the route DTOs, so re-check them here:
+ * component types with the strict data-URL rule, system components with the laxer one. Returns the
+ * first error, or null when all valid.
+ */
+function findInvalidImportedSymbol(body: ImportSymbolBody): string | null {
+    const checkSymbol = (symbol: unknown, pattern: RegExp): string | null => {
+        if (symbol == null || symbol === "") {
+            return null;
+        }
+        if (typeof symbol !== "string") {
+            return FIELD_MUST_BE_VALID_IMAGE_DATA("symbol");
+        }
+        if (symbol.length > MAX_SYMBOL_LENGTH) {
+            return STRING_TOO_LONG_MESSAGE("symbol", MAX_SYMBOL_LENGTH);
+        }
+        if (!pattern.test(symbol)) {
+            return FIELD_MUST_BE_VALID_IMAGE_DATA("symbol");
+        }
+        return null;
+    };
+
+    // A present-but-non-array value would make `for...of` throw here, before the import's try/catch,
+    // so reject it through the normal bad-request path instead.
+    const checkSymbolArray = (value: unknown, field: string, pattern: RegExp): string | null => {
+        if (value == null) {
+            return null;
+        }
+        if (!Array.isArray(value)) {
+            return FIELD_MUST_BE_ARRAY_MESSAGE(field);
+        }
+        for (const item of value) {
+            const error = checkSymbol((item as { symbol?: unknown } | null)?.symbol, pattern);
+            if (error != null) {
+                return error;
+            }
+        }
+        return null;
+    };
+
+    return (
+        checkSymbolArray(body.componentTypes, "componentTypes", IMAGE_DATA_URL_PATTERN) ??
+        checkSymbolArray(body.system?.data?.components, "components", SYSTEM_COMPONENT_SYMBOL_PATTERN)
+    );
+}
 import { Logger } from "#logging/index.js";
 
 /**
@@ -42,6 +101,12 @@ import { Logger } from "#logging/index.js";
  */
 export async function importProject(request: Request<void>, response: Response, next: NextFunction): Promise<void> {
     Logger.debug("call import project");
+
+    const symbolError = findInvalidImportedSymbol(request.body as ImportSymbolBody);
+    if (symbolError != null) {
+        next(new BadRequestError(symbolError));
+        return;
+    }
 
     const threatIdsDict = new Map<number, number>();
     const measureIdsDict = new Map<number, number>();

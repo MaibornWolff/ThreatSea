@@ -45,6 +45,7 @@ export interface EditorSidebarProps {
     selectedConnectionPoint: SystemConnectionPoint | null | undefined;
     userRole: USER_ROLES | undefined;
     handleOnDescriptionChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+    handleOpenChangeIconDialog: () => void;
     connectedComponents: ConnectionEndpointWithComponent[];
     handleDeleteConnectionBetweenComponents: (sourceComponentId: string, targetComponentId: string) => void;
     handleOnConnectionPointDescriptionChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
@@ -90,6 +91,7 @@ export const EditorSidebar = ({
     selectedConnectionPoint,
     userRole,
     handleOnDescriptionChange,
+    handleOpenChangeIconDialog,
     connectedComponents,
     handleDeleteConnectionBetweenComponents,
     handleOnConnectionPointDescriptionChange,
@@ -158,6 +160,7 @@ export const EditorSidebar = ({
                             pointsOfAttackOfSelectedComponent={pointsOfAttackOfSelectedComponent}
                             userRole={userRole}
                             handleOnDescriptionChange={handleOnDescriptionChange}
+                            handleOpenChangeIconDialog={handleOpenChangeIconDialog}
                             connectedComponents={connectedComponents}
                             handleDeleteConnectionBetweenComponents={handleDeleteConnectionBetweenComponents}
                             handleChangeCommunicationInterfaceName={handleChangeCommunicationInterfaceName}

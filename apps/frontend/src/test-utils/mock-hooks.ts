@@ -93,6 +93,7 @@ export const mockUseEditor = (config?: Partial<UseEditorResult>): MockInstance =
         setComponentsGridPosition: vi.fn(),
         setSelectedComponentName: vi.fn(),
         setSelectedComponentDescription: vi.fn(),
+        setSelectedComponentSymbol: vi.fn(),
         setSelectedConnectionPointDescription: vi.fn(),
         addPointOfAttack: vi.fn(),
         removePointOfAttack: vi.fn(),

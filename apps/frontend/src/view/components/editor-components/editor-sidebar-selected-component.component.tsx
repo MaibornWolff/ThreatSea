@@ -5,6 +5,7 @@ import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { POA_COLORS } from "#view/colors/pointsOfAttack.colors.ts";
 import Delete from "@mui/icons-material/Delete";
 import Edit from "@mui/icons-material/Edit";
+import { EditorSidebarComponentIcon } from "./editor-sidebar-component-icon.component";
 import { TextField } from "#view/components/textfield.component.tsx";
 import { SearchField } from "#view/components/search-field.component.tsx";
 import { ToggleButtons } from "#view/components/toggle-buttons.component.tsx";
@@ -40,6 +41,7 @@ export interface EditorSidebarSelectedComponentProps {
     pointsOfAttackOfSelectedComponent: SystemPointOfAttack[];
     userRole: USER_ROLES | undefined;
     handleOnDescriptionChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+    handleOpenChangeIconDialog: () => void;
     connectedComponents: ConnectionEndpointWithComponent[];
     handleDeleteConnectionBetweenComponents: (sourceComponentId: string, targetComponentId: string) => void;
     handleChangeCommunicationInterfaceName: (componentId: string, interfaceId: string, value: string) => void;
@@ -81,6 +83,7 @@ const EditorSidebarSelectedComponentInner = ({
     pointsOfAttackOfSelectedComponent,
     userRole,
     handleOnDescriptionChange,
+    handleOpenChangeIconDialog,
     connectedComponents,
     handleDeleteConnectionBetweenComponents,
     handleChangeCommunicationInterfaceName,
@@ -208,6 +211,12 @@ const EditorSidebarSelectedComponentInner = ({
                     </IconButton>
                 )}
             </Box>
+
+            <EditorSidebarComponentIcon
+                symbol={selectedComponent.symbol}
+                userRole={userRole}
+                onChangeIcon={handleOpenChangeIconDialog}
+            />
 
             <Box
                 sx={{
@@ -853,6 +862,7 @@ export const EditorSidebarSelectedComponent = memo(EditorSidebarSelectedComponen
     return (
         prev.selectedComponent?.id === next.selectedComponent?.id &&
         prev.selectedComponent?.name === next.selectedComponent?.name &&
+        prev.selectedComponent?.symbol === next.selectedComponent?.symbol &&
         prev.selectedComponent?.description === next.selectedComponent?.description &&
         prev.selectedComponent?.communicationInterfaces === next.selectedComponent?.communicationInterfaces &&
         prev.selectedComponent?.pointsOfAttack === next.selectedComponent?.pointsOfAttack &&
