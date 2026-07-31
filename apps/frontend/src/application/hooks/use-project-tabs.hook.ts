@@ -101,14 +101,21 @@ export const useProjectTabs = (): ProjectTabs => {
 
     if (showProjectCatalogueInnerNavigation) {
         if (pathname.includes("/catalogs")) {
-            // Catalog inner page exposes only the members button; consumers render it
-            // inline alongside the primary toggle when finalButtons.length === 1.
+            // Catalog inner page exposes the catalog editor and members buttons;
+            // consumers render them inline alongside the primary toggle.
             if (!checkUserRole(userRole, USER_ROLES.EDITOR)) {
                 finalButtons = [];
             } else {
-                const button = defaultProjectButtons.at(-1);
-                if (button) {
-                    finalButtons = [{ ...button, value: `/catalogs/${catalogId}/members` }];
+                const membersButton = defaultProjectButtons.at(-1);
+                if (membersButton) {
+                    finalButtons = [
+                        {
+                            value: `/catalogs/${catalogId}`,
+                            text: t("catalogEditor"),
+                            "data-testid": "navigation-header_catalog-editor-button",
+                        },
+                        { ...membersButton, value: `/catalogs/${catalogId}/members` },
+                    ];
                 }
             }
         } else {

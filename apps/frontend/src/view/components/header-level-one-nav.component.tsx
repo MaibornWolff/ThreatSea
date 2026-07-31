@@ -14,9 +14,9 @@ export const HeaderLevelOneNav = ({ projectTabs }: HeaderLevelOneNavProps) => {
     const { showProjectTabs, finalButtons, finalOnChangePath, pathname } = projectTabs;
 
     const showLevelOne = showUniversalHeaderNavigation;
-    const inlineSingleTab = showProjectTabs && finalButtons.length === 1;
+    const inlineCatalogTabs = showProjectTabs && pathname.includes("/catalogs");
 
-    if (!showLevelOne && !inlineSingleTab) {
+    if (!showLevelOne && !inlineCatalogTabs) {
         return null;
     }
 
@@ -27,6 +27,7 @@ export const HeaderLevelOneNav = ({ projectTabs }: HeaderLevelOneNavProps) => {
                 justifySelf: "center",
                 display: "flex",
                 alignItems: "center",
+                flexWrap: { xs: "wrap", md: "nowrap" },
                 gap: 1,
             }}
         >
@@ -51,7 +52,7 @@ export const HeaderLevelOneNav = ({ projectTabs }: HeaderLevelOneNavProps) => {
                     ]}
                 />
             )}
-            {inlineSingleTab && (
+            {inlineCatalogTabs && (
                 <ButtonNavigation size="medium" value={pathname} onChange={finalOnChangePath} buttons={finalButtons} />
             )}
         </Box>

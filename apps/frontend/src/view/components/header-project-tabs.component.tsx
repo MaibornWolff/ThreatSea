@@ -9,7 +9,7 @@ interface HeaderProjectTabsProps {
 export const HeaderProjectTabs = ({ projectTabs }: HeaderProjectTabsProps) => {
     const { showProjectTabs, finalButtons, finalOnChangePath, pathname } = projectTabs;
 
-    if (!showProjectTabs || finalButtons.length <= 1) {
+    if (!showProjectTabs || pathname.includes("/catalogs") || finalButtons.length <= 1) {
         return null;
     }
 

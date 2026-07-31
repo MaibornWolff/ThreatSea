@@ -33,7 +33,7 @@ const CatalogPageBody = () => {
     const [pointOfAttack, setPointOfAttack] = useState<POINTS_OF_ATTACK | null>(null);
     const navigate = useNavigate();
     const { t } = useTranslation("catalogPage");
-    usePageTitle(t("catalogueEditor", { ns: "common" }));
+    usePageTitle(t("catalogEditor", { ns: "common" }));
 
     const dispatch = useAppDispatch();
 

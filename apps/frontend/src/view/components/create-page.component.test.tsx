@@ -1,20 +1,30 @@
-import { screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { MouseEvent } from "react";
+import { Provider } from "react-redux";
+import { I18nextProvider } from "react-i18next";
+import { createMemoryRouter, RouterProvider } from "react-router";
 import type { ExtendedProject } from "#api/types/project.types.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
+import { CatalogsActions } from "#application/actions/catalogs.actions.ts";
 import { ProjectsActions } from "#application/actions/projects.actions.ts";
+import catalogsReducer from "#application/reducers/catalogs.reducer.ts";
 import projectsReducer from "#application/reducers/projects.reducer.ts";
 import { navigationReducer } from "#application/reducers/navigation.reducer.ts";
+import { createStore } from "#application/store.ts";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { translationUtil } from "#utils/translations.ts";
-import { createProject } from "#test-utils/builders.ts";
+import { createCatalog, createProject } from "#test-utils/builders.ts";
 import { mockUseConfirm } from "#test-utils/mock-hooks.ts";
+import { Theme } from "#view/wrappers/theme.wrapper.tsx";
 
 // Importing the real #main.tsx bootstraps the whole app (createStore + ReactDOM render).
-// The layout effect only reads this global store, so a minimal stub is enough.
+// The layout effect only reads this global store, so a minimal stub is enough. It needs
+// a catalogs slice so the catalogue-fetch branch can run selectById without throwing.
 vi.mock("#main.tsx", () => ({
-    store: { getState: () => ({ projects: { deletingProjectId: undefined } }) },
+    store: {
+        getState: () => ({ projects: { deletingProjectId: undefined }, catalogs: { ids: [], entities: {} } }),
+    },
 }));
 
 vi.mock("./header-level-one-nav.component", () => ({ HeaderLevelOneNav: () => null }));
@@ -152,5 +162,83 @@ describe("CreatePage — project header actions", () => {
 
         expect(deleteProject).toHaveBeenCalledWith(project);
         expect(navigate).toHaveBeenCalledWith("/projects");
+    });
+});
+
+describe("CreatePage — catalog header", () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        mockUseConfirm({ openConfirm });
+        vi.spyOn(CatalogsActions, "getCatalogFromBackend").mockReturnValue((() => Promise.resolve()) as never);
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    const renderOnCatalog = (current: ReturnType<typeof createCatalog> | undefined, getCatalogInfo: boolean) => {
+        const Page = CreatePage(HeaderRightSlot, PageBody);
+        renderWithProviders(<Page />, {
+            preloadedState: {
+                catalogs: { ...catalogsReducer(undefined, { type: "@@INIT" }), current },
+                navigation: {
+                    ...navigationReducer(undefined, { type: "@@INIT" }),
+                    showProjectInfo: false,
+                    getCatalogInfo,
+                },
+            },
+            initialEntries: ["/catalogs/5"],
+        });
+    };
+
+    // Renders inside a real /catalogs/:catalogId match so useParams resolves catalogId,
+    // which the header compares against the loaded catalogue's id.
+    const renderOnCatalogAtRoute = (current: ReturnType<typeof createCatalog>, catalogId: string) => {
+        const Page = CreatePage(HeaderRightSlot, PageBody);
+        const store = createStore({
+            catalogs: { ...catalogsReducer(undefined, { type: "@@INIT" }), current },
+            navigation: {
+                ...navigationReducer(undefined, { type: "@@INIT" }),
+                showProjectInfo: false,
+                getCatalogInfo: true,
+            },
+        });
+        const router = createMemoryRouter([{ path: "/catalogs/:catalogId", element: <Page /> }], {
+            initialEntries: [`/catalogs/${catalogId}`],
+        });
+        render(
+            <Provider store={store}>
+                <I18nextProvider i18n={translationUtil}>
+                    <Theme>
+                        <RouterProvider router={router} />
+                    </Theme>
+                </I18nextProvider>
+            </Provider>
+        );
+    };
+
+    it("shows the current catalog's name so the active catalog is identifiable", () => {
+        renderOnCatalogAtRoute(createCatalog({ id: 5, name: "Threat Library" }), "5");
+
+        expect(screen.getByTestId("catalog-header_name")).toHaveTextContent("Threat Library");
+    });
+
+    it("does not show a stale catalog title when the loaded catalog does not match the route", () => {
+        // Route is /catalogs/5 while the store still holds a different catalog.
+        renderOnCatalogAtRoute(createCatalog({ id: 999, name: "Previous Catalog" }), "5");
+
+        expect(screen.queryByTestId("catalog-header_name")).not.toBeInTheDocument();
+    });
+
+    it("renders no catalog title when the catalog info is not requested", () => {
+        renderOnCatalog(createCatalog({ id: 5, name: "Threat Library" }), false);
+
+        expect(screen.queryByTestId("catalog-header_name")).not.toBeInTheDocument();
+    });
+
+    it("renders no catalog title while the catalog is not yet loaded", () => {
+        renderOnCatalog(undefined, true);
+
+        expect(screen.queryByTestId("catalog-header_name")).not.toBeInTheDocument();
     });
 });

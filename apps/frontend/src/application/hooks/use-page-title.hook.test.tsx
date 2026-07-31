@@ -62,13 +62,13 @@ describe("usePageTitle", () => {
         expect(document.title).toBe("ThreatSea - Alpha - Assets");
     });
 
-    it("composes app name, catalogue name and view label on catalogue routes", () => {
-        renderUsePageTitle("Catalogue Editor", {
+    it("composes app name, catalog name and view label on catalog routes", () => {
+        renderUsePageTitle("Catalog Editor", {
             initialEntries: ["/catalogs/7/"],
             preloadedState: { catalogs: catalogsStateWith(createCatalog({ id: 7, name: "Std" })) },
         });
 
-        expect(document.title).toBe("ThreatSea - Std - Catalogue Editor");
+        expect(document.title).toBe("ThreatSea - Std - Catalog Editor");
     });
 
     it("drops the name when the entity is not yet in the store", () => {

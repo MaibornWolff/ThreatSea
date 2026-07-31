@@ -520,7 +520,9 @@ test.describe("Catalog Page Tests", () => {
 
         await pg.membersButton.click();
         await expect(page).toHaveURL(`/catalogs/${catalogId}/members`);
-        await pg.goto(catalogId);
+
+        await pg.catalogEditorButton.click();
+        await expect(page).toHaveURL(`/catalogs/${catalogId}`);
 
         await pg.accountButton.click();
         await expect(pg.accountMenuUsername).toBeVisible();
