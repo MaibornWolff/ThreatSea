@@ -1,6 +1,7 @@
 import type { AppMiddleware } from "./types";
 import assets from "./assets/assets.middleware";
 import projects from "./projects/projects.middleware";
+import folders from "./folders/folders.middleware";
 import alert from "./alert/alert.middleware";
 import dialogs from "./dialogs/dialogs.middleware";
 import catalogs from "./catalogs/catalogs.middleware";
@@ -19,6 +20,7 @@ export const middleware: AppMiddleware[] = [
     ...errors,
     ...assets,
     ...projects,
+    ...folders,
     ...alert,
     ...dialogs,
     ...system,

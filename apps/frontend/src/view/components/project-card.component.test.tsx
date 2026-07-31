@@ -68,14 +68,14 @@ describe("ProjectCard — actions menu delegation", () => {
         );
     });
 
-    it("does not render the actions menu for an editor", () => {
+    it("renders the actions menu for an editor (item-level gating happens inside the menu)", () => {
         setup(createProject({ role: USER_ROLES.EDITOR }));
-        expect(screen.queryByTestId("project-actions-menu-stub")).not.toBeInTheDocument();
+        expect(screen.getByTestId("project-actions-menu-stub")).toBeInTheDocument();
     });
 
-    it("does not render the actions menu for a viewer", () => {
+    it("renders the actions menu for a viewer (so they can move the project into their own folder)", () => {
         setup(createProject({ role: USER_ROLES.VIEWER }));
-        expect(screen.queryByTestId("project-actions-menu-stub")).not.toBeInTheDocument();
+        expect(screen.getByTestId("project-actions-menu-stub")).toBeInTheDocument();
     });
 
     it("forwards the edit callback with the project", async () => {

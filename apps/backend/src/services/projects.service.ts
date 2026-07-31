@@ -336,7 +336,9 @@ export async function deleteProject(projectId: number): Promise<void> {
     await db.delete(projects).where(eq(projects.id, projectId));
 }
 
-type ExtendedProject = Project & { role: USER_ROLES; image: string | null };
+// `folderId` is the per-user placement of the project (null = ungrouped); it comes from
+// the caller's own `usersProjects` row, so two members can file the same project differently.
+type ExtendedProject = Project & { role: USER_ROLES; image: string | null; folderId: number | null };
 
 /**
  * Fetches the projects of threatsea with their system images.
@@ -346,7 +348,7 @@ type ExtendedProject = Project & { role: USER_ROLES; image: string | null };
 export async function getProjects(userId: number): Promise<ExtendedProject[]> {
     const selectedProjects: ExtendedProject[] = [];
     const items = await db
-        .select({ ...getTableColumns(projects), role: usersProjects.role })
+        .select({ ...getTableColumns(projects), role: usersProjects.role, folderId: usersProjects.folderId })
         .from(projects)
         .innerJoin(usersProjects, eq(projects.id, usersProjects.projectId))
         .where(eq(usersProjects.userId, userId));
@@ -372,7 +374,7 @@ export async function getProjects(userId: number): Promise<ExtendedProject[]> {
  */
 export async function getProject(projectId: number, userId: number): Promise<ExtendedProject | null> {
     const [project] = await db
-        .select({ ...getTableColumns(projects), role: usersProjects.role })
+        .select({ ...getTableColumns(projects), role: usersProjects.role, folderId: usersProjects.folderId })
         .from(projects)
         .innerJoin(usersProjects, eq(projects.id, usersProjects.projectId))
         .where(and(eq(projects.id, projectId), eq(usersProjects.userId, userId)));
