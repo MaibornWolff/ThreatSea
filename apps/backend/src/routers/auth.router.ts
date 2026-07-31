@@ -5,6 +5,7 @@
 
 import express from "express";
 import rateLimit from "express-rate-limit";
+import { AUTH_METHOD } from "#config/config.js";
 import {
     authenticate,
     authenticationMode,
@@ -22,7 +23,9 @@ const authLimiter = rateLimit({
 
 const authStatusLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 500,
+    // The fixed profile mode is used for local development and E2E. Those runs perform
+    // frequent /auth/status checks and can otherwise hit the limiter late in the suite.
+    max: AUTH_METHOD === "fixed" ? 5000 : 500,
 });
 
 authRouter.get("/authenticationMode", authenticationMode);
