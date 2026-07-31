@@ -6,6 +6,11 @@
 export const MAX_ICON_BYTES = 100_000;
 export const ACCEPTED_ICON_MIME_TYPES = "image/png,image/jpeg";
 
+// TODO(#577 follow-up): uploaded icons are stored inline as base64 data URLs in each
+// component's `symbol` (system.data JSONB), with no dedup. If storage size becomes a
+// concern, move icons to a content-hash-keyed table and keep only the reference here.
+// and/or think an object storage bucket implementation.
+
 /**
  * Converts the data of a given file to base64.
  *
