@@ -65,7 +65,7 @@
     "@vitejs/plugin-react": "6.0.4",
     "@vitest/coverage-v8": "catalog:",
     "dotenv": "catalog:",
-    "jsdom": "29.1.1",
+    "jsdom": "30.0.1",
     "oxlint": "catalog:",
     "oxlint-tsgolint": "catalog:",
     "vite": "8.1.5",
