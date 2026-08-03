@@ -65,9 +65,15 @@ Projects can be sorted by their name or their creation date. Via the search fiel
 
 Each project is represented by a project tile with the project name, the project creation date, a preview of the system model, shortcuts to the specific views of the system and an expandable description of the project.
 
-Project owners can use the dropdown menu in the top right corner of the project tile to edit, export or delete the project. For users that only have the viewer or editor role, the menu is not visible.
+Project owners can use the dropdown menu in the top right corner of the project tile to edit, export, delete or move the project to a folder. Editors and viewers see the same menu containing only the "Move to folder" entry, since folder placement is stored per user.
 
 ![Projects Page Project Options](assets/image-2024-7-30_13-11-38.png "Projects Page Project Options")
+
+Projects can additionally be organised into folders. A new top-level folder is created with the "New folder" button (the folder-plus icon in the toolbar next to the search field), which asks for a folder name. On the projects list, each folder appears as a collapsible section showing its name and a count of the projects and subfolders it contains, and a separate "Ungrouped" section at the bottom holds every project that is not placed in a folder. Which folders are expanded or collapsed is remembered while navigating in and out of projects, but resets on a full page reload.
+
+![Projects Page Folders](assets/projects-folders.png "Projects Page Folders")
+
+Every folder header has a three-dot actions menu on its right offering "New subfolder", "Rename folder", "Move to folder" and "Delete folder". Folders can be nested up to seven levels deep; the "New subfolder" entry is disabled once that limit is reached. Deleting an empty folder only requires confirmation, whereas deleting a folder that still contains subfolders or projects removes its subfolders and moves its projects back to "Ungrouped". A single project is placed into a folder from the project tile's dropdown menu via "Move to folder", which opens a dialog for choosing the target folder (or "Top level" to remove it from any folder). Folder placement is stored per user, so each member organises their own view of the shared projects without affecting other members.
 
 ### Create project
 
@@ -161,9 +167,13 @@ Users can move components within the system editor by drag and drop. The editor 
 
 ### Editing a component
 
-By clicking on a component, users can open the "edit component" pop-up pane. There, in the top row, the user can edit the name of the component and delete the component with the <img src="../assets/images_2_.png" alt="Editor Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> button.
+By clicking on a component, users can open the "edit component" pop-up pane. There, in the sidebar header at the top of the pane, the user can edit the name of the component, change the component's icon with the "Change icon" <img src="../assets/change-icon.svg" alt="Editor Page Change Icon" style="height:1em; width:auto; vertical-align:middle;"> button and delete the component with the <img src="../assets/images_2_.png" alt="Editor Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> button. The "Change icon" and delete buttons are only shown to users with the `Editor` role.
 
 ![Editor Page Edit Component Menu](assets/image-2025-4-10_9-5-21.png "Editor Page Edit Component Menu")
+
+The "Change icon" button opens the "Change component icon" dialog. There the user can either pick one of the standard icons (User, Client, Server, Database, Communication Infrastructure) or upload a custom image (PNG or JPEG, up to 100 kB).
+
+![Editor Page Change Component Icon](assets/change-component-icon.png "Editor Page Change Component Icon")
 
 #### Assigning attack points
 
@@ -208,7 +218,7 @@ Custom component types have to be created once and afterwards can be used within
 Users have to provide the following information for the component type:
 
 - Name: Name of the custom component type
-- Icon (optional): Icon that should be displayed within the system sketch for each component of the component type. Only files with MIME-type image/\* and a size less than 100kB can be used.
+- Icon (optional): Icon that should be displayed within the system sketch for each component of the component type. Only PNG or JPEG files up to 100 kB can be used.
 - Attack Points: With the attack point toggles, users can specify, which attack points (out of the four non-communication related attack points) should be activated by default for each component of the component type
 
 ![Editor Page Create Custom Component Menu](assets/image-2024-7-30_13-4-30.png "Editor Page Create Custom Component Menu")
@@ -238,7 +248,7 @@ Users can connect components to visualize a communication relationship between t
 
 #### Creating a communication interface
 
-Users can create a communication interfaces at a component by clicking on the <img src="../assets/connect-plug-icon-linear-logo-mark-in-black-and-white-vector.jpg" alt="Editor Page Connect Icon" style="height:1em; width:auto; vertical-align:middle;">buttons that are displayed in the button right corner of a component and selecting "Create New" in the list of communication interfaces. They can give a name and select an icon for the new communication interface.
+Users can create a communication interfaces at a component by clicking on the <img src="../assets/connect-plug-icon-linear-logo-mark-in-black-and-white-vector.jpg" alt="Editor Page Connect Icon" style="height:1em; width:auto; vertical-align:middle;">buttons that are displayed in the button right corner of a component and selecting "Create New" in the list of communication interfaces. They can give a name and select an icon for the new communication interface. A default icon is already preselected, so the interface can be created without opening the icon picker.
 
 ![Editor Page Create Communication Interface Button](assets/image-2025-4-10_17-3-28.png "Editor Page Create Communication Interface Button")
 
@@ -732,6 +742,8 @@ With the <img src="../assets/images_2_.png" alt="Catalogs Page Delete Catalog Ic
 ## Catalogs
 
 Each catalog is a representation of a 4x6 matrix in ThreatSea and is used by projects to generate proposed threats ("catalog threats") and measures ("catalog measures") for specific attacker type / attack point type combinations. The main view for catalogs lists the catalog threats on the left side and the catalog measures on the right side. Users can sort both lists according to name or creation date in ascending or descending order and search for specific catalog threats or catalog measures. With the two rows in the top, users can filter for all catalog threats and measures that apply to a specific attacker type and/or a specific attack point type.
+
+Catalog pages provide two views, reachable via the navigation in the top-right of the header bar: the "Catalog Editor" (the threats-and-measures view described here) and the "Members" view. The name of the current catalog is shown in the header bar.
 
 ![Catalogs Page View](assets/image-2024-7-30_14-30-7.png "Catalogs Page View")
 
