@@ -44,7 +44,7 @@ describe("EditorSidebarComponentHeader", () => {
     it("clicking the delete button calls onDelete", async () => {
         const { props, user } = setup();
 
-        await user.click(screen.getByTestId("DeleteIcon"));
+        await user.click(screen.getByRole("button", { name: "Delete component" }));
 
         expect(props.onDelete).toHaveBeenCalledOnce();
     });
@@ -53,6 +53,6 @@ describe("EditorSidebarComponentHeader", () => {
         setup({ userRole: USER_ROLES.VIEWER });
 
         expect(screen.queryByTestId("change-component-icon")).not.toBeInTheDocument();
-        expect(screen.queryByTestId("DeleteIcon")).not.toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: "Delete component" })).not.toBeInTheDocument();
     });
 });

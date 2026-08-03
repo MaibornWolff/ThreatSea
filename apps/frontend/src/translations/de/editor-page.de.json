@@ -28,7 +28,8 @@
   },
   "sidebar": {
     "component": {
-      "title": "Komponente"
+      "title": "Komponente",
+      "delete": "Komponente löschen"
     },
     "icon": {
       "change": "Icon ändern"

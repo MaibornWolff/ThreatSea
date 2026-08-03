@@ -68,7 +68,7 @@ export const EditorSidebarComponentHeader = ({
                         fontSize: "0.875rem !important",
                         width: "100% !important",
                     },
-                    color: "text.primary !important",
+                    color: `${theme.vars.palette.text.primary} !important`,
                     padding: "0 !important",
                 }}
             />
@@ -81,7 +81,7 @@ export const EditorSidebarComponentHeader = ({
                             data-testid="change-component-icon"
                             sx={{
                                 "&:hover": {
-                                    backgroundColor: "background.paperIntransparent",
+                                    backgroundColor: theme.vars.palette.background.paperIntransparent,
                                 },
                                 marginTop: -1,
                             }}
@@ -91,10 +91,11 @@ export const EditorSidebarComponentHeader = ({
                     </Tooltip>
                     <IconButton
                         onClick={onDelete}
+                        aria-label={t("sidebar.component.delete")}
                         sx={{
                             "&:hover": {
-                                color: "error.light",
-                                backgroundColor: "background.paperIntransparent",
+                                color: theme.vars.palette.error.light,
+                                backgroundColor: theme.vars.palette.background.paperIntransparent,
                             },
                             marginTop: -1,
                         }}
