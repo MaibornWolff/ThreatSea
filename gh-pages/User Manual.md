@@ -248,7 +248,7 @@ Users can connect components to visualize a communication relationship between t
 
 #### Creating a communication interface
 
-Users can create a communication interfaces at a component by clicking on the <img src="../assets/connect-plug-icon-linear-logo-mark-in-black-and-white-vector.jpg" alt="Editor Page Connect Icon" style="height:1em; width:auto; vertical-align:middle;">buttons that are displayed in the button right corner of a component and selecting "Create New" in the list of communication interfaces. They can give a name and select an icon for the new communication interface. A default icon is already preselected, so the interface can be created without opening the icon picker.
+Users can create a communication interface at a component by clicking on the <img src="../assets/connect-plug-icon-linear-logo-mark-in-black-and-white-vector.jpg" alt="Editor Page Connect Icon" style="height:1em; width:auto; vertical-align:middle;">button that is displayed in the bottom-right corner of a component and selecting "Create New" in the list of communication interfaces. They can give a name and select an icon for the new communication interface. A default icon is already preselected, so the interface can be created without opening the icon picker.
 
 ![Editor Page Create Communication Interface Button](assets/image-2025-4-10_17-3-28.png "Editor Page Create Communication Interface Button")
 
