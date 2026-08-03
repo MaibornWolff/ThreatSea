@@ -6,6 +6,8 @@ import {
 } from "./editor-sidebar-selected-point-of-attack.component";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { createAsset, createSystemComponent, createPointOfAttack } from "#test-utils/builders.ts";
+import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
+import { POA_COLORS } from "#view/colors/pointsOfAttack.colors.ts";
 
 const setup = (propsOverride: Partial<EditorSidebarSelectedPointOfAttackProps> = {}) => {
     const props = {
@@ -35,6 +37,28 @@ describe("EditorSidebarSelectedPointOfAttack", () => {
             await user.click(screen.getByText("My Component"));
 
             expect(props.handleComponentBreadcrumbClick).toHaveBeenCalledOnce();
+        });
+    });
+
+    describe("type colour dot", () => {
+        it("fills the dot with the colour of the selected point of attack type", () => {
+            setup({
+                selectedPointOfAttack: createPointOfAttack({ type: POINTS_OF_ATTACK.USER_INTERFACE }),
+            });
+
+            expect(screen.getByTestId("poa-type-color-dot")).toHaveStyle({
+                backgroundColor: POA_COLORS[POINTS_OF_ATTACK.USER_INTERFACE].normal,
+            });
+        });
+
+        it("uses a different colour for a different point of attack type", () => {
+            setup({
+                selectedPointOfAttack: createPointOfAttack({ type: POINTS_OF_ATTACK.PROCESSING_INFRASTRUCTURE }),
+            });
+
+            expect(screen.getByTestId("poa-type-color-dot")).toHaveStyle({
+                backgroundColor: POA_COLORS[POINTS_OF_ATTACK.PROCESSING_INFRASTRUCTURE].normal,
+            });
         });
     });
 
