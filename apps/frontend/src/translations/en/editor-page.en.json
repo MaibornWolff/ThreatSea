@@ -31,10 +31,7 @@
       "title": "Component"
     },
     "icon": {
-      "title": "Icon",
-      "change": "Change icon",
-      "standard": "Standard icon",
-      "custom": "Custom icon"
+      "change": "Change icon"
     },
     "pointsofattack": {
       "title": "Points of Attack"

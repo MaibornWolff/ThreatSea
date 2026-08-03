@@ -31,10 +31,7 @@
       "title": "Komponente"
     },
     "icon": {
-      "title": "Symbol",
-      "change": "Symbol ändern",
-      "standard": "Standard-Symbol",
-      "custom": "Eigenes Symbol"
+      "change": "Icon ändern"
     },
     "pointsofattack": {
       "title": "Angriffspunkte"
