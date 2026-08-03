@@ -5,7 +5,7 @@ import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { POA_COLORS } from "#view/colors/pointsOfAttack.colors.ts";
 import Delete from "@mui/icons-material/Delete";
 import Edit from "@mui/icons-material/Edit";
-import { EditorSidebarComponentIcon } from "./editor-sidebar-component-icon.component";
+import { EditorSidebarComponentHeader } from "./editor-sidebar-component-header.component";
 import { TextField } from "#view/components/textfield.component.tsx";
 import { SearchField } from "#view/components/search-field.component.tsx";
 import { ToggleButtons } from "#view/components/toggle-buttons.component.tsx";
@@ -151,71 +151,12 @@ const EditorSidebarSelectedComponentInner = ({
 
     return (
         <Box>
-            <Box
-                sx={{
-                    display: "flex",
-                    backgroundColor: "transparent",
-                    borderRadius: 15,
-                    paddingLeft: 0,
-                    paddingRight: 0,
-                    alignItems: "flex-start",
-                    justifyContent: "space-between",
-                    marginBottom: "-10px",
-                }}
-            >
-                <TextField
-                    value={localName}
-                    onChange={handleLocalNameChange}
-                    autoFocus={false}
-                    // Don't delete the whole Component if Delete is pressed
-                    onKeyUp={(event) => {
-                        if (event.key === "Delete") {
-                            event.stopPropagation();
-                        }
-                    }}
-                    sx={{
-                        border: "none !important",
-                        width: "82.5%",
-                        "& .MuiInputBase-root": {
-                            borderBottom: "1px solid transparent !important",
-                        },
-                        "*": {
-                            border: "none !important",
-                            padding: "0 !important",
-                            borderRadius: "0 !important",
-                            fontWeight: "bold",
-                        },
-                        "& .Mui-focused": {
-                            borderBottom: `1px solid ${theme.vars.palette.primary.main} !important`,
-                        },
-                        input: {
-                            fontSize: "0.875rem !important",
-                            width: "100% !important",
-                        },
-                        color: "text.primary !important",
-                        padding: "0 !important",
-                    }}
-                />
-                {checkUserRole(userRole, USER_ROLES.EDITOR) && (
-                    <IconButton
-                        onClick={handleDeleteComponent}
-                        sx={{
-                            "&:hover": {
-                                color: "error.light",
-                                backgroundColor: "background.paperIntransparent",
-                            },
-                            marginTop: -1,
-                        }}
-                    >
-                        <Delete sx={{ fontSize: 18 }} />
-                    </IconButton>
-                )}
-            </Box>
-
-            <EditorSidebarComponentIcon
-                symbol={selectedComponent.symbol}
+            <EditorSidebarComponentHeader
+                name={localName}
+                onNameChange={handleLocalNameChange}
                 userRole={userRole}
                 onChangeIcon={handleOpenChangeIconDialog}
+                onDelete={handleDeleteComponent}
             />
 
             <Box

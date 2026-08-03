@@ -278,6 +278,22 @@ describe("EditorSidebarSelectedComponent — new click handlers", () => {
         });
     });
 
+    describe("change symbol control", () => {
+        it("clicking the change symbol button calls handleOpenChangeIconDialog", async () => {
+            const { props, user } = setup();
+
+            await user.click(screen.getByTestId("change-component-icon"));
+
+            expect(props.handleOpenChangeIconDialog).toHaveBeenCalledOnce();
+        });
+
+        it("hides the change symbol button for non-editors", () => {
+            setup({ userRole: USER_ROLES.VIEWER });
+
+            expect(screen.queryByTestId("change-component-icon")).not.toBeInTheDocument();
+        });
+    });
+
     describe("asset hover popper", () => {
         it("hovering an asset name shows the (C / I / A) popper for that asset", async () => {
             const items = [
