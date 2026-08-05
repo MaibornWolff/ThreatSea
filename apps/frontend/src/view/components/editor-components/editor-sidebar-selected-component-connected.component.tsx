@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Box, IconButton, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import Delete from "@mui/icons-material/Delete";
 import ArrowUpward from "@mui/icons-material/ArrowUpward";
 import ArrowDownward from "@mui/icons-material/ArrowDownward";
@@ -24,6 +25,7 @@ export const EditorSidebarSelectedComponentConnected = ({
     handleDeleteConnectionBetweenComponents,
 }: EditorSidebarSelectedComponentConnectedProps) => {
     const { t } = useTranslation("editorPage");
+    const theme = useTheme();
     const [searchValue, setSearchValue] = useState("");
     const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
@@ -54,7 +56,7 @@ export const EditorSidebarSelectedComponentConnected = ({
             <Box
                 sx={{
                     display: "flex",
-                    backgroundColor: "background.paperWhite",
+                    backgroundColor: theme.vars.palette.background.paperWhite,
                     borderRadius: 15,
                     height: "31px",
                     paddingLeft: 8,
@@ -71,7 +73,7 @@ export const EditorSidebarSelectedComponentConnected = ({
                     sx={{
                         fontWeight: "bold",
                         fontSize: "0.75rem",
-                        color: "text.primary",
+                        color: theme.vars.palette.text.primary,
                     }}
                 >
                     {t("sidebar.connected_components.title")}
@@ -159,7 +161,7 @@ export const EditorSidebarSelectedComponentConnected = ({
                                 sx={{
                                     fontSize: "0.75rem",
                                     fontWeight: "bold",
-                                    color: "text.primary",
+                                    color: theme.vars.palette.text.primary,
                                     cursor: "pointer",
                                     "&:hover": { textDecoration: "underline" },
                                 }}
@@ -173,8 +175,8 @@ export const EditorSidebarSelectedComponentConnected = ({
                                 }
                                 sx={{
                                     "&:hover": {
-                                        color: "error.light",
-                                        backgroundColor: "background.paperIntransparent",
+                                        color: theme.vars.palette.error.light,
+                                        backgroundColor: theme.vars.palette.background.paperIntransparent,
                                     },
                                 }}
                             >
