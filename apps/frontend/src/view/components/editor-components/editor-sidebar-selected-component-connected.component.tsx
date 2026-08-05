@@ -1,6 +1,13 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Box, IconButton, Typography } from "@mui/material";
 import Delete from "@mui/icons-material/Delete";
+import ArrowUpward from "@mui/icons-material/ArrowUpward";
+import ArrowDownward from "@mui/icons-material/ArrowDownward";
+import { SearchField } from "#view/components/search-field.component.tsx";
+import { ToggleButtons } from "#view/components/toggle-buttons.component.tsx";
+import type { ChangeEvent } from "react";
+import type { SortDirection } from "#application/actions/list.actions.ts";
 import type { AugmentedSystemComponent, ConnectionEndpointWithComponent } from "#api/types/system.types.ts";
 
 export interface EditorSidebarSelectedComponentConnectedProps {
@@ -17,6 +24,30 @@ export const EditorSidebarSelectedComponentConnected = ({
     handleDeleteConnectionBetweenComponents,
 }: EditorSidebarSelectedComponentConnectedProps) => {
     const { t } = useTranslation("editorPage");
+    const [searchValue, setSearchValue] = useState("");
+    const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+
+    const handleSearchChanged = (event: ChangeEvent<HTMLInputElement>) => {
+        setSearchValue(event.target.value);
+    };
+
+    const handleSortDirectionChanged = (_event: React.MouseEvent<HTMLElement>, value: SortDirection) => {
+        if (value) {
+            setSortDirection(value);
+        }
+    };
+
+    const visibleConnectedComponents = connectedComponents
+        .filter((connection) => {
+            const name = connection.component?.name ?? "";
+            return searchValue === "" || name.toLowerCase().includes(searchValue.toLowerCase());
+        })
+        .toSorted((a, b) => {
+            const nameA = a.component?.name.toLowerCase() ?? "";
+            const nameB = b.component?.name.toLowerCase() ?? "";
+            const comparison = nameA < nameB ? -1 : nameA > nameB ? 1 : 0;
+            return sortDirection === "asc" ? comparison : -comparison;
+        });
 
     return (
         <>
@@ -46,8 +77,51 @@ export const EditorSidebarSelectedComponentConnected = ({
                     {t("sidebar.connected_components.title")}
                 </Typography>
             </Box>
+            <Box
+                sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: 1,
+                }}
+            >
+                <SearchField
+                    sx={{
+                        marginLeft: -0.5,
+                        width: "40%",
+                        height: "31px",
+                        borderRadius: 5,
+                    }}
+                    inputSx={{ fontSize: "0.75rem" }}
+                    //don't delete the whole Component if Delete is pressed
+                    onKeyUp={(event) => {
+                        if (event.key === "Delete") {
+                            event.stopPropagation();
+                        }
+                    }}
+                    value={searchValue}
+                    onChange={handleSearchChanged}
+                    data-testid="connected-component-search-field"
+                />
+                <ToggleButtons
+                    value={sortDirection}
+                    onChange={handleSortDirectionChanged}
+                    buttons={[
+                        {
+                            icon: ArrowUpward,
+                            value: "asc",
+                            "data-testid": "connected-component-ascending-sort-button",
+                        },
+                        {
+                            icon: ArrowDownward,
+                            value: "desc",
+                            "data-testid": "connected-component-descending-sort-button",
+                        },
+                    ]}
+                />
+            </Box>
             <Box>
-                {connectedComponents.map((connection, index) => {
+                {visibleConnectedComponents.map((connection, index) => {
                     const connectedComponent = connection.component;
                     if (!connectedComponent) {
                         return null;
