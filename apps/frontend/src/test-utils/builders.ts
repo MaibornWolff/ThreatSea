@@ -13,6 +13,7 @@ import {
     type AugmentedSystemComponent,
     type Component,
     type ConnectionAnchor,
+    type ConnectionEndpointWithComponent,
     type SystemCommunicationInterface,
     type SystemConnection,
     type SystemPointOfAttack,
@@ -176,6 +177,15 @@ export const createConnectionAnchor = (
     id: "comp-1",
     anchor: AnchorOrientation.right,
     type: STANDARD_COMPONENT_TYPES.CLIENT,
+    ...overrides,
+});
+
+export const createConnectedComponent = (
+    overrides: Partial<ConnectionEndpointWithComponent> = {}
+): ConnectionEndpointWithComponent => ({
+    ...createConnectionAnchor(),
+    communicationInterfaceId: null,
+    component: createSystemComponent(),
     ...overrides,
 });
 
