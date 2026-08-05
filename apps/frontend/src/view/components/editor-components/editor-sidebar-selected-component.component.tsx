@@ -504,6 +504,8 @@ const EditorSidebarSelectedComponentInner = ({
             )}
 
             <EditorSidebarSelectedComponentAssets
+                // Remount on component switch so local sort resets.
+                key={`assets-${selectedComponent.id}`}
                 items={items}
                 assetSearchValue={assetSearchValue}
                 handleAssetSearchChanged={handleAssetSearchChanged}
@@ -514,6 +516,8 @@ const EditorSidebarSelectedComponentInner = ({
             />
 
             <EditorSidebarSelectedComponentConnected
+                // Remount on component switch so local search and sort reset.
+                key={`connected-${selectedComponent.id}`}
                 selectedComponent={selectedComponent}
                 connectedComponents={connectedComponents}
                 handleSelectConnectedComponent={handleSelectConnectedComponent}
