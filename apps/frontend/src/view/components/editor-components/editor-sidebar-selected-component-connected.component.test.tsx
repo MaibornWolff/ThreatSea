@@ -131,5 +131,27 @@ describe("EditorSidebarSelectedComponentConnected — sorting & filtering", () =
             expect(props.handleDeleteConnectionBetweenComponents).toHaveBeenCalledOnce();
             expect(props.handleDeleteConnectionBetweenComponents).toHaveBeenCalledWith("comp-source", "comp-target");
         });
+
+        it("renders no row for a connection whose component is undefined", () => {
+            setup({ connectedComponents: [createConnectedComponent({ component: undefined })] });
+
+            expect(screen.queryByTestId("connected-component-name")).not.toBeInTheDocument();
+        });
+
+        it("selects the connected component with its id and communication interface id on click", async () => {
+            const { props, user } = setup({
+                connectedComponents: [
+                    createConnectedComponent({
+                        communicationInterfaceId: "ci-9",
+                        component: createSystemComponent({ id: "c-target", name: "Target" }),
+                    }),
+                ],
+            });
+
+            await user.click(screen.getByTestId("connected-component-name"));
+
+            expect(props.handleSelectConnectedComponent).toHaveBeenCalledOnce();
+            expect(props.handleSelectConnectedComponent).toHaveBeenCalledWith("c-target", "ci-9");
+        });
     });
 });

@@ -66,4 +66,10 @@ describe("EditorSidebarSelectedComponentAssets — sorting", () => {
 
         expect(assetNames()).toEqual(["Service A", "Service B"]);
     });
+
+    it("renders no asset rows when the list is empty", () => {
+        setup({ items: [] });
+
+        expect(screen.queryAllByTestId("selected-component-asset-search-results")).toHaveLength(0);
+    });
 });
