@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Box, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import ArrowUpward from "@mui/icons-material/ArrowUpward";
 import ArrowDownward from "@mui/icons-material/ArrowDownward";
 import { SearchField } from "#view/components/search-field.component.tsx";
@@ -34,6 +35,7 @@ export const EditorSidebarSelectedComponentAssets = ({
     handleRemoveAssetFromAllPointsOfAttack,
 }: EditorSidebarSelectedComponentAssetsProps) => {
     const { t } = useTranslation("editorPage");
+    const theme = useTheme();
     const { anchorEl: assetAnchorEl, hoveredAsset, handleAssetHover, handleAssetLeave } = useAssetHoverPopper();
     const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
@@ -60,7 +62,7 @@ export const EditorSidebarSelectedComponentAssets = ({
             <Box
                 sx={{
                     display: "flex",
-                    backgroundColor: "background.paperWhite",
+                    backgroundColor: theme.vars.palette.background.paperWhite,
                     borderRadius: 15,
                     height: "31px",
                     paddingLeft: 8,
@@ -77,7 +79,7 @@ export const EditorSidebarSelectedComponentAssets = ({
                     sx={{
                         fontWeight: "bold",
                         fontSize: "0.75rem",
-                        color: "text.primary",
+                        color: theme.vars.palette.text.primary,
                     }}
                 >
                     {t("sidebar.assets.title")}
@@ -146,7 +148,7 @@ export const EditorSidebarSelectedComponentAssets = ({
                                 sx={{
                                     minWidth: "130px",
                                     maxWidth: "130px",
-                                    color: "text.primary",
+                                    color: theme.vars.palette.text.primary,
                                     fontSize: "0.75rem",
                                     fontWeight: "bold",
                                     cursor: "pointer",
