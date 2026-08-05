@@ -5,7 +5,8 @@ import {
     type EditorSidebarSelectedComponentConnectedProps,
 } from "./editor-sidebar-selected-component-connected.component";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
-import { createConnectedComponent, createSystemComponent } from "#test-utils/builders.ts";
+import { createCommunicationInterface, createConnectedComponent, createSystemComponent } from "#test-utils/builders.ts";
+import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
 
 const connectedNames = () => screen.getAllByTestId("connected-component-name").map((element) => element.textContent);
 
@@ -89,6 +90,46 @@ describe("EditorSidebarSelectedComponentConnected — sorting & filtering", () =
             await user.type(screen.getByRole("textbox"), "service");
 
             expect(connectedNames()).toEqual(["Service A", "Service B"]);
+        });
+    });
+
+    describe("rendering & actions", () => {
+        it("appends the communication interface name to the label for a communication infrastructure component", () => {
+            setup({
+                selectedComponent: createSystemComponent({
+                    type: STANDARD_COMPONENT_TYPES.COMMUNICATION_INFRASTRUCTURE,
+                }),
+                connectedComponents: [
+                    createConnectedComponent({
+                        communicationInterfaceId: "ci-1",
+                        component: createSystemComponent({
+                            id: "c-backend",
+                            name: "Backend",
+                            communicationInterfaces: [
+                                createCommunicationInterface({ id: "ci-1", name: "API Gateway" }),
+                            ],
+                        }),
+                    }),
+                ],
+            });
+
+            expect(screen.getByTestId("connected-component-name")).toHaveTextContent("Backend > API Gateway");
+        });
+
+        it("deletes the connection with the selected and connected component ids when the delete button is clicked", async () => {
+            const { props, user } = setup({
+                selectedComponent: createSystemComponent({ id: "comp-source" }),
+                connectedComponents: [
+                    createConnectedComponent({
+                        component: createSystemComponent({ id: "comp-target", name: "Target" }),
+                    }),
+                ],
+            });
+
+            await user.click(screen.getByTestId("DeleteIcon"));
+
+            expect(props.handleDeleteConnectionBetweenComponents).toHaveBeenCalledOnce();
+            expect(props.handleDeleteConnectionBetweenComponents).toHaveBeenCalledWith("comp-source", "comp-target");
         });
     });
 });
