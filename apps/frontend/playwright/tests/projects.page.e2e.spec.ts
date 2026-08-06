@@ -200,25 +200,30 @@ test.describe("Projects Page Tests", () => {
         await projectsPage.folderNameInput.fill(folderName);
         await projectsPage.saveButton.click();
         await expect(page).toHaveURL("/projects");
-        await expect(projectsPage.folderSectionByName(folderName)).toBeVisible();
+
+        const folders = await getFolders(request, token);
+        const createdFolder = folders.find((folder) => folder.name === folderName);
+        if (!createdFolder) {
+            throw new Error(`Folder "${folderName}" was not created`);
+        }
+
+        await expect(projectsPage.folderSectionById(createdFolder.id)).toBeVisible();
 
         await projectsPage.searchField.fill(testIdentifier);
         await expect(projectsPage.projectCards).toHaveCount(1);
         await projectsPage.actionMenuButton.first().click();
         await projectsPage.moveProjectButton.click();
 
-        await expect(projectsPage.moveTargetByName(folderName)).toBeVisible();
-        await projectsPage.moveTargetByName(folderName).click();
+        await expect(projectsPage.moveTargetByFolderId(createdFolder.id)).toBeVisible();
+        await projectsPage.moveTargetByFolderId(createdFolder.id).click();
         await projectsPage.saveButton.click();
         await expect(page).toHaveURL("/projects");
+        await page.reload();
 
         await projectsPage.searchField.fill("");
-        await expect(
-            projectsPage
-                .folderSectionByName(folderName)
-                .locator('[data-testid="projects-page_project-card_project-name"]')
-                .filter({ hasText: projectToMove.name })
-        ).toBeVisible();
+        await projectsPage.expandFolderSection(createdFolder.id);
+        await expect(projectsPage.projectNameInFolderSection(createdFolder.id, projectToMove.name)).toBeVisible();
+        await expect(projectsPage.projectNameInUngroupedSection(projectToMove.name)).toHaveCount(0);
     });
 
     test("Should delete an existing project", async ({ page, request, browserName }, { testId }) => {

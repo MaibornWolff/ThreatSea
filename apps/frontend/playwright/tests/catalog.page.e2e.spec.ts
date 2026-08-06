@@ -535,14 +535,17 @@ test.describe("Catalog Page Tests", () => {
         await expect(catalogPage.catalogEditorButton).toBeVisible();
         await expect(catalogPage.membersButton).toBeVisible();
         await expect(catalogPage.catalogEditorButton).toHaveAttribute("aria-pressed", "true");
+        await expect(catalogPage.membersButton).not.toHaveAttribute("aria-pressed", "true");
         await expect(page).toHaveTitle(catalogEditorTitle);
 
         await Promise.all([page.waitForURL(`/catalogs/${catalogId}/members`), catalogPage.membersButton.click()]);
         await expect(catalogPage.membersButton).toHaveAttribute("aria-pressed", "true");
+        await expect(catalogPage.catalogEditorButton).not.toHaveAttribute("aria-pressed", "true");
         await expect(page).toHaveTitle(membersTitle);
 
         await Promise.all([page.waitForURL(`/catalogs/${catalogId}`), catalogPage.catalogEditorButton.click()]);
         await expect(catalogPage.catalogEditorButton).toHaveAttribute("aria-pressed", "true");
+        await expect(catalogPage.membersButton).not.toHaveAttribute("aria-pressed", "true");
         await expect(page).toHaveTitle(catalogEditorTitle);
     });
 });

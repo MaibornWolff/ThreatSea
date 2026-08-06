@@ -197,7 +197,9 @@ export class EditorPage extends BasePage {
     }
 
     communicationListItemByName(name: string): Locator {
-        return this.page.getByTestId("communication-list-item").filter({ hasText: name });
+        return this.page
+            .getByTestId("communication-list-item")
+            .filter({ has: this.page.getByText(name, { exact: true }) });
     }
 
     poaSwitchButton(poa: string): Locator {

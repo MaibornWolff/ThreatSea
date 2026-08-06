@@ -3,7 +3,15 @@ import type { Folder } from "#api/types/folder.types.ts";
 import { fetchApi } from "./api.utils.ts";
 
 export async function getFolders(request: APIRequestContext, token: string): Promise<Folder[]> {
-    return fetchApi(request, token, "GET", "/folders");
+    const folders = await fetchApi<
+        (Omit<Folder, "createdAt" | "updatedAt"> & { createdAt: string; updatedAt: string })[]
+    >(request, token, "GET", "/folders");
+
+    return folders.map((folder) => ({
+        ...folder,
+        createdAt: new Date(folder.createdAt),
+        updatedAt: new Date(folder.updatedAt),
+    }));
 }
 
 export async function deleteFolder(request: APIRequestContext, token: string, folderId: number): Promise<void> {

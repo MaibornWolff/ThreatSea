@@ -99,15 +99,38 @@ export class ProjectsPage extends BasePage {
         return this.page.locator('[data-testid="projects-page_project-card"] p').filter({ hasText: text });
     }
 
-    moveTargetByName(folderName: string): Locator {
-        return this.page
-            .locator('[data-testid="move-target-root"], [data-testid^="move-target-"]')
-            .filter({ has: this.page.getByText(folderName, { exact: true }) });
+    moveTargetByFolderId(folderId: number): Locator {
+        return this.page.locator(`[data-testid="move-target-${folderId}"]`);
     }
 
-    folderSectionByName(folderName: string): Locator {
-        return this.page
-            .locator('[data-testid^="folder-section-"]:not([data-testid$="_header"])')
-            .filter({ has: this.page.locator('[data-testid$="_header"]').getByText(folderName, { exact: true }) });
+    folderSectionById(folderId: number): Locator {
+        return this.page.locator(`[data-testid="folder-section-${folderId}"]`);
+    }
+
+    folderSectionHeaderById(folderId: number): Locator {
+        return this.page.locator(`[data-testid="folder-section-${folderId}_header"]`);
+    }
+
+    ungroupedFolderSection(): Locator {
+        return this.page.locator('[data-testid="folder-section-ungrouped"]');
+    }
+
+    projectNameInFolderSection(folderId: number, projectName: string): Locator {
+        return this.folderSectionById(folderId)
+            .locator('[data-testid="projects-page_project-card_project-name"]')
+            .filter({ has: this.page.getByText(projectName, { exact: true }) });
+    }
+
+    projectNameInUngroupedSection(projectName: string): Locator {
+        return this.ungroupedFolderSection()
+            .locator('[data-testid="projects-page_project-card_project-name"]')
+            .filter({ has: this.page.getByText(projectName, { exact: true }) });
+    }
+
+    async expandFolderSection(folderId: number): Promise<void> {
+        const folderSectionHeader = this.folderSectionHeaderById(folderId);
+        if ((await folderSectionHeader.getAttribute("aria-expanded")) !== "true") {
+            await folderSectionHeader.click();
+        }
     }
 }
