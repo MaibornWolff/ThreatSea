@@ -61,7 +61,7 @@
     "oxlint-tsgolint": "catalog:",
     "supertest": "7.2.2",
     "tsc-alias": "1.9.1",
-    "tsx": "4.23.4",
+    "tsx": "4.23.5",
     "vitest": "catalog:"
   },
   "lint-staged": {
