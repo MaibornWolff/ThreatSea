@@ -6,6 +6,7 @@ export class ProjectsPage extends BasePage {
 
     // Buttons
     readonly addProjectButton: Locator;
+    readonly addFolderButton: Locator;
     readonly sortByDateButton: Locator;
     readonly sortByNameButton: Locator;
     readonly ascendingSortButton: Locator;
@@ -16,6 +17,7 @@ export class ProjectsPage extends BasePage {
     readonly nameInput: Locator;
     readonly descriptionInput: Locator;
     readonly catalogSelection: Locator;
+    readonly folderNameInput: Locator;
     readonly saveButton: Locator;
     readonly cancelButton: Locator;
 
@@ -28,6 +30,7 @@ export class ProjectsPage extends BasePage {
     readonly editProjectButton: Locator;
     readonly deleteProjectButton: Locator;
     readonly exportProjectButton: Locator;
+    readonly moveProjectButton: Locator;
 
     // Navigation
     readonly projectsNavButton: Locator;
@@ -40,6 +43,7 @@ export class ProjectsPage extends BasePage {
     constructor(page: Page) {
         super(page);
         this.addProjectButton = page.locator('[data-testid="projects-page_add-project-button"]');
+        this.addFolderButton = page.locator('[data-testid="projects-page_add-folder-button"]');
         this.sortByDateButton = page.locator('[data-testid="projects-page_sort-projects-by-date-button"]');
         this.sortByNameButton = page.locator('[data-testid="projects-page_sort-projects-by-name-button"]');
         this.ascendingSortButton = page.locator('[data-testid="projects-page_ascending-projects-sort-button"]');
@@ -51,6 +55,7 @@ export class ProjectsPage extends BasePage {
             '[data-testid="project-creation-modal_description-input"] textarea[name="description"]'
         );
         this.catalogSelection = page.locator('[data-testid="project-creation-modal_catalog-selection"]');
+        this.folderNameInput = page.locator('[data-testid="folder-modal_name-input"] input');
         this.saveButton = page.locator('[data-testid="save-button"]');
         this.cancelButton = page.locator('[data-testid="cancel-button"]');
 
@@ -69,6 +74,9 @@ export class ProjectsPage extends BasePage {
         );
         this.exportProjectButton = page.locator(
             '[data-testid="projects-page_project-card_action-menu_export-project-button"]'
+        );
+        this.moveProjectButton = page.locator(
+            '[data-testid="projects-page_project-card_action-menu_move-project-button"]'
         );
 
         this.projectsNavButton = page.locator('[data-testid="navigation-header_projects-page-button"]');
@@ -89,5 +97,17 @@ export class ProjectsPage extends BasePage {
 
     projectCardNameFilter(text: string): Locator {
         return this.page.locator('[data-testid="projects-page_project-card"] p').filter({ hasText: text });
+    }
+
+    moveTargetByName(folderName: string): Locator {
+        return this.page
+            .locator('[data-testid="move-target-root"], [data-testid^="move-target-"]')
+            .filter({ has: this.page.getByText(folderName, { exact: true }) });
+    }
+
+    folderSectionByName(folderName: string): Locator {
+        return this.page
+            .locator('[data-testid^="folder-section-"]:not([data-testid$="_header"])')
+            .filter({ has: this.page.locator('[data-testid$="_header"]').getByText(folderName, { exact: true }) });
     }
 }

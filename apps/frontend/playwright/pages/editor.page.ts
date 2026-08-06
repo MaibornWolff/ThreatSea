@@ -33,6 +33,8 @@ export class EditorPage extends BasePage {
     readonly assetCreationModalNameInput: Locator;
     readonly saveButton: Locator;
     readonly cancelButton: Locator;
+    readonly changeComponentIconButton: Locator;
+    readonly saveComponentIconButton: Locator;
 
     // Custom component context menu + dialog
     readonly addCustomComponentButton: Locator;
@@ -82,6 +84,8 @@ export class EditorPage extends BasePage {
         this.assetCreationModalNameInput = page.locator('[data-testid="asset-creation-modal_name-input"]');
         this.saveButton = page.locator('[data-testid="save-button"]');
         this.cancelButton = page.locator('[data-testid="cancel-button"]');
+        this.changeComponentIconButton = page.getByTestId("change-component-icon");
+        this.saveComponentIconButton = page.getByTestId("save-component-icon");
 
         // The "+" on the Custom row and the dialog have no data-testid, so rely on
         // the MUI add-icon test id and accessible roles/labels instead.
@@ -174,6 +178,10 @@ export class EditorPage extends BasePage {
         return this.componentDialog.getByRole("switch", { name: label });
     }
 
+    iconSelectionButton(iconName: string): Locator {
+        return this.componentDialog.getByRole("button", { name: iconName, exact: true });
+    }
+
     async uploadCustomIcon(): Promise<void> {
         // PLAYWRIGHT_FRONTEND_ROOT is set in playwright.config.ts (avoids import.meta.url cache dir issues).
         const iconPath = path.join(process.env["PLAYWRIGHT_FRONTEND_ROOT"]!, "playwright/fixtures/custom-icon.png");
@@ -186,6 +194,10 @@ export class EditorPage extends BasePage {
 
     customComponentMenuButton(name: string): Locator {
         return this.customComponentEntry(name).locator('[data-testid="MoreVertIcon"]');
+    }
+
+    communicationListItemByName(name: string): Locator {
+        return this.page.getByTestId("communication-list-item").filter({ hasText: name });
     }
 
     poaSwitchButton(poa: string): Locator {

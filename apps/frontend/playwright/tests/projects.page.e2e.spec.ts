@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import type { CONFIDENTIALITY_LEVELS } from "#utils/confidentiality.ts";
 import { createCatalog, deleteCatalog, getCatalogs } from "../utils/catalog.api.ts";
+import { deleteFolders, getFolders } from "../utils/folder.api.ts";
 import { createProject, createProjects, deleteProjects, getProjects } from "../utils/project.api.ts";
 import { buildTestId, buildProject } from "../builder/test-data.builder.ts";
 import { ProjectsPage } from "../pages/projects.page.ts";
@@ -61,6 +62,10 @@ test.afterEach(async ({ page, request, browserName }, { testId }) => {
     const allProjects = await getProjects(request, token);
     const projectIds = allProjects.filter((p) => p.name.includes(tid)).map((p) => p.id);
     await deleteProjects(request, token, projectIds);
+
+    const allFolders = await getFolders(request, token);
+    const folderIds = allFolders.filter((folder) => folder.name.includes(tid)).map((folder) => folder.id);
+    await deleteFolders(request, token, folderIds);
 
     const catalogs = await getCatalogs(request, token);
     const catalog = catalogs.find((c) => c.name.includes(tid));
@@ -175,6 +180,45 @@ test.describe("Projects Page Tests", () => {
         await projectsPage.saveButton.click();
 
         await expect(projectsPage.projectCardNames.first()).toContainText(updatedName);
+    });
+
+    test("Should create a folder and move a project into it", async ({ page, request, browserName }, { testId }) => {
+        const projectsPage = new ProjectsPage(page);
+        const testIdentifier = buildTestId(browserName, testId);
+        const token = await projectsPage.getCsrfToken();
+
+        const projectToMove = { ...projects[0]!, name: `${projects[0]!.name}-${testIdentifier}` };
+        await createProject(
+            request,
+            token,
+            buildProject(projectToMove.name, projectToMove.catalogId, projectToMove.confidentialityLevel)
+        );
+        await page.reload();
+
+        const folderName = `Folder-${testIdentifier}`;
+        await projectsPage.addFolderButton.click();
+        await projectsPage.folderNameInput.fill(folderName);
+        await projectsPage.saveButton.click();
+        await expect(page).toHaveURL("/projects");
+        await expect(projectsPage.folderSectionByName(folderName)).toBeVisible();
+
+        await projectsPage.searchField.fill(testIdentifier);
+        await expect(projectsPage.projectCards).toHaveCount(1);
+        await projectsPage.actionMenuButton.first().click();
+        await projectsPage.moveProjectButton.click();
+
+        await expect(projectsPage.moveTargetByName(folderName)).toBeVisible();
+        await projectsPage.moveTargetByName(folderName).click();
+        await projectsPage.saveButton.click();
+        await expect(page).toHaveURL("/projects");
+
+        await projectsPage.searchField.fill("");
+        await expect(
+            projectsPage
+                .folderSectionByName(folderName)
+                .locator('[data-testid="projects-page_project-card_project-name"]')
+                .filter({ hasText: projectToMove.name })
+        ).toBeVisible();
     });
 
     test("Should delete an existing project", async ({ page, request, browserName }, { testId }) => {

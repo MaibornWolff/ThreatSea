@@ -518,14 +518,31 @@ test.describe("Catalog Page Tests", () => {
         await expect(page).toHaveURL("/catalogs");
         await pg.goto(catalogId);
 
-        await pg.membersButton.click();
-        await expect(page).toHaveURL(`/catalogs/${catalogId}/members`);
+        await Promise.all([page.waitForURL(`/catalogs/${catalogId}/members`), pg.membersButton.click()]);
 
-        await pg.catalogEditorButton.click();
-        await expect(page).toHaveURL(`/catalogs/${catalogId}`);
+        await pg.goto(catalogId);
 
         await pg.accountButton.click();
         await expect(pg.accountMenuUsername).toBeVisible();
         await expect(pg.accountMenuLogout).toBeVisible();
+    });
+
+    test("Should keep catalog header tabs and title in sync", async ({ page }) => {
+        const catalogPage = new CatalogPage(page);
+        const catalogEditorTitle = /^ThreatSea(?: - .+)? - Catalog Editor$/;
+        const membersTitle = /^ThreatSea(?: - .+)? - Members$/;
+
+        await expect(catalogPage.catalogEditorButton).toBeVisible();
+        await expect(catalogPage.membersButton).toBeVisible();
+        await expect(catalogPage.catalogEditorButton).toHaveAttribute("aria-pressed", "true");
+        await expect(page).toHaveTitle(catalogEditorTitle);
+
+        await Promise.all([page.waitForURL(`/catalogs/${catalogId}/members`), catalogPage.membersButton.click()]);
+        await expect(catalogPage.membersButton).toHaveAttribute("aria-pressed", "true");
+        await expect(page).toHaveTitle(membersTitle);
+
+        await Promise.all([page.waitForURL(`/catalogs/${catalogId}`), catalogPage.catalogEditorButton.click()]);
+        await expect(catalogPage.catalogEditorButton).toHaveAttribute("aria-pressed", "true");
+        await expect(page).toHaveTitle(catalogEditorTitle);
     });
 });
