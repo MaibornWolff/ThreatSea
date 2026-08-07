@@ -149,6 +149,24 @@ test.describe("Editor Page Tests", () => {
     });
 
     test.describe("Communication Interface Sidebar Tests", () => {
+        test("Creates a communication interface without manually choosing an icon", async ({ page, browserName }, {
+            testId,
+        }) => {
+            const editorPage = new EditorPage(page);
+            const communicationName = `Default Interface ${buildTestId(browserName, testId)}`;
+
+            await editorPage.clickCanvas(880, 375);
+            await expect(editorPage.createCommunicationButton).toBeVisible();
+            await editorPage.createCommunicationButton.click();
+            await editorPage.communicationNameInput.fill(communicationName);
+
+            await expect(editorPage.saveCommunicationButton).toBeEnabled();
+            await editorPage.saveCommunicationButton.click();
+            await expect(editorPage.saveCommunicationButton).toBeHidden();
+            await editorPage.clickCanvas(880, 375);
+            await expect(editorPage.communicationListItemByName(communicationName)).toBeVisible();
+        });
+
         test("Performs case insensitive search", async ({ page }) => {
             const pg = new EditorPage(page);
             await pg.addCommunication();
@@ -370,6 +388,25 @@ test.describe("Editor Page Tests", () => {
             await pg.openContextMenu();
             await pg.expandCustomComponents();
             await expect(pg.customComponentEntry(name)).toHaveCount(0);
+        });
+    });
+
+    test.describe("Placed Component Icon Tests", () => {
+        test("Saves and reopens the selected icon for a placed component", async ({ page }) => {
+            const editorPage = new EditorPage(page);
+
+            await editorPage.clickCanvas(505, 345);
+            await expect(editorPage.changeComponentIconButton).toBeVisible();
+            await editorPage.changeComponentIconButton.click();
+
+            await editorPage.iconSelectionButton("Server").click();
+            await expect(editorPage.iconSelectionButton("Server")).toHaveAttribute("aria-pressed", "true");
+
+            await editorPage.saveComponentIconButton.click();
+            await expect(editorPage.componentDialog).toBeHidden();
+
+            await editorPage.changeComponentIconButton.click();
+            await expect(editorPage.iconSelectionButton("Server")).toHaveAttribute("aria-pressed", "true");
         });
     });
 });
