@@ -44,7 +44,14 @@ function matchesBytes(header: Uint8Array, offset: number, bytes: readonly number
     return bytes.every((byte, index) => header[offset + index] === byte);
 }
 
-// Content checks per accepted MIME type: magic bytes for the binary formats, an <svg> element
+function isSvgDocument(bytes: Uint8Array): boolean {
+    const doc = new DOMParser().parseFromString(new TextDecoder().decode(bytes), "image/svg+xml");
+    // On malformed XML, DOMParser yields a <parsererror> root instead of throwing.
+    const root = doc.documentElement;
+    return root.localName === "svg" && root.namespaceURI === "http://www.w3.org/2000/svg";
+}
+
+// Content checks per accepted MIME type: magic bytes for the binary formats, a full XML parse
 // for SVG (text-based, so it has no magic bytes).
 const IMAGE_CONTENT_CHECKS: Record<string, (header: Uint8Array) => boolean> = {
     "image/png": (header) => matchesBytes(header, 0, [0x89, 0x50, 0x4e, 0x47]),
@@ -52,7 +59,7 @@ const IMAGE_CONTENT_CHECKS: Record<string, (header: Uint8Array) => boolean> = {
     // RIFF container (bytes 0-3) with WEBP form type (bytes 8-11).
     "image/webp": (header) =>
         matchesBytes(header, 0, [0x52, 0x49, 0x46, 0x46]) && matchesBytes(header, 8, [0x57, 0x45, 0x42, 0x50]),
-    "image/svg+xml": (header) => /<svg[\s/>]/i.test(new TextDecoder().decode(header)),
+    "image/svg+xml": isSvgDocument,
 };
 
 // Check the bytes against the check for the declared MIME type, so type and content must agree.

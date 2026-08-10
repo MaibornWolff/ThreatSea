@@ -95,6 +95,22 @@ describe("validateAndConvertIconFile", () => {
         expect(result).toEqual({ ok: false, reason: "content" });
     });
 
+    it("rejects a non-SVG document that merely mentions <svg> in a comment", async () => {
+        const result = await validateAndConvertIconFile(
+            new File(["<!-- <svg> --><html></html>"], "icon", { type: "image/svg+xml" })
+        );
+
+        expect(result).toEqual({ ok: false, reason: "content" });
+    });
+
+    it("rejects malformed XML labeled as SVG", async () => {
+        const result = await validateAndConvertIconFile(
+            new File(['<svg xmlns="http://www.w3.org/2000/svg"><rect</svg>'], "icon", { type: "image/svg+xml" })
+        );
+
+        expect(result).toEqual({ ok: false, reason: "content" });
+    });
+
     it("rejects a non-image whose extension/MIME was spoofed to look like a PNG", async () => {
         // "GIF" header bytes but claims to be image/png.
         const result = await validateAndConvertIconFile(
