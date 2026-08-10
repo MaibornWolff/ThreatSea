@@ -103,6 +103,13 @@ export const INVALID_LINES_OF_TOLERANCE_RATIO_MESSAGE = () => {
     return "lineOfToleranceGreen must be less or equal than lineOfToleranceRed";
 };
 
-export function formatValidationErrors(errors: ValidationError[]): string[] {
-    return errors.flatMap((error) => (error.constraints ? Object.values(error.constraints) : []));
+export function formatValidationErrors(errors: ValidationError[], parentPath = ""): string[] {
+    return errors.flatMap((error) => {
+        const path = parentPath ? `${parentPath}.${error.property}` : error.property;
+        // Top-level messages already name their field; nested ones need the path to locate them.
+        const ownMessages = error.constraints
+            ? Object.values(error.constraints).map((message) => (parentPath ? `${path}: ${message}` : message))
+            : [];
+        return [...ownMessages, ...formatValidationErrors(error.children ?? [], path)];
+    });
 }
