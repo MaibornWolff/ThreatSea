@@ -18,14 +18,15 @@ export const MAX_NAME_LENGTH = 255;
 export const MAX_DESCRIPTION_LENGTH = 65535;
 // Allows ~100 kB binary after base64 inflation (~33%) plus the `data:image/...;base64,` prefix.
 export const MAX_SYMBOL_LENGTH = 150_000;
-// Uploaded icon (component type): a base64 PNG or JPEG data URL only.
-export const IMAGE_DATA_URL_PATTERN = /^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/;
+// Uploaded icon (component type): a base64 PNG, JPEG, WebP or SVG data URL only.
+export const IMAGE_DATA_URL_PATTERN = /^data:image\/(png|jpeg|webp|svg\+xml);base64,[A-Za-z0-9+/=]+$/i;
 
-// Placed component: a rooted local asset path (bundled standard icons) or a PNG/JPEG data URL.
-// Anchored + case-insensitive so an embedded image can only ever be PNG/JPEG — blocks
-// data:image/svg+xml (incl. upper-cased/whitespace-padded schemes) and remote/`javascript:` URLs.
+// Placed component: a rooted local asset path (bundled standard icons) or one of the data URLs
+// above. Anchored + case-insensitive so an embedded image can only ever carry a registered image
+// MIME type — blocks non-image data URLs (incl. whitespace-padded schemes) and remote/
+// `javascript:` URLs. SVG may contain scripts, so symbols must only ever be rendered via <img>.
 export const SYSTEM_COMPONENT_SYMBOL_PATTERN =
-    /^(?:\/[\w.-][\w./-]*\.(?:png|jpe?g|webp|svg)|data:image\/(?:png|jpeg);base64,[A-Za-z0-9+/=]+)$/i;
+    /^(?:\/[\w.-][\w./-]*\.(?:png|jpe?g|webp|svg)|data:image\/(?:png|jpeg|webp|svg\+xml);base64,[A-Za-z0-9+/=]+)$/i;
 export const CIA_VALUE_MIN = 1;
 export const CIA_VALUE_MAX = 5;
 export const PROBABILITY_VALUE_MIN = 1;
@@ -76,7 +77,7 @@ export const FIELD_MUST_BE_ISO_8601_DATE = (field: string, condition?: string) =
 };
 
 export const FIELD_MUST_BE_VALID_IMAGE_DATA = (field: string, condition?: string) => {
-    return `Field ${field} must be a valid base64-encoded PNG or JPEG${condition ? ` ${condition}` : ""}`;
+    return `Field ${field} must be a valid base64-encoded PNG, JPEG, WebP or SVG${condition ? ` ${condition}` : ""}`;
 };
 
 export const FIELD_MUST_BE_ONE_OF_MESSAGE = (field: string, values: unknown[]) => {

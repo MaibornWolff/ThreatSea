@@ -12,7 +12,7 @@ describe("formatValidationErrors", () => {
             data: {
                 components: [
                     { symbol: "/static/media/user.4176f8c5.png" },
-                    { symbol: "data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=" },
+                    { symbol: "data:image/gif;base64,R0lGODlhAQABAAAAACw=" },
                 ],
             },
         };

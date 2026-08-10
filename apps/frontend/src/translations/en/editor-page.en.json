@@ -90,7 +90,7 @@
     "iconStandardLabel": "Standard icons",
     "iconOr": "or",
     "iconUploadLabel": "Custom upload",
-    "iconUploadHint": "PNG / JPEG, up to 100 kB.",
+    "iconUploadHint": "PNG / JPEG / WebP / SVG, up to 100 kB.",
     "iconUploadTooltip": "Upload custom icon",
     "iconRequired": "An icon is required",
     "errorMessages": {

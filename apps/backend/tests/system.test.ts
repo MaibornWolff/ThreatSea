@@ -647,11 +647,20 @@ const systemWithComponentSymbol = (symbol: string) => ({
     image: null,
 });
 
-it("should reject a component whose symbol is a data:image/svg+xml URL", async () => {
-    // "<svg></svg>" — embedded payload that must not be stored.
+it("should accept a component whose symbol is a data:image/svg+xml URL", async () => {
+    // "<svg></svg>" — SVG is a supported symbol format; only ever rendered via <img>.
     const res = await request(app)
         .put(`/api/projects/${projectId}/system`)
         .send(systemWithComponentSymbol("data:image/svg+xml;base64,PHN2Zz48L3N2Zz4="))
+        .set("X-CSRF-TOKEN", csrfToken)
+        .set("Cookie", cookies);
+    expect(res.statusCode).toEqual(200);
+});
+
+it("should reject a component whose symbol is an unsupported image data URL", async () => {
+    const res = await request(app)
+        .put(`/api/projects/${projectId}/system`)
+        .send(systemWithComponentSymbol("data:image/gif;base64,R0lGODlhAQABAAAAACw="))
         .set("X-CSRF-TOKEN", csrfToken)
         .set("Cookie", cookies);
     expect(res.statusCode).toEqual(400);
