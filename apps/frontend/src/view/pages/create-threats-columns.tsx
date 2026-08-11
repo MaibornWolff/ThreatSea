@@ -1,9 +1,12 @@
 import Add from "@mui/icons-material/Add";
+import Block from "@mui/icons-material/Block";
+import CheckCircle from "@mui/icons-material/CheckCircle";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import ContentCopy from "@mui/icons-material/ContentCopy";
 import Delete from "@mui/icons-material/Delete";
 import Edit from "@mui/icons-material/Edit";
 import ExpandMore from "@mui/icons-material/ExpandMore";
+import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
 import { Box, MenuItem, Select, Typography } from "@mui/material";
 import { type GridColDef, type GridRenderCellParams } from "@mui/x-data-grid";
 import type { TFunction } from "i18next";
@@ -56,6 +59,13 @@ interface ColumnConfig {
 }
 
 const cellText = { fontSize: "0.875rem" } as const;
+
+const threatStatusPresentation: Record<THREAT_STATUSES, { icon: React.ReactElement; color: string }> = {
+    [THREAT_STATUSES.NEW]: { icon: <FiberManualRecord sx={{ fontSize: 16 }} />, color: "primary.main" },
+    [THREAT_STATUSES.IN_PROGRESS]: { icon: <Edit sx={{ fontSize: 16 }} />, color: "secondary.main" },
+    [THREAT_STATUSES.FINALIZED]: { icon: <CheckCircle sx={{ fontSize: 16 }} />, color: "success.main" },
+    [THREAT_STATUSES.OUTOFSCOPE]: { icon: <Block sx={{ fontSize: 16 }} />, color: "text.disabled" },
+};
 
 export const createThreatsColumns = ({
     t,
@@ -375,7 +385,25 @@ export const createThreatsColumns = ({
             if (row.rowType === "genericThreat") {
                 return "-";
             }
-            return row.rowType === "threat" ? t(`statusList.${row.threat.status}`) : null;
+            if (row.rowType !== "threat") {
+                return null;
+            }
+            const presentation = threatStatusPresentation[row.threat.status];
+            return (
+                <Box
+                    sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 0.5,
+                        height: "100%",
+                        color: presentation.color,
+                    }}
+                >
+                    {presentation.icon}
+                    <Typography sx={cellText}>{t(`statusList.${row.threat.status}`)}</Typography>
+                </Box>
+            );
         },
     },
     {
