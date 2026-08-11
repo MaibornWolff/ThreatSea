@@ -2,6 +2,8 @@ import { MAX_ICON_BYTES, validateAndConvertIconFile } from "./files";
 
 const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47];
 const JPEG_SIGNATURE = [0xff, 0xd8, 0xff];
+// RIFF container (bytes 0-3) with WEBP form type (bytes 8-11).
+const WEBP_SIGNATURE = [0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50];
 
 /** Builds a File with `leadingBytes` first, zero-padded to `size`, of MIME `type`. */
 function buildFile({ leadingBytes = [], size, type }: { leadingBytes?: number[]; size?: number; type: string }): File {
@@ -32,6 +34,27 @@ describe("validateAndConvertIconFile", () => {
         }
     });
 
+    it("accepts a real WebP and returns a webp data URL", async () => {
+        const result = await validateAndConvertIconFile(
+            buildFile({ leadingBytes: WEBP_SIGNATURE, type: "image/webp" })
+        );
+
+        expect(result.ok).toBe(true);
+        if (result.ok) {
+            expect(result.dataUrl.startsWith("data:image/webp;base64,")).toBe(true);
+        }
+    });
+
+    it("accepts an SVG and returns an svg data URL", async () => {
+        const svg = '<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"></svg>';
+        const result = await validateAndConvertIconFile(new File([svg], "icon", { type: "image/svg+xml" }));
+
+        expect(result.ok).toBe(true);
+        if (result.ok) {
+            expect(result.dataUrl.startsWith("data:image/svg+xml;base64,")).toBe(true);
+        }
+    });
+
     it("rejects an unsupported MIME type", async () => {
         const result = await validateAndConvertIconFile(buildFile({ leadingBytes: PNG_SIGNATURE, type: "image/gif" }));
 
@@ -56,6 +79,36 @@ describe("validateAndConvertIconFile", () => {
         );
 
         expect(result).toEqual({ ok: false, reason: "size" });
+    });
+
+    it("rejects PNG bytes labeled as WebP (type and content disagree)", async () => {
+        const result = await validateAndConvertIconFile(buildFile({ leadingBytes: PNG_SIGNATURE, type: "image/webp" }));
+
+        expect(result).toEqual({ ok: false, reason: "content" });
+    });
+
+    it("rejects non-SVG text labeled as SVG", async () => {
+        const result = await validateAndConvertIconFile(
+            new File(["<html><script>alert(1)</script></html>"], "icon", { type: "image/svg+xml" })
+        );
+
+        expect(result).toEqual({ ok: false, reason: "content" });
+    });
+
+    it("rejects a non-SVG document that merely mentions <svg> in a comment", async () => {
+        const result = await validateAndConvertIconFile(
+            new File(["<!-- <svg> --><html></html>"], "icon", { type: "image/svg+xml" })
+        );
+
+        expect(result).toEqual({ ok: false, reason: "content" });
+    });
+
+    it("rejects malformed XML labeled as SVG", async () => {
+        const result = await validateAndConvertIconFile(
+            new File(['<svg xmlns="http://www.w3.org/2000/svg"><rect</svg>'], "icon", { type: "image/svg+xml" })
+        );
+
+        expect(result).toEqual({ ok: false, reason: "content" });
     });
 
     it("rejects a non-image whose extension/MIME was spoofed to look like a PNG", async () => {

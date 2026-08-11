@@ -90,7 +90,7 @@
     "iconStandardLabel": "Standardsymbole",
     "iconOr": "oder",
     "iconUploadLabel": "Eigenes Symbol",
-    "iconUploadHint": "PNG / JPEG, bis 100 kB.",
+    "iconUploadHint": "PNG / JPEG / WebP / SVG, bis 100 kB.",
     "iconUploadTooltip": "Eigenes Symbol hochladen",
     "iconRequired": "Ein Symbol ist erforderlich"
   },

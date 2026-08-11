@@ -81,9 +81,21 @@ describe("import a project", () => {
         expect(res.statusCode).toEqual(204);
     });
 
-    it("should reject an import whose component type symbol is a data:image/svg+xml URL", async () => {
+    it("should import a project whose component type symbol is a data:image/svg+xml URL", async () => {
         const project = JSON.parse(JSON.stringify(VALID_TEST_PROJECT));
         project.componentTypes[0].symbol = "data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=";
+
+        const res = await request(app)
+            .post("/api/import")
+            .send(project)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(204);
+    });
+
+    it("should reject an import whose component type symbol is an unsupported image data URL", async () => {
+        const project = JSON.parse(JSON.stringify(VALID_TEST_PROJECT));
+        project.componentTypes[0].symbol = "data:image/gif;base64,R0lGODlhAQABAAAAACw=";
 
         const res = await request(app)
             .post("/api/import")
