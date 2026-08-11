@@ -22,6 +22,9 @@
   "noThreatsFound": "Keine Bedrohungen gefunden",
   "actions": "Aktionen",
   "filterAll": "Alle",
+  "expandAllThreats": "Alle Bedrohungen ausklappen",
+  "collapseAllThreats": "Alle Bedrohungen einklappen",
+  "clearFilters": "Filter zurücksetzen",
   "noChildThreats": "Keine Bedrohungen zu dieser generischen Bedrohung.",
   "childThreatsCount_one": "{{count}} Bedrohung",
   "childThreatsCount_other": "{{count}} Bedrohungen"

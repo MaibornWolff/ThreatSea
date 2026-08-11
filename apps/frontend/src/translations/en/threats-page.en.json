@@ -23,6 +23,9 @@
   "heading": "Threats",
   "actions": "Actions",
   "filterAll": "All",
+  "expandAllThreats": "Expand all threats",
+  "collapseAllThreats": "Collapse all threats",
+  "clearFilters": "Clear filters",
   "noChildThreats": "No threats for this generic threat.",
   "childThreatsCount_one": "{{count}} threat",
   "childThreatsCount_other": "{{count}} threats"
