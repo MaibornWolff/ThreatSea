@@ -236,11 +236,6 @@ export const measureImpacts = pgTable(
     ]
 );
 
-// TODO: Delete this types in an upcoming migration
-export type CreateThreatMeasureImpact = CreateMeasureImpact;
-export type UpdateThreatMeasureImpact = UpdateMeasureImpact;
-export type ThreatMeasureImpact = MeasureImpact;
-
 export type Measure = typeof measures.$inferSelect;
 export type CreateMeasure = Omit<typeof measures.$inferInsert, DefaultFields>;
 export type UpdateMeasure = Omit<CreateMeasure, "projectId" | "catalogMeasureId">;
@@ -334,10 +329,6 @@ export const systems = pgTable(
 
 export type GenericThreat = typeof genericThreats.$inferSelect;
 export type CreateGenericThreat = Omit<typeof genericThreats.$inferInsert, DefaultFields>;
-export type UpdateGenericThreat = Omit<
-    CreateGenericThreat,
-    "pointOfAttackId" | "pointOfAttack" | "attacker" | "catalogThreatId"
->;
 
 export const genericThreats = pgTable(
     "generic_threats",
