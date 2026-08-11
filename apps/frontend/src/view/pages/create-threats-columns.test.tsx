@@ -175,6 +175,22 @@ describe("createThreatsColumns — child rows show metrics", () => {
         expect(screen.getByText("statusList.in progress")).toBeInTheDocument();
     });
 
+    it.each([
+        [THREAT_STATUSES.NEW, "statusList.new"],
+        [THREAT_STATUSES.IN_PROGRESS, "statusList.in progress"],
+        [THREAT_STATUSES.FINALIZED, "statusList.finalized"],
+        [THREAT_STATUSES.OUTOFSCOPE, "statusList.out of scope"],
+    ])("renders a status icon alongside the label for %s", (status, label) => {
+        const { byField } = columnByField();
+        const { container } = renderCell(byField["status"], {
+            rowType: "threat",
+            rowId: "threat-99",
+            threat: { ...childThreat, status },
+        });
+        expect(screen.getByText(label)).toBeInTheDocument();
+        expect(container.querySelector("svg")).toBeInTheDocument();
+    });
+
     it("exposes edit, duplicate and delete actions to editors and wires them", async () => {
         const { byField, handlers } = columnByField();
         renderCell(byField["actions"], threatRow);
