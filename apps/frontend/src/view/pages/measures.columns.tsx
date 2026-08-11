@@ -1,13 +1,13 @@
 import ContentCopyOutlined from "@mui/icons-material/ContentCopyOutlined";
 import Delete from "@mui/icons-material/Delete";
-import ExpandMore from "@mui/icons-material/ExpandMore";
 import Replay from "@mui/icons-material/Replay";
-import { Box, Collapse, IconButton as MuiIconButton, TextField, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { type GridColDef, type GridRenderCellParams } from "@mui/x-data-grid";
 import type { TFunction } from "i18next";
 import type { Measure } from "#api/types/measure.types.ts";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { IconButton } from "#view/components/icon-button.component.tsx";
+import { ColumnFilterHeader } from "#view/components/column-filter-header.component.tsx";
 
 interface ColumnConfig {
     t: TFunction;
@@ -20,46 +20,6 @@ interface ColumnConfig {
     handleDuplicateMeasure: (measure: Measure) => void;
     handleDeleteOrResetMeasure: (measure: Measure) => void;
 }
-
-const createFilterHeader = (
-    field: string,
-    label: string,
-    columnFilters: Record<string, string>,
-    handleFilterChange: (field: string, value: string) => void,
-    expandedFilters: Record<string, boolean>,
-    toggleFilterExpanded: (field: string) => void
-) => (
-    <Box sx={{ width: "100%" }}>
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 0.5 }}>
-            <Typography sx={{ fontWeight: "bold", fontSize: "0.875rem", textAlign: "center" }}>{label}</Typography>
-            <MuiIconButton
-                size="small"
-                onClick={(e) => {
-                    e.stopPropagation();
-                    toggleFilterExpanded(field);
-                }}
-                sx={{
-                    ml: 0.5,
-                    padding: 0.25,
-                    transform: expandedFilters[field] ? "rotate(180deg)" : "rotate(0deg)",
-                    transition: "transform 0.2s",
-                }}
-            >
-                <ExpandMore sx={{ fontSize: 18 }} />
-            </MuiIconButton>
-        </Box>
-        <Collapse in={expandedFilters[field] ?? false} timeout={200}>
-            <TextField
-                size="small"
-                placeholder="Filter..."
-                value={columnFilters[field] || ""}
-                onChange={(e) => handleFilterChange(field, e.target.value)}
-                onClick={(e) => e.stopPropagation()}
-                sx={{ width: "100%" }}
-            />
-        </Collapse>
-    </Box>
-);
 
 export const createMeasuresColumns = ({
     t,
@@ -79,15 +39,16 @@ export const createMeasuresColumns = ({
         minWidth: 200,
         align: "left",
         headerAlign: "center",
-        renderHeader: () =>
-            createFilterHeader(
-                "name",
-                tCommon("name"),
-                columnFilters,
-                handleFilterChange,
-                expandedFilters,
-                toggleFilterExpanded
-            ),
+        renderHeader: () => (
+            <ColumnFilterHeader
+                field="name"
+                label={tCommon("name")}
+                columnFilters={columnFilters}
+                onFilterChange={handleFilterChange}
+                expandedFilters={expandedFilters}
+                onToggleExpanded={toggleFilterExpanded}
+            />
+        ),
     },
     {
         field: "scheduledAt",
@@ -96,15 +57,16 @@ export const createMeasuresColumns = ({
         minWidth: 200,
         align: "center",
         headerAlign: "center",
-        renderHeader: () =>
-            createFilterHeader(
-                "scheduledAt",
-                tCommon("scheduledAt"),
-                columnFilters,
-                handleFilterChange,
-                expandedFilters,
-                toggleFilterExpanded
-            ),
+        renderHeader: () => (
+            <ColumnFilterHeader
+                field="scheduledAt"
+                label={tCommon("scheduledAt")}
+                columnFilters={columnFilters}
+                onFilterChange={handleFilterChange}
+                expandedFilters={expandedFilters}
+                onToggleExpanded={toggleFilterExpanded}
+            />
+        ),
         valueGetter: (value: string | null | undefined) => value || tCommon("notScheduledYet"),
     },
     ...(checkUserRole(userRole, USER_ROLES.EDITOR)

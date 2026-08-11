@@ -2,14 +2,14 @@ import Check from "@mui/icons-material/Check";
 import Clear from "@mui/icons-material/Clear";
 import ContentCopy from "@mui/icons-material/ContentCopy";
 import Delete from "@mui/icons-material/Delete";
-import ExpandMore from "@mui/icons-material/ExpandMore";
-import { Box, Collapse, IconButton as MuiIconButton, MenuItem, Select, TextField, Typography } from "@mui/material";
+import { Box, MenuItem, Select, Typography } from "@mui/material";
 import { type GridColDef, type GridRenderCellParams } from "@mui/x-data-grid";
 import type { TFunction } from "i18next";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import type { ThreatListItem } from "#application/hooks/use-threats-list.hook.ts";
 import { IconButton } from "#view/components/icon-button.component.tsx";
+import { ColumnFilterHeader } from "#view/components/column-filter-header.component.tsx";
 
 interface ColumnConfig {
     t: TFunction;
@@ -44,38 +44,14 @@ export const createThreatsColumns = ({
         align: "left",
         headerAlign: "center",
         renderHeader: () => (
-            <Box sx={{ width: "100%" }}>
-                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 0.5 }}>
-                    <Typography sx={{ fontWeight: "bold", fontSize: "0.875rem", textAlign: "center" }}>
-                        {t("name")}
-                    </Typography>
-                    <MuiIconButton
-                        size="small"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            toggleFilterExpanded("name");
-                        }}
-                        sx={{
-                            ml: 0.5,
-                            padding: 0.25,
-                            transform: expandedFilters["name"] ? "rotate(180deg)" : "rotate(0deg)",
-                            transition: "transform 0.2s",
-                        }}
-                    >
-                        <ExpandMore sx={{ fontSize: 18 }} />
-                    </MuiIconButton>
-                </Box>
-                <Collapse in={expandedFilters["name"] ?? false} timeout={200}>
-                    <TextField
-                        size="small"
-                        placeholder="Filter..."
-                        value={columnFilters["name"] || ""}
-                        onChange={(e) => handleFilterChange("name", e.target.value)}
-                        onClick={(e) => e.stopPropagation()}
-                        sx={{ width: "100%" }}
-                    />
-                </Collapse>
-            </Box>
+            <ColumnFilterHeader
+                field="name"
+                label={t("name")}
+                columnFilters={columnFilters}
+                onFilterChange={handleFilterChange}
+                expandedFilters={expandedFilters}
+                onToggleExpanded={toggleFilterExpanded}
+            />
         ),
     },
     {
@@ -85,38 +61,14 @@ export const createThreatsColumns = ({
         align: "center",
         headerAlign: "center",
         renderHeader: () => (
-            <Box sx={{ width: "100%" }}>
-                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 0.5 }}>
-                    <Typography sx={{ fontWeight: "bold", fontSize: "0.875rem", textAlign: "center" }}>
-                        {t("assets")}
-                    </Typography>
-                    <MuiIconButton
-                        size="small"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            toggleFilterExpanded("assets");
-                        }}
-                        sx={{
-                            ml: 0.5,
-                            padding: 0.25,
-                            transform: expandedFilters["assets"] ? "rotate(180deg)" : "rotate(0deg)",
-                            transition: "transform 0.2s",
-                        }}
-                    >
-                        <ExpandMore sx={{ fontSize: 18 }} />
-                    </MuiIconButton>
-                </Box>
-                <Collapse in={expandedFilters["assets"] ?? false} timeout={200}>
-                    <TextField
-                        size="small"
-                        placeholder="Filter..."
-                        value={columnFilters["assets"] || ""}
-                        onChange={(e) => handleFilterChange("assets", e.target.value)}
-                        onClick={(e) => e.stopPropagation()}
-                        sx={{ width: "100%" }}
-                    />
-                </Collapse>
-            </Box>
+            <ColumnFilterHeader
+                field="assets"
+                label={t("assets")}
+                columnFilters={columnFilters}
+                onFilterChange={handleFilterChange}
+                expandedFilters={expandedFilters}
+                onToggleExpanded={toggleFilterExpanded}
+            />
         ),
         valueGetter: (_value, row) => row.assets.length,
         renderCell: (params: GridRenderCellParams<ThreatListItem>) => (
@@ -137,38 +89,14 @@ export const createThreatsColumns = ({
         align: "center",
         headerAlign: "center",
         renderHeader: () => (
-            <Box sx={{ width: "100%" }}>
-                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 0.5 }}>
-                    <Typography sx={{ fontWeight: "bold", fontSize: "0.875rem", textAlign: "center" }}>
-                        {t("componentName")}
-                    </Typography>
-                    <MuiIconButton
-                        size="small"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            toggleFilterExpanded("componentName");
-                        }}
-                        sx={{
-                            ml: 0.5,
-                            padding: 0.25,
-                            transform: expandedFilters["componentName"] ? "rotate(180deg)" : "rotate(0deg)",
-                            transition: "transform 0.2s",
-                        }}
-                    >
-                        <ExpandMore sx={{ fontSize: 18 }} />
-                    </MuiIconButton>
-                </Box>
-                <Collapse in={expandedFilters["componentName"] ?? false} timeout={200}>
-                    <TextField
-                        size="small"
-                        placeholder="Filter..."
-                        value={columnFilters["componentName"] || ""}
-                        onChange={(e) => handleFilterChange("componentName", e.target.value)}
-                        onClick={(e) => e.stopPropagation()}
-                        sx={{ width: "100%" }}
-                    />
-                </Collapse>
-            </Box>
+            <ColumnFilterHeader
+                field="componentName"
+                label={t("componentName")}
+                columnFilters={columnFilters}
+                onFilterChange={handleFilterChange}
+                expandedFilters={expandedFilters}
+                onToggleExpanded={toggleFilterExpanded}
+            />
         ),
         valueGetter: (_value, row) => {
             if (row.pointOfAttack === "COMMUNICATION_INTERFACES") {
@@ -185,38 +113,14 @@ export const createThreatsColumns = ({
         align: "center",
         headerAlign: "center",
         renderHeader: () => (
-            <Box sx={{ width: "100%" }}>
-                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 0.5 }}>
-                    <Typography sx={{ fontWeight: "bold", fontSize: "0.875rem", textAlign: "center" }}>
-                        {t("pointOfAttack")}
-                    </Typography>
-                    <MuiIconButton
-                        size="small"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            toggleFilterExpanded("pointOfAttack");
-                        }}
-                        sx={{
-                            ml: 0.5,
-                            padding: 0.25,
-                            transform: expandedFilters["pointOfAttack"] ? "rotate(180deg)" : "rotate(0deg)",
-                            transition: "transform 0.2s",
-                        }}
-                    >
-                        <ExpandMore sx={{ fontSize: 18 }} />
-                    </MuiIconButton>
-                </Box>
-                <Collapse in={expandedFilters["pointOfAttack"] ?? false} timeout={200}>
-                    <TextField
-                        size="small"
-                        placeholder="Filter..."
-                        value={columnFilters["pointOfAttack"] || ""}
-                        onChange={(e) => handleFilterChange("pointOfAttack", e.target.value)}
-                        onClick={(e) => e.stopPropagation()}
-                        sx={{ width: "100%" }}
-                    />
-                </Collapse>
-            </Box>
+            <ColumnFilterHeader
+                field="pointOfAttack"
+                label={t("pointOfAttack")}
+                columnFilters={columnFilters}
+                onFilterChange={handleFilterChange}
+                expandedFilters={expandedFilters}
+                onToggleExpanded={toggleFilterExpanded}
+            />
         ),
         valueGetter: (value: string) => t(`pointsOfAttackList.${value}`),
     },
@@ -228,38 +132,14 @@ export const createThreatsColumns = ({
         align: "center",
         headerAlign: "center",
         renderHeader: () => (
-            <Box sx={{ width: "100%" }}>
-                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 0.5 }}>
-                    <Typography sx={{ fontWeight: "bold", fontSize: "0.875rem", textAlign: "center" }}>
-                        {t("attacker")}
-                    </Typography>
-                    <MuiIconButton
-                        size="small"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            toggleFilterExpanded("attacker");
-                        }}
-                        sx={{
-                            ml: 0.5,
-                            padding: 0.25,
-                            transform: expandedFilters["attacker"] ? "rotate(180deg)" : "rotate(0deg)",
-                            transition: "transform 0.2s",
-                        }}
-                    >
-                        <ExpandMore sx={{ fontSize: 18 }} />
-                    </MuiIconButton>
-                </Box>
-                <Collapse in={expandedFilters["attacker"] ?? false} timeout={200}>
-                    <TextField
-                        size="small"
-                        placeholder="Filter..."
-                        value={columnFilters["attacker"] || ""}
-                        onChange={(e) => handleFilterChange("attacker", e.target.value)}
-                        onClick={(e) => e.stopPropagation()}
-                        sx={{ width: "100%" }}
-                    />
-                </Collapse>
-            </Box>
+            <ColumnFilterHeader
+                field="attacker"
+                label={t("attacker")}
+                columnFilters={columnFilters}
+                onFilterChange={handleFilterChange}
+                expandedFilters={expandedFilters}
+                onToggleExpanded={toggleFilterExpanded}
+            />
         ),
         valueGetter: (value: string) => t(`attackerList.${value}`),
     },
@@ -270,38 +150,14 @@ export const createThreatsColumns = ({
         align: "center",
         headerAlign: "center",
         renderHeader: () => (
-            <Box sx={{ width: "100%" }}>
-                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 0.5 }}>
-                    <Typography sx={{ fontWeight: "bold", fontSize: "0.875rem", textAlign: "center" }}>
-                        {t("probability")}
-                    </Typography>
-                    <MuiIconButton
-                        size="small"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            toggleFilterExpanded("probability");
-                        }}
-                        sx={{
-                            ml: 0.5,
-                            padding: 0.25,
-                            transform: expandedFilters["probability"] ? "rotate(180deg)" : "rotate(0deg)",
-                            transition: "transform 0.2s",
-                        }}
-                    >
-                        <ExpandMore sx={{ fontSize: 18 }} />
-                    </MuiIconButton>
-                </Box>
-                <Collapse in={expandedFilters["probability"] ?? false} timeout={200}>
-                    <TextField
-                        size="small"
-                        placeholder="Filter..."
-                        value={columnFilters["probability"] || ""}
-                        onChange={(e) => handleFilterChange("probability", e.target.value)}
-                        onClick={(e) => e.stopPropagation()}
-                        sx={{ width: "100%" }}
-                    />
-                </Collapse>
-            </Box>
+            <ColumnFilterHeader
+                field="probability"
+                label={t("probability")}
+                columnFilters={columnFilters}
+                onFilterChange={handleFilterChange}
+                expandedFilters={expandedFilters}
+                onToggleExpanded={toggleFilterExpanded}
+            />
         ),
     },
     {
@@ -311,38 +167,14 @@ export const createThreatsColumns = ({
         align: "center",
         headerAlign: "center",
         renderHeader: () => (
-            <Box sx={{ width: "100%" }}>
-                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 0.5 }}>
-                    <Typography sx={{ fontWeight: "bold", fontSize: "0.875rem", textAlign: "center" }}>
-                        {t("damage")}
-                    </Typography>
-                    <MuiIconButton
-                        size="small"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            toggleFilterExpanded("damage");
-                        }}
-                        sx={{
-                            ml: 0.5,
-                            padding: 0.25,
-                            transform: expandedFilters["damage"] ? "rotate(180deg)" : "rotate(0deg)",
-                            transition: "transform 0.2s",
-                        }}
-                    >
-                        <ExpandMore sx={{ fontSize: 18 }} />
-                    </MuiIconButton>
-                </Box>
-                <Collapse in={expandedFilters["damage"] ?? false} timeout={200}>
-                    <TextField
-                        size="small"
-                        placeholder="Filter..."
-                        value={columnFilters["damage"] || ""}
-                        onChange={(e) => handleFilterChange("damage", e.target.value)}
-                        onClick={(e) => e.stopPropagation()}
-                        sx={{ width: "100%" }}
-                    />
-                </Collapse>
-            </Box>
+            <ColumnFilterHeader
+                field="damage"
+                label={t("damage")}
+                columnFilters={columnFilters}
+                onFilterChange={handleFilterChange}
+                expandedFilters={expandedFilters}
+                onToggleExpanded={toggleFilterExpanded}
+            />
         ),
     },
     {
@@ -352,38 +184,14 @@ export const createThreatsColumns = ({
         align: "center",
         headerAlign: "center",
         renderHeader: () => (
-            <Box sx={{ width: "100%" }}>
-                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 0.5 }}>
-                    <Typography sx={{ fontWeight: "bold", fontSize: "0.875rem", textAlign: "center" }}>
-                        {t("risk")}
-                    </Typography>
-                    <MuiIconButton
-                        size="small"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            toggleFilterExpanded("risk");
-                        }}
-                        sx={{
-                            ml: 0.5,
-                            padding: 0.25,
-                            transform: expandedFilters["risk"] ? "rotate(180deg)" : "rotate(0deg)",
-                            transition: "transform 0.2s",
-                        }}
-                    >
-                        <ExpandMore sx={{ fontSize: 18 }} />
-                    </MuiIconButton>
-                </Box>
-                <Collapse in={expandedFilters["risk"] ?? false} timeout={200}>
-                    <TextField
-                        size="small"
-                        placeholder="Filter..."
-                        value={columnFilters["risk"] || ""}
-                        onChange={(e) => handleFilterChange("risk", e.target.value)}
-                        onClick={(e) => e.stopPropagation()}
-                        sx={{ width: "100%" }}
-                    />
-                </Collapse>
-            </Box>
+            <ColumnFilterHeader
+                field="risk"
+                label={t("risk")}
+                columnFilters={columnFilters}
+                onFilterChange={handleFilterChange}
+                expandedFilters={expandedFilters}
+                onToggleExpanded={toggleFilterExpanded}
+            />
         ),
     },
     {
@@ -393,42 +201,27 @@ export const createThreatsColumns = ({
         align: "center",
         headerAlign: "center",
         renderHeader: () => (
-            <Box sx={{ width: "100%" }}>
-                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 0.5 }}>
-                    <Typography sx={{ fontWeight: "bold", fontSize: "0.875rem", textAlign: "center" }}>
-                        {t("edited")}
-                    </Typography>
-                    <MuiIconButton
-                        size="small"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            toggleFilterExpanded("doneEditing");
-                        }}
-                        sx={{
-                            ml: 0.5,
-                            padding: 0.25,
-                            transform: expandedFilters["doneEditing"] ? "rotate(180deg)" : "rotate(0deg)",
-                            transition: "transform 0.2s",
-                        }}
-                    >
-                        <ExpandMore sx={{ fontSize: 18 }} />
-                    </MuiIconButton>
-                </Box>
-                <Collapse in={expandedFilters["doneEditing"] ?? false} timeout={200}>
-                    <Select
-                        size="small"
-                        value={columnFilters["doneEditing"] || ""}
-                        onChange={(e) => handleFilterChange("doneEditing", e.target.value)}
-                        onClick={(e) => e.stopPropagation()}
-                        displayEmpty
-                        sx={{ width: "100%" }}
-                    >
-                        <MenuItem value="">{t("filterAll")}</MenuItem>
-                        <MenuItem value="edited">{t("edited")}</MenuItem>
-                        <MenuItem value="notEdited">{t("notEdited")}</MenuItem>
-                    </Select>
-                </Collapse>
-            </Box>
+            <ColumnFilterHeader
+                field="doneEditing"
+                label={t("edited")}
+                columnFilters={columnFilters}
+                onFilterChange={handleFilterChange}
+                expandedFilters={expandedFilters}
+                onToggleExpanded={toggleFilterExpanded}
+            >
+                <Select
+                    size="small"
+                    value={columnFilters["doneEditing"] || ""}
+                    onChange={(event) => handleFilterChange("doneEditing", event.target.value)}
+                    onClick={(event) => event.stopPropagation()}
+                    displayEmpty
+                    sx={{ width: "100%" }}
+                >
+                    <MenuItem value="">{t("filterAll")}</MenuItem>
+                    <MenuItem value="edited">{t("edited")}</MenuItem>
+                    <MenuItem value="notEdited">{t("notEdited")}</MenuItem>
+                </Select>
+            </ColumnFilterHeader>
         ),
         valueGetter: (_value, row) => (row.doneEditing ? "edited" : "notEdited"),
         renderCell: (params: GridRenderCellParams<ThreatListItem>) => (
