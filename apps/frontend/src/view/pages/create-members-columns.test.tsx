@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import type { TFunction } from "i18next";
 import type { GridColDef } from "@mui/x-data-grid";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
-import { createMeasuresColumns } from "./measures.columns";
+import { createMembersColumns } from "./create-members-columns";
 
 const identityT = ((key: string) => key) as unknown as TFunction;
 
@@ -16,29 +16,21 @@ interface BuildOptions {
 const buildColumns = (opts: BuildOptions = {}) => {
     const handleFilterChange = vi.fn();
     const toggleFilterExpanded = vi.fn();
-    const handleDuplicateMeasure = vi.fn();
-    const handleDeleteOrResetMeasure = vi.fn();
+    const handleDeleteMember = vi.fn();
 
-    const columns = createMeasuresColumns({
+    const columns = createMembersColumns({
         t: identityT,
-        tCommon: identityT,
-        userRole: opts.userRole ?? USER_ROLES.EDITOR,
+        userRole: opts.userRole ?? USER_ROLES.OWNER,
         columnFilters: opts.columnFilters ?? {},
         handleFilterChange,
         expandedFilters: opts.expandedFilters ?? {},
         toggleFilterExpanded,
-        handleDuplicateMeasure,
-        handleDeleteOrResetMeasure,
+        handleDeleteMember,
     });
 
     return {
         columns,
-        handlers: {
-            handleFilterChange,
-            toggleFilterExpanded,
-            handleDuplicateMeasure,
-            handleDeleteOrResetMeasure,
-        },
+        handlers: { handleFilterChange, toggleFilterExpanded, handleDeleteMember },
     };
 };
 
@@ -49,20 +41,26 @@ const renderColumnHeader = (column: GridColDef | undefined) => {
     return render(<>{column.renderHeader({} as never)}</>);
 };
 
-describe("createMeasuresColumns — column sizing (resize defaults)", () => {
+describe("createMembersColumns — column sizing (resize defaults)", () => {
     it("renders all expected columns in the documented order", () => {
         const { columns } = buildColumns();
-        expect(columns.map((c) => c.field)).toEqual(["name", "scheduledAt", "actions"]);
+        expect(columns.map((c) => c.field)).toEqual(["name", "email", "role", "actions"]);
     });
 
-    it("data columns flex equally with sensible minWidths", () => {
+    it("name and email columns flex with sensible minWidths", () => {
         const { columns } = buildColumns();
         const byField = Object.fromEntries(columns.map((c) => [c.field, c]));
 
-        for (const field of ["name", "scheduledAt"]) {
-            expect(byField[field]!.flex, `${field} should flex`).toBe(1);
-            expect(byField[field]!.minWidth).toBe(200);
-        }
+        expect(byField["name"]!.flex).toBe(1);
+        expect(byField["name"]!.minWidth).toBe(200);
+        expect(byField["email"]!.flex).toBe(1);
+        expect(byField["email"]!.minWidth).toBe(220);
+    });
+
+    it("role column is fixed-width (180) to fit translated role names", () => {
+        const { columns } = buildColumns();
+        const role = columns.find((c) => c.field === "role")!;
+        expect(role.width).toBe(180);
     });
 
     it("does not disable resizing on data columns (DataGrid default is resizable)", () => {
@@ -72,21 +70,21 @@ describe("createMeasuresColumns — column sizing (resize defaults)", () => {
         }
     });
 
-    it("Actions column is wider (120) to fit duplicate + delete/reset", () => {
+    it("Actions column has fixed width and is not sortable or filterable", () => {
         const { columns } = buildColumns();
         const actions = columns.find((c) => c.field === "actions")!;
-        expect(actions.width).toBe(120);
+        expect(actions.width).toBe(80);
         expect(actions.sortable).toBe(false);
         expect(actions.filterable).toBe(false);
     });
 
-    it("omits the actions column for non-editors", () => {
-        const { columns } = buildColumns({ userRole: USER_ROLES.VIEWER });
+    it("omits the actions column for non-owners (members deletes are owner-only)", () => {
+        const { columns } = buildColumns({ userRole: USER_ROLES.EDITOR });
         expect(columns.find((c) => c.field === "actions")).toBeUndefined();
     });
 });
 
-describe("createMeasuresColumns — filter header behavior", () => {
+describe("createMembersColumns — filter header behavior", () => {
     it("renders the column label and the expand chevron", () => {
         const { columns } = buildColumns();
         renderColumnHeader(columns.find((c) => c.field === "name"));
@@ -96,16 +94,16 @@ describe("createMeasuresColumns — filter header behavior", () => {
     });
 
     it("hides the filter input until expandedFilters[field] is true", () => {
-        const { columns } = buildColumns({ expandedFilters: { name: false } });
-        renderColumnHeader(columns.find((c) => c.field === "name"));
+        const { columns } = buildColumns({ expandedFilters: { email: false } });
+        renderColumnHeader(columns.find((c) => c.field === "email"));
 
         const collapseRoot = screen.getByPlaceholderText("Filter...").closest(".MuiCollapse-root");
         expect(collapseRoot!.classList.contains("MuiCollapse-hidden")).toBe(true);
     });
 
     it("shows the filter input when expandedFilters[field] is true", () => {
-        const { columns } = buildColumns({ expandedFilters: { scheduledAt: true } });
-        renderColumnHeader(columns.find((c) => c.field === "scheduledAt"));
+        const { columns } = buildColumns({ expandedFilters: { email: true } });
+        renderColumnHeader(columns.find((c) => c.field === "email"));
 
         const collapseRoot = screen.getByPlaceholderText("Filter...").closest(".MuiCollapse-root");
         expect(collapseRoot!.classList.contains("MuiCollapse-entered")).toBe(true);
@@ -113,40 +111,33 @@ describe("createMeasuresColumns — filter header behavior", () => {
 
     it("clicking the chevron toggles filter expansion with the column field", async () => {
         const { columns, handlers } = buildColumns();
-        renderColumnHeader(columns.find((c) => c.field === "scheduledAt"));
+        renderColumnHeader(columns.find((c) => c.field === "role"));
 
         await userEvent.click(screen.getByRole("button"));
 
-        expect(handlers.toggleFilterExpanded).toHaveBeenCalledWith("scheduledAt");
+        expect(handlers.toggleFilterExpanded).toHaveBeenCalledWith("role");
     });
 
     it("typing in the filter input calls handleFilterChange per keystroke with the field", async () => {
-        const { columns, handlers } = buildColumns({ expandedFilters: { name: true } });
-        renderColumnHeader(columns.find((c) => c.field === "name"));
+        const { columns, handlers } = buildColumns({ expandedFilters: { email: true } });
+        renderColumnHeader(columns.find((c) => c.field === "email"));
 
-        await userEvent.type(screen.getByPlaceholderText("Filter..."), "te");
+        await userEvent.type(screen.getByPlaceholderText("Filter..."), "ab");
 
-        expect(handlers.handleFilterChange).toHaveBeenNthCalledWith(1, "name", "t");
-        expect(handlers.handleFilterChange).toHaveBeenNthCalledWith(2, "name", "e");
+        expect(handlers.handleFilterChange).toHaveBeenNthCalledWith(1, "email", "a");
+        expect(handlers.handleFilterChange).toHaveBeenNthCalledWith(2, "email", "b");
     });
 });
 
-describe("createMeasuresColumns — scheduledAt valueGetter", () => {
-    it("passes a date string through unchanged", () => {
+describe("createMembersColumns — role valueGetter", () => {
+    it("translates the role enum via t('userRoles.<ROLE>')", () => {
         const { columns } = buildColumns();
-        const col = columns.find((c) => c.field === "scheduledAt")!;
-        const valueGetter = col.valueGetter as unknown as (value: string | null | undefined) => string;
+        const col = columns.find((c) => c.field === "role")!;
+        const valueGetter = col.valueGetter as unknown as (value: USER_ROLES) => string;
 
-        expect(valueGetter("2025-07-28")).toBe("2025-07-28");
-    });
-
-    it("falls back to the 'not scheduled yet' label for null/undefined/empty", () => {
-        const { columns } = buildColumns();
-        const col = columns.find((c) => c.field === "scheduledAt")!;
-        const valueGetter = col.valueGetter as unknown as (value: string | null | undefined) => string;
-
-        expect(valueGetter(null)).toBe("notScheduledYet");
-        expect(valueGetter(undefined)).toBe("notScheduledYet");
-        expect(valueGetter("")).toBe("notScheduledYet");
+        // identityT returns the lookup key untouched, so this asserts the format only.
+        expect(valueGetter(USER_ROLES.OWNER)).toBe(`userRoles.${USER_ROLES.OWNER}`);
+        expect(valueGetter(USER_ROLES.EDITOR)).toBe(`userRoles.${USER_ROLES.EDITOR}`);
+        expect(valueGetter(USER_ROLES.VIEWER)).toBe(`userRoles.${USER_ROLES.VIEWER}`);
     });
 });

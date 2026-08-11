@@ -13,7 +13,6 @@
   "filterAll": "Alle",
   "threatsLoading": "Bedrohungen werden geladen...",
   "deleteMessage": "Wollen Sie die Bedrohung '{{ threatName }}' wirklich löschen?",
-  "probability": "EW",
   "heading": "Bedrohungen",
   "noThreatsFound": "Keine Bedrohungen gefunden",
   "customizeView": "Ansicht anpassen",

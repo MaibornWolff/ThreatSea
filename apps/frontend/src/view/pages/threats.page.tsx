@@ -29,7 +29,7 @@ import { withProject } from "#view/components/with-project.hoc.tsx";
 import ThreatDialogPage from "./threat-dialog.page";
 import { MeasureImpactByMeasureDialogPage } from "./measure-impact-by-measure-dialog.page";
 import AddMeasureDialogPage from "./add-measure-dialog.page";
-import { createThreatsColumns } from "./threats.columns";
+import { createThreatsColumns } from "./create-threats-columns";
 
 /**
  * NoRowsOverlay component for the threats data grid
@@ -58,8 +58,7 @@ const ThreatsPageBody = () => {
     const { openConfirm } = useConfirm<ExtendedThreat>();
     const navigate = useNavigate();
     const { t } = useTranslation("threatsPage");
-    const { t: tCommon } = useTranslation("common");
-    usePageTitle(tCommon("threats"));
+    usePageTitle(t("threats"));
 
     const NoRowsOverlayWithMessage = useCallback(() => <NoRowsOverlay message={t("noThreatsFound")} />, [t]);
 
@@ -132,14 +131,14 @@ const ThreatsPageBody = () => {
     };
 
     const columnLabels: Record<string, string> = {
-        name: tCommon("name"),
-        assets: tCommon("assets"),
-        componentName: tCommon("componentName"),
-        pointOfAttack: tCommon("pointOfAttack"),
-        attacker: tCommon("attacker"),
-        probability: tCommon("probability"),
-        damage: tCommon("damage"),
-        risk: tCommon("risk"),
+        name: t("name"),
+        assets: t("assets"),
+        componentName: t("componentName"),
+        pointOfAttack: t("pointOfAttack"),
+        attacker: t("attacker"),
+        probability: t("probability"),
+        damage: t("damage"),
+        risk: t("risk"),
         doneEditing: t("edited"),
         actions: t("actions"),
     };

@@ -24,7 +24,7 @@ import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
 import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
 import { withProject } from "#view/components/with-project.hoc.tsx";
 import AssetDialogPage from "./asset-dialog.page";
-import { createAssetsColumns } from "./assets.columns";
+import { createAssetsColumns } from "./create-assets-columns";
 
 interface AssetsPageBodyProps {
     project: ExtendedProject;
@@ -47,8 +47,7 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
     const projectId = project.id;
     const dispatch = useAppDispatch();
     const { t } = useTranslation("assetsPage");
-    const { t: tCommon } = useTranslation("common");
-    usePageTitle(tCommon("assets"));
+    usePageTitle(t("assets"));
 
     const { deleteAsset, isPending, assets } = useAssetsList({ projectId });
 
@@ -104,11 +103,11 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
     };
 
     const columnLabels: Record<string, string> = {
-        name: tCommon("name"),
-        confidentiality: tCommon("confidentiality"),
-        integrity: tCommon("integrity"),
-        availability: tCommon("availability"),
-        createdAt: tCommon("creationDate"),
+        name: t("name"),
+        confidentiality: t("confidentiality"),
+        integrity: t("integrity"),
+        availability: t("availability"),
+        createdAt: t("creationDate"),
         actions: t("actions"),
     };
 

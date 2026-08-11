@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import type { TFunction } from "i18next";
 import type { GridColDef } from "@mui/x-data-grid";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
-import { createAssetsColumns } from "./assets.columns";
+import { createAssetsColumns } from "./create-assets-columns";
 
 const identityT = ((key: string) => key) as unknown as TFunction;
 
