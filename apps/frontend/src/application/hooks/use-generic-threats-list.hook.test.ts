@@ -1,7 +1,10 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
+import { createElement, type ReactNode } from "react";
+import { I18nextProvider } from "react-i18next";
 import { GenericThreatsAPI } from "#api/generic-threats.api.ts";
 import type { GenericThreatWithExtendedChildren } from "#api/types/generic-threat.types.ts";
 import { createThreat } from "#test-utils/builders.ts";
+import { translationUtil } from "#utils/translations.ts";
 import { useGenericThreatsList } from "./use-generic-threats-list.hook";
 
 vi.mock("#api/generic-threats.api.ts", () => ({
@@ -10,6 +13,19 @@ vi.mock("#api/generic-threats.api.ts", () => ({
 
 const genericThreat = (id: number, name: string): GenericThreatWithExtendedChildren =>
     ({ id, name, children: [createThreat({ id: id * 10 })] }) as unknown as GenericThreatWithExtendedChildren;
+
+const searchable = (id: number, attacker: string, pointOfAttack: string): GenericThreatWithExtendedChildren =>
+    ({
+        id,
+        name: `threat-${id}`,
+        description: "",
+        attacker,
+        pointOfAttack,
+        children: [createThreat({ id: id * 10 })],
+    }) as unknown as GenericThreatWithExtendedChildren;
+
+const i18nWrapper = ({ children }: { children: ReactNode }) =>
+    createElement(I18nextProvider, { i18n: translationUtil }, children);
 
 describe("useGenericThreatsList", () => {
     beforeEach(() => {
@@ -31,5 +47,30 @@ describe("useGenericThreatsList", () => {
 
         act(() => result.current.setAllGenericThreatsExpanded(false));
         expect(result.current.expandedGenericThreatIds).toEqual({});
+    });
+
+    it("matches the search against the localized attacker / point-of-attack label (German)", async () => {
+        const previousLanguage = translationUtil.language;
+        await translationUtil.changeLanguage("de");
+        vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedChildren).mockResolvedValue([
+            searchable(1, "ADMINISTRATORS", "DATA_STORAGE_INFRASTRUCTURE"),
+            searchable(2, "SYSTEM_USERS", "USER_INTERFACE"),
+        ]);
+
+        try {
+            const { result } = renderHook(() => useGenericThreatsList({ projectId: 1 }), { wrapper: i18nWrapper });
+            await waitFor(() => expect(result.current.genericThreats).toHaveLength(2));
+
+            // "Datenablagestruktur" is the German label for DATA_STORAGE_INFRASTRUCTURE — the raw
+            // enum code (english-derived) would never match this input.
+            act(() => result.current.setSearchValue("Datenablagestruktur"));
+            await waitFor(() => expect(result.current.genericThreats.map((g) => g.id)).toEqual([1]));
+
+            // and the German attacker label likewise.
+            act(() => result.current.setSearchValue("Administratoren"));
+            await waitFor(() => expect(result.current.genericThreats.map((g) => g.id)).toEqual([1]));
+        } finally {
+            await translationUtil.changeLanguage(previousLanguage);
+        }
     });
 });

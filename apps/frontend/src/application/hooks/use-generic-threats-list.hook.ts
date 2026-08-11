@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { GenericThreatsAPI } from "#api/generic-threats.api.ts";
 import type { GenericThreatWithExtendedChildren } from "#api/types/generic-threat.types.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
@@ -10,6 +11,10 @@ export type ExtendedThreatWithMetrics = ExtendedThreat & {
 };
 
 export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
+    // `attacker` and `pointOfAttack` are stored as language-neutral enum codes but shown to the
+    // user through these translation tables, so the search must match the localized label the user
+    // actually sees — not the raw code (which is English-derived and never matches German input).
+    const { t } = useTranslation("common");
     const [isPending, setIsPending] = useState<boolean>(false);
     const [genericThreats, setGenericThreats] = useState<GenericThreatWithExtendedChildren[]>([]);
     const [searchValue, setSearchValue] = useState<string>("");
@@ -83,11 +88,13 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
         }
 
         return genericThreats.filter((genericThreat) => {
+            const attackerLabel = t(`attackerList.${genericThreat.attacker}`).toLowerCase();
+            const pointOfAttackLabel = t(`pointsOfAttackList.${genericThreat.pointOfAttack}`).toLowerCase();
             const genericThreatMatches =
                 genericThreat.name.toLowerCase().includes(normalizedSearch) ||
                 genericThreat.description.toLowerCase().includes(normalizedSearch) ||
-                genericThreat.attacker.toLowerCase().includes(normalizedSearch) ||
-                genericThreat.pointOfAttack.toLowerCase().replace(/_/g, " ").includes(normalizedSearch);
+                attackerLabel.includes(normalizedSearch) ||
+                pointOfAttackLabel.includes(normalizedSearch);
 
             if (genericThreatMatches) {
                 return true;
@@ -100,7 +107,7 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
                     threat.description.toLowerCase().includes(normalizedSearch)
             );
         });
-    }, [threatsByGenericThreatId, genericThreats, searchValue]);
+    }, [threatsByGenericThreatId, genericThreats, searchValue, t]);
 
     return {
         isPending,
