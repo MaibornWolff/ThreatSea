@@ -1,13 +1,18 @@
 import Visibility from "@mui/icons-material/Visibility";
+import UnfoldMore from "@mui/icons-material/UnfoldMore";
+import UnfoldLess from "@mui/icons-material/UnfoldLess";
+import FilterAltOff from "@mui/icons-material/FilterAltOff";
 import {
     Box,
     Button,
     Checkbox,
     FormControlLabel,
+    IconButton,
     LinearProgress,
     Menu,
     MenuItem,
     Popper,
+    Tooltip,
     Typography,
 } from "@mui/material";
 import { DataGrid, GridRow, type GridColumnVisibilityModel, type GridRowProps } from "@mui/x-data-grid";
@@ -76,6 +81,7 @@ const ThreatsPageBody = () => {
     const { autoSaveStatus } = useEditor({ projectId: projectId });
 
     const {
+        searchValue: genericThreatSearchValue,
         setSearchValue: setGenericThreatSearchValue,
         loadGenericThreats,
         isPending: isGenericThreatsPending,
@@ -83,6 +89,7 @@ const ThreatsPageBody = () => {
         expandedGenericThreatIds,
         threatsByGenericThreatId,
         toggleGenericThreat,
+        setAllGenericThreatsExpanded,
     } = useGenericThreatsList({ projectId });
 
     const userRole = useAppSelector((state) => state.projects.current?.role);
@@ -286,6 +293,18 @@ const ThreatsPageBody = () => {
     const handleFilterChange = useCallback((field: string, value: string) => {
         setColumnFilters((prev) => ({ ...prev, [field]: value }));
     }, []);
+
+    const hasActiveFilter =
+        genericThreatSearchValue.trim() !== "" || Object.values(columnFilters).some((value) => value.trim() !== "");
+
+    const clearFilters = useCallback(() => {
+        setColumnFilters({});
+        setGenericThreatSearchValue("");
+    }, [setGenericThreatSearchValue]);
+
+    const allThreatsExpanded =
+        genericThreats.length > 0 &&
+        genericThreats.every((genericThreat) => expandedGenericThreatIds[genericThreat.id]);
 
     const toggleFilterExpanded = useCallback((field: string) => {
         setExpandedFilters((prev) => ({ ...prev, [field]: !prev[field] }));
@@ -508,7 +527,25 @@ const ThreatsPageBody = () => {
                         }}
                     >
                         <Box sx={{ display: "flex", alignItems: "center" }}>
-                            <SearchField onChange={onChangeSearchValue} data-testid="ThreatSearch" />
+                            <Tooltip title={allThreatsExpanded ? t("collapseAllThreats") : t("expandAllThreats")}>
+                                <IconButton
+                                    onClick={() => setAllGenericThreatsExpanded(!allThreatsExpanded)}
+                                    aria-label={allThreatsExpanded ? t("collapseAllThreats") : t("expandAllThreats")}
+                                    data-testid="ToggleExpandAllThreats"
+                                    sx={{ mr: 1, color: "text.primary" }}
+                                >
+                                    {allThreatsExpanded ? (
+                                        <UnfoldLess sx={{ fontSize: 20 }} />
+                                    ) : (
+                                        <UnfoldMore sx={{ fontSize: 20 }} />
+                                    )}
+                                </IconButton>
+                            </Tooltip>
+                            <SearchField
+                                value={genericThreatSearchValue}
+                                onChange={onChangeSearchValue}
+                                data-testid="ThreatSearch"
+                            />
                             <Button
                                 onClick={handleClick}
                                 startIcon={<Visibility sx={{ fontSize: 18 }} />}
@@ -548,14 +585,26 @@ const ThreatsPageBody = () => {
                                 ))}
                             </Menu>
                         </Box>
-                        {genericThreatsCount > 0 && (
-                            <Box sx={{ display: "flex", alignItems: "center" }}>
-                                <Typography sx={{ mr: 0.5, fontWeight: "bold", color: "primary.text" }}>
-                                    {genericThreatsCount}
-                                </Typography>
-                                <Typography>{t("threatsFound")}</Typography>
-                            </Box>
-                        )}
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                            {hasActiveFilter && (
+                                <Button
+                                    onClick={clearFilters}
+                                    startIcon={<FilterAltOff sx={{ fontSize: 18 }} />}
+                                    data-testid="ClearThreatFilters"
+                                    sx={{ mr: 2, textTransform: "none", color: "text.primary" }}
+                                >
+                                    {t("clearFilters")}
+                                </Button>
+                            )}
+                            {(genericThreatsCount > 0 || hasActiveFilter) && (
+                                <>
+                                    <Typography sx={{ mr: 0.5, fontWeight: "bold", color: "primary.text" }}>
+                                        {genericThreatsCount}
+                                    </Typography>
+                                    <Typography>{t("threatsFound")}</Typography>
+                                </>
+                            )}
+                        </Box>
                     </Box>
 
                     <DataGrid
