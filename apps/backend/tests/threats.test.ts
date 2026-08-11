@@ -5,7 +5,7 @@ import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import { nanoid } from "nanoid";
 import { db } from "#db/index.js";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import {
     assets,
     catalogs,
@@ -15,6 +15,7 @@ import {
     genericThreats,
     systems,
     usersCatalogs,
+    usersProjects,
 } from "#db/schema.js";
 import { POINTS_OF_ATTACK } from "#types/points-of-attack.types.js";
 import { ATTACKERS } from "#types/attackers.types.js";
@@ -442,5 +443,146 @@ describe("get, delete or update a single threat", () => {
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(204);
+    });
+});
+
+describe("authorization and ownership guards on threat endpoints", () => {
+    const getUserId = async (): Promise<number> => {
+        const authRes = await request(app)
+            .get("/api/auth/status")
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        return authRes.body.data.userId;
+    };
+
+    const setProjectRole = async (role: USER_ROLES): Promise<void> => {
+        const userId = await getUserId();
+        await db
+            .update(usersProjects)
+            .set({ role })
+            .where(and(eq(usersProjects.userId, userId), eq(usersProjects.projectId, projectId)));
+    };
+
+    const createChildThreat = async (): Promise<number> => {
+        const res = await request(app)
+            .post(`/api/projects/${projectId}/system/threats/${genericThreatId}`)
+            .send(CREATE_THREAT_BODY)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(201);
+        return res.body.id;
+    };
+
+    it("should reject reads from a user that is not a project member", async () => {
+        const userId = await getUserId();
+        await db
+            .delete(usersProjects)
+            .where(and(eq(usersProjects.userId, userId), eq(usersProjects.projectId, projectId)));
+
+        const res = await request(app)
+            .get(`/api/projects/${projectId}/system/genericThreats`)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(403);
+    });
+
+    it("should allow a viewer to read generic threats but not create child threats", async () => {
+        await setProjectRole(USER_ROLES.VIEWER);
+
+        const readRes = await request(app)
+            .get(`/api/projects/${projectId}/system/genericThreats`)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(readRes.statusCode).toEqual(200);
+
+        const createRes = await request(app)
+            .post(`/api/projects/${projectId}/system/threats/${genericThreatId}`)
+            .send(CREATE_THREAT_BODY)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(createRes.statusCode).toEqual(403);
+    });
+
+    it("should not update or delete a child threat as viewer", async () => {
+        const threatId = await createChildThreat();
+        await setProjectRole(USER_ROLES.VIEWER);
+
+        const updateRes = await request(app)
+            .put(`/api/projects/${projectId}/system/threats/${threatId}`)
+            .send(VALID_UPDATE_THREAT)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(updateRes.statusCode).toEqual(403);
+
+        const deleteRes = await request(app)
+            .delete(`/api/projects/${projectId}/system/threats/${threatId}`)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(deleteRes.statusCode).toEqual(403);
+    });
+
+    it("should return 404 when creating a child for a missing generic threat", async () => {
+        const res = await request(app)
+            .post(`/api/projects/${projectId}/system/threats/999999`)
+            .send(CREATE_THREAT_BODY)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(404);
+    });
+
+    it("should return 404 for get, update and delete of a missing child threat", async () => {
+        const getRes = await request(app)
+            .get(`/api/projects/${projectId}/system/threats/999999`)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(getRes.statusCode).toEqual(404);
+
+        const updateRes = await request(app)
+            .put(`/api/projects/${projectId}/system/threats/999999`)
+            .send(VALID_UPDATE_THREAT)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(updateRes.statusCode).toEqual(404);
+
+        const deleteRes = await request(app)
+            .delete(`/api/projects/${projectId}/system/threats/999999`)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(deleteRes.statusCode).toEqual(404);
+    });
+
+    it("should reject accessing threats of another project through this project's routes", async () => {
+        const threatId = await createChildThreat();
+
+        const otherProjectRes = await request(app)
+            .post("/api/projects")
+            .send({
+                name: "Other project",
+                description: "Description",
+                confidentialityLevel: CONFIDENTIALITY_LEVELS.INTERNAL,
+            })
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        const otherProjectId = otherProjectRes.body.id;
+
+        const getRes = await request(app)
+            .get(`/api/projects/${otherProjectId}/system/threats/${threatId}`)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(getRes.statusCode).toEqual(400);
+
+        const updateRes = await request(app)
+            .put(`/api/projects/${otherProjectId}/system/threats/${threatId}`)
+            .send(VALID_UPDATE_THREAT)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(updateRes.statusCode).toEqual(400);
+
+        const createRes = await request(app)
+            .post(`/api/projects/${otherProjectId}/system/threats/${genericThreatId}`)
+            .send(CREATE_THREAT_BODY)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(createRes.statusCode).toEqual(400);
     });
 });
