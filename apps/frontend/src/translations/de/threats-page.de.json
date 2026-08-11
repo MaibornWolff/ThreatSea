@@ -15,6 +15,5 @@
   "deleteMessage": "Wollen Sie die Bedrohung '{{ threatName }}' wirklich löschen?",
   "heading": "Bedrohungen",
   "noThreatsFound": "Keine Bedrohungen gefunden",
-  "customizeView": "Ansicht anpassen",
   "actions": "Aktionen"
 }

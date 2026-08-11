@@ -17,6 +17,5 @@
   "deleteMessage": "Do you really want to delete the threat '{{ threatName }}'?",
   "noThreatsFound": "No Threats found",
   "heading": "Threats",
-  "customizeView": "Customize view",
   "actions": "Actions"
 }

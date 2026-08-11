@@ -7,6 +7,5 @@
   "assetsLoading": "Assets werden geladen...",
   "assetDeleteMessage": "Sind Sie sicher, dass Sie das Asset '{{name}}' löschen möchten?",
   "heading": "Assets",
-  "customizeView": "Ansicht anpassen",
   "actions": "Aktionen"
 }
