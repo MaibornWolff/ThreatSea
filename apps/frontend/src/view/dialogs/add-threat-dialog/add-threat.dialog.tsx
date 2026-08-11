@@ -63,6 +63,11 @@ const AddThreatDialog = ({
     const formRef = useRef<HTMLFormElement | null>(null);
     const projectId = project.id;
     const threatId = threat.id;
+    // A threat under edit is never "new" — the dialog defaults (and the save
+    // transition) treat it as in progress unless it is already finalized/out of scope.
+    const isTerminalStatus =
+        threat?.status === THREAT_STATUSES.FINALIZED || threat?.status === THREAT_STATUSES.OUTOFSCOPE;
+    const initialStatus = isTerminalStatus ? threat.status : THREAT_STATUSES.IN_PROGRESS;
     const {
         control,
         register,
@@ -78,7 +83,7 @@ const AddThreatDialog = ({
             confidentiality: threat?.confidentiality ?? false,
             integrity: threat?.integrity ?? false,
             availability: threat?.availability ?? false,
-            status: threat?.status ?? THREAT_STATUSES.NEW,
+            status: initialStatus,
         },
     });
 
@@ -360,7 +365,7 @@ const AddThreatDialog = ({
                         <Button
                             type="submit"
                             color="success"
-                            sx={{ marginRight: 0 }}
+                            sx={{ marginRight: 0, backgroundColor: "primary.main", color: "text.white" }}
                             data-testid="EditEssetsSave"
                             disabled={isSubmitting || !isDirty || !checkUserRole(userRole, USER_ROLES.EDITOR)}
                         >
@@ -371,7 +376,7 @@ const AddThreatDialog = ({
                         <Button
                             type="submit"
                             color="success"
-                            sx={{ marginRight: 0 }}
+                            sx={{ marginRight: 0, backgroundColor: "primary.main", color: "text.white" }}
                             id="submitBtn"
                             data-testid="EditThreatSave"
                             disabled={isSubmitting || !isDirty || !checkUserRole(userRole, USER_ROLES.EDITOR)}
