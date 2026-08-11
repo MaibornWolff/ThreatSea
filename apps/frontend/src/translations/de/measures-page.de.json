@@ -5,5 +5,6 @@
   "noMeasuresFound": "Keine Maßnahmen gefunden",
   "measuresLoading": "Maßnahmen werden geladen...",
   "delete": "Maßnahme löschen",
-  "probability": "EW"
+  "probability": "EW",
+  "actions": "Aktionen"
 }
