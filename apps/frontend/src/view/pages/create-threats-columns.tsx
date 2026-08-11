@@ -61,10 +61,10 @@ interface ColumnConfig {
 const cellText = { fontSize: "0.875rem" } as const;
 
 const threatStatusPresentation: Record<THREAT_STATUSES, { icon: React.ReactElement; color: string }> = {
-    [THREAT_STATUSES.NEW]: { icon: <FiberManualRecord sx={{ fontSize: 16 }} />, color: "primary.main" },
+    [THREAT_STATUSES.NEW]: { icon: <FiberManualRecord sx={{ fontSize: 16 }} />, color: "text.statusNew" },
     [THREAT_STATUSES.IN_PROGRESS]: { icon: <Edit sx={{ fontSize: 16 }} />, color: "secondary.main" },
     [THREAT_STATUSES.FINALIZED]: { icon: <CheckCircle sx={{ fontSize: 16 }} />, color: "success.main" },
-    [THREAT_STATUSES.OUTOFSCOPE]: { icon: <Block sx={{ fontSize: 16 }} />, color: "text.disabled" },
+    [THREAT_STATUSES.OUTOFSCOPE]: { icon: <Block sx={{ fontSize: 16 }} />, color: "text.statusNeutral" },
 };
 
 export const createThreatsColumns = ({
