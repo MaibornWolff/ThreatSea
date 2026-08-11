@@ -250,6 +250,19 @@ describe("AddThreatDialog — Save", () => {
         expect(screen.getByTestId("EditThreatSave")).toBeEnabled();
     });
 
+    it("does not offer 'New' as a selectable status and shows a new threat as In progress", async () => {
+        const { user } = setup(USER_ROLES.EDITOR, "threats", undefined, { status: THREAT_STATUSES.NEW });
+
+        // A threat being edited is never "new"; the dialog shows it as In progress.
+        expect(screen.getByRole("combobox")).toHaveTextContent("In progress");
+
+        await user.click(screen.getByRole("combobox"));
+        expect(screen.queryByRole("option", { name: "New" })).not.toBeInTheDocument();
+        expect(screen.getByRole("option", { name: "In progress" })).toBeInTheDocument();
+        expect(screen.getByRole("option", { name: "Finalized" })).toBeInTheDocument();
+        expect(screen.getByRole("option", { name: "Out of scope" })).toBeInTheDocument();
+    });
+
     it("persists the child threat, notifies the host, and closes on success", async () => {
         vi.mocked(ThreatsAPI.updateThreat).mockResolvedValue(createThreat({ id: 42 }));
         const onSaved = vi.fn();
