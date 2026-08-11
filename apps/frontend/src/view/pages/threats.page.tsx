@@ -21,6 +21,7 @@ import { useEditor } from "#application/hooks/use-editor.hook.ts";
 import { useLoadThreatsOnce } from "#application/hooks/use-load-threats-once.hook.ts";
 import { useThreatsList, type ThreatListItem } from "#application/hooks/use-threats-list.hook.ts";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
+import { NoRowsOverlay } from "#view/components/no-rows-overlay.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
 import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
@@ -30,22 +31,6 @@ import ThreatDialogPage from "./threat-dialog.page";
 import { MeasureImpactByMeasureDialogPage } from "./measure-impact-by-measure-dialog.page";
 import AddMeasureDialogPage from "./add-measure-dialog.page";
 import { createThreatsColumns } from "./create-threats-columns";
-
-/**
- * NoRowsOverlay component for the threats data grid
- */
-const NoRowsOverlay = ({ message }: { message: string }) => (
-    <Box
-        sx={{
-            height: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-        }}
-    >
-        <Typography sx={{ fontSize: "0.75rem", fontStyle: "italic" }}>{message}</Typography>
-    </Box>
-);
 
 /**
  * on this page all threats are listed

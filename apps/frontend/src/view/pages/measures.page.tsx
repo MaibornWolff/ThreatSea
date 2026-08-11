@@ -13,6 +13,7 @@ import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { useMeasuresList } from "#application/hooks/use-measures-list.hook.ts";
 import { IconButton } from "#view/components/icon-button.component.tsx";
+import { NoRowsOverlay } from "#view/components/no-rows-overlay.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
 import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
@@ -32,19 +33,6 @@ type MeasureDialogState = Omit<Partial<Measure>, "id" | "scheduledAt"> & {
     scheduledAt?: string | undefined;
     active?: boolean;
 };
-
-const NoRowsOverlay = ({ message }: { message: string }) => (
-    <Box
-        sx={{
-            height: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-        }}
-    >
-        <Typography sx={{ fontSize: "0.75rem", fontStyle: "italic" }}>{message}</Typography>
-    </Box>
-);
 
 const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
     const { t } = useTranslation("measuresPage");
