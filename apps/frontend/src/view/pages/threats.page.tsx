@@ -126,7 +126,7 @@ const ThreatsPageBody = () => {
         (event: React.MouseEvent<HTMLElement>, threat: ExtendedThreat | undefined) => {
             event.preventDefault();
             if (threat) {
-                navigate(`/projects/${projectId}/threats/edit`, { state: { threat } });
+                navigate(`/projects/${projectId}/threats/edit?threatId=${threat.id}`, { state: { threat } });
             }
         },
         [navigate, projectId]
