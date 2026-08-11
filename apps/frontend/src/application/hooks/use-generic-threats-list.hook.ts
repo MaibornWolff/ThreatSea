@@ -18,9 +18,6 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
     const [threatsByGenericThreatId, setThreatsByGenericThreatId] = useState<
         Record<number, ExtendedThreatWithMetrics[]>
     >({});
-    const [loadingChildrenByGenericThreatId, setLoadingChildrenByGenericThreatId] = useState<Record<number, boolean>>(
-        {}
-    );
 
     const loadGenericThreats = useCallback(async () => {
         setIsPending(true);
@@ -33,7 +30,6 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
 
             if (sortedThreats.length === 0) {
                 setThreatsByGenericThreatId({});
-                setLoadingChildrenByGenericThreatId({});
                 return;
             }
 
@@ -49,12 +45,6 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
                 return result;
             }, {});
             setThreatsByGenericThreatId(threatsMap);
-
-            const loadedState = sortedThreats.reduce<Record<number, boolean>>((result, threat) => {
-                result[threat.id] = false;
-                return result;
-            }, {});
-            setLoadingChildrenByGenericThreatId(loadedState);
         } finally {
             setIsPending(false);
         }
@@ -111,7 +101,6 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
         genericThreats: filteredGenericThreats,
         expandedGenericThreatIds,
         threatsByGenericThreatId,
-        loadingChildrenByGenericThreatId,
         toggleGenericThreat,
     };
 };
