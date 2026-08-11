@@ -3,5 +3,10 @@
   "settings": "Einstellungen",
   "member": "Mitglieder",
   "privacy": "Datenschutzerklärung",
-  "imprint": "Impressum"
+  "imprint": "Impressum",
+  "about": "Über ThreatSea",
+  "aboutDialog": {
+    "license": "Lizenz",
+    "repository": "Quellcode auf GitHub"
+  }
 }

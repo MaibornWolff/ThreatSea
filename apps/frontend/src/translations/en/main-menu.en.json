@@ -4,5 +4,10 @@
   "member": "Members",
   "privacy": "Privacy Policy",
   "imprint": "Imprint",
-  "catalogs": "Catalogs"
+  "catalogs": "Catalogs",
+  "about": "About ThreatSea",
+  "aboutDialog": {
+    "license": "License",
+    "repository": "Source code on GitHub"
+  }
 }
