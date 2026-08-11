@@ -326,6 +326,14 @@ const ThreatsPageBody = () => {
                                     vertical: "top",
                                     horizontal: "left",
                                 }}
+                                slotProps={{
+                                    list: {
+                                        sx: { bgcolor: "background.mainIntransparent" },
+                                    },
+                                    paper: {
+                                        sx: { borderRadius: 5 },
+                                    },
+                                }}
                             >
                                 {Object.entries(columnLabels).map(([field, label]) => (
                                     <MenuItem

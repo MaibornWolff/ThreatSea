@@ -362,6 +362,14 @@ const MemberPageBody = () => {
                             onClose={handleClose}
                             anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
                             transformOrigin={{ vertical: "top", horizontal: "left" }}
+                            slotProps={{
+                                list: {
+                                    sx: { bgcolor: "background.mainIntransparent" },
+                                },
+                                paper: {
+                                    sx: { borderRadius: 5 },
+                                },
+                            }}
                         >
                             {Object.entries(columnLabels).map(([field, label]) => (
                                 <MenuItem key={field} onClick={() => toggleColumnVisibility(field)} sx={{ py: 0.5 }}>
