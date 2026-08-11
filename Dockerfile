@@ -14,6 +14,9 @@ ENV NODE_ENV=production
 ENV API_URI=""
 ENV VITE_API_URI=$API_URI
 
+ARG APP_VERSION=""
+ENV VITE_APP_VERSION=$APP_VERSION
+
 WORKDIR /builder
 
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./

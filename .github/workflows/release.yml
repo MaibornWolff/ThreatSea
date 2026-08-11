@@ -104,6 +104,8 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
+          build-args: |
+            APP_VERSION=${{ needs.compute-version.outputs.new_release_version }}
           platforms: linux/amd64,linux/arm64
           provenance: mode=max
           sbom: true
@@ -153,6 +155,8 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
+          build-args: |
+            APP_VERSION=${{ needs.compute-version.outputs.new_release_version }}
           platforms: linux/amd64,linux/arm64
           provenance: mode=max
           sbom: true
