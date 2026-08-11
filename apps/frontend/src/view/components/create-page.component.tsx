@@ -501,8 +501,12 @@ export const CreatePage = <P extends object>(
                         >
                             {t("about")}
                         </MuiLink>
-                        <Typography component="span" sx={{ font: "inherit", color: theme.vars.palette.text.subtle }}>
-                            {APP_VERSION}
+                        <Typography
+                            component="span"
+                            data-testid="page-footer_version"
+                            sx={{ font: "inherit", color: theme.vars.palette.text.subtle }}
+                        >
+                            {t("aboutDialog.version")}: {APP_VERSION}
                         </Typography>
                     </div>
                 </Box>

@@ -1,5 +1,5 @@
 import GitHub from "@mui/icons-material/GitHub";
-import { Box, DialogActions, DialogTitle, Link, Typography } from "@mui/material";
+import { Box, DialogActions, Link, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import logo from "#images/threatsealogo-dez.png";
 import { APP_VERSION } from "#utils/version.ts";
@@ -24,9 +24,8 @@ export const AboutDialog = ({ open, onClose }: AboutDialogProps) => {
                     gap: 1,
                 }}
             >
-                <img src={logo} height={64} alt="" />
-                <DialogTitle sx={{ padding: 0 }}>ThreatSea</DialogTitle>
-                <Typography data-testid="about-dialog_version">{APP_VERSION}</Typography>
+                <img src={logo} height={64} alt="ThreatSea" />
+                <Typography data-testid="about-dialog_version">{`${t("aboutDialog.version")}: ${APP_VERSION}`}</Typography>
                 <Typography>{`${t("aboutDialog.license")}: BSD-3-Clause`}</Typography>
                 <Link
                     href="https://github.com/MaibornWolff/ThreatSea"

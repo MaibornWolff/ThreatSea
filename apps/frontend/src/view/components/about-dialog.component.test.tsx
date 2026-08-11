@@ -9,7 +9,6 @@ describe("AboutDialog", () => {
         renderWithProviders(<AboutDialog open onClose={vi.fn()} />);
 
         const dialog = screen.getByRole("dialog");
-        expect(dialog).toHaveTextContent("ThreatSea");
         // Tests run without VITE_APP_VERSION, so the fallback label is shown.
         expect(screen.getByTestId("about-dialog_version")).toHaveTextContent("local dev");
         expect(dialog).toHaveTextContent("BSD-3-Clause");

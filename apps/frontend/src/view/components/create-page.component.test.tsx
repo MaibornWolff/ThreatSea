@@ -256,7 +256,7 @@ describe("CreatePage — footer", () => {
         setup(undefined, { showProjectInfo: false });
 
         // Tests run without VITE_APP_VERSION, so the fallback label is shown.
-        expect(screen.getByText("local dev")).toBeInTheDocument();
+        expect(screen.getByTestId("page-footer_version")).toHaveTextContent("local dev");
     });
 
     it("opens the About dialog from the footer link and shows the version", async () => {
@@ -265,7 +265,6 @@ describe("CreatePage — footer", () => {
         await user.click(screen.getByRole("button", { name: translationUtil.t("about", { ns: "mainMenu" }) }));
 
         const dialog = await screen.findByRole("dialog");
-        expect(dialog).toHaveTextContent("ThreatSea");
         expect(within(dialog).getByTestId("about-dialog_version")).toHaveTextContent("local dev");
     });
 });
