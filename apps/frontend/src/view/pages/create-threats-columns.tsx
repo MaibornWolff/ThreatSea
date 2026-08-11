@@ -17,6 +17,7 @@ import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import type { ExtendedThreatWithMetrics } from "#application/hooks/use-generic-threats-list.hook.ts";
 import { ColumnFilterHeader } from "#view/components/column-filter-header.component.tsx";
 import { IconButton } from "#view/components/icon-button.component.tsx";
+import { OverflowText } from "#view/components/overflow-text.component.tsx";
 
 export type ThreatsGridRow =
     | {
@@ -105,7 +106,7 @@ export const createThreatsColumns = ({
             const row = params.row;
             if (row.rowType === "genericThreat") {
                 return (
-                    <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+                    <Box sx={{ display: "flex", alignItems: "center", height: "100%", width: "100%", minWidth: 0 }}>
                         <IconButton
                             title={row.isExpanded ? "Collapse" : "Expand"}
                             onClick={(event) => {
@@ -119,22 +120,22 @@ export const createThreatsColumns = ({
                                 <ChevronRight sx={{ fontSize: 18 }} />
                             )}
                         </IconButton>
-                        <Typography
-                            sx={{ ...cellText, fontWeight: "bold" }}
-                            data-testid="threats-page_generic-threats-list-entry_name"
-                        >
-                            {row.genericThreat.name}
-                        </Typography>
+                        <OverflowText
+                            text={row.genericThreat.name}
+                            testId="threats-page_generic-threats-list-entry_name"
+                            bold
+                            containerSx={{ flex: 1 }}
+                        />
                     </Box>
                 );
             }
             if (row.rowType === "threat") {
                 return (
-                    <Box sx={{ display: "flex", alignItems: "center", height: "100%", paddingLeft: 5 }}>
-                        <Typography sx={cellText} data-testid="threats-page_threats-list-entry_name">
-                            {row.threat.name}
-                        </Typography>
-                    </Box>
+                    <OverflowText
+                        text={row.threat.name}
+                        testId="threats-page_threats-list-entry_name"
+                        containerSx={{ pl: 5 }}
+                    />
                 );
             }
             return (
@@ -199,16 +200,20 @@ export const createThreatsColumns = ({
             const row = params.row;
             if (row.rowType === "genericThreat") {
                 return (
-                    <span data-testid="threats-page_generic-threats-list-entry_component">
-                        {formatComponentName(row.genericThreat, t)}
-                    </span>
+                    <OverflowText
+                        text={formatComponentName(row.genericThreat, t)}
+                        testId="threats-page_generic-threats-list-entry_component"
+                        align="center"
+                    />
                 );
             }
             if (row.rowType === "threat") {
                 return (
-                    <span data-testid="threats-page_threats-list-entry_component">
-                        {formatComponentName(row.threat, t)}
-                    </span>
+                    <OverflowText
+                        text={formatComponentName(row.threat, t)}
+                        testId="threats-page_threats-list-entry_component"
+                        align="center"
+                    />
                 );
             }
             return null;
@@ -235,10 +240,12 @@ export const createThreatsColumns = ({
         renderCell: (params: GridRenderCellParams<ThreatsGridRow>) => {
             const row = params.row;
             if (row.rowType === "genericThreat") {
-                return t(`pointsOfAttackList.${row.genericThreat.pointOfAttack}`);
+                return (
+                    <OverflowText text={t(`pointsOfAttackList.${row.genericThreat.pointOfAttack}`)} align="center" />
+                );
             }
             if (row.rowType === "threat") {
-                return t(`pointsOfAttackList.${row.threat.pointOfAttack}`);
+                return <OverflowText text={t(`pointsOfAttackList.${row.threat.pointOfAttack}`)} align="center" />;
             }
             return null;
         },
@@ -264,10 +271,10 @@ export const createThreatsColumns = ({
         renderCell: (params: GridRenderCellParams<ThreatsGridRow>) => {
             const row = params.row;
             if (row.rowType === "genericThreat") {
-                return t(`attackerList.${row.genericThreat.attacker}`);
+                return <OverflowText text={t(`attackerList.${row.genericThreat.attacker}`)} align="center" />;
             }
             if (row.rowType === "threat") {
-                return t(`attackerList.${row.threat.attacker}`);
+                return <OverflowText text={t(`attackerList.${row.threat.attacker}`)} align="center" />;
             }
             return null;
         },
