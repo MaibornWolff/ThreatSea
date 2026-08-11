@@ -1,68 +1,24 @@
 import { useEffect, useMemo } from "react";
 import type { Asset } from "#api/types/asset.types.ts";
 import { useAssets } from "./use-assets.hook";
-import { useList } from "./use-list.hooks";
-
-const searchableAssetFields: (keyof Pick<Asset, "name" | "description">)[] = ["name", "description"];
-const sortableAssetFields: (keyof Pick<
-    Asset,
-    "name" | "confidentiality" | "integrity" | "availability" | "createdAt"
->)[] = ["name", "confidentiality", "integrity", "availability", "createdAt"];
-type AssetSortField = (typeof sortableAssetFields)[number];
 
 export const useAssetsList = ({ projectId }: { projectId: number }) => {
     const { isPending, items, loadAssets, deleteAsset } = useAssets({
         projectId,
     });
-    const { setSortDirection, setSearchValue, setSortBy, sortDirection, searchValue, sortBy } = useList("assets");
 
     useEffect(() => {
         loadAssets();
     }, [projectId, loadAssets]);
 
-    const filteredItems = useMemo(
-        () =>
-            items.filter((item: Asset) => {
-                const lcSearchValue = searchValue.toLowerCase();
-                return (
-                    searchableAssetFields.some((searchField) =>
-                        item[searchField].toLowerCase().includes(lcSearchValue)
-                    ) || `${item.id}` == searchValue
-                );
-            }),
-        [items, searchValue]
+    // Deterministic initial order; searching and per-column sorting are handled by the data grid.
+    const sortedItems = useMemo(
+        () => items.toSorted((a: Asset, b: Asset) => (a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1)),
+        [items]
     );
 
-    const sortedItems = useMemo(() => {
-        const sortField: AssetSortField = sortableAssetFields.includes(sortBy as AssetSortField)
-            ? (sortBy as AssetSortField)
-            : "name";
-
-        return filteredItems.sort((a, b) => {
-            if (sortDirection === "asc") {
-                if (sortField === "name") {
-                    return a[sortField].toLowerCase() < b[sortField].toLowerCase() ? -1 : 1;
-                } else {
-                    return new Date(a[sortField]) < new Date(b[sortField]) ? -1 : 1;
-                }
-            } else {
-                if (sortField === "name") {
-                    return a[sortField].toLowerCase() > b[sortField].toLowerCase() ? -1 : 1;
-                } else {
-                    return new Date(a[sortField]) > new Date(b[sortField]) ? -1 : 1;
-                }
-            }
-        });
-    }, [filteredItems, sortBy, sortDirection]);
-
     return {
-        setSortDirection,
-        setSearchValue,
-        setSortBy,
         deleteAsset,
-        sortDirection,
-        searchValue,
-        sortBy,
         isPending,
         assets: sortedItems,
     };
