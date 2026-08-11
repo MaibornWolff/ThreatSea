@@ -11,7 +11,6 @@ import { ColumnFilterHeader } from "#view/components/column-filter-header.compon
 
 interface ColumnConfig {
     t: TFunction;
-    tCommon: TFunction;
     userRole: USER_ROLES | undefined;
     columnFilters: Record<string, string>;
     handleFilterChange: (field: string, value: string) => void;
@@ -23,7 +22,6 @@ interface ColumnConfig {
 
 export const createMeasuresColumns = ({
     t,
-    tCommon,
     userRole,
     columnFilters,
     handleFilterChange,
@@ -34,7 +32,7 @@ export const createMeasuresColumns = ({
 }: ColumnConfig): GridColDef[] => [
     {
         field: "name",
-        headerName: tCommon("name"),
+        headerName: t("name"),
         flex: 1,
         minWidth: 200,
         align: "left",
@@ -42,7 +40,7 @@ export const createMeasuresColumns = ({
         renderHeader: () => (
             <ColumnFilterHeader
                 field="name"
-                label={tCommon("name")}
+                label={t("name")}
                 columnFilters={columnFilters}
                 onFilterChange={handleFilterChange}
                 expandedFilters={expandedFilters}
@@ -52,7 +50,7 @@ export const createMeasuresColumns = ({
     },
     {
         field: "scheduledAt",
-        headerName: tCommon("scheduledAt"),
+        headerName: t("scheduledAt"),
         flex: 1,
         minWidth: 200,
         align: "center",
@@ -60,14 +58,14 @@ export const createMeasuresColumns = ({
         renderHeader: () => (
             <ColumnFilterHeader
                 field="scheduledAt"
-                label={tCommon("scheduledAt")}
+                label={t("scheduledAt")}
                 columnFilters={columnFilters}
                 onFilterChange={handleFilterChange}
                 expandedFilters={expandedFilters}
                 onToggleExpanded={toggleFilterExpanded}
             />
         ),
-        valueGetter: (value: string | null | undefined) => value || tCommon("notScheduledYet"),
+        valueGetter: (value: string | null | undefined) => value || t("notScheduledYet"),
     },
     ...(checkUserRole(userRole, USER_ROLES.EDITOR)
         ? ([
@@ -100,7 +98,7 @@ export const createMeasuresColumns = ({
                               }}
                           >
                               <IconButton
-                                  title={tCommon("copy")}
+                                  title={t("copy")}
                                   data-testid="measures-page_measures-list-entry_copy-button"
                                   onClick={(e) => {
                                       e.stopPropagation();
@@ -111,7 +109,7 @@ export const createMeasuresColumns = ({
                               </IconButton>
                               {isCatalogMeasure ? (
                                   <IconButton
-                                      title={tCommon("reset")}
+                                      title={t("reset")}
                                       disabled={!measure.scheduledAt}
                                       onClick={(e) => {
                                           e.stopPropagation();

@@ -21,7 +21,7 @@ import { withProject } from "#view/components/with-project.hoc.tsx";
 import MeasureDetailsDialogPage from "./measure-details-dialog.page";
 import { MeasureImpactByThreatDialogPage } from "./measure-impact-by-threat-dialog.page";
 import ThreatDialogPage from "./threat-dialog.page";
-import { createMeasuresColumns } from "./measures.columns";
+import { createMeasuresColumns } from "./create-measures-columns";
 
 interface MeasuresPageBodyProps {
     project: ExtendedProject;
@@ -48,8 +48,7 @@ const NoRowsOverlay = ({ message }: { message: string }) => (
 
 const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
     const { t } = useTranslation("measuresPage");
-    const { t: tCommon } = useTranslation("common");
-    usePageTitle(tCommon("measures"));
+    usePageTitle(t("measures"));
     const { openConfirm } = useConfirm<Measure>();
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
@@ -104,8 +103,8 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
     };
 
     const columnLabels: Record<string, string> = {
-        name: tCommon("name"),
-        scheduledAt: tCommon("scheduledAt"),
+        name: t("name"),
+        scheduledAt: t("scheduledAt"),
         actions: t("actions"),
     };
 
@@ -157,14 +156,14 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                 active: false,
                 catalogMeasureId: null,
                 id: undefined,
-                name: tCommon("duplicateName", { name: measure.name }),
+                name: t("duplicateName", { name: measure.name }),
                 scheduledAt: undefined,
             };
             navigate(`/projects/${projectIdParam}/measures/edit`, {
                 state: { measure: measureState, project },
             });
         },
-        [navigate, projectIdParam, project, tCommon]
+        [navigate, projectIdParam, project, t]
     );
 
     const handleDeleteOrResetMeasure = useCallback(
@@ -173,16 +172,16 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
             openConfirm({
                 state: measure,
                 message: isReset
-                    ? tCommon("resetMeasureText", { measureName: measure.name })
-                    : tCommon("deleteMeasureText", { measureName: measure.name }),
-                acceptText: isReset ? tCommon("resetText") : tCommon("deleteText"),
-                cancelText: tCommon("cancelText"),
+                    ? t("resetMeasureText", { measureName: measure.name })
+                    : t("deleteMeasureText", { measureName: measure.name }),
+                acceptText: isReset ? t("resetText") : t("deleteText"),
+                cancelText: t("cancelText"),
                 onAccept: (measure) => {
                     deleteMeasure(measure);
                 },
             });
         },
-        [openConfirm, tCommon, deleteMeasure]
+        [openConfirm, t, deleteMeasure]
     );
 
     const NoRowsOverlayWithMessage = useCallback(() => <NoRowsOverlay message={t("noMeasuresFound")} />, [t]);
@@ -191,7 +190,6 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
         () =>
             createMeasuresColumns({
                 t,
-                tCommon,
                 userRole,
                 columnFilters,
                 handleFilterChange,
@@ -202,7 +200,6 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
             }),
         [
             t,
-            tCommon,
             userRole,
             columnFilters,
             handleFilterChange,
@@ -293,7 +290,7 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                             </Menu>
                             {checkUserRole(userRole, USER_ROLES.EDITOR) && (
                                 <IconButton
-                                    title={tCommon("addMeasure")}
+                                    title={t("addMeasure")}
                                     sx={{ ml: 1, color: "text.primary" }}
                                     onClick={onClickAddMeasure}
                                     data-testid="measures-page_add-measure-button"

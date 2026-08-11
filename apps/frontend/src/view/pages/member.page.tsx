@@ -22,7 +22,7 @@ import { AlertActions } from "#application/actions/alert.actions.ts";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import type { NavigationState } from "#application/reducers/navigation.reducer.ts";
 import type { ConfirmAcceptColor } from "#application/reducers/confirm.reducer.ts";
-import { createMembersColumns } from "./members.columns";
+import { createMembersColumns } from "./create-members-columns";
 
 type MemberPath = "projects" | "catalogs";
 
@@ -52,8 +52,7 @@ const MemberPageBody = () => {
     const { openConfirm } = useConfirm<DeleteMemberConfirmState>();
     const navigate = useNavigate();
     const { t } = useTranslation("memberPage");
-    const { t: tCommon } = useTranslation("common");
-    usePageTitle(tCommon("member"));
+    usePageTitle(t("member"));
     const { projectId, catalogId } = useParams<{ projectId?: string; catalogId?: string }>();
     const [memberRole, setMemberRole] = useState<USER_ROLES | null>(null);
 
@@ -148,9 +147,9 @@ const MemberPageBody = () => {
     };
 
     const columnLabels: Record<string, string> = {
-        name: tCommon("name"),
-        email: tCommon("email"),
-        role: tCommon("role"),
+        name: t("name"),
+        email: t("email"),
+        role: t("role"),
         actions: t("actions"),
     };
 
@@ -287,7 +286,6 @@ const MemberPageBody = () => {
         () =>
             createMembersColumns({
                 t,
-                tCommon,
                 userRole,
                 columnFilters,
                 handleFilterChange,
@@ -295,16 +293,7 @@ const MemberPageBody = () => {
                 toggleFilterExpanded,
                 handleDeleteMember,
             }),
-        [
-            t,
-            tCommon,
-            userRole,
-            columnFilters,
-            handleFilterChange,
-            expandedFilters,
-            toggleFilterExpanded,
-            handleDeleteMember,
-        ]
+        [t, userRole, columnFilters, handleFilterChange, expandedFilters, toggleFilterExpanded, handleDeleteMember]
     );
 
     const handleParticipantCount = (): string => {

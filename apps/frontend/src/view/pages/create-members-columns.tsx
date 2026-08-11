@@ -9,7 +9,6 @@ import { ColumnFilterHeader } from "#view/components/column-filter-header.compon
 
 interface ColumnConfig {
     t: TFunction;
-    tCommon: TFunction;
     userRole: USER_ROLES | undefined;
     columnFilters: Record<string, string>;
     handleFilterChange: (field: string, value: string) => void;
@@ -20,7 +19,6 @@ interface ColumnConfig {
 
 export const createMembersColumns = ({
     t,
-    tCommon,
     userRole,
     columnFilters,
     handleFilterChange,
@@ -30,7 +28,7 @@ export const createMembersColumns = ({
 }: ColumnConfig): GridColDef[] => [
     {
         field: "name",
-        headerName: tCommon("name"),
+        headerName: t("name"),
         flex: 1,
         minWidth: 200,
         align: "center",
@@ -38,7 +36,7 @@ export const createMembersColumns = ({
         renderHeader: () => (
             <ColumnFilterHeader
                 field="name"
-                label={tCommon("name")}
+                label={t("name")}
                 columnFilters={columnFilters}
                 onFilterChange={handleFilterChange}
                 expandedFilters={expandedFilters}
@@ -48,7 +46,7 @@ export const createMembersColumns = ({
     },
     {
         field: "email",
-        headerName: tCommon("email"),
+        headerName: t("email"),
         flex: 1,
         minWidth: 220,
         align: "center",
@@ -56,7 +54,7 @@ export const createMembersColumns = ({
         renderHeader: () => (
             <ColumnFilterHeader
                 field="email"
-                label={tCommon("email")}
+                label={t("email")}
                 columnFilters={columnFilters}
                 onFilterChange={handleFilterChange}
                 expandedFilters={expandedFilters}
@@ -66,14 +64,14 @@ export const createMembersColumns = ({
     },
     {
         field: "role",
-        headerName: tCommon("role"),
+        headerName: t("role"),
         width: 180,
         align: "center",
         headerAlign: "center",
         renderHeader: () => (
             <ColumnFilterHeader
                 field="role"
-                label={tCommon("role")}
+                label={t("role")}
                 columnFilters={columnFilters}
                 onFilterChange={handleFilterChange}
                 expandedFilters={expandedFilters}
