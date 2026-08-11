@@ -7,18 +7,17 @@ import { db } from "#db/index.js";
 import * as MeasureImpactsService from "#services/measureImpacts.service.js";
 import { getMeasure } from "#services/measures.service.js";
 import { getThreat } from "#services/threats.service.js";
+import { ThreatResponse } from "#types/threat.types.js";
 import { NotFoundError } from "#errors/not-found.error.js";
 import { BadRequestError } from "#errors/bad-request.error.js";
 import { ProjectIdParam } from "#types/project.types.js";
 import {
-    ThreatMeasureImpactResponse,
     CreateMeasureImpactRequest,
     MeasureImpactIdParam,
     MeasureImpactResponse,
     UpdateMeasureImpactRequest,
 } from "#types/measure-impact.types.js";
 import { MeasureResponse } from "#types/measure.types.js";
-import { ThreatIdParam, ThreatResponse } from "#types/threat.types.js";
 
 /**
  * Gets all measure impacts of a project.
@@ -33,38 +32,6 @@ export async function getMeasureImpacts(
     const projectId = request.params.projectId;
 
     const measureImpacts: MeasureImpactResponse[] = await MeasureImpactsService.getMeasureImpactsByProject(projectId);
-
-    response.json(measureImpacts);
-}
-
-/**
- * Gets all threat-linked measure impacts of a specific child threat.
- *
- * @param {object} request - The http request.
- * @param {object} response - The http response.
- * @param {NextFunction} next - The next middleware function.
- */
-export async function getMeasureImpactsByThreat(
-    request: Request<ThreatIdParam, ThreatMeasureImpactResponse[], void>,
-    response: Response<ThreatMeasureImpactResponse[]>,
-    next: NextFunction
-): Promise<void> {
-    const projectId = request.params.projectId;
-    const threatId = request.params.threatId;
-
-    const threat: ThreatResponse | null = await getThreat(threatId);
-    if (threat === null) {
-        next(new NotFoundError("Child Threat not found"));
-        return;
-    }
-
-    if (threat.projectId !== projectId) {
-        next(new BadRequestError("Child Threat is not part of this project"));
-        return;
-    }
-
-    const measureImpacts: ThreatMeasureImpactResponse[] =
-        await MeasureImpactsService.getMeasureImpactsByThreat(threatId);
 
     response.json(measureImpacts);
 }

@@ -6,7 +6,7 @@ import { db, TransactionType } from "#db/index.js";
 import {
     Asset,
     Threat,
-    ThreatMeasureImpact,
+    MeasureImpact,
     CreateProject,
     Measure,
     Project,
@@ -61,7 +61,7 @@ function transformThreats(
     threats: ReportThreat[],
     measuresWithIds: ExtendedMeasure[],
     assetsWithId: ExtendedAsset[],
-    measureImpacts: ThreatMeasureImpact[]
+    measureImpacts: MeasureImpact[]
 ) {
     return threats
         .map((threat) => {
@@ -135,7 +135,7 @@ type TransformedMeasure = Measure & {
 function transformMeasures(
     measures: Measure[],
     threats: (Threat & { reportId: string })[],
-    measureImpacts: ThreatMeasureImpact[]
+    measureImpacts: MeasureImpact[]
 ): TransformedMeasure[] {
     return measures.map((measure) => {
         const measureMeasureImpacts = measureImpacts.filter((measureImpact) => measureImpact.measureId === measure.id);
