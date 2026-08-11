@@ -51,9 +51,9 @@ interface ImportBody {
 /**
  * Upgrades an import body in place to the current data model version.
  *
- * A v3 export stores a single flat `threats` array. This mirrors the `0005` database migration to
+ * A v3 export stores a single flat `threats` array. This mirrors the `0007_new-model-migration` database migration to
  * split each flat threat into a generic (parent) threat plus a child threat:
- *   - generic threats are grouped by (catalogThreatId, projectId, pointOfAttackId); their
+ *   - generic threats are grouped by (catalogThreatId, pointOfAttackId) within the single exported project; their
  *     name/description/pointOfAttack/attacker come from the referenced catalogue threat,
  *   - each flat threat becomes a child threat keeping its own fields, its id (so measure impacts keep
  *     resolving), `status` set to "finalized" only when it was done editing and either impacts a

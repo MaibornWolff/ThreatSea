@@ -4,7 +4,7 @@
  */
 import { and, eq, getTableColumns } from "drizzle-orm";
 import { db, TransactionType } from "#db/index.js";
-import { genericThreats, GenericThreat, CreateGenericThreat, UpdateGenericThreat } from "#db/schema.js";
+import { genericThreats, GenericThreat, CreateGenericThreat } from "#db/schema.js";
 import { GenericThreatWithExtendedChildrenResponse } from "#types/generic-threat.types.js";
 import { getPointsOfAttack } from "#services/points-of-attack.service.js";
 import { POINTS_OF_ATTACK } from "#types/points-of-attack.types.js";
@@ -115,41 +115,6 @@ export async function createGenericThreat(
     }
 
     return genericThreat;
-}
-
-/**
- * Updates the generic threat with the specified id.
- *
- * @param {number} genericThreatId - The id of the generic threat.
- * @param {UpdateGenericThreat} updateGenericThreatData - The data of the generic threat.
- * @returns {Promise<GenericThreat>} A promise that resolves to the updated generic threat.
- * @throws {Error} If the generic threat could not be updated.
- */
-export async function updateGenericThreat(
-    genericThreatId: number,
-    updateGenericThreatData: UpdateGenericThreat
-): Promise<GenericThreat> {
-    const [genericThreat] = await db
-        .update(genericThreats)
-        .set(updateGenericThreatData)
-        .where(eq(genericThreats.id, genericThreatId))
-        .returning();
-
-    if (!genericThreat) {
-        throw new Error("Failed to update generic threat");
-    }
-
-    return genericThreat;
-}
-
-/**
- * Deletes the generic threat with the specified id.
- *
- * @param {number} genericThreatId - The id of the generic threat.
- * @returns {Promise<void>} A promise that resolves when the generic threat is deleted.
- */
-export async function deleteGenericThreat(genericThreatId: number): Promise<void> {
-    await db.delete(genericThreats).where(eq(genericThreats.id, genericThreatId));
 }
 
 export async function deleteGenericThreatsByPointOfAttackId(
