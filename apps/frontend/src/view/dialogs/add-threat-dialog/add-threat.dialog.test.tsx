@@ -229,6 +229,20 @@ describe("AddThreatDialog — Save", () => {
         mockUseThreatMeasuresList();
     });
 
+    it("warns before a browser reload only while the form has unsaved changes", async () => {
+        const { user } = setup(USER_ROLES.EDITOR, "threats");
+
+        const cleanUnload = new Event("beforeunload", { cancelable: true });
+        window.dispatchEvent(cleanUnload);
+        expect(cleanUnload.defaultPrevented).toBe(false);
+
+        await makeDirty(user);
+
+        const dirtyUnload = new Event("beforeunload", { cancelable: true });
+        window.dispatchEvent(dirtyUnload);
+        expect(dirtyUnload.defaultPrevented).toBe(true);
+    });
+
     it("disables save while the form is untouched and enables it once a field changes", async () => {
         const { user } = setup(USER_ROLES.EDITOR, "threats");
 
