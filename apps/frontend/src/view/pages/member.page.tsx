@@ -12,6 +12,7 @@ import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { useMembersList } from "#application/hooks/use-addedMember-list.hook.ts";
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { MatrixFilterToggleButtonGroup } from "#view/components/matrix-filter-toggle-button-group.component.tsx";
+import { NoRowsOverlay } from "#view/components/no-rows-overlay.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
 import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
@@ -33,19 +34,6 @@ interface DeleteMemberConfirmState {
     ownUserId: number;
     name: string;
 }
-
-const NoRowsOverlay = ({ message }: { message: string }) => (
-    <Box
-        sx={{
-            height: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-        }}
-    >
-        <Typography sx={{ fontSize: "0.75rem", fontStyle: "italic" }}>{message}</Typography>
-    </Box>
-);
 
 const MemberPageBody = () => {
     const dispatch = useAppDispatch();
