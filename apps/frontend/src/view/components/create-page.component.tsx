@@ -1,7 +1,7 @@
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlined";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutlined";
 import SyncIcon from "@mui/icons-material/Sync";
-import { IconButton, Typography } from "@mui/material";
+import { IconButton, Link as MuiLink, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import { useLayoutEffect, useState, type ComponentType, type MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
@@ -487,20 +487,20 @@ export const CreatePage = <P extends object>(
                                 </a>
                             );
                         })}
-                        <button
+                        <MuiLink
+                            component="button"
                             type="button"
                             onClick={() => setAboutOpen(true)}
-                            style={{
-                                background: "none",
-                                border: "none",
+                            color="inherit"
+                            underline="always"
+                            sx={{
                                 padding: "0 10px 0 0",
                                 font: "inherit",
-                                cursor: "pointer",
                                 color: theme.vars.palette.text.subtle,
                             }}
                         >
                             {t("about")}
-                        </button>
+                        </MuiLink>
                         <Typography component="span" sx={{ font: "inherit", color: theme.vars.palette.text.subtle }}>
                             {APP_VERSION}
                         </Typography>

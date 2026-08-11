@@ -1,4 +1,5 @@
 import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { translationUtil } from "#utils/translations.ts";
 import { AboutDialog } from "./about-dialog.component";
@@ -23,5 +24,15 @@ describe("AboutDialog", () => {
         renderWithProviders(<AboutDialog open={false} onClose={vi.fn()} />);
 
         expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
+
+    it("calls onClose when the close button is clicked", async () => {
+        const user = userEvent.setup();
+        const onClose = vi.fn();
+        renderWithProviders(<AboutDialog open onClose={onClose} />);
+
+        await user.click(screen.getByRole("button", { name: translationUtil.t("cancelBtn", { ns: "common" }) }));
+
+        expect(onClose).toHaveBeenCalledTimes(1);
     });
 });
