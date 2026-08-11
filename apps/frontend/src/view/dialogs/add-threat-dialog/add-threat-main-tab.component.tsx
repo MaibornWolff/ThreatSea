@@ -286,11 +286,15 @@ export const AddThreatMainTab = ({
                                     label={t("status")}
                                     data-testid="ThreatStatusSelect"
                                 >
-                                    {Object.values(THREAT_STATUSES).map((status) => (
-                                        <MenuItem key={status} value={status}>
-                                            {t(`statusList.${status}`)}
-                                        </MenuItem>
-                                    ))}
+                                    {/* NEW is machine-assigned only; opening the dialog to edit a threat
+                                        already moves it to IN_PROGRESS on save, so it is never user-selectable. */}
+                                    {Object.values(THREAT_STATUSES)
+                                        .filter((status) => status !== THREAT_STATUSES.NEW)
+                                        .map((status) => (
+                                            <MenuItem key={status} value={status}>
+                                                {t(`statusList.${status}`)}
+                                            </MenuItem>
+                                        ))}
                                 </Select>
                             )}
                         />
