@@ -122,14 +122,14 @@ describe("createThreatsColumns — structure", () => {
 
 describe("createThreatsColumns — parent rows carry no risk", () => {
     it.each(["probability", "damage", "risk", "assets", "status"])(
-        "renders a dash or empty for %s on a generic threat row",
+        "renders nothing (no misleading dash) for %s on a generic threat row",
         (field) => {
             const { byField } = columnByField();
-            renderCell(byField[field], genericRow);
-            // Parents never show a numeric risk metric; the risk-bearing fields render "-".
-            if (["probability", "damage", "risk"].includes(field)) {
-                expect(screen.getByText("-")).toBeInTheDocument();
-            }
+            const { container } = renderCell(byField[field], genericRow);
+            // Parents have no risk of their own; these cells stay empty rather than
+            // showing "-", which would read as a missing value.
+            expect(container).not.toHaveTextContent("-");
+            expect(container.querySelector("svg")).not.toBeInTheDocument();
         }
     );
 

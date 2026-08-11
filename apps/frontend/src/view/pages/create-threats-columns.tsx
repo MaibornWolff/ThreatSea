@@ -164,7 +164,7 @@ export const createThreatsColumns = ({
         renderCell: (params: GridRenderCellParams<ThreatsGridRow>) => {
             const row = params.row;
             if (row.rowType !== "threat") {
-                return row.rowType === "genericThreat" ? "-" : null;
+                return null;
             }
             return (
                 <span
@@ -291,16 +291,13 @@ export const createThreatsColumns = ({
         ),
         renderCell: (params: GridRenderCellParams<ThreatsGridRow>) => {
             const row = params.row;
-            if (row.rowType === "genericThreat") {
-                return "-";
-            }
             return row.rowType === "threat" ? row.threat.probability : null;
         },
     },
     {
         field: "damage",
         headerName: t("damage"),
-        width: 110,
+        width: 140,
         sortable: false,
         align: "center",
         headerAlign: "center",
@@ -316,9 +313,6 @@ export const createThreatsColumns = ({
         ),
         renderCell: (params: GridRenderCellParams<ThreatsGridRow>) => {
             const row = params.row;
-            if (row.rowType === "genericThreat") {
-                return "-";
-            }
             return row.rowType === "threat" ? row.threat.damage : null;
         },
     },
@@ -341,9 +335,6 @@ export const createThreatsColumns = ({
         ),
         renderCell: (params: GridRenderCellParams<ThreatsGridRow>) => {
             const row = params.row;
-            if (row.rowType === "genericThreat") {
-                return "-";
-            }
             return row.rowType === "threat" ? row.threat.risk : null;
         },
     },
@@ -382,9 +373,6 @@ export const createThreatsColumns = ({
         ),
         renderCell: (params: GridRenderCellParams<ThreatsGridRow>) => {
             const row = params.row;
-            if (row.rowType === "genericThreat") {
-                return "-";
-            }
             if (row.rowType !== "threat") {
                 return null;
             }
