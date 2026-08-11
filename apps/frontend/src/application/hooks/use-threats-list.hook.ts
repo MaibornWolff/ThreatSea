@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
-import { useList } from "./use-list.hooks";
 import { useThreats } from "./use-threats.hook";
 
 export type ThreatListItem = ExtendedThreat & {
@@ -8,47 +7,13 @@ export type ThreatListItem = ExtendedThreat & {
     damage: number;
 };
 
-const sortableThreatFields: (keyof Pick<
-    ThreatListItem,
-    | "name"
-    | "assets"
-    | "componentName"
-    | "pointOfAttack"
-    | "attacker"
-    | "probability"
-    | "damage"
-    | "risk"
-    | "doneEditing"
->)[] = ["name", "assets", "componentName", "pointOfAttack", "attacker", "probability", "damage", "risk", "doneEditing"];
-type ThreatSortField = (typeof sortableThreatFields)[number];
-
-const searchableThreatFields: (keyof Pick<
-    ExtendedThreat,
-    "name" | "description" | "componentName" | "attacker" | "pointOfAttack"
->)[] = ["name", "description", "componentName", "attacker", "pointOfAttack"];
-
 export const useThreatsList = ({ projectId }: { projectId: number }) => {
     const { isPending, items, loadThreats, deleteThreat, duplicateThreat } = useThreats({
         projectId,
     });
-    const { setSortDirection, setSearchValue, setSortBy, sortDirection, searchValue, sortBy } = useList("threats");
-
-    const filteredItems: ExtendedThreat[] = useMemo(() => {
-        return items.filter((item) => {
-            const matchesSearch =
-                searchableThreatFields.some((searchField) =>
-                    String(item[searchField] ?? "")
-                        .replace(/_/g, " ")
-                        .toLowerCase()
-                        .includes(searchValue.toLowerCase())
-                ) || `${item.id}` == searchValue;
-
-            return matchesSearch;
-        });
-    }, [items, searchValue]);
 
     const transformedItems = useMemo<ThreatListItem[]>(() => {
-        return filteredItems.map((item) => {
+        return items.map((item) => {
             const { confidentiality, integrity, availability, probability, assets } = item;
             const damage = assets.reduce((value, asset) => {
                 if (confidentiality && value < asset.confidentiality) {
@@ -70,32 +35,18 @@ export const useThreatsList = ({ projectId }: { projectId: number }) => {
                 assets,
             };
         });
-    }, [filteredItems]);
+    }, [items]);
 
-    const sortedItems = useMemo(() => {
-        const sortField: ThreatSortField = sortableThreatFields.includes(sortBy as ThreatSortField)
-            ? (sortBy as ThreatSortField)
-            : "name";
-
-        return transformedItems.sort((a, b) => {
-            if (sortDirection === "asc") {
-                return (a[sortField] ?? "") < (b[sortField] ?? "") ? -1 : 1;
-            } else {
-                return (a[sortField] ?? "") > (b[sortField] ?? "") ? -1 : 1;
-            }
-        });
-    }, [transformedItems, sortBy, sortDirection]);
+    // Deterministic initial order; searching and per-column sorting are handled by the data grid.
+    const sortedItems = useMemo(
+        () => transformedItems.toSorted((a, b) => (a.name < b.name ? -1 : 1)),
+        [transformedItems]
+    );
 
     return {
-        setSortDirection,
-        setSearchValue,
-        setSortBy,
         deleteThreat,
         duplicateThreat,
         loadThreats,
-        sortDirection,
-        searchValue,
-        sortBy,
         isPending,
         threats: sortedItems,
     };
