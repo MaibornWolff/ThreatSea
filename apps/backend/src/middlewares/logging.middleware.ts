@@ -15,12 +15,10 @@ import { NextFunction, Request, Response } from "express";
  * @param {Response} _response - The http response.
  * @param {NextFunction} next - The next middleware function.
  */
-export function LogHandler(request: Request, _response: Response, next: NextFunction): void {
-    if (request.statusCode !== null) {
-        Logger.debug(`Request: ${request.method} ${request.url} ${request.statusCode}`);
-    } else {
-        Logger.debug(`Request: ${request.method} ${request.url}`);
-    }
+export function LogHandler(request: Request, response: Response, next: NextFunction): void {
+    response.on("finish", () => {
+        Logger.debug(`Request: ${request.method} ${request.url} ${response.statusCode}`);
+    });
 
     next();
 }
