@@ -10,7 +10,7 @@ import {
     Typography,
     type DialogProps,
 } from "@mui/material";
-import { useRef, useState, type ChangeEvent, type MouseEvent, type SyntheticEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type MouseEvent, type SyntheticEvent } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useLocation } from "react-router";
@@ -86,6 +86,21 @@ const AddThreatDialog = ({
             status: initialStatus,
         },
     });
+
+    // Warn before a browser reload/close/external navigation while the form has unsaved
+    // changes. (In-app navigation, e.g. Cancel, intentionally discards the dialog.)
+    useEffect(() => {
+        if (!isDirty) {
+            return;
+        }
+        const warnOnUnload = (event: BeforeUnloadEvent) => {
+            // Modern browsers show their generic "unsaved changes" prompt when the default
+            // is prevented; no custom message is possible.
+            event.preventDefault();
+        };
+        window.addEventListener("beforeunload", warnOnUnload);
+        return () => window.removeEventListener("beforeunload", warnOnUnload);
+    }, [isDirty]);
 
     /**
      * Cancel a dialog and closes it.
