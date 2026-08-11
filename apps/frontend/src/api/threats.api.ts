@@ -2,16 +2,6 @@ import { fetchAPI } from "#api/utils.ts";
 import type { Threat, CreateThreatRequest, UpdateThreatRequest } from "#api/types/threat.types.ts";
 
 export class ThreatsAPI {
-    static async getThreatsByGenericThreat({
-        projectId,
-        genericThreatId,
-    }: {
-        projectId: number;
-        genericThreatId: number;
-    }): Promise<Threat[]> {
-        return await fetchAPI(`/projects/${projectId}/system/threats/${genericThreatId}/list`);
-    }
-
     static async getThreat({ projectId, id }: { projectId: number; id: number }): Promise<Threat> {
         return await fetchAPI(`/projects/${projectId}/system/threats/${id}`);
     }
