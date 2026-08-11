@@ -135,6 +135,8 @@ const ThreatsPageBody = () => {
     const handleAddThreat = useCallback(
         async (event: React.MouseEvent<HTMLElement>, genericThreat: GenericThreatWithExtendedChildren) => {
             event.preventDefault();
+            // Keep the add button from toggling the parent row's expand/collapse.
+            event.stopPropagation();
             try {
                 // Only the name is overridden; identity and assessment defaults come
                 // from the parent and its catalogue threat on the backend.
@@ -567,13 +569,12 @@ const ThreatsPageBody = () => {
                         disableColumnSelector
                         onCellClick={(params, event) => {
                             const row = params.row as ThreatsGridRow;
-                            if (params.field === "actions") {
-                                return;
-                            }
-                            if (row.rowType === "threat") {
-                                onClickEditThreat(event as unknown as React.MouseEvent<HTMLElement>, row.threat);
-                            } else if (row.rowType === "genericThreat") {
+                            // A parent row toggles from any cell (including the "n threats" text in
+                            // the actions cell); its add button stops propagation to keep its action.
+                            if (row.rowType === "genericThreat") {
                                 toggleGenericThreat(row.genericThreat.id);
+                            } else if (row.rowType === "threat" && params.field !== "actions") {
+                                onClickEditThreat(event as unknown as React.MouseEvent<HTMLElement>, row.threat);
                             }
                         }}
                         getRowClassName={(params) => {
