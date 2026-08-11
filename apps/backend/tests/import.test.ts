@@ -49,6 +49,15 @@ describe("import a project", () => {
         expect(res.statusCode).toEqual(400);
     });
 
+    it("should reject a malformed v3 body with 400 instead of crashing the upgrade shim", async () => {
+        const res = await request(app)
+            .post("/api/import")
+            .send({ datamodelVersion: 3, threats: {} })
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(400);
+    });
+
     it("should import a bigger project", async () => {
         const res = await request(app)
             .post("/api/import")
