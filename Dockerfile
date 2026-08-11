@@ -14,9 +14,6 @@ ENV NODE_ENV=production
 ENV API_URI=""
 ENV VITE_API_URI=$API_URI
 
-ARG APP_VERSION=""
-ENV VITE_APP_VERSION=$APP_VERSION
-
 WORKDIR /builder
 
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
@@ -26,6 +23,9 @@ RUN pnpm fetch --filter "..../${FRONTEND_DIR}"
 COPY . .
 
 RUN pnpm -r --filter "..../${FRONTEND_DIR}" install --frozen-lockfile
+
+ARG APP_VERSION=""
+ENV VITE_APP_VERSION=$APP_VERSION
 RUN pnpm -r --filter "..../${FRONTEND_DIR}" run build
 
 
