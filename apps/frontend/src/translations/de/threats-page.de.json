@@ -19,5 +19,10 @@
   "cannotDeleteOnlyThreat": "Sie können die einzige Bedrohung '{{ threatName }}' nicht löschen.",
   "probability": "EW",
   "heading": "Bedrohungen",
-  "noThreatsFound": "Keine Bedrohungen gefunden"
+  "noThreatsFound": "Keine Bedrohungen gefunden",
+  "actions": "Aktionen",
+  "filterAll": "Alle",
+  "noChildThreats": "Keine Bedrohungen zu dieser generischen Bedrohung.",
+  "childThreatsCount_one": "{{count}} Bedrohung",
+  "childThreatsCount_other": "{{count}} Bedrohungen"
 }

@@ -20,5 +20,10 @@
   "deleteMessage": "Do you really want to delete the threat '{{ threatName }}'?",
   "cannotDeleteOnlyThreat": "You cannot delete the only threat '{{ threatName }}'.",
   "noThreatsFound": "No Threats found",
-  "heading": "Threats"
+  "heading": "Threats",
+  "actions": "Actions",
+  "filterAll": "All",
+  "noChildThreats": "No threats for this generic threat.",
+  "childThreatsCount_one": "{{count}} threat",
+  "childThreatsCount_other": "{{count}} threats"
 }
