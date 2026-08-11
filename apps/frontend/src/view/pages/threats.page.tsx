@@ -578,6 +578,10 @@ const ThreatsPageBody = () => {
                         }}
                         getRowClassName={(params) => {
                             const row = params.row as ThreatsGridRow;
+                            // Finalized / out-of-scope threats are visually de-emphasised as a hint,
+                            // but nothing is actually blocked — the status and the action buttons stay
+                            // at full opacity (see the per-cell overrides below) so they remain
+                            // clearly readable and usable.
                             if (
                                 row.rowType === "threat" &&
                                 (row.threat.status === THREAT_STATUSES.FINALIZED ||
@@ -597,7 +601,10 @@ const ThreatsPageBody = () => {
                             "& .MuiDataGrid-columnHeader:focus": { outline: "none" },
                             "& .MuiDataGrid-columnHeader": { padding: "8px 16px" },
                             "& .MuiDataGrid-cell": { cursor: "pointer" },
-                            "& .threats-grid--dimmed": { opacity: 0.6 },
+                            // Dim per cell (not per row) so the exemptions below can win.
+                            "& .threats-grid--dimmed .MuiDataGrid-cell": { opacity: 0.6 },
+                            "& .threats-grid--dimmed .MuiDataGrid-cell[data-field='status']": { opacity: 1 },
+                            "& .threats-grid--dimmed .MuiDataGrid-cell[data-field='actions']": { opacity: 1 },
                         }}
                         initialState={{
                             pagination: { paginationModel: { pageSize: 25, page: 0 } },
