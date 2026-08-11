@@ -7,5 +7,7 @@
     "OWNER": "Owner",
     "EDITOR": "Editor",
     "VIEWER": "Viewer"
-  }
+  },
+  "actions": "Actions",
+  "noMembersFound": "No Members found"
 }

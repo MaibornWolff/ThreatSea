@@ -6,5 +6,7 @@
     "OWNER": "Besitz",
     "EDITOR": "Bearbeiten",
     "VIEWER": "Beobachten"
-  }
+  },
+  "actions": "Aktionen",
+  "noMembersFound": "Keine Teilnehmer gefunden"
 }
