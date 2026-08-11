@@ -54,6 +54,15 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
         void loadGenericThreats();
     }, [loadGenericThreats]);
 
+    const setAllGenericThreatsExpanded = useCallback(
+        (expanded: boolean) => {
+            setExpandedGenericThreatIds(
+                expanded ? Object.fromEntries(genericThreats.map((genericThreat) => [genericThreat.id, true])) : {}
+            );
+        },
+        [genericThreats]
+    );
+
     const toggleGenericThreat = useCallback(
         (genericThreatId: number) => {
             const shouldExpand = !expandedGenericThreatIds[genericThreatId];
@@ -102,5 +111,6 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
         expandedGenericThreatIds,
         threatsByGenericThreatId,
         toggleGenericThreat,
+        setAllGenericThreatsExpanded,
     };
 };
