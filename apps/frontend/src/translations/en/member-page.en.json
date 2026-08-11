@@ -3,6 +3,9 @@
   "participant": "Participant",
   "addMemberBtn": "Add Member",
   "title": "Title",
+  "actions": "Actions",
+  "noMembersFound": "No Members found",
+  "deleteMember": "Remove Member",
   "userRoles": {
     "OWNER": "Owner",
     "EDITOR": "Editor",
