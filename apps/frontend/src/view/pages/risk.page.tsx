@@ -251,7 +251,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
     const handleEditThreat = (threatIndex: number, threat: ThreatWithMetrics | undefined) => {
         setSelectedThreat(threatIndex);
         if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
-            navigate(`/projects/${projectId}/risk/threats/edit`, {
+            navigate(`/projects/${projectId}/risk/threats/edit?threatId=${threat?.id ?? ""}`, {
                 state: {
                     threat,
                 },
