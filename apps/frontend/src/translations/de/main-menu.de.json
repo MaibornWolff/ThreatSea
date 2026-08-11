@@ -7,6 +7,7 @@
   "about": "Über ThreatSea",
   "aboutDialog": {
     "license": "Lizenz",
-    "repository": "Quellcode auf GitHub"
+    "repository": "Quellcode auf GitHub",
+    "close": "Schließen"
   }
 }

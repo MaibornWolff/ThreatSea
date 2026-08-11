@@ -8,6 +8,7 @@
   "about": "About ThreatSea",
   "aboutDialog": {
     "license": "License",
-    "repository": "Source code on GitHub"
+    "repository": "Source code on GitHub",
+    "close": "Close"
   }
 }

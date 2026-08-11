@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { translationUtil } from "#utils/translations.ts";
@@ -18,6 +18,8 @@ describe("AboutDialog", () => {
             name: translationUtil.t("aboutDialog.repository", { ns: "mainMenu" }),
         });
         expect(repoLink).toHaveAttribute("href", "https://github.com/MaibornWolff/ThreatSea");
+        // The glyph is decorative — it must not leak into the link's accessible name asserted above.
+        expect(within(repoLink).getByTestId("GitHubIcon")).toBeInTheDocument();
     });
 
     it("renders nothing when closed", () => {
@@ -31,7 +33,9 @@ describe("AboutDialog", () => {
         const onClose = vi.fn();
         renderWithProviders(<AboutDialog open onClose={onClose} />);
 
-        await user.click(screen.getByRole("button", { name: translationUtil.t("cancelBtn", { ns: "common" }) }));
+        await user.click(
+            screen.getByRole("button", { name: translationUtil.t("aboutDialog.close", { ns: "mainMenu" }) })
+        );
 
         expect(onClose).toHaveBeenCalledTimes(1);
     });

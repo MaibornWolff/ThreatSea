@@ -1,3 +1,4 @@
+import GitHub from "@mui/icons-material/GitHub";
 import { Box, DialogActions, DialogTitle, Link, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import logo from "#images/threatsealogo-dez.png";
@@ -27,13 +28,19 @@ export const AboutDialog = ({ open, onClose }: AboutDialogProps) => {
                 <DialogTitle sx={{ padding: 0 }}>ThreatSea</DialogTitle>
                 <Typography data-testid="about-dialog_version">{APP_VERSION}</Typography>
                 <Typography>{`${t("aboutDialog.license")}: BSD-3-Clause`}</Typography>
-                <Link href="https://github.com/MaibornWolff/ThreatSea" target="_blank" rel="noopener noreferrer">
+                <Link
+                    href="https://github.com/MaibornWolff/ThreatSea"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}
+                >
+                    <GitHub fontSize="small" />
                     {t("aboutDialog.repository")}
                 </Link>
             </Box>
             <DialogActions sx={{ justifyContent: "center", paddingTop: 1.5, paddingBottom: 0 }}>
                 <Button data-testid="close-button" sx={{ marginRight: 0 }} onClick={onClose}>
-                    {t("cancelBtn")}
+                    {t("aboutDialog.close")}
                 </Button>
             </DialogActions>
         </Dialog>
