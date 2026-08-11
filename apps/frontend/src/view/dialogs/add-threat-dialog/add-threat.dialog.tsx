@@ -67,7 +67,7 @@ const AddThreatDialog = ({
         control,
         register,
         handleSubmit,
-        formState: { errors, isSubmitting },
+        formState: { errors, isSubmitting, isDirty },
     } = useForm<ThreatFormValues>({
         defaultValues: {
             ...threat,
@@ -362,7 +362,7 @@ const AddThreatDialog = ({
                             color="success"
                             sx={{ marginRight: 0 }}
                             data-testid="EditEssetsSave"
-                            disabled={isSubmitting || !checkUserRole(userRole, USER_ROLES.EDITOR)}
+                            disabled={isSubmitting || !isDirty || !checkUserRole(userRole, USER_ROLES.EDITOR)}
                         >
                             {t("saveBtn")}
                         </Button>
@@ -374,7 +374,7 @@ const AddThreatDialog = ({
                             sx={{ marginRight: 0 }}
                             id="submitBtn"
                             data-testid="EditThreatSave"
-                            disabled={isSubmitting || !checkUserRole(userRole, USER_ROLES.EDITOR)}
+                            disabled={isSubmitting || !isDirty || !checkUserRole(userRole, USER_ROLES.EDITOR)}
                         >
                             {t("saveBtn")}
                         </Button>

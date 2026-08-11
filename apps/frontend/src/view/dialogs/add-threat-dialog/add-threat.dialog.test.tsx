@@ -1,6 +1,13 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import AddThreatDialog, { type ThreatDialogHostRoute } from "./add-threat.dialog";
+
+// The save button only enables once the form is dirty; typing into the name
+// field is the least intrusive way to mark it changed in these tests.
+const makeDirty = async (user: ReturnType<typeof userEvent.setup>) => {
+    const nameInput = within(screen.getByTestId("EditThreatName")).getByRole("textbox");
+    await user.type(nameInput, " edit");
+};
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import {
     createAsset,
@@ -222,11 +229,33 @@ describe("AddThreatDialog — Save", () => {
         mockUseThreatMeasuresList();
     });
 
+    it("disables save while the form is untouched and enables it once a field changes", async () => {
+        const { user } = setup(USER_ROLES.EDITOR, "threats");
+
+        expect(screen.getByTestId("EditThreatSave")).toBeDisabled();
+
+        await makeDirty(user);
+
+        expect(screen.getByTestId("EditThreatSave")).toBeEnabled();
+    });
+
+    it("enables save when only the status changes", async () => {
+        const { user } = setup(USER_ROLES.EDITOR, "threats", undefined, { status: THREAT_STATUSES.NEW });
+
+        expect(screen.getByTestId("EditThreatSave")).toBeDisabled();
+
+        await user.click(screen.getByRole("combobox"));
+        await user.click(screen.getByRole("option", { name: "Finalized" }));
+
+        expect(screen.getByTestId("EditThreatSave")).toBeEnabled();
+    });
+
     it("persists the child threat, notifies the host, and closes on success", async () => {
         vi.mocked(ThreatsAPI.updateThreat).mockResolvedValue(createThreat({ id: 42 }));
         const onSaved = vi.fn();
         const { user } = setup(USER_ROLES.EDITOR, "threats", onSaved);
 
+        await makeDirty(user);
         await user.click(screen.getByTestId("EditThreatSave"));
 
         await waitFor(() => expect(navigate).toHaveBeenCalledWith(-1));
@@ -240,6 +269,7 @@ describe("AddThreatDialog — Save", () => {
         vi.mocked(ThreatsAPI.updateThreat).mockResolvedValue(createThreat({ id: 42 }));
         const { user } = setup(USER_ROLES.EDITOR, "threats", undefined, { status: THREAT_STATUSES.NEW });
 
+        await makeDirty(user);
         await user.click(screen.getByTestId("EditThreatSave"));
 
         await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled());
@@ -252,6 +282,7 @@ describe("AddThreatDialog — Save", () => {
         vi.mocked(ThreatsAPI.updateThreat).mockResolvedValue(createThreat({ id: 42 }));
         const { user } = setup(USER_ROLES.EDITOR, "threats", undefined, { status: THREAT_STATUSES.FINALIZED });
 
+        await makeDirty(user);
         await user.click(screen.getByTestId("EditThreatSave"));
 
         await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled());
@@ -264,6 +295,7 @@ describe("AddThreatDialog — Save", () => {
         vi.mocked(ThreatsAPI.updateThreat).mockResolvedValue(createThreat({ id: 42 }));
         const { user } = setup(USER_ROLES.EDITOR, "threats", undefined, { status: THREAT_STATUSES.OUTOFSCOPE });
 
+        await makeDirty(user);
         await user.click(screen.getByTestId("EditThreatSave"));
 
         await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled());
@@ -277,6 +309,7 @@ describe("AddThreatDialog — Save", () => {
         const onSaved = vi.fn();
         const { user } = setup(USER_ROLES.EDITOR, "threats", onSaved);
 
+        await makeDirty(user);
         await user.click(screen.getByTestId("EditThreatSave"));
 
         await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled());
