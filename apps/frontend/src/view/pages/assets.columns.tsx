@@ -1,11 +1,11 @@
 import Delete from "@mui/icons-material/Delete";
-import ExpandMore from "@mui/icons-material/ExpandMore";
-import { Box, Collapse, IconButton as MuiIconButton, TextField, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { type GridColDef, type GridRenderCellParams } from "@mui/x-data-grid";
 import type { TFunction } from "i18next";
 import type { Asset } from "#api/types/asset.types.ts";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { IconButton } from "#view/components/icon-button.component.tsx";
+import { ColumnFilterHeader } from "#view/components/column-filter-header.component.tsx";
 
 interface ColumnConfig {
     t: TFunction;
@@ -16,46 +16,6 @@ interface ColumnConfig {
     toggleFilterExpanded: (field: string) => void;
     handleDeleteAsset: (asset: Asset) => void;
 }
-
-const createFilterHeader = (
-    field: string,
-    label: string,
-    columnFilters: Record<string, string>,
-    handleFilterChange: (field: string, value: string) => void,
-    expandedFilters: Record<string, boolean>,
-    toggleFilterExpanded: (field: string) => void
-) => (
-    <Box sx={{ width: "100%" }}>
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 0.5 }}>
-            <Typography sx={{ fontWeight: "bold", fontSize: "0.875rem", textAlign: "center" }}>{label}</Typography>
-            <MuiIconButton
-                size="small"
-                onClick={(e) => {
-                    e.stopPropagation();
-                    toggleFilterExpanded(field);
-                }}
-                sx={{
-                    ml: 0.5,
-                    padding: 0.25,
-                    transform: expandedFilters[field] ? "rotate(180deg)" : "rotate(0deg)",
-                    transition: "transform 0.2s",
-                }}
-            >
-                <ExpandMore sx={{ fontSize: 18 }} />
-            </MuiIconButton>
-        </Box>
-        <Collapse in={expandedFilters[field] ?? false} timeout={200}>
-            <TextField
-                size="small"
-                placeholder="Filter..."
-                value={columnFilters[field] || ""}
-                onChange={(e) => handleFilterChange(field, e.target.value)}
-                onClick={(e) => e.stopPropagation()}
-                sx={{ width: "100%" }}
-            />
-        </Collapse>
-    </Box>
-);
 
 export const createAssetsColumns = ({
     t,
@@ -73,15 +33,16 @@ export const createAssetsColumns = ({
         minWidth: 200,
         align: "left",
         headerAlign: "center",
-        renderHeader: () =>
-            createFilterHeader(
-                "name",
-                t("name"),
-                columnFilters,
-                handleFilterChange,
-                expandedFilters,
-                toggleFilterExpanded
-            ),
+        renderHeader: () => (
+            <ColumnFilterHeader
+                field="name"
+                label={t("name")}
+                columnFilters={columnFilters}
+                onFilterChange={handleFilterChange}
+                expandedFilters={expandedFilters}
+                onToggleExpanded={toggleFilterExpanded}
+            />
+        ),
     },
     {
         field: "confidentiality",
@@ -91,15 +52,16 @@ export const createAssetsColumns = ({
         align: "center",
         headerAlign: "center",
         type: "number",
-        renderHeader: () =>
-            createFilterHeader(
-                "confidentiality",
-                t("confidentiality"),
-                columnFilters,
-                handleFilterChange,
-                expandedFilters,
-                toggleFilterExpanded
-            ),
+        renderHeader: () => (
+            <ColumnFilterHeader
+                field="confidentiality"
+                label={t("confidentiality")}
+                columnFilters={columnFilters}
+                onFilterChange={handleFilterChange}
+                expandedFilters={expandedFilters}
+                onToggleExpanded={toggleFilterExpanded}
+            />
+        ),
     },
     {
         field: "integrity",
@@ -109,15 +71,16 @@ export const createAssetsColumns = ({
         align: "center",
         headerAlign: "center",
         type: "number",
-        renderHeader: () =>
-            createFilterHeader(
-                "integrity",
-                t("integrity"),
-                columnFilters,
-                handleFilterChange,
-                expandedFilters,
-                toggleFilterExpanded
-            ),
+        renderHeader: () => (
+            <ColumnFilterHeader
+                field="integrity"
+                label={t("integrity")}
+                columnFilters={columnFilters}
+                onFilterChange={handleFilterChange}
+                expandedFilters={expandedFilters}
+                onToggleExpanded={toggleFilterExpanded}
+            />
+        ),
     },
     {
         field: "availability",
@@ -127,15 +90,16 @@ export const createAssetsColumns = ({
         align: "center",
         headerAlign: "center",
         type: "number",
-        renderHeader: () =>
-            createFilterHeader(
-                "availability",
-                t("availability"),
-                columnFilters,
-                handleFilterChange,
-                expandedFilters,
-                toggleFilterExpanded
-            ),
+        renderHeader: () => (
+            <ColumnFilterHeader
+                field="availability"
+                label={t("availability")}
+                columnFilters={columnFilters}
+                onFilterChange={handleFilterChange}
+                expandedFilters={expandedFilters}
+                onToggleExpanded={toggleFilterExpanded}
+            />
+        ),
     },
     {
         field: "createdAt",
@@ -144,15 +108,16 @@ export const createAssetsColumns = ({
         minWidth: 180,
         align: "center",
         headerAlign: "center",
-        renderHeader: () =>
-            createFilterHeader(
-                "createdAt",
-                t("creationDate"),
-                columnFilters,
-                handleFilterChange,
-                expandedFilters,
-                toggleFilterExpanded
-            ),
+        renderHeader: () => (
+            <ColumnFilterHeader
+                field="createdAt"
+                label={t("creationDate")}
+                columnFilters={columnFilters}
+                onFilterChange={handleFilterChange}
+                expandedFilters={expandedFilters}
+                onToggleExpanded={toggleFilterExpanded}
+            />
+        ),
         valueGetter: (value: Date | string) => {
             const date = value instanceof Date ? value : new Date(value);
             return date.toISOString().split("T")[0];
