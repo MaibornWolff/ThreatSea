@@ -215,14 +215,14 @@ describe("createThreatsColumns — expand toggle", () => {
     it("toggles the parent when its chevron is clicked", async () => {
         const { byField, handlers } = columnByField();
         renderCell(byField["name"], genericRow);
-        await userEvent.click(screen.getByRole("button", { name: "Expand" }));
+        await userEvent.click(screen.getByRole("button", { name: "expand" }));
         expect(handlers.onToggleGenericThreat).toHaveBeenCalledWith(7);
     });
 
     it("labels the chevron Collapse when the parent is expanded", () => {
         const { byField } = columnByField();
         renderCell(byField["name"], { ...genericRow, isExpanded: true });
-        expect(screen.getByRole("button", { name: "Collapse" })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: "collapse" })).toBeInTheDocument();
     });
 });
 

@@ -108,7 +108,7 @@ export const createThreatsColumns = ({
                 return (
                     <Box sx={{ display: "flex", alignItems: "center", height: "100%", width: "100%", minWidth: 0 }}>
                         <IconButton
-                            title={row.isExpanded ? "Collapse" : "Expand"}
+                            title={row.isExpanded ? t("collapse") : t("expand")}
                             onClick={(event) => {
                                 event.stopPropagation();
                                 onToggleGenericThreat(row.genericThreat.id);
