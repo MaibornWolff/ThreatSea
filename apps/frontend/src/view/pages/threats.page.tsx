@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { ThreatsActions } from "#application/actions/threats.actions.ts";
+import { useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { useEditor } from "#application/hooks/use-editor.hook.ts";
 import {
@@ -70,6 +71,19 @@ const ThreatsGridRowSlot = (props: GridRowProps) => {
  * @component
  * @category Pages
  */
+const DEFAULT_COLUMN_VISIBILITY: GridColumnVisibilityModel = {
+    name: true,
+    assets: true,
+    componentName: true,
+    pointOfAttack: true,
+    attacker: true,
+    probability: true,
+    damage: true,
+    risk: true,
+    status: true,
+    actions: true,
+};
+
 const ThreatsPageBody = () => {
     const { projectId: projectIdParam = "0" } = useParams<{ projectId?: string }>();
     const projectId = Number.parseInt(projectIdParam, 10);
@@ -234,45 +248,15 @@ const ThreatsPageBody = () => {
         [threatsByGenericThreatId, openConfirm, t, dispatch, projectId, loadGenericThreats]
     );
 
-    const SESSION_STORAGE_KEY = `threats-column-visibility-${projectId}`;
-
-    const getInitialColumnVisibility = (): GridColumnVisibilityModel => {
-        const stored = sessionStorage.getItem(SESSION_STORAGE_KEY);
-        if (stored) {
-            try {
-                return JSON.parse(stored);
-            } catch {
-                // Fall through to default
-            }
-        }
-        return {
-            name: true,
-            assets: true,
-            componentName: true,
-            pointOfAttack: true,
-            attacker: true,
-            probability: true,
-            damage: true,
-            risk: true,
-            status: true,
-            actions: true,
-        };
-    };
-
-    const [columnVisibility, setColumnVisibility] = useState<GridColumnVisibilityModel>(getInitialColumnVisibility);
+    const { columnVisibility, toggleColumnVisibility } = useColumnVisibility(
+        `threats-column-visibility-${projectId}`,
+        DEFAULT_COLUMN_VISIBILITY
+    );
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
     const handleClose = () => setAnchorEl(null);
-
-    const toggleColumnVisibility = (field: string) => {
-        setColumnVisibility((prev) => {
-            const newVisibility = { ...prev, [field]: !prev[field] };
-            sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(newVisibility));
-            return newVisibility;
-        });
-    };
 
     const columnLabels: Record<string, string> = {
         name: t("name"),
