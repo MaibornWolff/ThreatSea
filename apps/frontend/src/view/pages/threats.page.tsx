@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { ThreatsActions } from "#application/actions/threats.actions.ts";
+import { useColumnFilters } from "#application/hooks/use-column-filters.hook.ts";
 import { useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { useEditor } from "#application/hooks/use-editor.hook.ts";
@@ -271,28 +272,20 @@ const ThreatsPageBody = () => {
         actions: t("actions"),
     };
 
-    const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
-    const [expandedFilters, setExpandedFilters] = useState<Record<string, boolean>>({});
-
-    const handleFilterChange = useCallback((field: string, value: string) => {
-        setColumnFilters((prev) => ({ ...prev, [field]: value }));
-    }, []);
+    const { columnFilters, expandedFilters, handleFilterChange, toggleFilterExpanded, clearColumnFilters } =
+        useColumnFilters();
 
     const hasActiveFilter =
         genericThreatSearchValue.trim() !== "" || Object.values(columnFilters).some((value) => value.trim() !== "");
 
     const clearFilters = useCallback(() => {
-        setColumnFilters({});
+        clearColumnFilters();
         setGenericThreatSearchValue("");
-    }, [setGenericThreatSearchValue]);
+    }, [clearColumnFilters, setGenericThreatSearchValue]);
 
     const allThreatsExpanded =
         genericThreats.length > 0 &&
         genericThreats.every((genericThreat) => expandedGenericThreatIds[genericThreat.id]);
-
-    const toggleFilterExpanded = useCallback((field: string) => {
-        setExpandedFilters((prev) => ({ ...prev, [field]: !prev[field] }));
-    }, []);
 
     // The grid's own filtering would treat parent and child rows independently and
     // tear the hierarchy apart, so filters are applied here while building the rows.
