@@ -7,9 +7,16 @@ import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { ColumnFilterHeader } from "#view/components/column-filter-header.component.tsx";
 
-export const formatCreationDate = (value: Date | string): string => {
+export const formatCreationDate = (value: Date | string | null | undefined): string => {
+    if (value == null) {
+        return "";
+    }
     const date = value instanceof Date ? value : new Date(value);
-    return date.toISOString().slice(0, 10);
+    if (Number.isNaN(date.getTime())) {
+        return "";
+    }
+    // Local calendar day in YYYY-MM-DD (toISOString would shift to the UTC day).
+    return date.toLocaleDateString("sv-SE");
 };
 
 interface ColumnConfig {

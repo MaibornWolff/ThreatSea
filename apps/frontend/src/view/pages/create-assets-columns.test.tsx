@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import type { TFunction } from "i18next";
 import type { GridColDef } from "@mui/x-data-grid";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
-import { createAssetsColumns } from "./create-assets-columns";
+import { createAssetsColumns, formatCreationDate } from "./create-assets-columns";
 
 const identityT = ((key: string) => key) as unknown as TFunction;
 
@@ -149,12 +149,19 @@ describe("createAssetsColumns — filter header behavior", () => {
 });
 
 describe("createAssetsColumns — createdAt valueGetter", () => {
-    it("formats Date values to YYYY-MM-DD for stable sorting/filtering", () => {
+    it("formats dates to local-day YYYY-MM-DD for stable sorting/filtering", () => {
         const { columns } = buildColumns();
         const col = columns.find((c) => c.field === "createdAt")!;
         const valueGetter = col.valueGetter as unknown as (value: Date | string) => string;
 
+        // Midday UTC timestamps fall on the same local day in any test timezone.
         expect(valueGetter(new Date("2025-04-08T13:52:30Z"))).toBe("2025-04-08");
         expect(valueGetter("2023-11-27T12:14:16Z")).toBe("2023-11-27");
+    });
+
+    it("returns an empty string for missing or unparsable values", () => {
+        expect(formatCreationDate(null)).toBe("");
+        expect(formatCreationDate(undefined)).toBe("");
+        expect(formatCreationDate("not-a-date")).toBe("");
     });
 });
