@@ -198,6 +198,8 @@ test.describe("Threats Page Tests", () => {
         await expect(pg.threatListEntries).toHaveCount(1);
 
         await pg.deleteThreatButton(pg.threatListEntry(ONLY_THREAT)).click();
+        // The guard dialog (not the regular delete confirmation) must be the one showing.
+        await expect(page.getByText(`You cannot delete the only threat '${ONLY_THREAT}'.`)).toBeVisible();
         // The guard offers no delete action, so accepting the dialog must leave the threat in place.
         await pg.confirmButton.click();
 
