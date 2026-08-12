@@ -173,25 +173,23 @@ const MemberPageBody = () => {
             const isNotAloneOwner = checkIsOwnerNotAlone(member);
 
             if (isNotAloneOwner) {
-                message.preHighlightText = "Member: ";
-                message.afterHighlightText = " will be removed, are you sure?";
+                message.preHighlightText = t("deleteMemberMessagePre");
+                message.afterHighlightText = t("deleteMemberMessagePost");
 
-                acceptText = "Delete";
+                acceptText = t("delete");
                 onAccept = onConfirmDeleteMember;
                 acceptColor = "error";
                 cancelText = t("cancel");
                 ownUserId = user.userId;
             } else {
                 if (members.length > 1) {
-                    message.preHighlightText = "You can't remove ";
-                    message.afterHighlightText = ` because this user is the only owner left
-                    in the project. Declare a new owner first.`;
+                    message.preHighlightText = t("onlyOwnerLeftPre");
+                    message.afterHighlightText = t("onlyOwnerLeftPost");
                 } else {
-                    message.preHighlightText = "Can't remove ";
-                    message.afterHighlightText = ` because the project will be empty.
-                    Deletion of a project can be done under the projects page.`;
+                    message.preHighlightText = t("projectWouldBeEmptyPre");
+                    message.afterHighlightText = t("projectWouldBeEmptyPost");
                 }
-                acceptText = "Ok";
+                acceptText = t("ok");
                 acceptColor = "warning";
                 cancelText = null;
                 ownUserId = -1;
@@ -207,7 +205,7 @@ const MemberPageBody = () => {
                     name: member.name,
                 },
                 message: message,
-                acceptText: t(acceptText ?? "Ok"),
+                acceptText: acceptText ?? t("ok"),
                 cancelText: cancelText ?? null,
                 onAccept: onAccept ?? null,
                 acceptColor: acceptColor ?? "error",

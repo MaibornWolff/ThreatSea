@@ -8,5 +8,11 @@
     "VIEWER": "Beobachten"
   },
   "actions": "Aktionen",
-  "noMembersFound": "Keine Teilnehmer gefunden"
+  "noMembersFound": "Keine Teilnehmer gefunden",
+  "deleteMemberMessagePre": "Teilnehmer: ",
+  "deleteMemberMessagePost": " wird entfernt. Sind Sie sicher?",
+  "onlyOwnerLeftPre": "Sie können ",
+  "onlyOwnerLeftPost": " nicht entfernen, da dies der einzige verbleibende Besitzer im Projekt ist. Bestimmen Sie zuerst einen neuen Besitzer.",
+  "projectWouldBeEmptyPre": "Sie können ",
+  "projectWouldBeEmptyPost": " nicht entfernen, da das Projekt sonst leer wäre. Ein Projekt kann auf der Projekte-Seite gelöscht werden."
 }
