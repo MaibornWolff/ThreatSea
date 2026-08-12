@@ -24,9 +24,18 @@ import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 mockUseConfirm();
 mockUseThreatMeasuresList();
 
-vi.mock("#api/threats.api.ts", () => ({
-    ThreatsAPI: { updateThreat: vi.fn() },
-}));
+// Spy on the real module instead of vi.mock: with `isolate: false` an earlier
+// test file may have already loaded threats.actions.ts (via the store's error
+// middleware), whose thunk closes over the real ThreatsAPI — a module mock
+// registered here would not reach that cached closure, but a spy on the shared
+// module object does.
+const updateThreatSpy = vi.spyOn(ThreatsAPI, "updateThreat");
+beforeEach(() => {
+    updateThreatSpy.mockResolvedValue(createThreat({ id: 42 }));
+});
+afterAll(() => {
+    updateThreatSpy.mockRestore();
+});
 
 const navigate = vi.fn();
 vi.mock("react-router", async (importOriginal) => {
@@ -286,7 +295,7 @@ describe("AddThreatDialog — Save", () => {
         await makeDirty(user);
         await user.click(screen.getByTestId("EditThreatSave"));
 
-        await waitFor(() => expect(navigate).toHaveBeenCalledWith(-1), { timeout: 10000 });
+        await waitFor(() => expect(navigate).toHaveBeenCalledWith(-1));
         expect(ThreatsAPI.updateThreat).toHaveBeenCalledWith(
             expect.objectContaining({ id: 42, projectId: 7, status: THREAT_STATUSES.IN_PROGRESS })
         );
@@ -300,7 +309,7 @@ describe("AddThreatDialog — Save", () => {
         await makeDirty(user);
         await user.click(screen.getByTestId("EditThreatSave"));
 
-        await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled(), { timeout: 10000 });
+        await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled());
         expect(ThreatsAPI.updateThreat).toHaveBeenCalledWith(
             expect.objectContaining({ id: 42, status: THREAT_STATUSES.IN_PROGRESS })
         );
@@ -313,7 +322,7 @@ describe("AddThreatDialog — Save", () => {
         await makeDirty(user);
         await user.click(screen.getByTestId("EditThreatSave"));
 
-        await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled(), { timeout: 10000 });
+        await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled());
         expect(ThreatsAPI.updateThreat).toHaveBeenCalledWith(
             expect.objectContaining({ id: 42, status: THREAT_STATUSES.FINALIZED })
         );
@@ -326,7 +335,7 @@ describe("AddThreatDialog — Save", () => {
         await makeDirty(user);
         await user.click(screen.getByTestId("EditThreatSave"));
 
-        await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled(), { timeout: 10000 });
+        await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled());
         expect(ThreatsAPI.updateThreat).toHaveBeenCalledWith(
             expect.objectContaining({ id: 42, status: THREAT_STATUSES.OUTOFSCOPE })
         );
@@ -340,7 +349,7 @@ describe("AddThreatDialog — Save", () => {
         await makeDirty(user);
         await user.click(screen.getByTestId("EditThreatSave"));
 
-        await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled(), { timeout: 10000 });
+        await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled());
         expect(onSaved).not.toHaveBeenCalled();
         expect(navigate).not.toHaveBeenCalled();
     });
