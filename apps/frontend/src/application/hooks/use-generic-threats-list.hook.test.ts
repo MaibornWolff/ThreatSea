@@ -49,6 +49,27 @@ describe("useGenericThreatsList", () => {
         expect(result.current.expandedGenericThreatIds).toEqual({});
     });
 
+    it("scopes expand/collapse-all to the parents matching the active search", async () => {
+        vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedChildren).mockResolvedValue([
+            searchable(1, "ADMINISTRATORS", "DATA_STORAGE_INFRASTRUCTURE"),
+            searchable(2, "SYSTEM_USERS", "USER_INTERFACE"),
+        ]);
+        const { result } = renderHook(() => useGenericThreatsList({ projectId: 1 }), { wrapper: i18nWrapper });
+        await waitFor(() => expect(result.current.genericThreats).toHaveLength(2));
+
+        // Parent 2 is expanded manually, then hidden by the search.
+        act(() => result.current.toggleGenericThreat(2));
+        act(() => result.current.setSearchValue("threat-1"));
+        await waitFor(() => expect(result.current.genericThreats).toHaveLength(1));
+
+        act(() => result.current.setAllGenericThreatsExpanded(true));
+        expect(result.current.expandedGenericThreatIds).toEqual({ 1: true, 2: true });
+
+        // Collapse-all only affects the visible parent; the hidden one keeps its state.
+        act(() => result.current.setAllGenericThreatsExpanded(false));
+        expect(result.current.expandedGenericThreatIds).toEqual({ 2: true });
+    });
+
     it("keeps the expansion map empty when no generic threats are loaded", async () => {
         vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedChildren).mockResolvedValue([]);
         const { result } = renderHook(() => useGenericThreatsList({ projectId: 1 }));
