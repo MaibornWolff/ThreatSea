@@ -95,11 +95,6 @@ export const createMembersColumns = ({
                   filterable: false,
                   align: "right" as const,
                   headerAlign: "center" as const,
-                  renderHeader: () => (
-                      <Box sx={{ width: "100%" }}>
-                          <Typography sx={{ fontWeight: "bold", fontSize: "0.875rem", textAlign: "center" }} />
-                      </Box>
-                  ),
                   renderCell: (params: GridRenderCellParams<Member>) => (
                       <Box
                           sx={{

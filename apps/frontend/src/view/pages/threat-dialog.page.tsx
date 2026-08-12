@@ -50,8 +50,13 @@ const ThreatDialogPage = ({ onSaved }: ThreatDialogPageProps) => {
         if (stateThreat || !threatIdParam) {
             return;
         }
-        let cancelled = false;
         const threatId = Number(threatIdParam);
+        // A malformed id can never match a threat — redirect without issuing the request.
+        if (!Number.isInteger(threatId)) {
+            setFetchFailed(true);
+            return;
+        }
+        let cancelled = false;
         GenericThreatsAPI.getGenericThreatsWithExtendedChildren({ projectId: Number(projectId) })
             .then((genericThreats) => {
                 if (cancelled) {

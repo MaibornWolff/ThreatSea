@@ -1,5 +1,5 @@
 import Delete from "@mui/icons-material/Delete";
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import { type GridColDef, type GridRenderCellParams } from "@mui/x-data-grid";
 import type { TFunction } from "i18next";
 import type { Asset } from "#api/types/asset.types.ts";
@@ -142,11 +142,6 @@ export const createAssetsColumns = ({
                   filterable: false,
                   align: "right" as const,
                   headerAlign: "center" as const,
-                  renderHeader: () => (
-                      <Box sx={{ width: "100%" }}>
-                          <Typography sx={{ fontWeight: "bold", fontSize: "0.875rem", textAlign: "center" }} />
-                      </Box>
-                  ),
                   renderCell: (params: GridRenderCellParams<Asset>) => (
                       <Box
                           sx={{
