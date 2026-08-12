@@ -63,11 +63,10 @@ const AddThreatDialog = ({
     const formRef = useRef<HTMLFormElement | null>(null);
     const projectId = project.id;
     const threatId = threat.id;
-    // A threat under edit is never "new" — the dialog defaults (and the save
-    // transition) treat it as in progress unless it is already finalized/out of scope.
-    const isTerminalStatus =
-        threat?.status === THREAT_STATUSES.FINALIZED || threat?.status === THREAT_STATUSES.OUTOFSCOPE;
-    const initialStatus = isTerminalStatus ? threat.status : THREAT_STATUSES.IN_PROGRESS;
+    // Seed the form with the threat's real status so the Status select shows it accurately
+    // (a "new" threat displays as New). NEW stays non-selectable in the dropdown, and saving
+    // any non-terminal threat still advances it to IN_PROGRESS (see handleConfirmDialog).
+    const initialStatus = threat?.status ?? THREAT_STATUSES.NEW;
     const {
         control,
         register,

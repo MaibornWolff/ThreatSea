@@ -264,13 +264,14 @@ describe("AddThreatDialog — Save", () => {
         expect(screen.getByTestId("EditThreatSave")).toBeEnabled();
     });
 
-    it("does not offer 'New' as a selectable status and shows a new threat as In progress", async () => {
+    it("shows a new threat's real status but does not allow selecting 'New'", async () => {
         const { user } = setup(USER_ROLES.EDITOR, "threats", undefined, { status: THREAT_STATUSES.NEW });
 
-        // A threat being edited is never "new"; the dialog shows it as In progress.
-        expect(screen.getByRole("combobox")).toHaveTextContent("In progress");
+        // The select honestly reflects the threat's current status.
+        expect(screen.getByRole("combobox")).toHaveTextContent("New");
 
         await user.click(screen.getByRole("combobox"));
+        // "New" is shown in the closed select but is not offered as a dropdown option.
         expect(screen.queryByRole("option", { name: "New" })).not.toBeInTheDocument();
         expect(screen.getByRole("option", { name: "In progress" })).toBeInTheDocument();
         expect(screen.getByRole("option", { name: "Finalized" })).toBeInTheDocument();

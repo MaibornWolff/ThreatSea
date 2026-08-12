@@ -285,9 +285,14 @@ export const AddThreatMainTab = ({
                                     labelId="threat-status-label"
                                     label={t("status")}
                                     data-testid="ThreatStatusSelect"
+                                    // Render the current status in the closed select even when it has
+                                    // no matching option below (a "new" threat still shows as New).
+                                    renderValue={(status) => t(`statusList.${status}`)}
                                 >
-                                    {/* NEW is machine-assigned only; opening the dialog to edit a threat
-                                        already moves it to IN_PROGRESS on save, so it is never user-selectable. */}
+                                    {/* NEW is machine-assigned only, so it is not offered as an option:
+                                        a user can move a threat forward but never back to NEW. It is still
+                                        displayed via renderValue above, and saving a non-terminal threat
+                                        advances it to IN_PROGRESS (see handleConfirmDialog). */}
                                     {Object.values(THREAT_STATUSES)
                                         .filter((status) => status !== THREAT_STATUSES.NEW)
                                         .map((status) => (
