@@ -292,6 +292,20 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                                 onClickEditMeasure(params.row);
                             }
                         }}
+                        onCellKeyDown={(params, event) => {
+                            // Keyboard equivalent of the cell click; skip events coming from
+                            // interactive elements inside a cell (they handle Enter natively).
+                            if (event.key !== "Enter" && event.key !== " ") {
+                                return;
+                            }
+                            if ((event.target as HTMLElement).closest("button, a, input")) {
+                                return;
+                            }
+                            if (params.field !== "actions") {
+                                event.preventDefault();
+                                onClickEditMeasure(params.row);
+                            }
+                        }}
                         columnHeaderHeight={90}
                         columnVisibilityModel={columnVisibility}
                         sx={{

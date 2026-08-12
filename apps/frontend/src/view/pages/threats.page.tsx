@@ -603,6 +603,25 @@ const ThreatsPageBody = () => {
                                 onClickEditThreat(event as unknown as React.MouseEvent<HTMLElement>, row.threat);
                             }
                         }}
+                        onCellKeyDown={(params, event) => {
+                            // Keyboard equivalent of the cell click; skip events coming from
+                            // interactive elements inside a cell (they handle Enter natively —
+                            // acting here as well would double-trigger their action).
+                            if (event.key !== "Enter" && event.key !== " ") {
+                                return;
+                            }
+                            if ((event.target as HTMLElement).closest("button, a, input")) {
+                                return;
+                            }
+                            const row = params.row as ThreatsGridRow;
+                            if (row.rowType === "genericThreat") {
+                                event.preventDefault();
+                                toggleGenericThreat(row.genericThreat.id);
+                            } else if (row.rowType === "threat" && params.field !== "actions") {
+                                event.preventDefault();
+                                onClickEditThreat(event as unknown as React.MouseEvent<HTMLElement>, row.threat);
+                            }
+                        }}
                         getRowClassName={(params) => {
                             const row = params.row as ThreatsGridRow;
                             // Finalized / out-of-scope threats are visually de-emphasised as a hint,
