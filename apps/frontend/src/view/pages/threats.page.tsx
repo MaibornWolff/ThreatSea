@@ -137,10 +137,13 @@ const ThreatsPageBody = () => {
     const [assetAnchorEl, setAssetAnchorEl] = useState<HTMLElement | null>(null);
     const [currentAssetList, setCurrentAssetList] = useState<ExtendedThreat["assets"] | null>(null);
 
-    const handleAssetHover = useCallback((event: React.MouseEvent<HTMLElement>, assets: ExtendedThreat["assets"]) => {
-        setCurrentAssetList(assets);
-        setAssetAnchorEl(event.currentTarget);
-    }, []);
+    const handleAssetHover = useCallback(
+        (event: React.SyntheticEvent<HTMLElement>, assets: ExtendedThreat["assets"]) => {
+            setCurrentAssetList(assets);
+            setAssetAnchorEl(event.currentTarget);
+        },
+        []
+    );
 
     const handleAssetHoverEnd = useCallback(() => {
         setAssetAnchorEl(null);
