@@ -11,7 +11,9 @@ export const colorPrimitives = {
         blue900Pdf: "rgba(35, 60, 88, 1)",
         blue900Alpha10: "rgba(35, 60, 87, 0.1)",
         blue700: "rgba(79, 102, 132, 1)",
-        blue400: "rgba(59, 130, 200, 1)",
+        // 5.1:1 on white — the "New" status label renders at 14px, so WCAG AA
+        // requires at least 4.5:1.
+        blue400: "rgba(48, 113, 176, 1)",
         blue500Translucent: "rgba(24, 60, 87, 0.75)",
         blue500TranslucentDeep: "rgba(24, 60, 87, 0.9)",
         blue300: "rgba(173, 196, 230, 1)",
