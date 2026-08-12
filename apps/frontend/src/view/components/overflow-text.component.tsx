@@ -35,9 +35,22 @@ export const OverflowText = ({ text, testId, bold = false, align = "left", conta
         // Ignore transient 0×0 readings (e.g. while the grid re-lays out a cell) instead of
         // clearing the truncated state on them.
         const measure = () => {
-            if (element.clientWidth > 0) {
-                setIsTruncated(element.scrollWidth > element.clientWidth);
+            const boxWidth = element.getBoundingClientRect().width;
+            if (boxWidth <= 0) {
+                return;
             }
+            // `scrollWidth`/`clientWidth` are integer-rounded, so text that overflows its box by
+            // a fraction of a pixel — enough for the browser to still apply the CSS ellipsis —
+            // reads as scrollWidth === clientWidth and wrongly suppresses the tooltip. (Observed:
+            // an English "attacker" label at 145.03px in a 145px cell — 0.03px over, ellipsis
+            // shown, no tooltip.) Whether a label lands on that boundary depends on its exact
+            // width, so it varies by locale and column width. Compare the text's true fractional
+            // width (via a Range) against the fractional box width to catch the sub-pixel case;
+            // the tolerance only rejects float noise, since any real overflow triggers ellipsis.
+            const range = document.createRange();
+            range.selectNodeContents(element);
+            const textWidth = range.getBoundingClientRect().width;
+            setIsTruncated(textWidth - boxWidth > 0.01);
         };
         measure();
         // Re-measure on column resize so the tooltip appears/disappears as the fit changes.
