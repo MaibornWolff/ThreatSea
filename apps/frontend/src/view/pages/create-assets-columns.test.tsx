@@ -105,7 +105,7 @@ describe("createAssetsColumns — filter header behavior", () => {
         const { columns } = buildColumns({ expandedFilters: { name: false } });
         renderColumnHeader(columns.find((c) => c.field === "name"));
 
-        const collapseRoot = screen.getByPlaceholderText("Filter...").closest(".MuiCollapse-root");
+        const collapseRoot = screen.getByPlaceholderText("filterPlaceholder").closest(".MuiCollapse-root");
         expect(collapseRoot!.classList.contains("MuiCollapse-hidden")).toBe(true);
     });
 
@@ -113,7 +113,7 @@ describe("createAssetsColumns — filter header behavior", () => {
         const { columns } = buildColumns({ expandedFilters: { confidentiality: true } });
         renderColumnHeader(columns.find((c) => c.field === "confidentiality"));
 
-        const collapseRoot = screen.getByPlaceholderText("Filter...").closest(".MuiCollapse-root");
+        const collapseRoot = screen.getByPlaceholderText("filterPlaceholder").closest(".MuiCollapse-root");
         expect(collapseRoot!.classList.contains("MuiCollapse-entered")).toBe(true);
     });
 
@@ -131,7 +131,7 @@ describe("createAssetsColumns — filter header behavior", () => {
         const { columns, handlers } = buildColumns({ expandedFilters: { availability: true } });
         renderColumnHeader(columns.find((c) => c.field === "availability"));
 
-        await userEvent.type(screen.getByPlaceholderText("Filter..."), "ab");
+        await userEvent.type(screen.getByPlaceholderText("filterPlaceholder"), "ab");
 
         expect(handlers.handleFilterChange).toHaveBeenNthCalledWith(1, "availability", "a");
         expect(handlers.handleFilterChange).toHaveBeenNthCalledWith(2, "availability", "b");
@@ -144,7 +144,7 @@ describe("createAssetsColumns — filter header behavior", () => {
         });
         renderColumnHeader(columns.find((c) => c.field === "name"));
 
-        expect(screen.getByPlaceholderText("Filter...")).toHaveValue("user-id");
+        expect(screen.getByPlaceholderText("filterPlaceholder")).toHaveValue("user-id");
     });
 });
 

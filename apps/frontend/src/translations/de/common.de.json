@@ -46,6 +46,7 @@
   "description": "Beschreibung",
   "done": "Erledigt",
   "email": "Email Adresse",
+  "filterPlaceholder": "Filtern...",
   "fullExport": "Export der Assets, Bedrohungen und Maßnahmen",
   "heading": "Risiko Zeitstrahl",
   "language": "Sprache",

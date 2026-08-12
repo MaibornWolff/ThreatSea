@@ -97,7 +97,7 @@ describe("createMembersColumns — filter header behavior", () => {
         const { columns } = buildColumns({ expandedFilters: { email: false } });
         renderColumnHeader(columns.find((c) => c.field === "email"));
 
-        const collapseRoot = screen.getByPlaceholderText("Filter...").closest(".MuiCollapse-root");
+        const collapseRoot = screen.getByPlaceholderText("filterPlaceholder").closest(".MuiCollapse-root");
         expect(collapseRoot!.classList.contains("MuiCollapse-hidden")).toBe(true);
     });
 
@@ -105,7 +105,7 @@ describe("createMembersColumns — filter header behavior", () => {
         const { columns } = buildColumns({ expandedFilters: { email: true } });
         renderColumnHeader(columns.find((c) => c.field === "email"));
 
-        const collapseRoot = screen.getByPlaceholderText("Filter...").closest(".MuiCollapse-root");
+        const collapseRoot = screen.getByPlaceholderText("filterPlaceholder").closest(".MuiCollapse-root");
         expect(collapseRoot!.classList.contains("MuiCollapse-entered")).toBe(true);
     });
 
@@ -122,7 +122,7 @@ describe("createMembersColumns — filter header behavior", () => {
         const { columns, handlers } = buildColumns({ expandedFilters: { email: true } });
         renderColumnHeader(columns.find((c) => c.field === "email"));
 
-        await userEvent.type(screen.getByPlaceholderText("Filter..."), "ab");
+        await userEvent.type(screen.getByPlaceholderText("filterPlaceholder"), "ab");
 
         expect(handlers.handleFilterChange).toHaveBeenNthCalledWith(1, "email", "a");
         expect(handlers.handleFilterChange).toHaveBeenNthCalledWith(2, "email", "b");

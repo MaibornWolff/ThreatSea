@@ -45,6 +45,7 @@
   "description": "Description",
   "done": "Done",
   "email": "Email Address",
+  "filterPlaceholder": "Filter...",
   "heading": "Risk Timeline",
   "language": "Language",
   "lineOfTolerance.title": "Line of Tolerance",

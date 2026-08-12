@@ -98,7 +98,7 @@ describe("createMeasuresColumns — filter header behavior", () => {
         const { columns } = buildColumns({ expandedFilters: { name: false } });
         renderColumnHeader(columns.find((c) => c.field === "name"));
 
-        const collapseRoot = screen.getByPlaceholderText("Filter...").closest(".MuiCollapse-root");
+        const collapseRoot = screen.getByPlaceholderText("filterPlaceholder").closest(".MuiCollapse-root");
         expect(collapseRoot!.classList.contains("MuiCollapse-hidden")).toBe(true);
     });
 
@@ -106,7 +106,7 @@ describe("createMeasuresColumns — filter header behavior", () => {
         const { columns } = buildColumns({ expandedFilters: { scheduledAt: true } });
         renderColumnHeader(columns.find((c) => c.field === "scheduledAt"));
 
-        const collapseRoot = screen.getByPlaceholderText("Filter...").closest(".MuiCollapse-root");
+        const collapseRoot = screen.getByPlaceholderText("filterPlaceholder").closest(".MuiCollapse-root");
         expect(collapseRoot!.classList.contains("MuiCollapse-entered")).toBe(true);
     });
 
@@ -123,7 +123,7 @@ describe("createMeasuresColumns — filter header behavior", () => {
         const { columns, handlers } = buildColumns({ expandedFilters: { name: true } });
         renderColumnHeader(columns.find((c) => c.field === "name"));
 
-        await userEvent.type(screen.getByPlaceholderText("Filter..."), "te");
+        await userEvent.type(screen.getByPlaceholderText("filterPlaceholder"), "te");
 
         expect(handlers.handleFilterChange).toHaveBeenNthCalledWith(1, "name", "t");
         expect(handlers.handleFilterChange).toHaveBeenNthCalledWith(2, "name", "e");
