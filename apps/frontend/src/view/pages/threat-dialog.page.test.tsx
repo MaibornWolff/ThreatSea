@@ -15,9 +15,15 @@ vi.mock("#view/dialogs/add-threat-dialog/add-threat.dialog.tsx", () => ({
     __esModule: true,
 }));
 
-vi.mock("#api/generic-threats.api.ts", () => ({
-    GenericThreatsAPI: { getGenericThreatsWithExtendedChildren: vi.fn() },
-}));
+// Spy on the real module instead of vi.mock: under isolate:false a module
+// mock cannot reach closures cached by earlier test files (see AGENTS.md).
+const getGenericThreatsSpy = vi.spyOn(GenericThreatsAPI, "getGenericThreatsWithExtendedChildren");
+beforeEach(() => {
+    getGenericThreatsSpy.mockResolvedValue([]);
+});
+afterAll(() => {
+    getGenericThreatsSpy.mockRestore();
+});
 
 const REDIRECT_MARKER = "redirected-to-threats";
 
