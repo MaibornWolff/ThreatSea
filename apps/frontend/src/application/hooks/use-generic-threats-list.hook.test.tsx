@@ -1,6 +1,8 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { createElement, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { I18nextProvider } from "react-i18next";
+import { Provider } from "react-redux";
+import { createStore } from "#application/store.ts";
 import { GenericThreatsAPI } from "#api/generic-threats.api.ts";
 import type { GenericThreatWithExtendedChildren } from "#api/types/generic-threat.types.ts";
 import { createThreat } from "#test-utils/builders.ts";
@@ -24,8 +26,15 @@ const searchable = (id: number, attacker: string, pointOfAttack: string): Generi
         children: [createThreat({ id: id * 10 })],
     }) as unknown as GenericThreatWithExtendedChildren;
 
-const i18nWrapper = ({ children }: { children: ReactNode }) =>
-    createElement(I18nextProvider, { i18n: translationUtil }, children);
+// The hooks dispatch to the global error state, so every render needs a store.
+const makeWrapper = (store: ReturnType<typeof createStore>) =>
+    function Wrapper({ children }: { children: ReactNode }) {
+        return (
+            <Provider store={store}>
+                <I18nextProvider i18n={translationUtil}>{children}</I18nextProvider>
+            </Provider>
+        );
+    };
 
 describe("useGenericThreatsList", () => {
     beforeEach(() => {
@@ -37,7 +46,9 @@ describe("useGenericThreatsList", () => {
     });
 
     it("expands and collapses every loaded generic threat via setAllGenericThreatsExpanded", async () => {
-        const { result } = renderHook(() => useGenericThreatsList({ projectId: 1 }));
+        const { result } = renderHook(() => useGenericThreatsList({ projectId: 1 }), {
+            wrapper: makeWrapper(createStore()),
+        });
 
         await waitFor(() => expect(result.current.genericThreats).toHaveLength(2));
         expect(result.current.expandedGenericThreatIds).toEqual({});
@@ -54,7 +65,9 @@ describe("useGenericThreatsList", () => {
             searchable(1, "ADMINISTRATORS", "DATA_STORAGE_INFRASTRUCTURE"),
             searchable(2, "SYSTEM_USERS", "USER_INTERFACE"),
         ]);
-        const { result } = renderHook(() => useGenericThreatsList({ projectId: 1 }), { wrapper: i18nWrapper });
+        const { result } = renderHook(() => useGenericThreatsList({ projectId: 1 }), {
+            wrapper: makeWrapper(createStore()),
+        });
         await waitFor(() => expect(result.current.genericThreats).toHaveLength(2));
 
         // Parent 2 is expanded manually, then hidden by the search.
@@ -72,13 +85,33 @@ describe("useGenericThreatsList", () => {
 
     it("keeps the expansion map empty when no generic threats are loaded", async () => {
         vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedChildren).mockResolvedValue([]);
-        const { result } = renderHook(() => useGenericThreatsList({ projectId: 1 }));
+        const { result } = renderHook(() => useGenericThreatsList({ projectId: 1 }), {
+            wrapper: makeWrapper(createStore()),
+        });
 
         await waitFor(() => expect(result.current.isPending).toBe(false));
         expect(result.current.genericThreats).toEqual([]);
 
         act(() => result.current.setAllGenericThreatsExpanded(true));
         expect(result.current.expandedGenericThreatIds).toEqual({});
+    });
+
+    it("routes a failed load into the global error state and keeps prior items", async () => {
+        const store = createStore();
+        const { result } = renderHook(() => useGenericThreatsList({ projectId: 1 }), {
+            wrapper: makeWrapper(store),
+        });
+        await waitFor(() => expect(result.current.genericThreats).toHaveLength(2));
+
+        vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedChildren).mockRejectedValue(new Error("boom"));
+        await act(async () => {
+            await result.current.loadGenericThreats();
+        });
+
+        expect(result.current.isPending).toBe(false);
+        // A failed refresh keeps the data that was already on screen.
+        expect(result.current.genericThreats).toHaveLength(2);
+        expect(store.getState().error.message).toBe("boom");
     });
 
     it("matches the search against the localized attacker / point-of-attack label (German)", async () => {
@@ -90,7 +123,9 @@ describe("useGenericThreatsList", () => {
         ]);
 
         try {
-            const { result } = renderHook(() => useGenericThreatsList({ projectId: 1 }), { wrapper: i18nWrapper });
+            const { result } = renderHook(() => useGenericThreatsList({ projectId: 1 }), {
+                wrapper: makeWrapper(createStore()),
+            });
             await waitFor(() => expect(result.current.genericThreats).toHaveLength(2));
 
             // "Datenablagestruktur" is the German label for DATA_STORAGE_INFRASTRUCTURE — the raw

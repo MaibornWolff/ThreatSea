@@ -4,6 +4,9 @@ import { GenericThreatsAPI } from "#api/generic-threats.api.ts";
 import type { GenericThreatWithExtendedChildren } from "#api/types/generic-threat.types.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import { calcDamage } from "#utils/helpers.ts";
+import { ErrorActions } from "#application/actions/error.actions.ts";
+import { toSerializedError } from "#utils/serialize-error.ts";
+import { useAppDispatch } from "./use-app-redux.hook";
 
 export type ExtendedThreatWithMetrics = ExtendedThreat & {
     damage: number;
@@ -15,6 +18,7 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
     // user through these translation tables, so the search must match the localized label the user
     // actually sees — not the raw code (which is English-derived and never matches German input).
     const { t } = useTranslation("common");
+    const dispatch = useAppDispatch();
     const [isPending, setIsPending] = useState<boolean>(false);
     const [genericThreats, setGenericThreats] = useState<GenericThreatWithExtendedChildren[]>([]);
     const [searchValue, setSearchValue] = useState<string>("");
@@ -50,10 +54,14 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
                 return result;
             }, {});
             setThreatsByGenericThreatId(threatsMap);
+        } catch (error) {
+            // Surface through the global error state, like the redux thunks do
+            // via the error middleware; keep any previously loaded threats.
+            dispatch(ErrorActions.setAPIError(toSerializedError(error)));
         } finally {
             setIsPending(false);
         }
-    }, [projectId]);
+    }, [projectId, dispatch]);
 
     useEffect(() => {
         void loadGenericThreats();
