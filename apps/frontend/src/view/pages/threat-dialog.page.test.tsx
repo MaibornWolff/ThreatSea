@@ -77,6 +77,21 @@ describe("ThreatDialogPage", () => {
         expect(await screen.findByText(REDIRECT_MARKER)).toBeInTheDocument();
     });
 
+    it("redirects to the threats list when the re-fetch fails", async () => {
+        vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedChildren).mockRejectedValue(new Error("network"));
+
+        renderPage("/projects/1/threats/edit?threatId=42");
+
+        expect(await screen.findByText(REDIRECT_MARKER)).toBeInTheDocument();
+    });
+
+    it("redirects immediately for a malformed threat id without fetching", async () => {
+        renderPage("/projects/1/threats/edit?threatId=not-a-number");
+
+        expect(await screen.findByText(REDIRECT_MARKER)).toBeInTheDocument();
+        expect(GenericThreatsAPI.getGenericThreatsWithExtendedChildren).not.toHaveBeenCalled();
+    });
+
     it("redirects to the threats list when there is neither state nor a threat id", () => {
         renderPage("/projects/1/threats/edit");
 
