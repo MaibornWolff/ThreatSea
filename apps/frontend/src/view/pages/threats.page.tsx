@@ -229,7 +229,9 @@ const ThreatsPageBody = () => {
                     state: threat,
                     message: t("cannotDeleteOnlyThreat", { threatName: threat.name }),
                     acceptText: t("ok"),
-                    cancelText: t("cancel"),
+                    // Informational dialog — no action to cancel (same pattern as the
+                    // member page's warning dialogs).
+                    cancelText: null,
                 });
                 return;
             }
