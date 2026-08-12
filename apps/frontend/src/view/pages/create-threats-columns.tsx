@@ -383,7 +383,10 @@ export const createThreatsColumns = ({
             if (row.rowType !== "threat") {
                 return null;
             }
-            const presentation = threatStatusPresentation[row.threat.status];
+            // Fallback guards against status values the frontend doesn't know
+            // (e.g. version skew) — without it the whole grid unmounts.
+            const presentation =
+                threatStatusPresentation[row.threat.status] ?? threatStatusPresentation[THREAT_STATUSES.NEW];
             return (
                 <Box
                     sx={{
