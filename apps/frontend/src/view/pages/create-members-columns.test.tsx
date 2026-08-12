@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import type { TFunction } from "i18next";
 import type { GridColDef } from "@mui/x-data-grid";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
+import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { createMembersColumns } from "./create-members-columns";
 
 const identityT = ((key: string) => key) as unknown as TFunction;
@@ -97,16 +98,14 @@ describe("createMembersColumns — filter header behavior", () => {
         const { columns } = buildColumns({ expandedFilters: { email: false } });
         renderColumnHeader(columns.find((c) => c.field === "email"));
 
-        const collapseRoot = screen.getByPlaceholderText("filterPlaceholder").closest(".MuiCollapse-root");
-        expect(collapseRoot!.classList.contains("MuiCollapse-hidden")).toBe(true);
+        expect(screen.getByPlaceholderText("filterPlaceholder")).not.toBeVisible();
     });
 
     it("shows the filter input when expandedFilters[field] is true", () => {
         const { columns } = buildColumns({ expandedFilters: { email: true } });
         renderColumnHeader(columns.find((c) => c.field === "email"));
 
-        const collapseRoot = screen.getByPlaceholderText("filterPlaceholder").closest(".MuiCollapse-root");
-        expect(collapseRoot!.classList.contains("MuiCollapse-entered")).toBe(true);
+        expect(screen.getByPlaceholderText("filterPlaceholder")).toBeVisible();
     });
 
     it("clicking the chevron toggles filter expansion with the column field", async () => {
@@ -139,5 +138,20 @@ describe("createMembersColumns — role valueGetter", () => {
         expect(valueGetter(USER_ROLES.OWNER)).toBe(`userRoles.${USER_ROLES.OWNER}`);
         expect(valueGetter(USER_ROLES.EDITOR)).toBe(`userRoles.${USER_ROLES.EDITOR}`);
         expect(valueGetter(USER_ROLES.VIEWER)).toBe(`userRoles.${USER_ROLES.VIEWER}`);
+    });
+});
+
+describe("createMembersColumns — actions cell", () => {
+    it("delete calls handleDeleteMember with the row and does not bubble to the row click", async () => {
+        const { columns, handlers } = buildColumns();
+        const actions = columns.find((c) => c.field === "actions")!;
+        const member = { id: 3, name: "Robin", email: "robin@example.com", role: USER_ROLES.EDITOR };
+        const onRowClick = vi.fn();
+
+        renderWithProviders(<div onClick={onRowClick}>{actions.renderCell!({ row: member } as never)}</div>);
+        await userEvent.click(screen.getByRole("button", { name: "deleteMember" }));
+
+        expect(handlers.handleDeleteMember).toHaveBeenCalledWith(member);
+        expect(onRowClick).not.toHaveBeenCalled();
     });
 });

@@ -3,6 +3,8 @@ import userEvent from "@testing-library/user-event";
 import type { TFunction } from "i18next";
 import type { GridColDef } from "@mui/x-data-grid";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
+import { createMeasure } from "#test-utils/builders.ts";
+import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { createMeasuresColumns } from "./create-measures-columns";
 
 const identityT = ((key: string) => key) as unknown as TFunction;
@@ -98,16 +100,14 @@ describe("createMeasuresColumns — filter header behavior", () => {
         const { columns } = buildColumns({ expandedFilters: { name: false } });
         renderColumnHeader(columns.find((c) => c.field === "name"));
 
-        const collapseRoot = screen.getByPlaceholderText("filterPlaceholder").closest(".MuiCollapse-root");
-        expect(collapseRoot!.classList.contains("MuiCollapse-hidden")).toBe(true);
+        expect(screen.getByPlaceholderText("filterPlaceholder")).not.toBeVisible();
     });
 
     it("shows the filter input when expandedFilters[field] is true", () => {
         const { columns } = buildColumns({ expandedFilters: { scheduledAt: true } });
         renderColumnHeader(columns.find((c) => c.field === "scheduledAt"));
 
-        const collapseRoot = screen.getByPlaceholderText("filterPlaceholder").closest(".MuiCollapse-root");
-        expect(collapseRoot!.classList.contains("MuiCollapse-entered")).toBe(true);
+        expect(screen.getByPlaceholderText("filterPlaceholder")).toBeVisible();
     });
 
     it("clicking the chevron toggles filter expansion with the column field", async () => {
@@ -147,5 +147,46 @@ describe("createMeasuresColumns — scheduledAt valueGetter", () => {
         expect(valueGetter(null)).toBe("notScheduledYet");
         expect(valueGetter(undefined)).toBe("notScheduledYet");
         expect(valueGetter("")).toBe("notScheduledYet");
+    });
+});
+
+describe("createMeasuresColumns — actions cell", () => {
+    const renderActionsCell = (measureOverrides: Parameters<typeof createMeasure>[0]) => {
+        const { columns, handlers } = buildColumns();
+        const actions = columns.find((c) => c.field === "actions")!;
+        const measure = createMeasure(measureOverrides);
+        const onRowClick = vi.fn();
+        renderWithProviders(<div onClick={onRowClick}>{actions.renderCell!({ row: measure } as never)}</div>);
+        return { handlers, measure, onRowClick };
+    };
+
+    it("catalog measures get a reset action, disabled until scheduled", () => {
+        renderActionsCell({ catalogMeasureId: 5, scheduledAt: "" });
+        expect(screen.getByTestId("measures-page_measures-list-entry_reset-button")).toBeDisabled();
+        expect(screen.queryByTestId("measures-page_measures-list-entry_delete-button")).not.toBeInTheDocument();
+    });
+
+    it("an enabled reset calls handleDeleteOrResetMeasure without bubbling to the row", async () => {
+        const { handlers, measure, onRowClick } = renderActionsCell({
+            catalogMeasureId: 5,
+            scheduledAt: "2026-01-01",
+        });
+        await userEvent.click(screen.getByTestId("measures-page_measures-list-entry_reset-button"));
+        expect(handlers.handleDeleteOrResetMeasure).toHaveBeenCalledWith(measure);
+        expect(onRowClick).not.toHaveBeenCalled();
+    });
+
+    it("custom measures get a delete action instead of reset", async () => {
+        const { handlers, measure } = renderActionsCell({ catalogMeasureId: null });
+        expect(screen.queryByTestId("measures-page_measures-list-entry_reset-button")).not.toBeInTheDocument();
+        await userEvent.click(screen.getByTestId("measures-page_measures-list-entry_delete-button"));
+        expect(handlers.handleDeleteOrResetMeasure).toHaveBeenCalledWith(measure);
+    });
+
+    it("copy calls handleDuplicateMeasure without bubbling to the row", async () => {
+        const { handlers, measure, onRowClick } = renderActionsCell({ catalogMeasureId: null });
+        await userEvent.click(screen.getByTestId("measures-page_measures-list-entry_copy-button"));
+        expect(handlers.handleDuplicateMeasure).toHaveBeenCalledWith(measure);
+        expect(onRowClick).not.toHaveBeenCalled();
     });
 });
