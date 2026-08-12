@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { GenericThreatsAPI } from "#api/generic-threats.api.ts";
 import type { GenericThreatWithExtendedChildren } from "#api/types/generic-threat.types.ts";
@@ -28,10 +28,19 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
         Record<number, ExtendedThreatWithMetrics[]>
     >({});
 
+    // loadGenericThreats is fired from mount, the autosave effect, and after every mutation, so
+    // calls can overlap. Track a per-call sequence and apply results only for the latest one, so
+    // a slower older response can't overwrite newer data or clear pending while a newer load runs.
+    const loadSequenceRef = useRef(0);
+
     const loadGenericThreats = useCallback(async () => {
+        const sequence = ++loadSequenceRef.current;
         setIsPending(true);
         try {
             const threats = await GenericThreatsAPI.getGenericThreatsWithExtendedChildren({ projectId });
+            if (sequence !== loadSequenceRef.current) {
+                return;
+            }
             const sortedThreats = [...threats].sort((a, b) =>
                 a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
             );
@@ -55,11 +64,18 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
             }, {});
             setThreatsByGenericThreatId(threatsMap);
         } catch (error) {
+            if (sequence !== loadSequenceRef.current) {
+                return;
+            }
             // Surface through the global error state, like the redux thunks do
             // via the error middleware; keep any previously loaded threats.
             dispatch(ErrorActions.setAPIError(toSerializedError(error)));
         } finally {
-            setIsPending(false);
+            // Only the latest load owns the pending flag; an older one finishing must not
+            // clear it while the newer request is still in flight.
+            if (sequence === loadSequenceRef.current) {
+                setIsPending(false);
+            }
         }
     }, [projectId, dispatch]);
 

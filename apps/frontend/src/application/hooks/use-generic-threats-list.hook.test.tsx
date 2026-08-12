@@ -114,6 +114,53 @@ describe("useGenericThreatsList", () => {
         expect(store.getState().error.message).toBe("boom");
     });
 
+    it("ignores a stale response that resolves after a newer load", async () => {
+        const { result } = renderHook(() => useGenericThreatsList({ projectId: 1 }), {
+            wrapper: makeWrapper(createStore()),
+        });
+        await waitFor(() => expect(result.current.genericThreats).toHaveLength(2));
+
+        // Two overlapping loads where the OLDER one resolves LAST.
+        let resolveOld!: (value: GenericThreatWithExtendedChildren[]) => void;
+        let resolveNew!: (value: GenericThreatWithExtendedChildren[]) => void;
+        const oldResponse = new Promise<GenericThreatWithExtendedChildren[]>((resolve) => {
+            resolveOld = resolve;
+        });
+        const newResponse = new Promise<GenericThreatWithExtendedChildren[]>((resolve) => {
+            resolveNew = resolve;
+        });
+        vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedChildren)
+            .mockReturnValueOnce(oldResponse)
+            .mockReturnValueOnce(newResponse);
+
+        let oldLoad!: Promise<void>;
+        let newLoad!: Promise<void>;
+        act(() => {
+            oldLoad = result.current.loadGenericThreats();
+        });
+        act(() => {
+            newLoad = result.current.loadGenericThreats();
+        });
+
+        // The newer load resolves first with three parents.
+        await act(async () => {
+            resolveNew([genericThreat(1, "Alpha"), genericThreat(2, "Beta"), genericThreat(3, "Gamma")]);
+            await newLoad;
+        });
+        expect(result.current.genericThreats).toHaveLength(3);
+        expect(result.current.isPending).toBe(false);
+
+        // The older load resolves afterwards; its stale single-parent result must be ignored,
+        // and it must not re-raise the pending flag.
+        await act(async () => {
+            resolveOld([genericThreat(9, "Stale")]);
+            await oldLoad;
+        });
+        expect(result.current.genericThreats).toHaveLength(3);
+        expect(result.current.genericThreats.map((threat) => threat.id)).toEqual([1, 2, 3]);
+        expect(result.current.isPending).toBe(false);
+    });
+
     it("matches the search against the localized attacker / point-of-attack label (German)", async () => {
         const previousLanguage = translationUtil.language;
         await translationUtil.changeLanguage("de");
