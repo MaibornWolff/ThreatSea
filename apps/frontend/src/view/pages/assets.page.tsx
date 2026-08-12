@@ -16,6 +16,7 @@ import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { useAssetsList } from "#application/hooks/use-assets-list.hook.ts";
+import { useColumnFilters } from "#application/hooks/use-column-filters.hook.ts";
 import { useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { IconButton } from "#view/components/icon-button.component.tsx";
@@ -84,16 +85,7 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
         actions: t("actions"),
     };
 
-    const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
-    const [expandedFilters, setExpandedFilters] = useState<Record<string, boolean>>({});
-
-    const handleFilterChange = useCallback((field: string, value: string) => {
-        setColumnFilters((prev) => ({ ...prev, [field]: value }));
-    }, []);
-
-    const toggleFilterExpanded = useCallback((field: string) => {
-        setExpandedFilters((prev) => ({ ...prev, [field]: !prev[field] }));
-    }, []);
+    const { columnFilters, expandedFilters, handleFilterChange, toggleFilterExpanded } = useColumnFilters();
 
     // Filtered in JS: the community DataGrid applies at most one controlled
     // filter-model item, which silently breaks combined column filters.
