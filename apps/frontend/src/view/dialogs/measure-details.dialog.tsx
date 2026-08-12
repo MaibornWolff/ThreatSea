@@ -114,8 +114,8 @@ const MeasureDetailsDialog = ({ project, measure, initialTab, ...props }: Measur
     const onClickEditThreat = (event: React.MouseEvent<HTMLElement>, threat: ExtendedThreat | undefined) => {
         event.preventDefault();
         event.stopPropagation();
-        if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
-            navigate(`/projects/${projectId}/measures/threats/edit?threatId=${threat?.id ?? ""}`, {
+        if (threat && checkUserRole(userRole, USER_ROLES.EDITOR)) {
+            navigate(`/projects/${projectId}/measures/threats/edit?threatId=${threat.id}`, {
                 state: { threat },
             });
         }
