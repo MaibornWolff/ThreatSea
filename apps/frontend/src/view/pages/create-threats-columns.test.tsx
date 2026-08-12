@@ -82,6 +82,8 @@ const genericRow: ThreatsGridRow = {
 
 const threatRow: ThreatsGridRow = { rowType: "threat", rowId: "threat-42", threat: childThreat };
 
+const emptyChildrenRow: ThreatsGridRow = { rowType: "emptyChildren", rowId: "empty-7" };
+
 const cellParams = (row: ThreatsGridRow): GridRenderCellParams<ThreatsGridRow> =>
     ({ row }) as unknown as GridRenderCellParams<ThreatsGridRow>;
 
@@ -264,5 +266,18 @@ describe("formatComponentName", () => {
                 identityT
             )
         ).toBe("Database");
+    });
+});
+
+describe("createThreatsColumns — empty children placeholder", () => {
+    it("spans the whole grid and shows the placeholder for a parent without children", () => {
+        const { byField } = columnByField();
+        const nameColumn = byField["name"]!;
+        const colSpan = nameColumn.colSpan as (value: unknown, row: ThreatsGridRow) => number | undefined;
+        expect(colSpan(undefined, emptyChildrenRow)).toBe(10);
+        expect(colSpan(undefined, threatRow)).toBeUndefined();
+
+        renderCell(nameColumn, emptyChildrenRow);
+        expect(screen.getByText("noChildThreats")).toBeInTheDocument();
     });
 });
