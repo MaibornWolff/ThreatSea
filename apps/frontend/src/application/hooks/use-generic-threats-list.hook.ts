@@ -59,15 +59,6 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
         void loadGenericThreats();
     }, [loadGenericThreats]);
 
-    const setAllGenericThreatsExpanded = useCallback(
-        (expanded: boolean) => {
-            setExpandedGenericThreatIds(
-                expanded ? Object.fromEntries(genericThreats.map((genericThreat) => [genericThreat.id, true])) : {}
-            );
-        },
-        [genericThreats]
-    );
-
     const toggleGenericThreat = useCallback(
         (genericThreatId: number) => {
             const shouldExpand = !expandedGenericThreatIds[genericThreatId];
@@ -108,6 +99,25 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
             );
         });
     }, [threatsByGenericThreatId, genericThreats, searchValue, t]);
+
+    // Scoped to the parents the user can currently see: with a search active,
+    // expand/collapse-all must not silently change hidden parents' state.
+    const setAllGenericThreatsExpanded = useCallback(
+        (expanded: boolean) => {
+            setExpandedGenericThreatIds((previous) => {
+                const next = { ...previous };
+                for (const genericThreat of filteredGenericThreats) {
+                    if (expanded) {
+                        next[genericThreat.id] = true;
+                    } else {
+                        delete next[genericThreat.id];
+                    }
+                }
+                return next;
+            });
+        },
+        [filteredGenericThreats]
+    );
 
     return {
         isPending,
