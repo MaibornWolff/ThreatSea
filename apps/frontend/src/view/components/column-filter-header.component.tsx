@@ -30,6 +30,8 @@ export const ColumnFilterHeader = ({
                 <Typography sx={{ fontWeight: "bold", fontSize: "0.875rem", textAlign: "center" }}>{label}</Typography>
                 <MuiIconButton
                     size="small"
+                    aria-label={t("toggleColumnFilter", { column: label })}
+                    aria-expanded={expandedFilters[field] ?? false}
                     onClick={(event) => {
                         event.stopPropagation();
                         onToggleExpanded(field);

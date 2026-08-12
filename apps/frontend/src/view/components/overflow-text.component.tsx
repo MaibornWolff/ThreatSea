@@ -66,6 +66,9 @@ export const OverflowText = ({ text, testId, bold = false, align = "left", conta
                     ref={textRef}
                     component="span"
                     data-testid={testId}
+                    // Focusable only while truncated, so keyboard users can reach the tooltip
+                    // with the full text without adding tab stops for fully visible labels.
+                    tabIndex={isTruncated ? 0 : undefined}
                     sx={{
                         flex: 1,
                         minWidth: 0,

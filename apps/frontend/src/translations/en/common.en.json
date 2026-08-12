@@ -46,6 +46,7 @@
   "done": "Done",
   "email": "Email Address",
   "filterPlaceholder": "Filter...",
+  "toggleColumnFilter": "Toggle {{column}} filter",
   "heading": "Risk Timeline",
   "language": "Language",
   "lineOfTolerance.title": "Line of Tolerance",
