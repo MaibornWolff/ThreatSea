@@ -10,6 +10,7 @@ import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { MemberActions } from "#application/actions/members.actions.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { useMembersList } from "#application/hooks/use-addedMember-list.hook.ts";
+import { useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { MatrixFilterToggleButtonGroup } from "#view/components/matrix-filter-toggle-button-group.component.tsx";
 import { NoRowsOverlay } from "#view/components/no-rows-overlay.component.tsx";
@@ -35,6 +36,13 @@ interface DeleteMemberConfirmState {
     ownUserId: number;
     name: string;
 }
+
+const DEFAULT_COLUMN_VISIBILITY: GridColumnVisibilityModel = {
+    name: true,
+    email: true,
+    role: true,
+    actions: true,
+};
 
 const MemberPageBody = () => {
     const dispatch = useAppDispatch();
@@ -101,39 +109,15 @@ const MemberPageBody = () => {
         dispatch(NavigationActions.setPageHeader(headerConfig));
     }, [dispatch, headerConfig]);
 
-    const SESSION_STORAGE_KEY = `members-column-visibility-${memberPath}-${projectCatalogId}`;
-
-    const getInitialColumnVisibility = (): GridColumnVisibilityModel => {
-        const stored = sessionStorage.getItem(SESSION_STORAGE_KEY);
-        if (stored) {
-            try {
-                return JSON.parse(stored);
-            } catch {
-                // Fall through to default
-            }
-        }
-        return {
-            name: true,
-            email: true,
-            role: true,
-            actions: true,
-        };
-    };
-
-    const [columnVisibility, setColumnVisibility] = useState<GridColumnVisibilityModel>(getInitialColumnVisibility);
+    const { columnVisibility, toggleColumnVisibility } = useColumnVisibility(
+        `members-column-visibility-${memberPath}-${projectCatalogId}`,
+        DEFAULT_COLUMN_VISIBILITY
+    );
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
     const handleClose = () => setAnchorEl(null);
-
-    const toggleColumnVisibility = (field: string) => {
-        setColumnVisibility((prev) => {
-            const newVisibility = { ...prev, [field]: !prev[field] };
-            sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(newVisibility));
-            return newVisibility;
-        });
-    };
 
     const columnLabels: Record<string, string> = {
         name: t("name"),

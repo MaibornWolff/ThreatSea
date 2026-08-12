@@ -16,6 +16,7 @@ import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { useAssetsList } from "#application/hooks/use-assets-list.hook.ts";
+import { useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { NoRowsOverlay } from "#view/components/no-rows-overlay.component.tsx";
@@ -31,6 +32,15 @@ import { createAssetsColumns, formatCreationDate } from "./create-assets-columns
 interface AssetsPageBodyProps {
     project: ExtendedProject;
 }
+
+const DEFAULT_COLUMN_VISIBILITY: GridColumnVisibilityModel = {
+    name: true,
+    confidentiality: true,
+    integrity: true,
+    availability: true,
+    createdAt: true,
+    actions: true,
+};
 
 const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
     const projectId = project.id;
@@ -55,41 +65,15 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
         );
     }, [dispatch]);
 
-    const SESSION_STORAGE_KEY = `assets-column-visibility-${projectId}`;
-
-    const getInitialColumnVisibility = (): GridColumnVisibilityModel => {
-        const stored = sessionStorage.getItem(SESSION_STORAGE_KEY);
-        if (stored) {
-            try {
-                return JSON.parse(stored);
-            } catch {
-                // Fall through to default
-            }
-        }
-        return {
-            name: true,
-            confidentiality: true,
-            integrity: true,
-            availability: true,
-            createdAt: true,
-            actions: true,
-        };
-    };
-
-    const [columnVisibility, setColumnVisibility] = useState<GridColumnVisibilityModel>(getInitialColumnVisibility);
+    const { columnVisibility, toggleColumnVisibility } = useColumnVisibility(
+        `assets-column-visibility-${projectId}`,
+        DEFAULT_COLUMN_VISIBILITY
+    );
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
     const handleClose = () => setAnchorEl(null);
-
-    const toggleColumnVisibility = (field: string) => {
-        setColumnVisibility((prev) => {
-            const newVisibility = { ...prev, [field]: !prev[field] };
-            sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(newVisibility));
-            return newVisibility;
-        });
-    };
 
     const columnLabels: Record<string, string> = {
         name: t("name"),
