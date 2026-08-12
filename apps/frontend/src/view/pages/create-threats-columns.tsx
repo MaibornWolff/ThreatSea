@@ -51,7 +51,7 @@ interface ColumnConfig {
     expandedFilters: Record<string, boolean>;
     onToggleFilterExpanded: (field: string) => void;
     onToggleGenericThreat: (genericThreatId: number) => void;
-    onAssetHover: (event: React.MouseEvent<HTMLElement>, assets: ExtendedThreat["assets"]) => void;
+    onAssetHover: (event: React.SyntheticEvent<HTMLElement>, assets: ExtendedThreat["assets"]) => void;
     onAssetHoverEnd: () => void;
     onAddThreat: (event: React.MouseEvent<HTMLElement>, genericThreat: GenericThreatWithExtendedChildren) => void;
     onEditThreat: (event: React.MouseEvent<HTMLElement>, threat: ExtendedThreat) => void;
@@ -169,8 +169,11 @@ export const createThreatsColumns = ({
             }
             return (
                 <span
+                    tabIndex={0}
                     onMouseEnter={(event) => onAssetHover(event, row.threat.assets)}
                     onMouseLeave={onAssetHoverEnd}
+                    onFocus={(event) => onAssetHover(event, row.threat.assets)}
+                    onBlur={onAssetHoverEnd}
                     style={{ display: "block", width: "100%", height: "100%" }}
                 >
                     {row.threat.assets.length}
