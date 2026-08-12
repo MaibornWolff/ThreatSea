@@ -431,7 +431,9 @@ const ThreatsPageBody = () => {
         ]
     );
 
-    const genericThreatsCount = genericThreats.length;
+    // Count what the grid actually shows: parent groups surviving both the
+    // top search and the column filters (not the unfiltered hook result).
+    const genericThreatsCount = useMemo(() => rows.filter((row) => row.rowType === "genericThreat").length, [rows]);
 
     return (
         <Box sx={{ overflow: "hidden", height: "100%", boxSizing: "border-box" }}>
