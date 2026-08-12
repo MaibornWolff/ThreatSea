@@ -1,7 +1,7 @@
 import Add from "@mui/icons-material/Add";
 import Visibility from "@mui/icons-material/Visibility";
 import { Box, Button, Checkbox, FormControlLabel, Menu, MenuItem, Tooltip, Typography } from "@mui/material";
-import { DataGrid, type GridColumnVisibilityModel, type GridFilterModel } from "@mui/x-data-grid";
+import { DataGrid, type GridColumnVisibilityModel } from "@mui/x-data-grid";
 import { memo, useCallback, useLayoutEffect, useMemo, useState, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router";
@@ -23,6 +23,7 @@ import { AlertActions } from "#application/actions/alert.actions.ts";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import type { NavigationState } from "#application/reducers/navigation.reducer.ts";
 import type { ConfirmAcceptColor } from "#application/reducers/confirm.reducer.ts";
+import { applyColumnFilters } from "#utils/column-filters.ts";
 import { createMembersColumns } from "./create-members-columns";
 
 type MemberPath = "projects" | "catalogs";
@@ -152,17 +153,14 @@ const MemberPageBody = () => {
         setExpandedFilters((prev) => ({ ...prev, [field]: !prev[field] }));
     }, []);
 
-    const filterModel: GridFilterModel = useMemo(
-        () => ({
-            items: Object.entries(columnFilters)
-                .filter(([_, value]) => value.trim() !== "")
-                .map(([field, value]) => ({
-                    field,
-                    operator: "contains",
-                    value,
-                })),
-        }),
-        [columnFilters]
+    // Filtered in JS: the community DataGrid applies at most one controlled
+    // filter-model item, which silently breaks combined column filters.
+    const filteredMembers = useMemo(
+        () =>
+            applyColumnFilters(members, columnFilters, {
+                role: (member) => t(`userRoles.${member.role}`),
+            }),
+        [members, columnFilters, t]
     );
 
     const onClickAddMember = () => {
@@ -409,13 +407,12 @@ const MemberPageBody = () => {
                 </Box>
 
                 <DataGrid
-                    rows={members}
+                    rows={filteredMembers}
                     columns={columns}
                     disableRowSelectionOnClick
                     disableColumnFilter
                     disableColumnMenu
                     disableColumnSelector
-                    filterModel={filterModel}
                     onCellClick={(params) => {
                         if (params.field !== "actions") {
                             onClickEditMember(params.row);

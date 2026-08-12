@@ -1,24 +1,15 @@
 import Delete from "@mui/icons-material/Delete";
 import { Box, Typography } from "@mui/material";
-import { type GridColDef, type GridFilterOperator, type GridRenderCellParams } from "@mui/x-data-grid";
+import { type GridColDef, type GridRenderCellParams } from "@mui/x-data-grid";
 import type { TFunction } from "i18next";
 import type { Asset } from "#api/types/asset.types.ts";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { ColumnFilterHeader } from "#view/components/column-filter-header.component.tsx";
 
-// Numeric columns don't support the "contains" operator the column filter
-// headers emit — without this the grid throws as soon as a value is typed.
-export const containsNumberOperator: GridFilterOperator = {
-    label: "Contains",
-    value: "contains",
-    getApplyFilterFn: (filterItem) => {
-        const needle = String(filterItem.value ?? "").trim();
-        if (needle === "") {
-            return null;
-        }
-        return (value) => value != null && String(value).includes(needle);
-    },
+export const formatCreationDate = (value: Date | string): string => {
+    const date = value instanceof Date ? value : new Date(value);
+    return date.toISOString().slice(0, 10);
 };
 
 interface ColumnConfig {
@@ -66,7 +57,6 @@ export const createAssetsColumns = ({
         align: "center",
         headerAlign: "center",
         type: "number",
-        filterOperators: [containsNumberOperator],
         renderHeader: () => (
             <ColumnFilterHeader
                 field="confidentiality"
@@ -86,7 +76,6 @@ export const createAssetsColumns = ({
         align: "center",
         headerAlign: "center",
         type: "number",
-        filterOperators: [containsNumberOperator],
         renderHeader: () => (
             <ColumnFilterHeader
                 field="integrity"
@@ -106,7 +95,6 @@ export const createAssetsColumns = ({
         align: "center",
         headerAlign: "center",
         type: "number",
-        filterOperators: [containsNumberOperator],
         renderHeader: () => (
             <ColumnFilterHeader
                 field="availability"
@@ -135,10 +123,7 @@ export const createAssetsColumns = ({
                 onToggleExpanded={toggleFilterExpanded}
             />
         ),
-        valueGetter: (value: Date | string) => {
-            const date = value instanceof Date ? value : new Date(value);
-            return date.toISOString().split("T")[0];
-        },
+        valueGetter: (value: Date | string) => formatCreationDate(value),
     },
     ...(checkUserRole(userRole, USER_ROLES.EDITOR)
         ? ([

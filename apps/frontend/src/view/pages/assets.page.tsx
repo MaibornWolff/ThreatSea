@@ -6,7 +6,7 @@
 import Add from "@mui/icons-material/Add";
 import Visibility from "@mui/icons-material/Visibility";
 import { Box, Button, Checkbox, FormControlLabel, LinearProgress, Menu, MenuItem, Typography } from "@mui/material";
-import { DataGrid, type GridColumnVisibilityModel, type GridFilterModel } from "@mui/x-data-grid";
+import { DataGrid, type GridColumnVisibilityModel } from "@mui/x-data-grid";
 import { memo, useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate } from "react-router";
@@ -24,8 +24,9 @@ import { CreatePage } from "#view/components/create-page.component.tsx";
 import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
 import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
 import { withProject } from "#view/components/with-project.hoc.tsx";
+import { applyColumnFilters } from "#utils/column-filters.ts";
 import AssetDialogPage from "./asset-dialog.page";
-import { createAssetsColumns } from "./create-assets-columns";
+import { createAssetsColumns, formatCreationDate } from "./create-assets-columns";
 
 interface AssetsPageBodyProps {
     project: ExtendedProject;
@@ -110,18 +111,14 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
         setExpandedFilters((prev) => ({ ...prev, [field]: !prev[field] }));
     }, []);
 
-    const filterModel: GridFilterModel = useMemo(
-        () => ({
-            items: Object.entries(columnFilters)
-                .filter(([_, value]) => value.trim() !== "")
-                .map(([field, value]) => ({
-                    id: field,
-                    field,
-                    operator: "contains",
-                    value,
-                })),
-        }),
-        [columnFilters]
+    // Filtered in JS: the community DataGrid applies at most one controlled
+    // filter-model item, which silently breaks combined column filters.
+    const filteredAssets = useMemo(
+        () =>
+            applyColumnFilters(assets, columnFilters, {
+                createdAt: (asset) => formatCreationDate(asset.createdAt),
+            }),
+        [assets, columnFilters]
     );
 
     const onClickAddAssets = () => {
@@ -273,14 +270,13 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
                     </Box>
 
                     <DataGrid
-                        rows={assets}
+                        rows={filteredAssets}
                         columns={columns}
                         loading={isPending}
                         disableRowSelectionOnClick
                         disableColumnFilter
                         disableColumnMenu
                         disableColumnSelector
-                        filterModel={filterModel}
                         onCellClick={(params) => {
                             if (params.field !== "actions") {
                                 onClickEditAsset(params.row);
