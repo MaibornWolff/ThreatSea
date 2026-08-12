@@ -22,6 +22,8 @@
   "noThreatsFound": "Keine Bedrohungen gefunden",
   "actions": "Aktionen",
   "filterAll": "Alle",
+  "expand": "Ausklappen",
+  "collapse": "Einklappen",
   "expandAllThreats": "Alle Bedrohungen ausklappen",
   "collapseAllThreats": "Alle Bedrohungen einklappen",
   "clearFilters": "Filter zurücksetzen",

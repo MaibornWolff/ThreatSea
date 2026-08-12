@@ -23,6 +23,8 @@
   "heading": "Threats",
   "actions": "Actions",
   "filterAll": "All",
+  "expand": "Expand",
+  "collapse": "Collapse",
   "expandAllThreats": "Expand all threats",
   "collapseAllThreats": "Collapse all threats",
   "clearFilters": "Clear filters",
