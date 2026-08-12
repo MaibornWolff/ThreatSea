@@ -12,6 +12,7 @@ import { type GridColDef, type GridRenderCellParams } from "@mui/x-data-grid";
 import type { TFunction } from "i18next";
 import type { GenericThreatWithExtendedChildren } from "#api/types/generic-threat.types.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
+import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import type { ExtendedThreatWithMetrics } from "#application/hooks/use-generic-threats-list.hook.ts";
@@ -37,7 +38,7 @@ export const formatComponentName = (
     entity: Pick<GenericThreatWithExtendedChildren, "pointOfAttack" | "componentName" | "interfaceName">,
     t: TFunction
 ): string => {
-    if (entity.pointOfAttack === "COMMUNICATION_INTERFACES") {
+    if (entity.pointOfAttack === POINTS_OF_ATTACK.COMMUNICATION_INTERFACES) {
         return `${entity.componentName || t("unknown")}${entity.interfaceName ? ` > ${entity.interfaceName}` : ""}`;
     }
     return entity.componentName ?? "";
@@ -409,17 +410,12 @@ export const createThreatsColumns = ({
     },
     {
         field: "actions",
-        headerName: t("actions"),
+        headerName: "",
         width: 170,
         sortable: false,
         filterable: false,
         align: "right",
         headerAlign: "center",
-        renderHeader: () => (
-            <Box sx={{ width: "100%" }}>
-                <Typography sx={{ fontWeight: "bold", fontSize: "0.875rem", textAlign: "center" }} />
-            </Box>
-        ),
         renderCell: (params: GridRenderCellParams<ThreatsGridRow>) => {
             const row = params.row;
             if (row.rowType === "genericThreat") {
