@@ -15,6 +15,7 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { DataGrid, GridRow, type GridColumnVisibilityModel, type GridRowProps } from "@mui/x-data-grid";
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
@@ -92,6 +93,7 @@ const ThreatsPageBody = () => {
     const navigate = useNavigate();
     const { t } = useTranslation("threatsPage");
     usePageTitle(t("threats"));
+    const theme = useTheme();
 
     const { autoSaveStatus } = useEditor({ projectId: projectId });
 
@@ -511,7 +513,7 @@ const ThreatsPageBody = () => {
                                     onClick={() => setAllGenericThreatsExpanded(!allThreatsExpanded)}
                                     aria-label={allThreatsExpanded ? t("collapseAllThreats") : t("expandAllThreats")}
                                     data-testid="ToggleExpandAllThreats"
-                                    sx={{ mr: 1, color: "text.primary" }}
+                                    sx={{ mr: 1, color: theme.vars.palette.text.primary }}
                                 >
                                     {allThreatsExpanded ? (
                                         <UnfoldLess sx={{ fontSize: 20 }} />
@@ -528,7 +530,7 @@ const ThreatsPageBody = () => {
                             <Button
                                 onClick={handleClick}
                                 startIcon={<Visibility sx={{ fontSize: 18 }} />}
-                                sx={{ ml: 2, textTransform: "none", color: "text.primary" }}
+                                sx={{ ml: 2, textTransform: "none", color: theme.vars.palette.text.primary }}
                             >
                                 {t("customizeView")}
                             </Button>
@@ -570,7 +572,7 @@ const ThreatsPageBody = () => {
                                     onClick={clearFilters}
                                     startIcon={<FilterAltOff sx={{ fontSize: 18 }} />}
                                     data-testid="ClearThreatFilters"
-                                    sx={{ mr: 2, textTransform: "none", color: "text.primary" }}
+                                    sx={{ mr: 2, textTransform: "none", color: theme.vars.palette.text.primary }}
                                 >
                                     {t("clearFilters")}
                                 </Button>
