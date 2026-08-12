@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import type { TFunction } from "i18next";
 import type { GridColDef } from "@mui/x-data-grid";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
-import { createAssetsColumns } from "./create-assets-columns";
+import { containsNumberOperator, createAssetsColumns } from "./create-assets-columns";
 
 const identityT = ((key: string) => key) as unknown as TFunction;
 
@@ -156,5 +156,36 @@ describe("createAssetsColumns — createdAt valueGetter", () => {
 
         expect(valueGetter(new Date("2025-04-08T13:52:30Z"))).toBe("2025-04-08");
         expect(valueGetter("2023-11-27T12:14:16Z")).toBe("2023-11-27");
+    });
+});
+
+describe("createAssetsColumns — numeric CIA filter operator", () => {
+    // Numeric columns lack a built-in "contains" operator; without the custom
+    // one the grid throws as soon as a CIA column filter has a value.
+    it("CIA columns define a 'contains' filter operator", () => {
+        const { columns } = buildColumns();
+        for (const field of ["confidentiality", "integrity", "availability"]) {
+            const col = columns.find((c) => c.field === field)!;
+            expect(col.filterOperators?.map((op) => op.value)).toContain("contains");
+        }
+    });
+
+    it("matches numeric values by substring and ignores empty input", () => {
+        const applyFn = containsNumberOperator.getApplyFilterFn(
+            { id: "confidentiality", field: "confidentiality", operator: "contains", value: "3" },
+            {} as never
+        );
+        expect(applyFn).not.toBeNull();
+        expect(applyFn!(3 as never, {} as never, {} as never, {} as never)).toBe(true);
+        expect(applyFn!(13 as never, {} as never, {} as never, {} as never)).toBe(true);
+        expect(applyFn!(4 as never, {} as never, {} as never, {} as never)).toBe(false);
+        expect(applyFn!(null as never, {} as never, {} as never, {} as never)).toBe(false);
+
+        expect(
+            containsNumberOperator.getApplyFilterFn(
+                { id: "confidentiality", field: "confidentiality", operator: "contains", value: "  " },
+                {} as never
+            )
+        ).toBeNull();
     });
 });

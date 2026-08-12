@@ -115,6 +115,7 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
             items: Object.entries(columnFilters)
                 .filter(([_, value]) => value.trim() !== "")
                 .map(([field, value]) => ({
+                    id: field,
                     field,
                     operator: "contains",
                     value,
