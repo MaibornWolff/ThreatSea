@@ -49,6 +49,17 @@ describe("useGenericThreatsList", () => {
         expect(result.current.expandedGenericThreatIds).toEqual({});
     });
 
+    it("keeps the expansion map empty when no generic threats are loaded", async () => {
+        vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedChildren).mockResolvedValue([]);
+        const { result } = renderHook(() => useGenericThreatsList({ projectId: 1 }));
+
+        await waitFor(() => expect(result.current.isPending).toBe(false));
+        expect(result.current.genericThreats).toEqual([]);
+
+        act(() => result.current.setAllGenericThreatsExpanded(true));
+        expect(result.current.expandedGenericThreatIds).toEqual({});
+    });
+
     it("matches the search against the localized attacker / point-of-attack label (German)", async () => {
         const previousLanguage = translationUtil.language;
         await translationUtil.changeLanguage("de");
