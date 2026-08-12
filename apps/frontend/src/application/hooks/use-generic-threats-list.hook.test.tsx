@@ -9,9 +9,15 @@ import { createThreat } from "#test-utils/builders.ts";
 import { translationUtil } from "#utils/translations.ts";
 import { useGenericThreatsList } from "./use-generic-threats-list.hook";
 
-vi.mock("#api/generic-threats.api.ts", () => ({
-    GenericThreatsAPI: { getGenericThreatsWithExtendedChildren: vi.fn() },
-}));
+// Spy on the real module instead of vi.mock: under isolate:false a module
+// mock cannot reach closures cached by earlier test files (see AGENTS.md).
+const getGenericThreatsSpy = vi.spyOn(GenericThreatsAPI, "getGenericThreatsWithExtendedChildren");
+beforeEach(() => {
+    getGenericThreatsSpy.mockResolvedValue([]);
+});
+afterAll(() => {
+    getGenericThreatsSpy.mockRestore();
+});
 
 const genericThreat = (id: number, name: string): GenericThreatWithExtendedChildren =>
     ({ id, name, children: [createThreat({ id: id * 10 })] }) as unknown as GenericThreatWithExtendedChildren;
