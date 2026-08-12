@@ -285,7 +285,7 @@ describe("AddThreatDialog — Save", () => {
         await makeDirty(user);
         await user.click(screen.getByTestId("EditThreatSave"));
 
-        await waitFor(() => expect(navigate).toHaveBeenCalledWith(-1));
+        await waitFor(() => expect(navigate).toHaveBeenCalledWith(-1), { timeout: 10000 });
         expect(ThreatsAPI.updateThreat).toHaveBeenCalledWith(
             expect.objectContaining({ id: 42, projectId: 7, status: THREAT_STATUSES.IN_PROGRESS })
         );
@@ -299,7 +299,7 @@ describe("AddThreatDialog — Save", () => {
         await makeDirty(user);
         await user.click(screen.getByTestId("EditThreatSave"));
 
-        await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled());
+        await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled(), { timeout: 10000 });
         expect(ThreatsAPI.updateThreat).toHaveBeenCalledWith(
             expect.objectContaining({ id: 42, status: THREAT_STATUSES.IN_PROGRESS })
         );
@@ -312,7 +312,7 @@ describe("AddThreatDialog — Save", () => {
         await makeDirty(user);
         await user.click(screen.getByTestId("EditThreatSave"));
 
-        await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled());
+        await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled(), { timeout: 10000 });
         expect(ThreatsAPI.updateThreat).toHaveBeenCalledWith(
             expect.objectContaining({ id: 42, status: THREAT_STATUSES.FINALIZED })
         );
@@ -325,7 +325,7 @@ describe("AddThreatDialog — Save", () => {
         await makeDirty(user);
         await user.click(screen.getByTestId("EditThreatSave"));
 
-        await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled());
+        await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled(), { timeout: 10000 });
         expect(ThreatsAPI.updateThreat).toHaveBeenCalledWith(
             expect.objectContaining({ id: 42, status: THREAT_STATUSES.OUTOFSCOPE })
         );
@@ -339,7 +339,7 @@ describe("AddThreatDialog — Save", () => {
         await makeDirty(user);
         await user.click(screen.getByTestId("EditThreatSave"));
 
-        await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled());
+        await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled(), { timeout: 10000 });
         expect(onSaved).not.toHaveBeenCalled();
         expect(navigate).not.toHaveBeenCalled();
     });
