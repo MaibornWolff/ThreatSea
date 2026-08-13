@@ -13,7 +13,9 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import { ChevronRight, ExpandMore, InfoOutlined } from "@mui/icons-material";
+import ChevronRight from "@mui/icons-material/ChevronRight";
+import ExpandMore from "@mui/icons-material/ExpandMore";
+import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import { useTheme } from "@mui/material/styles";
 import { Controller, useWatch, type Control, type FieldErrors, type UseFormRegister } from "react-hook-form";
 import { useTranslation } from "react-i18next";
