@@ -2092,7 +2092,13 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "generic_threats_project_catalog_threat_point_of_attack_unique": {
+          "name": "generic_threats_project_catalog_threat_point_of_attack_unique",
+          "nullsNotDistinct": false,
+          "columns": ["projectId", "catalogThreatId", "pointOfAttackId"]
+        }
+      },
       "policies": {},
       "checkConstraints": {
         "generic_threats_name_not_empty": {
