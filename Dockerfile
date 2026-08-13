@@ -23,6 +23,9 @@ RUN pnpm fetch --filter "..../${FRONTEND_DIR}"
 COPY . .
 
 RUN pnpm -r --filter "..../${FRONTEND_DIR}" install --frozen-lockfile
+
+ARG APP_VERSION=""
+ENV VITE_APP_VERSION=$APP_VERSION
 RUN pnpm -r --filter "..../${FRONTEND_DIR}" run build
 
 

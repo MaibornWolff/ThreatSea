@@ -1,7 +1,7 @@
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlined";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutlined";
 import SyncIcon from "@mui/icons-material/Sync";
-import { IconButton, Typography } from "@mui/material";
+import { IconButton, Link as MuiLink, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import { useLayoutEffect, useState, type ComponentType, type MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
@@ -23,6 +23,8 @@ import type { ExtendedProject } from "#api/types/project.types.ts";
 import { HeaderLevelOneNav } from "./header-level-one-nav.component";
 import { HeaderProjectTabs } from "./header-project-tabs.component";
 import { ProjectActionsMenu } from "./project-actions-menu.component";
+import { AboutDialog } from "./about-dialog.component";
+import { APP_VERSION } from "#utils/version.ts";
 import ProjectDialogPage from "#view/pages/project-dialog.page.tsx";
 import Edit from "@mui/icons-material/Edit";
 
@@ -55,6 +57,7 @@ export const CreatePage = <P extends object>(
         const autoSaveStatus = useAppSelector(editorSelectors.selectAutoSaveStatus);
         const autoSaveText = useAppSelector(editorSelectors.selectAutoSaveHelperText);
         const [autoSaveOnClick, setAutoSaveOnClick] = useState<(() => void) | undefined>(undefined);
+        const [aboutOpen, setAboutOpen] = useState(false);
 
         const updateAutoSaveOnClick = (onClick: () => void) => {
             setAutoSaveOnClick(() => onClick);
@@ -484,8 +487,30 @@ export const CreatePage = <P extends object>(
                                 </a>
                             );
                         })}
+                        <MuiLink
+                            component="button"
+                            type="button"
+                            onClick={() => setAboutOpen(true)}
+                            color="inherit"
+                            underline="always"
+                            sx={{
+                                padding: "0 10px 0 0",
+                                font: "inherit",
+                                color: theme.vars.palette.text.subtle,
+                            }}
+                        >
+                            {t("about")}
+                        </MuiLink>
+                        <Typography
+                            component="span"
+                            data-testid="page-footer_version"
+                            sx={{ font: "inherit", color: theme.vars.palette.text.subtle }}
+                        >
+                            {t("aboutDialog.version")}: {APP_VERSION}
+                        </Typography>
                     </div>
                 </Box>
+                <AboutDialog open={aboutOpen} onClose={() => setAboutOpen(false)} />
                 <Routes>
                     <Route path="editProject" element={<ProjectDialogPage />} />
                 </Routes>

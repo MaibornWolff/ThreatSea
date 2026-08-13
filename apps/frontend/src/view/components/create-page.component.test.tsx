@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { MouseEvent } from "react";
 import { Provider } from "react-redux";
@@ -111,7 +111,7 @@ describe("CreatePage — project header actions", () => {
 
         expect(screen.queryByTestId("project-actions-menu-stub")).not.toBeInTheDocument();
 
-        await user.click(screen.getByRole("button"));
+        await user.click(within(screen.getByRole("banner")).getByRole("button"));
 
         expect(navigate).toHaveBeenCalledWith("/projects/1/editProject", { state: { project } });
     });
@@ -120,7 +120,7 @@ describe("CreatePage — project header actions", () => {
         setup(createProject({ id: 1, role: USER_ROLES.OWNER }), { showProjectInfo: false });
 
         expect(screen.queryByTestId("project-actions-menu-stub")).not.toBeInTheDocument();
-        expect(screen.queryByRole("button")).not.toBeInTheDocument();
+        expect(within(screen.getByRole("banner")).queryByRole("button")).not.toBeInTheDocument();
     });
 
     it("navigates to the edit-project route with the project when edit is triggered", async () => {
@@ -240,5 +240,31 @@ describe("CreatePage — catalog header", () => {
         renderOnCatalog(undefined, true);
 
         expect(screen.queryByTestId("catalog-header_name")).not.toBeInTheDocument();
+    });
+});
+
+describe("CreatePage — footer", () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    it("shows the app version in the footer", () => {
+        setup(undefined, { showProjectInfo: false });
+
+        // Tests run without VITE_APP_VERSION, so the fallback label is shown.
+        expect(screen.getByTestId("page-footer_version")).toHaveTextContent("local dev");
+    });
+
+    it("opens the About dialog from the footer link and shows the version", async () => {
+        const { user } = setup(undefined, { showProjectInfo: false });
+
+        await user.click(screen.getByRole("button", { name: translationUtil.t("about", { ns: "mainMenu" }) }));
+
+        const dialog = await screen.findByRole("dialog");
+        expect(within(dialog).getByTestId("about-dialog_version")).toHaveTextContent("local dev");
     });
 });
