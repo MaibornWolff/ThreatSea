@@ -16,8 +16,12 @@ const enableAltBrowsers =
 
 // Team default is the vite dev server on 3000; override for deviating local layouts
 // (e.g. PW_BASE_URL=http://localhost:3100). The backend's ORIGIN_APP must point at the
-// same origin, since the login flow redirects there.
-const baseURL = process.env["PW_BASE_URL"] ?? "http://localhost:3000";
+// same origin, since the login flow redirects there. Trailing slashes are stripped so
+// auth.setup's `${base}/**` redirect glob never contains a literal double slash.
+let baseURL = process.env["PW_BASE_URL"] ?? "http://localhost:3000";
+while (baseURL.endsWith("/")) {
+    baseURL = baseURL.slice(0, -1);
+}
 process.env["PW_RESOLVED_BASE_URL"] = baseURL;
 
 /**
