@@ -81,7 +81,7 @@ const MeasureImpactByMeasureDialog = ({
     const navigate = useNavigate();
     const location = useLocation();
     const dispatch = useAppDispatch();
-    const { values: preselectedValues } = useDialog<MeasureImpactFormValues | null>("measureImpacts");
+    const { values: preselectedValues, cancelDialog } = useDialog<MeasureImpactFormValues | null>("measureImpacts");
     const { suggestedMeasures, appliedMeasures, filteredCatalogMeasures, remainingMeasures } = useMeasureSuggestions({
         selectedThreat: threat,
         projectId: project.id,
@@ -170,9 +170,12 @@ const MeasureImpactByMeasureDialog = ({
     };
 
     /**
-     * Closes the dialog.
+     * Closes the dialog. Clears the measureImpacts dialog namespace first — the
+     * save-measure flow preselects a measureId there, and a leftover value would
+     * pre-fill the next dialog open from any path.
      */
     const closeDialog = () => {
+        cancelDialog();
         navigate(-1);
     };
 
