@@ -34,10 +34,13 @@ export class MeasuresPage extends BasePage {
         );
         this.measureCopyButtons = page.locator('[data-testid="measures-page_measures-list-entry_copy-button"]');
         this.measureDeleteButtons = page.locator('[data-testid="measures-page_measures-list-entry_delete-button"]');
-        this.sortByNameButton = page.locator('[data-testid="measures-page_sort-measures-by-name-button"]');
-        this.sortByScheduledAtButton = page.locator(
-            '[data-testid="measures-page_sort-measures-by-scheduled-at-button"]'
-        );
+        // Sorting happens via the DataGrid column headers; the header element carries
+        // aria-sort and toggles the sort on click (the filter toggle inside it stops
+        // propagation, so it does not interfere).
+        this.sortByNameButton = page.locator('.MuiDataGrid-columnHeader[data-field="name"]');
+        this.sortByScheduledAtButton = page.locator('.MuiDataGrid-columnHeader[data-field="scheduledAt"]');
+        // (Click sorting goes through toggleSort(), which targets the header label —
+        // center-clicking the header element can hit the filter toggle instead.)
 
         this.nameInput = page.locator('[data-testid="measure-creation-modal_name-input"] textarea[name="name"]');
         this.descriptionInput = page.locator(
@@ -61,5 +64,13 @@ export class MeasuresPage extends BasePage {
 
     projectNavButton(link: string): Locator {
         return this.page.locator(`[data-testid="navigation-header_${link}-button"]`);
+    }
+
+    /**
+     * Toggles a column's sort by clicking its header label. Clicking the header element
+     * itself is unreliable: its center can hit the filter toggle (which stops propagation).
+     */
+    async toggleSort(field: string): Promise<void> {
+        await this.page.locator(`.MuiDataGrid-columnHeader[data-field="${field}"] p`).first().click();
     }
 }

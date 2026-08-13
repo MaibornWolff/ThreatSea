@@ -6,7 +6,11 @@
 import Add from "@mui/icons-material/Add";
 import Visibility from "@mui/icons-material/Visibility";
 import { Box, Button, Checkbox, FormControlLabel, LinearProgress, Menu, MenuItem, Typography } from "@mui/material";
-import { DataGrid, type GridColumnVisibilityModel } from "@mui/x-data-grid";
+import { DataGrid, GridRow, type GridColumnVisibilityModel, type GridRowProps } from "@mui/x-data-grid";
+
+// The e2e page objects locate rows and the action buttons inside them via a row-level
+// test id, so it must live on the grid row element itself (same pattern as the threats page).
+const AssetsGridRowSlot = (props: GridRowProps) => <GridRow {...props} data-testid="assets-page_assets-list-entry" />;
 import { memo, useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate } from "react-router";
@@ -285,9 +289,10 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
                         }}
                         initialState={{
                             pagination: { paginationModel: { pageSize: 25, page: 0 } },
+                            sorting: { sortModel: [{ field: "name", sort: "asc" }] },
                         }}
                         pageSizeOptions={[10, 25, 50, 100]}
-                        slots={{ noRowsOverlay: NoRowsOverlayWithMessage }}
+                        slots={{ noRowsOverlay: NoRowsOverlayWithMessage, row: AssetsGridRowSlot }}
                     />
                 </Box>
                 <Routes>

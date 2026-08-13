@@ -6,6 +6,7 @@ import type { Asset } from "#api/types/asset.types.ts";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { ColumnFilterHeader } from "#view/components/column-filter-header.component.tsx";
+import { OverflowText } from "#view/components/overflow-text.component.tsx";
 
 export const formatCreationDate = (value: Date | string | null | undefined): string => {
     if (value == null) {
@@ -55,6 +56,9 @@ export const createAssetsColumns = ({
                 onToggleExpanded={toggleFilterExpanded}
             />
         ),
+        renderCell: ({ row }: GridRenderCellParams<Asset>) => (
+            <OverflowText text={row.name} testId="assets-page_assets-list-entry_name" />
+        ),
     },
     {
         field: "confidentiality",
@@ -73,6 +77,9 @@ export const createAssetsColumns = ({
                 expandedFilters={expandedFilters}
                 onToggleExpanded={toggleFilterExpanded}
             />
+        ),
+        renderCell: ({ value }: GridRenderCellParams<Asset>) => (
+            <span data-testid="assets-page_assets-list-entry_confidentiality">{value}</span>
         ),
     },
     {
@@ -93,6 +100,9 @@ export const createAssetsColumns = ({
                 onToggleExpanded={toggleFilterExpanded}
             />
         ),
+        renderCell: ({ value }: GridRenderCellParams<Asset>) => (
+            <span data-testid="assets-page_assets-list-entry_integrity">{value}</span>
+        ),
     },
     {
         field: "availability",
@@ -111,6 +121,9 @@ export const createAssetsColumns = ({
                 expandedFilters={expandedFilters}
                 onToggleExpanded={toggleFilterExpanded}
             />
+        ),
+        renderCell: ({ value }: GridRenderCellParams<Asset>) => (
+            <span data-testid="assets-page_assets-list-entry_availability">{value}</span>
         ),
     },
     {

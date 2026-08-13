@@ -8,6 +8,7 @@ import type { Measure } from "#api/types/measure.types.ts";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { ColumnFilterHeader } from "#view/components/column-filter-header.component.tsx";
+import { OverflowText } from "#view/components/overflow-text.component.tsx";
 
 interface ColumnConfig {
     t: TFunction;
@@ -47,6 +48,9 @@ export const createMeasuresColumns = ({
                 onToggleExpanded={toggleFilterExpanded}
             />
         ),
+        renderCell: ({ row }: GridRenderCellParams<Measure>) => (
+            <OverflowText text={row.name} testId="measures-page_measures-list-entry_name" />
+        ),
     },
     {
         field: "scheduledAt",
@@ -66,6 +70,9 @@ export const createMeasuresColumns = ({
             />
         ),
         valueGetter: (value: string | null | undefined) => value || t("notScheduledYet"),
+        renderCell: ({ value }: GridRenderCellParams<Measure>) => (
+            <span data-testid="measures-page_measures-list-entry_scheduled-at">{value}</span>
+        ),
     },
     ...(checkUserRole(userRole, USER_ROLES.EDITOR)
         ? ([
