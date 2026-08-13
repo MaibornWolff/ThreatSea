@@ -86,4 +86,27 @@ describe("useThreats", () => {
             expect(result.current.isPending).toBe(false);
         });
     });
+
+    it("routes a failed refresh into the global error state and keeps prior items", async () => {
+        getGenericThreatsSpy.mockResolvedValue([genericThreat(1, [createThreat({ id: 11, name: "kept" })])]);
+        const store = createStore();
+        const { result } = renderHook(() => useThreats({ projectId: 1 }), {
+            wrapper: makeWrapper(store),
+        });
+
+        await act(async () => {
+            await result.current.loadThreats();
+        });
+        expect(result.current.items.map((threat) => threat.name)).toEqual(["kept"]);
+
+        getGenericThreatsSpy.mockRejectedValue(new Error("boom"));
+        await act(async () => {
+            await result.current.loadThreats();
+        });
+
+        expect(result.current.isPending).toBe(false);
+        // A failed refresh keeps the data that was already on screen.
+        expect(result.current.items.map((threat) => threat.name)).toEqual(["kept"]);
+        expect(store.getState().error.message).toBe("boom");
+    });
 });
