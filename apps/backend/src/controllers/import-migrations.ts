@@ -115,6 +115,10 @@ export function upgradeImportBodyToCurrent(body: ImportBody): void {
             confidentiality: flatThreat.confidentiality,
             integrity: flatThreat.integrity,
             availability: flatThreat.availability,
+            // Intentional mapping, agreed with the product owner — mirrors the status
+            // backfill in drizzle/0010_new-model-migration.sql: finalized only with a
+            // C/I/A flag or an out-of-scope impact; everything else restarts as 'new'
+            // for re-triage. Keep both sites in sync.
             status:
                 flatThreat.doneEditing &&
                 (flatThreat.confidentiality ||

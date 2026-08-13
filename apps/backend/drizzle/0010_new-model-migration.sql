@@ -75,6 +75,14 @@ SELECT
     t."confidentiality",
     t."integrity",
     t."availability",
+    -- Status backfill — intentional mapping, agreed with the product owner. 'finalized'
+    -- requires the app's finalize criteria: a C/I/A flag or an applied out-of-scope impact
+    -- (the impact case mirrors finalizeThreatWhenOutOfScopeApplied at runtime; matrix
+    -- exclusion is impact-driven, so such rows do not linger in the risk matrix).
+    -- doneEditing threats without either carry no risk data and deliberately restart as
+    -- 'new' for re-triage. 'in progress' and the user-set 'out of scope' status have no
+    -- old-model equivalent and are never produced here.
+    -- Keep in sync with the v3 import shim (src/controllers/import-migrations.ts).
     CASE
         WHEN t."doneEditing" = true AND (
             t."confidentiality" OR t."integrity" OR t."availability"
