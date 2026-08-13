@@ -17,6 +17,7 @@ CREATE TABLE "generic_threats" (
     "updatedAt" timestamp with time zone DEFAULT now() NOT NULL,
     "catalogThreatId" integer NOT NULL,
     "projectId" integer NOT NULL,
+    CONSTRAINT "generic_threats_project_catalog_threat_point_of_attack_unique" UNIQUE("projectId","catalogThreatId","pointOfAttackId"),
     CONSTRAINT "generic_threats_name_not_empty" CHECK ("generic_threats"."name" <> '')
 );
 
@@ -36,7 +37,6 @@ CREATE TABLE "threats" (
     "updatedAt" timestamp with time zone DEFAULT now() NOT NULL,
     "genericThreatId" integer NOT NULL,
     "projectId" integer NOT NULL,
-    "_old_threat_id" integer,
     CONSTRAINT "threats_name_not_empty" CHECK ("threats"."name" <> ''),
     CONSTRAINT "threats_probability_min_max" CHECK ("threats"."probability" between 1 and 5)
 );
@@ -63,8 +63,9 @@ GROUP BY
     ct."pointOfAttack",
     ct."attacker";
 
-INSERT INTO "threats" ("pointOfAttackId", "name", "description", "pointOfAttack", "attacker", "probability", "confidentiality", "integrity", "availability", "status", "createdAt", "updatedAt", "genericThreatId", "projectId", "_old_threat_id")
+INSERT INTO "threats" ("id", "pointOfAttackId", "name", "description", "pointOfAttack", "attacker", "probability", "confidentiality", "integrity", "availability", "status", "createdAt", "updatedAt", "genericThreatId", "projectId")
 SELECT
+    t."id",
     t."pointOfAttackId",
     t."name",
     COALESCE(t."description", ''),
@@ -88,20 +89,20 @@ SELECT
     t."createdAt",
     t."updatedAt",
     gt."id",
-    t."projectId",
-    t."id"
+    t."projectId"
 FROM "_old_threats" t
 JOIN "generic_threats" gt
     ON gt."catalogThreatId" = t."catalogThreatId"
     AND gt."projectId" = t."projectId"
     AND gt."pointOfAttackId" = t."pointOfAttackId";
 
-ALTER TABLE "measure_impacts" DROP CONSTRAINT "measure_impacts_threatId_threats_id_fk";
+SELECT setval(
+    pg_get_serial_sequence('threats', 'id'),
+    COALESCE((SELECT max("id") FROM "threats"), 0) + 1,
+    false
+);
 
-UPDATE "measure_impacts" mi
-SET "threatId" = t."id"
-FROM "threats" t
-WHERE t."_old_threat_id" = mi."threatId";
+ALTER TABLE "measure_impacts" DROP CONSTRAINT "measure_impacts_threatId_threats_id_fk";
 
 ALTER TABLE "measure_impacts"
     ADD CONSTRAINT "measure_impacts_threatId_threats_id_fk"
@@ -109,8 +110,6 @@ ALTER TABLE "measure_impacts"
 
 CREATE INDEX "measure_impacts_threat_id" ON "measure_impacts" USING btree ("threatId");
 CREATE INDEX "measure_impacts_measure_id" ON "measure_impacts" USING btree ("measureId");
-
-ALTER TABLE "threats" DROP COLUMN "_old_threat_id";
 
 DROP TABLE "_old_threats";
 

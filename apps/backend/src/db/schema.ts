@@ -354,6 +354,11 @@ export const genericThreats = pgTable(
     },
     (table) => [
         check("generic_threats_name_not_empty", sql`${table.name} <> ''`),
+        unique("generic_threats_project_catalog_threat_point_of_attack_unique").on(
+            table.projectId,
+            table.catalogThreatId,
+            table.pointOfAttackId
+        ),
         index("generic_threats_catalog_threat_id").on(table.catalogThreatId),
         index("generic_threats_project_id").on(table.projectId),
     ]
