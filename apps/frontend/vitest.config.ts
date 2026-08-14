@@ -27,6 +27,12 @@ export default defineConfig({
             exclude: ["src/**/*.{test,spec}.{ts,tsx}", "src/test-utils/**", "src/index.tsx", "src/reportWebVitals.ts"],
             provider: "v8",
             reporter: ["text", "lcov", "html", "cobertura"],
+            thresholds: {
+                branches: 45,
+                functions: 47,
+                lines: 54,
+                statements: 54,
+            },
             reportsDirectory: path.resolve(import.meta.dirname, "coverage"),
         },
         globalSetup: ["vitest.global-setup.ts"],
