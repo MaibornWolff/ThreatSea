@@ -14,6 +14,10 @@ on:
 concurrency:
   group: release-${{ github.repository }}
 
+env:
+  # semantic-release pushes tags/commits; the local pre-push hook (lint/format/test) must not run in CI
+  HUSKY: "0"
+
 jobs:
   compute-version:
     name: Compute Version
