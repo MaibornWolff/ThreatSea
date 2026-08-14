@@ -20,7 +20,7 @@ export default defineConfig({
                 lines: 64,
                 statements: 64,
             },
-            reportsDirectory: path.resolve(__dirname, "coverage"),
+            reportsDirectory: path.resolve(import.meta.dirname, "coverage"),
         },
         globalSetup: ["vitest.setup.global.ts", "vitest.teardown.global.ts"],
         setupFiles: ["vitest.setup.ts"],
