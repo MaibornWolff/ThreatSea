@@ -117,8 +117,8 @@ importers:
         specifier: 4.0.0
         version: 4.0.0
       openid-client:
-        specifier: 6.8.4
-        version: 6.8.4
+        specifier: 6.8.5
+        version: 6.8.5
       pg:
         specifier: 8.23.0
         version: 8.23.0
@@ -3673,8 +3673,8 @@ packages:
       - validate-npm-package-name
       - which
 
-  oauth4webapi@3.8.6:
-    resolution: {integrity: sha512-iwemM91xz8nryHti2yTmg5fhyEMVOkOXwHNqbvcATjyajb5oQxCQzrNOA6uElRHuMhQQTKUyFKV9y/CNyg25BQ==}
+  oauth4webapi@3.8.7:
+    resolution: {integrity: sha512-4RxcKxXjuItDFZ20RRPf4YTw3kpeXJyCgJFxVzJ068A7PNJ18st2Dg90tlC1LkSDS0GecroagCLHYEIVUhCAkw==}
 
   object-assign@4.1.1:
     resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
@@ -3707,8 +3707,8 @@ packages:
     resolution: {integrity: sha512-1FlR+gjXK7X+AsAHso35MnyN5KqGwJRi/31ft6x0M194ht7S+rWAvd7PHss9xSKMzE0asv1pyIHaJYq+BbacAQ==}
     engines: {node: '>=12'}
 
-  openid-client@6.8.4:
-    resolution: {integrity: sha512-QSw0BA08piujetEwfZsHoTrDpMEha7GDZDicQqVwX4u0ChCjefvjDB++TZ8BTg76UpwhzIQgdvvfgfl3HpCSAw==}
+  openid-client@6.8.5:
+    resolution: {integrity: sha512-jNGC/5wnTYwCcEUe2ss0IRUmVRQcgxM0A1nLb3eX/9llqNbMWOQd2xd+qDAgfVCpA5Qh96Y1cdnkfbva6+bSdA==}
 
   oxfmt@0.63.0:
     resolution: {integrity: sha512-kgdDwv35wvVf6554U2Ab8Jnd0zTM+TsEQWwaB70RAjK3gICFAFGO+2Hd3Be27GMoXj3XRL9IKSNRVl7KBQL6iw==}
@@ -7746,7 +7746,7 @@ snapshots:
 
   npm@11.19.0: {}
 
-  oauth4webapi@3.8.6: {}
+  oauth4webapi@3.8.7: {}
 
   object-assign@4.1.1: {}
 
@@ -7770,10 +7770,10 @@ snapshots:
     dependencies:
       mimic-fn: 4.0.0
 
-  openid-client@6.8.4:
+  openid-client@6.8.5:
     dependencies:
       jose: 6.2.8
-      oauth4webapi: 3.8.6
+      oauth4webapi: 3.8.7
 
   oxfmt@0.63.0:
     dependencies:
