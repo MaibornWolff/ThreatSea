@@ -27,7 +27,7 @@ export default defineConfig({
             exclude: ["src/**/*.{test,spec}.{ts,tsx}", "src/test-utils/**", "src/index.tsx", "src/reportWebVitals.ts"],
             provider: "v8",
             reporter: ["text", "lcov", "html", "cobertura"],
-            reportsDirectory: path.resolve(__dirname, "coverage"),
+            reportsDirectory: path.resolve(import.meta.dirname, "coverage"),
         },
         globalSetup: ["vitest.global-setup.ts"],
         setupFiles: ["vitest.setup.ts"],
