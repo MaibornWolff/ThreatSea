@@ -273,7 +273,7 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
     }, [setIsChanged, language]);
 
     return (
-        <Box>
+        <Box sx={{ overflow: "hidden", height: "100%", boxSizing: "border-box" }}>
             <Backdrop open={loading} sx={{ zIndex: 999 }}>
                 <Box
                     sx={{
@@ -292,9 +292,12 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
             {<LinearProgress sx={{ visibility: data ? "hidden" : "visible" }} />}
             <Page
                 sx={{
+                    boxSizing: "border-box",
+                    height: "100%",
                     padding: 0,
                     paddingLeft: 6,
                     paddingRight: 6,
+                    paddingBottom: 4,
                 }}
             >
                 {data && (
@@ -302,6 +305,8 @@ const ReportPageBody = ({ project }: ReportPageBodyProps) => {
                         sx={{
                             display: "flex",
                             flexDirection: "column",
+                            height: "100%",
+                            overflowY: "auto",
                         }}
                     >
                         <Box
