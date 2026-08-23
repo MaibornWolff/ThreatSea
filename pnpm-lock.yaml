@@ -117,8 +117,8 @@ importers:
         specifier: 4.0.0
         version: 4.0.0
       openid-client:
-        specifier: 6.8.6
-        version: 6.8.6
+        specifier: 6.8.7
+        version: 6.8.7
       pg:
         specifier: 8.23.0
         version: 8.23.0
@@ -3712,8 +3712,8 @@ packages:
     resolution: {integrity: sha512-1FlR+gjXK7X+AsAHso35MnyN5KqGwJRi/31ft6x0M194ht7S+rWAvd7PHss9xSKMzE0asv1pyIHaJYq+BbacAQ==}
     engines: {node: '>=12'}
 
-  openid-client@6.8.6:
-    resolution: {integrity: sha512-lsfMRH/GCgMiGCRnBRY3e70uogkgOessPaTOhP3rw/dxqNOZHwOazWx+m6jt5EVk3ecRFULl0TwWpk9Qnw3RKQ==}
+  openid-client@6.8.7:
+    resolution: {integrity: sha512-gtKthNu7evSBvTdrrlHb4F3Fi9dcwlb5QaITlCs+9mfpvuOi0Q3qtBf5+iY4sEP8hy1qCoAdxBNPDcmZeVSDzQ==}
 
   oxfmt@0.64.0:
     resolution: {integrity: sha512-XZ4GFBN/PLbXKq+0zrgpQfPKYuJlUuj+nzZJY7UpIbFMNyefNLCdN9EwViycNqnYcv0wrn0jXcQLlqJp8RCKBg==}
@@ -7764,7 +7764,7 @@ snapshots:
     dependencies:
       mimic-fn: 4.0.0
 
-  openid-client@6.8.6:
+  openid-client@6.8.7:
     dependencies:
       jose: 6.2.9
       oauth4webapi: 3.8.7
