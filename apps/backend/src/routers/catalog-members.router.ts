@@ -54,7 +54,7 @@ catalogMembersRouter.put<CatalogMemberIdParam, void, UpdateMemberRequest>(
     `/:${idParam}`,
     ValidateParamHandler(CatalogMemberIdParam),
     ValidateBodyHandler(UpdateMemberRequest),
-    CheckCatalogRoleHandler(USER_ROLES.EDITOR),
+    CheckCatalogRoleHandler(USER_ROLES.OWNER),
     updateCatalogAddedMember
 );
 
