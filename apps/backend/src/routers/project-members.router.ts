@@ -54,7 +54,7 @@ projectMembersRouter.put<ProjectMemberIdParam, void, UpdateMemberRequest>(
     `/:${idParam}`,
     ValidateParamHandler(ProjectMemberIdParam),
     ValidateBodyHandler(UpdateMemberRequest),
-    CheckProjectRoleHandler(USER_ROLES.EDITOR),
+    CheckProjectRoleHandler(USER_ROLES.OWNER),
     updateProjectAddedMember
 );
 
