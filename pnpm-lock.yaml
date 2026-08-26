@@ -266,8 +266,8 @@ importers:
         specifier: 1.62.1
         version: 1.62.1
       '@react-pdf/types':
-        specifier: 2.11.3
-        version: 2.11.3
+        specifier: 2.12.0
+        version: 2.12.0
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
@@ -1471,6 +1471,9 @@ packages:
   '@react-pdf/font@4.0.10':
     resolution: {integrity: sha512-8Bg7PvtjFumVY8RnIpkbgLIwX3ZlMjrQemGl+sVz1Mx/hi8o8Bj+M9jVCWFaNXLbKAA06YxOlAMhfLEPT1+GLg==}
 
+  '@react-pdf/font@4.0.11':
+    resolution: {integrity: sha512-PihVj3Qy1TT45sjBuFdDcmSsKgK1W7jaGPmEWtThib20BK9HZDHUp26aP1d6KWZtS5t/Mq89N5uNmavZkUCdoA==}
+
   '@react-pdf/image@3.1.1':
     resolution: {integrity: sha512-pbeb2qUs+lDZsvNpWSjoVkAm10WjXsoYd5jIB3utqkfWwwMkh3qo2Iz4By08AptAcRINPXaG6ICT3zsrXBMb6A==}
 
@@ -1482,6 +1485,9 @@ packages:
 
   '@react-pdf/primitives@4.3.0':
     resolution: {integrity: sha512-nYXoZ36pvwNzbc54+DbL8RCn15jU7woJ9D/svnh5tpUXekJ+CbI4mZLo6boSv24CvJgychOu6h7gxX03B4ps0A==}
+
+  '@react-pdf/primitives@4.4.0':
+    resolution: {integrity: sha512-BFpuhNH6ffSFjTTMnpdUoZxWoXdhPmFDdrSVBl0i/zMR4yDTEfYOW3AcfjjmNIOpm9+LnIXbgELLklQJ+nD3oA==}
 
   '@react-pdf/reconciler@2.0.0':
     resolution: {integrity: sha512-7zaPRujpbHSmCpIrZ+b9HSTJHthcVZzX0Wx7RzvQGsGBUbHP4p6s5itXrAIOuQuPvDepoHGNOvf6xUuMVvdoyw==}
@@ -1499,14 +1505,17 @@ packages:
   '@react-pdf/stylesheet@6.2.3':
     resolution: {integrity: sha512-To5bbdM5KyOwkY+GqWdZSq6TlgBe+tQc/r00H1gF6RnqucMfkriRRgqXbYNlH2+RBOg5jltq7IhYARyyuge+1g==}
 
+  '@react-pdf/stylesheet@6.2.4':
+    resolution: {integrity: sha512-ZwTJ1EZI+qBecZv+ZxmnF/Qzc4rx7sZJFlqsgFGJ4t7e8qRcH2/Ze/pdIRqOK84ecbT+wkKF5xIGhv73eFgqvA==}
+
   '@react-pdf/svg@1.1.0':
     resolution: {integrity: sha512-cTIHXiz9x1HrbfqzfxfZP3FRdDwUXG77QWF6Fb5MP/lV3ONxR+g0Z3hwtBatCS9HeGBQCpxX/Lzb8wHE+co1PA==}
 
   '@react-pdf/textkit@6.4.1':
     resolution: {integrity: sha512-wjQu/f1pKxyC2iRPJrnIm4Sc0tEmofsWtHdiyHP4NUlfN9uX4l7yVihPDWUWfoVPWB1QnTOTAIKv1vqRlGgoSg==}
 
-  '@react-pdf/types@2.11.3':
-    resolution: {integrity: sha512-/3jG6KUOsSERDDmz2zq+pLI2NcHqupzYtLP+hEnO39FgzWUpAnD44eJdoDtARkoqX/Yhahu4Luu8N6XK9u0/pw==}
+  '@react-pdf/types@2.12.0':
+    resolution: {integrity: sha512-TGuXNuQuHLWxGYX/v2bOrJ8u26VeAVNJ951aBDELhBR7fV09Qa95ituErmEAQK9nm4r6xecy3iBl3p6lLTpbtg==}
 
   '@reduxjs/toolkit@2.12.0':
     resolution: {integrity: sha512-KiT+RzZbp6mQET+Mg+h2c97+9j1sNflUxQkIHI7Yuzf6Peu+OYpmkn6nbHWmLLWj+1ZODUJFwGZ7gx3L9R9EOw==}
@@ -3472,6 +3481,9 @@ packages:
 
   media-engine@1.0.3:
     resolution: {integrity: sha512-aa5tG6sDoK+k70B9iEX1NeyfT8ObCKhNDs6lJVpwF6r8vhUfuKMslIcirq6HIUYuuUYLefcEQOn9bSBOvawtwg==}
+
+  media-engine@2.0.0:
+    resolution: {integrity: sha512-FqNmlXKYrp5d3g7xEOMJb+6gXZE0fTssdyIQqYR4LbkifbNbS0hDylhNDOh8r6tCgLboHd8+mwgH2njgSYDpnQ==}
 
   media-typer@1.1.1:
     resolution: {integrity: sha512-yz3xRaG20c6/BOzvYoDaGtPmGscs7YivItZEEqe6GbwNfHuxu9YNmvnEkMzKldAGY4/80pRcQRZSEnhquk9XuQ==}
@@ -5686,7 +5698,14 @@ snapshots:
   '@react-pdf/font@4.0.10':
     dependencies:
       '@react-pdf/pdfkit': 6.0.1
-      '@react-pdf/types': 2.11.3
+      '@react-pdf/types': 2.12.0
+      fontkit: 2.0.4
+      is-url: 1.2.4
+
+  '@react-pdf/font@4.0.11':
+    dependencies:
+      '@react-pdf/pdfkit': 6.0.1
+      '@react-pdf/types': 2.12.0
       fontkit: 2.0.4
       is-url: 1.2.4
 
@@ -5703,7 +5722,7 @@ snapshots:
       '@react-pdf/primitives': 4.3.0
       '@react-pdf/stylesheet': 6.2.3
       '@react-pdf/textkit': 6.4.1
-      '@react-pdf/types': 2.11.3
+      '@react-pdf/types': 2.12.0
       emoji-regex-xs: 1.0.0
       queue: 6.0.2
       yoga-layout: 3.2.1
@@ -5722,6 +5741,8 @@ snapshots:
 
   '@react-pdf/primitives@4.3.0': {}
 
+  '@react-pdf/primitives@4.4.0': {}
+
   '@react-pdf/reconciler@2.0.0(react@19.2.8)':
     dependencies:
       object-assign: 4.1.1
@@ -5734,7 +5755,7 @@ snapshots:
       '@react-pdf/fns': 3.1.3
       '@react-pdf/primitives': 4.3.0
       '@react-pdf/textkit': 6.4.1
-      '@react-pdf/types': 2.11.3
+      '@react-pdf/types': 2.12.0
       abs-svg-path: 0.1.1
       color-string: 2.1.4
       normalize-svg-path: 1.1.0
@@ -5751,7 +5772,7 @@ snapshots:
       '@react-pdf/primitives': 4.3.0
       '@react-pdf/reconciler': 2.0.0(react@19.2.8)
       '@react-pdf/render': 4.6.1
-      '@react-pdf/types': 2.11.3
+      '@react-pdf/types': 2.12.0
       events: 3.3.0
       object-assign: 4.1.1
       prop-types: 15.8.1
@@ -5761,10 +5782,19 @@ snapshots:
   '@react-pdf/stylesheet@6.2.3':
     dependencies:
       '@react-pdf/fns': 3.1.3
-      '@react-pdf/types': 2.11.3
+      '@react-pdf/types': 2.12.0
       color-string: 2.1.4
       hsl-to-hex: 1.0.0
       media-engine: 1.0.3
+      postcss-value-parser: 4.2.0
+
+  '@react-pdf/stylesheet@6.2.4':
+    dependencies:
+      '@react-pdf/fns': 3.1.3
+      '@react-pdf/types': 2.12.0
+      color-string: 2.1.4
+      hsl-to-hex: 1.0.0
+      media-engine: 2.0.0
       postcss-value-parser: 4.2.0
 
   '@react-pdf/svg@1.1.0':
@@ -5778,11 +5808,11 @@ snapshots:
       hyphen: 1.14.1
       unicode-properties: 1.4.1
 
-  '@react-pdf/types@2.11.3':
+  '@react-pdf/types@2.12.0':
     dependencies:
-      '@react-pdf/font': 4.0.10
-      '@react-pdf/primitives': 4.3.0
-      '@react-pdf/stylesheet': 6.2.3
+      '@react-pdf/font': 4.0.11
+      '@react-pdf/primitives': 4.4.0
+      '@react-pdf/stylesheet': 6.2.4
 
   '@reduxjs/toolkit@2.12.0(react-redux@9.3.0(@types/react@19.2.18)(react@19.2.8)(redux@5.0.1))(react@19.2.8)':
     dependencies:
@@ -7642,6 +7672,8 @@ snapshots:
   mdn-data@2.27.1: {}
 
   media-engine@1.0.3: {}
+
+  media-engine@2.0.0: {}
 
   media-typer@1.1.1: {}
 
