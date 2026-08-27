@@ -1,11 +1,25 @@
 import Delete from "@mui/icons-material/Delete";
 import { Box, Typography } from "@mui/material";
-import { type GridColDef, type GridRenderCellParams } from "@mui/x-data-grid";
+import { type GridColDef, type GridComparatorFn, type GridRenderCellParams } from "@mui/x-data-grid";
 import type { TFunction } from "i18next";
 import type { Member } from "#api/types/members.types.ts";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { ColumnFilterHeader } from "#view/components/column-filter-header.component.tsx";
+
+// Case-insensitive text sort, consistent with the case-insensitive ordering the list hooks
+// already apply, so column sorting matches regardless of the stored name/email casing.
+const caseInsensitiveComparator: GridComparatorFn = (a, b) => {
+    const first = String(a ?? "").toLowerCase();
+    const second = String(b ?? "").toLowerCase();
+    if (first < second) {
+        return -1;
+    }
+    if (first > second) {
+        return 1;
+    }
+    return 0;
+};
 
 interface ColumnConfig {
     t: TFunction;
@@ -33,6 +47,7 @@ export const createMembersColumns = ({
         minWidth: 200,
         align: "center",
         headerAlign: "center",
+        sortComparator: caseInsensitiveComparator,
         renderHeader: () => (
             <ColumnFilterHeader
                 field="name"
@@ -51,6 +66,7 @@ export const createMembersColumns = ({
         minWidth: 220,
         align: "center",
         headerAlign: "center",
+        sortComparator: caseInsensitiveComparator,
         renderHeader: () => (
             <ColumnFilterHeader
                 field="email"

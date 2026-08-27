@@ -408,6 +408,10 @@ const MemberPageBody = () => {
                     }}
                     columnHeaderHeight={90}
                     columnVisibilityModel={columnVisibility}
+                    // Two-state header sort (asc<->desc, never the DataGrid default third
+                    // "unsorted" state) so clicking a column header always toggles between the
+                    // two directions, matching the members list's expected sort behaviour.
+                    sortingOrder={["asc", "desc"]}
                     sx={{
                         borderRadius: 5,
                         boxShadow: 1,
@@ -419,6 +423,7 @@ const MemberPageBody = () => {
                     }}
                     initialState={{
                         pagination: { paginationModel: { pageSize: 25, page: 0 } },
+                        sorting: { sortModel: [{ field: "name", sort: "asc" }] },
                     }}
                     pageSizeOptions={[10, 25, 50, 100]}
                     slots={{ noRowsOverlay: NoRowsOverlayWithMessage }}
