@@ -1,66 +1,50 @@
-import { useCallback } from "react";
-import type { ExtendedThreat, Threat } from "#api/types/threat.types.ts";
-import { ThreatsActions } from "#application/actions/threats.actions.ts";
-import { threatsSelectors } from "#application/selectors/threats.selectors.ts";
-import { useAppDispatch, useAppSelector } from "./use-app-redux.hook";
+import { useCallback, useRef, useState } from "react";
+import { GenericThreatsAPI } from "#api/generic-threats.api.ts";
+import type { ExtendedThreat } from "#api/types/threat.types.ts";
+import { ErrorActions } from "#application/actions/error.actions.ts";
+import { toSerializedError } from "#utils/serialize-error.ts";
+import { useAppDispatch } from "./use-app-redux.hook";
 
 export const useThreats = ({ projectId }: { projectId: number }) => {
     const dispatch = useAppDispatch();
-    const items = useAppSelector((state) => threatsSelectors.selectByProjectId(state, projectId));
-    const isPending = useAppSelector((state) => state.threats.isPending);
+    const [items, setItems] = useState<ExtendedThreat[]>([]);
+    const [isPending, setIsPending] = useState(false);
 
-    const loadThreats = useCallback(() => {
-        dispatch(ThreatsActions.getThreats({ projectId }));
+    // Consumers refetch on autosave and navigation, so calls can overlap. Apply results only
+    // for the latest call, so a slower older response can't overwrite newer data or clear
+    // pending while a newer load runs (same pattern as use-generic-threats-list.hook).
+    const loadSequenceRef = useRef(0);
+
+    const loadThreats = useCallback(async () => {
+        const sequence = ++loadSequenceRef.current;
+        setIsPending(true);
+        try {
+            const genericThreats = await GenericThreatsAPI.getGenericThreatsWithExtendedChildren({ projectId });
+            if (sequence !== loadSequenceRef.current) {
+                return;
+            }
+            const threats = genericThreats
+                .flatMap((genericThreat) => genericThreat.children)
+                .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
+
+            setItems(threats);
+        } catch (error) {
+            if (sequence !== loadSequenceRef.current) {
+                return;
+            }
+            // Surface through the global error state, like the redux thunks do
+            // via the error middleware; keep any previously loaded items.
+            dispatch(ErrorActions.setAPIError(toSerializedError(error)));
+        } finally {
+            if (sequence === loadSequenceRef.current) {
+                setIsPending(false);
+            }
+        }
     }, [projectId, dispatch]);
-
-    const deleteThreat = (threat: Threat) => {
-        dispatch(ThreatsActions.deleteThreat(threat));
-    };
-
-    const duplicateThreat = ({
-        name,
-        description,
-        pointOfAttackId,
-        projectId,
-        catalogThreatId,
-        pointOfAttack,
-        attacker,
-        probability,
-        confidentiality,
-        integrity,
-        availability,
-        doneEditing,
-    }: ExtendedThreat) => {
-        const filteredThreats = items.filter(
-            (item) =>
-                item.pointOfAttackId === pointOfAttackId &&
-                item.attacker === attacker &&
-                item.pointOfAttack === pointOfAttack
-        );
-        const namePostfix = " (" + filteredThreats.length + ")";
-        dispatch(
-            ThreatsActions.createThreat({
-                name: name + namePostfix,
-                description,
-                pointOfAttackId,
-                projectId,
-                catalogThreatId,
-                pointOfAttack,
-                attacker,
-                probability,
-                confidentiality,
-                integrity,
-                availability,
-                doneEditing,
-            })
-        );
-    };
 
     return {
         items,
         isPending,
         loadThreats,
-        deleteThreat,
-        duplicateThreat,
     };
 };

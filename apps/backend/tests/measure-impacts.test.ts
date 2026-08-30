@@ -9,10 +9,13 @@ import {
     catalogMeasures,
     catalogs,
     catalogThreats,
+    CreateThreat,
     CreateMeasure,
+    CreateGenericThreat,
+    threats,
+    genericThreats,
     measureImpacts,
     measures,
-    threats,
     usersCatalogs,
 } from "#db/schema.js";
 import { POINTS_OF_ATTACK } from "#types/points-of-attack.types.js";
@@ -22,7 +25,7 @@ import { app } from "#server.js";
 import { LANGUAGES } from "#types/languages.type.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
 import { CreateProjectRequest } from "#types/project.types.js";
-import { CreateThreatRequest } from "#types/threat.types.js";
+import { THREAT_STATUSES } from "#types/threat-statuses.types.js";
 import { CreateMeasureRequest } from "#types/measure.types.js";
 import { CreateCatalogThreatRequest } from "#types/catalog-threat.types.js";
 import { CreateCatalogMeasureRequest } from "#types/catalog-measure.types.js";
@@ -34,6 +37,7 @@ let catalogId: number;
 let catalogThreatId: number;
 let catalogMeasureId: number;
 let measureId: number;
+let genericThreatId: number;
 let threatId: number;
 let cookies: string[];
 let csrfToken: string;
@@ -44,7 +48,15 @@ const VALID_PROJECT: Omit<InstanceType<typeof CreateProjectRequest>, "catalogId"
     confidentialityLevel: CONFIDENTIALITY_LEVELS.INTERNAL,
 };
 
-const VALID_THREAT_1: Omit<InstanceType<typeof CreateThreatRequest>, "catalogThreatId"> = {
+const VALID_GENERIC_THREAT_1: Omit<CreateGenericThreat, "catalogThreatId" | "projectId"> = {
+    pointOfAttackId: nanoid(),
+    name: "Generic Threat 1",
+    description: "Generic description 1",
+    pointOfAttack: POINTS_OF_ATTACK.COMMUNICATION_INFRASTRUCTURE,
+    attacker: ATTACKERS.ADMINISTRATORS,
+};
+
+const VALID_THREAT_1: Omit<CreateThreat, "genericThreatId" | "projectId"> = {
     pointOfAttackId: nanoid(),
     name: "valid threat",
     description: "valid description test test",
@@ -54,7 +66,7 @@ const VALID_THREAT_1: Omit<InstanceType<typeof CreateThreatRequest>, "catalogThr
     confidentiality: true,
     integrity: true,
     availability: false,
-    doneEditing: false,
+    status: THREAT_STATUSES.NEW,
 };
 
 const VALID_MEASURE_1: InstanceType<typeof CreateMeasureRequest> = {
@@ -191,12 +203,24 @@ beforeEach(async () => {
     ).at(0);
     catalogMeasureId = catalogMeasure!.id;
 
+    const genericThreat = (
+        await db
+            .insert(genericThreats)
+            .values({
+                ...VALID_GENERIC_THREAT_1,
+                catalogThreatId,
+                projectId,
+            })
+            .returning()
+    ).at(0);
+    genericThreatId = genericThreat!.id;
+
     const threat = (
         await db
             .insert(threats)
             .values({
                 ...VALID_THREAT_1,
-                catalogThreatId,
+                genericThreatId,
                 projectId,
             })
             .returning()
@@ -426,5 +450,63 @@ describe("measures impacts (invalid data)", () => {
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(400);
+    });
+});
+
+describe("applying an out-of-scope measure finalizes the child threat", () => {
+    const getChildStatus = async (id: number) =>
+        (await db.query.threats.findFirst({ where: eq(threats.id, id) }))!.status;
+
+    const setChildStatus = async (id: number, status: THREAT_STATUSES) =>
+        await db.update(threats).set({ status }).where(eq(threats.id, id));
+
+    const postImpact = async (body: Omit<InstanceType<typeof CreateMeasureImpactRequest>, "measureId" | "threatId">) =>
+        await request(app)
+            .post(`/api/projects/${projectId}/system/measureImpacts`)
+            .send({ ...body, threatId, measureId })
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+
+    it("finalizes the child threat when an out-of-scope impact is created", async () => {
+        const res = await postImpact(VALID_MEASURE_IMPACT_2);
+        expect(res.statusCode).toEqual(200);
+        expect(await getChildStatus(threatId)).toBe(THREAT_STATUSES.FINALIZED);
+    });
+
+    it("leaves the status unchanged when an ordinary impact is created", async () => {
+        const res = await postImpact(VALID_MEASURE_IMPACT_1);
+        expect(res.statusCode).toEqual(200);
+        expect(await getChildStatus(threatId)).toBe(THREAT_STATUSES.NEW);
+    });
+
+    it("finalizes the child threat when an impact is edited to set it out of scope", async () => {
+        const created = await postImpact(VALID_MEASURE_IMPACT_1);
+        expect(await getChildStatus(threatId)).toBe(THREAT_STATUSES.NEW);
+
+        await request(app)
+            .put(`/api/projects/${projectId}/system/measureImpacts/${created.body.id}`)
+            .send({ ...VALID_MEASURE_IMPACT_2, threatId, measureId })
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(await getChildStatus(threatId)).toBe(THREAT_STATUSES.FINALIZED);
+    });
+
+    it("does not revert the status when the out-of-scope impact is removed", async () => {
+        const created = await postImpact(VALID_MEASURE_IMPACT_2);
+        expect(await getChildStatus(threatId)).toBe(THREAT_STATUSES.FINALIZED);
+
+        const res = await request(app)
+            .delete(`/api/projects/${projectId}/system/measureImpacts/${created.body.id}`)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(204);
+        expect(await getChildStatus(threatId)).toBe(THREAT_STATUSES.FINALIZED);
+    });
+
+    it("finalizes regardless of the threat's current status", async () => {
+        await setChildStatus(threatId, THREAT_STATUSES.IN_PROGRESS);
+
+        await postImpact(VALID_MEASURE_IMPACT_2);
+        expect(await getChildStatus(threatId)).toBe(THREAT_STATUSES.FINALIZED);
     });
 });

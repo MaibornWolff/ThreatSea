@@ -40,11 +40,14 @@
   "catalogs": "Kataloge",
   "componentName": "Komponente",
   "creationDate": "Datum",
+  "customizeView": "Ansicht anpassen",
   "damage": "Schaden",
   "damageAxis": "Schaden",
   "description": "Beschreibung",
   "done": "Erledigt",
   "email": "Email Adresse",
+  "filterPlaceholder": "Filtern...",
+  "toggleColumnFilter": "Filter für {{column}} umschalten",
   "fullExport": "Export der Assets, Bedrohungen und Maßnahmen",
   "heading": "Risiko Zeitstrahl",
   "language": "Sprache",
@@ -69,6 +72,7 @@
   "title": "Titel",
 
   "addBtn": "Hinzufügen",
+  "ok": "OK",
   "cancel": "Abbrechen",
   "cancelBtn": "Abbrechen",
   "cancelText": "Abbrechen",
@@ -148,6 +152,13 @@
     "COMMUNICATION_INTERFACES": "Kommunikationsschnittstelle",
     "USER_INTERFACE": "Benutzerschnittstelle",
     "USER_BEHAVIOUR": "Benutzerverhalten"
+  },
+
+  "statusList": {
+    "new": "Neu",
+    "in progress": "In Bearbeitung",
+    "finalized": "Finalisiert",
+    "out of scope": "Out of Scope"
   },
 
   "probabilities": {

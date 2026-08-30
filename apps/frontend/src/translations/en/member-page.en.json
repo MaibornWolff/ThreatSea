@@ -7,5 +7,13 @@
     "OWNER": "Owner",
     "EDITOR": "Editor",
     "VIEWER": "Viewer"
-  }
+  },
+  "actions": "Actions",
+  "noMembersFound": "No Members found",
+  "deleteMemberMessagePre": "Member: ",
+  "deleteMemberMessagePost": " will be removed, are you sure?",
+  "onlyOwnerLeftPre": "You can't remove ",
+  "onlyOwnerLeftPost": " because this user is the only owner left in the project. Declare a new owner first.",
+  "projectWouldBeEmptyPre": "Can't remove ",
+  "projectWouldBeEmptyPost": " because the project will be empty. Deletion of a project can be done under the projects page."
 }

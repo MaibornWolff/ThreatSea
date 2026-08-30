@@ -1,4 +1,5 @@
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
+import type { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import type { DialogValue } from "#application/reducers/dialogs.reducer.ts";
 
 export interface FormValues {
@@ -9,7 +10,7 @@ export interface FormValues {
     confidentiality: boolean;
     integrity: boolean;
     availability: boolean;
-    doneEditing: boolean;
+    status: THREAT_STATUSES;
 }
 
 export interface ThreatFormValues extends FormValues, Omit<ExtendedThreat, keyof FormValues>, DialogValue {}

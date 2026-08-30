@@ -1,147 +1,54 @@
 /**
- * Module that defines the logic for thread
- * manipulation for the current project.
+ * Module that defines the access and manipulation
+ * of threats.
  */
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db, TransactionType } from "#db/index.js";
-import { Asset, CreateThreat, Threat, threats, UpdateThreat } from "#db/schema.js";
-import { ComponentType } from "#types/system.types.js";
-import { getPointsOfAttack } from "#services/points-of-attack.service.js";
-import { deleteMeasureImpactsByThreat } from "#services/measureImpacts.service.js";
-import { POINTS_OF_ATTACK } from "#types/points-of-attack.types.js";
+import { threats, Threat, CreateThreat, UpdateThreat } from "#db/schema.js";
+import { getGenericThreat } from "./generic-threats.service.js";
+import { getCatalogThreatById } from "./catalog-threats.service.js";
+import { NotFoundError } from "#errors/not-found.error.js";
+import { THREAT_STATUSES } from "#types/threat-statuses.types.js";
 
-export async function cleanUpUnusedImpacts(projectId: number) {
-    const selectedThreats = await db.query.threats.findMany({ where: eq(threats.projectId, projectId) });
-
-    // Gets the points of attack for this project.
-    const pointsOfAttack = await getPointsOfAttack(projectId);
-
-    selectedThreats
-        .map((threat) => {
-            // Get point of attack involved.
-            const pointOfAttack = pointsOfAttack.find((pointOfAttack) => pointOfAttack.id === threat.pointOfAttackId);
-
-            // Map threat data with assets together.
-            return {
-                ...threat,
-                assets: pointOfAttack?.assets || [],
-            };
-        })
-        .forEach((threat) => {
-            if (threat.assets.length <= 0) {
-                deleteMeasureImpactsByThreat(threat.id);
-            }
-        });
-}
-
-export type ExtendedThreat = Threat & {
-    assets: Asset[];
-    componentName: string | null;
-    componentType: number | ComponentType | null;
-    componentReportId?: string | null;
-    interfaceName: string | null;
-};
+// ------------------------------------------------------------------------------
+// TODO: RENAMING TO THREAT INSTEAD OF CHILD THREAT LATER ON
+// ------------------------------------------------------------------------------
 
 /**
- * Gets all threats of the project with the components and assets involved.
+ * Gets all child threats of a generic threat.
  *
- * @param {number} projectId - id of the current project.
- * @returns {Promise<ExtendedThreat[]>} A promise that resolves to an array of threats with their components and assets.
+ * @param {number} genericThreatId - The id of the generic threat.
+ * @returns {Promise<Threat[]>} A promise that resolves to an array of child threats.
  */
-export async function getThreats(projectId: number): Promise<ExtendedThreat[]> {
-    // Fetches all thread of the current project.
-    const selectedThreats = await db.query.threats.findMany({ where: eq(threats.projectId, projectId) });
-
-    // Gets the points of attack for this project.
-    const pointsOfAttack = await getPointsOfAttack(projectId);
-
-    return (
-        selectedThreats
-            .map((threat) => {
-                // Get point of attack involved.
-                const pointOfAttack = pointsOfAttack.find(
-                    (pointOfAttack) => pointOfAttack.id === threat.pointOfAttackId
-                );
-
-                let interfaceName: string | null = null;
-                if (pointOfAttack?.type === POINTS_OF_ATTACK.COMMUNICATION_INTERFACES) {
-                    interfaceName = pointOfAttack.name ?? null;
-                }
-
-                // Map threat data with the component and assets together.
-                return {
-                    ...threat,
-                    componentName: pointOfAttack?.componentName ?? null,
-                    componentType: pointOfAttack?.componentType ?? null,
-                    assets: pointOfAttack?.assets ?? [],
-                    interfaceName,
-                };
-            })
-            // Sort out threats with no assets involved. And deleting useless MeasureImpacts
-            .filter((threat) => {
-                if (threat.assets.length > 0) {
-                    return true;
-                } else {
-                    deleteMeasureImpactsByThreat(threat.id);
-                    return false;
-                }
-            })
-    );
-}
-
-/**
- * Gets all threats of the project with the components and assets involved for export.
- *
- * @param {number} projectId - The id of the project.
- * @returns {Promise<ExtendedThreat>} A promise that resolves to an array of extended threats.
- */
-export async function getThreatsForExport(projectId: number): Promise<ExtendedThreat[]> {
-    // Fetches all thread of the current project.
-    const selectedThreats = await db.query.threats.findMany({ where: eq(threats.projectId, projectId) });
-
-    // Gets the points of attack for this project.
-    const pointsOfAttack = await getPointsOfAttack(projectId);
-
-    return selectedThreats.map((threat) => {
-        // Get point of attack involved.
-        const pointOfAttack = pointsOfAttack.find((pointOfAttack) => pointOfAttack.id === threat.pointOfAttackId);
-
-        // Resolve the component.
-        let actualComponentName: string | null = null;
-        let actualComponentType: number | ComponentType | null = null;
-        if (pointOfAttack) {
-            const { type, componentType, componentName, connectionName, connectionPointName } = pointOfAttack;
-            actualComponentName =
-                type === "COMMUNICATION_INTERFACES"
-                    ? connectionPointName
-                    : type === "COMMUNICATION_INFRASTRUCTURE"
-                      ? connectionName
-                      : componentName
-                        ? componentName
-                        : "";
-            actualComponentType = componentType;
-        }
-
-        let interfaceName: string | null = null;
-        if (pointOfAttack?.type === POINTS_OF_ATTACK.COMMUNICATION_INTERFACES) {
-            interfaceName = pointOfAttack.name ?? null;
-        }
-        // Map threat data with the component and assets together.
-        return {
-            ...threat,
-            componentName: actualComponentName,
-            componentType: actualComponentType,
-            assets: pointOfAttack?.assets ?? [],
-            interfaceName,
-        };
+export async function getThreatsByGenericThreatId(
+    genericThreatId: number,
+    transaction: TransactionType | undefined = undefined
+): Promise<Threat[]> {
+    return await (transaction ?? db).query.threats.findMany({
+        where: eq(threats.genericThreatId, genericThreatId),
     });
 }
 
 /**
- * Gets a specific threat by its id.
+ * Gets all child threats of a project.
  *
- * @param {number} threatId - The id of the thread.
- * @returns
+ * @param {number} projectId - The id of the project.
+ * @returns {Promise<Threat[]>} A promise that resolves to an array of child threats.
+ */
+export async function getThreatsByProjectId(
+    projectId: number,
+    transaction: TransactionType | undefined = undefined
+): Promise<Threat[]> {
+    return await (transaction ?? db).query.threats.findMany({
+        where: eq(threats.projectId, projectId),
+    });
+}
+
+/**
+ * Gets a specific child threat by its id.
+ *
+ * @param {number} threatId - The id of the threat.
+ * @returns {Promise<Threat | null>} A promise that resolves to the child threat or null if not found.
  */
 export async function getThreat(threatId: number): Promise<Threat | null> {
     const threat = await db.query.threats.findFirst({ where: eq(threats.id, threatId) });
@@ -150,65 +57,103 @@ export async function getThreat(threatId: number): Promise<Threat | null> {
 }
 
 /**
- * Updates the threat with the specified id.
+ * Creates a child threat.
  *
- * @param threatId - The id of the threat.
- * @param {UpdateThreat} updateThreatData - The data of the threat.
- * @return {Promise<Threat>} A promise that resolves to the updated threat.
- * @throws {Error} If the threat could not be updated.
+ * @param {CreateThreat} createThreatData - The data of the child threat.
+ * @param {TransactionType} transaction - drizzle transaction.
+ * @returns {Promise<Threat>} A promise that resolves to the created child threat.
+ * @throws {Error} If the child threat could not be created.
  */
-export async function updateThreat(threatId: number, updateThreatData: UpdateThreat): Promise<Threat> {
-    const [threat] = await db.update(threats).set(updateThreatData).where(eq(threats.id, threatId)).returning();
+export async function createThreat(
+    createThreatData: CreateThreat,
+    transaction: TransactionType | undefined = undefined
+): Promise<Threat> {
+    const [childthreat] = await (transaction ?? db).insert(threats).values(createThreatData).returning();
 
-    if (!threat) {
-        throw new Error("Failed to update threat");
+    if (!childthreat) {
+        throw new Error("Failed to create child threat");
     }
 
-    return threat;
+    return childthreat;
+}
+
+/** The user-editable subset of a child threat; identity fields are excluded on purpose. */
+export type ThreatRefinement = Partial<
+    Pick<
+        CreateThreat,
+        "name" | "description" | "probability" | "confidentiality" | "integrity" | "availability" | "status"
+    >
+>;
+
+export async function createThreatForGenericThreat(
+    genericThreatId: number,
+    refinement: ThreatRefinement = {},
+    transaction: TransactionType | undefined = undefined
+): Promise<Threat> {
+    const genericThreat = await getGenericThreat(genericThreatId, transaction);
+
+    if (!genericThreat) {
+        throw new NotFoundError("Generic threat not found");
+    }
+
+    const catalogThreat = await getCatalogThreatById(genericThreat.catalogThreatId, transaction);
+
+    if (!catalogThreat) {
+        throw new NotFoundError("Catalog threat not found");
+    }
+
+    const createThreatData: CreateThreat = {
+        attacker: genericThreat.attacker,
+        name: refinement.name ?? genericThreat.name,
+        description: refinement.description ?? "",
+        confidentiality: refinement.confidentiality ?? catalogThreat.confidentiality,
+        integrity: refinement.integrity ?? catalogThreat.integrity,
+        availability: refinement.availability ?? catalogThreat.availability,
+        projectId: genericThreat.projectId,
+        pointOfAttack: genericThreat.pointOfAttack,
+        probability: refinement.probability ?? catalogThreat.probability,
+        pointOfAttackId: genericThreat.pointOfAttackId,
+        status: refinement.status ?? THREAT_STATUSES.NEW,
+        genericThreatId: genericThreatId,
+    };
+
+    return await createThreat(createThreatData, transaction);
 }
 
 /**
- * Deletes the threat with the specified id.
+ * Updates the child threat with the specified id.
  *
- * @param {number} threatId - The id of the threat.
- * @returns {Promise<void>} A promise that resolves when the threat is deleted.
+ * @param {number} threatId - The id of the child threat.
+ * @param {UpdateThreat} updateThreatData - The data of the child threat.
+ * @returns {Promise<Threat>} A promise that resolves to the updated child threat.
+ * @throws {Error} If the child threat could not be updated.
+ */
+export async function updateThreat(threatId: number, updateThreatData: UpdateThreat): Promise<Threat> {
+    const [childthreat] = await db.update(threats).set(updateThreatData).where(eq(threats.id, threatId)).returning();
+
+    if (!childthreat) {
+        throw new Error("Failed to update child threat");
+    }
+
+    return childthreat;
+}
+
+/**
+ * Deletes the child threat with the specified id.
+ *
+ * @param {number} threatId - The id of the child threat.
+ * @returns {Promise<void>} A promise that resolves when the child threat is deleted.
  */
 export async function deleteThreat(threatId: number): Promise<void> {
     await db.delete(threats).where(eq(threats.id, threatId));
 }
 
-/**
- * Creates a new thread.
- *
- * @param {CreateThreat} createThreatData - The data of the threat.
- * @param {TransactionType} transaction - drizzle transaction
- * @returns {Promise<Threat>} A promise that resolves to the created threat.
- * @throws {Error} If the threat could not be created.
- */
-export async function createThreat(
-    createThreatData: CreateThreat,
+export async function deleteThreatsByPointOfAttackId(
+    pointOfAttackId: string,
+    projectId: number,
     transaction: TransactionType | undefined = undefined
-): Promise<ExtendedThreat> {
-    const [threat] = await (transaction ?? db).insert(threats).values(createThreatData).returning();
-
-    if (!threat) {
-        throw new Error("Failed to create threat");
-    }
-
-    const pointOfAttack = (await getPointsOfAttack(createThreatData.projectId)).find(
-        (poa) => poa.id === threat?.pointOfAttackId
-    );
-
-    let interfaceName: string | null = null;
-    if (pointOfAttack?.type === POINTS_OF_ATTACK.COMMUNICATION_INTERFACES) {
-        interfaceName = pointOfAttack.name ?? null;
-    }
-
-    return {
-        ...threat,
-        componentName: pointOfAttack?.componentName ?? null,
-        componentType: pointOfAttack?.componentType ?? null,
-        assets: pointOfAttack?.assets ?? [],
-        interfaceName,
-    };
+): Promise<void> {
+    await (transaction ?? db)
+        .delete(threats)
+        .where(and(eq(threats.pointOfAttackId, pointOfAttackId), eq(threats.projectId, projectId)));
 }

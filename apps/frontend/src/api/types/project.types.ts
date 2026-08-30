@@ -42,8 +42,8 @@ export interface ExtendedProject extends Project {
 export interface ProjectReport {
     systemImage: string | null;
     project: Project;
-    components: (Component & { reportId: string })[];
     assets: (Asset & { reportId: string })[];
+    components: (Component & { reportId: string })[];
     threats: (Threat & {
         componentName: string | null;
         componentType: number | STANDARD_COMPONENT_TYPES | null;
@@ -51,8 +51,6 @@ export interface ProjectReport {
         interfaceName: string | null;
         damage: number;
         risk: number;
-        attacker: ATTACKERS;
-        pointOfAttack: POINTS_OF_ATTACK;
         assets: { name: string | undefined; id: number; reportId: string | undefined }[];
         measures: (MeasureImpact & {
             reportId: string | undefined;
@@ -63,7 +61,6 @@ export interface ProjectReport {
         netDamage: number;
         netRisk: number;
         reportId: string;
-        id: number;
         bruttoColor: MatrixColorKey;
         nettoColor: MatrixColorKey;
     })[];
@@ -71,6 +68,22 @@ export interface ProjectReport {
         threats: { id: number; reportId: string | undefined; name: string | undefined }[];
     })[];
     measureImpacts: (MeasureImpact & { measureReportId: string | undefined; threatReportId: string | undefined })[];
+    threatGroups: ReportThreatGroup[];
+}
+
+// A parent (generic) threat as it appears in the report: a group header carrying the
+// shared identity and no risk, plus the ids of its child threats in canonical order.
+export interface ReportThreatGroup {
+    reportId: string;
+    genericThreatId: number;
+    name: string;
+    description: string;
+    componentName: string | null;
+    componentType: number | STANDARD_COMPONENT_TYPES | null;
+    interfaceName: string | null;
+    pointOfAttack: POINTS_OF_ATTACK;
+    attacker: ATTACKERS;
+    threatIds: number[];
 }
 
 export type ThreatReport = ProjectReport["threats"][number];

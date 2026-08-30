@@ -28,6 +28,8 @@ import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useLocation } from "react-router";
 import { useDialog } from "#application/hooks/use-dialog.hook.ts";
+import { useAppDispatch } from "#application/hooks/use-app-redux.hook.ts";
+import { MeasureImpactsActions } from "#application/actions/measureImpacts.actions.ts";
 import { Button } from "#view/components/button.component.tsx";
 import { Dialog } from "#view/components/dialog.component.tsx";
 import { DialogTextField } from "#view/components/dialog.textfield.component.tsx";
@@ -58,6 +60,7 @@ interface MeasureImpactByMeasureDialogProps extends DialogProps {
     project: Project;
     threat: ApplyMeasureThreat;
     measureImpact: MeasureImpact | null;
+    onApplied?: () => void;
 }
 
 /**
@@ -72,15 +75,13 @@ const MeasureImpactByMeasureDialog = ({
     project,
     threat,
     measureImpact,
+    onApplied,
     ...props
 }: MeasureImpactByMeasureDialogProps) => {
     const navigate = useNavigate();
     const location = useLocation();
-    const {
-        confirmDialog,
-        cancelDialog,
-        values: preselectedValues,
-    } = useDialog<MeasureImpactFormValues | null>("measureImpacts");
+    const dispatch = useAppDispatch();
+    const { values: preselectedValues, cancelDialog } = useDialog<MeasureImpactFormValues | null>("measureImpacts");
     const { suggestedMeasures, appliedMeasures, filteredCatalogMeasures, remainingMeasures } = useMeasureSuggestions({
         selectedThreat: threat,
         projectId: project.id,
@@ -130,7 +131,6 @@ const MeasureImpactByMeasureDialog = ({
      * @event Button#onClick
      */
     const handleCancelDialog = () => {
-        cancelDialog();
         closeDialog();
     };
 
@@ -140,21 +140,42 @@ const MeasureImpactByMeasureDialog = ({
      * @event Box#onSubmit
      * @param {object} data - Data of the measure.
      */
-    const handleConfirmDialog = (data: MeasureImpactFormValues) => {
-        confirmDialog({
+    const handleConfirmDialog = async (data: MeasureImpactFormValues) => {
+        const payload = {
             ...data,
             probability: data.setsOutOfScope || !data.impactsProbability ? null : data.probability,
             damage: data.setsOutOfScope || !data.impactsDamage ? null : data.damage,
             threatId: threat.id,
             projectId: project.id,
-        });
-        closeDialog();
+        };
+        try {
+            if (payload.id != null) {
+                await dispatch(
+                    MeasureImpactsActions.updateMeasureImpact(
+                        payload as Parameters<typeof MeasureImpactsActions.updateMeasureImpact>[0]
+                    )
+                ).unwrap();
+            } else {
+                await dispatch(
+                    MeasureImpactsActions.createMeasureImpact(
+                        payload as Parameters<typeof MeasureImpactsActions.createMeasureImpact>[0]
+                    )
+                ).unwrap();
+            }
+            onApplied?.();
+            closeDialog();
+        } catch {
+            // handled globally; keep the dialog open so the user can retry
+        }
     };
 
     /**
-     * Closes the dialog.
+     * Closes the dialog. Clears the measureImpacts dialog namespace first — the
+     * save-measure flow preselects a measureId there, and a leftover value would
+     * pre-fill the next dialog open from any path.
      */
     const closeDialog = () => {
+        cancelDialog();
         navigate(-1);
     };
 

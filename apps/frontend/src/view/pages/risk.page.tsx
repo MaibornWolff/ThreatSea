@@ -24,6 +24,7 @@ import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
 import type { ThreatWithMetrics, SelectedMatrixCell, ThreatMeasure } from "#application/hooks/use-matrix.hook.ts";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
+import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { ProjectsActions } from "#application/actions/projects.actions.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
@@ -69,7 +70,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
     const {
         timeline,
         matrix,
-        threats,
+        threats: threats,
         sortDirection,
         sortBy,
         setThreatSearchValue,
@@ -81,7 +82,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
         setSortBy,
         setSelectedCell,
         setTimelineDate,
-        loadThreats,
+        loadThreats: loadThreats,
         deleteMeasureImpact,
     } = useMatrix({
         projectId: project.id,
@@ -250,7 +251,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
     const handleEditThreat = (threatIndex: number, threat: ThreatWithMetrics | undefined) => {
         setSelectedThreat(threatIndex);
         if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
-            navigate(`/projects/${projectId}/risk/threats/edit`, {
+            navigate(`/projects/${projectId}/risk/threats/edit?threatId=${threat?.id ?? ""}`, {
                 state: {
                     threat,
                 },
@@ -550,7 +551,11 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                                     borderRightColor: "border.divider",
                                                                 }}
                                                             >
-                                                                {threat.newProbability}
+                                                                {threat.newProbability === 0
+                                                                    ? t(`statusList.${THREAT_STATUSES.OUTOFSCOPE}`, {
+                                                                          ns: "common",
+                                                                      })
+                                                                    : threat.newProbability}
                                                             </CustomTableCell>
                                                             <CustomTableCell
                                                                 showBorder={true}
@@ -847,10 +852,13 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
             </Box>
             {checkUserRole(userRole, USER_ROLES.EDITOR) && (
                 <Routes>
-                    <Route path="measureImpacts/edit" element={<MeasureImpactByMeasureDialogPage />}>
+                    <Route
+                        path="measureImpacts/edit"
+                        element={<MeasureImpactByMeasureDialogPage onApplied={() => void loadThreats()} />}
+                    >
                         <Route path="measures/add" element={<AddMeasureDialogPage />} />
                     </Route>
-                    <Route path="threats/edit" element={<ThreatDialogPage />} />
+                    <Route path="threats/edit" element={<ThreatDialogPage onSaved={() => void loadThreats()} />} />
                     <Route path="appliedMeasure/edit" element={<MeasureDetailsDialogPage />} />
                 </Routes>
             )}

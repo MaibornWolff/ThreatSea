@@ -1,28 +1,38 @@
-import Check from "@mui/icons-material/Check";
-import Clear from "@mui/icons-material/Clear";
-import ContentCopy from "@mui/icons-material/ContentCopy";
-import Delete from "@mui/icons-material/Delete";
-import { Box, LinearProgress, Popper, Typography } from "@mui/material";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell, { type TableCellProps } from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import { memo, useLayoutEffect, useState, type ChangeEvent, type SyntheticEvent } from "react";
+import Visibility from "@mui/icons-material/Visibility";
+import UnfoldMore from "@mui/icons-material/UnfoldMore";
+import UnfoldLess from "@mui/icons-material/UnfoldLess";
+import FilterAltOff from "@mui/icons-material/FilterAltOff";
+import {
+    Box,
+    Button,
+    Checkbox,
+    FormControlLabel,
+    IconButton,
+    LinearProgress,
+    Menu,
+    MenuItem,
+    Popper,
+    Tooltip,
+    Typography,
+} from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import { DataGrid, GridRow, type GridColumnVisibilityModel, type GridRowProps } from "@mui/x-data-grid";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router";
-import type { ExtendedThreat } from "#api/types/threat.types.ts";
-import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
+import { ThreatsActions } from "#application/actions/threats.actions.ts";
+import { useColumnFilters } from "#application/hooks/use-column-filters.hook.ts";
+import { useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { useEditor } from "#application/hooks/use-editor.hook.ts";
-import { useLoadThreatsOnce } from "#application/hooks/use-load-threats-once.hook.ts";
-import { useThreatsList, type ThreatListItem } from "#application/hooks/use-threats-list.hook.ts";
-import { IconButton } from "#view/components/icon-button.component.tsx";
+import {
+    useGenericThreatsList,
+    type ExtendedThreatWithMetrics,
+} from "#application/hooks/use-generic-threats-list.hook.ts";
+import { NoRowsOverlay } from "#view/components/no-rows-overlay.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
 import { SearchField } from "#view/components/search-field.component.tsx";
-import { CustomTableHeaderCell } from "#view/components/table-header.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
 import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
 import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
@@ -31,48 +41,82 @@ import { MeasureImpactByMeasureDialogPage } from "./measure-impact-by-measure-di
 import AddMeasureDialogPage from "./add-measure-dialog.page";
 import { withProject } from "#view/components/with-project.hoc.tsx";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
+import type { Threat, ExtendedThreat } from "#api/types/threat.types.ts";
+import type { GenericThreatWithExtendedChildren } from "#api/types/generic-threat.types.ts";
+import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
+import {
+    createThreatsColumns,
+    formatComponentName,
+    GENERIC_THREAT_ROW_PREFIX,
+    THREAT_ROW_PREFIX,
+    type ThreatsGridRow,
+} from "./create-threats-columns";
+
+// Fields whose values only exist on child threats; a filter on them can never
+// match a generic (parent) threat directly.
+const childOnlyFilterFields = ["assets", "probability", "damage", "risk", "status"] as const;
+
+// The e2e page objects locate action buttons inside the row-level test ids, so
+// the ids must live on the grid row element itself, not on a single cell.
+const ThreatsGridRowSlot = (props: GridRowProps) => {
+    const rowId = String(props.rowId);
+    const testId = rowId.startsWith(GENERIC_THREAT_ROW_PREFIX)
+        ? "threats-page_generic-threats-list-entry"
+        : rowId.startsWith(THREAT_ROW_PREFIX)
+          ? "threats-page_threats-list-entry"
+          : undefined;
+    return <GridRow {...props} data-testid={testId} />;
+};
 
 /**
  * on this page all threats are listed
  * @component
  * @category Pages
  */
+const DEFAULT_COLUMN_VISIBILITY: GridColumnVisibilityModel = {
+    name: true,
+    assets: true,
+    componentName: true,
+    pointOfAttack: true,
+    attacker: true,
+    probability: true,
+    damage: true,
+    risk: true,
+    status: true,
+    actions: true,
+};
+
 const ThreatsPageBody = () => {
     const { projectId: projectIdParam = "0" } = useParams<{ projectId?: string }>();
     const projectId = Number.parseInt(projectIdParam, 10);
-    const { openConfirm } = useConfirm<ExtendedThreat>();
+    const { openConfirm } = useConfirm<Threat>();
     const navigate = useNavigate();
     const { t } = useTranslation("threatsPage");
-    usePageTitle(t("threats", { ns: "common" }));
-
-    const {
-        setSortDirection,
-        setSearchValue,
-        setSortBy,
-        duplicateThreat,
-        deleteThreat,
-        loadThreats,
-        isPending,
-        searchValue,
-        sortDirection,
-        sortBy,
-        threats,
-    } = useThreatsList({ projectId: projectId });
+    usePageTitle(t("threats"));
+    const theme = useTheme();
 
     const { autoSaveStatus } = useEditor({ projectId: projectId });
+
+    const {
+        searchValue: genericThreatSearchValue,
+        setSearchValue: setGenericThreatSearchValue,
+        loadGenericThreats,
+        isPending: isGenericThreatsPending,
+        genericThreats,
+        expandedGenericThreatIds,
+        threatsByGenericThreatId,
+        toggleGenericThreat,
+        setAllGenericThreatsExpanded,
+    } = useGenericThreatsList({ projectId });
 
     const userRole = useAppSelector((state) => state.projects.current?.role);
 
     const onChangeSearchValue = (event: ChangeEvent<HTMLInputElement>) => {
-        setSearchValue(event.target.value);
+        setGenericThreatSearchValue(event.target.value);
     };
 
     const dispatch = useAppDispatch();
 
-    /**
-     * Layout effect to change the header bar
-     * to the current environment the user is at.
-     */
     useLayoutEffect(() => {
         dispatch(
             NavigationActions.setPageHeader({
@@ -84,76 +128,327 @@ const ThreatsPageBody = () => {
         );
     }, [dispatch]);
 
-    const onChangeSortBy = (_event: SyntheticEvent, newSortBy: string | null) => {
-        if (sortBy === newSortBy) {
-            const newSortDirection = sortDirection === "asc" ? "desc" : sortDirection === "desc" ? "asc" : null;
-            if (newSortDirection) {
-                setSortDirection(newSortDirection);
-            }
-        } else if (newSortBy) {
-            setSortBy(newSortBy);
+    useEffect(() => {
+        if (autoSaveStatus === "upToDate") {
+            void loadGenericThreats();
         }
-    };
-
-    const onClickEditThreat = (event: React.MouseEvent<HTMLElement>, threat: ThreatListItem) => {
-        if (!event.isDefaultPrevented()) {
-            navigate(`/projects/${projectId}/threats/edit`, {
-                state: { threat },
-            });
-        }
-    };
-
-    const handleDuplicateThreat = (event: React.MouseEvent<HTMLElement>, threat: ThreatListItem) => {
-        event.preventDefault();
-        openConfirm({
-            state: threat,
-            message: t("duplicateMessage", { threatName: threat.name }),
-            acceptText: t("duplicate"),
-            cancelText: t("cancel"),
-            acceptColor: "secondary",
-            onAccept: (threat) => {
-                duplicateThreat(threat);
-            },
-        });
-    };
-
-    const handleDeleteThreat = (event: React.MouseEvent<HTMLElement>, threat: ThreatListItem) => {
-        event.preventDefault();
-        openConfirm({
-            state: threat,
-            message: t("deleteMessage", { threatName: threat.name }),
-            acceptText: t("delete"),
-            cancelText: t("cancel"),
-            onAccept: (threat) => {
-                deleteThreat(threat);
-            },
-        });
-    };
-
-    useLoadThreatsOnce({ projectId, autoSaveStatus, load: loadThreats });
+    }, [autoSaveStatus, loadGenericThreats]);
 
     const [assetAnchorEl, setAssetAnchorEl] = useState<HTMLElement | null>(null);
     const [currentAssetList, setCurrentAssetList] = useState<ExtendedThreat["assets"] | null>(null);
 
-    /**
-     * Make the Popper show the asset list for the threat the mouse is over
-     * @param {*} e - The event, containing the element the popper relates to
-     * @param {*} assets - The list of assets for the currently selected threat
-     */
-    const handleAssetHover = (event: React.MouseEvent<HTMLElement>, assets: ExtendedThreat["assets"]) => {
-        setCurrentAssetList(assets);
-        setAssetAnchorEl(event.currentTarget);
+    const handleAssetHover = useCallback(
+        (event: React.SyntheticEvent<HTMLElement>, assets: ExtendedThreat["assets"]) => {
+            setCurrentAssetList(assets);
+            setAssetAnchorEl(event.currentTarget);
+        },
+        []
+    );
+
+    const handleAssetHoverEnd = useCallback(() => {
+        setAssetAnchorEl(null);
+    }, []);
+
+    const onClickEditThreat = useCallback(
+        (event: React.MouseEvent<HTMLElement>, threat: ExtendedThreat | undefined) => {
+            event.preventDefault();
+            if (threat) {
+                navigate(`/projects/${projectId}/threats/edit?threatId=${threat.id}`, { state: { threat } });
+            }
+        },
+        [navigate, projectId]
+    );
+
+    const handleAddThreat = useCallback(
+        async (event: React.MouseEvent<HTMLElement>, genericThreat: GenericThreatWithExtendedChildren) => {
+            event.preventDefault();
+            // Keep the add button from toggling the parent row's expand/collapse.
+            event.stopPropagation();
+            try {
+                // Only the name is overridden; identity and assessment defaults come
+                // from the parent and its catalogue threat on the backend.
+                await dispatch(
+                    ThreatsActions.createThreat({
+                        projectId: Number(projectId),
+                        genericThreatId: genericThreat.id,
+                        name: `${genericThreat.name} (${t("newThreatSuffix")})`,
+                    })
+                ).unwrap();
+                if (!expandedGenericThreatIds[genericThreat.id]) {
+                    toggleGenericThreat(genericThreat.id);
+                }
+                void loadGenericThreats();
+            } catch {
+                // handled globally
+            }
+        },
+        [dispatch, projectId, t, expandedGenericThreatIds, toggleGenericThreat, loadGenericThreats]
+    );
+
+    const handleDuplicateThreat = useCallback(
+        (event: React.MouseEvent<HTMLElement>, threat: Threat) => {
+            event.preventDefault();
+            openConfirm({
+                state: threat,
+                message: t("duplicateMessage", { threatName: threat.name }),
+                acceptText: t("duplicate"),
+                cancelText: t("cancel"),
+                acceptColor: "secondary",
+                onAccept: async (threat) => {
+                    try {
+                        const payload = {
+                            projectId: Number(projectId),
+                            genericThreatId: threat.genericThreatId,
+                            name: `${threat.name} (${t("duplicateSuffix")})`,
+                            description: threat.description,
+                            probability: threat.probability,
+                            confidentiality: threat.confidentiality,
+                            integrity: threat.integrity,
+                            availability: threat.availability,
+                            status: THREAT_STATUSES.NEW,
+                        };
+
+                        await dispatch(ThreatsActions.createThreat(payload)).unwrap();
+                        void loadGenericThreats();
+                    } catch {
+                        // swallow; error handling via global error handler
+                    }
+                },
+            });
+        },
+        [openConfirm, t, dispatch, projectId, loadGenericThreats]
+    );
+
+    const handleDeleteThreat = useCallback(
+        (event: React.MouseEvent<HTMLElement>, threat: Threat) => {
+            event.preventDefault();
+            // Prevent deleting the only child threat for a generic threat
+            const siblings = threatsByGenericThreatId[threat.genericThreatId] ?? [];
+            if (siblings.length <= 1) {
+                openConfirm({
+                    state: threat,
+                    message: t("cannotDeleteOnlyThreat", { threatName: threat.name }),
+                    acceptText: t("ok"),
+                    // Informational dialog — no action to cancel (same pattern as the
+                    // member page's warning dialogs).
+                    cancelText: null,
+                });
+                return;
+            }
+
+            openConfirm({
+                state: threat,
+                message: t("deleteMessage", { threatName: threat.name }),
+                acceptText: t("delete"),
+                cancelText: t("cancel"),
+                onAccept: async (threat) => {
+                    try {
+                        await dispatch(
+                            ThreatsActions.deleteThreat({ id: threat.id, projectId: Number(projectId) })
+                        ).unwrap();
+                        void loadGenericThreats();
+                    } catch {
+                        // handled globally
+                    }
+                },
+            });
+        },
+        [threatsByGenericThreatId, openConfirm, t, dispatch, projectId, loadGenericThreats]
+    );
+
+    const { columnVisibility, toggleColumnVisibility } = useColumnVisibility(
+        `threats-column-visibility-${projectId}`,
+        DEFAULT_COLUMN_VISIBILITY
+    );
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const open = Boolean(anchorEl);
+
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
+    const handleClose = () => setAnchorEl(null);
+
+    const columnLabels: Record<string, string> = {
+        name: t("name"),
+        assets: t("assets"),
+        componentName: t("componentName"),
+        pointOfAttack: t("pointOfAttack"),
+        attacker: t("attacker"),
+        probability: t("probability"),
+        damage: t("damage"),
+        risk: t("risk"),
+        status: t("status"),
+        actions: t("actions"),
     };
+
+    const { columnFilters, expandedFilters, handleFilterChange, toggleFilterExpanded, clearColumnFilters } =
+        useColumnFilters();
+
+    const hasActiveFilter =
+        genericThreatSearchValue.trim() !== "" || Object.values(columnFilters).some((value) => value.trim() !== "");
+
+    const clearFilters = useCallback(() => {
+        clearColumnFilters();
+        setGenericThreatSearchValue("");
+    }, [clearColumnFilters, setGenericThreatSearchValue]);
+
+    const allThreatsExpanded =
+        genericThreats.length > 0 &&
+        genericThreats.every((genericThreat) => expandedGenericThreatIds[genericThreat.id]);
+
+    // The grid's own filtering would treat parent and child rows independently and
+    // tear the hierarchy apart, so filters are applied here while building the rows.
+    const matchesChildFilters = useCallback(
+        (threat: ExtendedThreatWithMetrics): boolean => {
+            return Object.entries(columnFilters).every(([field, value]) => {
+                const filterValue = value.trim().toLowerCase();
+                if (!filterValue) {
+                    return true;
+                }
+                switch (field) {
+                    case "name":
+                        return threat.name.toLowerCase().includes(filterValue);
+                    case "assets":
+                        return String(threat.assets.length).includes(filterValue);
+                    case "componentName":
+                        return formatComponentName(threat, t).toLowerCase().includes(filterValue);
+                    case "pointOfAttack":
+                        return t(`pointsOfAttackList.${threat.pointOfAttack}`).toLowerCase().includes(filterValue);
+                    case "attacker":
+                        return t(`attackerList.${threat.attacker}`).toLowerCase().includes(filterValue);
+                    case "probability":
+                        return String(threat.probability).includes(filterValue);
+                    case "damage":
+                        return String(threat.damage).includes(filterValue);
+                    case "risk":
+                        return String(threat.risk).includes(filterValue);
+                    case "status":
+                        return threat.status === value;
+                    default:
+                        return true;
+                }
+            });
+        },
+        [columnFilters, t]
+    );
+
+    const matchesParentFilters = useCallback(
+        (genericThreat: GenericThreatWithExtendedChildren): boolean => {
+            return Object.entries(columnFilters).every(([field, value]) => {
+                const filterValue = value.trim().toLowerCase();
+                if (!filterValue) {
+                    return true;
+                }
+                switch (field) {
+                    case "name":
+                        return genericThreat.name.toLowerCase().includes(filterValue);
+                    case "componentName":
+                        return formatComponentName(genericThreat, t).toLowerCase().includes(filterValue);
+                    case "pointOfAttack":
+                        return t(`pointsOfAttackList.${genericThreat.pointOfAttack}`)
+                            .toLowerCase()
+                            .includes(filterValue);
+                    case "attacker":
+                        return t(`attackerList.${genericThreat.attacker}`).toLowerCase().includes(filterValue);
+                    default:
+                        return true;
+                }
+            });
+        },
+        [columnFilters, t]
+    );
+
+    const rows = useMemo<ThreatsGridRow[]>(() => {
+        const hasChildOnlyFilter = childOnlyFilterFields.some((field) => (columnFilters[field] ?? "").trim() !== "");
+
+        const result: ThreatsGridRow[] = [];
+        for (const genericThreat of genericThreats) {
+            const children = threatsByGenericThreatId[genericThreat.id] ?? [];
+            const visibleChildren = children.filter(matchesChildFilters);
+
+            const parentVisible =
+                visibleChildren.length > 0 || (!hasChildOnlyFilter && matchesParentFilters(genericThreat));
+            if (!parentVisible) {
+                continue;
+            }
+
+            const isExpanded = expandedGenericThreatIds[genericThreat.id] ?? false;
+            result.push({
+                rowType: "genericThreat",
+                rowId: `${GENERIC_THREAT_ROW_PREFIX}${genericThreat.id}`,
+                genericThreat,
+                childCount: visibleChildren.length,
+                isExpanded,
+            });
+            if (isExpanded) {
+                if (visibleChildren.length === 0) {
+                    result.push({ rowType: "emptyChildren", rowId: `empty-${genericThreat.id}` });
+                } else {
+                    for (const threat of visibleChildren) {
+                        result.push({
+                            rowType: "threat",
+                            rowId: `${THREAT_ROW_PREFIX}${threat.id}`,
+                            threat,
+                        });
+                    }
+                }
+            }
+        }
+        return result;
+    }, [
+        genericThreats,
+        threatsByGenericThreatId,
+        expandedGenericThreatIds,
+        columnFilters,
+        matchesChildFilters,
+        matchesParentFilters,
+    ]);
+
+    const NoRowsOverlayWithMessage = useCallback(() => <NoRowsOverlay message={t("noThreatsFound")} />, [t]);
+
+    const columns = useMemo(
+        () =>
+            createThreatsColumns({
+                t,
+                userRole,
+                columnFilters,
+                onFilterChange: handleFilterChange,
+                expandedFilters,
+                onToggleFilterExpanded: toggleFilterExpanded,
+                onToggleGenericThreat: toggleGenericThreat,
+                onAssetHover: handleAssetHover,
+                onAssetHoverEnd: handleAssetHoverEnd,
+                onAddThreat: (event, genericThreat) => void handleAddThreat(event, genericThreat),
+                onEditThreat: onClickEditThreat,
+                onDuplicateThreat: handleDuplicateThreat,
+                onDeleteThreat: handleDeleteThreat,
+            }),
+        [
+            t,
+            userRole,
+            columnFilters,
+            handleFilterChange,
+            expandedFilters,
+            toggleFilterExpanded,
+            toggleGenericThreat,
+            handleAssetHover,
+            handleAssetHoverEnd,
+            handleAddThreat,
+            onClickEditThreat,
+            handleDuplicateThreat,
+            handleDeleteThreat,
+        ]
+    );
+
+    // Count what the grid actually shows: parent groups surviving both the
+    // top search and the column filters (not the unfiltered hook result).
+    const genericThreatsCount = useMemo(() => rows.filter((row) => row.rowType === "genericThreat").length, [rows]);
 
     return (
         <Box sx={{ overflow: "hidden", height: "100%", boxSizing: "border-box" }}>
-            {
-                <LinearProgress
-                    sx={{
-                        visibility: isPending || autoSaveStatus === "saving" ? "visible" : "hidden",
-                    }}
-                />
-            }
+            <LinearProgress
+                sx={{
+                    visibility: isGenericThreatsPending || autoSaveStatus === "saving" ? "visible" : "hidden",
+                }}
+            />
             <Page
                 sx={{
                     display: "flex",
@@ -196,6 +491,7 @@ const ThreatsPageBody = () => {
                         ))}
                     </ul>
                 </Popper>
+
                 <Box
                     sx={{
                         display: "flex",
@@ -213,344 +509,177 @@ const ThreatsPageBody = () => {
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "space-between",
-                            paddingTop: 1,
-                            paddingBottom: 2,
+                            marginBottom: 2,
                         }}
                     >
                         <Box sx={{ display: "flex", alignItems: "center" }}>
-                            <SearchField onChange={onChangeSearchValue} data-testid="ThreatSearch" />
-                        </Box>
-                        {threats.length > 0 && (
-                            <Box sx={{ display: "flex", alignItems: "center" }}>
-                                <Typography
-                                    sx={{
-                                        mr: 0.5,
-                                        fontWeight: "bold",
-                                        color: "primary.text",
-                                    }}
+                            <Tooltip title={allThreatsExpanded ? t("collapseAllThreats") : t("expandAllThreats")}>
+                                <IconButton
+                                    onClick={() => setAllGenericThreatsExpanded(!allThreatsExpanded)}
+                                    aria-label={allThreatsExpanded ? t("collapseAllThreats") : t("expandAllThreats")}
+                                    data-testid="ToggleExpandAllThreats"
+                                    sx={{ mr: 1, color: theme.vars.palette.text.primary }}
                                 >
-                                    {threats.length}
-                                </Typography>
-                                <Typography>{t("threatsFound")}</Typography>
-                            </Box>
-                        )}
-                    </Box>
-
-                    <Box
-                        sx={{
-                            borderRadius: 5,
-                            boxShadow: 1,
-                            boxSizing: "border-box",
-                            overflowX: "hidden",
-                            height: "100%",
-                        }}
-                    >
-                        <Box
-                            sx={{
-                                borderRadius: 5,
-                                height: "100%",
-                            }}
-                        >
-                            <TableContainer
-                                sx={{
-                                    height: "100%",
-                                    overflowY: "auto",
-                                    boxSizing: "border-box",
-                                    position: "relative",
-                                    width: "100%",
-                                    "::-webkit-scrollbar-track": {
-                                        borderTopLeftRadius: 0,
-                                        borderBottomLeftRadius: 0,
-                                        borderBottomRightRadius: 500,
-                                        borderTopRightRadius: 500,
+                                    {allThreatsExpanded ? (
+                                        <UnfoldLess sx={{ fontSize: 20 }} />
+                                    ) : (
+                                        <UnfoldMore sx={{ fontSize: 20 }} />
+                                    )}
+                                </IconButton>
+                            </Tooltip>
+                            <SearchField
+                                value={genericThreatSearchValue}
+                                onChange={onChangeSearchValue}
+                                data-testid="ThreatSearch"
+                            />
+                            <Button
+                                onClick={handleClick}
+                                startIcon={<Visibility sx={{ fontSize: 18 }} />}
+                                sx={{ ml: 2, textTransform: "none", color: theme.vars.palette.text.primary }}
+                            >
+                                {t("customizeView")}
+                            </Button>
+                            <Menu
+                                anchorEl={anchorEl}
+                                open={open}
+                                onClose={handleClose}
+                                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                                transformOrigin={{ vertical: "top", horizontal: "left" }}
+                                slotProps={{
+                                    list: {
+                                        sx: { bgcolor: "background.mainIntransparent" },
+                                    },
+                                    paper: {
+                                        sx: { borderRadius: 5 },
                                     },
                                 }}
                             >
-                                <Table stickyHeader sx={{ minWidth: 650 }}>
-                                    <TableHead>
-                                        <TableRow>
-                                            <CustomTableHeaderCell
-                                                name="name"
-                                                sortBy={sortBy}
-                                                sortDirection={sortDirection}
-                                                showBorder={true}
-                                                onClick={onChangeSortBy}
-                                                data-testid="ThreatName"
-                                            >
-                                                {t("name")}
-                                            </CustomTableHeaderCell>
-                                            <CustomTableHeaderCell
-                                                name="assets"
-                                                sortBy={sortBy}
-                                                sortDirection={sortDirection}
-                                                showBorder={true}
-                                                onClick={onChangeSortBy}
-                                                data-testid="ThreatAssets"
-                                            >
-                                                {t("assets")}
-                                            </CustomTableHeaderCell>
-                                            <CustomTableHeaderCell
-                                                name="componentName"
-                                                sortBy={sortBy}
-                                                sortDirection={sortDirection}
-                                                onClick={onChangeSortBy}
-                                                data-testid="ThreatComponent"
-                                            >
-                                                {t("componentName")}
-                                            </CustomTableHeaderCell>
-                                            <CustomTableHeaderCell
-                                                name="pointOfAttack"
-                                                sortBy={sortBy}
-                                                sortDirection={sortDirection}
-                                                onClick={onChangeSortBy}
-                                                data-testid="ThreatPoA"
-                                            >
-                                                {t("pointOfAttack")}
-                                            </CustomTableHeaderCell>
-                                            <CustomTableHeaderCell
-                                                name="attacker"
-                                                sortBy={sortBy}
-                                                sortDirection={sortDirection}
-                                                showBorder={true}
-                                                sx={{ minWidth: 200 }}
-                                                onClick={onChangeSortBy}
-                                                data-testid="ThreatAttacker"
-                                            >
-                                                {t("attacker")}
-                                            </CustomTableHeaderCell>
-                                            <CustomTableHeaderCell
-                                                name="probability"
-                                                sortBy={sortBy}
-                                                sortDirection={sortDirection}
-                                                onClick={onChangeSortBy}
-                                                data-testid="ThreatProbability"
-                                            >
-                                                {t("probability")}
-                                            </CustomTableHeaderCell>
-                                            <CustomTableHeaderCell
-                                                name="damage"
-                                                sortBy={sortBy}
-                                                sortDirection={sortDirection}
-                                                onClick={onChangeSortBy}
-                                                data-testid="ThreatDamage"
-                                            >
-                                                {t("damage")}
-                                            </CustomTableHeaderCell>
-                                            <CustomTableHeaderCell
-                                                name="risk"
-                                                sortBy={sortBy}
-                                                sortDirection={sortDirection}
-                                                showBorder={true}
-                                                onClick={onChangeSortBy}
-                                                data-testid="ThreatRisk"
-                                            >
-                                                {t("risk")}
-                                            </CustomTableHeaderCell>
-                                            <CustomTableHeaderCell
-                                                name="doneEditing"
-                                                sortBy={sortBy}
-                                                sortDirection={sortDirection}
-                                                showBorder={true}
-                                                onClick={onChangeSortBy}
-                                                data-testid="DoneEditing"
-                                            >
-                                                {t("edited")}
-                                            </CustomTableHeaderCell>
-                                            <CustomTableHeaderCell></CustomTableHeaderCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {isPending && (
-                                            <Typography
-                                                sx={{
-                                                    paddingTop: 2,
-                                                    paddingLeft: 2,
-                                                    fontSize: "0.75rem",
-                                                    fontStyle: "italic",
-                                                }}
-                                            >
-                                                {t("threatsLoading")}
-                                            </Typography>
-                                        )}
-                                        {threats.length === 0 && !isPending && (
-                                            <Typography
-                                                sx={{
-                                                    paddingTop: 2,
-                                                    paddingLeft: 2,
-                                                    fontSize: "0.75rem",
-                                                    fontStyle: "italic",
-                                                }}
-                                            >
-                                                {t("noThreatsFound")}
-                                            </Typography>
-                                        )}
-                                        {!isPending &&
-                                            threats.map((threat) => {
-                                                const {
-                                                    name,
-                                                    componentName,
-                                                    attacker,
-                                                    probability,
-                                                    damage,
-                                                    risk,
-                                                    pointOfAttack,
-                                                    assets,
-                                                    doneEditing,
-                                                } = threat;
-                                                return (
-                                                    <TableRow
-                                                        key={threat.id}
-                                                        sx={{
-                                                            backgroundColor: "background.mainIntransparent",
-                                                            opacity: doneEditing ? 0.6 : 1,
-                                                            borderRadius: 5,
-                                                            marginBottom: 1,
-
-                                                            "&:last-child td, &:last-child th": { border: 0 },
-                                                        }}
-                                                        onClick={(e) => onClickEditThreat(e, threat)}
-                                                        hover
-                                                        data-testid="threats-page_threats-list-entry"
-                                                    >
-                                                        <CustomTableCell
-                                                            scope="row"
-                                                            showBorder={true}
-                                                            sx={{
-                                                                fontWeight: "bold",
-                                                            }}
-                                                            align={"left"}
-                                                        >
-                                                            {name}
-                                                        </CustomTableCell>
-                                                        <CustomTableCell showBorder={true}>
-                                                            <Box
-                                                                onMouseEnter={(e) => {
-                                                                    handleAssetHover(e, assets);
-                                                                }}
-                                                                onMouseLeave={() => {
-                                                                    setAssetAnchorEl(null);
-                                                                }}
-                                                            >
-                                                                {assets.length}
-                                                            </Box>
-                                                        </CustomTableCell>
-                                                        <CustomTableCell>
-                                                            {pointOfAttack === "COMMUNICATION_INTERFACES"
-                                                                ? `${componentName || t("unknown")} > ${threat.interfaceName}`
-                                                                : componentName}
-                                                        </CustomTableCell>
-                                                        <CustomTableCell>
-                                                            {t(`pointsOfAttackList.${pointOfAttack}`)}
-                                                        </CustomTableCell>
-                                                        <CustomTableCell showBorder={true}>
-                                                            {t(`attackerList.${attacker}`)}
-                                                        </CustomTableCell>
-                                                        <CustomTableCell
-                                                            sx={{
-                                                                borderBottomColor: "border.divider",
-                                                                fontSize: "0.875rem",
-                                                            }}
-                                                        >
-                                                            {probability}
-                                                        </CustomTableCell>
-                                                        <CustomTableCell>{damage}</CustomTableCell>
-                                                        <CustomTableCell showBorder={true}>{risk}</CustomTableCell>
-                                                        <CustomTableCell showBorder={true}>
-                                                            {threat.doneEditing ? <Check /> : <Clear />}
-                                                        </CustomTableCell>
-                                                        <CustomTableCell padding="none" align="right">
-                                                            <Box
-                                                                sx={{
-                                                                    display: "flex",
-                                                                    paddingRight: 2,
-                                                                    paddingLeft: 2,
-                                                                }}
-                                                            >
-                                                                {checkUserRole(userRole, USER_ROLES.EDITOR) && [
-                                                                    <IconButton
-                                                                        key={`${threat.id}-duplicate`}
-                                                                        title={t("duplicateThreat")}
-                                                                        onClick={(e) =>
-                                                                            handleDuplicateThreat(e, threat)
-                                                                        }
-                                                                    >
-                                                                        <ContentCopy
-                                                                            sx={{
-                                                                                fontSize: 18,
-                                                                            }}
-                                                                        />
-                                                                    </IconButton>,
-                                                                    <IconButton
-                                                                        key={`${threat.id}-delete`}
-                                                                        title={t("deleteThreat")}
-                                                                        hoverColor="error"
-                                                                        onClick={(e) => handleDeleteThreat(e, threat)}
-                                                                    >
-                                                                        <Delete
-                                                                            sx={{
-                                                                                fontSize: 18,
-                                                                            }}
-                                                                        />
-                                                                    </IconButton>,
-                                                                ]}
-                                                            </Box>
-                                                        </CustomTableCell>
-                                                    </TableRow>
-                                                );
-                                            })}
-                                        <TableRow></TableRow>
-                                    </TableBody>
-                                </Table>
-                                {threats.length === 0 && searchValue.length > 0 && (
-                                    <Box
-                                        sx={{
-                                            height: "calc(100% - 59px)",
-                                            display: "flex",
-                                            flexDirection: "column",
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                        }}
+                                {Object.entries(columnLabels).map(([field, label]) => (
+                                    <MenuItem
+                                        key={field}
+                                        onClick={() => toggleColumnVisibility(field)}
+                                        sx={{ py: 0.5 }}
                                     >
-                                        <Typography align="center" sx={{ p: 1 }}>
-                                            {t("noThreatsFound")}
-                                        </Typography>
-                                    </Box>
-                                )}
-                            </TableContainer>
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox checked={columnVisibility[field] !== false} size="small" />
+                                            }
+                                            label={label}
+                                            sx={{ m: 0, width: "100%", pointerEvents: "none" }}
+                                        />
+                                    </MenuItem>
+                                ))}
+                            </Menu>
+                        </Box>
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                            {hasActiveFilter && (
+                                <Button
+                                    onClick={clearFilters}
+                                    startIcon={<FilterAltOff sx={{ fontSize: 18 }} />}
+                                    data-testid="ClearThreatFilters"
+                                    sx={{ mr: 2, textTransform: "none", color: theme.vars.palette.text.primary }}
+                                >
+                                    {t("clearFilters")}
+                                </Button>
+                            )}
+                            {(genericThreatsCount > 0 || hasActiveFilter) && (
+                                <>
+                                    <Typography sx={{ mr: 0.5, fontWeight: "bold", color: "primary.text" }}>
+                                        {genericThreatsCount}
+                                    </Typography>
+                                    <Typography>{t("threatsFound")}</Typography>
+                                </>
+                            )}
                         </Box>
                     </Box>
+
+                    <DataGrid
+                        rows={rows}
+                        columns={columns}
+                        getRowId={(row) => row.rowId}
+                        loading={isGenericThreatsPending}
+                        disableRowSelectionOnClick
+                        disableColumnFilter
+                        disableColumnMenu
+                        disableColumnSelector
+                        onCellClick={(params, event) => {
+                            const row = params.row as ThreatsGridRow;
+                            // A parent row toggles from any cell (including the "n threats" text in
+                            // the actions cell); its add button stops propagation to keep its action.
+                            if (row.rowType === "genericThreat") {
+                                toggleGenericThreat(row.genericThreat.id);
+                            } else if (row.rowType === "threat" && params.field !== "actions") {
+                                onClickEditThreat(event as unknown as React.MouseEvent<HTMLElement>, row.threat);
+                            }
+                        }}
+                        onCellKeyDown={(params, event) => {
+                            // Keyboard equivalent of the cell click; skip events coming from
+                            // interactive elements inside a cell (they handle Enter natively —
+                            // acting here as well would double-trigger their action).
+                            if (event.key !== "Enter" && event.key !== " ") {
+                                return;
+                            }
+                            if ((event.target as HTMLElement).closest("button, a, input")) {
+                                return;
+                            }
+                            const row = params.row as ThreatsGridRow;
+                            if (row.rowType === "genericThreat") {
+                                event.preventDefault();
+                                toggleGenericThreat(row.genericThreat.id);
+                            } else if (row.rowType === "threat" && params.field !== "actions") {
+                                event.preventDefault();
+                                onClickEditThreat(event as unknown as React.MouseEvent<HTMLElement>, row.threat);
+                            }
+                        }}
+                        getRowClassName={(params) => {
+                            const row = params.row as ThreatsGridRow;
+                            // Finalized / out-of-scope threats are visually de-emphasised as a hint,
+                            // but nothing is actually blocked — the status and the action buttons stay
+                            // at full opacity (see the per-cell overrides below) so they remain
+                            // clearly readable and usable.
+                            if (
+                                row.rowType === "threat" &&
+                                (row.threat.status === THREAT_STATUSES.FINALIZED ||
+                                    row.threat.status === THREAT_STATUSES.OUTOFSCOPE)
+                            ) {
+                                return "threats-grid--dimmed";
+                            }
+                            return "";
+                        }}
+                        columnHeaderHeight={90}
+                        columnVisibilityModel={columnVisibility}
+                        sx={{
+                            borderRadius: 5,
+                            boxShadow: 1,
+                            "& .MuiDataGrid-row": { cursor: "pointer" },
+                            "& .MuiDataGrid-cell:focus": { outline: "none" },
+                            "& .MuiDataGrid-columnHeader:focus": { outline: "none" },
+                            "& .MuiDataGrid-columnHeader": { padding: "8px 16px" },
+                            "& .MuiDataGrid-cell": { cursor: "pointer" },
+                            // Dim per cell (not per row) so the exemptions below can win.
+                            "& .threats-grid--dimmed .MuiDataGrid-cell": { opacity: 0.6 },
+                            "& .threats-grid--dimmed .MuiDataGrid-cell[data-field='status']": { opacity: 1 },
+                            "& .threats-grid--dimmed .MuiDataGrid-cell[data-field='actions']": { opacity: 1 },
+                        }}
+                        initialState={{
+                            pagination: { paginationModel: { pageSize: 25, page: 0 } },
+                        }}
+                        pageSizeOptions={[10, 25, 50, 100]}
+                        slots={{ noRowsOverlay: NoRowsOverlayWithMessage, row: ThreatsGridRowSlot }}
+                    />
                 </Box>
+
                 <Routes>
-                    <Route path="edit" element={<ThreatDialogPage />} />
-                    <Route path="measureImpacts/edit" element={<MeasureImpactByMeasureDialogPage />}>
+                    <Route path="edit" element={<ThreatDialogPage onSaved={() => void loadGenericThreats()} />} />
+                    <Route
+                        path="measureImpacts/edit"
+                        element={<MeasureImpactByMeasureDialogPage onApplied={() => void loadGenericThreats()} />}
+                    >
                         <Route path="measures/add" element={<AddMeasureDialogPage />} />
                     </Route>
                 </Routes>
             </Page>
         </Box>
-    );
-};
-
-interface CustomTableCellProps extends TableCellProps {
-    showBorder?: boolean;
-}
-
-const CustomTableCell = ({ sx, showBorder = false, children, ...props }: CustomTableCellProps) => {
-    const borderRight = showBorder ? "1.5px solid transparent" : null;
-    return (
-        <TableCell
-            align="center"
-            sx={{
-                fontSize: "0.875rem",
-                borderRight,
-                borderRightColor: "primary.main",
-                borderBottomColor: "border.divider",
-                ...sx,
-            }}
-            {...props}
-        >
-            {children}
-        </TableCell>
     );
 };
 

@@ -39,11 +39,14 @@
   "catalog": "Catalog",
   "componentName": "Component",
   "creationDate": "Date",
+  "customizeView": "Customize view",
   "damage": "Damage",
   "damageAxis": "Damage",
   "description": "Description",
   "done": "Done",
   "email": "Email Address",
+  "filterPlaceholder": "Filter...",
+  "toggleColumnFilter": "Toggle {{column}} filter",
   "heading": "Risk Timeline",
   "language": "Language",
   "lineOfTolerance.title": "Line of Tolerance",
@@ -66,6 +69,7 @@
   "catalogEditor": "Catalog Editor",
 
   "addBtn": "Add",
+  "ok": "OK",
   "cancel": "Cancel",
   "cancelBtn": "Cancel",
   "cancelText": "Cancel",
@@ -146,6 +150,13 @@
     "COMMUNICATION_INTERFACES": "Communication Interfaces",
     "USER_INTERFACE": "User Interface",
     "USER_BEHAVIOUR": "User Behaviour"
+  },
+
+  "statusList": {
+    "new": "New",
+    "in progress": "In progress",
+    "finalized": "Finalized",
+    "out of scope": "Out of scope"
   },
 
   "probabilities": {

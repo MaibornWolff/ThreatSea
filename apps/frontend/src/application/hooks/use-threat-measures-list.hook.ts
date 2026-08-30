@@ -34,7 +34,7 @@ interface UseThreatMeasuresListParams {
 /**
  * Creates a Custom Hook for the list of measures for a threat.
  * @param {number} projectId - id of the current project.
- * @param {number} threatId - id of the current threat
+ * @param {number} threatId - id of the current child threat
  * @returns {{threatMeasures: {
  *                     measureId,
  *                     measureName,

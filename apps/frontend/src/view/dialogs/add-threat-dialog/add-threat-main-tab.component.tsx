@@ -1,4 +1,20 @@
-import { Box, Checkbox, FormControlLabel, FormGroup, InputAdornment, Switch, Tooltip, Typography } from "@mui/material";
+import { useState } from "react";
+import {
+    Box,
+    Collapse,
+    FormControl,
+    FormControlLabel,
+    FormGroup,
+    InputAdornment,
+    InputLabel,
+    MenuItem,
+    Select,
+    Switch,
+    Tooltip,
+    Typography,
+} from "@mui/material";
+import ChevronRight from "@mui/icons-material/ChevronRight";
+import ExpandMore from "@mui/icons-material/ExpandMore";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import { useTheme } from "@mui/material/styles";
 import { Controller, useWatch, type Control, type FieldErrors, type UseFormRegister } from "react-hook-form";
@@ -12,6 +28,7 @@ import { calcNetRisk, calcRiskColour } from "#utils/calcRisk.ts";
 import type { Asset } from "#api/types/asset.types.ts";
 import type { ThreatMeasure } from "#application/hooks/use-threat-measures-list.hook.ts";
 import type { ThreatFormValues } from "./add-threat-form.types.ts";
+import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 
 interface AddThreatMainTabProps {
     active: boolean;
@@ -23,6 +40,7 @@ interface AddThreatMainTabProps {
     register: UseFormRegister<ThreatFormValues>;
     control: Control<ThreatFormValues>;
     errors: FieldErrors<ThreatFormValues>;
+    genericThreatDescription: string;
 }
 
 export const AddThreatMainTab = ({
@@ -35,9 +53,11 @@ export const AddThreatMainTab = ({
     register,
     control,
     errors,
+    genericThreatDescription,
 }: AddThreatMainTabProps) => {
     const { t } = useTranslation("threatDialogPage");
     const theme = useTheme();
+    const [showGenericDescription, setShowGenericDescription] = useState(false);
 
     const watchedConfidentiality = useWatch({ control, name: "confidentiality" });
     const watchedIntegrity = useWatch({ control, name: "integrity" });
@@ -82,6 +102,52 @@ export const AddThreatMainTab = ({
             <BoxNameTextField register={register} error={errors?.name} margin="normal" data-testid="EditThreatName" />
 
             <DescriptionTextField register={register} error={errors?.description} data-testid="EditThreatDescription" />
+
+            <Box sx={{ mt: 0.5 }}>
+                <Box
+                    role="button"
+                    tabIndex={0}
+                    aria-expanded={showGenericDescription}
+                    onClick={() => setShowGenericDescription((shown) => !shown)}
+                    onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            setShowGenericDescription((shown) => !shown);
+                        }
+                    }}
+                    sx={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                        cursor: "pointer",
+                        color: "text.secondary",
+                        userSelect: "none",
+                    }}
+                    data-testid="GenericThreatDescriptionToggle"
+                >
+                    {showGenericDescription ? (
+                        <ExpandMore sx={{ fontSize: 18 }} />
+                    ) : (
+                        <ChevronRight sx={{ fontSize: 18 }} />
+                    )}
+                    <InfoOutlined sx={{ fontSize: 16 }} />
+                    <Typography sx={{ fontSize: "0.875rem" }}>{t("genericThreatDescription")}</Typography>
+                </Box>
+                <Collapse in={showGenericDescription}>
+                    <Typography
+                        data-testid="GenericThreatDescriptionText"
+                        sx={{
+                            fontSize: "0.875rem",
+                            whiteSpace: "pre-wrap",
+                            color: "text.secondary",
+                            mt: 0.5,
+                            ml: 3,
+                        }}
+                    >
+                        {genericThreatDescription}
+                    </Typography>
+                </Collapse>
+            </Box>
 
             <DialogTextField
                 sx={{
@@ -210,25 +276,36 @@ export const AddThreatMainTab = ({
                             },
                         }}
                     />
-                    <FormGroup>
-                        <FormControlLabel
-                            control={
-                                <Controller
-                                    control={control}
-                                    render={({ field }) => <Checkbox {...field} checked={!!field?.value} />}
-                                    {...register("doneEditing")}
-                                    name="doneEditing"
-                                />
-                            }
-                            label={t("doneEditing")}
-                            labelPlacement="start"
-                            sx={{
-                                ".MuiFormControlLabel-label": {
-                                    fontSize: "0.875rem",
-                                },
-                            }}
+                    <FormControl size="small" sx={{ minWidth: 180 }}>
+                        <InputLabel id="threat-status-label">{t("status")}</InputLabel>
+                        <Controller
+                            control={control}
+                            name="status"
+                            render={({ field }) => (
+                                <Select
+                                    {...field}
+                                    labelId="threat-status-label"
+                                    label={t("status")}
+                                    data-testid="ThreatStatusSelect"
+                                    // Render the current status in the closed select even when it has
+                                    // no matching option below (a "new" threat still shows as New).
+                                    renderValue={(status) => t(`statusList.${status}`)}
+                                >
+                                    {/* NEW is machine-assigned only, so it is not offered as an option:
+                                        a user can move a threat forward but never back to NEW. It is still
+                                        displayed via renderValue above, and saving a non-terminal threat
+                                        advances it to IN_PROGRESS (see handleConfirmDialog). */}
+                                    {Object.values(THREAT_STATUSES)
+                                        .filter((status) => status !== THREAT_STATUSES.NEW)
+                                        .map((status) => (
+                                            <MenuItem key={status} value={status}>
+                                                {t(`statusList.${status}`)}
+                                            </MenuItem>
+                                        ))}
+                                </Select>
+                            )}
                         />
-                    </FormGroup>
+                    </FormControl>
                 </FormGroup>
                 <ThreatRiskPreview
                     grossRisk={grossRisk}

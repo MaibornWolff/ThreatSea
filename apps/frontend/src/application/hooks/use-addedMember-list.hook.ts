@@ -1,64 +1,26 @@
 import { useEffect, useMemo } from "react";
-import type { Member } from "#api/types/members.types.ts";
 import type { USER_ROLES } from "#api/types/user-roles.types.ts";
 import { useMembers } from "./use-addedMember.hook";
-import { useList } from "./use-list.hooks";
-
-const searchableMemberFields: (keyof Pick<Member, "name" | "email">)[] = ["name", "email"];
-const sortableMemberFields: (keyof Pick<Member, "name" | "email" | "role">)[] = ["name", "email", "role"];
-type MemberSortField = (typeof sortableMemberFields)[number];
 
 export const useMembersList = (projectCatalogId: number, memberPath: string, memberRole: USER_ROLES | null) => {
     const { isAddedPending, items, loadAddedMembers, onConfirmDeleteMember } = useMembers();
-    const { setSortDirection, setSearchValue, setSortBy, sortDirection, searchValue, sortBy } = useList("addedMembers");
 
     useEffect(() => {
         loadAddedMembers(projectCatalogId, memberPath);
     }, [projectCatalogId, memberPath, loadAddedMembers]);
 
-    const filteredItems = useMemo(() => {
-        let resItems = items.filter((item) => {
-            const lcSearchValue = searchValue.toLowerCase();
+    const filteredItems = useMemo(
+        () => (memberRole != null ? items.filter((item) => item.role === memberRole) : items),
+        [items, memberRole]
+    );
 
-            return searchableMemberFields.some((searchField) =>
-                item[searchField].toLowerCase().includes(lcSearchValue)
-            );
-        });
-
-        if (memberRole != null) {
-            resItems = resItems.filter((item) => item.role === memberRole);
-        }
-
-        return resItems;
-    }, [items, searchValue, memberRole]);
-
-    const sortedItems = useMemo(() => {
-        const sortField: MemberSortField = sortableMemberFields.includes(sortBy as MemberSortField)
-            ? (sortBy as MemberSortField)
-            : "name";
-        const direction = sortDirection === "asc" ? 1 : -1;
-        const getKey = (member: Member) => (sortField === "role" ? member.role : member[sortField].toLowerCase());
-
-        return filteredItems.toSorted((a, b) => {
-            const aKey = getKey(a);
-            const bKey = getKey(b);
-            if (aKey < bKey) {
-                return -direction;
-            }
-            if (aKey > bKey) {
-                return direction;
-            }
-            return 0;
-        });
-    }, [filteredItems, sortBy, sortDirection]);
+    // Deterministic initial order; searching and per-column sorting are handled by the data grid.
+    const sortedItems = useMemo(
+        () => filteredItems.toSorted((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" })),
+        [filteredItems]
+    );
 
     return {
-        setSortDirection,
-        setSearchValue,
-        setSortBy,
-        sortDirection,
-        searchValue,
-        sortBy,
         isPending: isAddedPending,
         onConfirmDeleteMember,
         members: sortedItems,

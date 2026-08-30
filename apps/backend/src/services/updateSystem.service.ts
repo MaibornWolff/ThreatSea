@@ -1,0 +1,171 @@
+/**
+ * Module that defines the update-system use case orchestration.
+ */
+import { db, TransactionType } from "#db/index.js";
+import { CatalogThreat, GenericThreat, System } from "#db/schema.js";
+import { NotFoundError } from "#errors/not-found.error.js";
+import { PointOfAttack, UpdateSystemRequest } from "#types/system.types.js";
+import { getCatalogThreatsByProjectId } from "#services/catalog-threats.service.js";
+import {
+    createThreatForGenericThreat,
+    deleteThreatsByPointOfAttackId,
+    getThreatsByGenericThreatId,
+} from "#services/threats.service.js";
+import {
+    createGenericThreat,
+    deleteGenericThreatsByPointOfAttackId,
+    getGenericThreatsByProjectId,
+} from "#services/generic-threats.service.js";
+import * as systemService from "#services/system.service.js";
+
+/**
+ * Updates a system and synchronizes related threat data.
+ *
+ * @param {number} projectId - The id of the current project.
+ * @param {UpdateSystemRequest} updateSystemData - New system payload.
+ * @returns {Promise<System>} A promise that resolves to the updated system.
+ */
+export async function updateSystem(projectId: number, updateSystemData: UpdateSystemRequest): Promise<System> {
+    const oldSystem = await systemService.findSystem(projectId);
+
+    if (!oldSystem) {
+        throw new NotFoundError("System not found");
+    }
+
+    return await db.transaction(async (tx) => {
+        const updatedSystem = await systemService.updateSystem(projectId, updateSystemData, tx);
+
+        await deleteThreatsByPointsOfAttack(getDeletedPointsOfAttack(oldSystem, updatedSystem), projectId, tx);
+
+        await createThreatsByPointsOfAttack(
+            getCreatedPointsOfAttack(oldSystem, updatedSystem),
+            await getCatalogThreatsByProjectId(projectId, tx),
+            projectId,
+            tx
+        );
+
+        await createThreatsForAssetAssignedPointsOfAttack(
+            getPointsOfAttackWithAssets(updatedSystem),
+            await getGenericThreatsByProjectId(projectId, tx),
+            projectId,
+            tx
+        );
+
+        return updatedSystem;
+    });
+}
+
+function getDeletedPointsOfAttack(oldSystem: System | undefined, newSystem: System): PointOfAttack[] {
+    const oldPointsOfAttack = oldSystem?.data?.pointsOfAttack || [];
+    const newPointsOfAttack = newSystem.data?.pointsOfAttack || [];
+
+    return oldPointsOfAttack.filter((oldPointOfAttack) => {
+        return !newPointsOfAttack.some((newPointOfAttack) => newPointOfAttack.id === oldPointOfAttack.id);
+    });
+}
+
+function getCreatedPointsOfAttack(oldSystem: System | undefined, newSystem: System): PointOfAttack[] {
+    const oldPointsOfAttack = oldSystem?.data?.pointsOfAttack || [];
+    const newPointsOfAttack = newSystem.data?.pointsOfAttack || [];
+
+    return newPointsOfAttack.filter((newPointOfAttack) => {
+        return !oldPointsOfAttack.some((oldPointOfAttack) => oldPointOfAttack.id === newPointOfAttack.id);
+    });
+}
+
+// Returns every point of attack that currently has assets. Child-threat creation is deduplicated
+// downstream by an existing-children check, so re-checking asset-bearing points on each update is
+// safe and covers points that retain assets but have lost all their children (e.g. remove-then-re-add).
+function getPointsOfAttackWithAssets(newSystem: System): PointOfAttack[] {
+    const newPointsOfAttack = newSystem.data?.pointsOfAttack || [];
+
+    return newPointsOfAttack.filter((pointOfAttack) => (pointOfAttack.assets?.length ?? 0) > 0);
+}
+
+async function deleteThreatsByPointsOfAttack(
+    pointsOfAttack: PointOfAttack[],
+    projectId: number,
+    transaction: TransactionType
+): Promise<void> {
+    for (const pointOfAttack of pointsOfAttack) {
+        await deleteGenericThreatsByPointOfAttackId(pointOfAttack.id, projectId, transaction);
+
+        await deleteThreatsByPointOfAttackId(pointOfAttack.id, projectId, transaction);
+    }
+}
+
+async function createThreatsByPointsOfAttack(
+    pointsOfAttack: PointOfAttack[],
+    catalogThreats: CatalogThreat[],
+    projectId: number,
+    transaction: TransactionType
+): Promise<void> {
+    const existingGenericThreats = await getGenericThreatsByProjectId(projectId, transaction);
+
+    for (const pointOfAttack of pointsOfAttack) {
+        const relevantCatalogThreats = catalogThreats.filter(
+            (catalogThreat) => catalogThreat.pointOfAttack === pointOfAttack.type
+        );
+
+        for (const catalogThreat of relevantCatalogThreats) {
+            const {
+                id: catalogThreatId,
+                name,
+                description,
+                attacker,
+                pointOfAttack: catalogThreatPointOfAttack,
+            } = catalogThreat;
+
+            let genericThreat = existingGenericThreats.find(
+                (existingThreat) =>
+                    existingThreat.catalogThreatId === catalogThreatId &&
+                    existingThreat.pointOfAttackId === pointOfAttack.id &&
+                    existingThreat.projectId === projectId
+            );
+
+            if (!genericThreat) {
+                genericThreat = await createGenericThreat(
+                    {
+                        projectId,
+                        pointOfAttackId: pointOfAttack.id,
+                        catalogThreatId,
+                        name,
+                        description,
+                        attacker,
+                        pointOfAttack: catalogThreatPointOfAttack,
+                    },
+                    transaction
+                );
+                existingGenericThreats.push(genericThreat);
+            }
+        }
+    }
+}
+
+async function createThreatsForAssetAssignedPointsOfAttack(
+    pointsOfAttack: PointOfAttack[],
+    genericThreats: GenericThreat[],
+    projectId: number,
+    transaction: TransactionType
+): Promise<void> {
+    if (pointsOfAttack.length === 0) {
+        return;
+    }
+
+    for (const pointOfAttack of pointsOfAttack) {
+        const applicableGenericThreats = genericThreats.filter(
+            (genericThreat) =>
+                genericThreat.pointOfAttackId === pointOfAttack.id && genericThreat.projectId === projectId
+        );
+
+        for (const genericThreat of applicableGenericThreats) {
+            const existingThreats = await getThreatsByGenericThreatId(genericThreat.id, transaction);
+
+            if (existingThreats.length > 0) {
+                continue;
+            }
+
+            await createThreatForGenericThreat(genericThreat.id, {}, transaction);
+        }
+    }
+}

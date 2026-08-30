@@ -1,0 +1,128 @@
+/**
+ * Module that defines the access and manipulation
+ * of generic threats.
+ */
+import { and, eq, getTableColumns } from "drizzle-orm";
+import { db, TransactionType } from "#db/index.js";
+import { genericThreats, GenericThreat, CreateGenericThreat } from "#db/schema.js";
+import { GenericThreatWithExtendedChildrenResponse } from "#types/generic-threat.types.js";
+import { getPointsOfAttack } from "#services/points-of-attack.service.js";
+import { POINTS_OF_ATTACK } from "#types/points-of-attack.types.js";
+
+/**
+ * Gets a specific generic threat by its id.
+ *
+ * @param {number} genericThreatId - The id of the generic threat.
+ * @returns {Promise<GenericThreat | null>} A promise that resolves to the generic threat or null if not found.
+ */
+export async function getGenericThreat(
+    genericThreatId: number,
+    transaction: TransactionType | undefined = undefined
+): Promise<GenericThreat | null> {
+    const genericThreat = await (transaction ?? db).query.genericThreats.findFirst({
+        where: eq(genericThreats.id, genericThreatId),
+    });
+
+    return genericThreat ?? null;
+}
+
+/**
+ * Gets all generic threats of a project.
+ *
+ * @param {number} projectId - The id of the current project.
+ * @returns {Promise<GenericThreat[]>} A promise that resolves to an array of generic threats.
+ */
+export async function getGenericThreatsByProjectId(
+    projectId: number,
+    transaction: TransactionType | undefined = undefined
+): Promise<GenericThreat[]> {
+    return await (transaction ?? db)
+        .select({ ...getTableColumns(genericThreats) })
+        .from(genericThreats)
+        .where(eq(genericThreats.projectId, projectId));
+}
+
+export async function getGenericThreatsWithExtendedChildren(
+    projectId: number
+): Promise<GenericThreatWithExtendedChildrenResponse[]> {
+    const genericThreatsWithExtendedChildren = await db.query.genericThreats.findMany({
+        where: eq(genericThreats.projectId, projectId),
+        with: {
+            threats: true,
+        },
+    });
+
+    const pointsOfAttack = await getPointsOfAttack(projectId);
+    const pointsOfAttackById = new Map(pointsOfAttack.map((pointOfAttack) => [pointOfAttack.id, pointOfAttack]));
+
+    return genericThreatsWithExtendedChildren
+        .map(({ threats, ...genericThreat }) => {
+            const genericPointOfAttack = pointsOfAttackById.get(genericThreat.pointOfAttackId);
+            const genericInterfaceName =
+                genericPointOfAttack?.type === POINTS_OF_ATTACK.COMMUNICATION_INTERFACES
+                    ? (genericPointOfAttack.name ?? null)
+                    : null;
+
+            return {
+                ...genericThreat,
+                componentName: genericPointOfAttack?.componentName ?? null,
+                componentType: genericPointOfAttack?.componentType ?? null,
+                interfaceName: genericInterfaceName,
+                children: threats
+                    .map((threat) => {
+                        const pointOfAttack = pointsOfAttackById.get(threat.pointOfAttackId);
+                        const interfaceName =
+                            pointOfAttack?.type === POINTS_OF_ATTACK.COMMUNICATION_INTERFACES
+                                ? (pointOfAttack.name ?? null)
+                                : null;
+
+                        return {
+                            ...threat,
+                            genericThreatDescription: genericThreat.description,
+                            componentName: pointOfAttack?.componentName ?? null,
+                            componentType: pointOfAttack?.componentType ?? null,
+                            interfaceName,
+                            assets: pointOfAttack?.assets ?? [],
+                        };
+                    })
+                    // A threat's damage is derived from its point of attack's assets; without
+                    // assets the risk is always 0, so drop those threats instead of listing them.
+                    .filter((threat) => threat.assets.length > 0),
+            };
+        })
+        .filter((genericThreat) => genericThreat.children.length > 0);
+}
+
+/**
+ * Creates a generic threat.
+ *
+ * @param {CreateGenericThreat} createGenericThreatData - The data of the generic threat.
+ * @param {TransactionType} transaction - drizzle transaction.
+ * @returns {Promise<GenericThreat>} A promise that resolves to the created generic threat.
+ * @throws {Error} If the generic threat could not be created.
+ */
+export async function createGenericThreat(
+    createGenericThreatData: CreateGenericThreat,
+    transaction: TransactionType | undefined = undefined
+): Promise<GenericThreat> {
+    const [genericThreat] = await (transaction ?? db)
+        .insert(genericThreats)
+        .values(createGenericThreatData)
+        .returning();
+
+    if (!genericThreat) {
+        throw new Error("Failed to create generic threat");
+    }
+
+    return genericThreat;
+}
+
+export async function deleteGenericThreatsByPointOfAttackId(
+    pointOfAttackId: string,
+    projectId: number,
+    transaction: TransactionType | undefined = undefined
+): Promise<void> {
+    await (transaction ?? db)
+        .delete(genericThreats)
+        .where(and(eq(genericThreats.pointOfAttackId, pointOfAttackId), eq(genericThreats.projectId, projectId)));
+}

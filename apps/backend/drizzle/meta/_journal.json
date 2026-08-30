@@ -71,6 +71,13 @@
       "when": 1784904671606,
       "tag": "0009_add-project-folders",
       "breakpoints": false
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1784904671607,
+      "tag": "0010_new-model-migration",
+      "breakpoints": false
     }
   ]
 }
