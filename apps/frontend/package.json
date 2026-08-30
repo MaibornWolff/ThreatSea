@@ -57,7 +57,7 @@
     "@react-pdf/types": "2.13.1",
     "@repo/typescript-config": "workspace:*",
     "@testing-library/jest-dom": "7.0.1",
-    "@testing-library/react": "16.3.2",
+    "@testing-library/react": "16.3.3",
     "@testing-library/user-event": "14.6.6",
     "@types/node": "catalog:",
     "@types/react": "19.2.18",
