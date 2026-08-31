@@ -266,8 +266,8 @@ importers:
         specifier: 1.62.1
         version: 1.62.1
       '@react-pdf/types':
-        specifier: 2.13.1
-        version: 2.13.1
+        specifier: 2.14.0
+        version: 2.14.0
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
@@ -1471,6 +1471,9 @@ packages:
   '@react-pdf/font@4.1.1':
     resolution: {integrity: sha512-D+4Xb0Ldv7oW4buvdPo/tDtZ95mWFQsg1oLkqgmxRfwJe/qpsk8X5Zq9VJ9F3Lqbj3Lrq+ztz7FFaIv39V1POw==}
 
+  '@react-pdf/font@4.1.2':
+    resolution: {integrity: sha512-RT/jiGWIRjIC9c4S9NiqhEyfuA6YL+DtWL3Rm+k+zQhfeHYvHwGzFxr7ZJzThIMrT8sIQy+mpvFvfYyitEei/Q==}
+
   '@react-pdf/hyphenate@0.1.0':
     resolution: {integrity: sha512-CWulbuusHh2Lnos9ZffT3ZYfjCt332Yl8wjSyCKWbwhbTpe/VdFt53fM5elPp3HU3R6tzH6j3oYlLXDwC2WEHQ==}
 
@@ -1502,14 +1505,17 @@ packages:
   '@react-pdf/stylesheet@6.3.1':
     resolution: {integrity: sha512-+tlgVBsyG8lKMXJp6XycTnYrFkxAxxoLGbc6DUXKe5sxDxqgtD/AqhlrrpUwewxgCDrcIWmWBUb4E95ZUa+hEg==}
 
+  '@react-pdf/stylesheet@6.3.2':
+    resolution: {integrity: sha512-UR247sNBx2k3RdL8JUCpUiyx39yQsUABagv3uAi91iMZCORE+fSCsOh7MOcEImmpms4GihydLGudbngI5g14PA==}
+
   '@react-pdf/svg@1.1.1':
     resolution: {integrity: sha512-m1GmGxV2wg/3VpoQ0aCJ598fBedCCfN+HtxKx1lq5kdwUWEaTbfXI1DGFAUedprFDd/i24okKFaUhV/KVZIqIQ==}
 
   '@react-pdf/textkit@7.0.1':
     resolution: {integrity: sha512-ljY/YoEETIOR/+zxWdLLmKlupz8/nBsbmxglM3mDRco62UEzEPnIeMEzYVVVraovCAJC2t+50gKFNSV17FYxbw==}
 
-  '@react-pdf/types@2.13.1':
-    resolution: {integrity: sha512-uzEWSHZR8HRjsa7g0yCA+sGX1vC10rm9mBE+Ds3j669y1Ax+1hn+MfIknf8Ae8p3WVNNikUof02pVwLRw6kJng==}
+  '@react-pdf/types@2.14.0':
+    resolution: {integrity: sha512-TYHpThdf2sz/d1g+CP9nWjYCJ8BYBUN5ORL6+60A85Js9S/YouK8OXzi+hDpYUSZJTOdYXdRxUNeG2oW8//Ulg==}
 
   '@reduxjs/toolkit@2.12.0':
     resolution: {integrity: sha512-KiT+RzZbp6mQET+Mg+h2c97+9j1sNflUxQkIHI7Yuzf6Peu+OYpmkn6nbHWmLLWj+1ZODUJFwGZ7gx3L9R9EOw==}
@@ -5685,7 +5691,14 @@ snapshots:
 
   '@react-pdf/font@4.1.1':
     dependencies:
-      '@react-pdf/types': 2.13.1
+      '@react-pdf/types': 2.14.0
+      fontkit: 2.0.4
+      is-url: 1.2.4
+      pdfkit: 0.20.1
+
+  '@react-pdf/font@4.1.2':
+    dependencies:
+      '@react-pdf/types': 2.14.0
       fontkit: 2.0.4
       is-url: 1.2.4
       pdfkit: 0.20.1
@@ -5708,7 +5721,7 @@ snapshots:
       '@react-pdf/primitives': 4.4.0
       '@react-pdf/stylesheet': 6.3.1
       '@react-pdf/textkit': 7.0.1
-      '@react-pdf/types': 2.13.1
+      '@react-pdf/types': 2.14.0
       emoji-regex-xs: 1.0.0
       queue: 6.0.2
       yoga-layout: 3.2.1
@@ -5729,7 +5742,7 @@ snapshots:
       '@react-pdf/fns': 3.1.3
       '@react-pdf/primitives': 4.4.0
       '@react-pdf/textkit': 7.0.1
-      '@react-pdf/types': 2.13.1
+      '@react-pdf/types': 2.14.0
       abs-svg-path: 0.1.1
       color-string: 2.1.4
       normalize-svg-path: 1.1.0
@@ -5745,7 +5758,7 @@ snapshots:
       '@react-pdf/primitives': 4.4.0
       '@react-pdf/reconciler': 2.0.0(react@19.2.8)
       '@react-pdf/render': 4.6.4
-      '@react-pdf/types': 2.13.1
+      '@react-pdf/types': 2.14.0
       events: 3.3.0
       object-assign: 4.1.1
       pdfkit: 0.20.1
@@ -5756,7 +5769,16 @@ snapshots:
   '@react-pdf/stylesheet@6.3.1':
     dependencies:
       '@react-pdf/fns': 3.1.3
-      '@react-pdf/types': 2.13.1
+      '@react-pdf/types': 2.14.0
+      color-string: 2.1.4
+      hsl-to-hex: 1.0.0
+      media-engine: 2.0.0
+      postcss-value-parser: 4.2.0
+
+  '@react-pdf/stylesheet@6.3.2':
+    dependencies:
+      '@react-pdf/fns': 3.1.3
+      '@react-pdf/types': 2.14.0
       color-string: 2.1.4
       hsl-to-hex: 1.0.0
       media-engine: 2.0.0
@@ -5773,11 +5795,11 @@ snapshots:
       bidi-js: 1.0.3
       unicode-properties: 1.4.1
 
-  '@react-pdf/types@2.13.1':
+  '@react-pdf/types@2.14.0':
     dependencies:
-      '@react-pdf/font': 4.1.1
+      '@react-pdf/font': 4.1.2
       '@react-pdf/primitives': 4.4.0
-      '@react-pdf/stylesheet': 6.3.1
+      '@react-pdf/stylesheet': 6.3.2
 
   '@reduxjs/toolkit@2.12.0(react-redux@9.3.0(@types/react@19.2.18)(react@19.2.8)(redux@5.0.1))(react@19.2.8)':
     dependencies:
