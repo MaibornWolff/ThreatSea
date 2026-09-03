@@ -28,6 +28,10 @@ export class RiskPage extends BasePage {
     readonly impactsDamageCheckbox: Locator;
     readonly damageInput: Locator;
     readonly applyMeasureSaveButton: Locator;
+    readonly dialogs: Locator;
+    readonly measureRequiredError: Locator;
+    readonly damageRequiredError: Locator;
+    readonly damageMaxError: Locator;
 
     // Nested "create new measure" dialog (opened from within "Apply Measure")
     readonly newMeasureNameInput: Locator;
@@ -67,6 +71,10 @@ export class RiskPage extends BasePage {
         this.impactsDamageCheckbox = page.locator('[data-testid="apply-measure-modal_impacts-damage-checkbox"]');
         this.damageInput = page.locator('[data-testid="apply-measure-modal_damage-input"] input');
         this.applyMeasureSaveButton = page.locator('[data-testid="apply-measure-modal_save-button"]');
+        this.dialogs = page.getByRole("dialog");
+        this.measureRequiredError = page.getByText("Measure required");
+        this.damageRequiredError = page.getByText("Damage required");
+        this.damageMaxError = page.getByText("Damage must be 5 or smaller");
 
         this.newMeasureNameInput = page.locator(
             '[data-testid="measure-creation-modal_name-input"] textarea[name="name"]'

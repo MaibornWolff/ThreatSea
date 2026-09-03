@@ -127,7 +127,7 @@ test.describe("Risk page tests", () => {
         await expect(page).toHaveURL(urlBeforeClick);
 
         await page.goto(`/projects/${projectId}/risk/threats/edit`);
-        await expect(page.getByRole("dialog")).toHaveCount(0);
+        await expect(pg.dialogs).toHaveCount(0);
         await expect(pg.threatRows.first()).toBeVisible();
     });
 
@@ -270,7 +270,7 @@ test.describe("Risk page tests", () => {
         await expect(pg.measureSelect).toBeVisible();
         await pg.applyMeasureSaveButton.click();
 
-        await expect(page.getByText("Measure required")).toBeVisible();
+        await expect(pg.measureRequiredError).toBeVisible();
         await expect(page).toHaveURL(new RegExp(`/projects/${projectId}/risk/measureImpacts/edit$`));
     });
 
@@ -283,11 +283,11 @@ test.describe("Risk page tests", () => {
 
         await pg.impactsDamageCheckbox.click();
         await pg.applyMeasureSaveButton.click();
-        await expect(page.getByText("Damage required")).toBeVisible();
+        await expect(pg.damageRequiredError).toBeVisible();
 
         await pg.damageInput.fill("9");
         await pg.applyMeasureSaveButton.click();
-        await expect(page.getByText("Damage must be 5 or smaller")).toBeVisible();
+        await expect(pg.damageMaxError).toBeVisible();
 
         await expect(page).toHaveURL(new RegExp(`/projects/${projectId}/risk/measureImpacts/edit$`));
     });
