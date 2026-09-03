@@ -2,6 +2,10 @@ import type { APIRequestContext } from "@playwright/test";
 import type { CreateMeasureRequest, Measure } from "#api/types/measure.types.ts";
 import { fetchApi } from "../utils/api.utils.ts";
 
+export async function getMeasures(request: APIRequestContext, token: string, projectId: number): Promise<Measure[]> {
+    return fetchApi(request, token, "GET", `/projects/${projectId}/system/measures`);
+}
+
 export async function createMeasure(
     request: APIRequestContext,
     token: string,
