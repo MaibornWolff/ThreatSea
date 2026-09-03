@@ -168,10 +168,21 @@ const AddMeasureDialog = ({ project, measure, ...props }: AddMeasureDialogProps)
                         paddingLeft: 0,
                     }}
                 >
-                    <Button variant="contained" sx={{ marginRight: 0 }} onClick={handleCancelDialog}>
+                    <Button
+                        variant="contained"
+                        sx={{ marginRight: 0 }}
+                        onClick={handleCancelDialog}
+                        data-testid="cancel-button"
+                    >
                         {t("cancelBtn")}
                     </Button>
-                    <Button type="submit" sx={{ marginRight: 0 }} variant="contained" color="success">
+                    <Button
+                        type="submit"
+                        sx={{ marginRight: 0 }}
+                        variant="contained"
+                        color="success"
+                        data-testid="save-button"
+                    >
                         {t("saveBtn")}
                     </Button>
                 </DialogActions>

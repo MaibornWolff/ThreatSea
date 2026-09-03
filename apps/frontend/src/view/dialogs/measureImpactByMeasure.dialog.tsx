@@ -251,6 +251,7 @@ const MeasureImpactByMeasureDialog = ({
                                     label={t("measure")}
                                     multiple={false}
                                     value={value}
+                                    data-testid="apply-measure-modal_measure-select"
                                     open={measureSelectOpen}
                                     onOpen={() => setMeasureSelectOpen(true)}
                                     onClose={() => setMeasureSelectOpen(false)}
@@ -295,7 +296,11 @@ const MeasureImpactByMeasureDialog = ({
                                     }}
                                 >
                                     <SelectBoxCategorySubHeader>
-                                        <Button endIcon={<Add />} onClick={(event) => handleNewBlankMeasure(event)}>
+                                        <Button
+                                            endIcon={<Add />}
+                                            onClick={(event) => handleNewBlankMeasure(event)}
+                                            data-testid="apply-measure-modal_add-new-measure-button"
+                                        >
                                             {t("newMeasure")}
                                         </Button>
                                     </SelectBoxCategorySubHeader>
@@ -344,6 +349,7 @@ const MeasureImpactByMeasureDialog = ({
                     error={errors?.description}
                     placeholder={t("placeholder-description")}
                     rows={2}
+                    data-testid="apply-measure-modal_description-input"
                 />
                 <Box
                     sx={{
@@ -360,6 +366,7 @@ const MeasureImpactByMeasureDialog = ({
                                     <Checkbox
                                         {...props}
                                         checked={props.value}
+                                        data-testid="apply-measure-modal_out-of-scope-checkbox"
                                         onChange={(event) => {
                                             props.onChange(event.target.checked);
                                             setOutOfScopeCheckbox(!outOfScopeCheckbox);
@@ -396,6 +403,7 @@ const MeasureImpactByMeasureDialog = ({
                                         {...props}
                                         checked={props.value}
                                         disabled={outOfScopeCheckbox}
+                                        data-testid="apply-measure-modal_impacts-probability-checkbox"
                                         onChange={(event) => {
                                             props.onChange(event.target.checked);
                                             setProbabilityCheckbox(!probabilityCheckbox);
@@ -431,6 +439,7 @@ const MeasureImpactByMeasureDialog = ({
                         label={t("probability") + " (" + t("gross") + " " + threat.probability + ")"}
                         type="number"
                         margin="normal"
+                        data-testid="apply-measure-modal_probability-input"
                         {...register("probability", {
                             required: {
                                 value: !outOfScopeCheckbox && probabilityCheckbox,
@@ -494,6 +503,7 @@ const MeasureImpactByMeasureDialog = ({
                                         {...props}
                                         checked={props.value}
                                         disabled={outOfScopeCheckbox}
+                                        data-testid="apply-measure-modal_impacts-damage-checkbox"
                                         onChange={(event) => {
                                             props.onChange(event.target.checked);
                                             setDamageCheckbox(!damageCheckbox);
@@ -529,6 +539,7 @@ const MeasureImpactByMeasureDialog = ({
                         label={t("damage") + " (" + t("gross") + " " + threat.damage + ")"}
                         type="number"
                         margin="normal"
+                        data-testid="apply-measure-modal_damage-input"
                         {...register("damage", {
                             required: {
                                 value: !outOfScopeCheckbox && damageCheckbox,
@@ -599,10 +610,21 @@ const MeasureImpactByMeasureDialog = ({
                         paddingLeft: 0,
                     }}
                 >
-                    <Button variant="contained" sx={{ marginRight: 0 }} onClick={handleCancelDialog}>
+                    <Button
+                        variant="contained"
+                        sx={{ marginRight: 0 }}
+                        onClick={handleCancelDialog}
+                        data-testid="apply-measure-modal_cancel-button"
+                    >
                         {t("cancelBtn")}
                     </Button>
-                    <Button type="submit" sx={{ marginRight: 0 }} variant="contained" color="success">
+                    <Button
+                        type="submit"
+                        sx={{ marginRight: 0 }}
+                        variant="contained"
+                        color="success"
+                        data-testid="apply-measure-modal_save-button"
+                    >
                         {t("saveBtn")}
                     </Button>
                 </DialogActions>
