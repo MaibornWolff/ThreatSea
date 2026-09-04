@@ -201,6 +201,7 @@ const MatrixCell = ({
                     cursor: "pointer",
                 },
             }}
+            data-testid={`risk-matrix_cell-${probability}-${damage}`}
             onClick={(e) =>
                 onClick(
                     e,

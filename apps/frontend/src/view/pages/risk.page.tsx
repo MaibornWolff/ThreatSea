@@ -351,7 +351,10 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                             >
                                 {t("threats")}
                             </Typography>
-                            <SearchField onChange={handleOnThreatSearchChanged} />
+                            <SearchField
+                                onChange={handleOnThreatSearchChanged}
+                                data-testid="risk-page_threat-search-input"
+                            />
                         </Box>
 
                         <Box
@@ -375,6 +378,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                     title={t("applyMeasure")}
                                     sx={{ boxSizing: "border-box" }}
                                     onClick={() => onClickApplyMeasure(threats[selectedThreat])}
+                                    data-testid="risk-page_apply-measure-button"
                                 >
                                     <Add sx={{ fontSize: 18 }} />
                                 </IconButton>
@@ -447,6 +451,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                         sortDirection={sortDirection}
                                                         showBorder={false}
                                                         onClick={onChangeSortBy}
+                                                        data-testid="risk-page_sort-threats-by-name-button"
                                                     >
                                                         {t("name")}
                                                     </ThreatTableHeaderCell>
@@ -456,6 +461,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                         sortDirection={sortDirection}
                                                         showBorder={false}
                                                         onClick={onChangeSortBy}
+                                                        data-testid="risk-page_sort-threats-by-probability-button"
                                                     >
                                                         {t("probability")}
                                                     </ThreatTableHeaderCell>
@@ -465,6 +471,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                         sortDirection={sortDirection}
                                                         showBorder={false}
                                                         onClick={onChangeSortBy}
+                                                        data-testid="risk-page_sort-threats-by-risk-button"
                                                     >
                                                         {t("risk")}
                                                     </ThreatTableHeaderCell>
@@ -477,6 +484,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                         sx={{
                                                             fontWeight: "normal",
                                                         }}
+                                                        data-testid="risk-page_sort-threats-by-component-button"
                                                     >
                                                         {t("componentName")}
                                                     </ThreatTableHeaderCell>
@@ -526,6 +534,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                             }}
                                                             onClick={() => handleSelectThreat(i)}
                                                             hover
+                                                            data-testid="risk-page_threat-list-entry"
                                                         >
                                                             <CustomTableCell
                                                                 scope="row"
@@ -540,6 +549,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                                 }}
                                                                 align={"left"}
                                                                 onClick={() => handleEditThreat(i, threat)}
+                                                                data-testid="risk-page_threat-list-entry_name"
                                                             >
                                                                 {name}
                                                             </CustomTableCell>
@@ -549,6 +559,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                                     position: "relative",
                                                                     borderRightColor: "border.divider",
                                                                 }}
+                                                                data-testid="risk-page_threat-list-entry_probability"
                                                             >
                                                                 {threat.newProbability}
                                                             </CustomTableCell>
@@ -558,6 +569,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                                     position: "relative",
                                                                     borderRightColor: "border.divider",
                                                                 }}
+                                                                data-testid="risk-page_threat-list-entry_risk"
                                                             >
                                                                 {threat.newRisk}
                                                             </CustomTableCell>
@@ -726,6 +738,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                                         )
                                                                     }
                                                                     hover
+                                                                    data-testid="risk-page_applied-measure-list-entry"
                                                                 >
                                                                     <CustomTableCell
                                                                         showBorder={true}
@@ -778,6 +791,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                                                     textDecoration: "underline",
                                                                                 },
                                                                             }}
+                                                                            data-testid="risk-page_applied-measure-list-entry_name"
                                                                         >
                                                                             {name}
                                                                         </Typography>
@@ -787,6 +801,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                                         sx={{
                                                                             borderRightColor: "border.divider",
                                                                         }}
+                                                                        data-testid="risk-page_applied-measure-list-entry_scheduled-at"
                                                                     >
                                                                         <Typography
                                                                             sx={{
@@ -806,6 +821,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                                                 <IconButton
                                                                                     disabled={!scheduledAt}
                                                                                     title={t("unapplyMeasure")}
+                                                                                    data-testid="risk-page_applied-measure-list-entry_unapply-button"
                                                                                     onClick={(e) => {
                                                                                         if (
                                                                                             threats?.[selectedThreat]

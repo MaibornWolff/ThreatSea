@@ -97,6 +97,7 @@ export const MeasureTimeline = ({ timeline, onChange, sx = {}, ...props }: Measu
                 paddingRight: 1,
                 ...sx,
             }}
+            data-testid="risk-page_measure-timeline-slider"
             {...props}
         >
             <TimeSlider
