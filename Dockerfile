@@ -17,6 +17,7 @@ ENV VITE_API_URI=$API_URI
 WORKDIR /builder
 
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY patches/ patches/
 
 RUN pnpm fetch --filter "..../${FRONTEND_DIR}"
 
@@ -33,10 +34,12 @@ RUN pnpm -r --filter "..../${FRONTEND_DIR}" run build
 FROM base AS build_backend
 
 ARG BACKEND_DIR=apps/backend
+ENV PNPM_CONFIG_ALLOW_UNUSED_PATCHES=true
 
 WORKDIR /builder
 
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY patches/ patches/
 
 RUN pnpm fetch --filter "..../${BACKEND_DIR}"
 
@@ -49,6 +52,7 @@ RUN pnpm -r --filter "..../${BACKEND_DIR}" run build
 FROM base AS deploy_backend
 
 ARG BACKEND_DIR=apps/backend
+ENV PNPM_CONFIG_ALLOW_UNUSED_PATCHES=true
 ENV NODE_ENV=production
 
 COPY --from=build_backend /builder /deployer
