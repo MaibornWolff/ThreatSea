@@ -209,8 +209,8 @@ importers:
         specifier: 8.3.0
         version: 8.3.0
       jose:
-        specifier: 6.2.10
-        version: 6.2.10
+        specifier: 6.2.11
+        version: 6.2.11
       json-stable-stringify:
         specifier: 1.3.0
         version: 1.3.0
@@ -3330,8 +3330,8 @@ packages:
   jay-peg@1.1.1:
     resolution: {integrity: sha512-D62KEuBxz/ip2gQKOEhk/mx14o7eiFRaU+VNNSP4MOiIkwb/D6B3G1Mfas7C/Fit8EsSV2/IWjZElx/Gs6A4ww==}
 
-  jose@6.2.10:
-    resolution: {integrity: sha512-iiW7J9qRFlGxvCOIBDBDxFePQSn7ZMAnrYGhrrOo6siO/MIqwfyilLR27pkfDgUk+raLuzADS8A3S/KLBisc0g==}
+  jose@6.2.11:
+    resolution: {integrity: sha512-A5NPn7g8EAzGU3IzRs+Yiq8K5n3ypYS75M5+KKiVHdUexfpWK1kP4ZMq7QnTGDoMj6TJ1dtcEJjW60yZDXS4hg==}
 
   js-tokens@10.0.0:
     resolution: {integrity: sha512-lM/UBzQmfJRo9ABXbPWemivdCW8V2G8FHaHdypQaIy523snUjog0W71ayWXTjiR+ixeMyVHN2XcpnTd/liPg/Q==}
@@ -7534,7 +7534,7 @@ snapshots:
     dependencies:
       restructure: 3.0.2
 
-  jose@6.2.10: {}
+  jose@6.2.11: {}
 
   js-tokens@10.0.0: {}
 
@@ -7889,7 +7889,7 @@ snapshots:
 
   openid-client@6.8.7:
     dependencies:
-      jose: 6.2.10
+      jose: 6.2.11
       oauth4webapi: 3.8.7
 
   oxfmt@0.66.0:
