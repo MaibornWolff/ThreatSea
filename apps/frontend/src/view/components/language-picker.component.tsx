@@ -15,7 +15,6 @@ const LANGUAGES = [
         label: "EN",
     },
 ];
-let currentLanguageIndex = 0;
 
 export const LanguagePicker = () => {
     const [currentLanguage, setCurrentLanguage] = useLocalStorage(
@@ -25,13 +24,9 @@ export const LanguagePicker = () => {
     const { i18n } = useTranslation();
 
     const handleClick = () => {
-        currentLanguageIndex = getLanguageIndexForLanguage(currentLanguage);
-        currentLanguageIndex++;
-        if (currentLanguageIndex >= LANGUAGES.length) {
-            currentLanguageIndex = 0;
-        }
+        const nextLanguageIndex = (getLanguageIndexForLanguage(currentLanguage) + 1) % LANGUAGES.length;
 
-        const newLanguage = LANGUAGES[currentLanguageIndex];
+        const newLanguage = LANGUAGES[nextLanguageIndex];
         if (newLanguage) {
             setCurrentLanguage(newLanguage.id);
         }
@@ -47,14 +42,10 @@ export const LanguagePicker = () => {
     };
 
     useEffect(() => {
-        currentLanguageIndex = getLanguageIndexForLanguage(currentLanguage);
-    }, [currentLanguage]);
-
-    useEffect(() => {
         i18n.changeLanguage(currentLanguage);
     }, [i18n, currentLanguage]);
 
-    const languageLabel = LANGUAGES[currentLanguageIndex]?.label || "-";
+    const languageLabel = LANGUAGES.find((language) => language.id === currentLanguage)?.label ?? "-";
 
     return (
         <Box sx={{ ml: 2, mr: 2 }}>
