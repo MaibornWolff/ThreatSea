@@ -58,7 +58,7 @@ ENV NODE_ENV=production
 COPY --from=build_backend /builder /deployer
 WORKDIR /deployer
 
-RUN pnpm --filter "./${BACKEND_DIR}" deploy --legacy --prod /out
+RUN pnpm --filter "./${BACKEND_DIR}" deploy --prod /out
 
 
 # build production container with gcr.io/distroless/nodejs24-debian13:nonroot
