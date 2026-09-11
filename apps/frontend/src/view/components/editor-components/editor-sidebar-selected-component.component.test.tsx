@@ -1,11 +1,16 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
     EditorSidebarSelectedComponent,
     type EditorSidebarSelectedComponentProps,
 } from "./editor-sidebar-selected-component.component";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
-import { createAsset, createSystemComponent, createPointOfAttack } from "#test-utils/builders.ts";
+import {
+    createAsset,
+    createConnectedComponent,
+    createSystemComponent,
+    createPointOfAttack,
+} from "#test-utils/builders.ts";
 import type { Asset } from "#api/types/asset.types.ts";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
@@ -205,6 +210,91 @@ describe("EditorSidebarSelectedComponent — new click handlers", () => {
             );
 
             expect(screen.getByDisplayValue("OriginalX")).toBeInTheDocument();
+        });
+    });
+
+    describe("reset on component switch", () => {
+        const baseHandlers = {
+            handleDeleteComponent: vi.fn(),
+            handleOnNameChange: vi.fn(),
+            handleChangePointOfAttack: vi.fn(),
+            handleAddAssetToAllPointsOfAttack: vi.fn(),
+            handleRemoveAssetFromAllPointsOfAttack: vi.fn(),
+            assetSearchValue: "",
+            handleAssetSearchChanged: vi.fn(),
+            pointsOfAttackOfSelectedComponent: [],
+            userRole: USER_ROLES.EDITOR,
+            handleOnDescriptionChange: vi.fn(),
+            handleOpenChangeIconDialog: vi.fn(),
+            handleDeleteConnectionBetweenComponents: vi.fn(),
+            handleChangeCommunicationInterfaceName: vi.fn(),
+            handleDeleteCommunicationInterface: vi.fn(),
+            handlePointOfAttackLabelClick: vi.fn(),
+            handleAssetNameClick: vi.fn(),
+            handleSelectConnectedComponent: vi.fn(),
+        };
+
+        it("clears the connected components search when a different component is selected", async () => {
+            const user = userEvent.setup();
+            const props = {
+                ...baseHandlers,
+                items: [] as Asset[],
+                connectedComponents: [
+                    createConnectedComponent({ component: createSystemComponent({ id: "c-a", name: "Alpha" }) }),
+                    createConnectedComponent({ component: createSystemComponent({ id: "c-b", name: "Beta" }) }),
+                ],
+            };
+            const searchInput = () =>
+                within(screen.getByTestId("connected-component-search-field")).getByRole("textbox");
+
+            const { rerender } = renderWithProviders(
+                <EditorSidebarSelectedComponent
+                    {...props}
+                    selectedComponent={createSystemComponent({ id: "comp-1" })}
+                />
+            );
+
+            await user.type(searchInput(), "alpha");
+            expect(searchInput()).toHaveValue("alpha");
+
+            rerender(
+                <EditorSidebarSelectedComponent
+                    {...props}
+                    selectedComponent={createSystemComponent({ id: "comp-2" })}
+                />
+            );
+
+            expect(searchInput()).toHaveValue("");
+        });
+
+        it("resets the assets sort to ascending when a different component is selected", async () => {
+            const user = userEvent.setup();
+            const props = {
+                ...baseHandlers,
+                items: [createAsset({ id: 1, name: "Beta" }), createAsset({ id: 2, name: "Alpha" })],
+                connectedComponents: [] as ConnectionEndpointWithComponent[],
+            };
+            const assetNames = () =>
+                screen.getAllByTestId("selected-component-asset-search-results").map((element) => element.textContent);
+
+            const { rerender } = renderWithProviders(
+                <EditorSidebarSelectedComponent
+                    {...props}
+                    selectedComponent={createSystemComponent({ id: "comp-1" })}
+                />
+            );
+
+            await user.click(screen.getByTestId("selected-component-asset-descending-sort-button"));
+            expect(assetNames()).toEqual(["Beta", "Alpha"]);
+
+            rerender(
+                <EditorSidebarSelectedComponent
+                    {...props}
+                    selectedComponent={createSystemComponent({ id: "comp-2" })}
+                />
+            );
+
+            expect(assetNames()).toEqual(["Alpha", "Beta"]);
         });
     });
 
