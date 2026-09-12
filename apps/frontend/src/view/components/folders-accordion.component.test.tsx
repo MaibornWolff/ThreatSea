@@ -1,20 +1,18 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ExtendedProject } from "#api/types/project.types.ts";
 import { createFolder, createProject } from "#test-utils/builders.ts";
 import { mockUseConfirm, mockUseFolders } from "#test-utils/mock-hooks.ts";
+import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { buildFolderTree } from "#utils/build-folder-tree.ts";
 
+// Partial mock: the real module is kept so renderWithProviders still gets
+// MemoryRouter, only useNavigate is swapped for a spy.
 const navigate = vi.fn();
-vi.mock("react-router", () => ({ useNavigate: () => navigate }));
-vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
-
-const dispatch = vi.fn();
-vi.mock("#application/hooks/use-app-redux.hook.ts", () => ({
-    useAppSelector: (selector: (state: { folders: { collapsed: Record<string, boolean> } }) => unknown) =>
-        selector({ folders: { collapsed: {} } }),
-    useAppDispatch: () => dispatch,
-}));
+vi.mock("react-router", async (importOriginal) => {
+    const actual = await importOriginal<typeof import("react-router")>();
+    return { ...actual, useNavigate: () => navigate };
+});
 
 // The accordion owns grouping and sections, not card layout — stub the grid.
 vi.mock("./projects-grid.component", () => ({
@@ -44,7 +42,7 @@ describe("FoldersAccordion", () => {
         mockUseFolders();
         mockUseConfirm();
 
-        render(<FoldersAccordion tree={tree} {...handlers} />);
+        renderWithProviders(<FoldersAccordion tree={tree} {...handlers} />);
 
         expect(screen.getByTestId("folder-section-1")).toBeInTheDocument();
         expect(screen.getByTestId("folder-section-ungrouped")).toBeInTheDocument();
@@ -55,7 +53,7 @@ describe("FoldersAccordion", () => {
         mockUseFolders();
         mockUseConfirm();
 
-        render(<FoldersAccordion tree={tree} {...handlers} />);
+        renderWithProviders(<FoldersAccordion tree={tree} {...handlers} />);
 
         expect(screen.queryByTestId("folder-section-ungrouped")).not.toBeInTheDocument();
     });
@@ -66,7 +64,7 @@ describe("FoldersAccordion", () => {
         mockUseFolders();
         mockUseConfirm();
 
-        render(<FoldersAccordion tree={tree} {...handlers} />);
+        renderWithProviders(<FoldersAccordion tree={tree} {...handlers} />);
         await userEvent.click(screen.getByTestId("folder-section-1_menu-button"));
         await userEvent.click(screen.getByTestId("folder-section-1_rename-button"));
 
@@ -82,23 +80,26 @@ describe("FoldersAccordion", () => {
         mockUseFolders();
         mockUseConfirm({ openConfirm });
 
-        render(<FoldersAccordion tree={tree} {...handlers} />);
+        renderWithProviders(<FoldersAccordion tree={tree} {...handlers} />);
         await userEvent.click(screen.getByTestId("folder-section-1_menu-button"));
         await userEvent.click(screen.getByTestId("folder-section-1_delete-button"));
 
         expect(openConfirm).toHaveBeenCalledTimes(1);
     });
 
-    it("dispatches a collapse toggle when a section header is clicked", async () => {
+    it("collapses a section when its header is clicked", async () => {
         const tree = buildFolderTree([createFolder({ id: 1, name: "Payments" })], []);
         mockUseFolders();
         mockUseConfirm();
-        dispatch.mockClear();
 
-        render(<FoldersAccordion tree={tree} {...handlers} />);
+        // Asserts the store state the toggle produces, not merely that something
+        // was dispatched: absent means expanded, true means collapsed.
+        const { store } = renderWithProviders(<FoldersAccordion tree={tree} {...handlers} />);
+        expect(store.getState().folders.collapsed["1"]).toBeUndefined();
+
         await userEvent.click(screen.getByTestId("folder-section-1_header"));
 
-        expect(dispatch).toHaveBeenCalledTimes(1);
+        expect(store.getState().folders.collapsed["1"]).toBe(true);
     });
 
     it("disables new-subfolder once a folder is at the maximum depth", async () => {
@@ -110,7 +111,7 @@ describe("FoldersAccordion", () => {
         mockUseFolders();
         mockUseConfirm();
 
-        render(<FoldersAccordion tree={tree} {...handlers} />);
+        renderWithProviders(<FoldersAccordion tree={tree} {...handlers} />);
         await userEvent.click(screen.getByTestId("folder-section-7_menu-button"));
 
         expect(screen.getByTestId("folder-section-7_new-subfolder-button")).toHaveAttribute("aria-disabled", "true");
