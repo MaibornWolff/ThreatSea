@@ -1,14 +1,6 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ComponentProps } from "react";
-
-// Keep the real module (renderWithProviders needs I18nextProvider) but force t to
-// return the key so we can assert on the untranslated headings directly.
-vi.mock("react-i18next", async (importOriginal) => ({
-    ...(await importOriginal<typeof import("react-i18next")>()),
-    useTranslation: () => ({ t: (key: string) => key }),
-}));
-
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { OutputSettingsColumn } from "./output-settings-column.component";
 
@@ -30,9 +22,9 @@ const renderColumn = (props: Partial<OutputSettingsColumnProps> = {}) =>
 describe("OutputSettingsColumn", () => {
     it("renders the language, sort and export headings", () => {
         renderColumn();
-        expect(screen.getByText("language")).toBeInTheDocument();
-        expect(screen.getByText("sortThreats")).toBeInTheDocument();
-        expect(screen.getByText("export")).toBeInTheDocument();
+        expect(screen.getByText("Language")).toBeInTheDocument();
+        expect(screen.getByText("Sort (Threats)")).toBeInTheDocument();
+        expect(screen.getByText("Export as Excel")).toBeInTheDocument();
     });
 
     it("calls onChangeLanguage with the picked language", async () => {
@@ -48,7 +40,7 @@ describe("OutputSettingsColumn", () => {
         const onChangeSortBy = vi.fn();
         renderColumn({ sortBy: "netRisk", onChangeSortBy });
 
-        await userEvent.click(screen.getByRole("button", { name: "risk_gross" }));
+        await userEvent.click(screen.getByRole("button", { name: "Risk (gross)" }));
 
         expect(onChangeSortBy).toHaveBeenCalledWith(expect.anything(), "risk");
     });
