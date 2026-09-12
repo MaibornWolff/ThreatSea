@@ -8,8 +8,6 @@ import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import type { ComponentType } from "#api/types/component-types.types.ts";
 
 const confirmDialog = vi.fn();
-mockUseDialog({ confirmDialog });
-mockUseConfirm();
 
 const navigate = vi.fn();
 vi.mock("react-router", async (importOriginal) => {
@@ -40,6 +38,8 @@ const enableFirstPointOfAttack = async (user: ReturnType<typeof userEvent.setup>
 describe("ComponentDialog — icon picker", () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        mockUseDialog({ confirmDialog });
+        mockUseConfirm();
     });
 
     it("renders four standard-icon tiles plus a custom-upload tile", () => {

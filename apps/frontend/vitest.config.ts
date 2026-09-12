@@ -19,6 +19,12 @@ export default defineConfig({
             },
         },
         clearMocks: true,
+        // Spies created with vi.spyOn() mutate the shared hook modules. With
+        // isolate: false every test file runs against the same module registry,
+        // so without restoring them a spy survives until some other file happens
+        // to overwrite it. Test files must therefore install their spies in
+        // beforeEach, not at module load.
+        restoreMocks: true,
         pool: "threads",
         isolate: false,
         maxWorkers: 1,
