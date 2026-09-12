@@ -1,11 +1,6 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-
-// t returns the key so we can assert on the untranslated ids/labels directly.
-vi.mock("react-i18next", () => ({
-    useTranslation: () => ({ t: (key: string) => key }),
-}));
-
+import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { PageSettingsColumn, type PageToggle } from "./page-settings-column.component";
 
 const createToggle = (overrides: Partial<PageToggle> = {}): PageToggle => ({
@@ -17,8 +12,8 @@ const createToggle = (overrides: Partial<PageToggle> = {}): PageToggle => ({
 
 describe("PageSettingsColumn", () => {
     it("renders the page-settings heading", () => {
-        render(<PageSettingsColumn toggles={[]} />);
-        expect(screen.getByText("pageSettings")).toBeInTheDocument();
+        renderWithProviders(<PageSettingsColumn toggles={[]} />);
+        expect(screen.getByText("Page Settings")).toBeInTheDocument();
     });
 
     it("renders one switch per toggle, labelled by its id", () => {
@@ -27,16 +22,16 @@ describe("PageSettingsColumn", () => {
             createToggle({ id: "matrixPage" }),
             createToggle({ id: "threatsPage" }),
         ];
-        render(<PageSettingsColumn toggles={toggles} />);
+        renderWithProviders(<PageSettingsColumn toggles={toggles} />);
 
         expect(screen.getAllByRole("switch")).toHaveLength(3);
-        expect(screen.getByLabelText("coverPage")).toBeInTheDocument();
-        expect(screen.getByLabelText("matrixPage")).toBeInTheDocument();
-        expect(screen.getByLabelText("threatsPage")).toBeInTheDocument();
+        expect(screen.getByLabelText("Show Cover Page")).toBeInTheDocument();
+        expect(screen.getByLabelText("Show Matrix Page")).toBeInTheDocument();
+        expect(screen.getByLabelText("Show Threats Page")).toBeInTheDocument();
     });
 
     it("reflects each toggle's checked state", () => {
-        render(
+        renderWithProviders(
             <PageSettingsColumn
                 toggles={[
                     createToggle({ id: "coverPage", checked: true }),
@@ -45,15 +40,17 @@ describe("PageSettingsColumn", () => {
             />
         );
 
-        expect(screen.getByLabelText("coverPage")).toBeChecked();
-        expect(screen.getByLabelText("matrixPage")).not.toBeChecked();
+        expect(screen.getByLabelText("Show Cover Page")).toBeChecked();
+        expect(screen.getByLabelText("Show Matrix Page")).not.toBeChecked();
     });
 
     it("calls the toggle's onChange with true when an unchecked switch is clicked", async () => {
         const onChange = vi.fn();
-        render(<PageSettingsColumn toggles={[createToggle({ id: "coverPage", checked: false, onChange })]} />);
+        renderWithProviders(
+            <PageSettingsColumn toggles={[createToggle({ id: "coverPage", checked: false, onChange })]} />
+        );
 
-        await userEvent.click(screen.getByLabelText("coverPage"));
+        await userEvent.click(screen.getByLabelText("Show Cover Page"));
 
         expect(onChange).toHaveBeenCalledTimes(1);
         expect(onChange).toHaveBeenCalledWith(expect.anything(), true);
@@ -61,9 +58,11 @@ describe("PageSettingsColumn", () => {
 
     it("calls the toggle's onChange with false when a checked switch is clicked", async () => {
         const onChange = vi.fn();
-        render(<PageSettingsColumn toggles={[createToggle({ id: "coverPage", checked: true, onChange })]} />);
+        renderWithProviders(
+            <PageSettingsColumn toggles={[createToggle({ id: "coverPage", checked: true, onChange })]} />
+        );
 
-        await userEvent.click(screen.getByLabelText("coverPage"));
+        await userEvent.click(screen.getByLabelText("Show Cover Page"));
 
         expect(onChange).toHaveBeenCalledWith(expect.anything(), false);
     });
@@ -71,7 +70,7 @@ describe("PageSettingsColumn", () => {
     it("only toggles the clicked switch, leaving the others untouched", async () => {
         const onChangeCover = vi.fn();
         const onChangeMatrix = vi.fn();
-        render(
+        renderWithProviders(
             <PageSettingsColumn
                 toggles={[
                     createToggle({ id: "coverPage", onChange: onChangeCover }),
@@ -80,14 +79,14 @@ describe("PageSettingsColumn", () => {
             />
         );
 
-        await userEvent.click(screen.getByLabelText("matrixPage"));
+        await userEvent.click(screen.getByLabelText("Show Matrix Page"));
 
         expect(onChangeMatrix).toHaveBeenCalledTimes(1);
         expect(onChangeCover).not.toHaveBeenCalled();
     });
 
     it("renders no switches when the toggles list is empty", () => {
-        render(<PageSettingsColumn toggles={[]} />);
+        renderWithProviders(<PageSettingsColumn toggles={[]} />);
         expect(screen.queryByRole("switch")).not.toBeInTheDocument();
     });
 });
