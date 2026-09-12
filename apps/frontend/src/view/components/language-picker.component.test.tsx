@@ -4,14 +4,24 @@ import { useState } from "react";
 
 // ── Mocks ────────────────────────────────────────────────────────────────────
 
-// Spy on i18n.changeLanguage without importing translations.ts (which calls
-// localStorage at module-load time, before jsdom is ready).
+// react-i18next is mocked here deliberately, and this mock has to stay.
+//
+// i18next is a single shared instance and vitest runs with `isolate: false`, so a
+// real `changeLanguage("de")` does not stop at this file. Measured with a throwaway
+// probe test: the next file to run already reported `i18n.language === "de"` and
+// would render German for the rest of the suite.
+//
+// Spying on the real instance instead would mean importing translations.ts, which
+// reads localStorage at module-load time, before jsdom is ready.
+//
+// The component only consumes `i18n.changeLanguage`, so the mock stays that narrow —
+// in particular no `t`, which would make tests assert translation keys instead of
+// what the user sees.
 const changeLanguageMock = vi.fn().mockResolvedValue(undefined);
 
 vi.mock("react-i18next", () => ({
     useTranslation: () => ({
         i18n: { changeLanguage: changeLanguageMock },
-        t: (key: string) => key,
     }),
 }));
 
