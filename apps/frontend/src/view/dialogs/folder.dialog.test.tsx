@@ -7,7 +7,6 @@ import { mockUseDialog } from "#test-utils/mock-hooks.ts";
 
 const confirmDialog = vi.fn();
 const cancelDialog = vi.fn();
-mockUseDialog({ confirmDialog, cancelDialog });
 
 const navigate = vi.fn();
 vi.mock("react-router", async (importOriginal) => {
@@ -24,6 +23,7 @@ const setup = (props: Partial<React.ComponentProps<typeof FolderDialog>> = {}) =
 describe("FolderDialog", () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        mockUseDialog({ confirmDialog, cancelDialog });
     });
 
     it("shows the create title when no folder is given", () => {
