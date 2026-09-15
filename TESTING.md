@@ -31,7 +31,7 @@
 
 ```
                       ┌───────────────────────────────┐
-                      │  E2E (Playwright, 125 tests)  │  ← Yassine
+                      │  E2E (Playwright, 140 tests)  │  ← Yassine
                       │  apps/frontend/playwright/    │
                       └───────────────────────────────┘
                                   ▲
@@ -117,10 +117,10 @@ testId)` so parallel runs and reruns don't collide.
 apps/frontend/playwright/
 ├── auth.setup.ts       # Per-browser login → tmp/.auth/<browser>-user.json
 ├── pages/               # 12 Page Objects (base.page.ts + one per route)
-├── tests/               # 13 spec files, 125 tests total, e.g.:
+├── tests/               # 13 spec files, 140 tests total, e.g.:
 │   ├── projects.page.e2e.spec.ts   # 7 tests
-│   ├── editor.page.e2e.spec.ts     # 29 tests
-│   ├── members.page.e2e.spec.ts    # 14 tests
+│   ├── editor.page.e2e.spec.ts     # 32 tests (some parameterized, e.g. per icon)
+│   ├── members.page.e2e.spec.ts    # 23 tests (most run once for projects, once for catalogs)
 │   └── risk.page.e2e.spec.ts       # 11 tests (2 quarantined, see 7.1)
 ├── fixtures/            # JSON test data
 ├── builder/             # test-data.builder.ts — buildTestId, buildProject, ...
@@ -267,7 +267,7 @@ page object/spec pair) → `AGENTS.md` → `README.md`.
 | Date       | Version | Author  | Change                                                                                                                                                                    |
 | ---------- | ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-05-29 | 1.0     | Yassine | Initial documentation after POM migration; CI integration plan                                                                                                            |
-| 2026-09-04 | 1.1     | Yassine | Refreshed suite counts (63 → 125 tests); added role-based testing (4.5) and the 7.1 worked example                                                                        |
+| 2026-09-04 | 1.1     | Yassine | Refreshed suite counts (63 → 140 tests); added role-based testing (4.5) and the 7.1 worked example                                                                        |
 | 2026-09-15 | 1.2     | Yassine | Trimmed for length: cut worked-example code (point at the real files instead), condensed the CI proposal and the POM migration history, merged redundant ownership tables |
 
 Suites added since 1.0, all following the POM pattern from day one: Editor drawing, Connection
