@@ -494,7 +494,7 @@
       {
         "id": 92255,
         "name": "Technically conveyed deception, social engineering",
-        "description": "Unauthorised parties trick users into triggering actions they actually don't want to have executed. To achieve this they interact directly or by technical means (e.g. by simultaneously executed rograms) with the user. Usually users are mislead about the action or are not aware of the fact that it is forbidden. Typical examples are Phising and other approaches of Social Engineering as well as technical attacks like malware, CSRF, Click-Jacking or drive-by-downloads. Please note that this kinds of attack can have impact not only on the attacked system but on its surroundings and infrastructure.",
+        "description": "Unauthorised parties trick users into triggering actions they actually don't want to have executed. To achieve this they interact directly or by technical means (e.g. by simultaneously executed programs) with the user. Usually users are mislead about the action or are not aware of the fact that it is forbidden. Typical examples are Phishing and other approaches of Social Engineering as well as technical attacks like malware, CSRF, Click-Jacking or drive-by-downloads. Please note that this kinds of attack can have impact not only on the attacked system but on its surroundings and infrastructure.",
         "pointOfAttack": "USER_BEHAVIOUR",
         "attacker": "UNAUTHORISED_PARTIES",
         "probability": 4,
@@ -1226,7 +1226,7 @@
         "id": 60,
         "pointOfAttackId": "UlQaJbZDuHd8d8n3oxtsg",
         "name": "Technically conveyed deception, social engineering",
-        "description": "Unauthorised parties trick users into triggering actions they actually don't want to have executed. To achieve this they interact directly or by technical means (e.g. by simultaneously executed rograms) with the user. Usually users are mislead about the action or are not aware of the fact that it is forbidden. Typical examples are Phising and other approaches of Social Engineering as well as technical attacks like malware, CSRF, Click-Jacking or drive-by-downloads. Please note that this kinds of attack can have impact not only on the attacked system but on its surroundings and infrastructure.",
+        "description": "Unauthorised parties trick users into triggering actions they actually don't want to have executed. To achieve this they interact directly or by technical means (e.g. by simultaneously executed programs) with the user. Usually users are mislead about the action or are not aware of the fact that it is forbidden. Typical examples are Phishing and other approaches of Social Engineering as well as technical attacks like malware, CSRF, Click-Jacking or drive-by-downloads. Please note that this kinds of attack can have impact not only on the attacked system but on its surroundings and infrastructure.",
         "pointOfAttack": "USER_BEHAVIOUR",
         "attacker": "UNAUTHORISED_PARTIES",
         "probability": 4,
