@@ -22,7 +22,6 @@
   "riskMatrixSettings": "Risikomatrix Einstellungen",
   "export": "Export als Excel",
   "fullExportBtn": "Klicken zum Download des Exports",
-  "scheduledAt": "Umgesetzte Maßnahmen",
   "risk_gross": "Risiko (brutto)",
   "risk_net": "Risiko (netto)"
 }
