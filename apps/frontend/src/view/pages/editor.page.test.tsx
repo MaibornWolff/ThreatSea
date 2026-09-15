@@ -10,12 +10,20 @@ import { SystemComponent } from "#view/components/editor-components/system-compo
 import { ConnectionEditHandles } from "#view/components/editor-components/connection-edit-handles.component.tsx";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 
-// --- Hook spies (module-level, persist across tests) ---
+// --- Hook spies ---
+//
+// Installed per test rather than once at module load. These are `vi.spyOn`
+// instances on shared hook modules, and `restoreMocks: true` tears them down
+// after every test — a module-level install would only survive the first one.
 
-const editorSpy = mockUseEditor();
-mockUseAssets();
-mockUseConfirm();
-mockUseAlert();
+let editorSpy: ReturnType<typeof mockUseEditor>;
+
+beforeEach(() => {
+    editorSpy = mockUseEditor();
+    mockUseAssets();
+    mockUseConfirm();
+    mockUseAlert();
+});
 
 // --- Child component mocks (isolate page from canvas/sidebar internals) ---
 

@@ -20,7 +20,6 @@ const exportItemId = `${TEST_ID_PREFIX}_export-project-button`;
 const deleteItemId = `${TEST_ID_PREFIX}_delete-project-button`;
 
 const exportProject = vi.fn();
-mockUseProjectExport({ exportProject });
 
 const setup = (props: Partial<React.ComponentProps<typeof ProjectActionsMenu>> = {}) => {
     // Owner by default so the owner-only items (edit/export/delete) are present.
@@ -50,6 +49,7 @@ const openMenu = async (user: ReturnType<typeof userEvent.setup>) => {
 describe("ProjectActionsMenu", () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        mockUseProjectExport({ exportProject });
     });
 
     it("renders the trigger button with the composed test id", () => {
