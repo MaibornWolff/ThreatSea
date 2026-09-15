@@ -2,6 +2,7 @@ import { fireEvent, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ComponentProps } from "react";
 import { createReportMilestone } from "#test-utils/builders.ts";
+import { translationUtil } from "#utils/translations.ts";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { RiskMatrixSettingsColumn } from "./risk-matrix-settings-column.component";
 
@@ -24,6 +25,11 @@ describe("RiskMatrixSettingsColumn", () => {
         renderColumn();
         expect(screen.getByText("Risk Matrix for Milestones")).toBeInTheDocument();
         expect(screen.getByText("Scheduled at")).toBeInTheDocument();
+    });
+
+    it("labels the scheduled-at heading in German the same way it labels it in English", () => {
+        const translateGerman = translationUtil.getFixedT("de", "reportPage");
+        expect(translateGerman("scheduledAt")).toBe("Geplant für");
     });
 
     it("renders one switch per milestone, labelled by its scheduled date", () => {
