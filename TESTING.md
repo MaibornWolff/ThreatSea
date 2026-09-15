@@ -37,7 +37,7 @@
                                   ▲
                 ┌──────────────────────────────────────┐
                 │  Frontend Component Tests (Vitest)   │  ← Katharina
-                │  apps/frontend/src/**/*.test.tsx     │
+                │  apps/frontend/src/**/*.{test,spec}.{ts,tsx} │
                 └──────────────────────────────────────┘
                                   ▲
                 ┌──────────────────────────────────────┐
@@ -45,9 +45,9 @@
                 └──────────────────────────────────────┘
 ```
 
-Component tests run on every commit; E2E runs locally today (see [section 6](#6-cicd-integration)
-for why it's not in CI yet). Both follow the Page Object Model / co-location conventions below to
-stay maintainable and handover-ready.
+Component tests run on every commit and follow a co-location convention (test files live next to
+what they cover). E2E runs locally today (see [section 6](#6-cicd-integration) for why it's not in
+CI yet) and follows the Page Object Model conventions below to stay maintainable and handover-ready.
 
 **Project-wide testing rules** (from `AGENTS.md`):
 
@@ -73,9 +73,10 @@ Both review each other's test changes when out of office, and both keep this doc
 
 ## 3. Frontend Component Tests (Vitest)
 
-Tests live **next to the component** they cover (`button.component.tsx` →
-`button.component.test.tsx`), enforced by `include: ["src/**/*.{test,spec}.{ts,tsx}"]` in
-`vitest.config.ts`. Use `@testing-library/react` + `@testing-library/user-event`; prefer
+Tests are a **project convention**: they live next to the component they cover
+(`button.component.tsx` → `button.component.test.tsx`). Vitest discovers files via
+`include: ["src/**/*.{test,spec}.{ts,tsx}"]` in `vitest.config.ts` (`.test.ts`, `.test.tsx`,
+`.spec.ts`, `.spec.tsx`). Use `@testing-library/react` + `@testing-library/user-event`; prefer
 accessible queries (`getByRole`, `getByLabelText`) over `getByTestId`. `describe`/`it`/`expect`/
 `vi` are Vitest globals — never imported. Testing a `disabled` MUI control needs
 `userEvent.click(el, { pointerEventsCheck: 0 })`, since MUI disables pointer-events via CSS.
@@ -147,7 +148,7 @@ for long — this table drifts the moment someone adds a test and forgets to com
 ```bash
 # Prerequisites (separate terminals): docker compose up -d postgres; pnpm dev --filter=threatsea_be
 pnpm --filter threatsea_fe playwright:init   # install browsers, once per machine
-pnpm --filter threatsea_fe playwright        # headless, Chromium, 1 worker (matches CI shape)
+pnpm --filter threatsea_fe playwright        # headless, Chromium, 1 worker (local baseline; candidate CI shape)
 pnpm --filter threatsea_fe playwright:ui     # interactive UI mode, recommended for debugging
 ```
 
