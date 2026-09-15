@@ -923,9 +923,9 @@ pnpm --filter threatsea_fe playwright:ui
 
 ## Changelog
 
-| Date       | Version | Author  | Change                                                                          |
-| ---------- | ------- | ------- | -------------------------------------------------------------------------------- |
-| 2026-05-29 | 1.0     | Yassine | Initial documentation after POM migration; CI integration plan                   |
+| Date       | Version | Author  | Change                                                                            |
+| ---------- | ------- | ------- | --------------------------------------------------------------------------------- |
+| 2026-05-29 | 1.0     | Yassine | Initial documentation after POM migration; CI integration plan                    |
 | 2026-09-04 | 1.1     | Yassine | Refreshed suite counts; added sections 5.8 and the 9.2 worked example (see below) |
 
 Suites that landed between the two updates above, each following the POM pattern from day one:
