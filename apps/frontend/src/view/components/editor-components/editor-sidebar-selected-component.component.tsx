@@ -1,20 +1,18 @@
 import { useTranslation } from "react-i18next";
-import { AssetSecurityNeedsPopper } from "./asset-security-needs-popper.component";
 import { PointOfAttackSwitch } from "./point-of-attack-switch.component";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { POA_COLORS } from "#view/colors/pointsOfAttack.colors.ts";
 import Delete from "@mui/icons-material/Delete";
 import Edit from "@mui/icons-material/Edit";
 import { EditorSidebarComponentHeader } from "./editor-sidebar-component-header.component";
+import { EditorSidebarSelectedComponentAssets } from "./editor-sidebar-selected-component-assets.component";
+import { EditorSidebarSelectedComponentConnected } from "./editor-sidebar-selected-component-connected.component";
 import { TextField } from "#view/components/textfield.component.tsx";
-import { SearchField } from "#view/components/search-field.component.tsx";
-import { ToggleButtons } from "#view/components/toggle-buttons.component.tsx";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { useState, useEffect, useEffectEvent, memo } from "react";
 import { Box, FormGroup, ListItemAvatar, Typography, IconButton, Avatar } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { DynamicMuiIcon } from "#view/components/dynamic-mui-icon.component.tsx";
-import { useAssetHoverPopper } from "#application/hooks/useAssetHoverPopper.ts";
 import { useDebounce } from "#hooks/useDebounce.ts";
 import type { ChangeEvent } from "react";
 import type { Asset } from "#api/types/asset.types.ts";
@@ -98,7 +96,6 @@ const EditorSidebarSelectedComponentInner = ({
     const [localDescription, setLocalDescription] = useState<string>("");
     const [interfaceNames, setInterfaceNames] = useState<Record<string, string>>({});
     const [editingInterfaceId, setEditingInterfaceId] = useState<string | null>(null);
-    const { anchorEl: assetAnchorEl, hoveredAsset, handleAssetHover, handleAssetLeave } = useAssetHoverPopper();
 
     const debouncedHandleNameChange = useDebounce(handleOnNameChange);
     const debouncedHandleDescriptionChange = useDebounce(handleOnDescriptionChange);
@@ -506,291 +503,26 @@ const EditorSidebarSelectedComponentInner = ({
                 </>
             )}
 
-            <Box
-                sx={{
-                    display: "flex",
-                    backgroundColor: "background.paperWhite",
-                    borderRadius: 15,
-                    height: "31px",
-                    paddingLeft: 8,
-                    paddingRight: 0,
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    marginTop: 4,
-                    marginBottom: 2,
-                    marginLeft: -8,
-                    marginRight: -8,
-                }}
-            >
-                <Typography
-                    sx={{
-                        fontWeight: "bold",
-                        fontSize: "0.75rem",
-                        color: "text.primary",
-                    }}
-                >
-                    {t("sidebar.assets.title")}
-                </Typography>
-            </Box>
-            <Box>
-                <SearchField
-                    sx={{
-                        marginBottom: 1,
-                        marginLeft: -0.5,
-                        width: "40%",
-                        height: "31px",
-                        borderRadius: 5,
-                    }}
-                    inputSx={{ fontSize: "0.75rem" }}
-                    //don't delete the whole Component if Delete is pressed
-                    onKeyUp={(event) => {
-                        if (event.key === "Delete") {
-                            event.stopPropagation();
-                        }
-                    }}
-                    value={assetSearchValue}
-                    onChange={handleAssetSearchChanged}
-                    data-testid="selected-component-asset-search-field"
-                />
-                {items
-                    .filter((item) => {
-                        const lcSearchValue = assetSearchValue.toLowerCase();
-                        return (
-                            assetSearchValue === "" ||
-                            item.name.replace(/_/g, " ").toLowerCase().includes(lcSearchValue)
-                        );
-                    })
-                    .map((asset, index) => {
-                        let assetIsSetOnCommunicationInterfaces = false;
-                        return (
-                            <Box
-                                key={index}
-                                sx={{
-                                    display: "flex",
-                                    flexDirection: "row",
-                                    alignItems: "center",
-                                    marginBottom: 1,
-                                }}
-                            >
-                                <Typography
-                                    onClick={() => handleAssetNameClick(asset)}
-                                    onMouseEnter={(event) => handleAssetHover(event, asset)}
-                                    onMouseLeave={handleAssetLeave}
-                                    sx={{
-                                        minWidth: "130px",
-                                        maxWidth: "130px",
-                                        color: "text.primary",
-                                        fontSize: "0.75rem",
-                                        fontWeight: "bold",
-                                        cursor: "pointer",
-                                        "&:hover": { textDecoration: "underline" },
-                                    }}
-                                    data-testid="selected-component-asset-search-results"
-                                >
-                                    {asset.name}
-                                </Typography>
-                                <Box
-                                    sx={{
-                                        display: "flex",
-                                        flexDirection: "row",
-                                        minWidth: "104px",
-                                    }}
-                                >
-                                    {pointsOfAttackOfSelectedComponent
-                                        .sort((a, b) => b.type.localeCompare(a.type))
-                                        .map((pointOfAttack, pointOfAttackIndex) => {
-                                            if (
-                                                !assetIsSetOnCommunicationInterfaces &&
-                                                pointOfAttack.type === POINTS_OF_ATTACK.COMMUNICATION_INTERFACES
-                                            ) {
-                                                assetIsSetOnCommunicationInterfaces = true;
-                                                const communicationInterfaces =
-                                                    pointsOfAttackOfSelectedComponent.filter(
-                                                        (poa) => poa.type === POINTS_OF_ATTACK.COMMUNICATION_INTERFACES
-                                                    );
-                                                const setInterfaces = communicationInterfaces.filter((poa) =>
-                                                    poa.assets.includes(asset.id)
-                                                );
-                                                if (setInterfaces.length > 0) {
-                                                    return (
-                                                        <Box key={pointOfAttackIndex}>
-                                                            <Box
-                                                                sx={{
-                                                                    backgroundColor:
-                                                                        POA_COLORS[pointOfAttack.type].normal,
-                                                                    width: "16px",
-                                                                    height: "16px",
-                                                                    marginLeft: 1,
-                                                                    borderRadius: 50,
-                                                                    clipPath:
-                                                                        setInterfaces.length ===
-                                                                        communicationInterfaces.length
-                                                                            ? "circle(50%)"
-                                                                            : "polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%)",
-                                                                }}
-                                                            ></Box>
-                                                        </Box>
-                                                    );
-                                                }
-                                            } else if (
-                                                pointOfAttack.type !== POINTS_OF_ATTACK.COMMUNICATION_INTERFACES &&
-                                                pointOfAttack.assets.includes(asset.id)
-                                            ) {
-                                                return (
-                                                    <Box key={pointOfAttackIndex}>
-                                                        <Box
-                                                            sx={{
-                                                                backgroundColor: POA_COLORS[pointOfAttack.type].normal,
-                                                                width: "16px",
-                                                                height: "16px",
-                                                                marginLeft: 1,
-                                                                borderRadius: 50,
-                                                            }}
-                                                        ></Box>
-                                                    </Box>
-                                                );
-                                            }
-                                            return null;
-                                        })}
-                                </Box>
-                                <Box
-                                    sx={{
-                                        display: "flex",
-                                        flexDirection: "row",
-                                        marginLeft: "auto",
-                                    }}
-                                >
-                                    <ToggleButtons
-                                        value={(() => {
-                                            // Count how many POAs (including com interfaces) have this asset
-                                            const totalAssetOccurrences = pointsOfAttackOfSelectedComponent.reduce(
-                                                (count, poa) => count + (poa.assets.includes(asset.id) ? 1 : 0),
-                                                0
-                                            );
+            <EditorSidebarSelectedComponentAssets
+                // Remount on component switch so local sort resets.
+                key={`assets-${selectedComponent.id}`}
+                items={items}
+                assetSearchValue={assetSearchValue}
+                handleAssetSearchChanged={handleAssetSearchChanged}
+                pointsOfAttackOfSelectedComponent={pointsOfAttackOfSelectedComponent}
+                handleAssetNameClick={handleAssetNameClick}
+                handleAddAssetToAllPointsOfAttack={handleAddAssetToAllPointsOfAttack}
+                handleRemoveAssetFromAllPointsOfAttack={handleRemoveAssetFromAllPointsOfAttack}
+            />
 
-                                            if (totalAssetOccurrences === 0) {
-                                                return "unsetAll";
-                                            }
-
-                                            if (totalAssetOccurrences === pointsOfAttackOfSelectedComponent.length) {
-                                                return "setAll";
-                                            }
-
-                                            return "";
-                                        })()}
-                                        buttonProps={{
-                                            width: "87px",
-                                        }}
-                                        buttons={[
-                                            {
-                                                value: "setAll",
-                                                text: t("setAllBtn"),
-                                                onClick: (e) => handleAddAssetToAllPointsOfAttack(e, asset),
-                                            },
-                                            {
-                                                value: "unsetAll",
-                                                text: t("unsetAllBtn"),
-                                                onClick: (e) => handleRemoveAssetFromAllPointsOfAttack(e, asset),
-                                            },
-                                        ]}
-                                    />
-                                </Box>
-                            </Box>
-                        );
-                    })}
-                <AssetSecurityNeedsPopper anchorEl={assetAnchorEl} asset={hoveredAsset} />
-            </Box>
-
-            <Box
-                sx={{
-                    display: "flex",
-                    backgroundColor: "background.paperWhite",
-                    borderRadius: 15,
-                    height: "31px",
-                    paddingLeft: 8,
-                    paddingRight: 0,
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    marginTop: 4,
-                    marginBottom: 2,
-                    marginLeft: -8,
-                    marginRight: -8,
-                }}
-            >
-                <Typography
-                    sx={{
-                        fontWeight: "bold",
-                        fontSize: "0.75rem",
-                        color: "text.primary",
-                    }}
-                >
-                    {t("sidebar.connected_components.title")}
-                </Typography>
-            </Box>
-            <Box>
-                {connectedComponents.map((connection, index) => {
-                    const connectedComponent = connection.component;
-                    if (!connectedComponent) {
-                        return null;
-                    }
-
-                    const communicationInterfaceName =
-                        selectedComponent.type === "COMMUNICATION_INFRASTRUCTURE"
-                            ? connectedComponent.communicationInterfaces?.find(
-                                  (communicationInterface) =>
-                                      communicationInterface.id === connection.communicationInterfaceId
-                              )?.name
-                            : undefined;
-
-                    const label =
-                        connectedComponent.name +
-                        (communicationInterfaceName ? ` > ${communicationInterfaceName}` : "");
-
-                    return (
-                        <Box
-                            key={index}
-                            sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                                marginBottom: 1,
-                            }}
-                        >
-                            <Typography
-                                onClick={() =>
-                                    handleSelectConnectedComponent(
-                                        connectedComponent.id,
-                                        connection.communicationInterfaceId
-                                    )
-                                }
-                                sx={{
-                                    fontSize: "0.75rem",
-                                    fontWeight: "bold",
-                                    color: "text.primary",
-                                    cursor: "pointer",
-                                    "&:hover": { textDecoration: "underline" },
-                                }}
-                                data-testid="connected-component-name"
-                            >
-                                {label}
-                            </Typography>
-                            <IconButton
-                                onClick={() =>
-                                    handleDeleteConnectionBetweenComponents(selectedComponent.id, connectedComponent.id)
-                                }
-                                sx={{
-                                    "&:hover": {
-                                        color: "error.light",
-                                        backgroundColor: "background.paperIntransparent",
-                                    },
-                                }}
-                            >
-                                <Delete sx={{ fontSize: 18 }} />
-                            </IconButton>
-                        </Box>
-                    );
-                })}
-            </Box>
+            <EditorSidebarSelectedComponentConnected
+                // Remount on component switch so local search and sort reset.
+                key={`connected-${selectedComponent.id}`}
+                selectedComponent={selectedComponent}
+                connectedComponents={connectedComponents}
+                handleSelectConnectedComponent={handleSelectConnectedComponent}
+                handleDeleteConnectionBetweenComponents={handleDeleteConnectionBetweenComponents}
+            />
         </Box>
     );
 };
