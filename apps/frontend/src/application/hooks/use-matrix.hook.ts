@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
 import { calcNetRisk } from "#utils/calcRisk.ts";
@@ -68,12 +69,14 @@ interface UseMatrixArgs {
     language: string;
 }
 
-const sortableThreatFields: (keyof Pick<
-    ThreatWithMetrics,
-    "name" | "description" | "componentName" | "attacker" | "pointOfAttack"
->)[] = ["name", "description", "componentName", "attacker", "pointOfAttack"];
+const searchableThreatFields: (keyof Pick<ThreatWithMetrics, "name" | "description" | "componentName">)[] = [
+    "name",
+    "description",
+    "componentName",
+];
 
 export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
+    const { t } = useTranslation("common");
     const project = useAppSelector((state) => projectsSelectors.selectById(state, projectId));
     const defaultGreen = project?.lineOfToleranceGreen ?? 6;
     const defaultRed = project?.lineOfToleranceRed ?? 15;
@@ -177,19 +180,25 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
     }, [threats, matrixDesign]);
 
     const filteredThreats: ThreatWithMetrics[] = useMemo(() => {
-        const lcSearchValue = threatSearchValue.toLowerCase();
+        const lowerCaseSearchValue = threatSearchValue.toLowerCase();
         return threats.filter((threat) => {
+            const searchableValues = [
+                ...searchableThreatFields.map((searchField) => threat[searchField]?.replace(/_/g, " ") ?? ""),
+                t(`attackerList.${threat.attacker}`),
+                t(`pointsOfAttackList.${threat.pointOfAttack}`),
+            ];
+
             return (
                 ((selectedCell === null ||
                     (threat.newProbability === selectedCell?.probability &&
                         threat.newDamage === selectedCell?.damage)) &&
-                    sortableThreatFields.some((searchField) =>
-                        threat[searchField]?.replace(/_/g, " ").toLowerCase().includes(lcSearchValue)
+                    searchableValues.some((searchableValue) =>
+                        searchableValue.toLowerCase().includes(lowerCaseSearchValue)
                     )) ||
                 `${threat.id}` == threatSearchValue
             );
         });
-    }, [threats, selectedCell, threatSearchValue]);
+    }, [threats, selectedCell, threatSearchValue, t]);
 
     const matrixSelected = useMemo<MatrixGrid>(() => {
         return matrix.map((row, y) =>

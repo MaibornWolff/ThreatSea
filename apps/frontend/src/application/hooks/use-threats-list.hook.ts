@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import { useList } from "./use-list.hooks";
 import { useThreats } from "./use-threats.hook";
@@ -22,30 +23,37 @@ const sortableThreatFields: (keyof Pick<
 >)[] = ["name", "assets", "componentName", "pointOfAttack", "attacker", "probability", "damage", "risk", "doneEditing"];
 type ThreatSortField = (typeof sortableThreatFields)[number];
 
-const searchableThreatFields: (keyof Pick<
-    ExtendedThreat,
-    "name" | "description" | "componentName" | "attacker" | "pointOfAttack"
->)[] = ["name", "description", "componentName", "attacker", "pointOfAttack"];
+const searchableThreatFields: (keyof Pick<ExtendedThreat, "name" | "description" | "componentName">)[] = [
+    "name",
+    "description",
+    "componentName",
+];
 
 export const useThreatsList = ({ projectId }: { projectId: number }) => {
     const { isPending, items, loadThreats, deleteThreat, duplicateThreat } = useThreats({
         projectId,
     });
     const { setSortDirection, setSearchValue, setSortBy, sortDirection, searchValue, sortBy } = useList("threats");
+    const { t } = useTranslation("common");
 
     const filteredItems: ExtendedThreat[] = useMemo(() => {
+        const lowerCaseSearchValue = searchValue.toLowerCase();
+
         return items.filter((item) => {
+            const searchableValues = [
+                ...searchableThreatFields.map((searchField) => String(item[searchField] ?? "").replace(/_/g, " ")),
+                t(`attackerList.${item.attacker}`),
+                t(`pointsOfAttackList.${item.pointOfAttack}`),
+            ];
+
             const matchesSearch =
-                searchableThreatFields.some((searchField) =>
-                    String(item[searchField] ?? "")
-                        .replace(/_/g, " ")
-                        .toLowerCase()
-                        .includes(searchValue.toLowerCase())
+                searchableValues.some((searchableValue) =>
+                    searchableValue.toLowerCase().includes(lowerCaseSearchValue)
                 ) || `${item.id}` == searchValue;
 
             return matchesSearch;
         });
-    }, [items, searchValue]);
+    }, [items, searchValue, t]);
 
     const transformedItems = useMemo<ThreatListItem[]>(() => {
         return filteredItems.map((item) => {
