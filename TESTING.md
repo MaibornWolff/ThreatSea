@@ -26,14 +26,14 @@
                       │  apps/frontend/playwright/    │
                       └───────────────────────────────┘
                                   ▲
-                ┌──────────────────────────────────────┐
-                │  Frontend Component Tests (Vitest)   │  ← Katharina
+                ┌──────────────────────────────────────────────┐
+                │  Frontend Component Tests (Vitest)           │  ← Katharina
                 │  apps/frontend/src/**/*.{test,spec}.{ts,tsx} │
-                └──────────────────────────────────────┘
+                └──────────────────────────────────────────────┘
                                   ▲
-                ┌──────────────────────────────────────┐
-                │  Backend Unit/Integration (Vitest)   │  (out of scope here)
-                └──────────────────────────────────────┘
+                ┌──────────────────────────────────────────────┐
+                │  Backend Unit/Integration (Vitest)           │  (out of scope here)
+                └──────────────────────────────────────────────┘
 ```
 
 Component tests run on every commit and follow a co-location convention (test files live next to
