@@ -20,7 +20,7 @@
 
 ## 1. Testing Concept
 
-```
+```text
                       ┌───────────────────────────────┐
                       │  E2E (Playwright, 140 tests)  │  ← Yassine
                       │  apps/frontend/playwright/    │
@@ -125,7 +125,7 @@ testId)` so parallel runs and reruns don't collide.
 
 ### 4.2 Folder Layout
 
-```
+```text
 apps/frontend/playwright/
 ├── auth.setup.ts       # Per-browser login → tmp/.auth/<browser>-user.json
 ├── pages/               # 12 Page Objects (base.page.ts + one per route)
@@ -153,6 +153,11 @@ for long — this table drifts the moment someone adds a test and forgets to com
 | `data-testid` value | `<page>_<feature>_<element>`                   | `project-creation-modal_name-input`              |
 | Test title          | `"Should <observable behavior>"`               | `"Should create new projects"`                   |
 | Test resource name  | always include `buildTestId(...)`              | `` `${project.name}-${tid}` ``                   |
+
+These apply to **new** tests. Parts of the suite predate them: the titles in `editor`,
+`editor-drawing`, `footer-links` and `connection-editing` mostly don't start with `Should`, and a
+number of older `data-testid`s sit outside the pattern (`AddMember`, `add-asset-dialog`). Take this
+table as the reference, not the surrounding code, and don't rewrite existing tests just to conform.
 
 ### 4.4 Running Tests Locally
 
@@ -212,7 +217,8 @@ helper if you need to seed/clean data → write `tests/<route>.page.e2e.spec.ts`
 observable behavior (not internals) with at least one edge case → run
 `test:unit:watch` → open a PR (reviewer: Katharina).
 
-**Debugging a failing E2E test:** `playwright show-report` → open the failing test's **trace**
+**Debugging a failing E2E test:** `pnpm --filter threatsea_fe exec playwright show-report` (there
+is no package script for it) → open the failing test's **trace**
 (screenshots, DOM snapshots, console/network logs) → `playwright:ui` to step through → `--headed
 --debug` to watch it live → check the obvious environment causes (backend/Postgres running,
 `.env.test` changed).
