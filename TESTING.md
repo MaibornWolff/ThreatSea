@@ -300,12 +300,6 @@ pnpm --filter threatsea_fe playwright:ui     # Playwright UI mode
 The frontend dev server is not in this list on purpose: Playwright starts it and reuses a running
 one locally (`webServer.reuseExistingServer` in `playwright.config.ts`).
 
-### 8.6 Read in this order
-
-This document → `apps/frontend/playwright/pages/base.page.ts` (12 lines, sets the pattern) →
-`pages/projects.page.ts` + `tests/projects.page.e2e.spec.ts` (representative page object/spec
-pair) → `AGENTS.md` → `README.md`.
-
 ---
 
 ## 9. Glossary
@@ -319,19 +313,6 @@ pair) → `AGENTS.md` → `README.md`.
 | **CSRF token**     | Anti-forgery token in `localStorage` after login; read via `getCsrfToken()`                            |
 | **Trace**          | Playwright artifact (`*.zip`) with screenshots, DOM snapshots, network/console logs for one test run   |
 | **Vitest globals** | `describe`, `it`, `expect`, `vi`, etc. exposed without imports (`globals: true` in `vitest.config.ts`) |
-
----
-
-## Changelog
-
-| Date       | Version | Author  | Change                                                                                                                                                                    |
-| ---------- | ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-05-29 | 1.0     | Yassine | Initial documentation after POM migration; CI integration plan                                                                                                            |
-| 2026-09-04 | 1.1     | Yassine | Refreshed suite counts (63 → 140 tests); added role-based testing (4.5) and the 7.1 worked example                                                                        |
-| 2026-09-15 | 1.2     | Yassine | Trimmed for length: cut worked-example code (point at the real files instead), condensed the CI proposal and the POM migration history, merged redundant ownership tables |
-
-Suites added since 1.0, all following the POM pattern from day one: Editor drawing, Connection
-editing, Report, Footer links, Members, Risk.
 
 ---
 
