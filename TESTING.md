@@ -234,14 +234,25 @@ CI, component suite < 3 min (shard with `--shard=1/N` if the E2E suite outgrows 
 
 ## 8. Quick Start (Day 1)
 
-```bash
-git clone git@github.com:MaibornWolff/ThreatSea.git && cd ThreatSea && pnpm install
+From a fresh clone to a running test suite. 8.1, 8.2 and 8.4 are one-time setup; 8.3 and 8.5 are
+what you run day to day.
 
-# apps/backend/.env is gitignored and has to be created once. `cp .env.example .env`
-# does not work: its placeholders are read as literal values, so AUTH_METHOD and both
-# ORIGIN_* entries end up invalid, and DATABASE_TLS / COOKIES_SECURE_OPTION have to say
-# exactly "disabled" — otherwise Postgres is contacted over TLS and the session cookie
-# is never set over plain http://localhost. The values below mirror docker-compose.yaml.
+### 8.1 Clone and install
+
+```bash
+git clone git@github.com:MaibornWolff/ThreatSea.git && cd ThreatSea
+pnpm install
+```
+
+### 8.2 Create the backend `.env`
+
+`apps/backend/.env` is gitignored and has to be created once. It is not optional: `pnpm dev` runs
+the backend as `tsx --env-file .env`, so without the file Node aborts before the first line of
+application code.
+
+The values below mirror the `threatsea` service in `docker-compose.yaml`:
+
+```bash
 cat > apps/backend/.env <<'EOF'
 JWT_SECRET=somerandomstringtobeusedasJWTsecret
 EXPRESS_SESSION_SECRET=someRandomExpressSessionSecret
@@ -255,21 +266,45 @@ DATABASE_NAME=threatsea
 DATABASE_TLS=disabled
 COOKIES_SECURE_OPTION=disabled
 EOF
-
-docker compose up -d postgres
-pnpm dev --filter=threatsea_be              # separate terminal
-pnpm --filter threatsea_fe playwright:init  # once per machine
-pnpm --filter threatsea_fe test:unit:watch
-pnpm --filter threatsea_fe playwright:ui
 ```
 
 `AUTH_METHOD=fixed` is not optional for E2E — `auth.setup.ts` logs in via
 `/api/auth/login?testUser=<n>`, a route that only exists in fixed-auth mode. The same fixed
 profiles back the role-based tests in [section 4.5](#45-role-based--multi-identity-testing).
 
-Read in this order: this document → `apps/frontend/playwright/pages/base.page.ts` (12 lines,
-sets the pattern) → `pages/projects.page.ts` + `tests/projects.page.e2e.spec.ts` (representative
-page object/spec pair) → `AGENTS.md` → `README.md`.
+### 8.3 Start database and backend
+
+```bash
+docker compose up -d postgres
+pnpm dev --filter=threatsea_be
+```
+
+Give the backend its own terminal and leave it running. It applies pending Drizzle migrations on
+startup, before it binds port 8000 — there is no separate migration step.
+
+### 8.4 Install the Playwright browsers
+
+Once per machine:
+
+```bash
+pnpm --filter threatsea_fe playwright:init
+```
+
+### 8.5 Run the tests
+
+```bash
+pnpm --filter threatsea_fe test:unit:watch   # Vitest component tests, watch mode
+pnpm --filter threatsea_fe playwright:ui     # Playwright UI mode
+```
+
+The frontend dev server is not in this list on purpose: Playwright starts it and reuses a running
+one locally (`webServer.reuseExistingServer` in `playwright.config.ts`).
+
+### 8.6 Read in this order
+
+This document → `apps/frontend/playwright/pages/base.page.ts` (12 lines, sets the pattern) →
+`pages/projects.page.ts` + `tests/projects.page.e2e.spec.ts` (representative page object/spec
+pair) → `AGENTS.md` → `README.md`.
 
 ---
 
