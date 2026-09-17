@@ -231,7 +231,12 @@ Not currently planned; if that changes, mirror `test-backend`'s Postgres service
 `waitForTimeout`), one test = one behavior, `buildTestId(...)`-namespaced resources, always clean
 up in `afterEach`.
 
-### 7.1 When a test becomes flaky
+### 7.1 Quarantine: flakes and known gaps
+
+Two kinds of test end up quarantined: one that is genuinely unstable, and one that fails reliably
+because of a known product gap or an environment artifact. The process below is the same for both
+— that is what the `test.fixme` comments mean when they point at "the flake/known-gap process in
+TESTING.md".
 
 Quarantine immediately (`test.fixme(...)` + a comment explaining why) → open an issue → find the
 root cause, never just add retries → fix and unquarantine (sprint review checks remaining
