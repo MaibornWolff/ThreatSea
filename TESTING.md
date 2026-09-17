@@ -72,6 +72,19 @@ accessible queries (`getByRole`, `getByLabelText`) over `getByTestId`. `describe
 `vi` are Vitest globals — never imported. Testing a `disabled` MUI control needs
 `userEvent.click(el, { pointerEventsCheck: 0 })`, since MUI disables pointer-events via CSS.
 
+**Render through `renderWithProviders`** (`src/test-utils/render-with-providers.tsx`), not through
+the bare `render()`. It supplies the Redux store, `MemoryRouter`, i18next and the MUI theme, and
+takes `preloadedState` / `initialEntries`; the bare `render()` is for components that need none of
+them. Prefer `preloadedState` over mocking `useAppSelector` — a partial fake state diverges from
+the real store without anything failing.
+
+**`vitest.config.ts` sets `isolate: false`**, so every test file runs against the same module
+registry. A spy from `vi.spyOn()` therefore mutates a module that later files still see: install
+spies in `beforeEach`, never at module load. For the same reason `react-i18next` must not be
+mocked wholesale — that also strips the `I18nextProvider` which `renderWithProviders` relies on,
+and a real `i18n.changeLanguage()` on the shared singleton flips the language for every file that
+runs after it. `AGENTS.md` has the full rules.
+
 ```bash
 pnpm --filter threatsea_fe test:unit:watch   # while iterating
 pnpm --filter threatsea_fe test:unit         # single run
