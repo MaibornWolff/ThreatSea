@@ -236,12 +236,36 @@ CI, component suite < 3 min (shard with `--shard=1/N` if the E2E suite outgrows 
 
 ```bash
 git clone git@github.com:MaibornWolff/ThreatSea.git && cd ThreatSea && pnpm install
+
+# apps/backend/.env is gitignored and has to be created once. `cp .env.example .env`
+# does not work: its placeholders are read as literal values, so AUTH_METHOD and both
+# ORIGIN_* entries end up invalid, and DATABASE_TLS / COOKIES_SECURE_OPTION have to say
+# exactly "disabled" — otherwise Postgres is contacted over TLS and the session cookie
+# is never set over plain http://localhost. The values below mirror docker-compose.yaml.
+cat > apps/backend/.env <<'EOF'
+JWT_SECRET=somerandomstringtobeusedasJWTsecret
+EXPRESS_SESSION_SECRET=someRandomExpressSessionSecret
+AUTH_METHOD=fixed
+ORIGIN_APP=http://localhost:3000
+ORIGIN_BACKEND=http://localhost:8000
+DATABASE_HOST=127.0.0.1
+DATABASE_USER=threatsea
+DATABASE_PASSWORD=threatseapassword
+DATABASE_NAME=threatsea
+DATABASE_TLS=disabled
+COOKIES_SECURE_OPTION=disabled
+EOF
+
 docker compose up -d postgres
 pnpm dev --filter=threatsea_be              # separate terminal
 pnpm --filter threatsea_fe playwright:init  # once per machine
 pnpm --filter threatsea_fe test:unit:watch
 pnpm --filter threatsea_fe playwright:ui
 ```
+
+`AUTH_METHOD=fixed` is not optional for E2E — `auth.setup.ts` logs in via
+`/api/auth/login?testUser=<n>`, a route that only exists in fixed-auth mode. The same fixed
+profiles back the role-based tests in [section 4.5](#45-role-based--multi-identity-testing).
 
 Read in this order: this document → `apps/frontend/playwright/pages/base.page.ts` (12 lines,
 sets the pattern) → `pages/projects.page.ts` + `tests/projects.page.e2e.spec.ts` (representative
