@@ -187,7 +187,9 @@ observable behavior (not internals) with at least one edge case → run
 
 **Avoid:** hard waits (`page.waitForTimeout`), raw selectors in specs, shared mutable state
 between tests, asserting on internals instead of user-visible behavior, and `test.only` in
-committed code (`forbidOnly: true` fails CI).
+committed code — nothing catches that one today: `forbidOnly` is tied to `CI`
+(`forbidOnly: !!process.env["CI"]`), and the E2E suite doesn't run there (see §6). Reviewers have
+to spot it.
 
 ---
 
