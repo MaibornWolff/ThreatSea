@@ -3,7 +3,6 @@
 > **Audience:** New testers joining the project, or contributors who need to understand the test setup end-to-end.
 > **Scope:** Frontend component tests (Vitest) and end-to-end tests (Playwright) for [ThreatSea](https://github.com/MaibornWolff/ThreatSea), the threat-modeling tool by MaibornWolff.
 
-**Last updated:** 2026-09-04
 **Owners:** Katharina (FE Component Tests) · Yassine (Playwright / E2E / CI)
 
 ---
@@ -23,7 +22,6 @@
 6. [CI/CD Integration](#6-cicd-integration)
 7. [Stability & Maintenance](#7-stability--maintenance)
 8. [Quick Start (Day 1)](#8-quick-start-day-1)
-9. [Glossary](#9-glossary)
 
 ---
 
@@ -100,6 +98,11 @@ the **Page Object Model**: `tests/` describe behavior only (no selectors, no har
 `pages/` (one class per route extending `BasePage`, owns all `Locator`s and page-level actions) →
 `utils/` (typed API clients for fast setup/teardown) → `builder/`/`fixtures/`/`enums/` (payload
 factories, JSON test data, shared enums).
+
+`BasePage` itself is deliberately small: `navigate(path)` plus `getCsrfToken()`, which reads the
+token the app writes to `localStorage` at login and throws if it is missing. Specs hand that token
+to the `utils/` API clients, which send it as `x-csrf-token` — so API-driven setup and teardown
+starts by asking a page object for it.
 
 Key patterns:
 
@@ -299,20 +302,6 @@ pnpm --filter threatsea_fe playwright:ui     # Playwright UI mode
 
 The frontend dev server is not in this list on purpose: Playwright starts it and reuses a running
 one locally (`webServer.reuseExistingServer` in `playwright.config.ts`).
-
----
-
-## 9. Glossary
-
-| Term               | Meaning                                                                                                |
-| ------------------ | ------------------------------------------------------------------------------------------------------ |
-| **POM**            | Page Object Model — encapsulates a page's selectors and actions into a class                           |
-| **`data-testid`**  | HTML attribute used as a stable selector hook for tests                                                |
-| **`buildTestId`**  | Combines `browserName` + Playwright's per-test `testId` into a unique resource namespace               |
-| **Storage state**  | Playwright's mechanism for persisting cookies + localStorage between tests (skips the login flow)      |
-| **CSRF token**     | Anti-forgery token in `localStorage` after login; read via `getCsrfToken()`                            |
-| **Trace**          | Playwright artifact (`*.zip`) with screenshots, DOM snapshots, network/console logs for one test run   |
-| **Vitest globals** | `describe`, `it`, `expect`, `vi`, etc. exposed without imports (`globals: true` in `vitest.config.ts`) |
 
 ---
 
