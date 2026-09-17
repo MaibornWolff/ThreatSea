@@ -78,7 +78,9 @@ pnpm --filter threatsea_fe test:unit         # single run
 pnpm --filter threatsea_fe test:unit:coverage  # + coverage/index.html
 ```
 
-Reports land in `apps/frontend/coverage/` and `apps/frontend/junit.xml`.
+Only the third command writes a report, into `apps/frontend/coverage/`. The
+`apps/frontend/junit.xml` that CI picks up comes from `test:unit:ci` alone — none of the
+commands above produce it.
 
 ---
 
