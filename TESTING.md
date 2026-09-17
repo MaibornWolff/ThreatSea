@@ -3,8 +3,6 @@
 > **Audience:** New testers joining the project, or contributors who need to understand the test setup end-to-end.
 > **Scope:** Frontend component tests (Vitest) and end-to-end tests (Playwright) for [ThreatSea](https://github.com/MaibornWolff/ThreatSea), the threat-modeling tool by MaibornWolff.
 
-**Owners:** Katharina (FE Component Tests) · Yassine (Playwright / E2E / CI)
-
 ---
 
 ## Table of Contents
