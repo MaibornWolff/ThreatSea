@@ -161,7 +161,14 @@ for long — this table drifts the moment someone adds a test and forgets to com
 pnpm --filter threatsea_fe playwright:init   # install browsers, once per machine
 pnpm --filter threatsea_fe playwright        # headless, Chromium, 1 worker (local baseline; candidate CI shape)
 pnpm --filter threatsea_fe playwright:ui     # interactive UI mode, recommended for debugging
+PW_ALL_BROWSERS=1 pnpm --filter threatsea_fe playwright   # + Firefox and WebKit
 ```
+
+Locally only Chromium runs. `PW_ALL_BROWSERS=1` (or `=true`) adds the Firefox and WebKit projects;
+`CI=1` has the same effect. Each browser logs in as its own fixed profile in `auth.setup.ts`
+(Chromium `testUser=2`, Firefox `3`, WebKit `4`), stores its session in
+`tmp/.auth/<browser>-user.json`, and namespaces the resources it creates via
+`buildTestId(browserName, ...)` — so the three runs don't collide in a shared database.
 
 On failure: HTML report in `apps/frontend/playwright-report/`, traces/screenshots/video in
 `apps/frontend/test-results/`.
