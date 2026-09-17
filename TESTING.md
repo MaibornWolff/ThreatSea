@@ -243,11 +243,13 @@ root cause, never just add retries → fix and unquarantine (sprint review check
 `fixme`s).
 
 A consistently-failing automated test is evidence to investigate, not proof of a bug by itself.
-Two `risk.page.e2e.spec.ts` cases made that concrete: one failure turned out to be a real
-frontend/backend permission mismatch (reported); an outwardly identical one turned out to only
-happen under React's `<StrictMode>` combined with Playwright's automation timing — never
-reproducible manually, and confirmed as no real bug once `<StrictMode>` was removed and the test
-passed. Cross-check with a manual repro before reporting anything.
+Two `risk.page.e2e.spec.ts` cases made that concrete. One failure turned out to be a real
+frontend/backend permission mismatch: reported to the dev team, but still waiting on a tracking
+issue and a product decision, so the test stays quarantined. An outwardly identical one turned out
+to only happen under React's `<StrictMode>` combined with Playwright's automation timing — never
+reproducible manually, and confirmed as no real bug by removing `<StrictMode>` locally for one run
+and watching the test pass. That was a diagnostic step, not a change: `<StrictMode>` is still in
+`src/main.tsx`. Cross-check with a manual repro before reporting anything.
 
 ### 7.2 Cadence & targets
 
