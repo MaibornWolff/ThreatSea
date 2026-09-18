@@ -174,3 +174,41 @@ describe("get report from imported project", () => {
         expect(res.statusCode).toEqual(200);
     });
 });
+
+describe("import annotations", () => {
+    it("should remap annotation project ids to the new project", async () => {
+        const projectName = "annotation remap project";
+        const project = JSON.parse(JSON.stringify(VALID_TEST_PROJECT));
+        project.project.name = projectName;
+        project.system.data.annotations = [
+            {
+                id: "annotation-rect",
+                type: "rect",
+                projectId: 1,
+                x: 120,
+                y: 240,
+                width: 60,
+                height: 40,
+                stroke: "#000000",
+                strokeWidth: 2,
+            },
+        ];
+
+        const res = await request(app)
+            .post("/api/import")
+            .send(project)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(204);
+
+        const importedProject = await db.query.projects.findFirst({
+            where: eq(projects.name, projectName),
+        });
+        const exportRes = await request(app)
+            .get("/api/export/" + importedProject!.id)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+
+        expect(exportRes.body.system.data.annotations[0].projectId).toEqual(importedProject!.id);
+    });
+});
