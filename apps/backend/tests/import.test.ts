@@ -192,6 +192,16 @@ describe("import annotations", () => {
                 stroke: "#000000",
                 strokeWidth: 2,
             },
+            {
+                id: "annotation-circle",
+                type: "circle",
+                projectId: 1,
+                x: 400,
+                y: 90,
+                radius: 25,
+                stroke: "#ff0000",
+                strokeWidth: 1,
+            },
         ];
 
         const res = await request(app)
@@ -209,6 +219,9 @@ describe("import annotations", () => {
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
 
-        expect(exportRes.body.system.data.annotations[0].projectId).toEqual(importedProject!.id);
+        expect(exportRes.body.system.data.annotations).toHaveLength(2);
+        for (const annotation of exportRes.body.system.data.annotations) {
+            expect(annotation.projectId).toEqual(importedProject!.id);
+        }
     });
 });
