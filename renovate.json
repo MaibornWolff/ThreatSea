@@ -11,6 +11,15 @@
   },
   "minimumReleaseAge": "72 hours",
   "rebaseWhen": "behind-base-branch",
+  "customManagers": [
+    {
+      "description": "Update npm tools pinned inline in workflow run commands (e.g. npm install -g @cyclonedx/cdxgen@1.2.3). No built-in manager reads versions out of run: commands, so without this the pins drift silently.",
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/.+\\.ya?ml$/"],
+      "matchStrings": ["npm (?:install|i) -g (?<depName>@?[^@\\s]+(?:/[^@\\s]+)?)@(?<currentValue>[\\w.+-]+)"],
+      "datasourceTemplate": "npm"
+    }
+  ],
   "packageRules": [
     {
       "description": "minimumReleaseAge cannot be enforced for these update types (the package manager performs the resolution); without this they would be filtered as permanently pending and never raised as PRs",
