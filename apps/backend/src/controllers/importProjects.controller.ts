@@ -19,7 +19,7 @@ import {
     Project,
     Threat,
 } from "#db/schema.js";
-import { Component, Connection, ConnectionPoint, PointOfAttack } from "#types/system.types.js";
+import { Annotation, Component, Connection, ConnectionPoint, PointOfAttack } from "#types/system.types.js";
 import { createProject } from "#services/projects.service.js";
 import { importAssets } from "#services/assets.service.js";
 import { createCustomCatalog, getCatalogsByUserId } from "#services/catalogs.service.js";
@@ -248,6 +248,10 @@ export async function importProject(request: Request<void>, response: Response, 
             }
             for (const connectionPoint of body.system.data.connectionPoints as ConnectionPoint[]) {
                 connectionPoint.projectId = newProjectId;
+            }
+
+            for (const annotation of (body.system.data.annotations ?? []) as Annotation[]) {
+                annotation.projectId = newProjectId;
             }
 
             await createEmptySystem(newProjectId, tx);
