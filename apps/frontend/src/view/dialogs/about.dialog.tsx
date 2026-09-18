@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import logo from "#images/threatsealogo-dez.png";
 import { APP_VERSION } from "#utils/version.ts";
 import { Button } from "#view/components/button.component.tsx";
-import { Dialog } from "./dialog.component";
+import { Dialog } from "#view/components/dialog.component.tsx";
 
 interface AboutDialogProps {
     open: boolean;
