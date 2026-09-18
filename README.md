@@ -22,6 +22,8 @@ $ pnpm run dev
 
 ThreatSea uses [Playwright](https://playwright.dev/) for end-to-end testing. The test suite is located under `apps/frontend/playwright/` and follows the **Page Object Model (POM)** pattern.
 
+This section covers running the suite. [`TESTING.md`](TESTING.md) is the full test documentation — conventions, Page Object structure, role-based testing, and a day-1 quick start including the backend `.env` a fresh clone needs.
+
 ### Setup
 
 Run the init script once to ensure Playwright browsers are installed on your machine:
