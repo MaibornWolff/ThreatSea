@@ -396,11 +396,11 @@ importers:
         specifier: 17.0.14
         version: 17.0.14(i18next@26.4.2(typescript@7.0.2))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2)
       react-konva:
-        specifier: 19.2.7
-        version: 19.2.7(@types/react@19.3.0)(konva@10.5.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        specifier: 19.3.0
+        version: 19.3.0(@types/react@19.3.0)(konva@10.5.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       react-konva-utils:
         specifier: 2.0.0
-        version: 2.0.0(konva@10.5.0)(react-dom@19.3.0(react@19.3.0))(react-konva@19.2.7(@types/react@19.3.0)(konva@10.5.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)
+        version: 2.0.0(konva@10.5.0)(react-dom@19.3.0(react@19.3.0))(react-konva@19.3.0(@types/react@19.3.0)(konva@10.5.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)
       react-redux:
         specifier: 9.3.0
         version: 9.3.0(@types/react@19.3.0)(react@19.3.0)(redux@5.0.1)
@@ -4228,18 +4228,18 @@ packages:
       react-dom: ^18.2.0 || ^19.0.0
       react-konva: ^18.2.14 || ^19.0.10
 
-  react-konva@19.2.7:
-    resolution: {integrity: sha512-z/mxVITj2W+MQ8+TeD7ONMnMvy99hj4NJ4UfmWbjJcdeUOm8AZR41cCfwRZTryE3/z4r2/nOyckRNlr0GP+G3w==}
+  react-konva@19.3.0:
+    resolution: {integrity: sha512-YEDAdM0PUUUJcTzXAKXMRO2+krSE+hhjGsupWjy6UBtzyFI6f2LkwSYQresl7WwvD+j3fbMy0uj3jtnytKqk9Q==}
     peerDependencies:
       konva: ^8.0.1 || ^7.2.5 || ^9.0.0 || ^10.0.0
-      react: ^19.2.0
-      react-dom: ^19.2.0
+      react: ^19.3.0
+      react-dom: ^19.3.0
 
-  react-reconciler@0.33.0:
-    resolution: {integrity: sha512-KetWRytFv1epdpJc3J4G75I4WrplZE5jOL7Yq0p34+OVOKF4Se7WrdIdVC45XsSSmUTlht2FM/fM1FZb1mfQeA==}
+  react-reconciler@0.34.0:
+    resolution: {integrity: sha512-eVibvB1fc9j5Qf1KRkiM3GzRPBdjg2P6G6QV2f3P6Eb3OGMxRBhdg2rrUwjbV5JrQaJj8nOa8uajmmJA5tJWjQ==}
     engines: {node: '>=0.10.0'}
     peerDependencies:
-      react: ^19.2.0
+      react: ^19.3.0
 
   react-redux@9.3.0:
     resolution: {integrity: sha512-KQopgqFo/p/fgmAs5qz6p5RWaNAzq40WAu7fJIXnQpYxFPbJYtsJPWvGeF2rOBaY/kEuV77AVsX8TsQzKm+A/g==}
@@ -4376,9 +4376,6 @@ packages:
 
   scheduler@0.25.0-rc-603e6108-20241029:
     resolution: {integrity: sha512-pFwF6H1XrSdYYNLfOcGlM28/j8CGLu8IvdrxqhjWULe2bPcKiKW4CV+OWqR/9fT52mywx65l7ysNkjLKBda7eA==}
-
-  scheduler@0.27.0:
-    resolution: {integrity: sha512-eNv+WrVbKu1f3vbYJT/xtiF5syA5HPIMtf9IgY/nKg0sWqzAUEvqY/xm7OcZc/qafLx/iO9FgOmeSAp4v5ti/Q==}
 
   scheduler@0.28.0:
     resolution: {integrity: sha512-juorfCmIkIw8tT+p5BXSm6PJjQF/ycEYmKyzURCIt/RaZIhL+PulbQ9Yu2z1HdOJDdqDTlxA1+xKBmHXJsczAw==}
@@ -8264,30 +8261,30 @@ snapshots:
 
   react-is@19.3.0: {}
 
-  react-konva-utils@2.0.0(konva@10.5.0)(react-dom@19.3.0(react@19.3.0))(react-konva@19.2.7(@types/react@19.3.0)(konva@10.5.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0):
+  react-konva-utils@2.0.0(konva@10.5.0)(react-dom@19.3.0(react@19.3.0))(react-konva@19.3.0(@types/react@19.3.0)(konva@10.5.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0):
     dependencies:
       konva: 10.5.0
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
-      react-konva: 19.2.7(@types/react@19.3.0)(konva@10.5.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      react-konva: 19.3.0(@types/react@19.3.0)(konva@10.5.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       use-image: 1.1.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
 
-  react-konva@19.2.7(@types/react@19.3.0)(konva@10.5.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
+  react-konva@19.3.0(@types/react@19.3.0)(konva@10.5.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
     dependencies:
       '@types/react-reconciler': 0.33.0(@types/react@19.3.0)
       its-fine: 2.0.0(@types/react@19.3.0)(react@19.3.0)
       konva: 10.5.0
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
-      react-reconciler: 0.33.0(react@19.3.0)
-      scheduler: 0.27.0
+      react-reconciler: 0.34.0(react@19.3.0)
+      scheduler: 0.28.0
     transitivePeerDependencies:
       - '@types/react'
 
-  react-reconciler@0.33.0(react@19.3.0):
+  react-reconciler@0.34.0(react@19.3.0):
     dependencies:
       react: 19.3.0
-      scheduler: 0.27.0
+      scheduler: 0.28.0
 
   react-redux@9.3.0(@types/react@19.3.0)(react@19.3.0)(redux@5.0.1):
     dependencies:
@@ -8444,8 +8441,6 @@ snapshots:
       xmlchars: 2.2.0
 
   scheduler@0.25.0-rc-603e6108-20241029: {}
-
-  scheduler@0.27.0: {}
 
   scheduler@0.28.0: {}
 
