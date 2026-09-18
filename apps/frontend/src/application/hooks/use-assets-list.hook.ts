@@ -1,9 +1,9 @@
 import { useEffect, useMemo } from "react";
+import { matchesAssetSearch } from "#utils/asset-search.ts";
 import type { Asset } from "#api/types/asset.types.ts";
 import { useAssets } from "./use-assets.hook";
 import { useList } from "./use-list.hooks";
 
-const searchableAssetFields: (keyof Pick<Asset, "name" | "description">)[] = ["name", "description"];
 const sortableAssetFields: (keyof Pick<
     Asset,
     "name" | "confidentiality" | "integrity" | "availability" | "createdAt"
@@ -21,15 +21,7 @@ export const useAssetsList = ({ projectId }: { projectId: number }) => {
     }, [projectId, loadAssets]);
 
     const filteredItems = useMemo(
-        () =>
-            items.filter((item: Asset) => {
-                const lcSearchValue = searchValue.toLowerCase();
-                return (
-                    searchableAssetFields.some((searchField) =>
-                        item[searchField].toLowerCase().includes(lcSearchValue)
-                    ) || `${item.id}` == searchValue
-                );
-            }),
+        () => items.filter((item: Asset) => matchesAssetSearch(item, searchValue)),
         [items, searchValue]
     );
 

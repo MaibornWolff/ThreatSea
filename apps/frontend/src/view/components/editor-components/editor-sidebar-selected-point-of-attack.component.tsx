@@ -6,6 +6,7 @@ import { EditorSidebarAssetList } from "./editor-sidebar-asset-list.component";
 import { POA_COLORS } from "#view/colors/pointsOfAttack.colors.ts";
 import { SearchField } from "#view/components/search-field.component.tsx";
 import { useAssetHoverPopper } from "#application/hooks/useAssetHoverPopper.ts";
+import { matchesAssetSearch } from "#utils/asset-search.ts";
 import type { ChangeEvent } from "react";
 import type { Asset } from "#api/types/asset.types.ts";
 import type { SystemComponent, SystemPointOfAttack } from "#api/types/system.types.ts";
@@ -132,17 +133,7 @@ export const EditorSidebarSelectedPointOfAttack = ({
             />
 
             <EditorSidebarAssetList
-                items={
-                    assetSearchValue != ""
-                        ? items.filter((item) => {
-                              const lcSearchValue = assetSearchValue.toLowerCase();
-                              return (
-                                  assetSearchValue === "" ||
-                                  item.name.replace(/_/g, " ").toLowerCase().includes(lcSearchValue)
-                              );
-                          })
-                        : items
-                }
+                items={items.filter((item) => matchesAssetSearch(item, assetSearchValue))}
                 checkedAssets={selectedPointOfAttack.assets}
                 onChangeHandler={handleOnAssetChanged}
                 onAssetNameClick={handleAssetNameClick}

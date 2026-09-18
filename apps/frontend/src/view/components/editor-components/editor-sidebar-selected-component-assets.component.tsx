@@ -10,6 +10,7 @@ import { AssetSecurityNeedsPopper } from "./asset-security-needs-popper.componen
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { POA_COLORS } from "#view/colors/pointsOfAttack.colors.ts";
 import { useAssetHoverPopper } from "#application/hooks/useAssetHoverPopper.ts";
+import { matchesAssetSearch } from "#utils/asset-search.ts";
 import type { ChangeEvent } from "react";
 import type { SortDirection } from "#application/actions/list.actions.ts";
 import type { Asset } from "#api/types/asset.types.ts";
@@ -46,10 +47,7 @@ export const EditorSidebarSelectedComponentAssets = ({
     };
 
     const visibleAssets = items
-        .filter((item) => {
-            const lcSearchValue = assetSearchValue.toLowerCase();
-            return assetSearchValue === "" || item.name.replace(/_/g, " ").toLowerCase().includes(lcSearchValue);
-        })
+        .filter((item) => matchesAssetSearch(item, assetSearchValue))
         .toSorted((a, b) => {
             const nameA = a.name.toLowerCase();
             const nameB = b.name.toLowerCase();
