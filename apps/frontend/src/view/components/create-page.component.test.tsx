@@ -262,7 +262,7 @@ describe("CreatePage — footer", () => {
     it("opens the About dialog from the footer link and shows the version", async () => {
         const { user } = setup(undefined, { showProjectInfo: false });
 
-        await user.click(screen.getByRole("button", { name: translationUtil.t("about", { ns: "mainMenu" }) }));
+        await user.click(screen.getByRole("link", { name: translationUtil.t("about", { ns: "mainMenu" }) }));
 
         const dialog = await screen.findByRole("dialog");
         expect(within(dialog).getByTestId("about-dialog_version")).toHaveTextContent("local dev");

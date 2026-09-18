@@ -5,7 +5,7 @@ export class FooterLinksPage extends BasePage {
     readonly footerVersionLabel: Locator;
     readonly imprintLink: Locator;
     readonly privacyPolicyLink: Locator;
-    readonly aboutThreatSeaButton: Locator;
+    readonly aboutThreatSeaLink: Locator;
     readonly aboutDialogVersionLabel: Locator;
     readonly aboutDialogRepositoryLink: Locator;
     readonly aboutDialogCloseButton: Locator;
@@ -17,7 +17,7 @@ export class FooterLinksPage extends BasePage {
         this.footerVersionLabel = page.getByTestId("page-footer_version");
         this.imprintLink = footerContainer.locator('a[href="/imprint"]');
         this.privacyPolicyLink = footerContainer.locator('a[href="/privacy-policy"]');
-        this.aboutThreatSeaButton = footerContainer.locator('button[type="button"]');
+        this.aboutThreatSeaLink = footerContainer.locator('a[href="#about"]');
 
         this.aboutDialogVersionLabel = page.getByTestId("about-dialog_version");
         this.aboutDialogRepositoryLink = page.locator('a[href="https://github.com/MaibornWolff/ThreatSea"]');
