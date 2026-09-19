@@ -3,7 +3,7 @@ packages:
   - "packages/*"
 
 catalog:
-  "@types/node": 24.13.4
+  "@types/node": 24.13.5
   "@vitest/coverage-v8": 4.1.11
   dotenv: 17.4.2
   oxlint: 1.83.0
