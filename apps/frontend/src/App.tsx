@@ -69,7 +69,7 @@ export function App(): JSX.Element {
                     <Translations>
                         <Suspense fallback={<PageLoader />}>
                             <Routes>
-                                <Route path="/login" element={<LoginPage />} />
+                                <Route path="/login/*" element={<LoginPage />} />
 
                                 <Route
                                     path="/projects/*"
