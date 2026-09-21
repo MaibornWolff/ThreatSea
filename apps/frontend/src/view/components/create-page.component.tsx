@@ -487,9 +487,9 @@ export const CreatePage = <P extends object>(
                     >
                         {footerLinks.map((link) => {
                             return (
-                                <a
+                                <Link
                                     key={link.url}
-                                    href={link.url}
+                                    to={link.url}
                                     onClick={link.onClick}
                                     style={{
                                         paddingRight: "10px",
@@ -497,7 +497,7 @@ export const CreatePage = <P extends object>(
                                     }}
                                 >
                                     {link.text}
-                                </a>
+                                </Link>
                             );
                         })}
                         <Typography
