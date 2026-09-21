@@ -117,6 +117,20 @@ export async function createGenericThreat(
     return genericThreat;
 }
 
+/**
+ * Creates multiple generic threats in a single insert.
+ *
+ * @param {CreateGenericThreat[]} createGenericThreatsData - The data of the generic threats.
+ * @param {TransactionType} transaction - drizzle transaction.
+ * @returns {Promise<GenericThreat[]>} A promise that resolves to the created generic threats.
+ */
+export async function createGenericThreats(
+    createGenericThreatsData: CreateGenericThreat[],
+    transaction: TransactionType | undefined = undefined
+): Promise<GenericThreat[]> {
+    return await (transaction ?? db).insert(genericThreats).values(createGenericThreatsData).returning();
+}
+
 export async function deleteGenericThreatsByPointOfAttackId(
     pointOfAttackId: string,
     projectId: number,
