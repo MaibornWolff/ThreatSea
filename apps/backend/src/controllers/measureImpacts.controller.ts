@@ -148,7 +148,18 @@ export async function updateMeasureImpact(
     const data = request.body;
     try {
         const updatedMeasureImpact: MeasureImpactResponse = await db.transaction(async (tx) => {
-            const updated = await MeasureImpactsService.updateMeasureImpact(measureImpactId, data, tx);
+            const updated = await MeasureImpactsService.updateMeasureImpact(
+                measureImpactId,
+                {
+                    description: data.description,
+                    setsOutOfScope: data.setsOutOfScope,
+                    impactsProbability: data.impactsProbability,
+                    impactsDamage: data.impactsDamage,
+                    probability: data.probability,
+                    damage: data.damage,
+                },
+                tx
+            );
             await MeasureImpactsService.finalizeThreatWhenOutOfScopeApplied(updated.threatId!, tx);
 
             return updated;
