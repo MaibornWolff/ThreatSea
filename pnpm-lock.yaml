@@ -171,8 +171,8 @@ catalogs:
       specifier: 4.1.11
       version: 4.1.11
     dotenv:
-      specifier: 17.4.2
-      version: 17.4.2
+      specifier: 18.0.0
+      version: 18.0.0
     oxlint:
       specifier: 1.83.0
       version: 1.83.0
@@ -249,7 +249,7 @@ importers:
         version: 4.2.1
       dotenv:
         specifier: 'catalog:'
-        version: 17.4.2
+        version: 18.0.0
       drizzle-orm:
         specifier: 0.45.2
         version: 0.45.2(@types/pg@8.23.1)(pg@8.23.0)
@@ -455,7 +455,7 @@ importers:
         version: 4.1.11(vitest@4.1.11)
       dotenv:
         specifier: 'catalog:'
-        version: 17.4.2
+        version: 18.0.0
       jsdom:
         specifier: 30.0.1
         version: 30.0.1(@noble/hashes@1.8.0)
@@ -2751,9 +2751,10 @@ packages:
     resolution: {integrity: sha512-QM8q3zDe58hqUqjraQOmzZ1LIH9SWQJTlEKCH4kJ2oQvLZk7RbQXvtDM2XEq3fwkV9CCvvH4LA0AV+ogFsBM2Q==}
     engines: {node: '>=8'}
 
-  dotenv@17.4.2:
-    resolution: {integrity: sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==}
+  dotenv@18.0.0:
+    resolution: {integrity: sha512-16YSUvsKtKbwrTbESvtTSZzzJUug6jdFdqiBFg9Q6Bk1JY9r0hAtrtTiWxdI9YrsgOTmkjZRdgU0n3LnwGpECw==}
     engines: {node: '>=12'}
+    hasBin: true
 
   drizzle-kit@0.31.10:
     resolution: {integrity: sha512-7OZcmQUrdGI+DUNNsKBn1aW8qSoKuTH7d0mYgSP8bAzdFzKoovxEFnoGQp2dVs82EOJeYycqRtciopszwUf8bw==}
@@ -6958,7 +6959,7 @@ snapshots:
     dependencies:
       is-obj: 2.0.0
 
-  dotenv@17.4.2: {}
+  dotenv@18.0.0: {}
 
   drizzle-kit@0.31.10:
     dependencies:
