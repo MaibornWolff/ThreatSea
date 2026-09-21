@@ -2,17 +2,17 @@
  * Module that defines the update-system use case orchestration.
  */
 import { db, TransactionType } from "#db/index.js";
-import { CatalogThreat, GenericThreat, System } from "#db/schema.js";
+import { CatalogThreat, CreateGenericThreat, GenericThreat, System } from "#db/schema.js";
 import { NotFoundError } from "#errors/not-found.error.js";
 import { PointOfAttack, UpdateSystemRequest } from "#types/system.types.js";
 import { getCatalogThreatsByProjectId } from "#services/catalog-threats.service.js";
 import {
     createThreatForGenericThreat,
     deleteThreatsByPointOfAttackId,
-    getThreatsByGenericThreatId,
+    getThreatsByProjectId,
 } from "#services/threats.service.js";
 import {
-    createGenericThreat,
+    createGenericThreats,
     deleteGenericThreatsByPointOfAttackId,
     getGenericThreatsByProjectId,
 } from "#services/generic-threats.service.js";
@@ -101,6 +101,7 @@ async function createThreatsByPointsOfAttack(
     transaction: TransactionType
 ): Promise<void> {
     const existingGenericThreats = await getGenericThreatsByProjectId(projectId, transaction);
+    const newGenericThreats: CreateGenericThreat[] = [];
 
     for (const pointOfAttack of pointsOfAttack) {
         const relevantCatalogThreats = catalogThreats.filter(
@@ -116,29 +117,34 @@ async function createThreatsByPointsOfAttack(
                 pointOfAttack: catalogThreatPointOfAttack,
             } = catalogThreat;
 
-            let genericThreat = existingGenericThreats.find(
-                (existingThreat) =>
-                    existingThreat.catalogThreatId === catalogThreatId &&
-                    existingThreat.pointOfAttackId === pointOfAttack.id &&
-                    existingThreat.projectId === projectId
-            );
+            const genericThreat =
+                existingGenericThreats.find(
+                    (existingThreat) =>
+                        existingThreat.catalogThreatId === catalogThreatId &&
+                        existingThreat.pointOfAttackId === pointOfAttack.id &&
+                        existingThreat.projectId === projectId
+                ) ??
+                newGenericThreats.find(
+                    (newThreat) =>
+                        newThreat.catalogThreatId === catalogThreatId && newThreat.pointOfAttackId === pointOfAttack.id
+                );
 
             if (!genericThreat) {
-                genericThreat = await createGenericThreat(
-                    {
-                        projectId,
-                        pointOfAttackId: pointOfAttack.id,
-                        catalogThreatId,
-                        name,
-                        description,
-                        attacker,
-                        pointOfAttack: catalogThreatPointOfAttack,
-                    },
-                    transaction
-                );
-                existingGenericThreats.push(genericThreat);
+                newGenericThreats.push({
+                    projectId,
+                    pointOfAttackId: pointOfAttack.id,
+                    catalogThreatId,
+                    name,
+                    description,
+                    attacker,
+                    pointOfAttack: catalogThreatPointOfAttack,
+                });
             }
         }
+    }
+
+    if (newGenericThreats.length > 0) {
+        await createGenericThreats(newGenericThreats, transaction);
     }
 }
 
@@ -152,6 +158,8 @@ async function createThreatsForAssetAssignedPointsOfAttack(
         return;
     }
 
+    const existingThreats = await getThreatsByProjectId(projectId, transaction);
+
     for (const pointOfAttack of pointsOfAttack) {
         const applicableGenericThreats = genericThreats.filter(
             (genericThreat) =>
@@ -159,13 +167,11 @@ async function createThreatsForAssetAssignedPointsOfAttack(
         );
 
         for (const genericThreat of applicableGenericThreats) {
-            const existingThreats = await getThreatsByGenericThreatId(genericThreat.id, transaction);
-
-            if (existingThreats.length > 0) {
+            if (existingThreats.some((threat) => threat.genericThreatId === genericThreat.id)) {
                 continue;
             }
 
-            await createThreatForGenericThreat(genericThreat.id, {}, transaction);
+            existingThreats.push(await createThreatForGenericThreat(genericThreat.id, {}, transaction));
         }
     }
 }
