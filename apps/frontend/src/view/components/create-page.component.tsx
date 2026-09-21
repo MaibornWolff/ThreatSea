@@ -126,13 +126,15 @@ export const CreatePage = <P extends object>(
         const { t: tProjects } = useTranslation("projectsPage");
         const { openConfirm } = useConfirm<ExtendedProject>();
         const footerLinks: {
+            id: string;
             url: string;
             text: string;
             onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
         }[] = [
-            { url: "/imprint", text: t("imprint") },
-            { url: "/privacy-policy", text: t("privacy") },
+            { id: "page-footer_imprint_link", url: "/imprint", text: t("imprint") },
+            { id: "page-footer_policy_link", url: "/privacy-policy", text: t("privacy") },
             {
+                id: "page-footer_about_link",
                 url: "#about",
                 text: t("about"),
                 onClick: (event) => {
@@ -488,6 +490,7 @@ export const CreatePage = <P extends object>(
                         {footerLinks.map((link) => {
                             return (
                                 <Link
+                                    data-testid={link.id}
                                     key={link.url}
                                     to={link.url}
                                     onClick={link.onClick}
