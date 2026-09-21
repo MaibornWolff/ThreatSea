@@ -10,6 +10,15 @@ on:
       SO_API_TOKEN:
         required: true
   workflow_dispatch:
+    inputs:
+      prerelease_suffix:
+        description: "Pre-release suffix for the next branch (X.Y.Z-<suffix>.N). Within a release cycle the suffix can only move forward: alpha -> beta -> rc."
+        type: choice
+        options:
+          - rc
+          - alpha
+          - beta
+        default: rc
 
 concurrency:
   group: release-${{ github.repository }}
@@ -17,6 +26,8 @@ concurrency:
 env:
   # semantic-release pushes tags/commits; the local pre-push hook (lint/format/test) must not run in CI
   HUSKY: "0"
+  # read by release.config.mjs; only affects the next branch, main never releases a prerelease
+  PRERELEASE_SUFFIX: ${{ inputs.prerelease_suffix || 'rc' }}
 
 jobs:
   compute-version:
