@@ -3,7 +3,7 @@ import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { ATTACKERS } from "#api/types/attackers.types.ts";
 import { POA_COLORS } from "#view/colors/pointsOfAttack.colors.ts";
 import i18next from "i18next";
-import type { Milestone, RiskMatrix } from "#utils/report-risk.ts";
+import { getOutOfScopeReason, type Milestone, type RiskMatrix } from "#utils/report-risk.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -60,6 +60,8 @@ interface Translations {
     after: string;
     gross: string;
     net: string;
+    outOfScope: string;
+    outOfScopeByMeasure: string;
     systemImage: string;
     assets: string;
     measures: string;
@@ -124,6 +126,8 @@ function buildTranslations(language: string): Translations {
         after: t("after"),
         gross: t("gross"),
         net: t("net"),
+        outOfScope: t("outOfScope"),
+        outOfScopeByMeasure: t("outOfScopeByMeasure"),
         systemImage: t("systemImage"),
         assets: t("assets"),
         measures: t("measures"),
@@ -665,9 +669,15 @@ function threatsDetailSection(
             lines.push(
                 `| ${T.gross} | ${escapeCell(String(threat.probability))} | ${escapeCell(String(threat.damage))} | ${escapeCell(String(threat.risk))} |`
             );
-            lines.push(
-                `| ${T.net} | ${escapeCell(String(threat.netProbability))} | ${escapeCell(String(threat.netDamage))} | ${escapeCell(String(threat.netRisk))} |`
-            );
+            const outOfScopeReason = getOutOfScopeReason(threat);
+            if (outOfScopeReason) {
+                const label = outOfScopeReason === "measure" ? T.outOfScopeByMeasure : T.outOfScope;
+                lines.push(`| ${T.net} | – | – | ${escapeCell(label)} |`);
+            } else {
+                lines.push(
+                    `| ${T.net} | ${escapeCell(String(threat.netProbability))} | ${escapeCell(String(threat.netDamage))} | ${escapeCell(String(threat.netRisk))} |`
+                );
+            }
             lines.push("");
 
             if (threat.componentReportId && linkOptions.linkComponents) {

@@ -10,6 +10,7 @@ import { MATRIX_COLOR } from "#view/colors/matrix.ts";
 import type { MatrixColorKey } from "#view/colors/matrix.ts";
 import type { IndexCallback, ProjectReport, ThreatReport } from "#api/types/project.types.ts";
 import { colors } from "#view/wrappers/color-tokens.ts";
+import { getOutOfScopeReason, type OutOfScopeReason } from "#utils/report-risk.ts";
 
 type ReportThreat = ProjectReport["threats"][number];
 type ThreatAsset = ReportThreat["assets"][number];
@@ -37,6 +38,7 @@ interface ThreatCardProps extends ThreatReport {
 
 interface RiskInfoProps {
     language: string;
+    outOfScopeReason: OutOfScopeReason;
     bruttoColor: MatrixColorKey;
     nettoColor: MatrixColorKey;
     damage: number;
@@ -187,6 +189,7 @@ const ThreatCard = ({
     confidentiality,
     integrity,
     availability,
+    status,
     measures,
     assets,
     componentName,
@@ -248,6 +251,7 @@ const ThreatCard = ({
                     />
                     <RiskInfo
                         language={language}
+                        outOfScopeReason={getOutOfScopeReason({ status, measures })}
                         bruttoColor={bruttoColor}
                         nettoColor={nettoColor}
                         damage={damage}
@@ -304,6 +308,7 @@ const ThreatCard = ({
 
 const RiskInfo = ({
     language,
+    outOfScopeReason,
     bruttoColor,
     nettoColor,
     damage,
@@ -406,31 +411,57 @@ const RiskInfo = ({
                         backgroundColor: MATRIX_COLOR[nettoColor]?.light,
                     }}
                 >
-                    <Text size="small" style={{ width: 60, textAlign: "center" }}>
-                        {netProbability}
-                    </Text>
-                    <Text size="small" style={{ width: 60, textAlign: "center" }}>
-                        {netDamage}
-                    </Text>
-                    <View
-                        style={{
-                            display: "flex",
-                            flexDirection: "row",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            width: 60,
-                        }}
-                    >
-                        <Text size="small">{netRisk}</Text>
-                        <Text
+                    {outOfScopeReason ? (
+                        <View
                             style={{
-                                paddingLeft: 2,
-                                fontSize: 8,
+                                display: "flex",
+                                flexDirection: "row",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                width: 180,
                             }}
                         >
-                            ({t("net")})
-                        </Text>
-                    </View>
+                            <Text size="small" style={{ textAlign: "center", fontSize: 8, flexShrink: 1 }}>
+                                {outOfScopeReason === "measure" ? t("outOfScopeByMeasure") : t("outOfScope")}
+                            </Text>
+                            <Text
+                                style={{
+                                    paddingLeft: 2,
+                                    fontSize: 8,
+                                }}
+                            >
+                                ({t("net")})
+                            </Text>
+                        </View>
+                    ) : (
+                        <>
+                            <Text size="small" style={{ width: 60, textAlign: "center" }}>
+                                {netProbability}
+                            </Text>
+                            <Text size="small" style={{ width: 60, textAlign: "center" }}>
+                                {netDamage}
+                            </Text>
+                            <View
+                                style={{
+                                    display: "flex",
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    width: 60,
+                                }}
+                            >
+                                <Text size="small">{netRisk}</Text>
+                                <Text
+                                    style={{
+                                        paddingLeft: 2,
+                                        fontSize: 8,
+                                    }}
+                                >
+                                    ({t("net")})
+                                </Text>
+                            </View>
+                        </>
+                    )}
                 </View>
             </View>
         </View>
