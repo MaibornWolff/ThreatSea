@@ -1,6 +1,6 @@
 import type { ProjectReport } from "#api/types/project.types.ts";
 import type { MatrixColorKey } from "#view/colors/matrix.ts";
-import { calcNetRisk } from "#utils/calcRisk.ts";
+import { calcThreatNetRisk } from "#utils/calcRisk.ts";
 import { dayNumberFromDateString, addThreatsToRiskMatrix } from "#utils/riskMatrix.ts";
 
 export type ReportThreat = ProjectReport["threats"][number];
@@ -67,7 +67,7 @@ export const filterThreatsByScheduledRange = (
         const filteredMeasures = threat.measures.filter((measure) =>
             isMeasureWithinScheduledRange(measure, fromDay, tillDay)
         );
-        const { netProbability, netDamage, netRisk } = calcNetRisk(threat.probability, threat.damage, filteredMeasures);
+        const { netProbability, netDamage, netRisk } = calcThreatNetRisk(threat, filteredMeasures);
         return {
             ...threat,
             measures: filteredMeasures,
@@ -106,7 +106,7 @@ export const calcActiveMeasureNetRisk = (threat: ReportThreat, scheduledAt: stri
         const measureScheduledAt = dayNumberFromDateString(measure.scheduledAt);
         return !Number.isNaN(measureScheduledAt) && measureScheduledAt <= dayNumberFromDateString(scheduledAt);
     });
-    return calcNetRisk(threat.probability, threat.damage, activeMeasures);
+    return calcThreatNetRisk(threat, activeMeasures);
 };
 
 export const calcNetRiskMatrix = (
