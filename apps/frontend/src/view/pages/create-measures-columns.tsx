@@ -110,21 +110,17 @@ export const createMeasuresColumns = ({
                                   <ContentCopyOutlined sx={{ fontSize: 18 }} />
                               </IconButton>
                               {isCatalogMeasure ? (
-                                  // The span keeps the tooltip working while the button is
-                                  // disabled (disabled MUI buttons fire no pointer events).
-                                  <span>
-                                      <IconButton
-                                          title={t("reset")}
-                                          disabled={!measure.scheduledAt}
-                                          data-testid="measures-page_measures-list-entry_reset-button"
-                                          onClick={(e) => {
-                                              e.stopPropagation();
-                                              handleDeleteOrResetMeasure(measure);
-                                          }}
-                                      >
-                                          <Replay sx={{ fontSize: 18 }} />
-                                      </IconButton>
-                                  </span>
+                                  <IconButton
+                                      title={t("reset")}
+                                      disabled={!measure.scheduledAt}
+                                      data-testid="measures-page_measures-list-entry_reset-button"
+                                      onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleDeleteOrResetMeasure(measure);
+                                      }}
+                                  >
+                                      <Replay sx={{ fontSize: 18 }} />
+                                  </IconButton>
                               ) : (
                                   <IconButton
                                       title={t("delete")}
