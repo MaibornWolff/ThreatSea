@@ -2,12 +2,13 @@
  * Module that defines the update-system use case orchestration.
  */
 import { db, TransactionType } from "#db/index.js";
-import { CatalogThreat, CreateGenericThreat, GenericThreat, System } from "#db/schema.js";
+import { CatalogThreat, CreateGenericThreat, CreateThreat, GenericThreat, System } from "#db/schema.js";
 import { NotFoundError } from "#errors/not-found.error.js";
 import { PointOfAttack, UpdateSystemRequest } from "#types/system.types.js";
 import { getCatalogThreatsByProjectId } from "#services/catalog-threats.service.js";
 import {
-    createThreatForGenericThreat,
+    buildThreatForGenericThreat,
+    createThreats,
     deleteThreatsByPointOfAttackId,
     getThreatsByProjectId,
 } from "#services/threats.service.js";
@@ -37,9 +38,11 @@ export async function updateSystem(projectId: number, updateSystemData: UpdateSy
 
         await deleteThreatsByPointsOfAttack(getDeletedPointsOfAttack(oldSystem, updatedSystem), projectId, tx);
 
+        const catalogThreats = await getCatalogThreatsByProjectId(projectId, tx);
+
         await createThreatsByPointsOfAttack(
             getCreatedPointsOfAttack(oldSystem, updatedSystem),
-            await getCatalogThreatsByProjectId(projectId, tx),
+            catalogThreats,
             projectId,
             tx
         );
@@ -47,6 +50,7 @@ export async function updateSystem(projectId: number, updateSystemData: UpdateSy
         await createThreatsForAssetAssignedPointsOfAttack(
             getPointsOfAttackWithAssets(updatedSystem),
             await getGenericThreatsByProjectId(projectId, tx),
+            catalogThreats,
             projectId,
             tx
         );
@@ -151,6 +155,7 @@ async function createThreatsByPointsOfAttack(
 async function createThreatsForAssetAssignedPointsOfAttack(
     pointsOfAttack: PointOfAttack[],
     genericThreats: GenericThreat[],
+    catalogThreats: CatalogThreat[],
     projectId: number,
     transaction: TransactionType
 ): Promise<void> {
@@ -159,6 +164,7 @@ async function createThreatsForAssetAssignedPointsOfAttack(
     }
 
     const existingThreats = await getThreatsByProjectId(projectId, transaction);
+    const newThreats: CreateThreat[] = [];
 
     for (const pointOfAttack of pointsOfAttack) {
         const applicableGenericThreats = genericThreats.filter(
@@ -167,11 +173,26 @@ async function createThreatsForAssetAssignedPointsOfAttack(
         );
 
         for (const genericThreat of applicableGenericThreats) {
-            if (existingThreats.some((threat) => threat.genericThreatId === genericThreat.id)) {
+            if (
+                existingThreats.some((threat) => threat.genericThreatId === genericThreat.id) ||
+                newThreats.some((threat) => threat.genericThreatId === genericThreat.id)
+            ) {
                 continue;
             }
 
-            existingThreats.push(await createThreatForGenericThreat(genericThreat.id, {}, transaction));
+            const catalogThreat = catalogThreats.find(
+                (catalogThreat) => catalogThreat.id === genericThreat.catalogThreatId
+            );
+
+            if (!catalogThreat) {
+                throw new NotFoundError("Catalog threat not found");
+            }
+
+            newThreats.push(buildThreatForGenericThreat(genericThreat, catalogThreat));
         }
+    }
+
+    if (newThreats.length > 0) {
+        await createThreats(newThreats, transaction);
     }
 }
