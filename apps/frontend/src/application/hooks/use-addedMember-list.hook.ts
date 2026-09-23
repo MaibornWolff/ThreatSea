@@ -24,5 +24,8 @@ export const useMembersList = (projectCatalogId: number, memberPath: string, mem
         isPending: isAddedPending,
         onConfirmDeleteMember,
         members: sortedItems,
+        // The unfiltered membership: ownership/emptiness rules must not change their
+        // verdict just because a role filter hides rows from the list.
+        allMembers: items,
     };
 };

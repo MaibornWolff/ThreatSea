@@ -92,7 +92,7 @@ const MemberPageBody = () => {
         navigate("/projects");
     }
 
-    const { members, onConfirmDeleteMember } = useMembersList(projectCatalogId, memberPath, memberRole);
+    const { members, allMembers, onConfirmDeleteMember } = useMembersList(projectCatalogId, memberPath, memberRole);
 
     useLayoutEffect(() => {
         if (isSelfRemoved) {
@@ -156,9 +156,11 @@ const MemberPageBody = () => {
         setMemberRole(value);
     };
 
+    // Deliberately based on the unfiltered membership: an active role filter (e.g. Editors
+    // only) hides all owners from `members`, which must not flip the ownership verdict.
     const checkIsOwnerNotAlone = useCallback(
-        (member: Member) => members.find((m) => m.id !== member.id && checkUserRole(m.role, USER_ROLES.OWNER)),
-        [members]
+        (member: Member) => allMembers.find((m) => m.id !== member.id && checkUserRole(m.role, USER_ROLES.OWNER)),
+        [allMembers]
     );
 
     const handleDeleteMember = useCallback(
@@ -182,7 +184,7 @@ const MemberPageBody = () => {
                 cancelText = t("cancel");
                 ownUserId = user.userId;
             } else {
-                if (members.length > 1) {
+                if (allMembers.length > 1) {
                     message.preHighlightText = t("onlyOwnerLeftPre");
                     message.afterHighlightText = t("onlyOwnerLeftPost");
                 } else {
@@ -213,7 +215,7 @@ const MemberPageBody = () => {
         },
         [
             checkIsOwnerNotAlone,
-            members,
+            allMembers,
             onConfirmDeleteMember,
             openConfirm,
             memberPath,
