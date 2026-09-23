@@ -170,20 +170,15 @@ describe("createThreatsColumns — text-column filter header", () => {
         const { columns } = buildColumns({ expandedFilters: { name: false } });
         renderColumnHeader(columns.find((c) => c.field === "name"));
 
-        // Collapse keeps the DOM but with aria-hidden + zero height.
-        const input = screen.getByPlaceholderText("Filter...");
-        const collapseRoot = input.closest(".MuiCollapse-root");
-        expect(collapseRoot).not.toBeNull();
-        expect(collapseRoot!.classList.contains("MuiCollapse-hidden")).toBe(true);
+        // Collapse keeps the DOM but hides it until expanded.
+        expect(screen.getByPlaceholderText("filterPlaceholder")).not.toBeVisible();
     });
 
     it("shows the filter input when expandedFilters[field] is true", () => {
         const { columns } = buildColumns({ expandedFilters: { name: true } });
         renderColumnHeader(columns.find((c) => c.field === "name"));
 
-        const input = screen.getByPlaceholderText("Filter...");
-        const collapseRoot = input.closest(".MuiCollapse-root");
-        expect(collapseRoot!.classList.contains("MuiCollapse-entered")).toBe(true);
+        expect(screen.getByPlaceholderText("filterPlaceholder")).toBeVisible();
     });
 
     it("clicking the chevron toggles filter expansion with the column field", async () => {
@@ -200,7 +195,7 @@ describe("createThreatsColumns — text-column filter header", () => {
         const { columns, handlers } = buildColumns({ expandedFilters: { pointOfAttack: true } });
         renderColumnHeader(columns.find((c) => c.field === "pointOfAttack"));
 
-        await userEvent.type(screen.getByPlaceholderText("Filter..."), "abc");
+        await userEvent.type(screen.getByPlaceholderText("filterPlaceholder"), "abc");
 
         expect(handlers.handleFilterChange).toHaveBeenCalledTimes(3);
         for (const call of handlers.handleFilterChange.mock.calls) {
@@ -220,7 +215,7 @@ describe("createThreatsColumns — text-column filter header", () => {
         });
         renderColumnHeader(columns.find((c) => c.field === "name"));
 
-        expect(screen.getByPlaceholderText("Filter...")).toHaveValue("auth");
+        expect(screen.getByPlaceholderText("filterPlaceholder")).toHaveValue("auth");
     });
 });
 
