@@ -39,7 +39,7 @@
     },
     "assets": {
       "title": "Assets",
-      "add": "Add Asset"
+      "create": "Create Asset"
     },
     "connection": {
       "title": "Communication Infrastructure",

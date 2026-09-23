@@ -32,7 +32,6 @@ export class EditorPage extends BasePage {
 
     // Asset edit modal
     readonly assetCreationModalNameInput: Locator;
-    readonly assetNameInput: Locator;
     readonly assetDescriptionInput: Locator;
     readonly assetConfidentialityInput: Locator;
     readonly assetIntegrityInput: Locator;
@@ -89,7 +88,6 @@ export class EditorPage extends BasePage {
         this.assetSearchResults = page.getByTestId("asset-search-results");
 
         this.assetCreationModalNameInput = page.locator('[data-testid="asset-creation-modal_name-input"]');
-        this.assetNameInput = page.locator('[data-testid="asset-creation-modal_name-input"] input');
         this.assetDescriptionInput = page.locator(
             '[data-testid="asset-creation-modal_description-input"] textarea[name="description"]'
         );

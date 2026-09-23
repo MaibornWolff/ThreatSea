@@ -262,7 +262,7 @@ test.describe("Editor Page Tests", () => {
             await expect(pg.componentAddAssetButton).toBeInViewport();
             await pg.componentAddAssetButton.click();
             await expect(page).toHaveURL(/\/system\/assets\/edit$/);
-            await pg.assetNameInput.fill("Sidebar Asset");
+            await pg.assetCreationModalNameInput.locator("input").fill("Sidebar Asset");
             await pg.assetDescriptionInput.fill("Created from the component sidebar");
             await pg.assetConfidentialityInput.fill("3");
             await pg.assetIntegrityInput.fill("3");
