@@ -14,7 +14,7 @@ import {
     ValidateBodyHandler,
     ValidateParamHandler,
 } from "#middlewares/input-validations/input-validation.middleware.js";
-import threatsRouter from "./threats.router.js";
+import { threatsRouter } from "#routers/threats.router.js";
 
 export const systemRouter = express.Router({ mergeParams: true });
 

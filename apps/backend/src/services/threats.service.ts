@@ -5,8 +5,8 @@
 import { and, eq } from "drizzle-orm";
 import { db, TransactionType } from "#db/index.js";
 import { threats, Threat, CreateThreat, UpdateThreat, CatalogThreat, GenericThreat } from "#db/schema.js";
-import { getGenericThreat } from "./generic-threats.service.js";
-import { getCatalogThreatById } from "./catalog-threats.service.js";
+import { getGenericThreat } from "#services/generic-threats.service.js";
+import { getCatalogThreatById } from "#services/catalog-threats.service.js";
 import { NotFoundError } from "#errors/not-found.error.js";
 import { THREAT_STATUSES } from "#types/threat-statuses.types.js";
 
