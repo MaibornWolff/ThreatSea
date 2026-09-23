@@ -50,7 +50,7 @@ const genericThreat = {
     attacker: "UNAUTHORISED_PARTIES",
     componentName: "Database",
     interfaceName: null,
-    children: [],
+    threats: [],
 } as unknown as GenericThreatWithExtendedChildren;
 
 const childThreat = {

@@ -17,7 +17,7 @@ beforeEach(() => {
 });
 
 const genericThreat = (id: number, name: string): GenericThreatWithExtendedChildren =>
-    ({ id, name, children: [createThreat({ id: id * 10 })] }) as unknown as GenericThreatWithExtendedChildren;
+    ({ id, name, threats: [createThreat({ id: id * 10 })] }) as unknown as GenericThreatWithExtendedChildren;
 
 const searchable = (id: number, attacker: string, pointOfAttack: string): GenericThreatWithExtendedChildren =>
     ({
@@ -26,7 +26,7 @@ const searchable = (id: number, attacker: string, pointOfAttack: string): Generi
         description: "",
         attacker,
         pointOfAttack,
-        children: [createThreat({ id: id * 10 })],
+        threats: [createThreat({ id: id * 10 })],
     }) as unknown as GenericThreatWithExtendedChildren;
 
 // The hooks dispatch to the global error state, so every render needs a store.

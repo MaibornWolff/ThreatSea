@@ -1,5 +1,5 @@
 /**
- * @module threat-statuses.types Defines status values for child threats.
+ * @module threat-statuses.types Defines status values for threats.
  */
 
 export enum THREAT_STATUSES {

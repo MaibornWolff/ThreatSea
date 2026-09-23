@@ -1,7 +1,7 @@
 /**
  * Unit tests for the v3 (flat threats) -> current data model upgrade applied on import. The transform
- * mirrors the 0005 database migration, so these assert the same split: catalogue-derived generic
- * threats + flat-derived child threats.
+ * mirrors the 0010 database migration, so these assert the same split: catalogue-derived generic
+ * threats + flat-derived threats.
  */
 import { describe, expect, it } from "vitest";
 import { FLAT_THREAT_DATAMODEL_VERSION, upgradeImportBodyToCurrent } from "#controllers/import-migrations.js";
@@ -25,7 +25,7 @@ const flatThreat = (over: Record<string, unknown>) => ({
 });
 
 describe("upgradeImportBodyToCurrent", () => {
-    it("splits a v3 flat export into deduped generic + child threats (mirrors 0005)", () => {
+    it("splits a v3 flat export into deduped generic threats + threats (mirrors 0010)", () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const body: any = {
             datamodelVersion: FLAT_THREAT_DATAMODEL_VERSION,
@@ -59,13 +59,13 @@ describe("upgradeImportBodyToCurrent", () => {
         expect(genericA.catalogThreatId).toBe(10);
         expect(genericA).not.toHaveProperty("status");
 
-        // One child per flat threat, ids preserved, generic linkage by group.
+        // One threat per flat threat, ids preserved, generic linkage by group.
         expect(body.threats).toHaveLength(3);
         expect(body.threats.map((t: { id: number }) => t.id)).toEqual([1, 2, 3]);
         const [c1, c2, c3] = body.threats;
         expect(c1.genericThreatId).toBe(c2.genericThreatId);
         expect(c3.genericThreatId).not.toBe(c1.genericThreatId);
-        // finalized only when done editing AND a protection goal is impacted; child keeps its own
+        // finalized only when done editing AND a protection goal is impacted; threat keeps its own
         // (refined) name; drops catalog/doneEditing.
         expect(c1.status).toBe("finalized");
         expect(c2.status).toBe("new");
@@ -73,7 +73,7 @@ describe("upgradeImportBodyToCurrent", () => {
         expect(c1).not.toHaveProperty("catalogThreatId");
         expect(c1).not.toHaveProperty("doneEditing");
 
-        // Measure impacts are untouched (their threatId still points at the preserved child id).
+        // Measure impacts are untouched (their threatId still points at the preserved threat id).
         expect(body.measureImpacts).toEqual([{ id: 1, threatId: 2, measureId: 1 }]);
     });
 

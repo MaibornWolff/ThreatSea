@@ -88,8 +88,8 @@ export class UpdateThreatRequest {
 
 /**
  * Body of the create endpoint: every field is an optional refinement override.
- * A missing name defaults to the immutable parent's name, a missing description
- * stays empty (parent descriptions are deliberately not inherited), and missing
+ * A missing name defaults to the immutable generic threat's name, a missing description
+ * stays empty (generic threat descriptions are deliberately not inherited), and missing
  * assessment values default to the catalogue threat's values.
  */
 export class CreateThreatRequest {

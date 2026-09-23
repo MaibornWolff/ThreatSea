@@ -14,7 +14,7 @@ import {
     UpdateProject,
     usersProjects,
 } from "#db/schema.js";
-import { getGenericThreatsWithExtendedChildren } from "#services/generic-threats.service.js";
+import { getGenericThreatsWithExtendedThreats } from "#services/generic-threats.service.js";
 import { getPointsOfAttack } from "#services/points-of-attack.service.js";
 import { findSystem } from "#services/system.service.js";
 import { getAssets } from "#services/assets.service.js";
@@ -215,8 +215,8 @@ export async function getReportData(projectId: number) {
         ])
     );
 
-    // Get all generic (parent) threats of the project with their child threats.
-    const genericThreatsWithChildren = await getGenericThreatsWithExtendedChildren(projectId);
+    // Get all generic threats of the project with their threats.
+    const genericThreatsWithThreats = await getGenericThreatsWithExtendedThreats(projectId);
 
     // For communication-interface points of attack the displayed component name
     // includes the interface name.
@@ -230,12 +230,12 @@ export async function getReportData(projectId: number) {
               }
             : threat;
 
-    // Flat list of all child threats (needed for measure-impact filtering and transforms).
-    const threats: ReportThreat[] = genericThreatsWithChildren
-        .flatMap((genericThreat) => genericThreat.children)
-        .map((child) => ({
-            ...child,
-            componentReportId: componentReportIdByPointOfAttackId.get(child.pointOfAttackId) ?? null,
+    // Flat list of all threats (needed for measure-impact filtering and transforms).
+    const threats: ReportThreat[] = genericThreatsWithThreats
+        .flatMap((genericThreat) => genericThreat.threats)
+        .map((threat) => ({
+            ...threat,
+            componentReportId: componentReportIdByPointOfAttackId.get(threat.pointOfAttackId) ?? null,
         }))
         .map(withInterfaceComponentName);
 
@@ -271,41 +271,41 @@ export async function getReportData(projectId: number) {
     const transformedThreats = transformThreats(threats, measuresWithIds, assetsWithIds, measureImpacts);
     const transformedThreatsById = new Map(transformedThreats.map((threat) => [threat.id, threat]));
 
-    // Group children under their parent generic threat. Parents are ordered by their
-    // top child's net risk, children by net risk within a parent (both descending). Report
-    // ids follow this canonical order — parent "T.p", child "T.p.c" — and stay stable
-    // regardless of any display sorting the client applies. Cross-references point at children.
-    const orderedGroups = genericThreatsWithChildren
+    // Group threats under their generic threat. Generic threats are ordered by their
+    // top threat's net risk, threats by net risk within a generic threat (both descending). Report
+    // ids follow this canonical order — generic threat "T.g", threat "T.g.t" — and stay stable
+    // regardless of any display sorting the client applies. Cross-references point at threats.
+    const orderedGroups = genericThreatsWithThreats
         .map((genericThreat) => {
-            const children = genericThreat.children
-                .map((child) => transformedThreatsById.get(child.id))
-                .filter((child): child is (typeof transformedThreats)[number] => child !== undefined)
+            const sortedThreats = genericThreat.threats
+                .map((threat) => transformedThreatsById.get(threat.id))
+                .filter((threat): threat is (typeof transformedThreats)[number] => threat !== undefined)
                 .sort((a, b) => b.netRisk - a.netRisk);
-            const topNetRisk = children.reduce((max, child) => Math.max(max, child.netRisk), 0);
-            return { genericThreat, children, topNetRisk };
+            const topNetRisk = sortedThreats.reduce((max, threat) => Math.max(max, threat.netRisk), 0);
+            return { genericThreat, threats: sortedThreats, topNetRisk };
         })
-        .filter((group) => group.children.length > 0)
+        .filter((group) => group.threats.length > 0)
         .sort((a, b) => b.topNetRisk - a.topNetRisk);
 
     const threatsWithIds: ((typeof transformedThreats)[number] & { reportId: string })[] = [];
-    const threatGroups = orderedGroups.map((group, parentIndex) => {
-        const parentReportId = "T." + (parentIndex + 1);
+    const threatGroups = orderedGroups.map((group, genericThreatIndex) => {
+        const genericThreatReportId = "T." + (genericThreatIndex + 1);
         const threatIds: number[] = [];
-        group.children.forEach((child, childIndex) => {
-            const reportId = parentReportId + "." + (childIndex + 1);
-            threatReportIdsDict.set(child.id, reportId);
-            threatsWithIds.push({ ...child, reportId });
-            threatIds.push(child.id);
+        group.threats.forEach((threat, threatIndex) => {
+            const reportId = genericThreatReportId + "." + (threatIndex + 1);
+            threatReportIdsDict.set(threat.id, reportId);
+            threatsWithIds.push({ ...threat, reportId });
+            threatIds.push(threat.id);
         });
-        const firstChild = group.children[0];
+        const firstThreat = group.threats[0];
         return {
-            reportId: parentReportId,
+            reportId: genericThreatReportId,
             genericThreatId: group.genericThreat.id,
             name: group.genericThreat.name,
             description: group.genericThreat.description,
-            componentName: firstChild?.componentName ?? null,
-            componentType: firstChild?.componentType ?? null,
-            interfaceName: firstChild?.interfaceName ?? null,
+            componentName: firstThreat?.componentName ?? null,
+            componentType: firstThreat?.componentType ?? null,
+            interfaceName: firstThreat?.interfaceName ?? null,
             pointOfAttack: group.genericThreat.pointOfAttack,
             attacker: group.genericThreat.attacker,
             threatIds,

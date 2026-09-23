@@ -63,7 +63,7 @@ const ThreatDialogPage = ({ onSaved }: ThreatDialogPageProps) => {
                     return;
                 }
                 const match = genericThreats
-                    .flatMap((generic) => generic.children)
+                    .flatMap((generic) => generic.threats)
                     .find((child) => child.id === threatId);
                 if (match) {
                     setFetchedThreat(match);

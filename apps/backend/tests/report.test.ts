@@ -174,8 +174,8 @@ describe("report risk of out-of-scope threats", () => {
         availability: true,
     };
 
-    // Exposing a point of attack that carries an asset makes updateSystem generate the parent
-    // threat and its first child, which is the threat the report renders.
+    // Exposing a point of attack that carries an asset makes updateSystem generate the generic
+    // threat and its first threat, which is the threat the report renders.
     const seedThreatWithAsset = async () => {
         await request(app)
             .post("/api/catalogs/" + catalogId + "/threats")

@@ -24,7 +24,7 @@ export const useThreats = ({ projectId }: { projectId: number }) => {
                 return;
             }
             const threats = genericThreats
-                .flatMap((genericThreat) => genericThreat.children)
+                .flatMap((genericThreat) => genericThreat.threats)
                 .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
 
             setItems(threats);

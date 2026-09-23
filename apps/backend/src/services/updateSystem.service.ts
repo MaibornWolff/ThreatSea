@@ -77,9 +77,9 @@ function getCreatedPointsOfAttack(oldSystem: System | undefined, newSystem: Syst
     });
 }
 
-// Returns every point of attack that currently has assets. Child-threat creation is deduplicated
-// downstream by an existing-children check, so re-checking asset-bearing points on each update is
-// safe and covers points that retain assets but have lost all their children (e.g. remove-then-re-add).
+// Returns every point of attack that currently has assets. Threat creation is deduplicated
+// downstream by an existing-threats check, so re-checking asset-bearing points on each update is
+// safe and covers points that retain assets but have lost all their threats (e.g. remove-then-re-add).
 function getPointsOfAttackWithAssets(newSystem: System): PointOfAttack[] {
     const newPointsOfAttack = newSystem.data?.pointsOfAttack || [];
 

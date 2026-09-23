@@ -49,7 +49,7 @@ const VALID_GENERIC_THREAT_1: Omit<CreateGenericThreat, "catalogThreatId" | "pro
 // Seed data for direct db inserts; the create endpoint itself only accepts refinement fields.
 const VALID_THREAT_1: Omit<CreateThreat, "genericThreatId" | "projectId"> = {
     pointOfAttackId: nanoid(),
-    name: "Valid child threat 1",
+    name: "Valid threat 1",
     description: "Valid description test 1",
     pointOfAttack: POINTS_OF_ATTACK.COMMUNICATION_INTERFACES,
     attacker: ATTACKERS.ADMINISTRATORS,
@@ -61,7 +61,7 @@ const VALID_THREAT_1: Omit<CreateThreat, "genericThreatId" | "projectId"> = {
 };
 
 const CREATE_THREAT_BODY: InstanceType<typeof UpdateThreatRequest> = {
-    name: "Refined child threat",
+    name: "Refined threat",
     description: "Refined description",
     probability: 4,
     confidentiality: false,
@@ -71,7 +71,7 @@ const CREATE_THREAT_BODY: InstanceType<typeof UpdateThreatRequest> = {
 };
 
 const VALID_UPDATE_THREAT: InstanceType<typeof UpdateThreatRequest> = {
-    name: "Valid child threat 2",
+    name: "Valid threat 2",
     description: "Valid description test 2",
     probability: 3,
     confidentiality: false,
@@ -90,7 +90,7 @@ const INVALID_THREAT_NAME_MISSING: Omit<InstanceType<typeof UpdateThreatRequest>
 };
 
 const INVALID_THREAT_PROB_TOO_HIGH: InstanceType<typeof UpdateThreatRequest> = {
-    name: "Valid child threat",
+    name: "Valid threat",
     description: "Valid description test test",
     probability: 6,
     confidentiality: true,
@@ -100,7 +100,7 @@ const INVALID_THREAT_PROB_TOO_HIGH: InstanceType<typeof UpdateThreatRequest> = {
 };
 
 const INVALID_THREAT_PROB_TOO_LOW: InstanceType<typeof UpdateThreatRequest> = {
-    name: "Valid child threat",
+    name: "Valid threat",
     description: "Valid description test test",
     probability: 0,
     confidentiality: true,
@@ -241,16 +241,16 @@ describe("get or create threats", () => {
         expect(res.body.length).toBeGreaterThan(0);
 
         const genericThreat = res.body[0];
-        expect(Array.isArray(genericThreat.children)).toBe(true);
-        expect(genericThreat.children.length).toBeGreaterThan(0);
-        // Each child carries its parent generic threat's description verbatim.
-        for (const child of genericThreat.children) {
-            expect(child.genericThreatDescription).toBe(genericThreat.description);
+        expect(Array.isArray(genericThreat.threats)).toBe(true);
+        expect(genericThreat.threats.length).toBeGreaterThan(0);
+        // Each threat carries its generic threat's description verbatim.
+        for (const threat of genericThreat.threats) {
+            expect(threat.genericThreatDescription).toBe(genericThreat.description);
         }
     });
 
-    it("should return an empty list for a generic threat without children", async () => {
-        const childlessGenericThreat = (
+    it("should return an empty list for a generic threat without threats", async () => {
+        const genericThreatWithoutThreats = (
             await db
                 .insert(genericThreats)
                 .values({
@@ -263,14 +263,14 @@ describe("get or create threats", () => {
         ).at(0)!;
 
         const res = await request(app)
-            .get(`/api/projects/${projectId}/system/threats/${childlessGenericThreat.id}/list`)
+            .get(`/api/projects/${projectId}/system/threats/${genericThreatWithoutThreats.id}/list`)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(200);
         expect(res.body).toEqual([]);
     });
 
-    it("should create a threat inheriting identity from its parent", async () => {
+    it("should create a threat inheriting identity from its generic threat", async () => {
         const res = await request(app)
             .post(`/api/projects/${projectId}/system/threats/${genericThreatId}`)
             .send(CREATE_THREAT_BODY)
@@ -283,7 +283,7 @@ describe("get or create threats", () => {
         expect(res.body.confidentiality).toBe(CREATE_THREAT_BODY.confidentiality);
         expect(res.body.status).toBe(CREATE_THREAT_BODY.status);
         expect(res.body.genericThreatId).toBe(genericThreatId);
-        // Identity comes from the parent generic threat, not the request
+        // Identity comes from the generic threat, not the request
         expect(res.body.pointOfAttack).toBe(VALID_GENERIC_THREAT_1.pointOfAttack);
         expect(res.body.pointOfAttackId).toBe(VALID_GENERIC_THREAT_1.pointOfAttackId);
         expect(res.body.attacker).toBe(VALID_GENERIC_THREAT_1.attacker);
@@ -309,7 +309,7 @@ describe("get or create threats", () => {
         expect(res.body.attacker).toBe(VALID_GENERIC_THREAT_1.attacker);
     });
 
-    it("should create a threat from parent and catalog defaults when the body is empty", async () => {
+    it("should create a threat from generic threat and catalog defaults when the body is empty", async () => {
         const res = await request(app)
             .post(`/api/projects/${projectId}/system/threats/${genericThreatId}`)
             .send({})
@@ -317,9 +317,9 @@ describe("get or create threats", () => {
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(201);
 
-        // Identity text defaults to the parent generic threat
+        // Identity text defaults to the generic threat
         expect(res.body.name).toBe(VALID_GENERIC_THREAT_1.name);
-        // The child's own description starts empty; the generic description is shown read-only instead.
+        // The threat's own description starts empty; the generic description is shown read-only instead.
         expect(res.body.description).toBe("");
         expect(res.body.pointOfAttack).toBe(VALID_GENERIC_THREAT_1.pointOfAttack);
         expect(res.body.pointOfAttackId).toBe(VALID_GENERIC_THREAT_1.pointOfAttackId);
@@ -463,7 +463,7 @@ describe("authorization and ownership guards on threat endpoints", () => {
             .where(and(eq(usersProjects.userId, userId), eq(usersProjects.projectId, projectId)));
     };
 
-    const createChildThreat = async (): Promise<number> => {
+    const createThreat = async (): Promise<number> => {
         const res = await request(app)
             .post(`/api/projects/${projectId}/system/threats/${genericThreatId}`)
             .send(CREATE_THREAT_BODY)
@@ -486,7 +486,7 @@ describe("authorization and ownership guards on threat endpoints", () => {
         expect(res.statusCode).toEqual(403);
     });
 
-    it("should allow a viewer to read generic threats but not create child threats", async () => {
+    it("should allow a viewer to read generic threats but not create threats", async () => {
         await setProjectRole(USER_ROLES.VIEWER);
 
         const readRes = await request(app)
@@ -503,8 +503,8 @@ describe("authorization and ownership guards on threat endpoints", () => {
         expect(createRes.statusCode).toEqual(403);
     });
 
-    it("should not update or delete a child threat as viewer", async () => {
-        const threatId = await createChildThreat();
+    it("should not update or delete a threat as viewer", async () => {
+        const threatId = await createThreat();
         await setProjectRole(USER_ROLES.VIEWER);
 
         const updateRes = await request(app)
@@ -521,7 +521,7 @@ describe("authorization and ownership guards on threat endpoints", () => {
         expect(deleteRes.statusCode).toEqual(403);
     });
 
-    it("should return 404 when creating a child for a missing generic threat", async () => {
+    it("should return 404 when creating a threat for a missing generic threat", async () => {
         const res = await request(app)
             .post(`/api/projects/${projectId}/system/threats/999999`)
             .send(CREATE_THREAT_BODY)
@@ -530,7 +530,7 @@ describe("authorization and ownership guards on threat endpoints", () => {
         expect(res.statusCode).toEqual(404);
     });
 
-    it("should return 404 for get, update and delete of a missing child threat", async () => {
+    it("should return 404 for get, update and delete of a missing threat", async () => {
         const getRes = await request(app)
             .get(`/api/projects/${projectId}/system/threats/999999`)
             .set("X-CSRF-TOKEN", csrfToken)
@@ -552,7 +552,7 @@ describe("authorization and ownership guards on threat endpoints", () => {
     });
 
     it("should reject accessing threats of another project through this project's routes", async () => {
-        const threatId = await createChildThreat();
+        const threatId = await createThreat();
 
         const otherProjectRes = await request(app)
             .post("/api/projects")
