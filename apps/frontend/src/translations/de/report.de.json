@@ -17,6 +17,8 @@
   "method": "Die 4x6 Methodik",
   "gross": "brutto",
   "net": "netto",
+  "outOfScope": "Out of Scope",
+  "outOfScopeByMeasure": "Out of Scope durch Maßnahme",
   "matrixLegend": "G = grün (geringes Risiko), Y = gelb (mittleres Risiko), R = rot (hohes Risiko). Anzahl wird angezeigt, wenn Bedrohungen vorhanden sind.",
   "matrixAxisLegend": "P = Wahrscheinlichkeit (1 = niedrig, 5 = hoch), D = Schaden (1 = niedrig, 5 = hoch)",
 

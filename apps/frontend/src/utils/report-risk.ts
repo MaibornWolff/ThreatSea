@@ -1,6 +1,7 @@
 import type { ProjectReport } from "#api/types/project.types.ts";
 import type { MatrixColorKey } from "#view/colors/matrix.ts";
 import { calcThreatNetRisk } from "#utils/calcRisk.ts";
+import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import { dayNumberFromDateString, addThreatsToRiskMatrix } from "#utils/riskMatrix.ts";
 
 export type ReportThreat = ProjectReport["threats"][number];
@@ -46,6 +47,26 @@ const isMeasureWithinScheduledRange = (
         return false;
     }
     return true;
+};
+
+export type OutOfScopeReason = "status" | "measure" | null;
+
+/**
+ * Why a threat carries no residual risk: because a user put it out of scope, or because one of
+ * its measures does. Derived from the threat itself rather than from a net value of 0, since a
+ * threat with no affected protection goal legitimately has a damage of 0.
+ */
+export const getOutOfScopeReason = (threat: {
+    status: THREAT_STATUSES;
+    measures: { setsOutOfScope: boolean }[];
+}): OutOfScopeReason => {
+    if (threat.status === THREAT_STATUSES.OUTOFSCOPE) {
+        return "status";
+    }
+    if (threat.measures.some((measure) => measure.setsOutOfScope)) {
+        return "measure";
+    }
+    return null;
 };
 
 /**
