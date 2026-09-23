@@ -71,8 +71,8 @@ export interface ProjectReport {
     threatGroups: ReportThreatGroup[];
 }
 
-// A parent (generic) threat as it appears in the report: a group header carrying the
-// shared identity and no risk, plus the ids of its child threats in canonical order.
+// A generic threat as it appears in the report: a group header carrying the
+// shared identity and no risk, plus the ids of its threats in canonical order.
 export interface ReportThreatGroup {
     reportId: string;
     genericThreatId: number;

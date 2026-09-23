@@ -125,7 +125,7 @@ export const ThreatsListPage = ({
     );
 };
 
-// A generic threat rendered as a bold, unlinked heading row above its children.
+// A generic threat rendered as a bold, unlinked heading row above its threats.
 const IndexGenericThreatRow = ({
     reportId,
     name,

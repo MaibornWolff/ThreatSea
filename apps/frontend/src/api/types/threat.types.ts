@@ -29,8 +29,8 @@ export interface ExtendedThreat extends Threat {
     assets: Asset[];
 }
 
-// The user-editable subset of a child threat; identity fields are derived from the
-// parent generic threat on the backend and cannot be set by the client.
+// The user-editable subset of a threat; identity fields are derived from the
+// generic threat on the backend and cannot be set by the client.
 export interface ThreatRefinement {
     name?: string;
     description?: string;

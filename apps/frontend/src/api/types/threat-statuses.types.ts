@@ -1,5 +1,5 @@
 /**
- * @module threat-statuses.types Defines status values for child threats.
+ * @module threat-statuses.types Defines status values for threats.
  * Mirrors the backend enum in apps/backend/src/types/threat-statuses.types.ts.
  */
 

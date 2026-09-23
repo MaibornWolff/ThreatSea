@@ -637,11 +637,11 @@ function threatsDetailSection(
             lines.push("");
         }
 
-        const children = group.threatIds
+        const groupThreats = group.threatIds
             .map((threatId) => threatsById.get(threatId))
             .filter((threat): threat is ThreatReport => threat !== undefined);
 
-        children.forEach((threat) => {
+        groupThreats.forEach((threat) => {
             const id = threatAnchorId(threat.reportId);
             const attackerName = T.attackers[threat.attacker]?.name ?? threat.attacker;
             const poaName = T.pointsOfAttacks[threat.pointOfAttack]?.name ?? threat.pointOfAttack;

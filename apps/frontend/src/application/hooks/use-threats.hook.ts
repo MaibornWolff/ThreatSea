@@ -19,7 +19,7 @@ export const useThreats = ({ projectId }: { projectId: number }) => {
         const sequence = ++loadSequenceRef.current;
         setIsPending(true);
         try {
-            const genericThreats = await GenericThreatsAPI.getGenericThreatsWithExtendedChildren({ projectId });
+            const genericThreats = await GenericThreatsAPI.getGenericThreatsWithExtendedThreats({ projectId });
             if (sequence !== loadSequenceRef.current) {
                 return;
             }

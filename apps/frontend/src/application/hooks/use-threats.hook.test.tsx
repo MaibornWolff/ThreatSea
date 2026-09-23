@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { Provider } from "react-redux";
 import { createStore } from "#application/store.ts";
 import { GenericThreatsAPI } from "#api/generic-threats.api.ts";
-import type { GenericThreatWithExtendedChildren } from "#api/types/generic-threat.types.ts";
+import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat.types.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import { createThreat } from "#test-utils/builders.ts";
 import { useThreats } from "./use-threats.hook";
@@ -11,14 +11,14 @@ import { useThreats } from "./use-threats.hook";
 // Spy on the real module instead of vi.mock: under isolate:false a module
 // mock cannot reach closures cached by earlier test files (see AGENTS.md).
 // restoreMocks removes spies after every test, so install them in beforeEach.
-const spyOnGetGenericThreats = () => vi.spyOn(GenericThreatsAPI, "getGenericThreatsWithExtendedChildren");
+const spyOnGetGenericThreats = () => vi.spyOn(GenericThreatsAPI, "getGenericThreatsWithExtendedThreats");
 let getGenericThreatsSpy: ReturnType<typeof spyOnGetGenericThreats>;
 beforeEach(() => {
     getGenericThreatsSpy = spyOnGetGenericThreats().mockResolvedValue([]);
 });
 
-const genericThreat = (id: number, threats: ExtendedThreat[]): GenericThreatWithExtendedChildren =>
-    ({ id, name: `generic-${id}`, threats }) as unknown as GenericThreatWithExtendedChildren;
+const genericThreat = (id: number, threats: ExtendedThreat[]): GenericThreatWithExtendedThreats =>
+    ({ id, name: `generic-${id}`, threats }) as unknown as GenericThreatWithExtendedThreats;
 
 const deferred = <T,>() => {
     let resolve!: (value: T) => void;
@@ -35,7 +35,7 @@ const makeWrapper = (store: ReturnType<typeof createStore>) =>
     };
 
 describe("useThreats", () => {
-    it("flattens the generic threats' children and sorts them case-insensitively by name", async () => {
+    it("flattens the generic threats' threats and sorts them case-insensitively by name", async () => {
         getGenericThreatsSpy.mockResolvedValue([
             genericThreat(1, [createThreat({ id: 11, name: "beta" })]),
             genericThreat(2, [createThreat({ id: 21, name: "Alpha" })]),
@@ -53,8 +53,8 @@ describe("useThreats", () => {
     });
 
     it("ignores an older response that resolves after a newer load", async () => {
-        const older = deferred<GenericThreatWithExtendedChildren[]>();
-        const newer = deferred<GenericThreatWithExtendedChildren[]>();
+        const older = deferred<GenericThreatWithExtendedThreats[]>();
+        const newer = deferred<GenericThreatWithExtendedThreats[]>();
         getGenericThreatsSpy.mockReturnValueOnce(older.promise).mockReturnValueOnce(newer.promise);
 
         const { result } = renderHook(() => useThreats({ projectId: 1 }), {

@@ -42,7 +42,7 @@ import AddMeasureDialogPage from "./add-measure-dialog.page";
 import { withProject } from "#view/components/with-project.hoc.tsx";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import type { Threat, ExtendedThreat } from "#api/types/threat.types.ts";
-import type { GenericThreatWithExtendedChildren } from "#api/types/generic-threat.types.ts";
+import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat.types.ts";
 import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import {
     createThreatsColumns,
@@ -52,9 +52,9 @@ import {
     type ThreatsGridRow,
 } from "./create-threats-columns";
 
-// Fields whose values only exist on child threats; a filter on them can never
-// match a generic (parent) threat directly.
-const childOnlyFilterFields = ["assets", "probability", "damage", "risk", "status"] as const;
+// Fields whose values only exist on threats; a filter on them can never
+// match a generic threat directly.
+const threatOnlyFilterFields = ["assets", "probability", "damage", "risk", "status"] as const;
 
 // The e2e page objects locate action buttons inside the row-level test ids, so
 // the ids must live on the grid row element itself, not on a single cell.
@@ -160,13 +160,13 @@ const ThreatsPageBody = () => {
     );
 
     const handleAddThreat = useCallback(
-        async (event: React.MouseEvent<HTMLElement>, genericThreat: GenericThreatWithExtendedChildren) => {
+        async (event: React.MouseEvent<HTMLElement>, genericThreat: GenericThreatWithExtendedThreats) => {
             event.preventDefault();
-            // Keep the add button from toggling the parent row's expand/collapse.
+            // Keep the add button from toggling the generic threat row's expand/collapse.
             event.stopPropagation();
             try {
                 // Only the name is overridden; identity and assessment defaults come
-                // from the parent and its catalogue threat on the backend.
+                // from the generic threat and its catalogue threat on the backend.
                 await dispatch(
                     ThreatsActions.createThreat({
                         projectId: Number(projectId),
@@ -222,7 +222,7 @@ const ThreatsPageBody = () => {
     const handleDeleteThreat = useCallback(
         (event: React.MouseEvent<HTMLElement>, threat: Threat) => {
             event.preventDefault();
-            // Prevent deleting the only child threat for a generic threat
+            // Prevent deleting the only threat of a generic threat
             const siblings = threatsByGenericThreatId[threat.genericThreatId] ?? [];
             if (siblings.length <= 1) {
                 openConfirm({
@@ -294,9 +294,9 @@ const ThreatsPageBody = () => {
         genericThreats.length > 0 &&
         genericThreats.every((genericThreat) => expandedGenericThreatIds[genericThreat.id]);
 
-    // The grid's own filtering would treat parent and child rows independently and
+    // The grid's own filtering would treat generic threat and threat rows independently and
     // tear the hierarchy apart, so filters are applied here while building the rows.
-    const matchesChildFilters = useCallback(
+    const matchesThreatFilters = useCallback(
         (threat: ExtendedThreatWithMetrics): boolean => {
             return Object.entries(columnFilters).every(([field, value]) => {
                 const filterValue = value.trim().toLowerCase();
@@ -330,8 +330,8 @@ const ThreatsPageBody = () => {
         [columnFilters, t]
     );
 
-    const matchesParentFilters = useCallback(
-        (genericThreat: GenericThreatWithExtendedChildren): boolean => {
+    const matchesGenericThreatFilters = useCallback(
+        (genericThreat: GenericThreatWithExtendedThreats): boolean => {
             return Object.entries(columnFilters).every(([field, value]) => {
                 const filterValue = value.trim().toLowerCase();
                 if (!filterValue) {
@@ -357,16 +357,16 @@ const ThreatsPageBody = () => {
     );
 
     const rows = useMemo<ThreatsGridRow[]>(() => {
-        const hasChildOnlyFilter = childOnlyFilterFields.some((field) => (columnFilters[field] ?? "").trim() !== "");
+        const hasThreatOnlyFilter = threatOnlyFilterFields.some((field) => (columnFilters[field] ?? "").trim() !== "");
 
         const result: ThreatsGridRow[] = [];
         for (const genericThreat of genericThreats) {
-            const children = threatsByGenericThreatId[genericThreat.id] ?? [];
-            const visibleChildren = children.filter(matchesChildFilters);
+            const threats = threatsByGenericThreatId[genericThreat.id] ?? [];
+            const visibleThreats = threats.filter(matchesThreatFilters);
 
-            const parentVisible =
-                visibleChildren.length > 0 || (!hasChildOnlyFilter && matchesParentFilters(genericThreat));
-            if (!parentVisible) {
+            const genericThreatVisible =
+                visibleThreats.length > 0 || (!hasThreatOnlyFilter && matchesGenericThreatFilters(genericThreat));
+            if (!genericThreatVisible) {
                 continue;
             }
 
@@ -375,14 +375,14 @@ const ThreatsPageBody = () => {
                 rowType: "genericThreat",
                 rowId: `${GENERIC_THREAT_ROW_PREFIX}${genericThreat.id}`,
                 genericThreat,
-                childCount: visibleChildren.length,
+                threatCount: visibleThreats.length,
                 isExpanded,
             });
             if (isExpanded) {
-                if (visibleChildren.length === 0) {
-                    result.push({ rowType: "emptyChildren", rowId: `empty-${genericThreat.id}` });
+                if (visibleThreats.length === 0) {
+                    result.push({ rowType: "noThreats", rowId: `empty-${genericThreat.id}` });
                 } else {
-                    for (const threat of visibleChildren) {
+                    for (const threat of visibleThreats) {
                         result.push({
                             rowType: "threat",
                             rowId: `${THREAT_ROW_PREFIX}${threat.id}`,
@@ -398,8 +398,8 @@ const ThreatsPageBody = () => {
         threatsByGenericThreatId,
         expandedGenericThreatIds,
         columnFilters,
-        matchesChildFilters,
-        matchesParentFilters,
+        matchesThreatFilters,
+        matchesGenericThreatFilters,
     ]);
 
     const NoRowsOverlayWithMessage = useCallback(() => <NoRowsOverlay message={t("noThreatsFound")} />, [t]);
@@ -438,7 +438,7 @@ const ThreatsPageBody = () => {
         ]
     );
 
-    // Count what the grid actually shows: parent groups surviving both the
+    // Count what the grid actually shows: generic threats surviving both the
     // top search and the column filters (not the unfiltered hook result).
     const genericThreatsCount = useMemo(() => rows.filter((row) => row.rowType === "genericThreat").length, [rows]);
 
@@ -604,7 +604,7 @@ const ThreatsPageBody = () => {
                         disableColumnSelector
                         onCellClick={(params, event) => {
                             const row = params.row as ThreatsGridRow;
-                            // A parent row toggles from any cell (including the "n threats" text in
+                            // A generic threat row toggles from any cell (including the "n threats" text in
                             // the actions cell); its add button stops propagation to keep its action.
                             if (row.rowType === "genericThreat") {
                                 toggleGenericThreat(row.genericThreat.id);

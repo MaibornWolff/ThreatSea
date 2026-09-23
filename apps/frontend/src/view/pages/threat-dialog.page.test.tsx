@@ -4,7 +4,7 @@ import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { createProject, createThreat } from "#test-utils/builders.ts";
 import type { RootState } from "#application/store.ts";
 import { GenericThreatsAPI } from "#api/generic-threats.api.ts";
-import type { GenericThreatWithExtendedChildren } from "#api/types/generic-threat.types.ts";
+import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat.types.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import ThreatDialogPage from "./threat-dialog.page";
 
@@ -19,7 +19,7 @@ vi.mock("#view/dialogs/add-threat-dialog/add-threat.dialog.tsx", () => ({
 // mock cannot reach closures cached by earlier test files (see AGENTS.md).
 // restoreMocks removes spies after every test, so install them in beforeEach.
 beforeEach(() => {
-    vi.spyOn(GenericThreatsAPI, "getGenericThreatsWithExtendedChildren").mockResolvedValue([]);
+    vi.spyOn(GenericThreatsAPI, "getGenericThreatsWithExtendedThreats").mockResolvedValue([]);
 });
 
 const REDIRECT_MARKER = "redirected-to-threats";
@@ -33,8 +33,8 @@ const projectsState = (): RootState["projects"] => ({
     deletingProjectId: undefined,
 });
 
-const genericWithChildren = (threats: ExtendedThreat[]) =>
-    ({ id: 7, threats }) as unknown as GenericThreatWithExtendedChildren;
+const genericThreatWithThreats = (threats: ExtendedThreat[]) =>
+    ({ id: 7, threats }) as unknown as GenericThreatWithExtendedThreats;
 
 function renderPage(url: InitialEntry) {
     return renderWithProviders(
@@ -56,23 +56,23 @@ describe("ThreatDialogPage", () => {
         renderPage({ pathname: "/projects/1/threats/edit", search: "?threatId=42", state: { threat } });
 
         expect(screen.getByTestId("add-threat-dialog")).toHaveAttribute("data-threat-id", "42");
-        expect(GenericThreatsAPI.getGenericThreatsWithExtendedChildren).not.toHaveBeenCalled();
+        expect(GenericThreatsAPI.getGenericThreatsWithExtendedThreats).not.toHaveBeenCalled();
     });
 
     it("re-fetches the threat by id from the URL when navigation state is gone (reload)", async () => {
-        vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedChildren).mockResolvedValue([
-            genericWithChildren([createThreat({ id: 42 })]),
+        vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedThreats).mockResolvedValue([
+            genericThreatWithThreats([createThreat({ id: 42 })]),
         ]);
 
         renderPage("/projects/1/threats/edit?threatId=42");
 
         expect(await screen.findByTestId("add-threat-dialog")).toHaveAttribute("data-threat-id", "42");
-        expect(GenericThreatsAPI.getGenericThreatsWithExtendedChildren).toHaveBeenCalledWith({ projectId: 1 });
+        expect(GenericThreatsAPI.getGenericThreatsWithExtendedThreats).toHaveBeenCalledWith({ projectId: 1 });
     });
 
     it("redirects to the threats list when the reloaded threat no longer exists", async () => {
-        vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedChildren).mockResolvedValue([
-            genericWithChildren([createThreat({ id: 1 })]),
+        vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedThreats).mockResolvedValue([
+            genericThreatWithThreats([createThreat({ id: 1 })]),
         ]);
 
         renderPage("/projects/1/threats/edit?threatId=999");
@@ -81,7 +81,7 @@ describe("ThreatDialogPage", () => {
     });
 
     it("redirects to the threats list when the re-fetch fails", async () => {
-        vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedChildren).mockRejectedValue(new Error("network"));
+        vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedThreats).mockRejectedValue(new Error("network"));
 
         renderPage("/projects/1/threats/edit?threatId=42");
 
@@ -92,13 +92,13 @@ describe("ThreatDialogPage", () => {
         renderPage("/projects/1/threats/edit?threatId=not-a-number");
 
         expect(await screen.findByText(REDIRECT_MARKER)).toBeInTheDocument();
-        expect(GenericThreatsAPI.getGenericThreatsWithExtendedChildren).not.toHaveBeenCalled();
+        expect(GenericThreatsAPI.getGenericThreatsWithExtendedThreats).not.toHaveBeenCalled();
     });
 
     it("redirects to the threats list when there is neither state nor a threat id", () => {
         renderPage("/projects/1/threats/edit");
 
         expect(screen.getByText(REDIRECT_MARKER)).toBeInTheDocument();
-        expect(GenericThreatsAPI.getGenericThreatsWithExtendedChildren).not.toHaveBeenCalled();
+        expect(GenericThreatsAPI.getGenericThreatsWithExtendedThreats).not.toHaveBeenCalled();
     });
 });

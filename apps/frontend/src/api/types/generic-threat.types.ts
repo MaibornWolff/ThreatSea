@@ -15,7 +15,7 @@ export interface GenericThreat {
     updatedAt: string;
 }
 
-export interface GenericThreatWithExtendedChildren extends GenericThreat {
+export interface GenericThreatWithExtendedThreats extends GenericThreat {
     componentName: string | null;
     componentType: number | null;
     interfaceName: string | null;

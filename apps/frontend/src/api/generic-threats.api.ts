@@ -1,12 +1,12 @@
 import { fetchAPI } from "#api/utils.ts";
-import type { GenericThreatWithExtendedChildren } from "#api/types/generic-threat.types.ts";
+import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat.types.ts";
 
 export class GenericThreatsAPI {
-    static async getGenericThreatsWithExtendedChildren({
+    static async getGenericThreatsWithExtendedThreats({
         projectId,
     }: {
         projectId: number;
-    }): Promise<GenericThreatWithExtendedChildren[]> {
+    }): Promise<GenericThreatWithExtendedThreats[]> {
         return await fetchAPI(`/projects/${projectId}/system/threats/generic`);
     }
 }
