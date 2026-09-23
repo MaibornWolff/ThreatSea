@@ -31,7 +31,7 @@ export const ColumnFilterHeader = ({
                 <MuiIconButton
                     size="small"
                     aria-label={t("toggleColumnFilter", { column: label })}
-                    aria-expanded={expandedFilters[field] ?? false}
+                    aria-expanded={expandedFilters[field] ?? true}
                     onClick={(event) => {
                         event.stopPropagation();
                         onToggleExpanded(field);
@@ -39,14 +39,15 @@ export const ColumnFilterHeader = ({
                     sx={{
                         ml: 0.5,
                         padding: 0.25,
-                        transform: expandedFilters[field] ? "rotate(180deg)" : "rotate(0deg)",
+                        transform: (expandedFilters[field] ?? true) ? "rotate(180deg)" : "rotate(0deg)",
                         transition: "transform 0.2s",
                     }}
                 >
                     <ExpandMore sx={{ fontSize: 18 }} />
                 </MuiIconButton>
             </Box>
-            <Collapse in={expandedFilters[field] ?? false} timeout={200}>
+            {/* Expanded by default: collapsed filters proved hard to discover for users. */}
+            <Collapse in={expandedFilters[field] ?? true} timeout={200}>
                 {children ?? (
                     <TextField
                         size="small"

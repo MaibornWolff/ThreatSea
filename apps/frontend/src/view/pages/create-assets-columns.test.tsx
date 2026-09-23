@@ -103,7 +103,14 @@ describe("createAssetsColumns — filter header behavior", () => {
         expect(screen.getByRole("button")).toBeInTheDocument();
     });
 
-    it("hides the filter input until expandedFilters[field] is true", () => {
+    it("shows the filter input by default (user feedback: collapsed filters were hard to discover)", () => {
+        const { columns } = buildColumns({ expandedFilters: {} });
+        renderColumnHeader(columns.find((c) => c.field === "name"));
+
+        expect(screen.getByPlaceholderText("filterPlaceholder")).toBeVisible();
+    });
+
+    it("hides the filter input when expandedFilters[field] is explicitly false", () => {
         const { columns } = buildColumns({ expandedFilters: { name: false } });
         renderColumnHeader(columns.find((c) => c.field === "name"));
 
