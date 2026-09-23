@@ -51,7 +51,7 @@ interface ImportBody {
 /**
  * Upgrades an import body in place to the current data model version.
  *
- * A v3 export stores a single flat `threats` array. This mirrors the `0010_new-model-migration` database migration to
+ * A v3 export stores a single flat `threats` array. This mirrors the `0010_inherited-threats-model` database migration to
  * split each flat threat into a generic threat plus a threat:
  *   - generic threats are grouped by (catalogThreatId, pointOfAttackId) within the single exported project; their
  *     name/description/pointOfAttack/attacker come from the referenced catalogue threat,
@@ -116,7 +116,7 @@ export function upgradeImportBodyToCurrent(body: ImportBody): void {
             integrity: flatThreat.integrity,
             availability: flatThreat.availability,
             // Intentional mapping, agreed with the product owner — mirrors the status
-            // backfill in drizzle/0010_new-model-migration.sql: finalized only with a
+            // backfill in drizzle/0010_inherited-threats-model.sql: finalized only with a
             // C/I/A flag or an out-of-scope impact; everything else restarts as 'new'
             // for re-triage. Keep both sites in sync.
             status:
