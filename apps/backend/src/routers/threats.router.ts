@@ -67,5 +67,3 @@ threatsRouter.delete<ThreatIdParam, void, void>(
     CheckProjectRoleHandler(USER_ROLES.EDITOR),
     deleteThreat
 );
-
-export default threatsRouter;

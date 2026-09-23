@@ -43,6 +43,8 @@ import {
     STRING_TOO_LONG_MESSAGE,
     SYSTEM_COMPONENT_SYMBOL_PATTERN,
 } from "#middlewares/input-validations/validator-messages.js";
+import { Logger } from "#logging/index.js";
+import { THREAT_STATUSES } from "#types/threat-statuses.types.js";
 
 interface ImportSymbolBody {
     componentTypes?: unknown;
@@ -94,8 +96,6 @@ function findInvalidImportedSymbol(body: ImportSymbolBody): string | null {
         checkSymbolArray(body.system?.data?.components, "components", SYSTEM_COMPONENT_SYMBOL_PATTERN)
     );
 }
-import { Logger } from "#logging/index.js";
-import { THREAT_STATUSES } from "#types/threat-statuses.types.js";
 
 /**
  * Imports the specified project and all associated data.
