@@ -38,7 +38,8 @@
       "title": "Points of Attack"
     },
     "assets": {
-      "title": "Assets"
+      "title": "Assets",
+      "add": "Add Asset"
     },
     "connection": {
       "title": "Communication Infrastructure",
