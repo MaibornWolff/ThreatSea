@@ -89,15 +89,15 @@ export const EditorSidebarSelectedComponentAssets = ({
                     {t("sidebar.assets.title")}
                 </Typography>
                 {checkUserRole(userRole, USER_ROLES.EDITOR) && (
-                    <Tooltip title={t("sidebar.assets.add")}>
+                    <Tooltip title={t("sidebar.assets.create")}>
                         <IconButton
                             onClick={handleAddAssetClick}
-                            aria-label={t("sidebar.assets.add")}
+                            aria-label={t("sidebar.assets.create")}
                             data-testid="selected-component-add-asset-button"
                             size="small"
                             sx={{
                                 "&:hover": {
-                                    backgroundColor: theme.vars.palette.background.paperIntransparent,
+                                    backgroundColor: theme.vars.palette.background.mainIntransparent,
                                 },
                             }}
                         >
