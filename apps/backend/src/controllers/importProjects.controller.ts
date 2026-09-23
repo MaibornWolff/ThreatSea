@@ -320,7 +320,7 @@ export async function importProject(request: Request<void>, response: Response, 
 
                 threatIdsDict.set(oldThreatId, createdThreat.id);
             }
-            Logger.debug("imported child threats");
+            Logger.debug("imported threats");
 
             for (const oldMeasureImpact of body.measureImpacts as MeasureImpact[]) {
                 oldMeasureImpact.threatId = threatIdsDict.get(oldMeasureImpact.threatId)!;

@@ -91,7 +91,7 @@ export async function createMeasureImpact(
         return;
     }
     if (threat === null) {
-        next(new NotFoundError("Child Threat not found"));
+        next(new NotFoundError("Threat not found"));
         return;
     }
     if (measure.projectId !== projectId) {
@@ -99,7 +99,7 @@ export async function createMeasureImpact(
         return;
     }
     if (threat.projectId !== projectId) {
-        next(new BadRequestError("Child Threat is not part of this project"));
+        next(new BadRequestError("Threat is not part of this project"));
         return;
     }
 

@@ -1,18 +1,18 @@
 /**
- * Routes for generic threats and child threats.
+ * Routes for generic threats and threats.
  */
 import express from "express";
 import {
     createThreat,
     deleteThreat,
-    getGenericThreatsWithExtendedChildren,
+    getGenericThreatsWithExtendedThreats,
     getThreat,
     getThreatsByGenericThreatId,
     updateThreat,
 } from "#controllers/threats.controller.js";
 import { CheckProjectRoleHandler } from "#guards/authorisation.guard.js";
 import { ThreatIdParam, ThreatResponse, CreateThreatRequest, UpdateThreatRequest } from "#types/threat.types.js";
-import { GenericThreatIdParam, GenericThreatWithExtendedChildrenResponse } from "#types/generic-threat.types.js";
+import { GenericThreatIdParam, GenericThreatWithExtendedThreatsResponse } from "#types/generic-threat.types.js";
 import { ProjectIdParam } from "#types/project.types.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
 import {
@@ -24,11 +24,11 @@ export const threatsRouter = express.Router({ mergeParams: true });
 const idParam = "threatId";
 
 // Must stay ahead of the `/:threatId` routes below, otherwise express matches "generic" as a threat id.
-threatsRouter.get<ProjectIdParam, GenericThreatWithExtendedChildrenResponse[], void>(
+threatsRouter.get<ProjectIdParam, GenericThreatWithExtendedThreatsResponse[], void>(
     "/generic",
     ValidateParamHandler(ProjectIdParam),
     CheckProjectRoleHandler(USER_ROLES.VIEWER),
-    getGenericThreatsWithExtendedChildren
+    getGenericThreatsWithExtendedThreats
 );
 
 threatsRouter.get<GenericThreatIdParam, ThreatResponse[], void>(

@@ -52,7 +52,7 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
             }
 
             const threatsMap = sortedThreats.reduce<Record<number, ExtendedThreatWithMetrics[]>>((result, threat) => {
-                result[threat.id] = threat.children.map((threat) => {
+                result[threat.id] = threat.threats.map((threat) => {
                     const damage = calcDamage(threat);
                     return {
                         ...threat,

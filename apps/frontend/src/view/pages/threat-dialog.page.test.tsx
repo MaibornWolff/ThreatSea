@@ -33,8 +33,8 @@ const projectsState = (): RootState["projects"] => ({
     deletingProjectId: undefined,
 });
 
-const genericWithChildren = (children: ExtendedThreat[]) =>
-    ({ id: 7, children }) as unknown as GenericThreatWithExtendedChildren;
+const genericWithChildren = (threats: ExtendedThreat[]) =>
+    ({ id: 7, threats }) as unknown as GenericThreatWithExtendedChildren;
 
 function renderPage(url: InitialEntry) {
     return renderWithProviders(

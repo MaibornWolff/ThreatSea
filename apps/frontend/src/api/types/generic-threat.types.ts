@@ -19,5 +19,5 @@ export interface GenericThreatWithExtendedChildren extends GenericThreat {
     componentName: string | null;
     componentType: number | null;
     interfaceName: string | null;
-    children: ExtendedThreat[];
+    threats: ExtendedThreat[];
 }

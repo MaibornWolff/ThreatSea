@@ -1,8 +1,8 @@
 /**
- * Tests for the updateSystem parent/child threat generation flow (the core of #396):
- * exposing a point of attack creates immutable parent (generic) threats; assigning assets creates
- * the first child; re-saving does not duplicate children; a point of attack that has assets but no
- * children gets one regenerated; and removing a point of attack cascades its threats away.
+ * Tests for the updateSystem generic threat/threat generation flow (the core of #396):
+ * exposing a point of attack creates immutable generic threats; assigning assets creates
+ * the first threat; re-saving does not duplicate threats; a point of attack that has assets but no
+ * threats gets one regenerated; and removing a point of attack cascades its threats away.
  */
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
@@ -20,7 +20,7 @@ import type { PointOfAttack, SystemData } from "#types/system.types.js";
 import { updateSystem } from "#services/updateSystem.service.js";
 import {
     getGenericThreatsByProjectId,
-    getGenericThreatsWithExtendedChildren,
+    getGenericThreatsWithExtendedThreats,
 } from "#services/generic-threats.service.js";
 import { getThreatsByGenericThreatId } from "#services/threats.service.js";
 
@@ -51,7 +51,7 @@ beforeAll(async () => {
 });
 
 // Fresh project (the project endpoint creates its empty system) on a catalog with exactly one
-// catalog threat matching POA_TYPE, so threat generation is deterministic (one parent per exposed
+// catalog threat matching POA_TYPE, so threat generation is deterministic (one generic threat per exposed
 // point of attack).
 beforeEach(async () => {
     const catalog = (await db.insert(catalogs).values({ name: "Catalog", language: LANGUAGES.EN }).returning()).at(0)!;
@@ -100,8 +100,8 @@ const systemWith = (pointsOfAttack: PointOfAttack[]): SystemData => ({
 
 const saveSystem = (pointsOfAttack: PointOfAttack[]) => updateSystem(projectId, { data: systemWith(pointsOfAttack) });
 
-describe("updateSystem parent/child threat generation", () => {
-    it("creates a parent threat with no children when a point of attack is exposed without assets", async () => {
+describe("updateSystem generic threat/threat generation", () => {
+    it("creates a generic threat with no threats when a point of attack is exposed without assets", async () => {
         const poaId = nanoid();
         await saveSystem([makePoA(poaId, [])]);
 
@@ -109,11 +109,11 @@ describe("updateSystem parent/child threat generation", () => {
         expect(generics).toHaveLength(1);
         expect(generics[0]!.pointOfAttackId).toBe(poaId);
 
-        const children = await getThreatsByGenericThreatId(generics[0]!.id);
-        expect(children).toEqual([]);
+        const generatedThreats = await getThreatsByGenericThreatId(generics[0]!.id);
+        expect(generatedThreats).toEqual([]);
     });
 
-    it("creates the first child threat, inheriting parent identity, when the point of attack gains assets", async () => {
+    it("creates the first threat, inheriting generic threat identity, when the point of attack gains assets", async () => {
         const poaId = nanoid();
         await saveSystem([makePoA(poaId, [])]);
         await saveSystem([makePoA(poaId, [1])]);
@@ -121,40 +121,40 @@ describe("updateSystem parent/child threat generation", () => {
         const generics = await getGenericThreatsByProjectId(projectId);
         expect(generics).toHaveLength(1);
 
-        const children = await getThreatsByGenericThreatId(generics[0]!.id);
-        expect(children).toHaveLength(1);
-        expect(children[0]!.pointOfAttackId).toBe(poaId);
-        expect(children[0]!.name).toBe(generics[0]!.name);
-        expect(children[0]!.attacker).toBe(generics[0]!.attacker);
+        const generatedThreats = await getThreatsByGenericThreatId(generics[0]!.id);
+        expect(generatedThreats).toHaveLength(1);
+        expect(generatedThreats[0]!.pointOfAttackId).toBe(poaId);
+        expect(generatedThreats[0]!.name).toBe(generics[0]!.name);
+        expect(generatedThreats[0]!.attacker).toBe(generics[0]!.attacker);
     });
 
-    it("does not duplicate children when the system is saved again with the same assets", async () => {
+    it("does not duplicate threats when the system is saved again with the same assets", async () => {
         const poaId = nanoid();
         await saveSystem([makePoA(poaId, [])]);
         await saveSystem([makePoA(poaId, [1])]);
         await saveSystem([makePoA(poaId, [1])]);
 
         const generics = await getGenericThreatsByProjectId(projectId);
-        const children = await getThreatsByGenericThreatId(generics[0]!.id);
-        expect(children).toHaveLength(1);
+        const generatedThreats = await getThreatsByGenericThreatId(generics[0]!.id);
+        expect(generatedThreats).toHaveLength(1);
     });
 
-    it("regenerates a child when a point of attack keeps its assets but has lost all children", async () => {
+    it("regenerates a threat when a point of attack keeps its assets but has lost all threats", async () => {
         const poaId = nanoid();
         await saveSystem([makePoA(poaId, [])]);
         await saveSystem([makePoA(poaId, [1])]);
 
-        // Simulate a point of attack that still has assets but ended up with zero children.
+        // Simulate a point of attack that still has assets but ended up with zero threats.
         await db.delete(threats).where(eq(threats.projectId, projectId));
 
         await saveSystem([makePoA(poaId, [1])]);
 
         const generics = await getGenericThreatsByProjectId(projectId);
-        const children = await getThreatsByGenericThreatId(generics[0]!.id);
-        expect(children).toHaveLength(1);
+        const generatedThreats = await getThreatsByGenericThreatId(generics[0]!.id);
+        expect(generatedThreats).toHaveLength(1);
     });
 
-    it("deletes parent and child threats when the point of attack is removed", async () => {
+    it("deletes generic threats and threats when the point of attack is removed", async () => {
         const poaId = nanoid();
         await saveSystem([makePoA(poaId, [1])]);
         expect(await getGenericThreatsByProjectId(projectId)).toHaveLength(1);
@@ -162,13 +162,13 @@ describe("updateSystem parent/child threat generation", () => {
         await saveSystem([]);
 
         expect(await getGenericThreatsByProjectId(projectId)).toEqual([]);
-        const remainingChildren = await db.query.threats.findMany({
+        const remainingThreats = await db.query.threats.findMany({
             where: eq(threats.projectId, projectId),
         });
-        expect(remainingChildren).toEqual([]);
+        expect(remainingThreats).toEqual([]);
     });
 
-    it("omits threats from the extended-children query when their point of attack has lost all assets", async () => {
+    it("omits threats from the extended-threats query when their point of attack has lost all assets", async () => {
         const asset = (
             await db
                 .insert(assets)
@@ -189,16 +189,16 @@ describe("updateSystem parent/child threat generation", () => {
         const poaId = nanoid();
         await saveSystem([makePoA(poaId, [asset.id])]);
 
-        // With an asset assigned, the generated child threat surfaces in the threats-table query.
-        const withAssets = await getGenericThreatsWithExtendedChildren(projectId);
+        // With an asset assigned, the generated threat surfaces in the threats-table query.
+        const withAssets = await getGenericThreatsWithExtendedThreats(projectId);
         expect(withAssets).toHaveLength(1);
-        expect(withAssets[0]!.children).toHaveLength(1);
+        expect(withAssets[0]!.threats).toHaveLength(1);
 
-        // Removing every asset from a kept point of attack leaves the child threat in the
+        // Removing every asset from a kept point of attack leaves the threat in the
         // database, but its risk is 0, so the query must not list it.
         await saveSystem([makePoA(poaId, [])]);
 
-        expect(await getGenericThreatsWithExtendedChildren(projectId)).toEqual([]);
+        expect(await getGenericThreatsWithExtendedThreats(projectId)).toEqual([]);
 
         const generics = await getGenericThreatsByProjectId(projectId);
         expect(await getThreatsByGenericThreatId(generics[0]!.id)).toHaveLength(1);

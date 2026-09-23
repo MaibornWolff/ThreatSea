@@ -2,13 +2,13 @@ import { DATAMODEL_VERSION } from "#dataModelVersion.js";
 import { THREAT_STATUSES } from "#types/threat-statuses.types.js";
 
 /**
- * Data model version of the old flat-threat export format (pre parent/child rework).
+ * Data model version of the old flat-threat export format (pre inherited-model rework).
  */
 export const FLAT_THREAT_DATAMODEL_VERSION = 3;
 
 /**
  * A threat as it appeared in a v3 (flat) export: one row per threat, carrying its own catalogue
- * reference and a `doneEditing` flag instead of the generic/child split and `status` enum.
+ * reference and a `doneEditing` flag instead of the genericThreat/threat split and `status` enum.
  */
 interface FlatThreat {
     id: number;
@@ -51,14 +51,14 @@ interface ImportBody {
 /**
  * Upgrades an import body in place to the current data model version.
  *
- * A v3 export stores a single flat `threats` array. This mirrors the `0007_new-model-migration` database migration to
- * split each flat threat into a generic (parent) threat plus a child threat:
+ * A v3 export stores a single flat `threats` array. This mirrors the `0010_new-model-migration` database migration to
+ * split each flat threat into a generic threat plus a threat:
  *   - generic threats are grouped by (catalogThreatId, pointOfAttackId) within the single exported project; their
  *     name/description/pointOfAttack/attacker come from the referenced catalogue threat,
- *   - each flat threat becomes a child threat keeping its own fields, its id (so measure impacts keep
+ *   - each flat threat becomes a threat keeping its own fields, its id (so measure impacts keep
  *     resolving), `status` set to "finalized" only when it was done editing and either impacts a
  *     protection goal or has a measure that sets it out of scope (otherwise "new"), and a
- *     `genericThreatId` pointing at its parent.
+ *     `genericThreatId` pointing at its generic threat.
  *
  * Bodies already at the current version (or any unknown version) are left untouched; the caller still
  * validates `datamodelVersion` afterwards.

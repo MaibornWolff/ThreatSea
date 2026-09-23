@@ -17,8 +17,8 @@ beforeEach(() => {
     getGenericThreatsSpy = spyOnGetGenericThreats().mockResolvedValue([]);
 });
 
-const genericThreat = (id: number, children: ExtendedThreat[]): GenericThreatWithExtendedChildren =>
-    ({ id, name: `generic-${id}`, children }) as unknown as GenericThreatWithExtendedChildren;
+const genericThreat = (id: number, threats: ExtendedThreat[]): GenericThreatWithExtendedChildren =>
+    ({ id, name: `generic-${id}`, threats }) as unknown as GenericThreatWithExtendedChildren;
 
 const deferred = <T,>() => {
     let resolve!: (value: T) => void;

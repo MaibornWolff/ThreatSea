@@ -30,9 +30,9 @@ export interface GenericThreatResponse {
     updatedAt: string;
 }
 
-export interface GenericThreatWithExtendedChildrenResponse extends GenericThreatResponse {
+export interface GenericThreatWithExtendedThreatsResponse extends GenericThreatResponse {
     componentName: string | null;
     componentType: number | ComponentType | null;
     interfaceName: string | null;
-    children: ExtendedThreatResponse[];
+    threats: ExtendedThreatResponse[];
 }

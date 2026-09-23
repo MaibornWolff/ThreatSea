@@ -5,7 +5,7 @@
 import { and, eq, getTableColumns } from "drizzle-orm";
 import { db, TransactionType } from "#db/index.js";
 import { genericThreats, GenericThreat, CreateGenericThreat } from "#db/schema.js";
-import { GenericThreatWithExtendedChildrenResponse } from "#types/generic-threat.types.js";
+import { GenericThreatWithExtendedThreatsResponse } from "#types/generic-threat.types.js";
 import { getPointsOfAttack } from "#services/points-of-attack.service.js";
 import { POINTS_OF_ATTACK } from "#types/points-of-attack.types.js";
 
@@ -42,10 +42,10 @@ export async function getGenericThreatsByProjectId(
         .where(eq(genericThreats.projectId, projectId));
 }
 
-export async function getGenericThreatsWithExtendedChildren(
+export async function getGenericThreatsWithExtendedThreats(
     projectId: number
-): Promise<GenericThreatWithExtendedChildrenResponse[]> {
-    const genericThreatsWithExtendedChildren = await db.query.genericThreats.findMany({
+): Promise<GenericThreatWithExtendedThreatsResponse[]> {
+    const genericThreatsWithExtendedThreats = await db.query.genericThreats.findMany({
         where: eq(genericThreats.projectId, projectId),
         with: {
             threats: true,
@@ -55,7 +55,7 @@ export async function getGenericThreatsWithExtendedChildren(
     const pointsOfAttack = await getPointsOfAttack(projectId);
     const pointsOfAttackById = new Map(pointsOfAttack.map((pointOfAttack) => [pointOfAttack.id, pointOfAttack]));
 
-    return genericThreatsWithExtendedChildren
+    return genericThreatsWithExtendedThreats
         .map(({ threats, ...genericThreat }) => {
             const genericPointOfAttack = pointsOfAttackById.get(genericThreat.pointOfAttackId);
             const genericInterfaceName =
@@ -68,7 +68,7 @@ export async function getGenericThreatsWithExtendedChildren(
                 componentName: genericPointOfAttack?.componentName ?? null,
                 componentType: genericPointOfAttack?.componentType ?? null,
                 interfaceName: genericInterfaceName,
-                children: threats
+                threats: threats
                     .map((threat) => {
                         const pointOfAttack = pointsOfAttackById.get(threat.pointOfAttackId);
                         const interfaceName =
@@ -90,7 +90,7 @@ export async function getGenericThreatsWithExtendedChildren(
                     .filter((threat) => threat.assets.length > 0),
             };
         })
-        .filter((genericThreat) => genericThreat.children.length > 0);
+        .filter((genericThreat) => genericThreat.threats.length > 0);
 }
 
 /**
