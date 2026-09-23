@@ -85,7 +85,7 @@ describe("createThreatsColumns — column sizing (resize defaults)", () => {
         const byField = Object.fromEntries(columns.map((c) => [c.field, c]));
 
         expect(byField["assets"]!.width).toBe(140);
-        expect(byField["probability"]!.width).toBe(200);
+        expect(byField["probability"]!.width).toBe(280);
         expect(byField["damage"]!.width).toBe(150);
         expect(byField["risk"]!.width).toBe(140);
     });

@@ -146,7 +146,9 @@ export const createThreatsColumns = ({
     {
         field: "probability",
         headerName: t("probability"),
-        width: 200,
+        // Wide enough for the German label ("Eintrittswahrscheinlichkeit") plus the
+        // filter toggle and the sort arrow that appears on hover, without clipping.
+        width: 280,
         align: "center",
         headerAlign: "center",
         renderHeader: () => (
