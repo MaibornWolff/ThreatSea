@@ -1,14 +1,32 @@
 /**
  * Module that defines the controller functions for
- * the child threat routing.
+ * the generic threat and child threat routing.
  */
 import { NextFunction, Request, Response } from "express";
 import { BadRequestError } from "#errors/bad-request.error.js";
 import { NotFoundError } from "#errors/not-found.error.js";
 import { ThreatIdParam, ThreatResponse, CreateThreatRequest, UpdateThreatRequest } from "#types/threat.types.js";
-import { GenericThreatIdParam } from "#types/generic-threat.types.js";
+import { GenericThreatIdParam, GenericThreatWithExtendedChildrenResponse } from "#types/generic-threat.types.js";
+import { ProjectIdParam } from "#types/project.types.js";
 import * as threatsService from "#services/threats.service.js";
 import * as genericThreatsService from "#services/generic-threats.service.js";
+
+/**
+ * Gets all generic threats of the current project that have at least one child threat.
+ *
+ * @param {Request} request - The http request.
+ * @param {Response} response - The http response.
+ */
+export async function getGenericThreatsWithExtendedChildren(
+    request: Request<ProjectIdParam, GenericThreatWithExtendedChildrenResponse[], void>,
+    response: Response<GenericThreatWithExtendedChildrenResponse[]>
+): Promise<void> {
+    const projectId = request.params.projectId;
+
+    const genericThreats = await genericThreatsService.getGenericThreatsWithExtendedChildren(projectId);
+
+    response.json(genericThreats);
+}
 
 /**
  * Gets all child threats for the specified generic threat.
