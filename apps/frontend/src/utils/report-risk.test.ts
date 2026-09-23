@@ -3,9 +3,11 @@ import {
     calcRiskBarGraph,
     filterMeasuresByScheduledRange,
     filterThreatsByScheduledRange,
+    getOutOfScopeReason,
     type RiskMatrix,
 } from "#utils/report-risk.ts";
 import { createReportMeasure, createReportThreat, createReportThreatMeasure } from "#test-utils/builders.ts";
+import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 
 describe("filterThreatsByScheduledRange", () => {
     it("returns the threats unchanged when no range is set", () => {
@@ -76,6 +78,30 @@ describe("filterThreatsByScheduledRange", () => {
         expect(filtered.netRisk).toBe(20);
     });
 
+    it("keeps an out-of-scope threat at zero when the range excludes every measure", () => {
+        const measure = createReportThreatMeasure({
+            scheduledAt: "2025-06-15",
+            impactsProbability: true,
+            probability: 1,
+        });
+        const threat = createReportThreat({
+            status: THREAT_STATUSES.OUTOFSCOPE,
+            probability: 4,
+            damage: 5,
+            measures: [measure],
+            netProbability: 0,
+            netDamage: 0,
+            netRisk: 0,
+        });
+
+        const filtered = filterThreatsByScheduledRange([threat], "2025-01-01", "2025-01-31")[0]!;
+
+        expect(filtered.measures).toHaveLength(0);
+        expect(filtered.netProbability).toBe(0);
+        expect(filtered.netDamage).toBe(0);
+        expect(filtered.netRisk).toBe(0);
+    });
+
     it("excludes measures without a scheduledAt", () => {
         const dated = createReportThreatMeasure({ scheduledAt: "2025-01-15" });
         const undatedMeasure = createReportThreatMeasure({ scheduledAt: undefined });
@@ -143,6 +169,66 @@ describe("calcActiveMeasureNetRisk", () => {
         expect(netProbability).toBe(2);
         expect(netDamage).toBe(5);
         expect(netRisk).toBe(10);
+    });
+
+    it("reports zero for an out-of-scope threat before any of its measures is scheduled", () => {
+        // A user's out-of-scope decision carries no date, so it applies to every milestone,
+        // unlike a measure that only takes effect from its scheduled date.
+        const measure = createReportThreatMeasure({
+            scheduledAt: "2025-06-15",
+            impactsProbability: true,
+            probability: 2,
+        });
+        const threat = createReportThreat({
+            status: THREAT_STATUSES.OUTOFSCOPE,
+            probability: 4,
+            damage: 5,
+            measures: [measure],
+        });
+
+        const { netProbability, netDamage, netRisk } = calcActiveMeasureNetRisk(threat, "2025-01-01");
+
+        expect(netProbability).toBe(0);
+        expect(netDamage).toBe(0);
+        expect(netRisk).toBe(0);
+    });
+});
+
+describe("getOutOfScopeReason", () => {
+    it("returns null for an ordinary threat", () => {
+        expect(getOutOfScopeReason(createReportThreat())).toBeNull();
+    });
+
+    it("reports the status when a user put the threat out of scope", () => {
+        const threat = createReportThreat({ status: THREAT_STATUSES.OUTOFSCOPE });
+
+        expect(getOutOfScopeReason(threat)).toBe("status");
+    });
+
+    it("reports the measure when a finalized threat carries an out-of-scope impact", () => {
+        const threat = createReportThreat({
+            status: THREAT_STATUSES.FINALIZED,
+            measures: [createReportThreatMeasure({ setsOutOfScope: true })],
+        });
+
+        expect(getOutOfScopeReason(threat)).toBe("measure");
+    });
+
+    it("prefers the status over the measure when both apply", () => {
+        const threat = createReportThreat({
+            status: THREAT_STATUSES.OUTOFSCOPE,
+            measures: [createReportThreatMeasure({ setsOutOfScope: true })],
+        });
+
+        expect(getOutOfScopeReason(threat)).toBe("status");
+    });
+
+    it("returns null for a threat whose damage is zero without being out of scope", () => {
+        // A threat with no affected protection goal has a damage of 0, which must not be read
+        // as being out of scope.
+        const threat = createReportThreat({ damage: 0, netDamage: 0, netRisk: 0 });
+
+        expect(getOutOfScopeReason(threat)).toBeNull();
     });
 });
 
