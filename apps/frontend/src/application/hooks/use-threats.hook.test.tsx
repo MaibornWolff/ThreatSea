@@ -10,12 +10,11 @@ import { useThreats } from "./use-threats.hook";
 
 // Spy on the real module instead of vi.mock: under isolate:false a module
 // mock cannot reach closures cached by earlier test files (see AGENTS.md).
-const getGenericThreatsSpy = vi.spyOn(GenericThreatsAPI, "getGenericThreatsWithExtendedChildren");
+// restoreMocks removes spies after every test, so install them in beforeEach.
+const spyOnGetGenericThreats = () => vi.spyOn(GenericThreatsAPI, "getGenericThreatsWithExtendedChildren");
+let getGenericThreatsSpy: ReturnType<typeof spyOnGetGenericThreats>;
 beforeEach(() => {
-    getGenericThreatsSpy.mockResolvedValue([]);
-});
-afterAll(() => {
-    getGenericThreatsSpy.mockRestore();
+    getGenericThreatsSpy = spyOnGetGenericThreats().mockResolvedValue([]);
 });
 
 const genericThreat = (id: number, children: ExtendedThreat[]): GenericThreatWithExtendedChildren =>
