@@ -76,7 +76,7 @@
       "idx": 10,
       "version": "7",
       "when": 1784904671607,
-      "tag": "0010_new-model-migration",
+      "tag": "0010_inherited-threats-model",
       "breakpoints": false
     }
   ]
