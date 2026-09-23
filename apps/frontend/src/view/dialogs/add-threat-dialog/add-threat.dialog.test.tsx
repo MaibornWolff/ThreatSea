@@ -29,12 +29,9 @@ mockUseThreatMeasuresList();
 // middleware), whose thunk closes over the real ThreatsAPI — a module mock
 // registered here would not reach that cached closure, but a spy on the shared
 // module object does.
-const updateThreatSpy = vi.spyOn(ThreatsAPI, "updateThreat");
+// restoreMocks removes spies after every test, so install them in beforeEach.
 beforeEach(() => {
-    updateThreatSpy.mockResolvedValue(createThreat({ id: 42 }));
-});
-afterAll(() => {
-    updateThreatSpy.mockRestore();
+    vi.spyOn(ThreatsAPI, "updateThreat").mockResolvedValue(createThreat({ id: 42 }));
 });
 
 const navigate = vi.fn();
