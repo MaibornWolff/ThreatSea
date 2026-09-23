@@ -1,7 +1,7 @@
 import Add from "@mui/icons-material/Add";
 import Visibility from "@mui/icons-material/Visibility";
 import { Box, Button, Checkbox, FormControlLabel, Menu, MenuItem, Tooltip, Typography } from "@mui/material";
-import { DataGrid, type GridColumnVisibilityModel, type GridFilterModel } from "@mui/x-data-grid";
+import { DataGrid, type GridColumnVisibilityModel } from "@mui/x-data-grid";
 import { memo, useCallback, useLayoutEffect, useMemo, useState, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router";
@@ -10,6 +10,8 @@ import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { MemberActions } from "#application/actions/members.actions.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { useMembersList } from "#application/hooks/use-addedMember-list.hook.ts";
+import { useColumnFilters } from "#application/hooks/use-column-filters.hook.ts";
+import { useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { MatrixFilterToggleButtonGroup } from "#view/components/matrix-filter-toggle-button-group.component.tsx";
 import { NoRowsOverlay } from "#view/components/no-rows-overlay.component.tsx";
@@ -23,6 +25,7 @@ import { AlertActions } from "#application/actions/alert.actions.ts";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import type { NavigationState } from "#application/reducers/navigation.reducer.ts";
 import type { ConfirmAcceptColor } from "#application/reducers/confirm.reducer.ts";
+import { applyColumnFilters } from "#utils/column-filters.ts";
 import { createMembersColumns } from "./create-members-columns";
 
 type MemberPath = "projects" | "catalogs";
@@ -34,6 +37,13 @@ interface DeleteMemberConfirmState {
     ownUserId: number;
     name: string;
 }
+
+const DEFAULT_COLUMN_VISIBILITY: GridColumnVisibilityModel = {
+    name: true,
+    email: true,
+    role: true,
+    actions: true,
+};
 
 const MemberPageBody = () => {
     const dispatch = useAppDispatch();
@@ -100,39 +110,15 @@ const MemberPageBody = () => {
         dispatch(NavigationActions.setPageHeader(headerConfig));
     }, [dispatch, headerConfig]);
 
-    const SESSION_STORAGE_KEY = `members-column-visibility-${memberPath}-${projectCatalogId}`;
-
-    const getInitialColumnVisibility = (): GridColumnVisibilityModel => {
-        const stored = sessionStorage.getItem(SESSION_STORAGE_KEY);
-        if (stored) {
-            try {
-                return JSON.parse(stored);
-            } catch {
-                // Fall through to default
-            }
-        }
-        return {
-            name: true,
-            email: true,
-            role: true,
-            actions: true,
-        };
-    };
-
-    const [columnVisibility, setColumnVisibility] = useState<GridColumnVisibilityModel>(getInitialColumnVisibility);
+    const { columnVisibility, toggleColumnVisibility } = useColumnVisibility(
+        `members-column-visibility-${memberPath}-${projectCatalogId}`,
+        DEFAULT_COLUMN_VISIBILITY
+    );
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
     const handleClose = () => setAnchorEl(null);
-
-    const toggleColumnVisibility = (field: string) => {
-        setColumnVisibility((prev) => {
-            const newVisibility = { ...prev, [field]: !prev[field] };
-            sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(newVisibility));
-            return newVisibility;
-        });
-    };
 
     const columnLabels: Record<string, string> = {
         name: t("name"),
@@ -141,28 +127,16 @@ const MemberPageBody = () => {
         actions: t("actions"),
     };
 
-    const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
-    const [expandedFilters, setExpandedFilters] = useState<Record<string, boolean>>({});
+    const { columnFilters, expandedFilters, handleFilterChange, toggleFilterExpanded } = useColumnFilters();
 
-    const handleFilterChange = useCallback((field: string, value: string) => {
-        setColumnFilters((prev) => ({ ...prev, [field]: value }));
-    }, []);
-
-    const toggleFilterExpanded = useCallback((field: string) => {
-        setExpandedFilters((prev) => ({ ...prev, [field]: !prev[field] }));
-    }, []);
-
-    const filterModel: GridFilterModel = useMemo(
-        () => ({
-            items: Object.entries(columnFilters)
-                .filter(([_, value]) => value.trim() !== "")
-                .map(([field, value]) => ({
-                    field,
-                    operator: "contains",
-                    value,
-                })),
-        }),
-        [columnFilters]
+    // Filtered in JS: the community DataGrid applies at most one controlled
+    // filter-model item, which silently breaks combined column filters.
+    const filteredMembers = useMemo(
+        () =>
+            applyColumnFilters(members, columnFilters, {
+                role: (member) => t(`userRoles.${member.role}`),
+            }),
+        [members, columnFilters, t]
     );
 
     const onClickAddMember = () => {
@@ -199,25 +173,23 @@ const MemberPageBody = () => {
             const isNotAloneOwner = checkIsOwnerNotAlone(member);
 
             if (isNotAloneOwner) {
-                message.preHighlightText = "Member: ";
-                message.afterHighlightText = " will be removed, are you sure?";
+                message.preHighlightText = t("deleteMemberMessagePre");
+                message.afterHighlightText = t("deleteMemberMessagePost");
 
-                acceptText = "Delete";
+                acceptText = t("delete");
                 onAccept = onConfirmDeleteMember;
                 acceptColor = "error";
-                cancelText = t("Cancel");
+                cancelText = t("cancel");
                 ownUserId = user.userId;
             } else {
                 if (members.length > 1) {
-                    message.preHighlightText = "You can't remove ";
-                    message.afterHighlightText = ` because this user is the only owner left
-                    in the project. Declare a new owner first.`;
+                    message.preHighlightText = t("onlyOwnerLeftPre");
+                    message.afterHighlightText = t("onlyOwnerLeftPost");
                 } else {
-                    message.preHighlightText = "Can't remove ";
-                    message.afterHighlightText = ` because the project will be empty.
-                    Deletion of a project can be done under the projects page.`;
+                    message.preHighlightText = t("projectWouldBeEmptyPre");
+                    message.afterHighlightText = t("projectWouldBeEmptyPost");
                 }
-                acceptText = "Ok";
+                acceptText = t("ok");
                 acceptColor = "warning";
                 cancelText = null;
                 ownUserId = -1;
@@ -233,7 +205,7 @@ const MemberPageBody = () => {
                     name: member.name,
                 },
                 message: message,
-                acceptText: t(acceptText ?? "Ok"),
+                acceptText: acceptText ?? t("ok"),
                 cancelText: cancelText ?? null,
                 onAccept: onAccept ?? null,
                 acceptColor: acceptColor ?? "error",
@@ -409,20 +381,37 @@ const MemberPageBody = () => {
                 </Box>
 
                 <DataGrid
-                    rows={members}
+                    rows={filteredMembers}
                     columns={columns}
                     disableRowSelectionOnClick
                     disableColumnFilter
                     disableColumnMenu
                     disableColumnSelector
-                    filterModel={filterModel}
                     onCellClick={(params) => {
                         if (params.field !== "actions") {
                             onClickEditMember(params.row);
                         }
                     }}
+                    onCellKeyDown={(params, event) => {
+                        // Keyboard equivalent of the cell click; skip events coming from
+                        // interactive elements inside a cell (they handle Enter natively).
+                        if (event.key !== "Enter" && event.key !== " ") {
+                            return;
+                        }
+                        if ((event.target as HTMLElement).closest("button, a, input")) {
+                            return;
+                        }
+                        if (params.field !== "actions") {
+                            event.preventDefault();
+                            onClickEditMember(params.row);
+                        }
+                    }}
                     columnHeaderHeight={90}
                     columnVisibilityModel={columnVisibility}
+                    // Two-state header sort (asc<->desc, never the DataGrid default third
+                    // "unsorted" state) so clicking a column header always toggles between the
+                    // two directions, matching the members list's expected sort behaviour.
+                    sortingOrder={["asc", "desc"]}
                     sx={{
                         borderRadius: 5,
                         boxShadow: 1,
@@ -434,6 +423,7 @@ const MemberPageBody = () => {
                     }}
                     initialState={{
                         pagination: { paginationModel: { pageSize: 25, page: 0 } },
+                        sorting: { sortModel: [{ field: "name", sort: "asc" }] },
                     }}
                     pageSizeOptions={[10, 25, 50, 100]}
                     slots={{ noRowsOverlay: NoRowsOverlayWithMessage }}

@@ -1,11 +1,24 @@
 import Delete from "@mui/icons-material/Delete";
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import { type GridColDef, type GridRenderCellParams } from "@mui/x-data-grid";
 import type { TFunction } from "i18next";
 import type { Asset } from "#api/types/asset.types.ts";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { ColumnFilterHeader } from "#view/components/column-filter-header.component.tsx";
+import { OverflowText } from "#view/components/overflow-text.component.tsx";
+
+export const formatCreationDate = (value: Date | string | null | undefined): string => {
+    if (value == null) {
+        return "";
+    }
+    const date = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(date.getTime())) {
+        return "";
+    }
+    // Local calendar day in YYYY-MM-DD (toISOString would shift to the UTC day).
+    return date.toLocaleDateString("sv-SE");
+};
 
 interface ColumnConfig {
     t: TFunction;
@@ -43,6 +56,9 @@ export const createAssetsColumns = ({
                 onToggleExpanded={toggleFilterExpanded}
             />
         ),
+        renderCell: ({ row }: GridRenderCellParams<Asset>) => (
+            <OverflowText text={row.name} testId="assets-page_assets-list-entry_name" />
+        ),
     },
     {
         field: "confidentiality",
@@ -61,6 +77,9 @@ export const createAssetsColumns = ({
                 expandedFilters={expandedFilters}
                 onToggleExpanded={toggleFilterExpanded}
             />
+        ),
+        renderCell: ({ value }: GridRenderCellParams<Asset>) => (
+            <span data-testid="assets-page_assets-list-entry_confidentiality">{value}</span>
         ),
     },
     {
@@ -81,6 +100,9 @@ export const createAssetsColumns = ({
                 onToggleExpanded={toggleFilterExpanded}
             />
         ),
+        renderCell: ({ value }: GridRenderCellParams<Asset>) => (
+            <span data-testid="assets-page_assets-list-entry_integrity">{value}</span>
+        ),
     },
     {
         field: "availability",
@@ -100,6 +122,9 @@ export const createAssetsColumns = ({
                 onToggleExpanded={toggleFilterExpanded}
             />
         ),
+        renderCell: ({ value }: GridRenderCellParams<Asset>) => (
+            <span data-testid="assets-page_assets-list-entry_availability">{value}</span>
+        ),
     },
     {
         field: "createdAt",
@@ -118,10 +143,7 @@ export const createAssetsColumns = ({
                 onToggleExpanded={toggleFilterExpanded}
             />
         ),
-        valueGetter: (value: Date | string) => {
-            const date = value instanceof Date ? value : new Date(value);
-            return date.toISOString().split("T")[0];
-        },
+        valueGetter: (value: Date | string) => formatCreationDate(value),
     },
     ...(checkUserRole(userRole, USER_ROLES.EDITOR)
         ? ([
@@ -133,11 +155,6 @@ export const createAssetsColumns = ({
                   filterable: false,
                   align: "right" as const,
                   headerAlign: "center" as const,
-                  renderHeader: () => (
-                      <Box sx={{ width: "100%" }}>
-                          <Typography sx={{ fontWeight: "bold", fontSize: "0.875rem", textAlign: "center" }} />
-                      </Box>
-                  ),
                   renderCell: (params: GridRenderCellParams<Asset>) => (
                       <Box
                           sx={{

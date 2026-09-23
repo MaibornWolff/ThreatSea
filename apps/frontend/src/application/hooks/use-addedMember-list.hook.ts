@@ -16,7 +16,7 @@ export const useMembersList = (projectCatalogId: number, memberPath: string, mem
 
     // Deterministic initial order; searching and per-column sorting are handled by the data grid.
     const sortedItems = useMemo(
-        () => filteredItems.toSorted((a, b) => (a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1)),
+        () => filteredItems.toSorted((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" })),
         [filteredItems]
     );
 

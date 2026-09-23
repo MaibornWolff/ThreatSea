@@ -13,7 +13,7 @@ export const useAssetsList = ({ projectId }: { projectId: number }) => {
 
     // Deterministic initial order; searching and per-column sorting are handled by the data grid.
     const sortedItems = useMemo(
-        () => items.toSorted((a: Asset, b: Asset) => (a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1)),
+        () => items.toSorted((a: Asset, b: Asset) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" })),
         [items]
     );
 

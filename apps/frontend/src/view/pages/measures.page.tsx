@@ -1,7 +1,13 @@
 import Add from "@mui/icons-material/Add";
 import Visibility from "@mui/icons-material/Visibility";
 import { Box, Button, Checkbox, FormControlLabel, LinearProgress, Menu, MenuItem, Typography } from "@mui/material";
-import { DataGrid, type GridColumnVisibilityModel, type GridFilterModel } from "@mui/x-data-grid";
+import { DataGrid, GridRow, type GridColumnVisibilityModel, type GridRowProps } from "@mui/x-data-grid";
+
+// The e2e page objects locate rows and the action buttons inside them via a row-level
+// test id, so it must live on the grid row element itself (same pattern as the threats page).
+const MeasuresGridRowSlot = (props: GridRowProps) => (
+    <GridRow {...props} data-testid="measures-page_measures-list-entry" />
+);
 import { memo, useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router";
@@ -11,6 +17,8 @@ import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
+import { useColumnFilters } from "#application/hooks/use-column-filters.hook.ts";
+import { useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
 import { useMeasuresList } from "#application/hooks/use-measures-list.hook.ts";
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { NoRowsOverlay } from "#view/components/no-rows-overlay.component.tsx";
@@ -19,10 +27,17 @@ import { CreatePage } from "#view/components/create-page.component.tsx";
 import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
 import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
 import { withProject } from "#view/components/with-project.hoc.tsx";
+import { applyColumnFilters } from "#utils/column-filters.ts";
 import MeasureDetailsDialogPage from "./measure-details-dialog.page";
 import { MeasureImpactByThreatDialogPage } from "./measure-impact-by-threat-dialog.page";
 import ThreatDialogPage from "./threat-dialog.page";
 import { createMeasuresColumns } from "./create-measures-columns";
+
+const DEFAULT_COLUMN_VISIBILITY: GridColumnVisibilityModel = {
+    name: true,
+    scheduledAt: true,
+    actions: true,
+};
 
 interface MeasuresPageBodyProps {
     project: ExtendedProject;
@@ -57,38 +72,15 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
         );
     }, [dispatch]);
 
-    const SESSION_STORAGE_KEY = `measures-column-visibility-${projectId}`;
-
-    const getInitialColumnVisibility = (): GridColumnVisibilityModel => {
-        const stored = sessionStorage.getItem(SESSION_STORAGE_KEY);
-        if (stored) {
-            try {
-                return JSON.parse(stored);
-            } catch {
-                // Fall through to default
-            }
-        }
-        return {
-            name: true,
-            scheduledAt: true,
-            actions: true,
-        };
-    };
-
-    const [columnVisibility, setColumnVisibility] = useState<GridColumnVisibilityModel>(getInitialColumnVisibility);
+    const { columnVisibility, toggleColumnVisibility } = useColumnVisibility(
+        `measures-column-visibility-${projectId}`,
+        DEFAULT_COLUMN_VISIBILITY
+    );
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
     const handleClose = () => setAnchorEl(null);
-
-    const toggleColumnVisibility = (field: string) => {
-        setColumnVisibility((prev) => {
-            const newVisibility = { ...prev, [field]: !prev[field] };
-            sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(newVisibility));
-            return newVisibility;
-        });
-    };
 
     const columnLabels: Record<string, string> = {
         name: t("name"),
@@ -96,28 +88,16 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
         actions: t("actions"),
     };
 
-    const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
-    const [expandedFilters, setExpandedFilters] = useState<Record<string, boolean>>({});
+    const { columnFilters, expandedFilters, handleFilterChange, toggleFilterExpanded } = useColumnFilters();
 
-    const handleFilterChange = useCallback((field: string, value: string) => {
-        setColumnFilters((prev) => ({ ...prev, [field]: value }));
-    }, []);
-
-    const toggleFilterExpanded = useCallback((field: string) => {
-        setExpandedFilters((prev) => ({ ...prev, [field]: !prev[field] }));
-    }, []);
-
-    const filterModel: GridFilterModel = useMemo(
-        () => ({
-            items: Object.entries(columnFilters)
-                .filter(([_, value]) => value.trim() !== "")
-                .map(([field, value]) => ({
-                    field,
-                    operator: "contains",
-                    value,
-                })),
-        }),
-        [columnFilters]
+    // Filtered in JS: the community DataGrid applies at most one controlled
+    // filter-model item, which silently breaks combined column filters.
+    const filteredMeasures = useMemo(
+        () =>
+            applyColumnFilters(measures, columnFilters, {
+                scheduledAt: (measure) => measure.scheduledAt || t("notScheduledYet"),
+            }),
+        [measures, columnFilters, t]
     );
 
     const onClickAddMeasure = () => {
@@ -306,16 +286,29 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                     </Box>
 
                     <DataGrid
-                        rows={measures}
+                        rows={filteredMeasures}
                         columns={columns}
                         loading={isPending}
                         disableRowSelectionOnClick
                         disableColumnFilter
                         disableColumnMenu
                         disableColumnSelector
-                        filterModel={filterModel}
                         onCellClick={(params) => {
                             if (params.field !== "actions") {
+                                onClickEditMeasure(params.row);
+                            }
+                        }}
+                        onCellKeyDown={(params, event) => {
+                            // Keyboard equivalent of the cell click; skip events coming from
+                            // interactive elements inside a cell (they handle Enter natively).
+                            if (event.key !== "Enter" && event.key !== " ") {
+                                return;
+                            }
+                            if ((event.target as HTMLElement).closest("button, a, input")) {
+                                return;
+                            }
+                            if (params.field !== "actions") {
+                                event.preventDefault();
                                 onClickEditMeasure(params.row);
                             }
                         }}
@@ -332,9 +325,10 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                         }}
                         initialState={{
                             pagination: { paginationModel: { pageSize: 25, page: 0 } },
+                            sorting: { sortModel: [{ field: "name", sort: "asc" }] },
                         }}
                         pageSizeOptions={[10, 25, 50, 100]}
-                        slots={{ noRowsOverlay: NoRowsOverlayWithMessage }}
+                        slots={{ noRowsOverlay: NoRowsOverlayWithMessage, row: MeasuresGridRowSlot }}
                     />
                 </Box>
                 <Routes>

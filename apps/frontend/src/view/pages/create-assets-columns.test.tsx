@@ -3,7 +3,9 @@ import userEvent from "@testing-library/user-event";
 import type { TFunction } from "i18next";
 import type { GridColDef } from "@mui/x-data-grid";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
-import { createAssetsColumns } from "./create-assets-columns";
+import { createAsset } from "#test-utils/builders.ts";
+import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
+import { createAssetsColumns, formatCreationDate } from "./create-assets-columns";
 
 const identityT = ((key: string) => key) as unknown as TFunction;
 
@@ -105,16 +107,14 @@ describe("createAssetsColumns — filter header behavior", () => {
         const { columns } = buildColumns({ expandedFilters: { name: false } });
         renderColumnHeader(columns.find((c) => c.field === "name"));
 
-        const collapseRoot = screen.getByPlaceholderText("Filter...").closest(".MuiCollapse-root");
-        expect(collapseRoot!.classList.contains("MuiCollapse-hidden")).toBe(true);
+        expect(screen.getByPlaceholderText("filterPlaceholder")).not.toBeVisible();
     });
 
     it("shows the filter input when expandedFilters[field] is true", () => {
         const { columns } = buildColumns({ expandedFilters: { confidentiality: true } });
         renderColumnHeader(columns.find((c) => c.field === "confidentiality"));
 
-        const collapseRoot = screen.getByPlaceholderText("Filter...").closest(".MuiCollapse-root");
-        expect(collapseRoot!.classList.contains("MuiCollapse-entered")).toBe(true);
+        expect(screen.getByPlaceholderText("filterPlaceholder")).toBeVisible();
     });
 
     it("clicking the chevron toggles filter expansion with the column field", async () => {
@@ -131,7 +131,7 @@ describe("createAssetsColumns — filter header behavior", () => {
         const { columns, handlers } = buildColumns({ expandedFilters: { availability: true } });
         renderColumnHeader(columns.find((c) => c.field === "availability"));
 
-        await userEvent.type(screen.getByPlaceholderText("Filter..."), "ab");
+        await userEvent.type(screen.getByPlaceholderText("filterPlaceholder"), "ab");
 
         expect(handlers.handleFilterChange).toHaveBeenNthCalledWith(1, "availability", "a");
         expect(handlers.handleFilterChange).toHaveBeenNthCalledWith(2, "availability", "b");
@@ -144,17 +144,39 @@ describe("createAssetsColumns — filter header behavior", () => {
         });
         renderColumnHeader(columns.find((c) => c.field === "name"));
 
-        expect(screen.getByPlaceholderText("Filter...")).toHaveValue("user-id");
+        expect(screen.getByPlaceholderText("filterPlaceholder")).toHaveValue("user-id");
     });
 });
 
 describe("createAssetsColumns — createdAt valueGetter", () => {
-    it("formats Date values to YYYY-MM-DD for stable sorting/filtering", () => {
+    it("formats dates to local-day YYYY-MM-DD for stable sorting/filtering", () => {
         const { columns } = buildColumns();
         const col = columns.find((c) => c.field === "createdAt")!;
         const valueGetter = col.valueGetter as unknown as (value: Date | string) => string;
 
+        // Midday UTC timestamps fall on the same local day in any test timezone.
         expect(valueGetter(new Date("2025-04-08T13:52:30Z"))).toBe("2025-04-08");
         expect(valueGetter("2023-11-27T12:14:16Z")).toBe("2023-11-27");
+    });
+
+    it("returns an empty string for missing or unparsable values", () => {
+        expect(formatCreationDate(null)).toBe("");
+        expect(formatCreationDate(undefined)).toBe("");
+        expect(formatCreationDate("not-a-date")).toBe("");
+    });
+});
+
+describe("createAssetsColumns — actions cell", () => {
+    it("delete calls handleDeleteAsset with the row and does not bubble to the row click", async () => {
+        const { columns, handlers } = buildColumns();
+        const actions = columns.find((c) => c.field === "actions")!;
+        const asset = createAsset({ id: 9, name: "Customer DB" });
+        const onRowClick = vi.fn();
+
+        renderWithProviders(<div onClick={onRowClick}>{actions.renderCell!({ row: asset } as never)}</div>);
+        await userEvent.click(screen.getByTestId("assets-page_assets-list-entry_delete-button"));
+
+        expect(handlers.handleDeleteAsset).toHaveBeenCalledWith(asset);
+        expect(onRowClick).not.toHaveBeenCalled();
     });
 });
