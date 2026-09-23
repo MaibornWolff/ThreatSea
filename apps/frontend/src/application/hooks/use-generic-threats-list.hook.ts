@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { GenericThreatsAPI } from "#api/generic-threats.api.ts";
-import type { GenericThreatWithExtendedChildren } from "#api/types/generic-threat.types.ts";
+import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat.types.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import { calcDamage } from "#utils/helpers.ts";
 import { ErrorActions } from "#application/actions/error.actions.ts";
@@ -20,7 +20,7 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
     const { t } = useTranslation("common");
     const dispatch = useAppDispatch();
     const [isPending, setIsPending] = useState<boolean>(false);
-    const [genericThreats, setGenericThreats] = useState<GenericThreatWithExtendedChildren[]>([]);
+    const [genericThreats, setGenericThreats] = useState<GenericThreatWithExtendedThreats[]>([]);
     const [searchValue, setSearchValue] = useState<string>("");
 
     const [expandedGenericThreatIds, setExpandedGenericThreatIds] = useState<Record<number, boolean>>({});
@@ -37,7 +37,7 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
         const sequence = ++loadSequenceRef.current;
         setIsPending(true);
         try {
-            const threats = await GenericThreatsAPI.getGenericThreatsWithExtendedChildren({ projectId });
+            const threats = await GenericThreatsAPI.getGenericThreatsWithExtendedThreats({ projectId });
             if (sequence !== loadSequenceRef.current) {
                 return;
             }
@@ -119,8 +119,8 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
         });
     }, [threatsByGenericThreatId, genericThreats, searchValue, t]);
 
-    // Scoped to the parents the user can currently see: with a search active,
-    // expand/collapse-all must not silently change hidden parents' state.
+    // Scoped to the generic threats the user can currently see: with a search active,
+    // expand/collapse-all must not silently change hidden generic threats' state.
     const setAllGenericThreatsExpanded = useCallback(
         (expanded: boolean) => {
             setExpandedGenericThreatIds((previous) => {

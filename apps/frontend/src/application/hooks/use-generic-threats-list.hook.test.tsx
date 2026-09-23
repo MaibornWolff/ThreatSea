@@ -4,7 +4,7 @@ import { I18nextProvider } from "react-i18next";
 import { Provider } from "react-redux";
 import { createStore } from "#application/store.ts";
 import { GenericThreatsAPI } from "#api/generic-threats.api.ts";
-import type { GenericThreatWithExtendedChildren } from "#api/types/generic-threat.types.ts";
+import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat.types.ts";
 import { createThreat } from "#test-utils/builders.ts";
 import { translationUtil } from "#utils/translations.ts";
 import { useGenericThreatsList } from "./use-generic-threats-list.hook";
@@ -13,13 +13,13 @@ import { useGenericThreatsList } from "./use-generic-threats-list.hook";
 // mock cannot reach closures cached by earlier test files (see AGENTS.md).
 // restoreMocks removes spies after every test, so install them in beforeEach.
 beforeEach(() => {
-    vi.spyOn(GenericThreatsAPI, "getGenericThreatsWithExtendedChildren").mockResolvedValue([]);
+    vi.spyOn(GenericThreatsAPI, "getGenericThreatsWithExtendedThreats").mockResolvedValue([]);
 });
 
-const genericThreat = (id: number, name: string): GenericThreatWithExtendedChildren =>
-    ({ id, name, threats: [createThreat({ id: id * 10 })] }) as unknown as GenericThreatWithExtendedChildren;
+const genericThreat = (id: number, name: string): GenericThreatWithExtendedThreats =>
+    ({ id, name, threats: [createThreat({ id: id * 10 })] }) as unknown as GenericThreatWithExtendedThreats;
 
-const searchable = (id: number, attacker: string, pointOfAttack: string): GenericThreatWithExtendedChildren =>
+const searchable = (id: number, attacker: string, pointOfAttack: string): GenericThreatWithExtendedThreats =>
     ({
         id,
         name: `threat-${id}`,
@@ -27,7 +27,7 @@ const searchable = (id: number, attacker: string, pointOfAttack: string): Generi
         attacker,
         pointOfAttack,
         threats: [createThreat({ id: id * 10 })],
-    }) as unknown as GenericThreatWithExtendedChildren;
+    }) as unknown as GenericThreatWithExtendedThreats;
 
 // The hooks dispatch to the global error state, so every render needs a store.
 const makeWrapper = (store: ReturnType<typeof createStore>) =>
@@ -42,7 +42,7 @@ const makeWrapper = (store: ReturnType<typeof createStore>) =>
 describe("useGenericThreatsList", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedChildren).mockResolvedValue([
+        vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedThreats).mockResolvedValue([
             genericThreat(1, "Alpha"),
             genericThreat(2, "Beta"),
         ]);
@@ -63,8 +63,8 @@ describe("useGenericThreatsList", () => {
         expect(result.current.expandedGenericThreatIds).toEqual({});
     });
 
-    it("scopes expand/collapse-all to the parents matching the active search", async () => {
-        vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedChildren).mockResolvedValue([
+    it("scopes expand/collapse-all to the generic threats matching the active search", async () => {
+        vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedThreats).mockResolvedValue([
             searchable(1, "ADMINISTRATORS", "DATA_STORAGE_INFRASTRUCTURE"),
             searchable(2, "SYSTEM_USERS", "USER_INTERFACE"),
         ]);
@@ -73,7 +73,7 @@ describe("useGenericThreatsList", () => {
         });
         await waitFor(() => expect(result.current.genericThreats).toHaveLength(2));
 
-        // Parent 2 is expanded manually, then hidden by the search.
+        // Generic threat 2 is expanded manually, then hidden by the search.
         act(() => result.current.toggleGenericThreat(2));
         act(() => result.current.setSearchValue("threat-1"));
         await waitFor(() => expect(result.current.genericThreats).toHaveLength(1));
@@ -81,13 +81,13 @@ describe("useGenericThreatsList", () => {
         act(() => result.current.setAllGenericThreatsExpanded(true));
         expect(result.current.expandedGenericThreatIds).toEqual({ 1: true, 2: true });
 
-        // Collapse-all only affects the visible parent; the hidden one keeps its state.
+        // Collapse-all only affects the visible generic threat; the hidden one keeps its state.
         act(() => result.current.setAllGenericThreatsExpanded(false));
         expect(result.current.expandedGenericThreatIds).toEqual({ 2: true });
     });
 
     it("keeps the expansion map empty when no generic threats are loaded", async () => {
-        vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedChildren).mockResolvedValue([]);
+        vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedThreats).mockResolvedValue([]);
         const { result } = renderHook(() => useGenericThreatsList({ projectId: 1 }), {
             wrapper: makeWrapper(createStore()),
         });
@@ -106,7 +106,7 @@ describe("useGenericThreatsList", () => {
         });
         await waitFor(() => expect(result.current.genericThreats).toHaveLength(2));
 
-        vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedChildren).mockRejectedValue(new Error("boom"));
+        vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedThreats).mockRejectedValue(new Error("boom"));
         await act(async () => {
             await result.current.loadGenericThreats();
         });
@@ -124,15 +124,15 @@ describe("useGenericThreatsList", () => {
         await waitFor(() => expect(result.current.genericThreats).toHaveLength(2));
 
         // Two overlapping loads where the OLDER one resolves LAST.
-        let resolveOld!: (value: GenericThreatWithExtendedChildren[]) => void;
-        let resolveNew!: (value: GenericThreatWithExtendedChildren[]) => void;
-        const oldResponse = new Promise<GenericThreatWithExtendedChildren[]>((resolve) => {
+        let resolveOld!: (value: GenericThreatWithExtendedThreats[]) => void;
+        let resolveNew!: (value: GenericThreatWithExtendedThreats[]) => void;
+        const oldResponse = new Promise<GenericThreatWithExtendedThreats[]>((resolve) => {
             resolveOld = resolve;
         });
-        const newResponse = new Promise<GenericThreatWithExtendedChildren[]>((resolve) => {
+        const newResponse = new Promise<GenericThreatWithExtendedThreats[]>((resolve) => {
             resolveNew = resolve;
         });
-        vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedChildren)
+        vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedThreats)
             .mockReturnValueOnce(oldResponse)
             .mockReturnValueOnce(newResponse);
 
@@ -145,7 +145,7 @@ describe("useGenericThreatsList", () => {
             newLoad = result.current.loadGenericThreats();
         });
 
-        // The newer load resolves first with three parents.
+        // The newer load resolves first with three generic threats.
         await act(async () => {
             resolveNew([genericThreat(1, "Alpha"), genericThreat(2, "Beta"), genericThreat(3, "Gamma")]);
             await newLoad;
@@ -153,7 +153,7 @@ describe("useGenericThreatsList", () => {
         expect(result.current.genericThreats).toHaveLength(3);
         expect(result.current.isPending).toBe(false);
 
-        // The older load resolves afterwards; its stale single-parent result must be ignored,
+        // The older load resolves afterwards; its stale single-generic-threat result must be ignored,
         // and it must not re-raise the pending flag.
         await act(async () => {
             resolveOld([genericThreat(9, "Stale")]);
@@ -167,7 +167,7 @@ describe("useGenericThreatsList", () => {
     it("matches the search against the localized attacker / point-of-attack label (German)", async () => {
         const previousLanguage = translationUtil.language;
         await translationUtil.changeLanguage("de");
-        vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedChildren).mockResolvedValue([
+        vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedThreats).mockResolvedValue([
             searchable(1, "ADMINISTRATORS", "DATA_STORAGE_INFRASTRUCTURE"),
             searchable(2, "SYSTEM_USERS", "USER_INTERFACE"),
         ]);

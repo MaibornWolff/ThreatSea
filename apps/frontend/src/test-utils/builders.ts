@@ -51,7 +51,7 @@ export const createThreat = (overrides: Partial<ExtendedThreat> = {}): ExtendedT
     projectId: 1,
     genericThreatId: 1,
     pointOfAttackId: "poa-1",
-    name: "Test Child Threat",
+    name: "Test Threat",
     description: "",
     pointOfAttack: POINTS_OF_ATTACK.USER_INTERFACE,
     attacker: ATTACKERS.UNAUTHORISED_PARTIES,

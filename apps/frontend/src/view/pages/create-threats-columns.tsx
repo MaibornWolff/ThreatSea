@@ -10,7 +10,7 @@ import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
 import { Box, MenuItem, Select, Typography } from "@mui/material";
 import { type GridColDef, type GridRenderCellParams } from "@mui/x-data-grid";
 import type { TFunction } from "i18next";
-import type { GenericThreatWithExtendedChildren } from "#api/types/generic-threat.types.ts";
+import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat.types.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
@@ -24,18 +24,18 @@ export type ThreatsGridRow =
     | {
           rowType: "genericThreat";
           rowId: string;
-          genericThreat: GenericThreatWithExtendedChildren;
-          childCount: number;
+          genericThreat: GenericThreatWithExtendedThreats;
+          threatCount: number;
           isExpanded: boolean;
       }
     | { rowType: "threat"; rowId: string; threat: ExtendedThreatWithMetrics }
-    | { rowType: "emptyChildren"; rowId: string };
+    | { rowType: "noThreats"; rowId: string };
 
 export const GENERIC_THREAT_ROW_PREFIX = "generic-";
 export const THREAT_ROW_PREFIX = "threat-";
 
 export const formatComponentName = (
-    entity: Pick<GenericThreatWithExtendedChildren, "pointOfAttack" | "componentName" | "interfaceName">,
+    entity: Pick<GenericThreatWithExtendedThreats, "pointOfAttack" | "componentName" | "interfaceName">,
     t: TFunction
 ): string => {
     if (entity.pointOfAttack === POINTS_OF_ATTACK.COMMUNICATION_INTERFACES) {
@@ -54,7 +54,7 @@ interface ColumnConfig {
     onToggleGenericThreat: (genericThreatId: number) => void;
     onAssetHover: (event: React.SyntheticEvent<HTMLElement>, assets: ExtendedThreat["assets"]) => void;
     onAssetHoverEnd: () => void;
-    onAddThreat: (event: React.MouseEvent<HTMLElement>, genericThreat: GenericThreatWithExtendedChildren) => void;
+    onAddThreat: (event: React.MouseEvent<HTMLElement>, genericThreat: GenericThreatWithExtendedThreats) => void;
     onEditThreat: (event: React.MouseEvent<HTMLElement>, threat: ExtendedThreat) => void;
     onDuplicateThreat: (event: React.MouseEvent<HTMLElement>, threat: ExtendedThreatWithMetrics) => void;
     onDeleteThreat: (event: React.MouseEvent<HTMLElement>, threat: ExtendedThreatWithMetrics) => void;
@@ -92,7 +92,7 @@ export const createThreatsColumns = ({
         sortable: false,
         align: "left",
         headerAlign: "center",
-        colSpan: (_value, row) => (row.rowType === "emptyChildren" ? 10 : undefined),
+        colSpan: (_value, row) => (row.rowType === "noThreats" ? 10 : undefined),
         renderHeader: () => (
             <ColumnFilterHeader
                 field="name"
@@ -141,7 +141,7 @@ export const createThreatsColumns = ({
             }
             return (
                 <Box sx={{ display: "flex", alignItems: "center", height: "100%", paddingLeft: 5 }}>
-                    <Typography sx={{ ...cellText, fontStyle: "italic" }}>{t("noChildThreats")}</Typography>
+                    <Typography sx={{ ...cellText, fontStyle: "italic" }}>{t("noThreats")}</Typography>
                 </Box>
             );
         },
@@ -430,7 +430,7 @@ export const createThreatsColumns = ({
                             paddingRight: 1,
                         }}
                     >
-                        <Typography sx={cellText}>{t("childThreatsCount", { count: row.childCount })}</Typography>
+                        <Typography sx={cellText}>{t("threatsCount", { count: row.threatCount })}</Typography>
                         {checkUserRole(userRole, USER_ROLES.EDITOR) && (
                             <IconButton
                                 title={t("addThreat")}

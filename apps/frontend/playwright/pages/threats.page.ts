@@ -45,7 +45,7 @@ export class ThreatsPage extends BasePage {
             });
     }
 
-    /** The informational guard shown when deleting a generic threat's only child is blocked. */
+    /** The informational guard shown when deleting a generic threat's only threat is blocked. */
     onlyThreatGuardMessage(threatName: string): Locator {
         return this.page.getByText(`You cannot delete the only threat '${threatName}'.`);
     }

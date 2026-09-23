@@ -6,7 +6,7 @@ import { USER_ROLES } from "#api/types/user-roles.types.ts";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
-import type { GenericThreatWithExtendedChildren } from "#api/types/generic-threat.types.ts";
+import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat.types.ts";
 import type { ExtendedThreatWithMetrics } from "#application/hooks/use-generic-threats-list.hook.ts";
 import { createThreatsColumns, formatComponentName, type ThreatsGridRow } from "./create-threats-columns";
 
@@ -51,13 +51,13 @@ const genericThreat = {
     componentName: "Database",
     interfaceName: null,
     threats: [],
-} as unknown as GenericThreatWithExtendedChildren;
+} as unknown as GenericThreatWithExtendedThreats;
 
-const childThreat = {
+const threat = {
     id: 42,
     genericThreatId: 7,
     name: "Refined access",
-    description: "child desc",
+    description: "threat desc",
     pointOfAttack: "DATA_STORAGE_INFRASTRUCTURE",
     attacker: "UNAUTHORISED_PARTIES",
     probability: 4,
@@ -76,13 +76,13 @@ const genericRow: ThreatsGridRow = {
     rowType: "genericThreat",
     rowId: "generic-7",
     genericThreat,
-    childCount: 1,
+    threatCount: 1,
     isExpanded: false,
 };
 
-const threatRow: ThreatsGridRow = { rowType: "threat", rowId: "threat-42", threat: childThreat };
+const threatRow: ThreatsGridRow = { rowType: "threat", rowId: "threat-42", threat };
 
-const emptyChildrenRow: ThreatsGridRow = { rowType: "emptyChildren", rowId: "empty-7" };
+const noThreatsRow: ThreatsGridRow = { rowType: "noThreats", rowId: "empty-7" };
 
 const cellParams = (row: ThreatsGridRow): GridRenderCellParams<ThreatsGridRow> =>
     ({ row }) as unknown as GridRenderCellParams<ThreatsGridRow>;
@@ -122,36 +122,36 @@ describe("createThreatsColumns — structure", () => {
     });
 });
 
-describe("createThreatsColumns — parent rows carry no risk", () => {
+describe("createThreatsColumns — generic threat rows carry no risk", () => {
     it.each(["probability", "damage", "risk", "assets", "status"])(
         "renders nothing (no misleading dash) for %s on a generic threat row",
         (field) => {
             const { byField } = columnByField();
             const { container } = renderCell(byField[field], genericRow);
-            // Parents have no risk of their own; these cells stay empty rather than
+            // Generic threats have no risk of their own; these cells stay empty rather than
             // showing "-", which would read as a missing value.
             expect(container).not.toHaveTextContent("-");
             expect(container.querySelector("svg")).not.toBeInTheDocument();
         }
     );
 
-    it("shows the child count and an add-child button on the parent actions cell", async () => {
+    it("shows the threat count and an add-threat button on the generic threat actions cell", async () => {
         const { byField, handlers } = columnByField();
-        renderCell(byField["actions"], { ...genericRow, childCount: 3 });
-        expect(screen.getByText("childThreatsCount")).toBeInTheDocument();
+        renderCell(byField["actions"], { ...genericRow, threatCount: 3 });
+        expect(screen.getByText("threatsCount")).toBeInTheDocument();
 
         await userEvent.click(screen.getByRole("button", { name: "addThreat" }));
         expect(handlers.onAddThreat).toHaveBeenCalledTimes(1);
     });
 
-    it("hides the add-child button from viewers", () => {
+    it("hides the add-threat button from viewers", () => {
         const { byField } = columnByField({ userRole: USER_ROLES.VIEWER });
         renderCell(byField["actions"], genericRow);
         expect(screen.queryByRole("button", { name: "addThreat" })).not.toBeInTheDocument();
     });
 });
 
-describe("createThreatsColumns — child rows show metrics", () => {
+describe("createThreatsColumns — threat rows show metrics", () => {
     it("renders probability, damage and risk from the computed metrics", () => {
         const { byField } = columnByField();
         renderCell(byField["probability"], threatRow);
@@ -187,7 +187,7 @@ describe("createThreatsColumns — child rows show metrics", () => {
         const { container } = renderCell(byField["status"], {
             rowType: "threat",
             rowId: "threat-99",
-            threat: { ...childThreat, status },
+            threat: { ...threat, status },
         });
         expect(screen.getByText(label)).toBeInTheDocument();
         expect(container.querySelector("svg")).toBeInTheDocument();
@@ -206,7 +206,7 @@ describe("createThreatsColumns — child rows show metrics", () => {
         expect(handlers.onDeleteThreat).toHaveBeenCalledTimes(1);
     });
 
-    it("hides child actions from viewers", () => {
+    it("hides threat actions from viewers", () => {
         const { byField } = columnByField({ userRole: USER_ROLES.VIEWER });
         renderCell(byField["actions"], threatRow);
         expect(screen.queryByRole("button", { name: "editThreat" })).not.toBeInTheDocument();
@@ -214,14 +214,14 @@ describe("createThreatsColumns — child rows show metrics", () => {
 });
 
 describe("createThreatsColumns — expand toggle", () => {
-    it("toggles the parent when its chevron is clicked", async () => {
+    it("toggles the generic threat when its chevron is clicked", async () => {
         const { byField, handlers } = columnByField();
         renderCell(byField["name"], genericRow);
         await userEvent.click(screen.getByRole("button", { name: "expand" }));
         expect(handlers.onToggleGenericThreat).toHaveBeenCalledWith(7);
     });
 
-    it("labels the chevron Collapse when the parent is expanded", () => {
+    it("labels the chevron Collapse when the generic threat is expanded", () => {
         const { byField } = columnByField();
         renderCell(byField["name"], { ...genericRow, isExpanded: true });
         expect(screen.getByRole("button", { name: "collapse" })).toBeInTheDocument();
@@ -269,15 +269,15 @@ describe("formatComponentName", () => {
     });
 });
 
-describe("createThreatsColumns — empty children placeholder", () => {
-    it("spans the whole grid and shows the placeholder for a parent without children", () => {
+describe("createThreatsColumns — no threats placeholder", () => {
+    it("spans the whole grid and shows the placeholder for a generic threat without threats", () => {
         const { byField } = columnByField();
         const nameColumn = byField["name"]!;
         const colSpan = nameColumn.colSpan as (value: unknown, row: ThreatsGridRow) => number | undefined;
-        expect(colSpan(undefined, emptyChildrenRow)).toBe(10);
+        expect(colSpan(undefined, noThreatsRow)).toBe(10);
         expect(colSpan(undefined, threatRow)).toBeUndefined();
 
-        renderCell(nameColumn, emptyChildrenRow);
-        expect(screen.getByText("noChildThreats")).toBeInTheDocument();
+        renderCell(nameColumn, noThreatsRow);
+        expect(screen.getByText("noThreats")).toBeInTheDocument();
     });
 });

@@ -57,14 +57,14 @@ const ThreatDialogPage = ({ onSaved }: ThreatDialogPageProps) => {
             return;
         }
         let cancelled = false;
-        GenericThreatsAPI.getGenericThreatsWithExtendedChildren({ projectId: Number(projectId) })
+        GenericThreatsAPI.getGenericThreatsWithExtendedThreats({ projectId: Number(projectId) })
             .then((genericThreats) => {
                 if (cancelled) {
                     return;
                 }
                 const match = genericThreats
                     .flatMap((generic) => generic.threats)
-                    .find((child) => child.id === threatId);
+                    .find((threat) => threat.id === threatId);
                 if (match) {
                     setFetchedThreat(match);
                 } else {

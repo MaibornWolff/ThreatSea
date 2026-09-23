@@ -284,7 +284,7 @@ describe("AddThreatDialog — Save", () => {
         expect(screen.getByRole("option", { name: "Out of scope" })).toBeInTheDocument();
     });
 
-    it("persists the child threat, notifies the host, and closes on success", async () => {
+    it("persists the threat, notifies the host, and closes on success", async () => {
         vi.mocked(ThreatsAPI.updateThreat).mockResolvedValue(createThreat({ id: 42 }));
         const onSaved = vi.fn();
         const { user } = setup(USER_ROLES.EDITOR, "threats", onSaved);
