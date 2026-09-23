@@ -6,7 +6,6 @@ import express from "express";
 import { getSystem, updateSystem } from "#controllers/system.controller.js";
 import { measuresRouter } from "#routers/measures.router.js";
 import { measureImpactRouter } from "#routers/measure-impact.router.js";
-import { genericThreatsRouter } from "#routers/generic-threats.router.js";
 import { CheckProjectRoleHandler } from "#guards/authorisation.guard.js";
 import { ProjectIdParam } from "#types/project.types.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
@@ -35,7 +34,6 @@ systemRouter.put<ProjectIdParam, SystemResponse, UpdateSystemRequest>(
 );
 
 /** Put threats, measures and MeasureImpacts into this router */
-systemRouter.use("/genericThreats", genericThreatsRouter);
 systemRouter.use("/measures", measuresRouter);
 systemRouter.use("/measureImpacts", measureImpactRouter);
 systemRouter.use("/threats", threatsRouter);

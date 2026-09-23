@@ -193,7 +193,7 @@ describe("import/export round-trip fidelity", () => {
 
         // And the HTTP endpoint the threats page actually calls returns both children.
         const endpointRes = await request(app)
-            .get(`/api/projects/${project!.id}/system/genericThreats`)
+            .get(`/api/projects/${project!.id}/system/threats/generic`)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(endpointRes.statusCode).toEqual(200);

@@ -233,7 +233,7 @@ beforeEach(async () => {
 describe("get or create threats", () => {
     it("should list all threats", async () => {
         const res = await request(app)
-            .get(`/api/projects/${projectId}/system/genericThreats`)
+            .get(`/api/projects/${projectId}/system/threats/generic`)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(200);
@@ -480,7 +480,7 @@ describe("authorization and ownership guards on threat endpoints", () => {
             .where(and(eq(usersProjects.userId, userId), eq(usersProjects.projectId, projectId)));
 
         const res = await request(app)
-            .get(`/api/projects/${projectId}/system/genericThreats`)
+            .get(`/api/projects/${projectId}/system/threats/generic`)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(403);
@@ -490,7 +490,7 @@ describe("authorization and ownership guards on threat endpoints", () => {
         await setProjectRole(USER_ROLES.VIEWER);
 
         const readRes = await request(app)
-            .get(`/api/projects/${projectId}/system/genericThreats`)
+            .get(`/api/projects/${projectId}/system/threats/generic`)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(readRes.statusCode).toEqual(200);
