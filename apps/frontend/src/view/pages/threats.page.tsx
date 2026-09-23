@@ -9,7 +9,7 @@ import {
     Checkbox,
     FormControlLabel,
 } from "@mui/material";
-import { DataGrid, type GridFilterModel, type GridColumnVisibilityModel } from "@mui/x-data-grid";
+import { DataGrid, type GridColumnVisibilityModel } from "@mui/x-data-grid";
 import Visibility from "@mui/icons-material/Visibility";
 import { memo, useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -20,6 +20,7 @@ import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { useEditor } from "#application/hooks/use-editor.hook.ts";
 import { useLoadThreatsOnce } from "#application/hooks/use-load-threats-once.hook.ts";
 import { useThreatsList, type ThreatListItem } from "#application/hooks/use-threats-list.hook.ts";
+import { applyColumnFilters } from "#utils/column-filters.ts";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import { NoRowsOverlay } from "#view/components/no-rows-overlay.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
@@ -194,17 +195,30 @@ const ThreatsPageBody = () => {
         }));
     }, []);
 
-    const filterModel: GridFilterModel = useMemo(
-        () => ({
-            items: Object.entries(columnFilters)
-                .filter(([_, value]) => value.trim() !== "")
-                .map(([field, value]) => ({
-                    field,
-                    operator: field === "doneEditing" ? "equals" : "contains",
-                    value,
-                })),
-        }),
-        [columnFilters]
+    // Filtered in JS: the community DataGrid applies at most one controlled
+    // filter-model item, which silently breaks combined column filters. The value
+    // getters mirror each column's displayed text.
+    const filteredThreats = useMemo(
+        () =>
+            applyColumnFilters(
+                threats,
+                columnFilters,
+                {
+                    assets: (threat) => String(threat.assets.length),
+                    componentName: (threat) =>
+                        threat.pointOfAttack === "COMMUNICATION_INTERFACES"
+                            ? `${threat.componentName || t("unknown")} > ${threat.interfaceName}`
+                            : (threat.componentName ?? ""),
+                    pointOfAttack: (threat) => t(`pointsOfAttackList.${threat.pointOfAttack}`),
+                    attacker: (threat) => t(`attackerList.${threat.attacker}`),
+                },
+                {
+                    // The header select stores "edited"/"notEdited"; a contains match cannot
+                    // separate them ("notedited" contains "edited"), so match exactly.
+                    doneEditing: (threat, filterValue) => (threat.doneEditing ? "edited" : "notedited") === filterValue,
+                }
+            ),
+        [threats, columnFilters, t]
     );
 
     const columns = useMemo(
@@ -361,7 +375,7 @@ const ThreatsPageBody = () => {
                                         color: "primary.text",
                                     }}
                                 >
-                                    {threats.length}
+                                    {filteredThreats.length}
                                 </Typography>
                                 <Typography>{t("threatsFound")}</Typography>
                             </Box>
@@ -369,14 +383,13 @@ const ThreatsPageBody = () => {
                     </Box>
 
                     <DataGrid
-                        rows={threats}
+                        rows={filteredThreats}
                         columns={columns}
                         loading={isPending}
                         disableRowSelectionOnClick
                         disableColumnFilter
                         disableColumnMenu
                         disableColumnSelector
-                        filterModel={filterModel}
                         onCellClick={(params) => {
                             if (params.field !== "actions") {
                                 onClickEditThreat(params.row);

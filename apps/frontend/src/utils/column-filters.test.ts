@@ -51,4 +51,31 @@ describe("applyColumnFilters", () => {
         expect(applyColumnFilters(sparse, { name: "x" }).map((r) => r.id)).toEqual([2]);
         expect(applyColumnFilters(sparse, { name: "null" })).toEqual([]);
     });
+
+    it("uses an exact matcher over the contains match when provided", () => {
+        const flagged = [
+            { id: 1, edited: true },
+            { id: 2, edited: false },
+        ] as unknown as (Row & { edited: boolean })[];
+        const matchers = {
+            // "notedited".includes("edited") is true, so enum-like tokens need exact matching.
+            edited: (row: { edited: boolean }, filterValue: string) =>
+                (row.edited ? "edited" : "notedited") === filterValue,
+        };
+
+        expect(applyColumnFilters(flagged, { edited: "edited" }, {}, matchers).map((r) => r.id)).toEqual([1]);
+        expect(applyColumnFilters(flagged, { edited: "notEdited" }, {}, matchers).map((r) => r.id)).toEqual([2]);
+    });
+
+    it("passes the normalized (trimmed, lowercased) filter value to matchers", () => {
+        const flagged = [{ id: 1, edited: true }] as unknown as (Row & { edited: boolean })[];
+        const seen: string[] = [];
+        applyColumnFilters(
+            flagged,
+            { edited: "  EdItEd  " },
+            {},
+            { edited: (_row: unknown, filterValue: string) => (seen.push(filterValue), true) }
+        );
+        expect(seen).toEqual(["edited"]);
+    });
 });
