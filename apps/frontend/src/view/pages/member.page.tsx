@@ -257,7 +257,7 @@ const MemberPageBody = () => {
     );
 
     const handleParticipantCount = (): string => {
-        if (members.length > 1) {
+        if (filteredMembers.length !== 1) {
             return t("participants");
         }
         return t("participant");
@@ -374,7 +374,7 @@ const MemberPageBody = () => {
                     </Box>
                     <Box sx={{ display: "flex", alignItems: "center" }}>
                         <Typography sx={{ mr: 0.5, fontWeight: "bold", color: "primary.text" }}>
-                            {members.length}
+                            {filteredMembers.length}
                         </Typography>
                         <Typography>{handleParticipantCount()}</Typography>
                     </Box>

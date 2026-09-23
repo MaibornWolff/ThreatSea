@@ -143,7 +143,7 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
     );
 
     const handleAssetsCount = (): string => {
-        if (assets.length > 1) {
+        if (filteredAssets.length !== 1) {
             return t("assetsFound");
         }
         return t("assetFound");
@@ -242,7 +242,7 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
                         {assets.length > 0 && (
                             <Box sx={{ display: "flex", alignItems: "center" }}>
                                 <Typography sx={{ mr: 0.5, fontWeight: "bold", color: "primary.text" }}>
-                                    {assets.length}
+                                    {filteredAssets.length}
                                 </Typography>
                                 <Typography>{handleAssetsCount()}</Typography>
                             </Box>

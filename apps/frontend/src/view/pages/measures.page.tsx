@@ -179,7 +179,7 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
     );
 
     const handleMeasureCount = (): string => {
-        if (measures.length > 1) {
+        if (filteredMeasures.length !== 1) {
             return t("measuresFound");
         }
         return t("measureFound");
@@ -278,7 +278,7 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                         {measures.length > 0 && (
                             <Box sx={{ display: "flex", alignItems: "center" }}>
                                 <Typography sx={{ mr: 0.5, fontWeight: "bold", color: "primary.text" }}>
-                                    {measures.length}
+                                    {filteredMeasures.length}
                                 </Typography>
                                 <Typography>{handleMeasureCount()}</Typography>
                             </Box>
