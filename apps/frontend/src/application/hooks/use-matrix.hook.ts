@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
-import { calcNetRisk } from "#utils/calcRisk.ts";
+import { calcThreatNetRisk } from "#utils/calcRisk.ts";
 import { createRiskMatrixDesign, addThreatsToRiskMatrix, dayNumberFromDateString } from "#utils/riskMatrix.ts";
 import { useCatalogMeasures } from "./use-catalog-measures.hook.ts";
 import { useThreats } from "./use-threats.hook.ts";
@@ -13,7 +13,6 @@ import { projectsSelectors } from "#application/selectors/projects.selectors.ts"
 import type { SortDirection } from "#application/actions/list.actions.ts";
 import type { MatrixColorKey } from "#view/colors/matrix.ts";
 import { calcDamage } from "#utils/helpers.ts";
-import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 
 export interface ThreatMeasure {
     measureId: number;
@@ -146,9 +145,7 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
                         netProbability: newProbability,
                         netDamage: newDamage,
                         netRisk: newRisk,
-                    } = threat.status === THREAT_STATUSES.OUTOFSCOPE
-                        ? { netProbability: 0, netDamage: 0, netRisk: 0 }
-                        : calcNetRisk(probability, damage, activeMeasureImpacts);
+                    } = calcThreatNetRisk(threat, activeMeasureImpacts);
                     const risk = probability * damage;
                     const activeMeasures = measures.reduce((sum, measure) => {
                         if (measure.scheduledAt) {

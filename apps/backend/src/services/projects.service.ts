@@ -21,6 +21,7 @@ import { getAssets } from "#services/assets.service.js";
 import { getMeasures } from "#services/measures.service.js";
 import { getMeasureImpactsByProject } from "#services/measureImpacts.service.js";
 import { ComponentType } from "#types/system.types.js";
+import { THREAT_STATUSES } from "#types/threat-statuses.types.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
 
 /**
@@ -97,6 +98,12 @@ function transformThreats(
             };
         })
         .map((threat) => {
+            // A threat the user put out of scope carries no residual risk, no matter which
+            // measures are applied to it. The gross values are not affected.
+            if (threat.status === THREAT_STATUSES.OUTOFSCOPE) {
+                return { ...threat, netProbability: 0, netDamage: 0, netRisk: 0 };
+            }
+
             const [netProbability, netDamage] = threat.measures.reduce(
                 (arr, measure) => {
                     const [netProbability, netDamage] = arr;
