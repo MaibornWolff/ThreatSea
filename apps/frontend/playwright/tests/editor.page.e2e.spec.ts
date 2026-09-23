@@ -254,6 +254,36 @@ test.describe("Editor Page Tests", () => {
         });
     });
 
+    test.describe("Create Asset From Component Sidebar Tests", () => {
+        test("Creates an asset and lists it in the component sidebar", async ({ page }) => {
+            const pg = new EditorPage(page);
+            await pg.clickCanvas(850, 345);
+            await expect(pg.componentAssetSearchResults).toHaveCount(2);
+            await expect(pg.componentAddAssetButton).toBeInViewport();
+            await pg.componentAddAssetButton.click();
+            await expect(page).toHaveURL(/\/system\/assets\/edit$/);
+            await pg.assetNameInput.fill("Sidebar Asset");
+            await pg.assetDescriptionInput.fill("Created from the component sidebar");
+            await pg.assetConfidentialityInput.fill("3");
+            await pg.assetIntegrityInput.fill("3");
+            await pg.assetAvailabilityInput.fill("3");
+            await pg.saveButton.click();
+            await expect(page).toHaveURL(/\/system$/);
+            await expect(pg.componentAssetSearchResults).toHaveCount(3);
+            await expect(pg.componentAssetSearchResults.filter({ hasText: "Sidebar Asset" })).toHaveCount(1);
+        });
+
+        test("Cancelling asset creation returns to editor", async ({ page }) => {
+            const pg = new EditorPage(page);
+            await pg.clickCanvas(850, 345);
+            await pg.componentAddAssetButton.click();
+            await expect(page).toHaveURL(/\/system\/assets\/edit$/);
+            await pg.cancelButton.click();
+            await expect(page).toHaveURL(/\/system$/);
+            await expect(pg.componentAssetSearchResults).toHaveCount(2);
+        });
+    });
+
     test.describe("POA Navigation Tests", () => {
         test("Clicking POA label switches sidebar to POA view", async ({ page }) => {
             const pg = new EditorPage(page);

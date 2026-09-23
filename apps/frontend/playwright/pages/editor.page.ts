@@ -17,6 +17,7 @@ export class EditorPage extends BasePage {
     readonly componentAssetSearchField: Locator;
     readonly componentAssetSearchResults: Locator;
     readonly componentAssetSearchContainer: Locator;
+    readonly componentAddAssetButton: Locator;
 
     // POA sidebar
     readonly poaAssetSearchField: Locator;
@@ -31,6 +32,11 @@ export class EditorPage extends BasePage {
 
     // Asset edit modal
     readonly assetCreationModalNameInput: Locator;
+    readonly assetNameInput: Locator;
+    readonly assetDescriptionInput: Locator;
+    readonly assetConfidentialityInput: Locator;
+    readonly assetIntegrityInput: Locator;
+    readonly assetAvailabilityInput: Locator;
     readonly saveButton: Locator;
     readonly cancelButton: Locator;
     readonly changeComponentIconButton: Locator;
@@ -70,6 +76,7 @@ export class EditorPage extends BasePage {
         this.componentAssetSearchField = page.locator('[data-testid="selected-component-asset-search-field"] input');
         this.componentAssetSearchResults = page.getByTestId("selected-component-asset-search-results");
         this.componentAssetSearchContainer = page.locator('[data-testid="selected-component-asset-search-field"]');
+        this.componentAddAssetButton = page.getByTestId("selected-component-add-asset-button");
 
         this.poaAssetSearchField = page.locator('[data-testid="selected-point-of-attack-asset-search-field"] input');
         this.poaAssetSearchContainer = page.locator('[data-testid="selected-point-of-attack-asset-search-field"]');
@@ -82,6 +89,15 @@ export class EditorPage extends BasePage {
         this.assetSearchResults = page.getByTestId("asset-search-results");
 
         this.assetCreationModalNameInput = page.locator('[data-testid="asset-creation-modal_name-input"]');
+        this.assetNameInput = page.locator('[data-testid="asset-creation-modal_name-input"] input');
+        this.assetDescriptionInput = page.locator(
+            '[data-testid="asset-creation-modal_description-input"] textarea[name="description"]'
+        );
+        this.assetConfidentialityInput = page.locator(
+            '[data-testid="asset-creation-modal_confidentiality-input"] input'
+        );
+        this.assetIntegrityInput = page.locator('[data-testid="asset-creation-modal_integrity-input"] input');
+        this.assetAvailabilityInput = page.locator('[data-testid="asset-creation-modal_availability-input"] input');
         this.saveButton = page.locator('[data-testid="save-button"]');
         this.cancelButton = page.locator('[data-testid="cancel-button"]');
         this.changeComponentIconButton = page.getByTestId("change-component-icon");

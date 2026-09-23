@@ -24,7 +24,8 @@ const REDIRECT_MARKER = "redirected-to-assets";
 function renderPage({ url, preloadedState }: { url: InitialEntry; preloadedState: Partial<RootState> }) {
     return renderWithProviders(
         <Routes>
-            <Route path="/projects/:projectId/assets/:assetId/edit" element={<AssetDialogPage />} />
+            <Route path="/projects/:projectId/system/assets/:assetId/edit" element={<AssetDialogPage />} />
+            <Route path="/projects/:projectId/system/assets/edit" element={<AssetDialogPage />} />
             <Route path="/projects/:projectId/assets/edit" element={<AssetDialogPage />} />
             <Route path="/projects/:projectId/assets" element={<div>{REDIRECT_MARKER}</div>} />
         </Routes>,
@@ -35,7 +36,7 @@ function renderPage({ url, preloadedState }: { url: InitialEntry; preloadedState
 describe("AssetDialogPage", () => {
     it("renders nothing while assets are still loading", () => {
         renderPage({
-            url: "/projects/1/assets/5/edit",
+            url: "/projects/1/system/assets/5/edit",
             preloadedState: {
                 assets: { ids: [], entities: {}, isPending: true },
                 projects: {
@@ -57,7 +58,7 @@ describe("AssetDialogPage", () => {
         const otherAsset = createAsset({ id: 10, name: "Other" });
 
         renderPage({
-            url: "/projects/1/assets/999/edit",
+            url: "/projects/1/system/assets/999/edit",
             preloadedState: {
                 assets: { ids: [10], entities: { 10: otherAsset }, isPending: false },
                 projects: {
@@ -80,7 +81,7 @@ describe("AssetDialogPage", () => {
         const project = createProject({ id: 1 });
 
         renderPage({
-            url: "/projects/1/assets/5/edit",
+            url: "/projects/1/system/assets/5/edit",
             preloadedState: {
                 assets: { ids: [5], entities: { 5: asset }, isPending: false },
                 projects: {
@@ -101,7 +102,7 @@ describe("AssetDialogPage", () => {
         expect(dialog).toHaveAttribute("data-has-on-dialog-close", "true");
     });
 
-    it("renders dialog from location state without onDialogClose when no assetId", () => {
+    it("renders dialog from location state without onDialogClose outside the editor", () => {
         renderPage({
             url: { pathname: "/projects/1/assets/edit", state: { asset: { name: "New Asset" } } },
             preloadedState: {
@@ -120,5 +121,48 @@ describe("AssetDialogPage", () => {
         const dialog = screen.getByTestId("add-asset-dialog");
         expect(dialog).toHaveAttribute("data-has-asset", "true");
         expect(dialog).toHaveAttribute("data-has-on-dialog-close", "false");
+    });
+
+    it("renders an empty create dialog with onDialogClose when opened from the editor", () => {
+        renderPage({
+            url: "/projects/1/system/assets/edit",
+            preloadedState: {
+                assets: { ids: [], entities: {}, isPending: false },
+                projects: {
+                    ids: [],
+                    entities: {},
+                    isLoadingAll: false,
+                    isPending: false,
+                    current: undefined,
+                    deletingProjectId: undefined,
+                },
+            },
+        });
+
+        const dialog = screen.getByTestId("add-asset-dialog");
+        expect(dialog).toHaveAttribute("data-project-id", "1");
+        expect(dialog).toHaveAttribute("data-has-asset", "false");
+        expect(dialog).toHaveAttribute("data-has-on-dialog-close", "true");
+        expect(screen.queryByText(REDIRECT_MARKER)).not.toBeInTheDocument();
+    });
+
+    it("redirects to assets list when opened outside the editor without asset or location state", () => {
+        renderPage({
+            url: "/projects/1/assets/edit",
+            preloadedState: {
+                assets: { ids: [], entities: {}, isPending: false },
+                projects: {
+                    ids: [],
+                    entities: {},
+                    isLoadingAll: false,
+                    isPending: false,
+                    current: undefined,
+                    deletingProjectId: undefined,
+                },
+            },
+        });
+
+        expect(screen.getByText(REDIRECT_MARKER)).toBeInTheDocument();
+        expect(screen.queryByTestId("add-asset-dialog")).not.toBeInTheDocument();
     });
 });
