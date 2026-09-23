@@ -4,7 +4,7 @@
  */
 import { and, eq } from "drizzle-orm";
 import { db, TransactionType } from "#db/index.js";
-import { threats, Threat, CreateThreat, UpdateThreat } from "#db/schema.js";
+import { threats, Threat, CreateThreat, UpdateThreat, CatalogThreat, GenericThreat } from "#db/schema.js";
 import { getGenericThreat } from "./generic-threats.service.js";
 import { getCatalogThreatById } from "./catalog-threats.service.js";
 import { NotFoundError } from "#errors/not-found.error.js";
@@ -77,6 +77,20 @@ export async function createThreat(
     return childthreat;
 }
 
+/**
+ * Creates multiple child threats in a single insert.
+ *
+ * @param {CreateThreat[]} createThreatsData - The data of the child threats.
+ * @param {TransactionType} transaction - drizzle transaction.
+ * @returns {Promise<Threat[]>} A promise that resolves to the created child threats.
+ */
+export async function createThreats(
+    createThreatsData: CreateThreat[],
+    transaction: TransactionType | undefined = undefined
+): Promise<Threat[]> {
+    return await (transaction ?? db).insert(threats).values(createThreatsData).returning();
+}
+
 /** The user-editable subset of a child threat; identity fields are excluded on purpose. */
 export type ThreatRefinement = Partial<
     Pick<
@@ -102,7 +116,23 @@ export async function createThreatForGenericThreat(
         throw new NotFoundError("Catalog threat not found");
     }
 
-    const createThreatData: CreateThreat = {
+    return await createThreat(buildThreatForGenericThreat(genericThreat, catalogThreat, refinement), transaction);
+}
+
+/**
+ * Builds the data of a child threat from its generic threat and catalog threat.
+ *
+ * @param {GenericThreat} genericThreat - The generic threat the child threat belongs to.
+ * @param {CatalogThreat} catalogThreat - The catalog threat the generic threat was created from.
+ * @param {ThreatRefinement} refinement - User-provided values that override the defaults.
+ * @returns {CreateThreat} The data of the child threat.
+ */
+export function buildThreatForGenericThreat(
+    genericThreat: GenericThreat,
+    catalogThreat: CatalogThreat,
+    refinement: ThreatRefinement = {}
+): CreateThreat {
+    return {
         attacker: genericThreat.attacker,
         name: refinement.name ?? genericThreat.name,
         description: refinement.description ?? "",
@@ -114,10 +144,8 @@ export async function createThreatForGenericThreat(
         probability: refinement.probability ?? catalogThreat.probability,
         pointOfAttackId: genericThreat.pointOfAttackId,
         status: refinement.status ?? THREAT_STATUSES.NEW,
-        genericThreatId: genericThreatId,
+        genericThreatId: genericThreat.id,
     };
-
-    return await createThreat(createThreatData, transaction);
 }
 
 /**
