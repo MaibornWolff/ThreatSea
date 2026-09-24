@@ -93,7 +93,7 @@ test.describe("Measures Page tests", () => {
             expect(entries[i]).toContain(sorted[i]!.name);
         }
 
-        await pg.sortByNameButton.click();
+        await pg.toggleSort("name");
         await expect(pg.sortByNameButton).toHaveAttribute("aria-sort", "descending");
         const reversed = await pg.measureListEntryNames.allTextContents();
         for (let i = 0; i < sorted.length; i++) {
@@ -108,14 +108,14 @@ test.describe("Measures Page tests", () => {
         await createMeasures(request, token, measures);
         await page.reload();
 
-        await pg.sortByScheduledAtButton.click();
+        await pg.toggleSort("scheduledAt");
         await expect(pg.sortByScheduledAtButton).toHaveAttribute("aria-sort", "ascending");
         const entries = await pg.measureListEntryScheduledAt.allTextContents();
         for (let i = 0; i < sorted.length; i++) {
             expect(entries[i]).toContain(sorted[i]!.scheduledAt);
         }
 
-        await pg.sortByScheduledAtButton.click();
+        await pg.toggleSort("scheduledAt");
         await expect(pg.sortByScheduledAtButton).toHaveAttribute("aria-sort", "descending");
         const reversed = await pg.measureListEntryScheduledAt.allTextContents();
         for (let i = 0; i < sorted.length; i++) {

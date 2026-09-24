@@ -15,30 +15,26 @@
   "reset": "Reset Measure",
   "resetMeasureText": "Do you really want to reset the measure '{{ measureName }}'?",
   "scheduledTooltip": "Scheduled Measure",
-
   "addAsset": "Add Asset",
   "assets": "Assets",
   "editAsset": "Edit Asset",
-
   "addThreatBtn": "Add Threat",
   "editThreat": "Edit Threat",
   "editThreatWithName": "Edit Threat: {{ name }}",
   "threat": "Threat",
   "threats": "Threats",
-
   "A": "Availability",
   "availability": "Availability",
   "C": "Confidentiality",
   "confidentiality": "Confidentiality",
   "I": "Integrity",
   "integrity": "Integrity",
-
   "unknown": "Unknown",
-
   "attacker": "Attacker",
   "catalog": "Catalog",
   "componentName": "Component",
   "creationDate": "Date",
+  "customizeView": "Customize view",
   "damage": "Damage",
   "damageAxis": "Damage",
   "description": "Description",
@@ -64,7 +60,6 @@
   "projects": "Projects",
   "catalogs": "Catalogs",
   "catalogEditor": "Catalog Editor",
-
   "addBtn": "Add",
   "cancel": "Cancel",
   "cancelBtn": "Cancel",
@@ -79,14 +74,12 @@
   "okBtn": "Okay",
   "resetText": "Reset",
   "saveBtn": "Save",
-
   "attackerList": {
     "ADMINISTRATORS": "Administrators",
     "APPLICATION_USERS": "Application Users",
     "SYSTEM_USERS": "System Users",
     "UNAUTHORISED_PARTIES": "Unauthorised Parties"
   },
-
   "confidentialityLevels": {
     "PUBLIC": "public",
     "INTERNAL": "internal",
@@ -94,7 +87,6 @@
     "HIGHLY_CONFIDENTIAL": "highly confidential",
     "undefined": "Loading..."
   },
-
   "errorMessages": {
     "availabilityMin": "Availability must be 1 or greater",
     "availabilityMax": "Availability must be 5 or smaller",
@@ -106,7 +98,6 @@
     "integrityMax": "Integrity must be 5 or smaller",
     "probabilityMin": "Probability must be 1 or greater",
     "probabilityMax": "Probability must be 5 or smaller",
-
     "attakerRequired": "Attacker required",
     "availabilityValue": "Availability required",
     "catalogRequired": "Catalog required",
@@ -125,7 +116,6 @@
     "roleRequired": "Role required",
     "threatRequired": "Threat required",
     "nameNotUnique": "Name is already taken",
-
     "noConnectionFound": "No connection found for this component.",
     "noCommunicationInterfaceFound": "The selected communication interface was not found for this component.",
     "userConnectionInvalid": "Users can only connect to clients, servers, or databases",
@@ -136,18 +126,15 @@
     "excelExportFailed": "Excel export failed.",
     "reportFetchFailed": "Report cannot be loaded."
   },
-
   "pointsOfAttackList": {
     "COMMUNICATION_INFRASTRUCTURE": "Communication Infrastructure",
     "DATA_STORAGE_INFRASTRUCTURE": "Data Storage Infrastructure",
     "PROCESSING_INFRASTRUCTURE": "Processing Infrastructure",
-
     "COMMUNICATION_INTERFACE": "Communication Interface",
     "COMMUNICATION_INTERFACES": "Communication Interfaces",
     "USER_INTERFACE": "User Interface",
     "USER_BEHAVIOUR": "User Behaviour"
   },
-
   "probabilities": {
     "1": {
       "name": "extremely unlikely",
@@ -170,7 +157,6 @@
       "description": "The threat can occur unintentionally, e.g. during regular usage by a non-malicious user."
     }
   },
-
   "damages": {
     "1": {
       "name": "very neglectable",
@@ -192,5 +178,8 @@
       "name": "very threatening",
       "description": "For the existence of the company"
     }
-  }
+  },
+  "filterPlaceholder": "Filter...",
+  "toggleColumnFilter": "Toggle {{column}} filter",
+  "ok": "OK"
 }
