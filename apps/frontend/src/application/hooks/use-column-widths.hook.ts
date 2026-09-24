@@ -1,6 +1,6 @@
 import type { GridColDef, GridColumnResizeParams, GridValidRowModel } from "@mui/x-data-grid";
 import { useCallback, useEffect, useState } from "react";
-import { tableViewStorageKey } from "#utils/table-view-storage.ts";
+import { readTableViewSetting, writeTableViewSetting } from "#utils/table-view-storage.ts";
 
 type ColumnWidths = Record<string, number>;
 
@@ -11,18 +11,8 @@ const isColumnWidths = (value: unknown): value is ColumnWidths =>
     Object.values(value).every((entry) => typeof entry === "number" && Number.isFinite(entry) && entry > 0);
 
 const readStoredWidths = (storageKey: string): ColumnWidths => {
-    const stored = sessionStorage.getItem(tableViewStorageKey(storageKey));
-    if (stored) {
-        try {
-            const parsed: unknown = JSON.parse(stored);
-            if (isColumnWidths(parsed)) {
-                return parsed;
-            }
-        } catch {
-            // Fall through to no stored widths on malformed entries.
-        }
-    }
-    return {};
+    const stored = readTableViewSetting(storageKey);
+    return isColumnWidths(stored) ? stored : {};
 };
 
 /**
@@ -57,7 +47,7 @@ export const useColumnWidths = (storageKey: string) => {
         ({ colDef, width }: GridColumnResizeParams) => {
             setColumnWidths((previous) => {
                 const newWidths = { ...previous, [colDef.field]: width };
-                sessionStorage.setItem(tableViewStorageKey(storageKey), JSON.stringify(newWidths));
+                writeTableViewSetting(storageKey, newWidths);
                 return newWidths;
             });
         },

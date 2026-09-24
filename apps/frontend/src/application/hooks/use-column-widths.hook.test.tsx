@@ -51,6 +51,17 @@ describe("useColumnWidths", () => {
         }
     );
 
+    it("starts without widths and still records resizes in memory when sessionStorage is unavailable", () => {
+        vi.spyOn(window, "sessionStorage", "get").mockImplementation(() => {
+            throw new DOMException("The operation is insecure.", "SecurityError");
+        });
+        const { result } = renderHook(() => useColumnWidths("table-1"));
+        expect(result.current.columnWidths).toEqual({});
+
+        act(() => result.current.handleColumnWidthChange(resizeTo("name", 300)));
+        expect(result.current.columnWidths).toEqual({ name: 300 });
+    });
+
     it("reloads the widths when the storage key changes without a remount", () => {
         sessionStorage.setItem(tableViewStorageKey("project-1"), JSON.stringify({ name: 320 }));
         const { result, rerender } = renderHook(({ key }) => useColumnWidths(key), {

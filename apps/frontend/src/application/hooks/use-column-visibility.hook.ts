@@ -1,6 +1,6 @@
 import type { GridColumnVisibilityModel } from "@mui/x-data-grid";
 import { useCallback, useEffect, useState } from "react";
-import { tableViewStorageKey } from "#utils/table-view-storage.ts";
+import { readTableViewSetting, writeTableViewSetting } from "#utils/table-view-storage.ts";
 
 const isVisibilityModel = (value: unknown): value is GridColumnVisibilityModel =>
     typeof value === "object" &&
@@ -9,18 +9,8 @@ const isVisibilityModel = (value: unknown): value is GridColumnVisibilityModel =
     Object.values(value).every((entry) => typeof entry === "boolean");
 
 const readStoredVisibility = (storageKey: string, defaults: GridColumnVisibilityModel): GridColumnVisibilityModel => {
-    const stored = sessionStorage.getItem(tableViewStorageKey(storageKey));
-    if (stored) {
-        try {
-            const parsed: unknown = JSON.parse(stored);
-            if (isVisibilityModel(parsed)) {
-                return parsed;
-            }
-        } catch {
-            // Fall through to the defaults on malformed entries.
-        }
-    }
-    return defaults;
+    const stored = readTableViewSetting(storageKey);
+    return isVisibilityModel(stored) ? stored : defaults;
 };
 
 /**
@@ -41,7 +31,7 @@ export const useColumnVisibility = (storageKey: string, defaults: GridColumnVisi
         (field: string) => {
             setColumnVisibility((prev) => {
                 const newVisibility = { ...prev, [field]: !prev[field] };
-                sessionStorage.setItem(tableViewStorageKey(storageKey), JSON.stringify(newVisibility));
+                writeTableViewSetting(storageKey, newVisibility);
                 return newVisibility;
             });
         },

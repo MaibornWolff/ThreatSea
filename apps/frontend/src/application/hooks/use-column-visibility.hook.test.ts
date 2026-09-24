@@ -36,6 +36,17 @@ describe("useColumnVisibility", () => {
         }
     );
 
+    it("falls back to the defaults and still toggles in memory when sessionStorage is unavailable", () => {
+        vi.spyOn(window, "sessionStorage", "get").mockImplementation(() => {
+            throw new DOMException("The operation is insecure.", "SecurityError");
+        });
+        const { result } = renderHook(() => useColumnVisibility("table-1", DEFAULTS));
+        expect(result.current.columnVisibility).toEqual(DEFAULTS);
+
+        act(() => result.current.toggleColumnVisibility("name"));
+        expect(result.current.columnVisibility).toEqual({ name: false, actions: true });
+    });
+
     it("reloads the model when the storage key changes without a remount", () => {
         sessionStorage.setItem(tableViewStorageKey("project-1"), JSON.stringify({ name: false, actions: true }));
         const { result, rerender } = renderHook(({ key }) => useColumnVisibility(key, DEFAULTS), {
