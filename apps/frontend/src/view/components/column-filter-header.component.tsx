@@ -25,11 +25,27 @@ export const ColumnFilterHeader = ({
     const { t } = useTranslation("common");
 
     return (
-        <Box sx={{ width: "100%" }}>
+        <Box
+            sx={{ width: "100%" }}
+            // The DataGrid header cell sorts on Enter; Enter inside the filter controls must only act on the control.
+            onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                    event.stopPropagation();
+                }
+            }}
+        >
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 0.5 }}>
                 <Typography sx={{ fontWeight: "bold", fontSize: "0.875rem", textAlign: "center" }}>{label}</Typography>
+                {/*
+                    Deliberately not a tab stop, like DataGrid's own header icons: the grid moves header focus to the
+                    first tabindex="0" element inside it, so a focusable chevron would take the header's keyboard focus
+                    and Enter would toggle the filter instead of sorting. Accepted trade-off: collapsing a filter is
+                    mouse-only; the (expanded by default) filter input stays reachable with Tab. A focusable filter
+                    passed as children (e.g. a Select) still takes the header focus, so that column sorts by mouse only.
+                */}
                 <MuiIconButton
                     size="small"
+                    tabIndex={-1}
                     aria-label={t("toggleColumnFilter", { column: label })}
                     aria-expanded={expandedFilters[field] ?? true}
                     onClick={(event) => {
