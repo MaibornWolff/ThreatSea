@@ -55,7 +55,7 @@
     "@types/pg": "8.23.1",
     "@types/supertest": "7.2.1",
     "@vitest/coverage-v8": "catalog:",
-    "drizzle-kit": "0.31.10",
+    "drizzle-kit": "0.31.11",
     "nanoid": "6.0.1",
     "oxlint": "catalog:",
     "oxlint-tsgolint": "catalog:",
