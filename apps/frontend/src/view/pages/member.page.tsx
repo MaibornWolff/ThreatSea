@@ -455,9 +455,8 @@ const MemberPageBody = () => {
                         columnHeaderHeight={90}
                         columnVisibilityModel={columnVisibility}
                         onColumnWidthChange={handleColumnWidthChange}
-                        // Two-state header sort (asc<->desc, never the DataGrid default third
-                        // "unsorted" state) so clicking a column header always toggles between the
-                        // two directions, matching the members list's expected sort behaviour.
+                        // Two-state sort like the tables before the DataGrid: a header click toggles asc <-> desc
+                        // instead of also cycling through DataGrid's default third, unsorted state.
                         sortingOrder={["asc", "desc"]}
                         sx={{
                             borderRadius: 5,

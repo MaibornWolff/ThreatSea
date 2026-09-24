@@ -321,6 +321,9 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                         columnHeaderHeight={90}
                         columnVisibilityModel={columnVisibility}
                         onColumnWidthChange={handleColumnWidthChange}
+                        // Two-state sort like the tables before the DataGrid: a header click toggles asc <-> desc
+                        // instead of also cycling through DataGrid's default third, unsorted state.
+                        sortingOrder={["asc", "desc"]}
                         sx={{
                             borderRadius: 5,
                             boxShadow: 1,
