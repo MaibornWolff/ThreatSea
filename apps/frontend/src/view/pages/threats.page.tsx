@@ -420,6 +420,7 @@ const ThreatsPageBody = () => {
                             pagination: {
                                 paginationModel: { pageSize: 25, page: 0 },
                             },
+                            sorting: { sortModel: [{ field: "name", sort: "asc" }] },
                         }}
                         pageSizeOptions={[10, 25, 50, 100]}
                         slots={{
