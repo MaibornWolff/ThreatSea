@@ -1,6 +1,16 @@
 import Add from "@mui/icons-material/Add";
 import Visibility from "@mui/icons-material/Visibility";
-import { Box, Button, Checkbox, FormControlLabel, Menu, MenuItem, Tooltip, Typography } from "@mui/material";
+import {
+    Box,
+    Button,
+    Checkbox,
+    FormControlLabel,
+    LinearProgress,
+    Menu,
+    MenuItem,
+    Tooltip,
+    Typography,
+} from "@mui/material";
 import { DataGrid, type GridColumnVisibilityModel } from "@mui/x-data-grid";
 import { memo, useCallback, useLayoutEffect, useMemo, useState, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
@@ -93,7 +103,11 @@ const MemberPageBody = () => {
         navigate("/projects");
     }
 
-    const { members, allMembers, onConfirmDeleteMember } = useMembersList(projectCatalogId, memberPath, memberRole);
+    const { isPending, members, allMembers, onConfirmDeleteMember } = useMembersList(
+        projectCatalogId,
+        memberPath,
+        memberRole
+    );
 
     useLayoutEffect(() => {
         if (isSelfRemoved) {
@@ -282,178 +296,193 @@ const MemberPageBody = () => {
     };
 
     return (
-        <Page
-            sx={{
-                mt: 5,
-                mb: 1,
-                overflow: "hidden",
-            }}
-        >
-            <MatrixFilterToggleButtonGroup
-                sx={{ mb: 2 }}
-                items={[
-                    {
-                        text: t("userRoles.OWNER"),
-                        value: USER_ROLES.OWNER,
-                        "data-testid": "memberOwnerFilter",
-                        width: "200px",
-                    },
-                    {
-                        text: t("userRoles.EDITOR"),
-                        value: USER_ROLES.EDITOR,
-                        "data-testid": "memberEditorFilter",
-                        width: "200px",
-                    },
-                    {
-                        text: t("userRoles.VIEWER"),
-                        value: USER_ROLES.VIEWER,
-                        "data-testid": "memberEditorViewer",
-                        width: "200px",
-                    },
-                ]}
-                value={memberRole}
-                onChange={handleChangeMemberRole}
-            />
-            <Box
+        <>
+            <LinearProgress
                 sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    backgroundColor: "background.paperIntransparent",
-                    boxShadow: 1,
-                    padding: 4,
+                    visibility: isPending ? "visible" : "hidden",
                     boxSizing: "border-box",
-                    borderRadius: 5,
-                    height: "100%",
-                    mb: 2,
+                }}
+            />
+            <Page
+                sx={{
+                    mt: 5,
+                    mb: 1,
                     overflow: "hidden",
                 }}
             >
+                <MatrixFilterToggleButtonGroup
+                    sx={{ mb: 2 }}
+                    items={[
+                        {
+                            text: t("userRoles.OWNER"),
+                            value: USER_ROLES.OWNER,
+                            "data-testid": "memberOwnerFilter",
+                            width: "200px",
+                        },
+                        {
+                            text: t("userRoles.EDITOR"),
+                            value: USER_ROLES.EDITOR,
+                            "data-testid": "memberEditorFilter",
+                            width: "200px",
+                        },
+                        {
+                            text: t("userRoles.VIEWER"),
+                            value: USER_ROLES.VIEWER,
+                            "data-testid": "memberEditorViewer",
+                            width: "200px",
+                        },
+                    ]}
+                    value={memberRole}
+                    onChange={handleChangeMemberRole}
+                />
                 <Box
                     sx={{
                         display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        paddingTop: 1,
-                        paddingBottom: 2,
+                        flexDirection: "column",
+                        backgroundColor: "background.paperIntransparent",
+                        boxShadow: 1,
+                        padding: 4,
+                        boxSizing: "border-box",
+                        borderRadius: 5,
+                        height: "100%",
+                        mb: 2,
+                        overflow: "hidden",
                     }}
                 >
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <Button
-                            variant="outlined"
-                            startIcon={<Visibility />}
-                            onClick={handleClick}
-                            sx={{ textTransform: "none" }}
-                        >
-                            {t("customizeView")}
-                        </Button>
-                        <Menu
-                            anchorEl={anchorEl}
-                            open={open}
-                            onClose={handleClose}
-                            anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-                            transformOrigin={{ vertical: "top", horizontal: "left" }}
-                            slotProps={{
-                                list: {
-                                    sx: { bgcolor: "background.mainIntransparent" },
-                                },
-                                paper: {
-                                    sx: { borderRadius: 5 },
-                                },
-                            }}
-                        >
-                            {Object.entries(columnLabels).map(([field, label]) => (
-                                <MenuItem key={field} onClick={() => toggleColumnVisibility(field)} sx={{ py: 0.5 }}>
-                                    <FormControlLabel
-                                        control={<Checkbox checked={columnVisibility[field] !== false} size="small" />}
-                                        label={label}
-                                        sx={{ m: 0, width: "100%", pointerEvents: "none" }}
-                                    />
-                                </MenuItem>
-                            ))}
-                        </Menu>
-                        {checkUserRole(userRole, USER_ROLES.OWNER) && (
-                            <IconButton
-                                onClick={onClickAddMember}
-                                sx={{
-                                    ml: 1,
-                                    "&:hover": {
-                                        color: "secondary.main",
-                                        bgcolor: "background.paper",
-                                    },
-                                    color: "text.primary",
-                                }}
-                                data-testid="AddMember"
+                    <Box
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            paddingTop: 1,
+                            paddingBottom: 2,
+                        }}
+                    >
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                            <Button
+                                variant="outlined"
+                                startIcon={<Visibility />}
+                                onClick={handleClick}
+                                sx={{ textTransform: "none" }}
                             >
-                                <Tooltip title={t("addMemberBtn")}>
-                                    <Add sx={{ fontSize: 18 }} />
-                                </Tooltip>
-                            </IconButton>
-                        )}
+                                {t("customizeView")}
+                            </Button>
+                            <Menu
+                                anchorEl={anchorEl}
+                                open={open}
+                                onClose={handleClose}
+                                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                                transformOrigin={{ vertical: "top", horizontal: "left" }}
+                                slotProps={{
+                                    list: {
+                                        sx: { bgcolor: "background.mainIntransparent" },
+                                    },
+                                    paper: {
+                                        sx: { borderRadius: 5 },
+                                    },
+                                }}
+                            >
+                                {Object.entries(columnLabels).map(([field, label]) => (
+                                    <MenuItem
+                                        key={field}
+                                        onClick={() => toggleColumnVisibility(field)}
+                                        sx={{ py: 0.5 }}
+                                    >
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox checked={columnVisibility[field] !== false} size="small" />
+                                            }
+                                            label={label}
+                                            sx={{ m: 0, width: "100%", pointerEvents: "none" }}
+                                        />
+                                    </MenuItem>
+                                ))}
+                            </Menu>
+                            {checkUserRole(userRole, USER_ROLES.OWNER) && (
+                                <IconButton
+                                    onClick={onClickAddMember}
+                                    sx={{
+                                        ml: 1,
+                                        "&:hover": {
+                                            color: "secondary.main",
+                                            bgcolor: "background.paper",
+                                        },
+                                        color: "text.primary",
+                                    }}
+                                    data-testid="AddMember"
+                                >
+                                    <Tooltip title={t("addMemberBtn")}>
+                                        <Add sx={{ fontSize: 18 }} />
+                                    </Tooltip>
+                                </IconButton>
+                            )}
+                        </Box>
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                            <Typography sx={{ mr: 0.5, fontWeight: "bold", color: "primary.text" }}>
+                                {filteredMembers.length}
+                            </Typography>
+                            <Typography>{handleParticipantCount()}</Typography>
+                        </Box>
                     </Box>
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <Typography sx={{ mr: 0.5, fontWeight: "bold", color: "primary.text" }}>
-                            {filteredMembers.length}
-                        </Typography>
-                        <Typography>{handleParticipantCount()}</Typography>
-                    </Box>
-                </Box>
 
-                <DataGrid
-                    rows={filteredMembers}
-                    columns={columns}
-                    disableRowSelectionOnClick
-                    disableColumnFilter
-                    disableColumnMenu
-                    disableColumnSelector
-                    onCellClick={(params) => {
-                        if (params.field !== "actions") {
-                            onClickEditMember(params.row);
-                        }
-                    }}
-                    onCellKeyDown={(params, event) => {
-                        // Keyboard equivalent of the cell click; skip events coming from
-                        // interactive elements inside a cell (they handle Enter natively).
-                        if (event.key !== "Enter" && event.key !== " ") {
-                            return;
-                        }
-                        if ((event.target as HTMLElement).closest("button, a, input")) {
-                            return;
-                        }
-                        if (params.field !== "actions") {
-                            event.preventDefault();
-                            onClickEditMember(params.row);
-                        }
-                    }}
-                    columnHeaderHeight={90}
-                    columnVisibilityModel={columnVisibility}
-                    onColumnWidthChange={handleColumnWidthChange}
-                    // Two-state header sort (asc<->desc, never the DataGrid default third
-                    // "unsorted" state) so clicking a column header always toggles between the
-                    // two directions, matching the members list's expected sort behaviour.
-                    sortingOrder={["asc", "desc"]}
-                    sx={{
-                        borderRadius: 5,
-                        boxShadow: 1,
-                        "& .MuiDataGrid-row": { cursor: "pointer" },
-                        "& .MuiDataGrid-cell:focus": { outline: "none" },
-                        "& .MuiDataGrid-columnHeader:focus": { outline: "none" },
-                        "& .MuiDataGrid-columnHeader": { padding: "8px 16px" },
-                        "& .MuiDataGrid-cell": { cursor: "pointer" },
-                    }}
-                    initialState={{
-                        pagination: { paginationModel: { pageSize: 25, page: 0 } },
-                        sorting: { sortModel: [{ field: "name", sort: "asc" }] },
-                    }}
-                    pageSizeOptions={[10, 25, 50, 100]}
-                    slots={{ noRowsOverlay: NoRowsOverlayWithMessage }}
-                />
-            </Box>
-            {checkUserRole(userRole, USER_ROLES.OWNER) && (
-                <Routes>
-                    <Route path="edit" element={<MemberDialogPage />} />
-                </Routes>
-            )}
-        </Page>
+                    <DataGrid
+                        rows={filteredMembers}
+                        columns={columns}
+                        loading={isPending}
+                        disableRowSelectionOnClick
+                        disableColumnFilter
+                        disableColumnMenu
+                        disableColumnSelector
+                        onCellClick={(params) => {
+                            if (params.field !== "actions") {
+                                onClickEditMember(params.row);
+                            }
+                        }}
+                        onCellKeyDown={(params, event) => {
+                            // Keyboard equivalent of the cell click; skip events coming from
+                            // interactive elements inside a cell (they handle Enter natively).
+                            if (event.key !== "Enter" && event.key !== " ") {
+                                return;
+                            }
+                            if ((event.target as HTMLElement).closest("button, a, input")) {
+                                return;
+                            }
+                            if (params.field !== "actions") {
+                                event.preventDefault();
+                                onClickEditMember(params.row);
+                            }
+                        }}
+                        columnHeaderHeight={90}
+                        columnVisibilityModel={columnVisibility}
+                        onColumnWidthChange={handleColumnWidthChange}
+                        // Two-state header sort (asc<->desc, never the DataGrid default third
+                        // "unsorted" state) so clicking a column header always toggles between the
+                        // two directions, matching the members list's expected sort behaviour.
+                        sortingOrder={["asc", "desc"]}
+                        sx={{
+                            borderRadius: 5,
+                            boxShadow: 1,
+                            "& .MuiDataGrid-row": { cursor: "pointer" },
+                            "& .MuiDataGrid-cell:focus": { outline: "none" },
+                            "& .MuiDataGrid-columnHeader:focus": { outline: "none" },
+                            "& .MuiDataGrid-columnHeader": { padding: "8px 16px" },
+                            "& .MuiDataGrid-cell": { cursor: "pointer" },
+                        }}
+                        initialState={{
+                            pagination: { paginationModel: { pageSize: 25, page: 0 } },
+                            sorting: { sortModel: [{ field: "name", sort: "asc" }] },
+                        }}
+                        pageSizeOptions={[10, 25, 50, 100]}
+                        slots={{ noRowsOverlay: NoRowsOverlayWithMessage }}
+                    />
+                </Box>
+                {checkUserRole(userRole, USER_ROLES.OWNER) && (
+                    <Routes>
+                        <Route path="edit" element={<MemberDialogPage />} />
+                    </Routes>
+                )}
+            </Page>
+        </>
     );
 };
 
