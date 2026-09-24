@@ -94,7 +94,7 @@ function registerMemberManagementTests(memberPath: MemberPath, options: MemberMa
         }
 
         if (includeListMechanicsTests) {
-            test("Should show the current owner and support searching by name and email", async ({ page, request }) => {
+            test("Should show the current owner and support filtering by name and email", async ({ page, request }) => {
                 const pg = new MembersPage(page);
                 const [owner] = await getAddedMembers(request, ownerToken, memberPath, entityId);
 
@@ -106,14 +106,15 @@ function registerMemberManagementTests(memberPath: MemberPath, options: MemberMa
                 await pg.goto(memberPath, entityId);
                 await expect(pg.memberRows).toHaveCount(2);
 
-                await pg.searchField.fill("testfn");
+                // The reworked members list filters per column rather than via one global search field.
+                await pg.setColumnFilter("name", "testfn");
                 await expect(pg.memberRows).toHaveCount(1);
                 await expect(pg.memberNameCells).toHaveText([SECONDARY_TEST_USER_A.name]);
 
-                await pg.searchField.fill("");
+                await pg.setColumnFilter("name", "");
                 await expect(pg.memberRows).toHaveCount(2);
 
-                await pg.searchField.fill(SECONDARY_TEST_USER_A.email);
+                await pg.setColumnFilter("email", SECONDARY_TEST_USER_A.email);
                 await expect(pg.memberRows).toHaveCount(1);
                 await expect(pg.memberEmailCells).toHaveText([SECONDARY_TEST_USER_A.email]);
             });
@@ -150,11 +151,13 @@ function registerMemberManagementTests(memberPath: MemberPath, options: MemberMa
                 await pg.emailHeader.click();
                 await expect(pg.memberEmailCells).toHaveText(byEmailAsc.toReversed().map((m) => m.email));
 
-                await pg.roleHeader.click();
-                await expect(pg.memberRoleCells).toHaveText(byRoleAsc.toReversed().map((m) => ROLE_LABELS[m.role]));
-
+                // Role is unsorted at this point, so the first click sorts ascending (DataGrid's
+                // native direction for a freshly-clicked column, same as the email column above).
                 await pg.roleHeader.click();
                 await expect(pg.memberRoleCells).toHaveText(byRoleAsc.map((m) => ROLE_LABELS[m.role]));
+
+                await pg.roleHeader.click();
+                await expect(pg.memberRoleCells).toHaveText(byRoleAsc.toReversed().map((m) => ROLE_LABELS[m.role]));
             });
 
             test("Should filter the member list by role and reset when toggled off", async ({ page, request }) => {
@@ -260,7 +263,7 @@ function registerMemberManagementTests(memberPath: MemberPath, options: MemberMa
 
             await pg.deleteButtonForRow(owner.email).click();
             await expect(pg.confirmButton).toBeVisible();
-            await expect(pg.confirmButton).toHaveText("Ok");
+            await expect(pg.confirmButton).toHaveText("OK");
             await expect(pg.cancelButton).toHaveCount(0);
             await expect(page.getByText(/only owner left/)).toBeVisible();
 
@@ -294,7 +297,7 @@ function registerMemberManagementTests(memberPath: MemberPath, options: MemberMa
 
             await expect(pg.memberRows).toHaveCount(2);
             await expect(pg.addMemberButton).toHaveCount(0);
-            await expect(page.locator('[data-testid="MembersBody"] button')).toHaveCount(0);
+            await expect(pg.rowActionButtons).toHaveCount(0);
 
             const urlBeforeClick = page.url();
             await pg.row(SECONDARY_TEST_USER_A.email).click();

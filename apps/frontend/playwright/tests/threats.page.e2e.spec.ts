@@ -63,4 +63,22 @@ test.describe("Threats Page Tests", () => {
         const expectedCount = exportedProject.threats?.length ?? 0;
         await expect(pg.threatListEntries).toHaveCount(expectedCount, { timeout: 20000 });
     });
+
+    test("Should sort all threats by name, toggling between both directions", async ({ page }) => {
+        const pg = new ThreatsPage(page);
+        const threats = exportedProject.threats ?? [];
+        const sortedNames = threats.map((threat) => threat.name).sort((a, b) => a.localeCompare(b));
+        await expect(pg.threatListEntries).toHaveCount(threats.length, { timeout: 20000 });
+
+        await expect(pg.sortByNameButton).toHaveAttribute("aria-sort", "ascending");
+        expect(await pg.threatListEntryNames.allTextContents()).toEqual(sortedNames);
+
+        await pg.toggleSort("name");
+        await expect(pg.sortByNameButton).toHaveAttribute("aria-sort", "descending");
+        expect(await pg.threatListEntryNames.allTextContents()).toEqual([...sortedNames].reverse());
+
+        await pg.toggleSort("name");
+        await expect(pg.sortByNameButton).toHaveAttribute("aria-sort", "ascending");
+        expect(await pg.threatListEntryNames.allTextContents()).toEqual(sortedNames);
+    });
 });

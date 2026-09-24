@@ -23,9 +23,11 @@ test("authenticate", async ({ page, browserName }) => {
             break;
     }
 
-    // Login via backend — follows redirect to http://localhost:3000
+    // Login via backend — follows the redirect to the frontend origin (backend ORIGIN_APP,
+    // which must match the base URL resolved in playwright.config.ts).
+    const frontendBaseUrl = process.env["PW_RESOLVED_BASE_URL"] ?? "http://localhost:3000";
     await page.goto(`${process.env["API_URI"]}/api/auth/login?testUser=${accountId}`);
-    await page.waitForURL("http://localhost:3000/**", { timeout: 15000 });
+    await page.waitForURL(`${frontendBaseUrl}/**`, { timeout: 15000 });
 
     // Navigate to /projects — initializes the app, which writes csrfToken to localStorage
     // asynchronously (App mount effect -> startTokenRefresh). Poll for the token instead of
