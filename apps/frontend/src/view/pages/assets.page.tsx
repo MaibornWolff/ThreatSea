@@ -17,7 +17,7 @@ import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { useAssetsList } from "#application/hooks/use-assets-list.hook.ts";
 import { useColumnFilters } from "#application/hooks/use-column-filters.hook.ts";
-import { useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
+import { getToggleableColumns, useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
 import { applyColumnWidths, useColumnWidths } from "#application/hooks/use-column-widths.hook.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { IconButton } from "#view/components/icon-button.component.tsx";
@@ -226,7 +226,7 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
                                     },
                                 }}
                             >
-                                {Object.entries(columnLabels).map(([field, label]) => (
+                                {getToggleableColumns(columnLabels, columns).map(([field, label]) => (
                                     <MenuItem
                                         key={field}
                                         onClick={() => toggleColumnVisibility(field)}

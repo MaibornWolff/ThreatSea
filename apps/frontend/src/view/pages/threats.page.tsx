@@ -21,7 +21,7 @@ import { useEditor } from "#application/hooks/use-editor.hook.ts";
 import { useLoadThreatsOnce } from "#application/hooks/use-load-threats-once.hook.ts";
 import { useThreatsList, type ThreatListItem } from "#application/hooks/use-threats-list.hook.ts";
 import { useColumnFilters } from "#application/hooks/use-column-filters.hook.ts";
-import { useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
+import { getToggleableColumns, useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
 import { applyColumnWidths, useColumnWidths } from "#application/hooks/use-column-widths.hook.ts";
 import { applyColumnFilters } from "#utils/column-filters.ts";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
@@ -327,7 +327,7 @@ const ThreatsPageBody = () => {
                                     },
                                 }}
                             >
-                                {Object.entries(columnLabels).map(([field, label]) => (
+                                {getToggleableColumns(columnLabels, columns).map(([field, label]) => (
                                     <MenuItem
                                         key={field}
                                         onClick={() => toggleColumnVisibility(field)}

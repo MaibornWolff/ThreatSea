@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import type { TFunction } from "i18next";
 import type { GridColDef } from "@mui/x-data-grid";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
+import { getToggleableColumns } from "#application/hooks/use-column-visibility.hook.ts";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { createMembersColumns } from "./create-members-columns";
 
@@ -82,6 +83,16 @@ describe("createMembersColumns — column sizing (resize defaults)", () => {
     it("omits the actions column for non-owners (members deletes are owner-only)", () => {
         const { columns } = buildColumns({ userRole: USER_ROLES.EDITOR });
         expect(columns.find((c) => c.field === "actions")).toBeUndefined();
+    });
+
+    it("offers the actions column in the customize-view menu to owners only", () => {
+        const columnLabels = { name: "Name", email: "Email", role: "Role", actions: "Actions" };
+
+        const editorMenu = getToggleableColumns(columnLabels, buildColumns({ userRole: USER_ROLES.EDITOR }).columns);
+        const ownerMenu = getToggleableColumns(columnLabels, buildColumns({ userRole: USER_ROLES.OWNER }).columns);
+
+        expect(editorMenu.map(([field]) => field)).toEqual(["name", "email", "role"]);
+        expect(ownerMenu.map(([field]) => field)).toEqual(["name", "email", "role", "actions"]);
     });
 });
 

@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { tableViewStorageKey } from "#utils/table-view-storage.ts";
-import { useColumnVisibility } from "./use-column-visibility.hook";
+import { getToggleableColumns, useColumnVisibility } from "./use-column-visibility.hook";
 
 const DEFAULTS = { name: true, actions: true };
 
@@ -66,5 +66,33 @@ describe("useColumnVisibility", () => {
             name: false,
             actions: true,
         });
+    });
+});
+
+describe("getToggleableColumns", () => {
+    const columnLabels = { name: "Name", createdAt: "Created", actions: "Actions" };
+
+    it("offers every labelled column the table renders, in label order", () => {
+        const columns = [{ field: "actions" }, { field: "createdAt" }, { field: "name" }];
+
+        expect(getToggleableColumns(columnLabels, columns)).toEqual([
+            ["name", "Name"],
+            ["createdAt", "Created"],
+            ["actions", "Actions"],
+        ]);
+    });
+
+    it("leaves out labelled columns the table does not render, such as actions for viewers", () => {
+        const columns = [{ field: "name" }, { field: "createdAt" }];
+
+        expect(getToggleableColumns(columnLabels, columns)).toEqual([
+            ["name", "Name"],
+            ["createdAt", "Created"],
+        ]);
+    });
+
+    it("offers nothing for rendered columns without a label or for a table without columns", () => {
+        expect(getToggleableColumns(columnLabels, [{ field: "unlabelled" }])).toEqual([]);
+        expect(getToggleableColumns(columnLabels, [])).toEqual([]);
     });
 });

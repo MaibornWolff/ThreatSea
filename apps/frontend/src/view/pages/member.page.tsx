@@ -21,7 +21,7 @@ import { MemberActions } from "#application/actions/members.actions.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { useMembersList } from "#application/hooks/use-addedMember-list.hook.ts";
 import { useColumnFilters } from "#application/hooks/use-column-filters.hook.ts";
-import { useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
+import { getToggleableColumns, useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
 import { applyColumnWidths, useColumnWidths } from "#application/hooks/use-column-widths.hook.ts";
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { MatrixFilterToggleButtonGroup } from "#view/components/matrix-filter-toggle-button-group.component.tsx";
@@ -382,7 +382,7 @@ const MemberPageBody = () => {
                                     },
                                 }}
                             >
-                                {Object.entries(columnLabels).map(([field, label]) => (
+                                {getToggleableColumns(columnLabels, columns).map(([field, label]) => (
                                     <MenuItem
                                         key={field}
                                         onClick={() => toggleColumnVisibility(field)}

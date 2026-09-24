@@ -1,4 +1,4 @@
-import type { GridColumnVisibilityModel } from "@mui/x-data-grid";
+import type { GridColDef, GridColumnVisibilityModel, GridValidRowModel } from "@mui/x-data-grid";
 import { useCallback, useEffect, useState } from "react";
 import { readTableViewSetting, writeTableViewSetting } from "#utils/table-view-storage.ts";
 
@@ -12,6 +12,17 @@ const readStoredVisibility = (storageKey: string, defaults: GridColumnVisibility
     const stored = readTableViewSetting(storageKey);
     return isVisibilityModel(stored) ? stored : defaults;
 };
+
+/**
+ * The [field, label] entries for a table's customize-view menu, in label order, limited to
+ * the columns the table actually renders: the column factories drop role-restricted columns
+ * (e.g. actions for viewers), and the menu must not offer to toggle a column that isn't there.
+ */
+export const getToggleableColumns = <Row extends GridValidRowModel>(
+    columnLabels: Record<string, string>,
+    columns: readonly GridColDef<Row>[]
+): [field: string, label: string][] =>
+    Object.entries(columnLabels).filter(([field]) => columns.some((column) => column.field === field));
 
 /**
  * Column-visibility model for a table, persisted per storage key in
