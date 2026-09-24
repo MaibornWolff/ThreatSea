@@ -1,5 +1,6 @@
 import type { GridColumnVisibilityModel } from "@mui/x-data-grid";
 import { useCallback, useEffect, useState } from "react";
+import { tableViewStorageKey } from "#utils/table-view-storage.ts";
 
 const isVisibilityModel = (value: unknown): value is GridColumnVisibilityModel =>
     typeof value === "object" &&
@@ -8,7 +9,7 @@ const isVisibilityModel = (value: unknown): value is GridColumnVisibilityModel =
     Object.values(value).every((entry) => typeof entry === "boolean");
 
 const readStoredVisibility = (storageKey: string, defaults: GridColumnVisibilityModel): GridColumnVisibilityModel => {
-    const stored = sessionStorage.getItem(storageKey);
+    const stored = sessionStorage.getItem(tableViewStorageKey(storageKey));
     if (stored) {
         try {
             const parsed: unknown = JSON.parse(stored);
@@ -24,10 +25,10 @@ const readStoredVisibility = (storageKey: string, defaults: GridColumnVisibility
 
 /**
  * Column-visibility model for a table, persisted per storage key in
- * sessionStorage. The model reloads when the key changes: the page can stay
- * mounted while the route entity changes (e.g. navigating between two
- * projects' pages via browser history), and must not carry one entity's
- * settings over to the other. Pass module-constant defaults.
+ * sessionStorage (cleared on logout). The model reloads when the key changes:
+ * the page can stay mounted while the route entity changes (e.g. navigating
+ * between two projects' pages via browser history), and must not carry one
+ * entity's settings over to the other. Pass module-constant defaults.
  */
 export const useColumnVisibility = (storageKey: string, defaults: GridColumnVisibilityModel) => {
     const [columnVisibility, setColumnVisibility] = useState(() => readStoredVisibility(storageKey, defaults));
@@ -40,7 +41,7 @@ export const useColumnVisibility = (storageKey: string, defaults: GridColumnVisi
         (field: string) => {
             setColumnVisibility((prev) => {
                 const newVisibility = { ...prev, [field]: !prev[field] };
-                sessionStorage.setItem(storageKey, JSON.stringify(newVisibility));
+                sessionStorage.setItem(tableViewStorageKey(storageKey), JSON.stringify(newVisibility));
                 return newVisibility;
             });
         },

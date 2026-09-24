@@ -1,4 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
+import { tableViewStorageKey } from "#utils/table-view-storage.ts";
 import { useColumnVisibility } from "./use-column-visibility.hook";
 
 const DEFAULTS = { name: true, actions: true };
@@ -14,26 +15,29 @@ describe("useColumnVisibility", () => {
     });
 
     it("restores a stored model and persists toggles under the key", () => {
-        sessionStorage.setItem("table-1", JSON.stringify({ name: false, actions: true }));
+        sessionStorage.setItem(tableViewStorageKey("table-1"), JSON.stringify({ name: false, actions: true }));
         const { result } = renderHook(() => useColumnVisibility("table-1", DEFAULTS));
         expect(result.current.columnVisibility).toEqual({ name: false, actions: true });
 
         act(() => result.current.toggleColumnVisibility("name"));
         expect(result.current.columnVisibility).toEqual({ name: true, actions: true });
-        expect(JSON.parse(sessionStorage.getItem("table-1")!)).toEqual({ name: true, actions: true });
+        expect(JSON.parse(sessionStorage.getItem(tableViewStorageKey("table-1"))!)).toEqual({
+            name: true,
+            actions: true,
+        });
     });
 
     it.each(["not-json{", "null", "[]", '"columns"', '{"name":"false"}'])(
         "ignores invalid stored value %s",
         (stored) => {
-            sessionStorage.setItem("table-1", stored);
+            sessionStorage.setItem(tableViewStorageKey("table-1"), stored);
             const { result } = renderHook(() => useColumnVisibility("table-1", DEFAULTS));
             expect(result.current.columnVisibility).toEqual(DEFAULTS);
         }
     );
 
     it("reloads the model when the storage key changes without a remount", () => {
-        sessionStorage.setItem("project-1", JSON.stringify({ name: false, actions: true }));
+        sessionStorage.setItem(tableViewStorageKey("project-1"), JSON.stringify({ name: false, actions: true }));
         const { result, rerender } = renderHook(({ key }) => useColumnVisibility(key, DEFAULTS), {
             initialProps: { key: "project-1" },
         });
@@ -43,7 +47,13 @@ describe("useColumnVisibility", () => {
         expect(result.current.columnVisibility).toEqual(DEFAULTS);
 
         act(() => result.current.toggleColumnVisibility("actions"));
-        expect(JSON.parse(sessionStorage.getItem("project-2")!)).toEqual({ name: true, actions: false });
-        expect(JSON.parse(sessionStorage.getItem("project-1")!)).toEqual({ name: false, actions: true });
+        expect(JSON.parse(sessionStorage.getItem(tableViewStorageKey("project-2"))!)).toEqual({
+            name: true,
+            actions: false,
+        });
+        expect(JSON.parse(sessionStorage.getItem(tableViewStorageKey("project-1"))!)).toEqual({
+            name: false,
+            actions: true,
+        });
     });
 });

@@ -3,6 +3,7 @@ import { act, renderHook, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { RefObject } from "react";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
+import { tableViewStorageKey } from "#utils/table-view-storage.ts";
 import { ColumnFilterHeader } from "#view/components/column-filter-header.component.tsx";
 import { useColumnFilters } from "./use-column-filters.hook";
 import { applyColumnWidths, useColumnWidths } from "./use-column-widths.hook";
@@ -20,13 +21,16 @@ describe("useColumnWidths", () => {
     });
 
     it("restores stored widths and persists resizes under the key", () => {
-        sessionStorage.setItem("table-1", JSON.stringify({ name: 320 }));
+        sessionStorage.setItem(tableViewStorageKey("table-1"), JSON.stringify({ name: 320 }));
         const { result } = renderHook(() => useColumnWidths("table-1"));
         expect(result.current.columnWidths).toEqual({ name: 320 });
 
         act(() => result.current.handleColumnWidthChange(resizeTo("createdAt", 150)));
         expect(result.current.columnWidths).toEqual({ name: 320, createdAt: 150 });
-        expect(JSON.parse(sessionStorage.getItem("table-1")!)).toEqual({ name: 320, createdAt: 150 });
+        expect(JSON.parse(sessionStorage.getItem(tableViewStorageKey("table-1"))!)).toEqual({
+            name: 320,
+            createdAt: 150,
+        });
     });
 
     it("keeps only the latest width when a column is resized again", () => {
@@ -41,14 +45,14 @@ describe("useColumnWidths", () => {
     it.each(["not-json{", "null", "[]", '"widths"', '{"name":"300"}', '{"name":0}', '{"name":-5}'])(
         "ignores invalid stored value %s",
         (stored) => {
-            sessionStorage.setItem("table-1", stored);
+            sessionStorage.setItem(tableViewStorageKey("table-1"), stored);
             const { result } = renderHook(() => useColumnWidths("table-1"));
             expect(result.current.columnWidths).toEqual({});
         }
     );
 
     it("reloads the widths when the storage key changes without a remount", () => {
-        sessionStorage.setItem("project-1", JSON.stringify({ name: 320 }));
+        sessionStorage.setItem(tableViewStorageKey("project-1"), JSON.stringify({ name: 320 }));
         const { result, rerender } = renderHook(({ key }) => useColumnWidths(key), {
             initialProps: { key: "project-1" },
         });
@@ -58,8 +62,8 @@ describe("useColumnWidths", () => {
         expect(result.current.columnWidths).toEqual({});
 
         act(() => result.current.handleColumnWidthChange(resizeTo("name", 200)));
-        expect(JSON.parse(sessionStorage.getItem("project-2")!)).toEqual({ name: 200 });
-        expect(JSON.parse(sessionStorage.getItem("project-1")!)).toEqual({ name: 320 });
+        expect(JSON.parse(sessionStorage.getItem(tableViewStorageKey("project-2"))!)).toEqual({ name: 200 });
+        expect(JSON.parse(sessionStorage.getItem(tableViewStorageKey("project-1"))!)).toEqual({ name: 320 });
     });
 });
 

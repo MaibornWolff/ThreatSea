@@ -1,5 +1,6 @@
 import type { GridColDef, GridColumnResizeParams, GridValidRowModel } from "@mui/x-data-grid";
 import { useCallback, useEffect, useState } from "react";
+import { tableViewStorageKey } from "#utils/table-view-storage.ts";
 
 type ColumnWidths = Record<string, number>;
 
@@ -10,7 +11,7 @@ const isColumnWidths = (value: unknown): value is ColumnWidths =>
     Object.values(value).every((entry) => typeof entry === "number" && Number.isFinite(entry) && entry > 0);
 
 const readStoredWidths = (storageKey: string): ColumnWidths => {
-    const stored = sessionStorage.getItem(storageKey);
+    const stored = sessionStorage.getItem(tableViewStorageKey(storageKey));
     if (stored) {
         try {
             const parsed: unknown = JSON.parse(stored);
@@ -39,11 +40,11 @@ export const applyColumnWidths = <Row extends GridValidRowModel>(
 
 /**
  * User-resized column widths for a table, persisted per storage key in
- * sessionStorage. The pages rebuild their column definitions whenever filter
- * state changes, and DataGrid resets a column to its definition's width on
- * every rebuild — so resized widths must be part of the definitions (via
- * applyColumnWidths), not only DataGrid's internal state. Reloads when the key
- * changes, like useColumnVisibility.
+ * sessionStorage (cleared on logout). The pages rebuild their column
+ * definitions whenever filter state changes, and DataGrid resets a column to
+ * its definition's width on every rebuild — so resized widths must be part of
+ * the definitions (via applyColumnWidths), not only DataGrid's internal state.
+ * Reloads when the key changes, like useColumnVisibility.
  */
 export const useColumnWidths = (storageKey: string) => {
     const [columnWidths, setColumnWidths] = useState(() => readStoredWidths(storageKey));
@@ -56,7 +57,7 @@ export const useColumnWidths = (storageKey: string) => {
         ({ colDef, width }: GridColumnResizeParams) => {
             setColumnWidths((previous) => {
                 const newWidths = { ...previous, [colDef.field]: width };
-                sessionStorage.setItem(storageKey, JSON.stringify(newWidths));
+                sessionStorage.setItem(tableViewStorageKey(storageKey), JSON.stringify(newWidths));
                 return newWidths;
             });
         },
