@@ -9,7 +9,7 @@ import {
     Checkbox,
     FormControlLabel,
 } from "@mui/material";
-import { DataGrid, type GridColumnVisibilityModel } from "@mui/x-data-grid";
+import { DataGrid, GridRow, type GridColumnVisibilityModel, type GridRowProps } from "@mui/x-data-grid";
 import Visibility from "@mui/icons-material/Visibility";
 import { memo, useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -24,6 +24,10 @@ import { useColumnFilters } from "#application/hooks/use-column-filters.hook.ts"
 import { useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
 import { applyColumnWidths, useColumnWidths } from "#application/hooks/use-column-widths.hook.ts";
 import { applyColumnFilters } from "#utils/column-filters.ts";
+
+const ThreatsGridRowSlot = (props: GridRowProps) => (
+    <GridRow {...props} data-testid="threats-page_threats-list-entry" />
+);
 
 const DEFAULT_COLUMN_VISIBILITY: GridColumnVisibilityModel = {
     name: true,
@@ -415,6 +419,7 @@ const ThreatsPageBody = () => {
                         pageSizeOptions={[10, 25, 50, 100]}
                         slots={{
                             noRowsOverlay: NoRowsOverlayWithMessage,
+                            row: ThreatsGridRowSlot,
                         }}
                     />
                 </Box>
