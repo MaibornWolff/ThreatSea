@@ -84,7 +84,7 @@ test.describe("Assets Page Tests", () => {
         await expect(pg.sortByNameButton).toHaveAttribute("aria-sort", "ascending");
         expect(await pg.assetListEntryNames.allTextContents()).toEqual(sorted.map((a) => a.name));
 
-        await pg.sortByNameButton.click();
+        await pg.toggleSort("name");
         await expect(pg.sortByNameButton).toHaveAttribute("aria-sort", "descending");
         expect(await pg.assetListEntryNames.allTextContents()).toEqual([...sorted].reverse().map((a) => a.name));
     });
@@ -96,11 +96,11 @@ test.describe("Assets Page Tests", () => {
         await createAssets(request, token, assets);
         await page.reload();
 
-        await pg.sortByDateButton.click();
+        await pg.toggleSort("createdAt");
         await expect(pg.sortByDateButton).toHaveAttribute("aria-sort", "ascending");
         expect(await pg.assetListEntryNames.allTextContents()).toEqual(sorted.map((a) => a.name));
 
-        await pg.sortByDateButton.click();
+        await pg.toggleSort("createdAt");
         await expect(pg.sortByDateButton).toHaveAttribute("aria-sort", "descending");
         expect(await pg.assetListEntryNames.allTextContents()).toEqual([...sorted].reverse().map((a) => a.name));
     });
@@ -114,17 +114,17 @@ test.describe("Assets Page Tests", () => {
         for (const attr of ["confidentiality", "integrity", "availability"] as const) {
             const sorted = [...assets].sort((a, b) => (a[attr] as number) - (b[attr] as number));
 
-            await pg.sortByCiaButton(attr).click();
+            await pg.toggleSort(attr);
             await expect(pg.sortByCiaButton(attr)).toHaveAttribute("aria-sort", "ascending");
             expect(await pg.assetListEntryCia(attr).allTextContents()).toEqual(sorted.map((a) => a[attr].toString()));
 
-            await pg.sortByCiaButton(attr).click();
+            await pg.toggleSort(attr);
             await expect(pg.sortByCiaButton(attr)).toHaveAttribute("aria-sort", "descending");
             expect(await pg.assetListEntryCia(attr).allTextContents()).toEqual(
                 [...sorted].reverse().map((a) => a[attr].toString())
             );
 
-            await pg.sortByCiaButton(attr).click();
+            await pg.toggleSort(attr);
         }
     });
 

@@ -19,15 +19,30 @@ export const IconButton = ({ hoverColor = "secondary", title, sx, children, ...p
     const combinedSx: MuiIconButtonProps["sx"] =
         sx == null ? defaultStyles : Array.isArray(sx) ? [defaultStyles, ...sx] : [defaultStyles, sx];
 
-    return title ? (
-        <Tooltip title={title}>
-            <MaterialIconButton sx={combinedSx} color="primary" {...props}>
-                {children}
-            </MaterialIconButton>
-        </Tooltip>
-    ) : (
-        <MaterialIconButton sx={combinedSx} color="primary" {...props}>
+    const button = (
+        <MaterialIconButton
+            sx={combinedSx}
+            color="primary"
+            aria-label={typeof title === "string" ? title : undefined}
+            {...props}
+        >
             {children}
         </MaterialIconButton>
+    );
+
+    if (!title) {
+        return button;
+    }
+
+    return (
+        <Tooltip title={title}>
+            {props.disabled ? (
+                // Disabled buttons fire no pointer events, so the tooltip's listeners must
+                // sit on a wrapper that still receives them (MUI's documented pattern).
+                <span style={{ display: "inline-flex" }}>{button}</span>
+            ) : (
+                button
+            )}
+        </Tooltip>
     );
 };

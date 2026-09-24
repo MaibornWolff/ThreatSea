@@ -37,6 +37,30 @@ describe("IconButton", () => {
         expect(await screen.findByRole("tooltip", { name: "Delete item" })).toBeInTheDocument();
     });
 
+    it("should still show the tooltip while the button is disabled", async () => {
+        render(
+            <IconButton title="Reset" disabled>
+                <Star />
+            </IconButton>
+        );
+
+        // Disabled buttons fire no pointer events; the tooltip listens on a wrapper span.
+        const button = screen.getByRole("button", { hidden: true });
+        expect(button).toBeDisabled();
+        await userEvent.hover(button.parentElement!);
+
+        expect(await screen.findByRole("tooltip", { name: "Reset" })).toBeInTheDocument();
+    });
+
+    it("keeps an accessible name on the button via aria-label from a string title", () => {
+        render(
+            <IconButton title="Reset" disabled>
+                <Star />
+            </IconButton>
+        );
+        expect(screen.getByRole("button", { hidden: true })).toHaveAccessibleName("Reset");
+    });
+
     it("should call onClick when clicked", async () => {
         const handleClick = vi.fn();
         render(
