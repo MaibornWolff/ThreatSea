@@ -24,7 +24,20 @@ import { useColumnFilters } from "#application/hooks/use-column-filters.hook.ts"
 import { useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
 import { applyColumnWidths, useColumnWidths } from "#application/hooks/use-column-widths.hook.ts";
 import { applyColumnFilters } from "#utils/column-filters.ts";
+import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
+import { NoRowsOverlay } from "#view/components/no-rows-overlay.component.tsx";
+import { Page } from "#view/components/page.component.tsx";
+import { CreatePage } from "#view/components/create-page.component.tsx";
+import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
+import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
+import { withProject } from "#view/components/with-project.hoc.tsx";
+import ThreatDialogPage from "./threat-dialog.page";
+import { MeasureImpactByMeasureDialogPage } from "./measure-impact-by-measure-dialog.page";
+import AddMeasureDialogPage from "./add-measure-dialog.page";
+import { createThreatsColumns } from "./create-threats-columns";
 
+// The e2e page objects count rows via a row-level test id, so it must live on the grid
+// row element itself (same pattern as the assets and measures pages).
 const ThreatsGridRowSlot = (props: GridRowProps) => (
     <GridRow {...props} data-testid="threats-page_threats-list-entry" />
 );
@@ -41,17 +54,6 @@ const DEFAULT_COLUMN_VISIBILITY: GridColumnVisibilityModel = {
     doneEditing: true,
     actions: true,
 };
-import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
-import { NoRowsOverlay } from "#view/components/no-rows-overlay.component.tsx";
-import { Page } from "#view/components/page.component.tsx";
-import { CreatePage } from "#view/components/create-page.component.tsx";
-import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
-import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
-import { withProject } from "#view/components/with-project.hoc.tsx";
-import ThreatDialogPage from "./threat-dialog.page";
-import { MeasureImpactByMeasureDialogPage } from "./measure-impact-by-measure-dialog.page";
-import AddMeasureDialogPage from "./add-measure-dialog.page";
-import { createThreatsColumns } from "./create-threats-columns";
 
 /**
  * on this page all threats are listed

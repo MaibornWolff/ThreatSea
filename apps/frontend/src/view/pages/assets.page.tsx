@@ -7,10 +7,6 @@ import Add from "@mui/icons-material/Add";
 import Visibility from "@mui/icons-material/Visibility";
 import { Box, Button, Checkbox, FormControlLabel, LinearProgress, Menu, MenuItem, Typography } from "@mui/material";
 import { DataGrid, GridRow, type GridColumnVisibilityModel, type GridRowProps } from "@mui/x-data-grid";
-
-// The e2e page objects locate rows and the action buttons inside them via a row-level
-// test id, so it must live on the grid row element itself (same pattern as the threats page).
-const AssetsGridRowSlot = (props: GridRowProps) => <GridRow {...props} data-testid="assets-page_assets-list-entry" />;
 import { memo, useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate } from "react-router";
@@ -34,6 +30,10 @@ import { withProject } from "#view/components/with-project.hoc.tsx";
 import { applyColumnFilters } from "#utils/column-filters.ts";
 import AssetDialogPage from "./asset-dialog.page";
 import { createAssetsColumns, formatCreationDate } from "./create-assets-columns";
+
+// The e2e page objects locate rows and the action buttons inside them via a row-level
+// test id, so it must live on the grid row element itself (same pattern as the threats page).
+const AssetsGridRowSlot = (props: GridRowProps) => <GridRow {...props} data-testid="assets-page_assets-list-entry" />;
 
 interface AssetsPageBodyProps {
     project: ExtendedProject;
