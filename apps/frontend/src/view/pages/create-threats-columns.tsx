@@ -10,6 +10,7 @@ import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import type { ThreatListItem } from "#application/hooks/use-threats-list.hook.ts";
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { ColumnFilterHeader } from "#view/components/column-filter-header.component.tsx";
+import { OverflowText } from "#view/components/overflow-text.component.tsx";
 
 interface ColumnConfig {
     t: TFunction;
@@ -52,6 +53,9 @@ export const createThreatsColumns = ({
                 expandedFilters={expandedFilters}
                 onToggleExpanded={toggleFilterExpanded}
             />
+        ),
+        renderCell: ({ row }: GridRenderCellParams<ThreatListItem>) => (
+            <OverflowText text={row.name} testId="threats-page_threats-list-entry_name" />
         ),
     },
     {
@@ -104,6 +108,9 @@ export const createThreatsColumns = ({
             }
             return row.componentName;
         },
+        renderCell: ({ value }: GridRenderCellParams<ThreatListItem, string | null>) => (
+            <OverflowText text={value ?? ""} testId="threats-page_threats-list-entry_component" align="center" />
+        ),
     },
     {
         field: "pointOfAttack",
@@ -123,6 +130,9 @@ export const createThreatsColumns = ({
             />
         ),
         valueGetter: (value: string) => t(`pointsOfAttackList.${value}`),
+        renderCell: ({ value }: GridRenderCellParams<ThreatListItem, string>) => (
+            <OverflowText text={value ?? ""} align="center" />
+        ),
     },
     {
         field: "attacker",
@@ -142,6 +152,9 @@ export const createThreatsColumns = ({
             />
         ),
         valueGetter: (value: string) => t(`attackerList.${value}`),
+        renderCell: ({ value }: GridRenderCellParams<ThreatListItem, string>) => (
+            <OverflowText text={value ?? ""} align="center" />
+        ),
     },
     {
         field: "probability",

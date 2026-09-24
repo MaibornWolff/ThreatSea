@@ -3,6 +3,10 @@ import userEvent from "@testing-library/user-event";
 import type { TFunction } from "i18next";
 import type { GridColDef } from "@mui/x-data-grid";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
+import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
+import type { ThreatListItem } from "#application/hooks/use-threats-list.hook.ts";
+import { createThreat } from "#test-utils/builders.ts";
+import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { createThreatsColumns } from "./create-threats-columns";
 
 const identityT = ((key: string) => key) as unknown as TFunction;
@@ -252,5 +256,60 @@ describe("createThreatsColumns — Edited (doneEditing) dropdown filter", () => 
         const valueGetter = edited.valueGetter as unknown as (value: unknown, row: { doneEditing: boolean }) => string;
         expect(valueGetter(undefined, { doneEditing: true })).toBe("edited");
         expect(valueGetter(undefined, { doneEditing: false })).toBe("notEdited");
+    });
+});
+
+describe("createThreatsColumns — text cells", () => {
+    const createThreatListItem = (overrides: Partial<ThreatListItem> = {}): ThreatListItem => ({
+        ...createThreat(),
+        risk: 0,
+        damage: 0,
+        ...overrides,
+    });
+
+    // Renders a cell the way DataGrid does: the column's valueGetter feeds the renderCell value.
+    const renderCell = (field: string, row: ThreatListItem) => {
+        const { columns } = buildColumns();
+        const column = columns.find((candidate) => candidate.field === field);
+        if (!column?.renderCell) {
+            throw new Error(`Column ${field} has no renderCell`);
+        }
+        const valueGetter = column.valueGetter as ((value: unknown, row: ThreatListItem) => unknown) | undefined;
+        const value = valueGetter ? valueGetter(row[field as keyof ThreatListItem], row) : undefined;
+        return renderWithProviders(<>{column.renderCell({ row, value } as never)}</>);
+    };
+
+    it("renders the threat name with its test id", () => {
+        renderCell("name", createThreatListItem({ name: "Spoofed login" }));
+
+        expect(screen.getByTestId("threats-page_threats-list-entry_name")).toHaveTextContent("Spoofed login");
+    });
+
+    it("renders the component the column filters on, including the interface of a communication interface", () => {
+        renderCell(
+            "componentName",
+            createThreatListItem({
+                pointOfAttack: POINTS_OF_ATTACK.COMMUNICATION_INTERFACES,
+                componentName: "Server",
+                interfaceName: "REST API",
+            })
+        );
+
+        expect(screen.getByTestId("threats-page_threats-list-entry_component")).toHaveTextContent("Server > REST API");
+    });
+
+    it("renders an empty component cell for a threat without a component", () => {
+        renderCell("componentName", createThreatListItem({ componentName: null }));
+
+        expect(screen.getByTestId("threats-page_threats-list-entry_component")).toHaveTextContent("");
+    });
+
+    it.each([
+        ["pointOfAttack", "pointsOfAttackList.USER_INTERFACE"],
+        ["attacker", "attackerList.UNAUTHORISED_PARTIES"],
+    ])("renders the %s cell from the translated value the column filters on", (field, expectedText) => {
+        renderCell(field, createThreatListItem());
+
+        expect(screen.getByText(expectedText)).toBeInTheDocument();
     });
 });
