@@ -4,6 +4,7 @@ import type { TFunction } from "i18next";
 import type { GridColDef } from "@mui/x-data-grid";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 import { createAsset } from "#test-utils/builders.ts";
+import { applyColumnFilters } from "#utils/column-filters.ts";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { createAssetsColumns, formatCreationDate } from "./create-assets-columns";
 
@@ -48,6 +49,7 @@ describe("createAssetsColumns — column sizing (resize defaults)", () => {
         const { columns } = buildColumns();
         expect(columns.map((c) => c.field)).toEqual([
             "name",
+            "description",
             "confidentiality",
             "integrity",
             "availability",
@@ -62,6 +64,7 @@ describe("createAssetsColumns — column sizing (resize defaults)", () => {
 
         const expectedMinWidths: Record<string, number> = {
             name: 200,
+            description: 200,
             confidentiality: 160,
             integrity: 160,
             availability: 160,
@@ -152,6 +155,32 @@ describe("createAssetsColumns — filter header behavior", () => {
         renderColumnHeader(columns.find((c) => c.field === "name"));
 
         expect(screen.getByPlaceholderText("filterPlaceholder")).toHaveValue("user-id");
+    });
+});
+
+describe("createAssetsColumns — description column", () => {
+    it("renders the full description with its test id", () => {
+        const { columns } = buildColumns();
+        const description = columns.find((column) => column.field === "description")!;
+
+        renderWithProviders(
+            <>
+                {description.renderCell!({
+                    row: createAsset({ description: "Nightly backup of the customer DB" }),
+                } as never)}
+            </>
+        );
+
+        expect(screen.getByTestId("assets-page_assets-list-entry_description")).toHaveTextContent(
+            "Nightly backup of the customer DB"
+        );
+    });
+
+    it("lets the description filter find assets by their description", () => {
+        const backup = createAsset({ id: 1, name: "Storage", description: "Nightly BACKUP of the customer DB" });
+        const gateway = createAsset({ id: 2, name: "Gateway", description: "Routes payments" });
+
+        expect(applyColumnFilters([backup, gateway], { description: "backup" })).toEqual([backup]);
     });
 });
 

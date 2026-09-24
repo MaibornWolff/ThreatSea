@@ -61,6 +61,7 @@ describe("createThreatsColumns — column sizing (resize defaults)", () => {
         const { columns } = buildColumns();
         expect(columns.map((c) => c.field)).toEqual([
             "name",
+            "description",
             "assets",
             "componentName",
             "pointOfAttack",
@@ -77,7 +78,7 @@ describe("createThreatsColumns — column sizing (resize defaults)", () => {
         const { columns } = buildColumns();
         const byField = Object.fromEntries(columns.map((c) => [c.field, c]));
 
-        for (const field of ["name", "componentName", "pointOfAttack", "attacker"]) {
+        for (const field of ["name", "description", "componentName", "pointOfAttack", "attacker"]) {
             const col = byField[field]!;
             expect(col.flex, `${field} should flex`).toBe(1);
             expect((col.minWidth ?? 0) >= 140, `${field} minWidth should be >= 140`).toBe(true);
@@ -283,6 +284,14 @@ describe("createThreatsColumns — text cells", () => {
         renderCell("name", createThreatListItem({ name: "Spoofed login" }));
 
         expect(screen.getByTestId("threats-page_threats-list-entry_name")).toHaveTextContent("Spoofed login");
+    });
+
+    it("renders the full description with its test id", () => {
+        renderCell("description", createThreatListItem({ description: "Attacker replays a stolen session" }));
+
+        expect(screen.getByTestId("threats-page_threats-list-entry_description")).toHaveTextContent(
+            "Attacker replays a stolen session"
+        );
     });
 
     it("renders the component the column filters on, including the interface of a communication interface", () => {

@@ -61,6 +61,27 @@ export const createAssetsColumns = ({
         ),
     },
     {
+        field: "description",
+        headerName: t("description"),
+        flex: 1,
+        minWidth: 200,
+        align: "left",
+        headerAlign: "center",
+        renderHeader: () => (
+            <ColumnFilterHeader
+                field="description"
+                label={t("description")}
+                columnFilters={columnFilters}
+                onFilterChange={handleFilterChange}
+                expandedFilters={expandedFilters}
+                onToggleExpanded={toggleFilterExpanded}
+            />
+        ),
+        renderCell: ({ row }: GridRenderCellParams<Asset>) => (
+            <OverflowText text={row.description} testId="assets-page_assets-list-entry_description" />
+        ),
+    },
+    {
         field: "confidentiality",
         headerName: t("confidentiality"),
         flex: 1,

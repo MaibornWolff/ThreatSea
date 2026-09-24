@@ -36,6 +36,8 @@ const MeasuresGridRowSlot = (props: GridRowProps) => (
 
 const DEFAULT_COLUMN_VISIBILITY: GridColumnVisibilityModel = {
     name: true,
+    // Descriptions are long free text; the column is opt-in via Customize view.
+    description: false,
     scheduledAt: true,
     actions: true,
 };
@@ -86,6 +88,7 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
 
     const columnLabels: Record<string, string> = {
         name: t("name"),
+        description: t("description"),
         scheduledAt: t("scheduledAt"),
         actions: t("actions"),
     };

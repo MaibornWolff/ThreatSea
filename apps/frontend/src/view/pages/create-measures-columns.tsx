@@ -53,6 +53,27 @@ export const createMeasuresColumns = ({
         ),
     },
     {
+        field: "description",
+        headerName: t("description"),
+        flex: 1,
+        minWidth: 200,
+        align: "left",
+        headerAlign: "center",
+        renderHeader: () => (
+            <ColumnFilterHeader
+                field="description"
+                label={t("description")}
+                columnFilters={columnFilters}
+                onFilterChange={handleFilterChange}
+                expandedFilters={expandedFilters}
+                onToggleExpanded={toggleFilterExpanded}
+            />
+        ),
+        renderCell: ({ row }: GridRenderCellParams<Measure>) => (
+            <OverflowText text={row.description} testId="measures-page_measures-list-entry_description" />
+        ),
+    },
+    {
         field: "scheduledAt",
         headerName: t("scheduledAt"),
         flex: 1,

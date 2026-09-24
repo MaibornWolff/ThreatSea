@@ -53,14 +53,14 @@ const renderColumnHeader = (column: GridColDef | undefined) => {
 describe("createMeasuresColumns — column sizing (resize defaults)", () => {
     it("renders all expected columns in the documented order", () => {
         const { columns } = buildColumns();
-        expect(columns.map((c) => c.field)).toEqual(["name", "scheduledAt", "actions"]);
+        expect(columns.map((c) => c.field)).toEqual(["name", "description", "scheduledAt", "actions"]);
     });
 
     it("data columns flex equally with sensible minWidths", () => {
         const { columns } = buildColumns();
         const byField = Object.fromEntries(columns.map((c) => [c.field, c]));
 
-        for (const field of ["name", "scheduledAt"]) {
+        for (const field of ["name", "description", "scheduledAt"]) {
             expect(byField[field]!.flex, `${field} should flex`).toBe(1);
             expect(byField[field]!.minWidth).toBe(200);
         }
@@ -127,6 +127,21 @@ describe("createMeasuresColumns — filter header behavior", () => {
 
         expect(handlers.handleFilterChange).toHaveBeenNthCalledWith(1, "name", "t");
         expect(handlers.handleFilterChange).toHaveBeenNthCalledWith(2, "name", "e");
+    });
+});
+
+describe("createMeasuresColumns — description column", () => {
+    it("renders the full description with its test id", () => {
+        const { columns } = buildColumns();
+        const description = columns.find((column) => column.field === "description")!;
+
+        renderWithProviders(
+            <>{description.renderCell!({ row: createMeasure({ description: "Rotate keys yearly" }) } as never)}</>
+        );
+
+        expect(screen.getByTestId("measures-page_measures-list-entry_description")).toHaveTextContent(
+            "Rotate keys yearly"
+        );
     });
 });
 

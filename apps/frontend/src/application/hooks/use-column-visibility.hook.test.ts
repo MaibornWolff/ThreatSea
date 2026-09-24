@@ -96,3 +96,20 @@ describe("getToggleableColumns", () => {
         expect(getToggleableColumns(columnLabels, [])).toEqual([]);
     });
 });
+
+// Module-constant, as the hook requires: a new defaults object per render would reload on every render.
+const DEFAULTS_WITH_NEW_COLUMN = { name: true, description: false, actions: true };
+
+describe("useColumnVisibility with a model stored before a column existed", () => {
+    beforeEach(() => {
+        sessionStorage.clear();
+    });
+
+    it("applies the new column's default instead of showing it", () => {
+        sessionStorage.setItem(tableViewStorageKey("table-1"), JSON.stringify({ name: false, actions: true }));
+
+        const { result } = renderHook(() => useColumnVisibility("table-1", DEFAULTS_WITH_NEW_COLUMN));
+
+        expect(result.current.columnVisibility).toEqual({ name: false, description: false, actions: true });
+    });
+});

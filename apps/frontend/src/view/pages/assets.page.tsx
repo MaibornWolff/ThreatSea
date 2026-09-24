@@ -41,6 +41,8 @@ interface AssetsPageBodyProps {
 
 const DEFAULT_COLUMN_VISIBILITY: GridColumnVisibilityModel = {
     name: true,
+    // Descriptions are long free text; the column is opt-in via Customize view.
+    description: false,
     confidentiality: true,
     integrity: true,
     availability: true,
@@ -84,6 +86,7 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
 
     const columnLabels: Record<string, string> = {
         name: t("name"),
+        description: t("description"),
         confidentiality: t("confidentiality"),
         integrity: t("integrity"),
         availability: t("availability"),

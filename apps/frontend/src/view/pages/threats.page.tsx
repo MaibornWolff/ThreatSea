@@ -44,6 +44,8 @@ const ThreatsGridRowSlot = (props: GridRowProps) => (
 
 const DEFAULT_COLUMN_VISIBILITY: GridColumnVisibilityModel = {
     name: true,
+    // Descriptions are long free text; the column is opt-in via Customize view.
+    description: false,
     assets: true,
     componentName: true,
     pointOfAttack: true,
@@ -107,6 +109,7 @@ const ThreatsPageBody = () => {
 
     const columnLabels: Record<string, string> = {
         name: t("name"),
+        description: t("description"),
         assets: t("assets"),
         componentName: t("componentName"),
         pointOfAttack: t("pointOfAttack"),

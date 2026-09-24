@@ -59,6 +59,27 @@ export const createThreatsColumns = ({
         ),
     },
     {
+        field: "description",
+        headerName: t("description"),
+        flex: 1,
+        minWidth: 200,
+        align: "left",
+        headerAlign: "center",
+        renderHeader: () => (
+            <ColumnFilterHeader
+                field="description"
+                label={t("description")}
+                columnFilters={columnFilters}
+                onFilterChange={handleFilterChange}
+                expandedFilters={expandedFilters}
+                onToggleExpanded={toggleFilterExpanded}
+            />
+        ),
+        renderCell: ({ row }: GridRenderCellParams<ThreatListItem>) => (
+            <OverflowText text={row.description} testId="threats-page_threats-list-entry_description" />
+        ),
+    },
+    {
         field: "assets",
         headerName: t("assets"),
         width: 140,

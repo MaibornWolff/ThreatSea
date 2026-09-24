@@ -10,7 +10,8 @@ const isVisibilityModel = (value: unknown): value is GridColumnVisibilityModel =
 
 const readStoredVisibility = (storageKey: string, defaults: GridColumnVisibilityModel): GridColumnVisibilityModel => {
     const stored = readTableViewSetting(storageKey);
-    return isVisibilityModel(stored) ? stored : defaults;
+    // Defaults first: a model stored before a column existed must not show that column by accident.
+    return isVisibilityModel(stored) ? { ...defaults, ...stored } : defaults;
 };
 
 /**
