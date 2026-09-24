@@ -22,6 +22,7 @@ import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { useAssetsList } from "#application/hooks/use-assets-list.hook.ts";
 import { useColumnFilters } from "#application/hooks/use-column-filters.hook.ts";
 import { useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
+import { applyColumnWidths, useColumnWidths } from "#application/hooks/use-column-widths.hook.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { NoRowsOverlay } from "#view/components/no-rows-overlay.component.tsx";
@@ -74,6 +75,7 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
         `assets-column-visibility-${projectId}`,
         DEFAULT_COLUMN_VISIBILITY
     );
+    const { columnWidths, handleColumnWidthChange } = useColumnWidths(`assets-column-widths-${projectId}`);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
@@ -130,16 +132,28 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
 
     const columns = useMemo(
         () =>
-            createAssetsColumns({
-                t,
-                userRole,
-                columnFilters,
-                handleFilterChange,
-                expandedFilters,
-                toggleFilterExpanded,
-                handleDeleteAsset,
-            }),
-        [t, userRole, columnFilters, handleFilterChange, expandedFilters, toggleFilterExpanded, handleDeleteAsset]
+            applyColumnWidths(
+                createAssetsColumns({
+                    t,
+                    userRole,
+                    columnFilters,
+                    handleFilterChange,
+                    expandedFilters,
+                    toggleFilterExpanded,
+                    handleDeleteAsset,
+                }),
+                columnWidths
+            ),
+        [
+            t,
+            userRole,
+            columnFilters,
+            handleFilterChange,
+            expandedFilters,
+            toggleFilterExpanded,
+            handleDeleteAsset,
+            columnWidths,
+        ]
     );
 
     const handleAssetsCount = (): string => {
@@ -278,6 +292,7 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
                         }}
                         columnHeaderHeight={90}
                         columnVisibilityModel={columnVisibility}
+                        onColumnWidthChange={handleColumnWidthChange}
                         sx={{
                             borderRadius: 5,
                             boxShadow: 1,

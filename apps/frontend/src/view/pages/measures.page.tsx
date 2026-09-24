@@ -19,6 +19,7 @@ import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { useColumnFilters } from "#application/hooks/use-column-filters.hook.ts";
 import { useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
+import { applyColumnWidths, useColumnWidths } from "#application/hooks/use-column-widths.hook.ts";
 import { useMeasuresList } from "#application/hooks/use-measures-list.hook.ts";
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { NoRowsOverlay } from "#view/components/no-rows-overlay.component.tsx";
@@ -76,6 +77,7 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
         `measures-column-visibility-${projectId}`,
         DEFAULT_COLUMN_VISIBILITY
     );
+    const { columnWidths, handleColumnWidthChange } = useColumnWidths(`measures-column-widths-${projectId}`);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
@@ -156,16 +158,19 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
 
     const columns = useMemo(
         () =>
-            createMeasuresColumns({
-                t,
-                userRole,
-                columnFilters,
-                handleFilterChange,
-                expandedFilters,
-                toggleFilterExpanded,
-                handleDuplicateMeasure,
-                handleDeleteOrResetMeasure,
-            }),
+            applyColumnWidths(
+                createMeasuresColumns({
+                    t,
+                    userRole,
+                    columnFilters,
+                    handleFilterChange,
+                    expandedFilters,
+                    toggleFilterExpanded,
+                    handleDuplicateMeasure,
+                    handleDeleteOrResetMeasure,
+                }),
+                columnWidths
+            ),
         [
             t,
             userRole,
@@ -175,6 +180,7 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
             toggleFilterExpanded,
             handleDuplicateMeasure,
             handleDeleteOrResetMeasure,
+            columnWidths,
         ]
     );
 
@@ -314,6 +320,7 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                         }}
                         columnHeaderHeight={90}
                         columnVisibilityModel={columnVisibility}
+                        onColumnWidthChange={handleColumnWidthChange}
                         sx={{
                             borderRadius: 5,
                             boxShadow: 1,

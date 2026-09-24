@@ -22,6 +22,7 @@ import { useLoadThreatsOnce } from "#application/hooks/use-load-threats-once.hoo
 import { useThreatsList, type ThreatListItem } from "#application/hooks/use-threats-list.hook.ts";
 import { useColumnFilters } from "#application/hooks/use-column-filters.hook.ts";
 import { useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
+import { applyColumnWidths, useColumnWidths } from "#application/hooks/use-column-widths.hook.ts";
 import { applyColumnFilters } from "#utils/column-filters.ts";
 
 const DEFAULT_COLUMN_VISIBILITY: GridColumnVisibilityModel = {
@@ -86,6 +87,7 @@ const ThreatsPageBody = () => {
         `threats-column-visibility-${projectId}`,
         DEFAULT_COLUMN_VISIBILITY
     );
+    const { columnWidths, handleColumnWidthChange } = useColumnWidths(`threats-column-widths-${projectId}`);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
@@ -189,18 +191,21 @@ const ThreatsPageBody = () => {
 
     const columns = useMemo(
         () =>
-            createThreatsColumns({
-                t,
-                userRole,
-                columnFilters,
-                handleFilterChange,
-                handleAssetHover,
-                setAssetAnchorEl,
-                handleDuplicateThreat,
-                handleDeleteThreat,
-                expandedFilters,
-                toggleFilterExpanded,
-            }),
+            applyColumnWidths(
+                createThreatsColumns({
+                    t,
+                    userRole,
+                    columnFilters,
+                    handleFilterChange,
+                    handleAssetHover,
+                    setAssetAnchorEl,
+                    handleDuplicateThreat,
+                    handleDeleteThreat,
+                    expandedFilters,
+                    toggleFilterExpanded,
+                }),
+                columnWidths
+            ),
         [
             t,
             userRole,
@@ -210,6 +215,7 @@ const ThreatsPageBody = () => {
             handleDeleteThreat,
             expandedFilters,
             toggleFilterExpanded,
+            columnWidths,
         ]
     );
 
@@ -378,6 +384,7 @@ const ThreatsPageBody = () => {
                         getRowClassName={(params) => (params.row.doneEditing ? "row-done-editing" : "")}
                         columnHeaderHeight={90}
                         columnVisibilityModel={columnVisibility}
+                        onColumnWidthChange={handleColumnWidthChange}
                         sx={{
                             borderRadius: 5,
                             boxShadow: 1,

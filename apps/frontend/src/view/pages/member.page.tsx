@@ -12,6 +12,7 @@ import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { useMembersList } from "#application/hooks/use-addedMember-list.hook.ts";
 import { useColumnFilters } from "#application/hooks/use-column-filters.hook.ts";
 import { useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
+import { applyColumnWidths, useColumnWidths } from "#application/hooks/use-column-widths.hook.ts";
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { MatrixFilterToggleButtonGroup } from "#view/components/matrix-filter-toggle-button-group.component.tsx";
 import { NoRowsOverlay } from "#view/components/no-rows-overlay.component.tsx";
@@ -113,6 +114,9 @@ const MemberPageBody = () => {
     const { columnVisibility, toggleColumnVisibility } = useColumnVisibility(
         `members-column-visibility-${memberPath}-${projectCatalogId}`,
         DEFAULT_COLUMN_VISIBILITY
+    );
+    const { columnWidths, handleColumnWidthChange } = useColumnWidths(
+        `members-column-widths-${memberPath}-${projectCatalogId}`
     );
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
@@ -246,16 +250,28 @@ const MemberPageBody = () => {
 
     const columns = useMemo(
         () =>
-            createMembersColumns({
-                t,
-                userRole,
-                columnFilters,
-                handleFilterChange,
-                expandedFilters,
-                toggleFilterExpanded,
-                handleDeleteMember,
-            }),
-        [t, userRole, columnFilters, handleFilterChange, expandedFilters, toggleFilterExpanded, handleDeleteMember]
+            applyColumnWidths(
+                createMembersColumns({
+                    t,
+                    userRole,
+                    columnFilters,
+                    handleFilterChange,
+                    expandedFilters,
+                    toggleFilterExpanded,
+                    handleDeleteMember,
+                }),
+                columnWidths
+            ),
+        [
+            t,
+            userRole,
+            columnFilters,
+            handleFilterChange,
+            expandedFilters,
+            toggleFilterExpanded,
+            handleDeleteMember,
+            columnWidths,
+        ]
     );
 
     const handleParticipantCount = (): string => {
@@ -410,6 +426,7 @@ const MemberPageBody = () => {
                     }}
                     columnHeaderHeight={90}
                     columnVisibilityModel={columnVisibility}
+                    onColumnWidthChange={handleColumnWidthChange}
                     // Two-state header sort (asc<->desc, never the DataGrid default third
                     // "unsorted" state) so clicking a column header always toggles between the
                     // two directions, matching the members list's expected sort behaviour.
