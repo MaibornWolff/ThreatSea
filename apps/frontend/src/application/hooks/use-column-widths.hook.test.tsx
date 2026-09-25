@@ -154,7 +154,7 @@ describe("useColumnWidths with a DataGrid whose columns are rebuilt on filtering
         act(() => gridApi.current!.setColumnWidth("name", 320));
         await userEvent.type(screen.getByPlaceholderText("Filter..."), "Al");
 
-        expect(gridApi.current!.getColumn("name").computedWidth).toBe(320);
+        expect(gridApi.current!.getColumn("name")?.computedWidth).toBe(320);
     });
 
     it("restores a resized width when the table is mounted again in the same session", () => {
@@ -164,6 +164,6 @@ describe("useColumnWidths with a DataGrid whose columns are rebuilt on filtering
 
         renderWithProviders(<ResizableFilterableGrid />);
 
-        expect(gridApi.current!.getColumn("name").computedWidth).toBe(320);
+        expect(gridApi.current!.getColumn("name")?.computedWidth).toBe(320);
     });
 });
