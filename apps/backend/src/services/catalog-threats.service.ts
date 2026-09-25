@@ -11,7 +11,7 @@ import {
     projects,
     UpdateCatalogThreat,
 } from "#db/schema.js";
-import { eq, getTableColumns } from "drizzle-orm";
+import { eq, getTableColumns, inArray } from "drizzle-orm";
 // oxlint-disable-next-line import/no-relative-parent-imports -- templates live outside src/; no alias defined
 import DefaultThreatMatrix from "../../templates/matrix/threats.matrix.json" with { type: "json" };
 import { POINTS_OF_ATTACK } from "#types/points-of-attack.types.js";
@@ -105,6 +105,24 @@ export async function getCatalogThreatById(
     });
 
     return catalogThreat ?? null;
+}
+
+/**
+ * Gets the catalog threats with the given ids, from any catalog.
+ *
+ * @param {number[]} catalogThreatIds - The ids of the catalog threats.
+ * @returns {Promise<CatalogThreat[]>} The catalog threats found; unknown ids are skipped.
+ */
+export async function getCatalogThreatsByIds(
+    catalogThreatIds: number[],
+    transaction: TransactionType | undefined = undefined
+): Promise<CatalogThreat[]> {
+    if (catalogThreatIds.length === 0) {
+        return [];
+    }
+    return await (transaction ?? db).query.catalogThreats.findMany({
+        where: inArray(catalogThreats.id, catalogThreatIds),
+    });
 }
 
 /**
