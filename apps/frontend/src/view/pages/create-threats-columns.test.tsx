@@ -1,16 +1,18 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { TFunction } from "i18next";
 import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
+import { translationUtil } from "#utils/translations.ts";
 import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat.types.ts";
 import type { ExtendedThreatWithMetrics } from "#application/hooks/use-generic-threats-list.hook.ts";
 import { createThreatsColumns, formatComponentName, type ThreatsGridRow } from "./create-threats-columns";
 
-const identityT = ((key: string) => key) as unknown as TFunction;
+// The app's real translations, fixed to English: the tests assert the texts users see, so a
+// missing or misspelled key fails instead of passing as its own name.
+const englishT = translationUtil.getFixedT("en", "threatsPage");
 
 interface BuildOptions {
     columnFilters?: Record<string, string>;
@@ -32,7 +34,7 @@ const buildColumns = (opts: BuildOptions = {}) => {
     };
 
     const columns = createThreatsColumns({
-        t: identityT,
+        t: englishT,
         userRole: opts.userRole ?? USER_ROLES.EDITOR,
         columnFilters: opts.columnFilters ?? {},
         expandedFilters: opts.expandedFilters ?? {},
@@ -139,16 +141,16 @@ describe("createThreatsColumns — generic threat rows carry no risk", () => {
     it("shows the threat count and an add-threat button on the generic threat actions cell", async () => {
         const { byField, handlers } = columnByField();
         renderCell(byField["actions"], { ...genericRow, threatCount: 3 });
-        expect(screen.getByText("threatsCount")).toBeInTheDocument();
+        expect(screen.getByText("3 threats")).toBeInTheDocument();
 
-        await userEvent.click(screen.getByRole("button", { name: "addThreat" }));
+        await userEvent.click(screen.getByRole("button", { name: "Add Threat" }));
         expect(handlers.onAddThreat).toHaveBeenCalledTimes(1);
     });
 
     it("hides the add-threat button from viewers", () => {
         const { byField } = columnByField({ userRole: USER_ROLES.VIEWER });
         renderCell(byField["actions"], genericRow);
-        expect(screen.queryByRole("button", { name: "addThreat" })).not.toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: "Add Threat" })).not.toBeInTheDocument();
     });
 });
 
@@ -172,17 +174,17 @@ describe("createThreatsColumns — threat rows show metrics", () => {
         expect(handlers.onAssetHover.mock.calls[0]?.[1]).toHaveLength(2);
     });
 
-    it("translates the status via the statusList namespace", () => {
+    it("shows the translated status", () => {
         const { byField } = columnByField();
         renderCell(byField["status"], threatRow);
-        expect(screen.getByText("statusList.in progress")).toBeInTheDocument();
+        expect(screen.getByText("In progress")).toBeInTheDocument();
     });
 
     it.each([
-        [THREAT_STATUSES.NEW, "statusList.new"],
-        [THREAT_STATUSES.IN_PROGRESS, "statusList.in progress"],
-        [THREAT_STATUSES.FINALIZED, "statusList.finalized"],
-        [THREAT_STATUSES.OUTOFSCOPE, "statusList.out of scope"],
+        [THREAT_STATUSES.NEW, "New"],
+        [THREAT_STATUSES.IN_PROGRESS, "In progress"],
+        [THREAT_STATUSES.FINALIZED, "Finalized"],
+        [THREAT_STATUSES.OUTOFSCOPE, "Out of scope"],
     ])("renders a status icon alongside the label for %s", (status, label) => {
         const { byField } = columnByField();
         const { container } = renderCell(byField["status"], {
@@ -198,9 +200,9 @@ describe("createThreatsColumns — threat rows show metrics", () => {
         const { byField, handlers } = columnByField();
         renderCell(byField["actions"], threatRow);
 
-        await userEvent.click(screen.getByRole("button", { name: "editThreat" }));
-        await userEvent.click(screen.getByRole("button", { name: "duplicateThreat" }));
-        await userEvent.click(screen.getByRole("button", { name: "deleteThreat" }));
+        await userEvent.click(screen.getByRole("button", { name: "Edit Threat" }));
+        await userEvent.click(screen.getByRole("button", { name: "Duplicate Threat" }));
+        await userEvent.click(screen.getByRole("button", { name: "Delete Threat" }));
 
         expect(handlers.onEditThreat).toHaveBeenCalledTimes(1);
         expect(handlers.onDuplicateThreat).toHaveBeenCalledTimes(1);
@@ -210,7 +212,7 @@ describe("createThreatsColumns — threat rows show metrics", () => {
     it("hides threat actions from viewers", () => {
         const { byField } = columnByField({ userRole: USER_ROLES.VIEWER });
         renderCell(byField["actions"], threatRow);
-        expect(screen.queryByRole("button", { name: "editThreat" })).not.toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: "Edit Threat" })).not.toBeInTheDocument();
     });
 });
 
@@ -218,14 +220,14 @@ describe("createThreatsColumns — expand toggle", () => {
     it("toggles the generic threat when its chevron is clicked", async () => {
         const { byField, handlers } = columnByField();
         renderCell(byField["name"], genericRow);
-        await userEvent.click(screen.getByRole("button", { name: "expand" }));
+        await userEvent.click(screen.getByRole("button", { name: "Expand" }));
         expect(handlers.onToggleGenericThreat).toHaveBeenCalledWith(7);
     });
 
     it("labels the chevron Collapse when the generic threat is expanded", () => {
         const { byField } = columnByField();
         renderCell(byField["name"], { ...genericRow, isExpanded: true });
-        expect(screen.getByRole("button", { name: "collapse" })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: "Collapse" })).toBeInTheDocument();
     });
 });
 
@@ -238,7 +240,7 @@ describe("formatComponentName", () => {
                     componentName: "Client",
                     interfaceName: "Test",
                 },
-                identityT
+                englishT
             )
         ).toBe("Client > Test");
     });
@@ -251,9 +253,9 @@ describe("formatComponentName", () => {
                     componentName: null,
                     interfaceName: "Test",
                 },
-                identityT
+                englishT
             )
-        ).toBe("unknown > Test");
+        ).toBe("Unknown > Test");
     });
 
     it("returns the plain component name for non-interface points of attack", () => {
@@ -264,7 +266,7 @@ describe("formatComponentName", () => {
                     componentName: "Database",
                     interfaceName: null,
                 },
-                identityT
+                englishT
             )
         ).toBe("Database");
     });
@@ -289,7 +291,7 @@ describe("createThreatsColumns — no threats placeholder", () => {
         expect(colSpan(undefined, threatRow, nameColumn, gridWithVisibleColumns(11))).toBeUndefined();
 
         renderCell(nameColumn, noThreatsRow);
-        expect(screen.getByText("noThreats")).toBeInTheDocument();
+        expect(screen.getByText("No threats for this generic threat.")).toBeInTheDocument();
     });
 });
 
