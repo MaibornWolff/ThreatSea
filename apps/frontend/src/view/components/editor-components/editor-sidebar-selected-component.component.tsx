@@ -51,6 +51,7 @@ export interface EditorSidebarSelectedComponentProps {
     ) => void;
     handlePointOfAttackLabelClick: (pointOfAttackId: string, componentId?: string) => void;
     handleAssetNameClick: (asset: Asset) => void;
+    handleAddAssetClick: () => void;
     handleSelectConnectedComponent: (componentId: string, communicationInterfaceId?: string | null) => void;
 }
 
@@ -88,6 +89,7 @@ const EditorSidebarSelectedComponentInner = ({
     handleDeleteCommunicationInterface,
     handlePointOfAttackLabelClick,
     handleAssetNameClick,
+    handleAddAssetClick,
     handleSelectConnectedComponent,
 }: EditorSidebarSelectedComponentProps) => {
     const { t } = useTranslation("editorPage");
@@ -513,6 +515,8 @@ const EditorSidebarSelectedComponentInner = ({
                 handleAssetNameClick={handleAssetNameClick}
                 handleAddAssetToAllPointsOfAttack={handleAddAssetToAllPointsOfAttack}
                 handleRemoveAssetFromAllPointsOfAttack={handleRemoveAssetFromAllPointsOfAttack}
+                handleAddAssetClick={handleAddAssetClick}
+                userRole={userRole}
             />
 
             <EditorSidebarSelectedComponentConnected
