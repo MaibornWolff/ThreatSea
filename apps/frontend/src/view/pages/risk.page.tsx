@@ -45,7 +45,6 @@ import { MeasureImpactByMeasureDialogPage } from "./measure-impact-by-measure-di
 import { useEditor } from "#application/hooks/use-editor.hook.ts";
 import ThreatDialogPage from "./threat-dialog.page";
 import AddMeasureDialogPage from "./add-measure-dialog.page";
-import { AlertActions } from "#application/actions/alert.actions.ts";
 import MeasureDetailsDialogPage from "./measure-details-dialog.page";
 import type { SortDirection } from "#application/actions/list.actions.ts";
 
@@ -219,28 +218,27 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
         });
     };
 
-    const handleChangeLineOfTolerance = (newValue: [number, number], save: boolean) => {
-        if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
-            const newGreenValue = newValue[0];
-            const newRedValue = newValue[1];
-            setCurrentGreenValue(newGreenValue);
-            setCurrentRedValue(newRedValue);
-            if (save && (newGreenValue !== lineOfToleranceGreen || newRedValue !== lineOfToleranceRed)) {
-                dispatch(
-                    ProjectsActions.updateProject({
-                        ...project,
-                        lineOfToleranceGreen: newGreenValue,
-                        lineOfToleranceRed: newRedValue,
-                    })
-                );
-            }
-        } else {
-            dispatch(
-                AlertActions.openErrorAlert({
-                    text: "Users with Viewer role may not change the slider for the line of tolerance.",
-                })
-            );
-        }
+    // Slider changes are a preview only; they are persisted on explicit save.
+    const isLineOfToleranceDirty = currentGreenValue !== lineOfToleranceGreen || currentRedValue !== lineOfToleranceRed;
+
+    const handleChangeLineOfTolerance = ([newGreenValue, newRedValue]: [number, number]) => {
+        setCurrentGreenValue(newGreenValue);
+        setCurrentRedValue(newRedValue);
+    };
+
+    const handleSaveLineOfTolerance = () => {
+        dispatch(
+            ProjectsActions.updateProjectLineOfTolerance({
+                id: project.id,
+                lineOfToleranceGreen: currentGreenValue,
+                lineOfToleranceRed: currentRedValue,
+            })
+        );
+    };
+
+    const handleResetLineOfTolerance = () => {
+        setCurrentGreenValue(lineOfToleranceGreen);
+        setCurrentRedValue(lineOfToleranceRed);
     };
 
     const handleSelectThreat = (threatIndex: number) => {
@@ -303,7 +301,10 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                             title={t("lineOfTolerance.title")}
                             greenValue={currentGreenValue}
                             redValue={currentRedValue}
+                            isDirty={isLineOfToleranceDirty}
                             onLoTChange={handleChangeLineOfTolerance}
+                            onSave={handleSaveLineOfTolerance}
+                            onReset={handleResetLineOfTolerance}
                         />
                     </Box>
                 </Box>
