@@ -5,7 +5,7 @@ import { db, TransactionType } from "#db/index.js";
 import { CatalogThreat, CreateGenericThreat, CreateThreat, GenericThreat, System } from "#db/schema.js";
 import { NotFoundError } from "#errors/not-found.error.js";
 import { PointOfAttack, UpdateSystemRequest } from "#types/system.types.js";
-import { getCatalogThreatsByProjectId } from "#services/catalog-threats.service.js";
+import { getCatalogThreatsByIds, getCatalogThreatsByProjectId } from "#services/catalog-threats.service.js";
 import {
     buildThreatForGenericThreat,
     createThreats,
@@ -164,6 +164,7 @@ async function createThreatsForAssetAssignedPointsOfAttack(
     }
 
     const existingThreats = await getThreatsByProjectId(projectId, transaction);
+    const catalogThreatsById = await mapCatalogThreatsOfGenericThreats(genericThreats, catalogThreats, transaction);
     const newThreats: CreateThreat[] = [];
 
     for (const pointOfAttack of pointsOfAttack) {
@@ -180,9 +181,7 @@ async function createThreatsForAssetAssignedPointsOfAttack(
                 continue;
             }
 
-            const catalogThreat = catalogThreats.find(
-                (catalogThreat) => catalogThreat.id === genericThreat.catalogThreatId
-            );
+            const catalogThreat = catalogThreatsById.get(genericThreat.catalogThreatId);
 
             if (!catalogThreat) {
                 throw new NotFoundError("Catalog threat not found");
@@ -195,4 +194,28 @@ async function createThreatsForAssetAssignedPointsOfAttack(
     if (newThreats.length > 0) {
         await createThreats(newThreats, transaction);
     }
+}
+
+/**
+ * The catalog threats of the given generic threats, by id. Generic threats reference their
+ * catalog threat by id rather than through the project's catalog, so any not in the project's
+ * catalog threats are looked up by id in one query instead of failing the whole system save.
+ */
+async function mapCatalogThreatsOfGenericThreats(
+    genericThreats: GenericThreat[],
+    projectCatalogThreats: CatalogThreat[],
+    transaction: TransactionType
+): Promise<Map<number, CatalogThreat>> {
+    const catalogThreatsById = new Map(projectCatalogThreats.map((catalogThreat) => [catalogThreat.id, catalogThreat]));
+    const missingCatalogThreatIds = [
+        ...new Set(
+            genericThreats
+                .map((genericThreat) => genericThreat.catalogThreatId)
+                .filter((catalogThreatId) => !catalogThreatsById.has(catalogThreatId))
+        ),
+    ];
+    for (const catalogThreat of await getCatalogThreatsByIds(missingCatalogThreatIds, transaction)) {
+        catalogThreatsById.set(catalogThreat.id, catalogThreat);
+    }
+    return catalogThreatsById;
 }

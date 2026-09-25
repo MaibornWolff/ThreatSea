@@ -8,7 +8,7 @@ import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import { nanoid } from "nanoid";
 import { db } from "#db/index.js";
-import { assets, catalogs, threats, usersCatalogs } from "#db/schema.js";
+import { assets, catalogs, catalogThreats, genericThreats, threats, usersCatalogs } from "#db/schema.js";
 import { app } from "#server.js";
 import { eq } from "drizzle-orm";
 import { LANGUAGES } from "#types/languages.type.js";
@@ -38,6 +38,7 @@ const CATALOG_THREAT = {
 };
 
 let projectId: number;
+let catalogId: number;
 let cookies: string[];
 let csrfToken: string;
 
@@ -55,6 +56,7 @@ beforeAll(async () => {
 // point of attack).
 beforeEach(async () => {
     const catalog = (await db.insert(catalogs).values({ name: "Catalog", language: LANGUAGES.EN }).returning()).at(0)!;
+    catalogId = catalog.id;
 
     const authRes = await request(app).get("/api/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
     const userId = authRes.body.data.userId;
@@ -202,5 +204,64 @@ describe("updateSystem generic threat/threat generation", () => {
 
         const generics = await getGenericThreatsByProjectId(projectId);
         expect(await getThreatsByGenericThreatId(generics[0]!.id)).toHaveLength(1);
+    });
+});
+
+const insertCatalogThreat = async (targetCatalogId: number, overrides: Partial<typeof CATALOG_THREAT>) =>
+    (
+        await db
+            .insert(catalogThreats)
+            .values({ ...CATALOG_THREAT, ...overrides, catalogId: targetCatalogId })
+            .returning()
+    ).at(0)!;
+
+describe("updateSystem threat creation for points of attack with assets", () => {
+    it("creates one threat per generic threat across several points of attack, with their catalog threat's defaults", async () => {
+        await insertCatalogThreat(catalogId, {
+            name: "Catalog Threat 2",
+            probability: 4,
+            confidentiality: false,
+            integrity: true,
+            availability: false,
+        });
+        const firstPointOfAttackId = nanoid();
+        const secondPointOfAttackId = nanoid();
+        await saveSystem([makePoA(firstPointOfAttackId, []), makePoA(secondPointOfAttackId, [])]);
+
+        await saveSystem([makePoA(firstPointOfAttackId, [1]), makePoA(secondPointOfAttackId, [1])]);
+
+        const generics = await getGenericThreatsByProjectId(projectId);
+        expect(generics).toHaveLength(4);
+        const createdThreats = await db.select().from(threats).where(eq(threats.projectId, projectId));
+        expect(createdThreats).toHaveLength(4);
+        expect(createdThreats.map((threat) => threat.genericThreatId).sort()).toEqual(
+            generics.map((genericThreat) => genericThreat.id).sort()
+        );
+        for (const threat of createdThreats) {
+            const expected =
+                threat.name === "Catalog Threat 2"
+                    ? { probability: 4, confidentiality: false, integrity: true, availability: false }
+                    : { probability: 2, confidentiality: true, integrity: false, availability: true };
+            expect(threat).toMatchObject({ ...expected, status: "new", description: "" });
+        }
+    });
+
+    it("uses a generic threat's catalog threat even when it is not in the project's catalog", async () => {
+        const pointOfAttackId = nanoid();
+        await saveSystem([makePoA(pointOfAttackId, [])]);
+        const otherCatalog = (
+            await db.insert(catalogs).values({ name: "Other catalog", language: LANGUAGES.EN }).returning()
+        ).at(0)!;
+        const otherCatalogThreat = await insertCatalogThreat(otherCatalog.id, { probability: 5, integrity: true });
+        await db
+            .update(genericThreats)
+            .set({ catalogThreatId: otherCatalogThreat.id })
+            .where(eq(genericThreats.projectId, projectId));
+
+        await saveSystem([makePoA(pointOfAttackId, [1])]);
+
+        const createdThreats = await db.select().from(threats).where(eq(threats.projectId, projectId));
+        expect(createdThreats).toHaveLength(1);
+        expect(createdThreats[0]).toMatchObject({ probability: 5, integrity: true });
     });
 });
