@@ -13,18 +13,10 @@ import {
     TableSortLabel,
     Typography,
 } from "@mui/material";
-import {
-    memo,
-    useEffect,
-    useLayoutEffect,
-    useState,
-    type ChangeEvent,
-    type ReactNode,
-    type SyntheticEvent,
-} from "react";
+import { memo, useLayoutEffect, useState, type ChangeEvent, type ReactNode, type SyntheticEvent } from "react";
 
 import { useTranslation } from "react-i18next";
-import { Route, Routes, useBlocker, useNavigate, useParams } from "react-router";
+import { Route, Routes, useNavigate, useParams } from "react-router";
 import type { SxProps, Theme } from "@mui/material";
 import type { TableCellProps } from "@mui/material/TableCell";
 import type { ExtendedProject } from "#api/types/project.types.ts";
@@ -34,10 +26,10 @@ import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
-import { ProjectsActions } from "#application/actions/projects.actions.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { useLoadThreatsOnce } from "#application/hooks/use-load-threats-once.hook.ts";
 import { useMatrix } from "#application/hooks/use-matrix.hook.ts";
+import { useLineOfToleranceEditor } from "#application/hooks/use-line-of-tolerance-editor.hook.ts";
 import { MATRIX_COLOR } from "#view/colors/matrix.ts";
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { LineOfToleranceSelector } from "#view/components/line-of-tolerance-selector.component.tsx";
@@ -98,7 +90,13 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
         language,
     });
 
-    const { lineOfToleranceGreen, lineOfToleranceRed } = project;
+    const lineOfTolerance = useLineOfToleranceEditor({
+        project,
+        currentGreenValue,
+        currentRedValue,
+        setLineOfTolerance,
+        resetLineOfTolerance,
+    });
     const { openConfirm } = useConfirm<MeasureImpact>();
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
@@ -228,73 +226,6 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
         });
     };
 
-    // Slider changes are a preview only; they are persisted on explicit save.
-    const isLineOfToleranceDirty = currentGreenValue !== lineOfToleranceGreen || currentRedValue !== lineOfToleranceRed;
-    // warn on unsaved changes when leaving the page
-    useEffect(() => {
-        if (!isLineOfToleranceDirty) {
-            return;
-        }
-        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-            event.preventDefault();
-        };
-        window.addEventListener("beforeunload", handleBeforeUnload);
-        return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-    }, [isLineOfToleranceDirty]);
-
-    // Dialogs of the risk page are nested routes, so only navigating outside of it is blocked.
-    const riskPath = `/projects/${projectId}/risk`;
-    const unsavedChangesBlocker = useBlocker(
-        ({ nextLocation }) =>
-            isLineOfToleranceDirty &&
-            nextLocation.pathname !== riskPath &&
-            !nextLocation.pathname.startsWith(`${riskPath}/`)
-    );
-    const [isSavingLineOfTolerance, setIsSavingLineOfTolerance] = useState<boolean>(false);
-
-    const handleChangeLineOfTolerance = ([newGreenValue, newRedValue]: [number, number]) => {
-        setLineOfTolerance(newGreenValue, newRedValue);
-    };
-
-    const saveLineOfTolerance = async () => {
-        setIsSavingLineOfTolerance(true);
-        const result = await dispatch(
-            ProjectsActions.updateProjectLineOfTolerance({
-                id: project.id,
-                lineOfToleranceGreen: currentGreenValue,
-                lineOfToleranceRed: currentRedValue,
-            })
-        );
-        setIsSavingLineOfTolerance(false);
-        return result;
-    };
-
-    const handleSaveLineOfTolerance = () => {
-        void saveLineOfTolerance();
-    };
-
-    const handleResetLineOfTolerance = () => {
-        resetLineOfTolerance();
-    };
-
-    const handleStayOnPage = () => {
-        unsavedChangesBlocker.reset?.();
-    };
-
-    const handleDiscardAndLeave = () => {
-        resetLineOfTolerance();
-        unsavedChangesBlocker.proceed?.();
-    };
-
-    const handleSaveAndLeave = async () => {
-        const result = await saveLineOfTolerance();
-        if (ProjectsActions.updateProjectLineOfTolerance.fulfilled.match(result)) {
-            unsavedChangesBlocker.proceed?.();
-        } else {
-            unsavedChangesBlocker.reset?.();
-        }
-    };
-
     const handleSelectThreat = (threatIndex: number) => {
         setSelectedThreat(threatIndex);
     };
@@ -355,11 +286,11 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                             title={t("lineOfTolerance.title")}
                             greenValue={currentGreenValue}
                             redValue={currentRedValue}
-                            isDirty={isLineOfToleranceDirty}
-                            isSaving={isSavingLineOfTolerance}
-                            onLoTChange={handleChangeLineOfTolerance}
-                            onSave={handleSaveLineOfTolerance}
-                            onReset={handleResetLineOfTolerance}
+                            isDirty={lineOfTolerance.isDirty}
+                            isSaving={lineOfTolerance.isSaving}
+                            onLoTChange={lineOfTolerance.handleChange}
+                            onSave={lineOfTolerance.handleSave}
+                            onReset={lineOfTolerance.handleReset}
                         />
                     </Box>
                 </Box>
@@ -933,13 +864,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                     <Route path="appliedMeasure/edit" element={<MeasureDetailsDialogPage />} />
                 </Routes>
             )}
-            <UnsavedLineOfToleranceDialog
-                open={unsavedChangesBlocker.state === "blocked"}
-                isSaving={isSavingLineOfTolerance}
-                onStay={handleStayOnPage}
-                onDiscard={handleDiscardAndLeave}
-                onSave={() => void handleSaveAndLeave()}
-            />
+            <UnsavedLineOfToleranceDialog {...lineOfTolerance.unsavedChangesDialogProps} />
         </Page>
     );
 };
