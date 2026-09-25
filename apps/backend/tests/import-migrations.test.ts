@@ -53,7 +53,9 @@ describe("upgradeImportBodyToCurrent", () => {
         // Two flat threats share (catalogThreatId, pointOfAttackId) -> one generic; the third -> another.
         expect(body.genericThreats).toHaveLength(2);
         // Generic identity comes from the catalogue threat, not the (refined) flat threat.
-        const genericA = body.genericThreats.find((g: { pointOfAttackId: string }) => g.pointOfAttackId === "poa-a");
+        const genericA = body.genericThreats.find(
+            (genericThreat: { pointOfAttackId: string }) => genericThreat.pointOfAttackId === "poa-a"
+        );
         expect(genericA.name).toBe("Catalogue name");
         expect(genericA.description).toBe("Catalogue desc");
         expect(genericA.catalogThreatId).toBe(10);
@@ -61,7 +63,7 @@ describe("upgradeImportBodyToCurrent", () => {
 
         // One threat per flat threat, ids preserved, generic linkage by group.
         expect(body.threats).toHaveLength(3);
-        expect(body.threats.map((t: { id: number }) => t.id)).toEqual([1, 2, 3]);
+        expect(body.threats.map((threat: { id: number }) => threat.id)).toEqual([1, 2, 3]);
         const [c1, c2, c3] = body.threats;
         expect(c1.genericThreatId).toBe(c2.genericThreatId);
         expect(c3.genericThreatId).not.toBe(c1.genericThreatId);

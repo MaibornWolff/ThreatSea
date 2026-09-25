@@ -96,7 +96,7 @@ const renderCell = (column: GridColDef<ThreatsGridRow> | undefined, row: Threats
 
 const columnByField = (opts: BuildOptions = {}) => {
     const { columns, handlers } = buildColumns(opts);
-    return { byField: Object.fromEntries(columns.map((c) => [c.field, c])), handlers };
+    return { byField: Object.fromEntries(columns.map((column) => [column.field, column])), handlers };
 };
 
 describe("createThreatsColumns — structure", () => {
@@ -119,7 +119,7 @@ describe("createThreatsColumns — structure", () => {
 
     it("disables sorting on every column (custom hierarchy ordering)", () => {
         const { columns } = buildColumns();
-        expect(columns.every((c) => c.sortable === false)).toBe(true);
+        expect(columns.every((column) => column.sortable === false)).toBe(true);
     });
 });
 

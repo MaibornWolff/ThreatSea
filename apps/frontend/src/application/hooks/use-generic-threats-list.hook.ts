@@ -37,31 +37,34 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
         const sequence = ++loadSequenceRef.current;
         setIsPending(true);
         try {
-            const threats = await GenericThreatsAPI.getGenericThreatsWithExtendedThreats({ projectId });
+            const loadedGenericThreats = await GenericThreatsAPI.getGenericThreatsWithExtendedThreats({ projectId });
             if (sequence !== loadSequenceRef.current) {
                 return;
             }
-            const sortedThreats = [...threats].sort((a, b) =>
+            const sortedGenericThreats = [...loadedGenericThreats].sort((a, b) =>
                 a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
             );
-            setGenericThreats(sortedThreats);
+            setGenericThreats(sortedGenericThreats);
 
-            if (sortedThreats.length === 0) {
+            if (sortedGenericThreats.length === 0) {
                 setThreatsByGenericThreatId({});
                 return;
             }
 
-            const threatsMap = sortedThreats.reduce<Record<number, ExtendedThreatWithMetrics[]>>((result, threat) => {
-                result[threat.id] = threat.threats.map((threat) => {
-                    const damage = calcDamage(threat);
-                    return {
-                        ...threat,
-                        damage,
-                        risk: threat.probability * damage,
-                    };
-                });
-                return result;
-            }, {});
+            const threatsMap = sortedGenericThreats.reduce<Record<number, ExtendedThreatWithMetrics[]>>(
+                (result, genericThreat) => {
+                    result[genericThreat.id] = genericThreat.threats.map((threat) => {
+                        const damage = calcDamage(threat);
+                        return {
+                            ...threat,
+                            damage,
+                            risk: threat.probability * damage,
+                        };
+                    });
+                    return result;
+                },
+                {}
+            );
             setThreatsByGenericThreatId(threatsMap);
         } catch (error) {
             if (sequence !== loadSequenceRef.current) {

@@ -382,9 +382,9 @@ function methodExplanationSection(T: Translations): string {
     lines.push(header);
     lines.push(sep);
     poaKeys.forEach((poaKey, i) => {
-        const poaName = poaNames[i] ?? poaKey;
+        const pointOfAttackName = poaNames[i] ?? poaKey;
         const cells = attackerKeys.map((attackerKey) => T.cellNames[poaKey]?.[attackerKey] ?? "");
-        lines.push(`| ${poaName} | ${cells.join(" | ")} |`);
+        lines.push(`| ${pointOfAttackName} | ${cells.join(" | ")} |`);
     });
     lines.push("");
 
@@ -644,7 +644,7 @@ function threatsDetailSection(
         groupThreats.forEach((threat) => {
             const id = threatAnchorId(threat.reportId);
             const attackerName = T.attackers[threat.attacker]?.name ?? threat.attacker;
-            const poaName = T.pointsOfAttacks[threat.pointOfAttack]?.name ?? threat.pointOfAttack;
+            const pointOfAttackName = T.pointsOfAttacks[threat.pointOfAttack]?.name ?? threat.pointOfAttack;
             const affectedGoals = [
                 threat.confidentiality && T.confidentiality,
                 threat.integrity && T.integrity,
@@ -690,7 +690,7 @@ function threatsDetailSection(
             lines.push("");
             lines.push(`**${T.attackersHeader}:** ${attackerName}`);
             lines.push("");
-            lines.push(`**${T.pointsOfAttackHeader}:** ${poaName}`);
+            lines.push(`**${T.pointsOfAttackHeader}:** ${pointOfAttackName}`);
             lines.push("");
 
             if (threat.description) {

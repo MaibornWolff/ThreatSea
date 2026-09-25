@@ -80,41 +80,41 @@ async function exportByName(name: string): Promise<ExportBody> {
 
 // Identity of a threat, stripped of the fields that legitimately change across import (surrogate
 // ids, remapped foreign keys, timestamps).
-const normalizeGeneric = (g: ThreatRow) => ({
-    name: g.name,
-    description: g.description,
-    attacker: g.attacker,
-    pointOfAttack: g.pointOfAttack,
-    pointOfAttackId: g.pointOfAttackId,
+const normalizeGenericThreat = (genericThreat: ThreatRow) => ({
+    name: genericThreat.name,
+    description: genericThreat.description,
+    attacker: genericThreat.attacker,
+    pointOfAttack: genericThreat.pointOfAttack,
+    pointOfAttackId: genericThreat.pointOfAttackId,
 });
 
-const normalizeThreat = (t: ThreatRow) => ({
-    name: t.name,
-    description: t.description,
-    status: t.status,
-    confidentiality: t.confidentiality,
-    integrity: t.integrity,
-    availability: t.availability,
-    probability: t.probability,
-    attacker: t.attacker,
-    pointOfAttack: t.pointOfAttack,
-    pointOfAttackId: t.pointOfAttackId,
+const normalizeThreat = (threat: ThreatRow) => ({
+    name: threat.name,
+    description: threat.description,
+    status: threat.status,
+    confidentiality: threat.confidentiality,
+    integrity: threat.integrity,
+    availability: threat.availability,
+    probability: threat.probability,
+    attacker: threat.attacker,
+    pointOfAttack: threat.pointOfAttack,
+    pointOfAttackId: threat.pointOfAttackId,
 });
 
 // A measure impact keyed by the *names* it links rather than the remapped ids, so the same link is
 // comparable across two imports.
-const resolveImpactLinks = (exp: ExportBody) => {
-    const threatById = new Map(exp.threats.map((t) => [t.id, t]));
-    const measureById = new Map(exp.measures.map((m) => [m.id, m]));
-    return exp.measureImpacts
-        .map((mi) => ({
-            threatName: threatById.get(mi.threatId)?.name,
-            measureName: measureById.get(mi.measureId)?.name,
-            probability: mi.probability,
-            damage: mi.damage,
-            impactsProbability: mi.impactsProbability,
-            impactsDamage: mi.impactsDamage,
-            setsOutOfScope: mi.setsOutOfScope,
+const resolveImpactLinks = (exported: ExportBody) => {
+    const threatById = new Map(exported.threats.map((threat) => [threat.id, threat]));
+    const measureById = new Map(exported.measures.map((measure) => [measure.id, measure]));
+    return exported.measureImpacts
+        .map((measureImpact) => ({
+            threatName: threatById.get(measureImpact.threatId)?.name,
+            measureName: measureById.get(measureImpact.measureId)?.name,
+            probability: measureImpact.probability,
+            damage: measureImpact.damage,
+            impactsProbability: measureImpact.impactsProbability,
+            impactsDamage: measureImpact.impactsDamage,
+            setsOutOfScope: measureImpact.setsOutOfScope,
         }))
         .sort((a, b) => `${a.threatName}${a.measureName}`.localeCompare(`${b.threatName}${b.measureName}`));
 };
@@ -130,13 +130,13 @@ describe("import/export round-trip fidelity", () => {
         body.project.name = SOURCE_NAME;
         await importProject(body);
 
-        const exp = await exportByName(SOURCE_NAME);
+        const exported = await exportByName(SOURCE_NAME);
 
         // Generic threat + threat actually landed.
-        expect(exp.genericThreats).toHaveLength(VALID_TEST_PROJECT.genericThreats.length);
-        expect(exp.threats).toHaveLength(VALID_TEST_PROJECT.threats.length);
+        expect(exported.genericThreats).toHaveLength(VALID_TEST_PROJECT.genericThreats.length);
+        expect(exported.threats).toHaveLength(VALID_TEST_PROJECT.threats.length);
 
-        const threat = exp.threats[0]!;
+        const threat = exported.threats[0]!;
         expect(threat.name).toBe("Test");
         expect(threat.status).toBe("new");
         expect(threat.confidentiality).toBe(true);
@@ -145,13 +145,13 @@ describe("import/export round-trip fidelity", () => {
         expect(threat.probability).toBe(1);
 
         // Threat hangs off a generic threat that exists in the same project.
-        expect(exp.genericThreats.some((g) => g.id === threat.genericThreatId)).toBe(true);
+        expect(exported.genericThreats.some((genericThreat) => genericThreat.id === threat.genericThreatId)).toBe(true);
 
         // The measure impact still connects the imported threat and measure after id remapping.
-        expect(exp.measureImpacts).toHaveLength(1);
-        const impact = exp.measureImpacts[0]!;
-        expect(exp.threats.some((c) => c.id === impact.threatId)).toBe(true);
-        expect(exp.measures.some((m) => m.id === impact.measureId)).toBe(true);
+        expect(exported.measureImpacts).toHaveLength(1);
+        const impact = exported.measureImpacts[0]!;
+        expect(exported.threats.some((exportedThreat) => exportedThreat.id === impact.threatId)).toBe(true);
+        expect(exported.measures.some((measure) => measure.id === impact.measureId)).toBe(true);
         expect(impact.impactsProbability).toBe(true);
         expect(impact.impactsDamage).toBe(true);
         expect(impact.setsOutOfScope).toBe(false);
@@ -175,16 +175,16 @@ describe("import/export round-trip fidelity", () => {
         const dbThreats = await db.query.threats.findMany({
             where: eq(threats.projectId, project!.id),
         });
-        const dbGenerics = await db.query.genericThreats.findMany({
+        const dbGenericThreats = await db.query.genericThreats.findMany({
             where: eq(genericThreats.projectId, project!.id),
         });
-        expect(dbGenerics).toHaveLength(1);
+        expect(dbGenericThreats).toHaveLength(1);
         expect(dbThreats).toHaveLength(2);
-        expect(new Set(dbThreats.map((t) => t.genericThreatId))).toEqual(new Set([dbGenerics[0]!.id]));
+        expect(new Set(dbThreats.map((threat) => threat.genericThreatId))).toEqual(new Set([dbGenericThreats[0]!.id]));
 
         // Export reflects both threats too.
-        const exp = await exportByName(NAME);
-        expect(exp.threats).toHaveLength(2);
+        const exported = await exportByName(NAME);
+        expect(exported.threats).toHaveLength(2);
 
         // The display path (threats page + report both consume this) returns both threats.
         const grouped = await getGenericThreatsWithExtendedThreats(project!.id);
@@ -210,8 +210,8 @@ describe("import/export round-trip fidelity", () => {
 
         const second = await exportByName(COPY_NAME);
 
-        expect(second.genericThreats.map(normalizeGeneric).sort(byName)).toEqual(
-            first.genericThreats.map(normalizeGeneric).sort(byName)
+        expect(second.genericThreats.map(normalizeGenericThreat).sort(byName)).toEqual(
+            first.genericThreats.map(normalizeGenericThreat).sort(byName)
         );
         expect(second.threats.map(normalizeThreat).sort(byName)).toEqual(
             first.threats.map(normalizeThreat).sort(byName)
@@ -226,21 +226,23 @@ describe("import upgrades legacy exports", () => {
 
         // Down-convert the current fixture to the old flat shape the shim must accept: a single
         // `threats` array carrying catalogThreatId + doneEditing, and no `genericThreats`.
-        const genericById = new Map(VALID_TEST_PROJECT.genericThreats.map((g) => [g.id, g]));
-        const flatThreats = VALID_TEST_PROJECT.threats.map((t) => ({
-            id: t.id,
-            pointOfAttackId: t.pointOfAttackId,
-            name: t.name,
-            description: t.description,
-            pointOfAttack: t.pointOfAttack,
-            attacker: t.attacker,
-            probability: t.probability,
-            confidentiality: t.confidentiality,
-            integrity: t.integrity,
-            availability: t.availability,
-            doneEditing: t.status === "finalized",
-            catalogThreatId: genericById.get(t.genericThreatId)!.catalogThreatId,
-            projectId: t.projectId,
+        const genericThreatById = new Map(
+            VALID_TEST_PROJECT.genericThreats.map((genericThreat) => [genericThreat.id, genericThreat])
+        );
+        const flatThreats = VALID_TEST_PROJECT.threats.map((threat) => ({
+            id: threat.id,
+            pointOfAttackId: threat.pointOfAttackId,
+            name: threat.name,
+            description: threat.description,
+            pointOfAttack: threat.pointOfAttack,
+            attacker: threat.attacker,
+            probability: threat.probability,
+            confidentiality: threat.confidentiality,
+            integrity: threat.integrity,
+            availability: threat.availability,
+            doneEditing: threat.status === "finalized",
+            catalogThreatId: genericThreatById.get(threat.genericThreatId)!.catalogThreatId,
+            projectId: threat.projectId,
         }));
 
         const body = structuredClone(VALID_TEST_PROJECT) as unknown as {
@@ -259,22 +261,26 @@ describe("import upgrades legacy exports", () => {
         const project = await db.query.projects.findFirst({ where: eq(projects.name, NAME) });
         expect(project).toBeTruthy();
 
-        const dbGenerics = await db.query.genericThreats.findMany({
+        const dbGenericThreats = await db.query.genericThreats.findMany({
             where: eq(genericThreats.projectId, project!.id),
         });
         const dbThreats = await db.query.threats.findMany({ where: eq(threats.projectId, project!.id) });
         // One generic per (catalogThreatId, pointOfAttackId); one threat per flat threat.
-        expect(dbGenerics).toHaveLength(VALID_TEST_PROJECT.genericThreats.length);
+        expect(dbGenericThreats).toHaveLength(VALID_TEST_PROJECT.genericThreats.length);
         expect(dbThreats).toHaveLength(VALID_TEST_PROJECT.threats.length);
-        expect(new Set(dbThreats.map((t) => t.genericThreatId))).toEqual(new Set(dbGenerics.map((g) => g.id)));
+        expect(new Set(dbThreats.map((threat) => threat.genericThreatId))).toEqual(
+            new Set(dbGenericThreats.map((genericThreat) => genericThreat.id))
+        );
 
-        const exp = await exportByName(NAME);
-        const threat = exp.threats[0]!;
+        const exported = await exportByName(NAME);
+        const threat = exported.threats[0]!;
         expect(threat.name).toBe("Test");
         expect(threat.status).toBe("new"); // derived from doneEditing = false
-        expect(exp.genericThreats.some((g) => g.id === threat.genericThreatId)).toBe(true);
+        expect(exported.genericThreats.some((genericThreat) => genericThreat.id === threat.genericThreatId)).toBe(true);
         // The measure impact still links through the flat -> threat id mapping.
-        expect(exp.measureImpacts).toHaveLength(1);
-        expect(exp.threats.some((c) => c.id === exp.measureImpacts[0]!.threatId)).toBe(true);
+        expect(exported.measureImpacts).toHaveLength(1);
+        expect(
+            exported.threats.some((exportedThreat) => exportedThreat.id === exported.measureImpacts[0]!.threatId)
+        ).toBe(true);
     });
 });
