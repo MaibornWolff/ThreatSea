@@ -24,7 +24,7 @@ import { DescriptionTextField } from "#view/components/description-textfield.com
 import { DialogTextField } from "#view/components/dialog.textfield.component.tsx";
 import { ThreatRiskPreview } from "#view/components/threat-risk-preview.component.tsx";
 import { calcDamage } from "#utils/helpers.ts";
-import { calcNetRisk, calcRiskColour } from "#utils/calcRisk.ts";
+import { calcRiskColour, calcThreatNetRisk } from "#utils/calcRisk.ts";
 import type { Asset } from "#api/types/asset.types.ts";
 import type { ThreatMeasure } from "#application/hooks/use-threat-measures-list.hook.ts";
 import type { ThreatFormValues } from "./add-threat-form.types.ts";
@@ -63,6 +63,7 @@ export const AddThreatMainTab = ({
     const watchedIntegrity = useWatch({ control, name: "integrity" });
     const watchedAvailability = useWatch({ control, name: "availability" });
     const watchedProbability = useWatch({ control, name: "probability" });
+    const watchedStatus = useWatch({ control, name: "status" });
 
     const grossDamage = calcDamage({
         assets,
@@ -74,9 +75,9 @@ export const AddThreatMainTab = ({
     // for the live preview to the 1–5 risk scale (0 keeps the empty/invalid state grey).
     const probabilityValue = Math.min(Math.max(Number(watchedProbability) || 0, 0), 5);
     const grossRisk = probabilityValue * grossDamage;
-    const { netProbability, netDamage, netRisk } = calcNetRisk(
-        probabilityValue,
-        grossDamage,
+    // Same rule as the risk page and the report: an out-of-scope threat carries no net risk.
+    const { netProbability, netDamage, netRisk } = calcThreatNetRisk(
+        { status: watchedStatus, probability: probabilityValue, damage: grossDamage },
         allThreatMeasures.map((threatMeasure) => threatMeasure.measureImpact)
     );
     const grossColor = calcRiskColour(grossDamage, probabilityValue, lineOfToleranceGreen, lineOfToleranceRed);

@@ -119,6 +119,29 @@ describe("AddThreatMainTab", () => {
         expect(netRisk).not.toHaveTextContent("12");
     });
 
+    it("shows no net risk for an out-of-scope threat while keeping its gross risk", () => {
+        renderMainTab({
+            assets: [createAsset({ confidentiality: 4 })],
+            defaultValues: { probability: 3, confidentiality: true, status: THREAT_STATUSES.OUTOFSCOPE },
+        });
+
+        expect(screen.getByTestId("GrossRisk")).toHaveTextContent(/^12 \(/);
+        expect(screen.getByTestId("NetRisk")).toHaveTextContent(/^0 \(/);
+    });
+
+    it("drops the net risk to zero as soon as the user sets the status to out of scope", async () => {
+        const { user } = renderMainTab({
+            assets: [createAsset({ confidentiality: 4 })],
+            defaultValues: { probability: 3, confidentiality: true, status: THREAT_STATUSES.IN_PROGRESS },
+        });
+        expect(screen.getByTestId("NetRisk")).toHaveTextContent(/^12 \(/);
+
+        await user.click(screen.getByRole("combobox"));
+        await user.click(screen.getByRole("option", { name: "Out of scope" }));
+
+        expect(screen.getByTestId("NetRisk")).toHaveTextContent(/^0 \(/);
+    });
+
     it("clamps the probability used for the preview to a maximum of 5", () => {
         renderMainTab({
             assets: [createAsset({ confidentiality: 4 })],
