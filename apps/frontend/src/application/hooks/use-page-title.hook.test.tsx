@@ -39,6 +39,7 @@ const projectsStateWith = (...projects: ReturnType<typeof createProject>[]): Roo
     isLoadingAll: false,
     current: undefined,
     deletingProjectId: undefined,
+    lineOfToleranceDraft: undefined,
 });
 
 const catalogsStateWith = (...catalogs: ReturnType<typeof createCatalog>[]): RootState["catalogs"] => ({
