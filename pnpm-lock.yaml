@@ -171,8 +171,8 @@ catalogs:
       specifier: 4.1.11
       version: 4.1.11
     dotenv:
-      specifier: 18.0.2
-      version: 18.0.2
+      specifier: 18.0.3
+      version: 18.0.3
     oxlint:
       specifier: 1.85.0
       version: 1.85.0
@@ -249,7 +249,7 @@ importers:
         version: 4.2.1
       dotenv:
         specifier: 'catalog:'
-        version: 18.0.2
+        version: 18.0.3
       drizzle-orm:
         specifier: 0.45.3
         version: 0.45.3(@types/pg@8.23.1)(pg@8.23.0)
@@ -458,7 +458,7 @@ importers:
         version: 4.1.11(vitest@4.1.11)
       dotenv:
         specifier: 'catalog:'
-        version: 18.0.2
+        version: 18.0.3
       jsdom:
         specifier: 30.0.1
         version: 30.0.1(@noble/hashes@1.8.0)
@@ -2781,8 +2781,8 @@ packages:
     resolution: {integrity: sha512-QM8q3zDe58hqUqjraQOmzZ1LIH9SWQJTlEKCH4kJ2oQvLZk7RbQXvtDM2XEq3fwkV9CCvvH4LA0AV+ogFsBM2Q==}
     engines: {node: '>=8'}
 
-  dotenv@18.0.2:
-    resolution: {integrity: sha512-wl0U3CxC0iobaryqEKpFJxzyp4AxQFYAKj/WWszXZr87vVHLi2yJv2syax5Vxt+u02xqNgE277rsc3lOKg9sPg==}
+  dotenv@18.0.3:
+    resolution: {integrity: sha512-/8CJTyL817qPnfbQrJgOEcrU3fDrJkRIoXBE566wHuvIXKOCHUZhPqGPbCPi9SogjdGnreF0TlvnTgK6J/8zpA==}
     engines: {node: '>=12'}
     hasBin: true
 
@@ -7062,7 +7062,7 @@ snapshots:
     dependencies:
       is-obj: 2.0.0
 
-  dotenv@18.0.2: {}
+  dotenv@18.0.3: {}
 
   drizzle-kit@0.31.11:
     dependencies:
