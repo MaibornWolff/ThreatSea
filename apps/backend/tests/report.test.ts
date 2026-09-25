@@ -4,7 +4,7 @@
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import { db } from "#db/index.js";
-import { assets, catalogs, threats, usersCatalogs } from "#db/schema.js";
+import { assets, catalogs, measureImpacts, measures, threats, usersCatalogs } from "#db/schema.js";
 import { CONFIDENTIALITY_LEVELS } from "#types/confidentiality-levels.types.js";
 import { app } from "#server.js";
 import { LANGUAGES } from "#types/languages.type.js";
@@ -177,11 +177,12 @@ describe("report risk of out-of-scope threats", () => {
     // Exposing a point of attack that carries an asset makes updateSystem generate the generic
     // threat and its first threat, which is the threat the report renders.
     const seedThreatWithAsset = async () => {
-        await request(app)
+        const catalogThreatResponse = await request(app)
             .post("/api/catalogs/" + catalogId + "/threats")
             .send(CATALOG_THREAT)
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
+        expect(catalogThreatResponse.statusCode).toEqual(200);
 
         const asset = (
             await db
@@ -257,5 +258,37 @@ describe("report risk of out-of-scope threats", () => {
         expect(threat.probability).toEqual(2);
         expect(threat.damage).toEqual(4);
         expect(threat.risk).toEqual(8);
+    });
+
+    it("reports no net risk for an out-of-scope threat even when a measure lowers its probability", async () => {
+        await seedThreatWithAsset();
+        const [threat] = await db.select().from(threats).where(eq(threats.projectId, projectId));
+        const measure = (
+            await db
+                .insert(measures)
+                .values({ name: "Measure 1", description: "", scheduledAt: "2025-01-01", projectId })
+                .returning()
+        ).at(0)!;
+        await db.insert(measureImpacts).values({
+            description: "",
+            setsOutOfScope: false,
+            impactsProbability: true,
+            probability: 1,
+            impactsDamage: false,
+            damage: null,
+            threatId: threat!.id,
+            measureId: measure.id,
+        });
+
+        // In scope, the measure lowers the net probability from 2 to 1: net risk 1 × 4.
+        expect((await getReportThreat()).netRisk).toEqual(4);
+
+        await db.update(threats).set({ status: THREAT_STATUSES.OUTOFSCOPE }).where(eq(threats.projectId, projectId));
+        const outOfScopeThreat = await getReportThreat();
+
+        expect(outOfScopeThreat.netProbability).toEqual(0);
+        expect(outOfScopeThreat.netDamage).toEqual(0);
+        expect(outOfScopeThreat.netRisk).toEqual(0);
+        expect(outOfScopeThreat.risk).toEqual(8);
     });
 });
