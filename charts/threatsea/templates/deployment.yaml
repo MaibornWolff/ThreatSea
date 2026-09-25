@@ -41,6 +41,10 @@ spec:
               containerPort: {{ .Values.service.containerPort }}
               protocol: TCP
           env:
+            # ── Server ────────────────────────────────────────────────────
+            - name: PORT
+              value: {{ .Values.service.containerPort | quote }}
+
             # ── Logging ──────────────────────────────────────────────────
             - name: LOG_LEVEL
               value: {{ .Values.config.logLevel | quote }}
