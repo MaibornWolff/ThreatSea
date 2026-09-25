@@ -3,7 +3,7 @@ import { USER_ROLES } from "#api/types/user-roles.types.ts";
 import { RiskPage } from "../pages/risk.page.ts";
 import { getProjects, importProject, deleteProject } from "../utils/project.api.ts";
 import { deleteCatalog } from "../utils/catalog.api.ts";
-import { getThreats } from "../utils/threat.api.ts";
+import { createThreat, getThreats } from "../utils/threat.api.ts";
 import { getMeasures } from "../utils/measure.api.ts";
 import { createMeasureImpact } from "../utils/measure-impact.api.ts";
 import { addMember, findAddableMemberId } from "../utils/member.api.ts";
@@ -298,19 +298,35 @@ test.describe("Risk page tests", () => {
         await expect(page).toHaveURL(new RegExp(`/projects/${projectId}/risk/measureImpacts/edit$`));
     });
 
-    test("Should filter the threat list by clicking a matrix cell", async ({ page }) => {
+    test("Should filter the threat list by clicking a matrix cell", async ({ page, request }) => {
+        // A second threat of the same generic threat with the same assessment shares
+        // "Breach of isolation on the server"'s cell (probability 3 / damage 2), so the cell holds two.
+        const breachOfIsolation = (await getThreats(request, ownerToken, projectId)).find(
+            (threat) => threat.name === "Breach of isolation on the server"
+        )!;
+        await createThreat(request, ownerToken, {
+            projectId,
+            genericThreatId: breachOfIsolation.genericThreatId,
+            name: "Breach of isolation on the server backup",
+            probability: breachOfIsolation.probability,
+            confidentiality: breachOfIsolation.confidentiality,
+            integrity: breachOfIsolation.integrity,
+            availability: breachOfIsolation.availability,
+        });
         const pg = new RiskPage(page);
         await pg.goto(projectId);
 
-        await expect(pg.threatRows).toHaveCount(5);
-
-        // Only "Breach of isolation on the server" sits at probability 3 / damage 2.
-        await pg.matrixCell(3, 2).click();
-        await expect(pg.threatRows).toHaveCount(1);
-        await expect(pg.threatNameCells).toHaveText(["Breach of isolation on the server"]);
+        await expect(pg.threatRows).toHaveCount(6);
 
         await pg.matrixCell(3, 2).click();
-        await expect(pg.threatRows).toHaveCount(5);
+        await expect(pg.threatRows).toHaveCount(2);
+        await expect(pg.threatNameCells).toHaveText([
+            "Breach of isolation on the server",
+            "Breach of isolation on the server backup",
+        ]);
+
+        await pg.matrixCell(3, 2).click();
+        await expect(pg.threatRows).toHaveCount(6);
     });
 
     test("Should let an Owner adjust the line of tolerance and have it persist", async ({ page }) => {
