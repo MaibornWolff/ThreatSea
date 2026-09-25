@@ -24,7 +24,7 @@ type ExportedProject = typeof riskFixture.project;
 // Rows are located by substring (hasText), so "Physical attack on the server" also matches the
 // server rack threat; the tests use the unambiguous names.
 const EXISTING_MEASURE_NAME = "Nothing special here";
-const PHYSICAL_ATTACK = "Physical attack on the server rack";
+const SERVER_RACK_THREAT = "Physical attack on the server rack";
 const THREAT_NAMES_ASC = [
     "Breach of isolation on the server",
     "Physical attack on the client",
@@ -99,11 +99,11 @@ test.describe("Risk page tests", () => {
     test("Should keep the Risk page read-only for a Viewer", async ({ page, request }) => {
         const threats = await getThreats(request, ownerToken, projectId);
         const measures = await getMeasures(request, ownerToken, projectId);
-        const physicalAttack = threats.find((threat) => threat.name === PHYSICAL_ATTACK)!;
+        const serverRackThreat = threats.find((threat) => threat.name === SERVER_RACK_THREAT)!;
         const existingMeasure = measures.find((measure) => measure.name === EXISTING_MEASURE_NAME)!;
         await createMeasureImpact(request, ownerToken, {
             projectId,
-            threatId: physicalAttack.id,
+            threatId: serverRackThreat.id,
             measureId: existingMeasure.id,
             description: "",
             setsOutOfScope: false,
@@ -121,7 +121,7 @@ test.describe("Risk page tests", () => {
 
         await expect(pg.applyMeasureButton).toHaveCount(0);
 
-        await pg.selectThreat(PHYSICAL_ATTACK);
+        await pg.selectThreat(SERVER_RACK_THREAT);
         await expect(pg.appliedMeasureRows).toHaveCount(1);
         await expect(pg.unapplyButtonFor(EXISTING_MEASURE_NAME)).toHaveCount(0);
 
@@ -129,7 +129,7 @@ test.describe("Risk page tests", () => {
         await expect(pg.lineOfToleranceThumbs.nth(1)).toBeDisabled();
 
         const urlBeforeClick = page.url();
-        await pg.editThreat(PHYSICAL_ATTACK);
+        await pg.editThreat(SERVER_RACK_THREAT);
         await expect(page).toHaveURL(urlBeforeClick);
 
         await page.goto(`/projects/${projectId}/risk/threats/edit`);
@@ -141,8 +141,8 @@ test.describe("Risk page tests", () => {
         const pg = new RiskPage(page);
         await pg.goto(projectId);
 
-        await pg.selectThreat(PHYSICAL_ATTACK);
-        await expect(pg.riskCellFor(PHYSICAL_ATTACK)).toHaveText("4");
+        await pg.selectThreat(SERVER_RACK_THREAT);
+        await expect(pg.riskCellFor(SERVER_RACK_THREAT)).toHaveText("4");
 
         await pg.applyMeasureButton.click();
         await pg.selectExistingMeasure(EXISTING_MEASURE_NAME);
@@ -153,13 +153,13 @@ test.describe("Risk page tests", () => {
         await expect(page).toHaveURL(new RegExp(`/projects/${projectId}/risk$`));
         await expect(pg.appliedMeasureRow(EXISTING_MEASURE_NAME)).toBeVisible();
         // The measure exists and is applied, but isn't "active" until the timeline reaches it.
-        await expect(pg.riskCellFor(PHYSICAL_ATTACK)).toHaveText("4");
+        await expect(pg.riskCellFor(SERVER_RACK_THREAT)).toHaveText("4");
 
         await pg.moveTimelineForward();
-        await expect(pg.riskCellFor(PHYSICAL_ATTACK)).toHaveText("2");
+        await expect(pg.riskCellFor(SERVER_RACK_THREAT)).toHaveText("2");
 
         await pg.moveTimelineToStart();
-        await expect(pg.riskCellFor(PHYSICAL_ATTACK)).toHaveText("4");
+        await expect(pg.riskCellFor(SERVER_RACK_THREAT)).toHaveText("4");
     });
 
     test("Should create a new measure inline while applying it to a threat", async ({ page }) => {
@@ -270,7 +270,7 @@ test.describe("Risk page tests", () => {
     test.fixme("Should require selecting a measure before applying it", async ({ page }) => {
         const pg = new RiskPage(page);
         await pg.goto(projectId);
-        await pg.selectThreat(PHYSICAL_ATTACK);
+        await pg.selectThreat(SERVER_RACK_THREAT);
         await pg.applyMeasureButton.click();
 
         await expect(pg.measureSelect).toBeVisible();
@@ -283,7 +283,7 @@ test.describe("Risk page tests", () => {
     test("Should validate the damage input in the Apply Measure dialog", async ({ page }) => {
         const pg = new RiskPage(page);
         await pg.goto(projectId);
-        await pg.selectThreat(PHYSICAL_ATTACK);
+        await pg.selectThreat(SERVER_RACK_THREAT);
         await pg.applyMeasureButton.click();
         await pg.selectExistingMeasure(EXISTING_MEASURE_NAME);
 

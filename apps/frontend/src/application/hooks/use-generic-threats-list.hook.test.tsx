@@ -181,11 +181,15 @@ describe("useGenericThreatsList", () => {
             // "Datenablagestruktur" is the German label for DATA_STORAGE_INFRASTRUCTURE — the raw
             // enum code (english-derived) would never match this input.
             act(() => result.current.setSearchValue("Datenablagestruktur"));
-            await waitFor(() => expect(result.current.genericThreats.map((g) => g.id)).toEqual([1]));
+            await waitFor(() =>
+                expect(result.current.genericThreats.map((genericThreat) => genericThreat.id)).toEqual([1])
+            );
 
             // and the German attacker label likewise.
             act(() => result.current.setSearchValue("Administratoren"));
-            await waitFor(() => expect(result.current.genericThreats.map((g) => g.id)).toEqual([1]));
+            await waitFor(() =>
+                expect(result.current.genericThreats.map((genericThreat) => genericThreat.id)).toEqual([1])
+            );
         } finally {
             await translationUtil.changeLanguage(previousLanguage);
         }

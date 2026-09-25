@@ -81,7 +81,7 @@ beforeEach(async () => {
     projectId = projectRes.body.id;
 });
 
-const makePoA = (id: string, assets: number[]): PointOfAttack => ({
+const makePointOfAttack = (id: string, assets: number[]): PointOfAttack => ({
     id,
     name: null,
     type: POA_TYPE,
@@ -104,37 +104,37 @@ const saveSystem = (pointsOfAttack: PointOfAttack[]) => updateSystem(projectId, 
 
 describe("updateSystem generic threat/threat generation", () => {
     it("creates a generic threat with no threats when a point of attack is exposed without assets", async () => {
-        const poaId = nanoid();
-        await saveSystem([makePoA(poaId, [])]);
+        const pointOfAttackId = nanoid();
+        await saveSystem([makePointOfAttack(pointOfAttackId, [])]);
 
         const generics = await getGenericThreatsByProjectId(projectId);
         expect(generics).toHaveLength(1);
-        expect(generics[0]!.pointOfAttackId).toBe(poaId);
+        expect(generics[0]!.pointOfAttackId).toBe(pointOfAttackId);
 
         const generatedThreats = await getThreatsByGenericThreatId(generics[0]!.id);
         expect(generatedThreats).toEqual([]);
     });
 
     it("creates the first threat, inheriting generic threat identity, when the point of attack gains assets", async () => {
-        const poaId = nanoid();
-        await saveSystem([makePoA(poaId, [])]);
-        await saveSystem([makePoA(poaId, [1])]);
+        const pointOfAttackId = nanoid();
+        await saveSystem([makePointOfAttack(pointOfAttackId, [])]);
+        await saveSystem([makePointOfAttack(pointOfAttackId, [1])]);
 
         const generics = await getGenericThreatsByProjectId(projectId);
         expect(generics).toHaveLength(1);
 
         const generatedThreats = await getThreatsByGenericThreatId(generics[0]!.id);
         expect(generatedThreats).toHaveLength(1);
-        expect(generatedThreats[0]!.pointOfAttackId).toBe(poaId);
+        expect(generatedThreats[0]!.pointOfAttackId).toBe(pointOfAttackId);
         expect(generatedThreats[0]!.name).toBe(generics[0]!.name);
         expect(generatedThreats[0]!.attacker).toBe(generics[0]!.attacker);
     });
 
     it("does not duplicate threats when the system is saved again with the same assets", async () => {
-        const poaId = nanoid();
-        await saveSystem([makePoA(poaId, [])]);
-        await saveSystem([makePoA(poaId, [1])]);
-        await saveSystem([makePoA(poaId, [1])]);
+        const pointOfAttackId = nanoid();
+        await saveSystem([makePointOfAttack(pointOfAttackId, [])]);
+        await saveSystem([makePointOfAttack(pointOfAttackId, [1])]);
+        await saveSystem([makePointOfAttack(pointOfAttackId, [1])]);
 
         const generics = await getGenericThreatsByProjectId(projectId);
         const generatedThreats = await getThreatsByGenericThreatId(generics[0]!.id);
@@ -142,14 +142,14 @@ describe("updateSystem generic threat/threat generation", () => {
     });
 
     it("regenerates a threat when a point of attack keeps its assets but has lost all threats", async () => {
-        const poaId = nanoid();
-        await saveSystem([makePoA(poaId, [])]);
-        await saveSystem([makePoA(poaId, [1])]);
+        const pointOfAttackId = nanoid();
+        await saveSystem([makePointOfAttack(pointOfAttackId, [])]);
+        await saveSystem([makePointOfAttack(pointOfAttackId, [1])]);
 
         // Simulate a point of attack that still has assets but ended up with zero threats.
         await db.delete(threats).where(eq(threats.projectId, projectId));
 
-        await saveSystem([makePoA(poaId, [1])]);
+        await saveSystem([makePointOfAttack(pointOfAttackId, [1])]);
 
         const generics = await getGenericThreatsByProjectId(projectId);
         const generatedThreats = await getThreatsByGenericThreatId(generics[0]!.id);
@@ -157,8 +157,8 @@ describe("updateSystem generic threat/threat generation", () => {
     });
 
     it("deletes generic threats and threats when the point of attack is removed", async () => {
-        const poaId = nanoid();
-        await saveSystem([makePoA(poaId, [1])]);
+        const pointOfAttackId = nanoid();
+        await saveSystem([makePointOfAttack(pointOfAttackId, [1])]);
         expect(await getGenericThreatsByProjectId(projectId)).toHaveLength(1);
 
         await saveSystem([]);
@@ -188,8 +188,8 @@ describe("updateSystem generic threat/threat generation", () => {
                 .returning()
         ).at(0)!;
 
-        const poaId = nanoid();
-        await saveSystem([makePoA(poaId, [asset.id])]);
+        const pointOfAttackId = nanoid();
+        await saveSystem([makePointOfAttack(pointOfAttackId, [asset.id])]);
 
         // With an asset assigned, the generated threat surfaces in the threats-table query.
         const withAssets = await getGenericThreatsWithExtendedThreats(projectId);
@@ -198,7 +198,7 @@ describe("updateSystem generic threat/threat generation", () => {
 
         // Removing every asset from a kept point of attack leaves the threat in the
         // database, but its risk is 0, so the query must not list it.
-        await saveSystem([makePoA(poaId, [])]);
+        await saveSystem([makePointOfAttack(pointOfAttackId, [])]);
 
         expect(await getGenericThreatsWithExtendedThreats(projectId)).toEqual([]);
 
@@ -226,9 +226,9 @@ describe("updateSystem threat creation for points of attack with assets", () => 
         });
         const firstPointOfAttackId = nanoid();
         const secondPointOfAttackId = nanoid();
-        await saveSystem([makePoA(firstPointOfAttackId, []), makePoA(secondPointOfAttackId, [])]);
+        await saveSystem([makePointOfAttack(firstPointOfAttackId, []), makePointOfAttack(secondPointOfAttackId, [])]);
 
-        await saveSystem([makePoA(firstPointOfAttackId, [1]), makePoA(secondPointOfAttackId, [1])]);
+        await saveSystem([makePointOfAttack(firstPointOfAttackId, [1]), makePointOfAttack(secondPointOfAttackId, [1])]);
 
         const generics = await getGenericThreatsByProjectId(projectId);
         expect(generics).toHaveLength(4);
@@ -248,7 +248,7 @@ describe("updateSystem threat creation for points of attack with assets", () => 
 
     it("uses a generic threat's catalog threat even when it is not in the project's catalog", async () => {
         const pointOfAttackId = nanoid();
-        await saveSystem([makePoA(pointOfAttackId, [])]);
+        await saveSystem([makePointOfAttack(pointOfAttackId, [])]);
         const otherCatalog = (
             await db.insert(catalogs).values({ name: "Other catalog", language: LANGUAGES.EN }).returning()
         ).at(0)!;
@@ -258,7 +258,7 @@ describe("updateSystem threat creation for points of attack with assets", () => 
             .set({ catalogThreatId: otherCatalogThreat.id })
             .where(eq(genericThreats.projectId, projectId));
 
-        await saveSystem([makePoA(pointOfAttackId, [1])]);
+        await saveSystem([makePointOfAttack(pointOfAttackId, [1])]);
 
         const createdThreats = await db.select().from(threats).where(eq(threats.projectId, projectId));
         expect(createdThreats).toHaveLength(1);
