@@ -13,6 +13,7 @@ import {
     getProject,
     getProjects,
     updateProject,
+    updateProjectLineOfTolerance,
 } from "#controllers/projects.controller.js";
 import { CheckProjectExistenceHandler } from "#middlewares/check-existence.middleware.js";
 import { CheckProjectRoleHandler } from "#guards/authorisation.guard.js";
@@ -21,6 +22,7 @@ import {
     ExtendedProjectResponse,
     ProjectIdParam,
     ProjectResponse,
+    UpdateProjectLineOfToleranceRequest,
     UpdateProjectRequest,
 } from "#types/project.types.js";
 import { projectMembersRouter } from "#routers/project-members.router.js";
@@ -57,6 +59,16 @@ projectsRouter.put<ProjectIdParam, ProjectResponse, UpdateProjectRequest>(
     CheckProjectExistenceHandler,
     CheckProjectRoleHandler(USER_ROLES.OWNER),
     updateProject
+);
+
+// Separate from the project update so Editors can save the lines of tolerance without being able to edit project details.
+projectsRouter.put<ProjectIdParam, ProjectResponse, UpdateProjectLineOfToleranceRequest>(
+    `/:${idParam}/lineOfTolerance`,
+    ValidateParamHandler(ProjectIdParam),
+    ValidateBodyHandler(UpdateProjectLineOfToleranceRequest),
+    CheckProjectExistenceHandler,
+    CheckProjectRoleHandler(USER_ROLES.EDITOR),
+    updateProjectLineOfTolerance
 );
 
 projectsRouter.delete<ProjectIdParam, void, void>(

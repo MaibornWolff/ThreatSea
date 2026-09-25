@@ -57,6 +57,7 @@ const asyncThunks = [
     ProjectsActions.createProject,
     ProjectsActions.deleteProject,
     ProjectsActions.updateProject,
+    ProjectsActions.updateProjectLineOfTolerance,
     ProjectsActions.importProjectFromJson,
     ProjectsActions.exportProjectToJson,
     SystemActions.getSystem,

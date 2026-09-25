@@ -16,6 +16,8 @@ const preloadedWithRole = (role?: USER_ROLES) => ({
 
 const setup = (role: USER_ROLES | undefined, props: Partial<ComponentProps<typeof LineOfToleranceSelector>> = {}) => {
     const onLoTChange = vi.fn();
+    const onSave = vi.fn();
+    const onReset = vi.fn();
     const user = userEvent.setup();
 
     renderWithProviders(
@@ -23,13 +25,16 @@ const setup = (role: USER_ROLES | undefined, props: Partial<ComponentProps<typeo
             title="Line of Tolerance"
             greenValue={3}
             redValue={6}
+            isDirty={false}
             onLoTChange={onLoTChange}
+            onSave={onSave}
+            onReset={onReset}
             {...props}
         />,
         { preloadedState: preloadedWithRole(role) }
     );
 
-    return { onLoTChange, user };
+    return { onLoTChange, onSave, onReset, user };
 };
 
 const expectSliderDisabled = (disabled: boolean) => {
@@ -84,6 +89,53 @@ describe("LineOfToleranceSelector — value conversion", () => {
         greenThumb!.focus();
         await user.keyboard("{ArrowRight}");
 
-        expect(onLoTChange).toHaveBeenCalledWith([4, 6], expect.any(Boolean));
+        expect(onLoTChange).toHaveBeenCalledWith([4, 6]);
+    });
+});
+
+describe("LineOfToleranceSelector — save & reset", () => {
+    const getSaveButton = () => screen.queryByRole("button", { name: "Save" });
+    const getResetButton = () => screen.queryByRole("button", { name: "Reset" });
+
+    it("hides save and reset for a viewer", () => {
+        setup(USER_ROLES.VIEWER, { isDirty: true });
+
+        expect(getSaveButton()).not.toBeInTheDocument();
+        expect(getResetButton()).not.toBeInTheDocument();
+    });
+
+    it.each([USER_ROLES.EDITOR, USER_ROLES.OWNER])("disables save and reset for %s without changes", (role) => {
+        setup(role, { isDirty: false });
+
+        expect(getSaveButton()).toBeDisabled();
+        expect(getResetButton()).toBeDisabled();
+    });
+
+    it("calls onSave when saving a change", async () => {
+        const { onSave, onReset, user } = setup(USER_ROLES.EDITOR, { isDirty: true });
+
+        await user.click(getSaveButton()!);
+
+        expect(onSave).toHaveBeenCalledTimes(1);
+        expect(onReset).not.toHaveBeenCalled();
+    });
+
+    it("calls onReset when resetting a change", async () => {
+        const { onSave, onReset, user } = setup(USER_ROLES.EDITOR, { isDirty: true });
+
+        await user.click(getResetButton()!);
+
+        expect(onReset).toHaveBeenCalledTimes(1);
+        expect(onSave).not.toHaveBeenCalled();
+    });
+
+    it("does not save when the slider moves", async () => {
+        const { onSave, user } = setup(USER_ROLES.EDITOR);
+        const [greenThumb] = screen.getAllByRole("slider");
+
+        greenThumb!.focus();
+        await user.keyboard("{ArrowRight}");
+
+        expect(onSave).not.toHaveBeenCalled();
     });
 });

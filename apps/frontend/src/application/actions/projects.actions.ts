@@ -6,7 +6,12 @@ import { createAsyncThunk, createAction } from "@reduxjs/toolkit";
 import { ImportsApi } from "#api/import.api.ts";
 import { ProjectsAPI } from "#api/projects.api.ts";
 import { ExportsApi } from "#api/export.api.ts";
-import type { CreateProjectRequest, Project, UpdateProjectRequest } from "#api/types/project.types.ts";
+import type {
+    CreateProjectRequest,
+    Project,
+    UpdateProjectLineOfToleranceRequest,
+    UpdateProjectRequest,
+} from "#api/types/project.types.ts";
 import type { USER_ROLES } from "#api/types/user-roles.types.ts";
 
 /**
@@ -86,6 +91,21 @@ export class ProjectsActions {
     static updateProject = createAsyncThunk("[projects] update project", async (data: UpdateProjectRequest) => {
         return await ProjectsAPI.updateProject(data);
     });
+
+    /**
+     * Action that updates the lines of tolerance of a project using the backend api.
+     * @function updateProjectLineOfTolerance
+     * @param {string} type - Action type.
+     * @param {function} payloadCreator - Async callback function
+     *      to update the lines of tolerance.
+     * @returns Action function for updating the lines of tolerance.
+     */
+    static updateProjectLineOfTolerance = createAsyncThunk(
+        "[projects] update project line of tolerance",
+        async (data: UpdateProjectLineOfToleranceRequest) => {
+            return await ProjectsAPI.updateProjectLineOfTolerance(data);
+        }
+    );
 
     /**
      * Action that fetches the data of a single project from the redux store.

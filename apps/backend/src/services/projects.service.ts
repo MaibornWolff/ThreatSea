@@ -327,6 +327,27 @@ export async function updateProject(projectId: number, updateProjectData: Update
 }
 
 /**
+ * Updates the lines of tolerance of a project.
+ *
+ * @param {number} projectId - The id of the project.
+ * @param {Pick<UpdateProject, "lineOfToleranceGreen" | "lineOfToleranceRed">} lineOfToleranceData - The new lines of tolerance.
+ * @returns {Promise<Project>} A promise that resolves to the updated project.
+ * @throws {Error} If the project could not be updated.
+ */
+export async function updateProjectLineOfTolerance(
+    projectId: number,
+    lineOfToleranceData: Pick<UpdateProject, "lineOfToleranceGreen" | "lineOfToleranceRed">
+): Promise<Project> {
+    const [project] = await db.update(projects).set(lineOfToleranceData).where(eq(projects.id, projectId)).returning();
+
+    if (!project) {
+        throw new Error("Failed to update project");
+    }
+
+    return project;
+}
+
+/**
  * Deletes a project.
  *
  * @param {number} projectId - The id of the project.
