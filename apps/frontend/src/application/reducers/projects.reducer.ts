@@ -87,7 +87,7 @@ const projectsReducer = createReducer(defaultState, (builder) => {
             image: state.entities[action.payload.id]?.image ?? null,
             folderId: state.entities[action.payload.id]?.folderId ?? null,
             ...action.payload,
-            role: USER_ROLES.OWNER,
+            role: state.entities[action.payload.id]?.role ?? USER_ROLES.OWNER,
         };
 
         projectsAdapter.upsertOne(state, extendedProject);

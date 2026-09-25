@@ -148,6 +148,29 @@ describe("projectsReducer — deletingProjectId lifecycle", () => {
         });
     });
 
+    describe("setProject", () => {
+        it("keeps the member's role when a non-owner saves the project", () => {
+            const state = withEntities(createProject({ id: 7, role: USER_ROLES.EDITOR, lineOfToleranceGreen: 6 }));
+
+            const next = projectsReducer(
+                state,
+                ProjectsActions.setProject(createProject({ id: 7, role: USER_ROLES.OWNER, lineOfToleranceGreen: 3 }))
+            );
+
+            expect(next.entities[7]?.role).toBe(USER_ROLES.EDITOR);
+            expect(next.entities[7]?.lineOfToleranceGreen).toBe(3);
+        });
+
+        it("marks a newly created project as owned", () => {
+            const next = projectsReducer(
+                getInitialState(),
+                ProjectsActions.setProject(createProject({ id: 7, role: USER_ROLES.VIEWER }))
+            );
+
+            expect(next.entities[7]?.role).toBe(USER_ROLES.OWNER);
+        });
+    });
+
     describe("setProjectFolder", () => {
         it("updates only the folder placement, leaving the role intact", () => {
             const state = withEntities(createProject({ id: 7, role: USER_ROLES.VIEWER, folderId: null }));

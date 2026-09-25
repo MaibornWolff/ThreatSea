@@ -1,10 +1,12 @@
 import { styled } from "@mui/material/styles";
 import { Box, Slider, Typography } from "@mui/material";
-import { useCallback, useEffect, useMemo, useRef, type SyntheticEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { calcRiskColourFromRisk } from "#utils/calcRisk.ts";
 import { MATRIX_COLOR } from "#view/colors/matrix.ts";
+import { Button } from "#view/components/button.component.tsx";
 
 const LineOfToleranceSlider = styled(Slider)(() => ({
     height: 2,
@@ -54,10 +56,23 @@ interface LineOfToleranceSelectorProps {
     title: string;
     greenValue: number;
     redValue: number;
-    onLoTChange: (values: [number, number], committed: boolean) => void;
+    isDirty: boolean;
+    onLoTChange: (values: [number, number]) => void;
+    onSave: () => void;
+    onReset: () => void;
 }
 
-export const LineOfToleranceSelector = ({ title, greenValue, redValue, onLoTChange }: LineOfToleranceSelectorProps) => {
+export const LineOfToleranceSelector = ({
+    title,
+    greenValue,
+    redValue,
+    isDirty,
+    onLoTChange,
+    onSave,
+    onReset,
+}: LineOfToleranceSelectorProps) => {
+    const { t } = useTranslation("common");
+
     // slider should stop only on steps where anything actually changes in the matrix, beeing only
     // multiples of 2, 3, 4 and 5
     const marksvals = useMemo(
@@ -100,6 +115,7 @@ export const LineOfToleranceSelector = ({ title, greenValue, redValue, onLoTChan
     );
 
     const userRole = useAppSelector((state) => state.projects.current?.role);
+    const canEdit = checkUserRole(userRole, USER_ROLES.EDITOR);
 
     const sliderRef = useRef<HTMLSpanElement>(null);
 
@@ -150,15 +166,7 @@ export const LineOfToleranceSelector = ({ title, greenValue, redValue, onLoTChan
         const redP = Array.isArray(newValue) ? newValue[1] : undefined;
         if (greenP && redP) {
             colorSlider(greenP, redP);
-            onLoTChange([stepValue(greenP), stepValue(redP)], false);
-        }
-    };
-
-    const OnValueSaved = (_: Event | SyntheticEvent, newValue: number | number[]) => {
-        const greenP = Array.isArray(newValue) ? newValue[0] : undefined;
-        const redP = Array.isArray(newValue) ? newValue[1] : undefined;
-        if (greenP && redP) {
-            onLoTChange([stepValue(greenP), stepValue(redP)], true);
+            onLoTChange([stepValue(greenP), stepValue(redP)]);
         }
     };
 
@@ -184,7 +192,7 @@ export const LineOfToleranceSelector = ({ title, greenValue, redValue, onLoTChan
                     sx={{
                         width: "99%",
                     }}
-                    disabled={!checkUserRole(userRole, USER_ROLES.EDITOR)}
+                    disabled={!canEdit}
                     step={1}
                     marks
                     scale={stepValue}
@@ -193,7 +201,6 @@ export const LineOfToleranceSelector = ({ title, greenValue, redValue, onLoTChan
                     max={marksvals.length - 1}
                     track={"inverted"}
                     onChange={onValueChanged}
-                    onChangeCommitted={OnValueSaved}
                     value={[findStep(greenValue), findStep(redValue)]}
                     ref={sliderRef}
                 />
@@ -209,6 +216,27 @@ export const LineOfToleranceSelector = ({ title, greenValue, redValue, onLoTChan
             >
                 {title}
             </Typography>
+            {canEdit && (
+                <Box sx={{ display: "flex", gap: 1, marginTop: 1 }}>
+                    <Button
+                        sx={{ marginRight: 0 }}
+                        disabled={!isDirty}
+                        onClick={onReset}
+                        data-testid="risk-page_line-of-tolerance-reset-button"
+                    >
+                        {t("resetText")}
+                    </Button>
+                    <Button
+                        sx={{ marginRight: 0 }}
+                        color="success"
+                        disabled={!isDirty}
+                        onClick={onSave}
+                        data-testid="risk-page_line-of-tolerance-save-button"
+                    >
+                        {t("saveBtn")}
+                    </Button>
+                </Box>
+            )}
         </Box>
     );
 };
