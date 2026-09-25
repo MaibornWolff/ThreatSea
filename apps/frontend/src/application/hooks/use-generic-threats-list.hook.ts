@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { GenericThreatsAPI } from "#api/generic-threats.api.ts";
 import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat.types.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
@@ -14,14 +13,9 @@ export type ExtendedThreatWithMetrics = ExtendedThreat & {
 };
 
 export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
-    // `attacker` and `pointOfAttack` are stored as language-neutral enum codes but shown to the
-    // user through these translation tables, so the search must match the localized label the user
-    // actually sees — not the raw code (which is English-derived and never matches German input).
-    const { t } = useTranslation("common");
     const dispatch = useAppDispatch();
     const [isPending, setIsPending] = useState<boolean>(false);
     const [genericThreats, setGenericThreats] = useState<GenericThreatWithExtendedThreats[]>([]);
-    const [searchValue, setSearchValue] = useState<string>("");
 
     const [expandedGenericThreatIds, setExpandedGenericThreatIds] = useState<Record<number, boolean>>({});
     const [threatsByGenericThreatId, setThreatsByGenericThreatId] = useState<
@@ -93,42 +87,11 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
         }));
     }, []);
 
-    const filteredGenericThreats = useMemo(() => {
-        const normalizedSearch = searchValue.toLowerCase().trim();
-
-        if (!normalizedSearch) {
-            return genericThreats;
-        }
-
-        return genericThreats.filter((genericThreat) => {
-            const attackerLabel = t(`attackerList.${genericThreat.attacker}`).toLowerCase();
-            const pointOfAttackLabel = t(`pointsOfAttackList.${genericThreat.pointOfAttack}`).toLowerCase();
-            const genericThreatMatches =
-                genericThreat.name.toLowerCase().includes(normalizedSearch) ||
-                genericThreat.description.toLowerCase().includes(normalizedSearch) ||
-                attackerLabel.includes(normalizedSearch) ||
-                pointOfAttackLabel.includes(normalizedSearch);
-
-            if (genericThreatMatches) {
-                return true;
-            }
-
-            const threats = threatsByGenericThreatId[genericThreat.id] ?? [];
-            return threats.some(
-                (threat) =>
-                    threat.name.toLowerCase().includes(normalizedSearch) ||
-                    threat.description.toLowerCase().includes(normalizedSearch)
-            );
-        });
-    }, [threatsByGenericThreatId, genericThreats, searchValue, t]);
-
-    // Scoped to the generic threats the user can currently see: with a search active,
-    // expand/collapse-all must not silently change hidden generic threats' state.
     const setAllGenericThreatsExpanded = useCallback(
         (expanded: boolean) => {
             setExpandedGenericThreatIds((previous) => {
                 const next = { ...previous };
-                for (const genericThreat of filteredGenericThreats) {
+                for (const genericThreat of genericThreats) {
                     if (expanded) {
                         next[genericThreat.id] = true;
                     } else {
@@ -138,15 +101,13 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
                 return next;
             });
         },
-        [filteredGenericThreats]
+        [genericThreats]
     );
 
     return {
         isPending,
-        searchValue,
-        setSearchValue,
         loadGenericThreats,
-        genericThreats: filteredGenericThreats,
+        genericThreats,
         expandedGenericThreatIds,
         threatsByGenericThreatId,
         toggleGenericThreat,
