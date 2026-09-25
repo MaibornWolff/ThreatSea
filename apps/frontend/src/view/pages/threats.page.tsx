@@ -56,7 +56,7 @@ import {
 
 // Fields whose values only exist on threats; a filter on them can never
 // match a generic threat directly.
-const threatOnlyFilterFields = ["assets", "probability", "damage", "risk", "status"] as const;
+const threatOnlyFilterFields = ["description", "assets", "probability", "damage", "risk", "status"] as const;
 
 // The e2e page objects locate action buttons inside the row-level test ids, so
 // the ids must live on the grid row element itself, not on a single cell.
@@ -77,6 +77,8 @@ const ThreatsGridRowSlot = (props: GridRowProps) => {
  */
 const DEFAULT_COLUMN_VISIBILITY: GridColumnVisibilityModel = {
     name: true,
+    // Descriptions are long free text; the column is opt-in via Customize view.
+    description: false,
     assets: true,
     componentName: true,
     pointOfAttack: true,
@@ -267,6 +269,7 @@ const ThreatsPageBody = () => {
 
     const columnLabels: Record<string, string> = {
         name: t("name"),
+        description: t("description"),
         assets: t("assets"),
         componentName: t("componentName"),
         pointOfAttack: t("pointOfAttack"),
@@ -305,6 +308,8 @@ const ThreatsPageBody = () => {
                 switch (field) {
                     case "name":
                         return threat.name.toLowerCase().includes(filterValue);
+                    case "description":
+                        return threat.description.toLowerCase().includes(filterValue);
                     case "assets":
                         return String(threat.assets.length).includes(filterValue);
                     case "componentName":

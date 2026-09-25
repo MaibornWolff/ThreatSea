@@ -104,6 +104,7 @@ describe("createThreatsColumns — structure", () => {
         const { columns } = buildColumns();
         expect(columns.map((c) => c.field)).toEqual([
             "name",
+            "description",
             "assets",
             "componentName",
             "pointOfAttack",
@@ -270,14 +271,40 @@ describe("formatComponentName", () => {
 });
 
 describe("createThreatsColumns — no threats placeholder", () => {
-    it("spans the whole grid and shows the placeholder for a generic threat without threats", () => {
+    it("spans every visible column and shows the placeholder for a generic threat without threats", () => {
         const { byField } = columnByField();
         const nameColumn = byField["name"]!;
-        const colSpan = nameColumn.colSpan as (value: unknown, row: ThreatsGridRow) => number | undefined;
-        expect(colSpan(undefined, noThreatsRow)).toBe(10);
-        expect(colSpan(undefined, threatRow)).toBeUndefined();
+        const colSpan = nameColumn.colSpan as (
+            value: unknown,
+            row: ThreatsGridRow,
+            column: unknown,
+            apiRef: { current: { getVisibleColumns: () => unknown[] } }
+        ) => number | undefined;
+        const gridWithVisibleColumns = (count: number) => ({
+            current: { getVisibleColumns: () => Array.from({ length: count }) },
+        });
+
+        expect(colSpan(undefined, noThreatsRow, nameColumn, gridWithVisibleColumns(11))).toBe(11);
+        expect(colSpan(undefined, noThreatsRow, nameColumn, gridWithVisibleColumns(9))).toBe(9);
+        expect(colSpan(undefined, threatRow, nameColumn, gridWithVisibleColumns(11))).toBeUndefined();
 
         renderCell(nameColumn, noThreatsRow);
         expect(screen.getByText("noThreats")).toBeInTheDocument();
+    });
+});
+
+describe("createThreatsColumns — description column", () => {
+    it("shows a threat's own description", () => {
+        const { byField } = columnByField();
+        renderCell(byField["description"], threatRow);
+
+        expect(screen.getByTestId("threats-page_threats-list-entry_description")).toHaveTextContent("threat desc");
+    });
+
+    it("stays empty on generic threat rows, whose description the filter does not match", () => {
+        const { byField } = columnByField();
+        const { container } = renderCell(byField["description"], genericRow);
+
+        expect(container).toBeEmptyDOMElement();
     });
 });

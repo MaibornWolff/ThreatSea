@@ -205,4 +205,20 @@ test.describe("Threats Page Tests", () => {
 
         await expect(pg.threatListEntry(ONLY_THREAT)).toHaveCount(1);
     });
+
+    test("Should filter by a threat's own description, not its generic threat's", async ({ page }) => {
+        const pg = new ThreatsPage(page);
+        await expect(pg.genericThreatListEntries).toHaveCount(EXPECTED_GENERIC_THREAT_COUNT, { timeout: 20000 });
+        await pg.showColumn("Description");
+
+        // Only the server rack threat's own description mentions the data centre.
+        await pg.columnFilterInput("description").fill("data centre");
+        await expect(pg.genericThreatListEntries).toHaveCount(1);
+        await pg.toggleButton(pg.genericThreatListEntry(PHYSICAL_ATTACK, SERVER)).click();
+        await expect(pg.threatListEntryNames).toHaveText([SERVER_RACK_THREAT]);
+
+        // "Physical access" appears only in generic threat descriptions, which the filter ignores.
+        await pg.columnFilterInput("description").fill("physical access");
+        await expect(pg.genericThreatListEntries).toHaveCount(0);
+    });
 });

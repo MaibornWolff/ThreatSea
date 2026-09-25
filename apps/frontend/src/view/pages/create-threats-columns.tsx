@@ -92,7 +92,9 @@ export const createThreatsColumns = ({
         sortable: false,
         align: "left",
         headerAlign: "center",
-        colSpan: (_value, row) => (row.rowType === "noThreats" ? 10 : undefined),
+        // The "no threats" placeholder row spans every visible column.
+        colSpan: (_value, row, _column, apiRef) =>
+            row.rowType === "noThreats" ? apiRef.current.getVisibleColumns().length : undefined,
         renderHeader: () => (
             <ColumnFilterHeader
                 field="name"
@@ -145,6 +147,33 @@ export const createThreatsColumns = ({
                 </Box>
             );
         },
+    },
+    {
+        field: "description",
+        headerName: t("description"),
+        flex: 1,
+        minWidth: 200,
+        sortable: false,
+        align: "left",
+        headerAlign: "center",
+        renderHeader: () => (
+            <ColumnFilterHeader
+                field="description"
+                label={t("description")}
+                columnFilters={columnFilters}
+                onFilterChange={onFilterChange}
+                expandedFilters={expandedFilters}
+                onToggleExpanded={onToggleFilterExpanded}
+            />
+        ),
+        // Only threats show and filter on their own description; generic threat rows stay empty.
+        renderCell: (params: GridRenderCellParams<ThreatsGridRow>) =>
+            params.row.rowType === "threat" ? (
+                <OverflowText
+                    text={params.row.threat.description}
+                    testId="threats-page_threats-list-entry_description"
+                />
+            ) : null,
     },
     {
         field: "assets",
