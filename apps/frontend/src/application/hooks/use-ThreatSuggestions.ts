@@ -47,12 +47,12 @@ export const useThreatSuggestions = ({
                 })
             );
         });
-        const matchingViaCatalogThreats = threats.filter((threat) => {
+        const matchingViaGenericThreats = threats.filter((threat) => {
             return (
                 !impactedThreats.includes(threat) &&
                 threats.some(
                     (otherThreat) =>
-                        otherThreat.catalogThreatId === threat.catalogThreatId &&
+                        otherThreat.genericThreatId === threat.genericThreatId &&
                         measureImpacts.some(
                             (measureImpact) =>
                                 measureImpact.measureId === selectedMeasure.id &&
@@ -61,7 +61,7 @@ export const useThreatSuggestions = ({
                 )
             );
         });
-        return [...new Set([...matchingViaCatalogThreats, ...matchingViaAttackPoints])].sort((a, b) =>
+        return [...new Set([...matchingViaGenericThreats, ...matchingViaAttackPoints])].sort((a, b) =>
             a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1
         );
     }, [selectedMeasure, threats, measureImpacts, impactedThreats]);

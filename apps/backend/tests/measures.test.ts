@@ -5,7 +5,16 @@ import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import { nanoid } from "nanoid";
 import { db } from "#db/index.js";
-import { catalogs, measureImpacts, measures, threats, usersCatalogs } from "#db/schema.js";
+import {
+    catalogs,
+    threats,
+    CreateThreat,
+    CreateGenericThreat,
+    genericThreats,
+    measureImpacts,
+    measures,
+    usersCatalogs,
+} from "#db/schema.js";
 import { POINTS_OF_ATTACK } from "#types/points-of-attack.types.js";
 import { ATTACKERS } from "#types/attackers.types.js";
 import { CONFIDENTIALITY_LEVELS } from "#types/confidentiality-levels.types.js";
@@ -15,7 +24,7 @@ import { USER_ROLES } from "#types/user-roles.types.js";
 import { CreateProjectRequest } from "#types/project.types.js";
 import { CreateMeasureRequest } from "#types/measure.types.js";
 import { CreateMeasureImpactRequest } from "#types/measure-impact.types.js";
-import { CreateThreatRequest } from "#types/threat.types.js";
+import { THREAT_STATUSES } from "#types/threat-statuses.types.js";
 import { CreateCatalogThreatRequest } from "#types/catalog-threat.types.js";
 import { CreateCatalogMeasureRequest } from "#types/catalog-measure.types.js";
 
@@ -87,17 +96,25 @@ const INVALID_MEASURE_SCHEDULED_AT_BAD_MONTH: InstanceType<typeof CreateMeasureR
     catalogMeasureId: null,
 };
 
-const VALID_THREAT_1: Omit<InstanceType<typeof CreateThreatRequest>, "catalogThreatId"> = {
+const VALID_GENERIC_THREAT_1: Omit<CreateGenericThreat, "catalogThreatId" | "projectId"> = {
+    pointOfAttackId: nanoid(),
+    name: "Generic Threat 1",
+    description: "Generic description 1",
+    pointOfAttack: POINTS_OF_ATTACK.COMMUNICATION_INTERFACES,
+    attacker: ATTACKERS.ADMINISTRATORS,
+};
+
+const VALID_THREAT_1: Omit<CreateThreat, "genericThreatId" | "projectId"> = {
     pointOfAttackId: nanoid(),
     name: "valid threat",
     description: "valid description test test",
-    pointOfAttack: POINTS_OF_ATTACK.COMMUNICATION_INFRASTRUCTURE,
+    pointOfAttack: POINTS_OF_ATTACK.COMMUNICATION_INTERFACES,
     attacker: ATTACKERS.ADMINISTRATORS,
     probability: 2,
     confidentiality: true,
     integrity: true,
     availability: false,
-    doneEditing: false,
+    status: THREAT_STATUSES.NEW,
 };
 
 const VALID_CATALOG_THREAT_1: InstanceType<typeof CreateCatalogThreatRequest> = {
@@ -125,6 +142,7 @@ const VALID_CATALOG_MEASURE_1: InstanceType<typeof CreateCatalogMeasureRequest> 
 let projectId: number;
 let catalogThreatId: number;
 let catalogMeasureId: number;
+let genericThreatId: number;
 let threatId: number;
 
 let cookies: string[];
@@ -186,16 +204,28 @@ beforeEach(async () => {
 
     await request(app)
         .post(`/api/projects/${projectId}/system/measures`)
-        .send({ ...VALID_MEASURE_3, catalogMeasureId: null, threatId })
+        .send({ ...VALID_MEASURE_3, catalogMeasureId: null })
         .set("X-CSRF-TOKEN", csrfToken)
         .set("Cookie", cookies);
+
+    const genericThreat = (
+        await db
+            .insert(genericThreats)
+            .values({
+                ...VALID_GENERIC_THREAT_1,
+                catalogThreatId,
+                projectId,
+            })
+            .returning()
+    ).at(0);
+    genericThreatId = genericThreat!.id;
 
     const threat = (
         await db
             .insert(threats)
             .values({
                 ...VALID_THREAT_1,
-                catalogThreatId,
+                genericThreatId,
                 projectId,
             })
             .returning()
@@ -231,7 +261,7 @@ describe("get or create measures", () => {
     it("should create a measure without catalog measure", async () => {
         const res = await request(app)
             .post(`/api/projects/${projectId}/system/measures`)
-            .send({ ...VALID_MEASURE_1, catalogMeasureId: null, threatId })
+            .send({ ...VALID_MEASURE_1, catalogMeasureId: null })
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(200);
@@ -245,7 +275,7 @@ describe("get or create measures", () => {
     it("should not create a measure (name missing)", async () => {
         const res = await request(app)
             .post(`/api/projects/${projectId}/system/measures`)
-            .send({ ...INVALID_MEASURE_NAME_MISSING, threatId })
+            .send({ ...INVALID_MEASURE_NAME_MISSING })
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(400);
@@ -255,7 +285,7 @@ describe("get or create measures", () => {
     it("should not create a measure (name not unique)", async () => {
         const res = await request(app)
             .post(`/api/projects/${projectId}/system/measures`)
-            .send({ ...VALID_MEASURE_3, threatId })
+            .send({ ...VALID_MEASURE_3 })
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(409);
@@ -264,7 +294,7 @@ describe("get or create measures", () => {
     it("should not create a measure (scheduled at missing)", async () => {
         const res = await request(app)
             .post(`/api/projects/${projectId}/system/measures`)
-            .send({ ...INVALID_MEASURE_SCHEDULED_AT_MISSING, threatId })
+            .send({ ...INVALID_MEASURE_SCHEDULED_AT_MISSING })
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(400);

@@ -4,7 +4,6 @@
  */
 import express from "express";
 import { getSystem, updateSystem } from "#controllers/system.controller.js";
-import { threatsRouter } from "#routers/threats.router.js";
 import { measuresRouter } from "#routers/measures.router.js";
 import { measureImpactRouter } from "#routers/measure-impact.router.js";
 import { CheckProjectRoleHandler } from "#guards/authorisation.guard.js";
@@ -15,6 +14,7 @@ import {
     ValidateBodyHandler,
     ValidateParamHandler,
 } from "#middlewares/input-validations/input-validation.middleware.js";
+import { threatsRouter } from "#routers/threats.router.js";
 
 export const systemRouter = express.Router({ mergeParams: true });
 
@@ -34,6 +34,6 @@ systemRouter.put<ProjectIdParam, SystemResponse, UpdateSystemRequest>(
 );
 
 /** Put threats, measures and MeasureImpacts into this router */
-systemRouter.use("/threats", threatsRouter);
 systemRouter.use("/measures", measuresRouter);
 systemRouter.use("/measureImpacts", measureImpactRouter);
+systemRouter.use("/threats", threatsRouter);

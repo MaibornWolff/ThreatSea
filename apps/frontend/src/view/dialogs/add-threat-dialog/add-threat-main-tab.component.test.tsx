@@ -7,6 +7,7 @@ import type { Asset } from "#api/types/asset.types.ts";
 import type { ThreatMeasure } from "#application/hooks/use-threat-measures-list.hook.ts";
 import { AddThreatMainTab } from "./add-threat-main-tab.component";
 import type { ThreatFormValues } from "./add-threat-form.types.ts";
+import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 
 interface RenderMainTabOptions {
     assets?: Asset[];
@@ -14,6 +15,7 @@ interface RenderMainTabOptions {
     lineOfToleranceGreen?: number;
     lineOfToleranceRed?: number;
     threatId?: number;
+    genericThreatDescription?: string;
     defaultValues?: DefaultValues<ThreatFormValues>;
 }
 
@@ -23,6 +25,7 @@ const renderMainTab = ({
     lineOfToleranceGreen = 3,
     lineOfToleranceRed = 6,
     threatId = 42,
+    genericThreatDescription = "Default generic wording",
     defaultValues,
 }: RenderMainTabOptions = {}) => {
     const FormHost = () => {
@@ -38,7 +41,7 @@ const renderMainTab = ({
                 confidentiality: false,
                 integrity: false,
                 availability: false,
-                doneEditing: false,
+                status: THREAT_STATUSES.NEW,
                 ...defaultValues,
             },
         });
@@ -54,6 +57,7 @@ const renderMainTab = ({
                 register={register}
                 control={control}
                 errors={errors}
+                genericThreatDescription={genericThreatDescription}
             />
         );
     };
@@ -70,12 +74,21 @@ describe("AddThreatMainTab", () => {
         expect(screen.getByText(/ID:\s*99/)).toBeInTheDocument();
     });
 
-    it("renders the C/I/A protection-goal switches, the done-editing checkbox and the probability field", () => {
+    it("renders the C/I/A protection-goal switches, the status select and the probability field", () => {
         renderMainTab();
 
         expect(screen.getAllByRole("switch")).toHaveLength(3);
-        expect(screen.getAllByRole("checkbox")).toHaveLength(1);
+        expect(screen.getByRole("combobox")).toBeInTheDocument();
         expect(screen.getByRole("spinbutton")).toBeInTheDocument();
+    });
+
+    it("lets the user change the status", async () => {
+        const { user } = renderMainTab({ defaultValues: { status: THREAT_STATUSES.NEW } });
+
+        await user.click(screen.getByRole("combobox"));
+        await user.click(screen.getByRole("option", { name: "In progress" }));
+
+        expect(screen.getByRole("combobox")).toHaveTextContent("In progress");
     });
 
     it("shows the gross risk as the clamped probability times the gross damage", () => {
@@ -104,6 +117,29 @@ describe("AddThreatMainTab", () => {
         const netRisk = screen.getByTestId("NetRisk");
         expect(netRisk).toHaveTextContent("4");
         expect(netRisk).not.toHaveTextContent("12");
+    });
+
+    it("shows no net risk for an out-of-scope threat while keeping its gross risk", () => {
+        renderMainTab({
+            assets: [createAsset({ confidentiality: 4 })],
+            defaultValues: { probability: 3, confidentiality: true, status: THREAT_STATUSES.OUTOFSCOPE },
+        });
+
+        expect(screen.getByTestId("GrossRisk")).toHaveTextContent(/^12 \(/);
+        expect(screen.getByTestId("NetRisk")).toHaveTextContent(/^0 \(/);
+    });
+
+    it("drops the net risk to zero as soon as the user sets the status to out of scope", async () => {
+        const { user } = renderMainTab({
+            assets: [createAsset({ confidentiality: 4 })],
+            defaultValues: { probability: 3, confidentiality: true, status: THREAT_STATUSES.IN_PROGRESS },
+        });
+        expect(screen.getByTestId("NetRisk")).toHaveTextContent(/^12 \(/);
+
+        await user.click(screen.getByRole("combobox"));
+        await user.click(screen.getByRole("option", { name: "Out of scope" }));
+
+        expect(screen.getByTestId("NetRisk")).toHaveTextContent(/^0 \(/);
     });
 
     it("clamps the probability used for the preview to a maximum of 5", () => {
@@ -189,5 +225,36 @@ describe("AddThreatMainTab — form fields", () => {
         await user.type(probabilityField, "5");
 
         expect(probabilityField).toHaveValue(5);
+    });
+});
+
+describe("AddThreatMainTab — generic threat description", () => {
+    it("Should render the generic description collapsed by default", () => {
+        renderMainTab({ genericThreatDescription: "Original generic wording" });
+
+        expect(screen.getByTestId("GenericThreatDescriptionToggle")).toBeInTheDocument();
+        expect(screen.queryByTestId("GenericThreatDescriptionText")).not.toBeVisible();
+    });
+
+    it("Should reveal the generic description when the toggle is clicked", async () => {
+        const { user } = renderMainTab({ genericThreatDescription: "Original generic wording" });
+
+        await user.click(screen.getByTestId("GenericThreatDescriptionToggle"));
+
+        const text = screen.getByTestId("GenericThreatDescriptionText");
+        expect(text).toBeVisible();
+        expect(text).toHaveTextContent("Original generic wording");
+    });
+
+    it("Should render the generic description as read-only, non-editable text", async () => {
+        const { user } = renderMainTab({ genericThreatDescription: "Original generic wording" });
+
+        await user.click(screen.getByTestId("GenericThreatDescriptionToggle"));
+
+        const text = screen.getByTestId("GenericThreatDescriptionText");
+        // Plain text node, not a form control.
+        expect(text.tagName).not.toBe("INPUT");
+        expect(text.tagName).not.toBe("TEXTAREA");
+        expect(text.querySelector("input, textarea")).toBeNull();
     });
 });

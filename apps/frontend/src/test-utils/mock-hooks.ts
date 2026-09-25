@@ -186,8 +186,6 @@ export const mockUseThreats = (config?: Partial<UseThreatsResult>): MockInstance
         items: [],
         isPending: false,
         loadThreats: vi.fn(),
-        deleteThreat: vi.fn(),
-        duplicateThreat: vi.fn(),
         ...config,
     }));
 };

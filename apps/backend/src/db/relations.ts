@@ -6,6 +6,7 @@ import {
     catalogMeasures,
     catalogThreats,
     componentTypes,
+    genericThreats,
     folders,
     threats,
     measureImpacts,
@@ -32,6 +33,7 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
         references: [catalogs.id],
     }),
     systems: one(systems),
+    genericThreats: many(genericThreats),
     threats: many(threats),
     usersProjects: many(usersProjects),
 }));
@@ -56,7 +58,31 @@ export const catalogThreatsRelations = relations(catalogThreats, ({ one, many })
         fields: [catalogThreats.catalogId],
         references: [catalogs.id],
     }),
+    genericThreats: many(genericThreats),
+}));
+
+export const genericThreatsRelations = relations(genericThreats, ({ one, many }) => ({
+    catalogThreat: one(catalogThreats, {
+        fields: [genericThreats.catalogThreatId],
+        references: [catalogThreats.id],
+    }),
+    project: one(projects, {
+        fields: [genericThreats.projectId],
+        references: [projects.id],
+    }),
     threats: many(threats),
+}));
+
+export const threatsRelations = relations(threats, ({ one, many }) => ({
+    genericThreat: one(genericThreats, {
+        fields: [threats.genericThreatId],
+        references: [genericThreats.id],
+    }),
+    project: one(projects, {
+        fields: [threats.projectId],
+        references: [projects.id],
+    }),
+    measureImpacts: many(measureImpacts),
 }));
 
 export const componentTypesRelations = relations(componentTypes, ({ one }) => ({
@@ -74,18 +100,6 @@ export const measureImpactsRelations = relations(measureImpacts, ({ one }) => ({
     measure: one(measures, {
         fields: [measureImpacts.measureId],
         references: [measures.id],
-    }),
-}));
-
-export const threatsRelations = relations(threats, ({ one, many }) => ({
-    measureImpacts: many(measureImpacts),
-    catalogThreat: one(catalogThreats, {
-        fields: [threats.catalogThreatId],
-        references: [catalogThreats.id],
-    }),
-    project: one(projects, {
-        fields: [threats.projectId],
-        references: [projects.id],
     }),
 }));
 

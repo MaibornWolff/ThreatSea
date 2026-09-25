@@ -62,6 +62,7 @@ export const useMeasureThreatsList = ({ projectId, measureId }: { projectId: num
             .filter((measureImpact) => measureImpact.measureId === measureId)
             .map((measureImpact) => {
                 const threat = threats.find((item) => item.id === measureImpact.threatId);
+
                 return {
                     measureImpactId: measureImpact.id,
                     setsOutOfScope: measureImpact.setsOutOfScope,

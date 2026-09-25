@@ -1,15 +1,18 @@
-import { render, screen, within } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { TFunction } from "i18next";
-import type { GridColDef } from "@mui/x-data-grid";
+import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
-import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
-import type { ThreatListItem } from "#application/hooks/use-threats-list.hook.ts";
-import { createThreat } from "#test-utils/builders.ts";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
-import { createThreatsColumns } from "./create-threats-columns";
+import { translationUtil } from "#utils/translations.ts";
+import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
+import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
+import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat.types.ts";
+import type { ExtendedThreatWithMetrics } from "#application/hooks/use-generic-threats-list.hook.ts";
+import { createThreatsColumns, formatComponentName, type ThreatsGridRow } from "./create-threats-columns";
 
-const identityT = ((key: string) => key) as unknown as TFunction;
+// The app's real translations, fixed to English: the tests assert the texts users see, so a
+// missing or misspelled key fails instead of passing as its own name.
+const englishT = translationUtil.getFixedT("en", "threatsPage");
 
 interface BuildOptions {
     columnFilters?: Record<string, string>;
@@ -18,46 +21,88 @@ interface BuildOptions {
 }
 
 const buildColumns = (opts: BuildOptions = {}) => {
-    const handleFilterChange = vi.fn();
-    const toggleFilterExpanded = vi.fn();
-    const handleAssetHover = vi.fn();
-    const setAssetAnchorEl = vi.fn();
-    const handleDuplicateThreat = vi.fn();
-    const handleDeleteThreat = vi.fn();
+    const handlers = {
+        onFilterChange: vi.fn(),
+        onToggleFilterExpanded: vi.fn(),
+        onToggleGenericThreat: vi.fn(),
+        onAssetHover: vi.fn(),
+        onAssetHoverEnd: vi.fn(),
+        onAddThreat: vi.fn(),
+        onEditThreat: vi.fn(),
+        onDuplicateThreat: vi.fn(),
+        onDeleteThreat: vi.fn(),
+    };
 
     const columns = createThreatsColumns({
-        t: identityT,
+        t: englishT,
         userRole: opts.userRole ?? USER_ROLES.EDITOR,
         columnFilters: opts.columnFilters ?? {},
-        handleFilterChange,
-        handleAssetHover,
-        setAssetAnchorEl,
-        handleDuplicateThreat,
-        handleDeleteThreat,
         expandedFilters: opts.expandedFilters ?? {},
-        toggleFilterExpanded,
+        ...handlers,
     });
 
-    return {
-        columns,
-        handlers: {
-            handleFilterChange,
-            toggleFilterExpanded,
-            handleDuplicateThreat,
-            handleDeleteThreat,
-        },
-    };
+    return { columns, handlers };
 };
 
-const renderColumnHeader = (column: GridColDef | undefined) => {
-    if (!column?.renderHeader) {
-        throw new Error("Column has no renderHeader");
+const genericThreat = {
+    id: 7,
+    name: "Physical access",
+    description: "desc",
+    pointOfAttack: "DATA_STORAGE_INFRASTRUCTURE",
+    attacker: "UNAUTHORISED_PARTIES",
+    componentName: "Database",
+    interfaceName: null,
+    threats: [],
+} as unknown as GenericThreatWithExtendedThreats;
+
+const threat = {
+    id: 42,
+    genericThreatId: 7,
+    name: "Refined access",
+    description: "threat desc",
+    pointOfAttack: "DATA_STORAGE_INFRASTRUCTURE",
+    attacker: "UNAUTHORISED_PARTIES",
+    probability: 4,
+    status: THREAT_STATUSES.IN_PROGRESS,
+    assets: [
+        { id: 1, name: "Credentials", confidentiality: 5, integrity: 5, availability: 5 },
+        { id: 2, name: "User ID", confidentiality: 2, integrity: 3, availability: 4 },
+    ],
+    componentName: "Database",
+    interfaceName: null,
+    damage: 5,
+    risk: 20,
+} as unknown as ExtendedThreatWithMetrics;
+
+const genericRow: ThreatsGridRow = {
+    rowType: "genericThreat",
+    rowId: "generic-7",
+    genericThreat,
+    threatCount: 1,
+    isExpanded: false,
+};
+
+const threatRow: ThreatsGridRow = { rowType: "threat", rowId: "threat-42", threat };
+
+const noThreatsRow: ThreatsGridRow = { rowType: "noThreats", rowId: "empty-7" };
+
+const cellParams = (row: ThreatsGridRow): GridRenderCellParams<ThreatsGridRow> =>
+    ({ row }) as unknown as GridRenderCellParams<ThreatsGridRow>;
+
+const renderCell = (column: GridColDef<ThreatsGridRow> | undefined, row: ThreatsGridRow) => {
+    if (!column?.renderCell) {
+        throw new Error("Column has no renderCell");
     }
-    return render(<>{column.renderHeader({} as never)}</>);
+    return renderWithProviders(<>{column.renderCell(cellParams(row))}</>);
 };
 
-describe("createThreatsColumns — column sizing (resize defaults)", () => {
-    it("renders all expected columns in the documented order", () => {
+const columnByField = (opts: BuildOptions = {}) => {
+    const { columns, handlers } = buildColumns(opts);
+    return { byField: Object.fromEntries(columns.map((column) => [column.field, column])), handlers };
+};
+
+describe("createThreatsColumns — structure", () => {
+    it("renders all expected columns in order", () => {
         const { columns } = buildColumns();
         expect(columns.map((c) => c.field)).toEqual([
             "name",
@@ -69,256 +114,206 @@ describe("createThreatsColumns — column sizing (resize defaults)", () => {
             "probability",
             "damage",
             "risk",
-            "doneEditing",
+            "status",
             "actions",
         ]);
     });
 
-    it("gives the wider text columns flex sizing with a sensible minWidth", () => {
+    it("keeps the probability column wide enough for its German header", () => {
         const { columns } = buildColumns();
-        const byField = Object.fromEntries(columns.map((c) => [c.field, c]));
-
-        for (const field of ["name", "description", "componentName", "pointOfAttack", "attacker"]) {
-            const col = byField[field]!;
-            expect(col.flex, `${field} should flex`).toBe(1);
-            expect((col.minWidth ?? 0) >= 140, `${field} minWidth should be >= 140`).toBe(true);
-        }
+        // "Eintrittswahrscheinlichkeit" measures about 181px in the header font; with the filter
+        // toggle and the header padding the column needs about 239px.
+        expect(columns.find((column) => column.field === "probability")!.width).toBeGreaterThanOrEqual(240);
     });
 
-    it("uses fixed widths for short-value columns", () => {
+    it("disables sorting on every column (custom hierarchy ordering)", () => {
         const { columns } = buildColumns();
-        const byField = Object.fromEntries(columns.map((c) => [c.field, c]));
-
-        expect(byField["assets"]!.width).toBe(140);
-        expect(byField["probability"]!.width).toBe(280);
-        expect(byField["damage"]!.width).toBe(150);
-        expect(byField["risk"]!.width).toBe(140);
-    });
-
-    it("keeps Probability wide enough that the filter chevron survives the DataGrid hover menu", () => {
-        // The header renders the label + a chevron button. On hover, MUI overlays
-        // its own column-menu icon on the right, eating ~30px. If the column is
-        // too narrow, the chevron gets squished and the filter becomes unusable.
-        const { columns } = buildColumns();
-        const probability = columns.find((c) => c.field === "probability")!;
-        expect(probability.width ?? 0).toBeGreaterThanOrEqual(180);
-    });
-
-    it("keeps Point of Attack wide enough that the filter chevron survives the DataGrid hover menu", () => {
-        // Same hover-menu squeeze as Probability — but this column is flex,
-        // so the floor is set by minWidth rather than width.
-        const { columns } = buildColumns();
-        const pointOfAttack = columns.find((c) => c.field === "pointOfAttack")!;
-        expect(pointOfAttack.minWidth ?? 0).toBeGreaterThanOrEqual(180);
-    });
-
-    it("keeps Component wide enough that the filter chevron survives the DataGrid hover menu", () => {
-        // German "Komponente" + chevron + hover-menu overlay squeezed at the old
-        // 150px floor; flex column so we enforce via minWidth.
-        const { columns } = buildColumns();
-        const componentName = columns.find((c) => c.field === "componentName")!;
-        expect(componentName.minWidth ?? 0).toBeGreaterThanOrEqual(160);
-    });
-
-    it("keeps Risk wide enough that the filter chevron survives the DataGrid hover menu", () => {
-        // German "Risiko" + chevron + hover-menu overlay was clipping at 120px;
-        // fixed-width column so we enforce via width.
-        const { columns } = buildColumns();
-        const risk = columns.find((c) => c.field === "risk")!;
-        expect(risk.width ?? 0).toBeGreaterThanOrEqual(140);
-    });
-
-    it("widens the Edited column to fit the dropdown filter", () => {
-        const { columns } = buildColumns();
-        const edited = columns.find((c) => c.field === "doneEditing")!;
-        expect(edited.width).toBe(180);
-    });
-
-    it("does not disable resizing on data columns (DataGrid default is resizable)", () => {
-        const { columns } = buildColumns();
-        // `resizable: false` would opt the column out — assert nobody set it.
-        for (const c of columns) {
-            expect(c.resizable, `${c.field} should not opt out of resizing`).not.toBe(false);
-        }
-    });
-
-    it("Edited column is sortable and filterable", () => {
-        const { columns } = buildColumns();
-        const edited = columns.find((c) => c.field === "doneEditing")!;
-        expect(edited.sortable).not.toBe(false);
-        expect(edited.filterable).not.toBe(false);
-    });
-
-    it("Actions column is not sortable or filterable", () => {
-        const { columns } = buildColumns();
-        const actions = columns.find((c) => c.field === "actions")!;
-        expect(actions.sortable).toBe(false);
-        expect(actions.filterable).toBe(false);
-    });
-
-    it("omits the actions column for non-editors", () => {
-        const { columns } = buildColumns({ userRole: USER_ROLES.VIEWER });
-        expect(columns.find((c) => c.field === "actions")).toBeUndefined();
+        expect(columns.every((column) => column.sortable === false)).toBe(true);
     });
 });
 
-describe("createThreatsColumns — text-column filter header", () => {
-    it("renders the column label and the expand chevron", () => {
-        const { columns } = buildColumns();
-        renderColumnHeader(columns.find((c) => c.field === "name"));
-
-        expect(screen.getByText("name")).toBeInTheDocument();
-        expect(screen.getByRole("button")).toBeInTheDocument();
-    });
-
-    it("hides the filter input until expandedFilters[field] is true", () => {
-        const { columns } = buildColumns({ expandedFilters: { name: false } });
-        renderColumnHeader(columns.find((c) => c.field === "name"));
-
-        // Collapse keeps the DOM but hides it until expanded.
-        expect(screen.getByPlaceholderText("filterPlaceholder")).not.toBeVisible();
-    });
-
-    it("shows the filter input when expandedFilters[field] is true", () => {
-        const { columns } = buildColumns({ expandedFilters: { name: true } });
-        renderColumnHeader(columns.find((c) => c.field === "name"));
-
-        expect(screen.getByPlaceholderText("filterPlaceholder")).toBeVisible();
-    });
-
-    it("clicking the chevron toggles filter expansion with the column field", async () => {
-        const { columns, handlers } = buildColumns();
-        renderColumnHeader(columns.find((c) => c.field === "name"));
-
-        await userEvent.click(screen.getByRole("button"));
-
-        expect(handlers.toggleFilterExpanded).toHaveBeenCalledTimes(1);
-        expect(handlers.toggleFilterExpanded).toHaveBeenCalledWith("name");
-    });
-
-    it("typing in the filter input calls handleFilterChange per keystroke with the field", async () => {
-        const { columns, handlers } = buildColumns({ expandedFilters: { pointOfAttack: true } });
-        renderColumnHeader(columns.find((c) => c.field === "pointOfAttack"));
-
-        await userEvent.type(screen.getByPlaceholderText("filterPlaceholder"), "abc");
-
-        expect(handlers.handleFilterChange).toHaveBeenCalledTimes(3);
-        for (const call of handlers.handleFilterChange.mock.calls) {
-            expect(call[0]).toBe("pointOfAttack");
+describe("createThreatsColumns — generic threat rows carry no risk", () => {
+    it.each(["probability", "damage", "risk", "assets", "status"])(
+        "renders nothing (no misleading dash) for %s on a generic threat row",
+        (field) => {
+            const { byField } = columnByField();
+            const { container } = renderCell(byField[field], genericRow);
+            // Generic threats have no risk of their own; these cells stay empty rather than
+            // showing "-", which would read as a missing value.
+            expect(container).not.toHaveTextContent("-");
+            expect(container.querySelector("svg")).not.toBeInTheDocument();
         }
-        // Controlled input never updates here (we don't re-render with a new value),
-        // so each event still carries a single-character string.
-        expect(handlers.handleFilterChange).toHaveBeenNthCalledWith(1, "pointOfAttack", "a");
-        expect(handlers.handleFilterChange).toHaveBeenNthCalledWith(2, "pointOfAttack", "b");
-        expect(handlers.handleFilterChange).toHaveBeenNthCalledWith(3, "pointOfAttack", "c");
+    );
+
+    it("shows the threat count and an add-threat button on the generic threat actions cell", async () => {
+        const { byField, handlers } = columnByField();
+        renderCell(byField["actions"], { ...genericRow, threatCount: 3 });
+        expect(screen.getByText("3 threats")).toBeInTheDocument();
+
+        await userEvent.click(screen.getByRole("button", { name: "Add Threat" }));
+        expect(handlers.onAddThreat).toHaveBeenCalledTimes(1);
     });
 
-    it("reflects the current filter value in the input", () => {
-        const { columns } = buildColumns({
-            columnFilters: { name: "auth" },
-            expandedFilters: { name: true },
-        });
-        renderColumnHeader(columns.find((c) => c.field === "name"));
-
-        expect(screen.getByPlaceholderText("filterPlaceholder")).toHaveValue("auth");
+    it("hides the add-threat button from viewers", () => {
+        const { byField } = columnByField({ userRole: USER_ROLES.VIEWER });
+        renderCell(byField["actions"], genericRow);
+        expect(screen.queryByRole("button", { name: "Add Threat" })).not.toBeInTheDocument();
     });
 });
 
-describe("createThreatsColumns — Edited (doneEditing) dropdown filter", () => {
-    it("renders a Select dropdown with All / Edited / Not Edited options", async () => {
-        const { columns } = buildColumns({ expandedFilters: { doneEditing: true } });
-        renderColumnHeader(columns.find((c) => c.field === "doneEditing"));
-
-        // Open the MUI Select dropdown.
-        await userEvent.click(screen.getByRole("combobox"));
-
-        const listbox = await screen.findByRole("listbox");
-        expect(within(listbox).getByRole("option", { name: "filterAll" })).toBeInTheDocument();
-        expect(within(listbox).getByRole("option", { name: "edited" })).toBeInTheDocument();
-        expect(within(listbox).getByRole("option", { name: "notEdited" })).toBeInTheDocument();
+describe("createThreatsColumns — threat rows show metrics", () => {
+    it("renders probability, damage and risk from the computed metrics", () => {
+        const { byField } = columnByField();
+        renderCell(byField["probability"], threatRow);
+        expect(screen.getByText("4")).toBeInTheDocument();
+        renderCell(byField["damage"], threatRow);
+        expect(screen.getByText("5")).toBeInTheDocument();
+        renderCell(byField["risk"], threatRow);
+        expect(screen.getByText("20")).toBeInTheDocument();
     });
 
-    it("selecting an option calls handleFilterChange with the stable internal value", async () => {
-        const { columns, handlers } = buildColumns({ expandedFilters: { doneEditing: true } });
-        renderColumnHeader(columns.find((c) => c.field === "doneEditing"));
-
-        await userEvent.click(screen.getByRole("combobox"));
-        const listbox = await screen.findByRole("listbox");
-        await userEvent.click(within(listbox).getByRole("option", { name: "edited" }));
-
-        expect(handlers.handleFilterChange).toHaveBeenCalledWith("doneEditing", "edited");
+    it("renders the asset count and reports hover with the asset list", async () => {
+        const { byField, handlers } = columnByField();
+        renderCell(byField["assets"], threatRow);
+        const count = screen.getByText("2");
+        await userEvent.hover(count);
+        expect(handlers.onAssetHover).toHaveBeenCalledTimes(1);
+        expect(handlers.onAssetHover.mock.calls[0]?.[1]).toHaveLength(2);
     });
 
-    it("uses a stable internal valueGetter (independent of locale)", () => {
-        const { columns } = buildColumns();
-        const edited = columns.find((c) => c.field === "doneEditing")!;
-        expect(edited.valueGetter).toBeDefined();
-
-        const valueGetter = edited.valueGetter as unknown as (value: unknown, row: { doneEditing: boolean }) => string;
-        expect(valueGetter(undefined, { doneEditing: true })).toBe("edited");
-        expect(valueGetter(undefined, { doneEditing: false })).toBe("notEdited");
-    });
-});
-
-describe("createThreatsColumns — text cells", () => {
-    const createThreatListItem = (overrides: Partial<ThreatListItem> = {}): ThreatListItem => ({
-        ...createThreat(),
-        risk: 0,
-        damage: 0,
-        ...overrides,
-    });
-
-    // Renders a cell the way DataGrid does: the column's valueGetter feeds the renderCell value.
-    const renderCell = (field: string, row: ThreatListItem) => {
-        const { columns } = buildColumns();
-        const column = columns.find((candidate) => candidate.field === field);
-        if (!column?.renderCell) {
-            throw new Error(`Column ${field} has no renderCell`);
-        }
-        const valueGetter = column.valueGetter as ((value: unknown, row: ThreatListItem) => unknown) | undefined;
-        const value = valueGetter ? valueGetter(row[field as keyof ThreatListItem], row) : undefined;
-        return renderWithProviders(<>{column.renderCell({ row, value } as never)}</>);
-    };
-
-    it("renders the threat name with its test id", () => {
-        renderCell("name", createThreatListItem({ name: "Spoofed login" }));
-
-        expect(screen.getByTestId("threats-page_threats-list-entry_name")).toHaveTextContent("Spoofed login");
-    });
-
-    it("renders the full description with its test id", () => {
-        renderCell("description", createThreatListItem({ description: "Attacker replays a stolen session" }));
-
-        expect(screen.getByTestId("threats-page_threats-list-entry_description")).toHaveTextContent(
-            "Attacker replays a stolen session"
-        );
-    });
-
-    it("renders the component the column filters on, including the interface of a communication interface", () => {
-        renderCell(
-            "componentName",
-            createThreatListItem({
-                pointOfAttack: POINTS_OF_ATTACK.COMMUNICATION_INTERFACES,
-                componentName: "Server",
-                interfaceName: "REST API",
-            })
-        );
-
-        expect(screen.getByTestId("threats-page_threats-list-entry_component")).toHaveTextContent("Server > REST API");
-    });
-
-    it("renders an empty component cell for a threat without a component", () => {
-        renderCell("componentName", createThreatListItem({ componentName: null }));
-
-        expect(screen.getByTestId("threats-page_threats-list-entry_component")).toHaveTextContent("");
+    it("shows the translated status", () => {
+        const { byField } = columnByField();
+        renderCell(byField["status"], threatRow);
+        expect(screen.getByText("In progress")).toBeInTheDocument();
     });
 
     it.each([
-        ["pointOfAttack", "pointsOfAttackList.USER_INTERFACE"],
-        ["attacker", "attackerList.UNAUTHORISED_PARTIES"],
-    ])("renders the %s cell from the translated value the column filters on", (field, expectedText) => {
-        renderCell(field, createThreatListItem());
+        [THREAT_STATUSES.NEW, "New"],
+        [THREAT_STATUSES.IN_PROGRESS, "In progress"],
+        [THREAT_STATUSES.FINALIZED, "Finalized"],
+        [THREAT_STATUSES.OUTOFSCOPE, "Out of scope"],
+    ])("renders a status icon alongside the label for %s", (status, label) => {
+        const { byField } = columnByField();
+        const { container } = renderCell(byField["status"], {
+            rowType: "threat",
+            rowId: "threat-99",
+            threat: { ...threat, status },
+        });
+        expect(screen.getByText(label)).toBeInTheDocument();
+        expect(container.querySelector("svg")).toBeInTheDocument();
+    });
 
-        expect(screen.getByText(expectedText)).toBeInTheDocument();
+    it("exposes edit, duplicate and delete actions to editors and wires them", async () => {
+        const { byField, handlers } = columnByField();
+        renderCell(byField["actions"], threatRow);
+
+        await userEvent.click(screen.getByRole("button", { name: "Edit Threat" }));
+        await userEvent.click(screen.getByRole("button", { name: "Duplicate Threat" }));
+        await userEvent.click(screen.getByRole("button", { name: "Delete Threat" }));
+
+        expect(handlers.onEditThreat).toHaveBeenCalledTimes(1);
+        expect(handlers.onDuplicateThreat).toHaveBeenCalledTimes(1);
+        expect(handlers.onDeleteThreat).toHaveBeenCalledTimes(1);
+    });
+
+    it("hides threat actions from viewers", () => {
+        const { byField } = columnByField({ userRole: USER_ROLES.VIEWER });
+        renderCell(byField["actions"], threatRow);
+        expect(screen.queryByRole("button", { name: "Edit Threat" })).not.toBeInTheDocument();
+    });
+});
+
+describe("createThreatsColumns — expand toggle", () => {
+    it("toggles the generic threat when its chevron is clicked", async () => {
+        const { byField, handlers } = columnByField();
+        renderCell(byField["name"], genericRow);
+        await userEvent.click(screen.getByRole("button", { name: "Expand" }));
+        expect(handlers.onToggleGenericThreat).toHaveBeenCalledWith(7);
+    });
+
+    it("labels the chevron Collapse when the generic threat is expanded", () => {
+        const { byField } = columnByField();
+        renderCell(byField["name"], { ...genericRow, isExpanded: true });
+        expect(screen.getByRole("button", { name: "Collapse" })).toBeInTheDocument();
+    });
+});
+
+describe("formatComponentName", () => {
+    it("appends the interface name for communication interfaces", () => {
+        expect(
+            formatComponentName(
+                {
+                    pointOfAttack: POINTS_OF_ATTACK.COMMUNICATION_INTERFACES,
+                    componentName: "Client",
+                    interfaceName: "Test",
+                },
+                englishT
+            )
+        ).toBe("Client > Test");
+    });
+
+    it("falls back to the unknown label when the component name is missing", () => {
+        expect(
+            formatComponentName(
+                {
+                    pointOfAttack: POINTS_OF_ATTACK.COMMUNICATION_INTERFACES,
+                    componentName: null,
+                    interfaceName: "Test",
+                },
+                englishT
+            )
+        ).toBe("Unknown > Test");
+    });
+
+    it("returns the plain component name for non-interface points of attack", () => {
+        expect(
+            formatComponentName(
+                {
+                    pointOfAttack: POINTS_OF_ATTACK.DATA_STORAGE_INFRASTRUCTURE,
+                    componentName: "Database",
+                    interfaceName: null,
+                },
+                englishT
+            )
+        ).toBe("Database");
+    });
+});
+
+describe("createThreatsColumns — no threats placeholder", () => {
+    it("spans every visible column and shows the placeholder for a generic threat without threats", () => {
+        const { byField } = columnByField();
+        const nameColumn = byField["name"]!;
+        const colSpan = nameColumn.colSpan as (
+            value: unknown,
+            row: ThreatsGridRow,
+            column: unknown,
+            apiRef: { current: { getVisibleColumns: () => unknown[] } }
+        ) => number | undefined;
+        const gridWithVisibleColumns = (count: number) => ({
+            current: { getVisibleColumns: () => Array.from({ length: count }) },
+        });
+
+        expect(colSpan(undefined, noThreatsRow, nameColumn, gridWithVisibleColumns(11))).toBe(11);
+        expect(colSpan(undefined, noThreatsRow, nameColumn, gridWithVisibleColumns(9))).toBe(9);
+        expect(colSpan(undefined, threatRow, nameColumn, gridWithVisibleColumns(11))).toBeUndefined();
+
+        renderCell(nameColumn, noThreatsRow);
+        expect(screen.getByText("No threats for this generic threat.")).toBeInTheDocument();
+    });
+});
+
+describe("createThreatsColumns — description column", () => {
+    it("shows a threat's own description", () => {
+        const { byField } = columnByField();
+        renderCell(byField["description"], threatRow);
+
+        expect(screen.getByTestId("threats-page_threats-list-entry_description")).toHaveTextContent("threat desc");
+    });
+
+    it("stays empty on generic threat rows, whose description the filter does not match", () => {
+        const { byField } = columnByField();
+        const { container } = renderCell(byField["description"], genericRow);
+
+        expect(container).toBeEmptyDOMElement();
     });
 });

@@ -2,12 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
-import { calcNetRisk } from "#utils/calcRisk.ts";
+import { calcThreatNetRisk } from "#utils/calcRisk.ts";
 import { createRiskMatrixDesign, addThreatsToRiskMatrix, dayNumberFromDateString } from "#utils/riskMatrix.ts";
 import { useCatalogMeasures } from "./use-catalog-measures.hook.ts";
+import { useThreats } from "./use-threats.hook.ts";
 import { useMeasureImpacts } from "./use-measureImpacts.hook.ts";
 import { useMeasures } from "./use-measures.hook.ts";
-import { useThreats } from "./use-threats.hook.ts";
 import { useAppSelector } from "./use-app-redux.hook.ts";
 import { projectsSelectors } from "#application/selectors/projects.selectors.ts";
 import type { SortDirection } from "#application/actions/list.actions.ts";
@@ -97,11 +97,11 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
     const threats: ThreatWithMetrics[] = useMemo(
         () =>
             threatsRaw
-                .map((item) => {
-                    const damage = calcDamage(item);
-                    const risk = item.probability * damage;
+                .map((threat) => {
+                    const damage = calcDamage(threat);
+                    const risk = threat.probability * damage;
                     return {
-                        ...item,
+                        ...threat,
                         risk,
                         damage,
                     };
@@ -123,7 +123,7 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
                                 return {
                                     measureId: measure.id,
                                     active: active,
-                                    catalogMeasureId: null,
+                                    catalogMeasureId: measure.catalogMeasureId,
                                     name: measure.name,
                                     description: measure.description,
                                     scheduledAt: measure.scheduledAt,
@@ -145,7 +145,7 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
                         netProbability: newProbability,
                         netDamage: newDamage,
                         netRisk: newRisk,
-                    } = calcNetRisk(probability, damage, activeMeasureImpacts);
+                    } = calcThreatNetRisk(threat, activeMeasureImpacts);
                     const risk = probability * damage;
                     const activeMeasures = measures.reduce((sum, measure) => {
                         if (measure.scheduledAt) {
@@ -279,6 +279,10 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
     );
 
     useEffect(() => {
+        loadThreats();
+    }, [projectId, loadThreats]);
+
+    useEffect(() => {
         loadCatalogMeasures();
     }, [projectId, loadCatalogMeasures]);
 
@@ -301,7 +305,7 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
         setCurrentGreenValue,
         setCurrentRedValue,
         loadMeasures,
-        loadThreats,
+        loadThreats: loadThreats,
         loadCatalogMeasures,
         currentRedValue,
         currentGreenValue,

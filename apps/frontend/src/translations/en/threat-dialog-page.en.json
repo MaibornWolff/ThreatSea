@@ -9,8 +9,9 @@
   "netProbability": "Net Probability",
   "netDamage": "Net Damage",
   "pointOfAttack": "Point of Attack",
-  "doneEditing": "Done editing",
+  "status": "Status",
   "scheduledAt": "Scheduled at",
+  "genericThreatDescription": "Generic threat description",
   "tab": {
     "threat": "Threat",
     "assets": "Assets",

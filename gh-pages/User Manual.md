@@ -406,9 +406,21 @@ Users can delete an asset via the <img src="../assets/images_2_.png" alt="Assets
 
 ## Threats
 
-The threats view is one of the core features of ThreatSea and displays the user a list of all threats that are relevant for the system containing the following information:
+The threats view is one of the core features of ThreatSea. It lists the threats that are relevant for the system, grouped by **generic threats**:
+
+- A **generic threat** is created from a threat of the project's catalogue for one attack point of a component. It is read-only and carries no risk of its own. Its row shows the name in bold, the component, the point of attack, the attacker and the number of its threats.
+- The **threats** below a generic threat are the concrete threat scenarios that users refine and assess. Users can add further threats to a generic threat to describe different scenarios, for example with different probabilities.
+
+Clicking a generic threat row (or its arrow) expands or collapses its threats. The button to the left of "Customize view" expands or collapses all generic threats at once.
+
+<!-- Screenshot outdated: shows the flat threats list from before the generic threat rework. Replace with the generic threats list. -->
+
+![Threats Page View](assets/image-2024-7-31_9-46-20.png "Threats Page View")
+
+For each threat, the list contains the following information:
 
 - **Name:** Name of the threat
+- **Description:** Description of the threat (hidden by default, see "Customize view" below)
 - **Assets:** Number of assets that are affected by the threat scenario
 - **Component:** Name of the component that is affected by the threat scenario
 - **Point of Attack:** Type of the attack point in the component that is affected by the threat scenario, as used in the 4x6 methodology (data storage infrastructure, processing infrastructure, user interface, user behaviour, communication interface, communication infrastructure)
@@ -416,28 +428,48 @@ The threats view is one of the core features of ThreatSea and displays the user 
 - **Probability:** (Gross) probability value for the risk that is associated with the threat scenario
 - **Damage:** (Gross) impact value for the risk that is associated with the threat scenario
 - **Risk:** (Gross) risk value that is associated with the threat scenario
-  Users can sort the threats list according to each of these information in ascending or descending order or search for specific threats. The search covers the name of the threat, its description, the component, the point of attack and the attacker.
+- **Status:** Assessment status of the threat (see below)
 
-Known Issue:
+Each column header contains a filter field. Text filters match any part of the value, regardless of upper and lower case; the status filter offers a selection. A generic threat stays in the list as long as one of its threats matches the filters, so filtering for a probability, for example, shows the generic threats that have a threat with this probability. The arrow next to a column name collapses its filter field, and "Clear filters" resets all filters. The number next to "Threats found" counts the listed generic threats.
 
-- Currently, the search uses the English names of the attackers and points of attack, irrespectively of the shown language.
+With "Customize view", users can show and hide columns, for example the description column. Columns can be resized by dragging the border of their header. Both settings are kept per project until the browser tab is closed or the user logs out.
 
-![Threats Page View](assets/image-2024-7-31_9-46-20.png "Threats Page View")
+The status of a threat shows how far its assessment has progressed:
 
-ThreatSea auto-generates the threat list by applying the threat catalogue that is assigned to the project. Each time the system sketch or the asset analysis is changed, the threat list is updated accordingly. To support users in keeping track of the refined threats, they can mark threats as "edited" after refining them. All threats that are marked as "edited" are displayed in grey in the threat list.
+- <span style="color: rgb(48, 113, 176)">**New:**</span> The threat was generated or added and has not been assessed yet.
+- <span style="color: rgb(252, 172, 12)">**In progress:**</span> The threat is being refined. A new threat changes to "In progress" as soon as it is saved in the "Edit Threat" dialog.
+- <span style="color: rgb(103, 173, 91)">**Finalized:**</span> The assessment of the threat is complete. Applying a measure that sets the threat out of scope also finalizes the threat.
+- <span style="color: rgb(84, 101, 129)">**Out of scope:**</span> The user decided that the threat is not part of the assessment. Its net risk is 0 and it is not shown in the risk matrix.
+
+Finalized and out-of-scope threats are displayed dimmed in the list.
+
+<!-- Screenshot outdated: shows threats marked as "edited" in grey, which the status replaced. Replace with the status column and dimmed finalized/out-of-scope rows. -->
 
 ![Threats Page Edited Threat](assets/image-2024-7-31_9-47-52.png "Threats Page Edited Threat")
+
+ThreatSea generates the generic threats by applying the threat catalogue that is assigned to the project to the attack points in the system sketch. As soon as an attack point has assets assigned, the first threat of each of its generic threats is created with the values of the catalogue. Each time the system sketch or the asset analysis is changed, the list is updated accordingly:
+
+- If all assets are removed from an attack point, its threats are hidden. They reappear, including their refinements, when assets are assigned to the attack point again.
+- If an attack point is removed, its generic threats and their threats are deleted.
 
 Tipp:
 
 - When refining the threats, it is highly recommended to develop an individual way of going through the threats in some kind of systematic order.
 - When hovering over the number of assets for a threat, a popup is displayed with the names of the assets and their protection need values for confidentiality, integrity and availability.
 
+<!-- Screenshot outdated: shows the asset popup in the flat threats list. Replace with the popup in the generic threats list. -->
+
 ![Threats Page Threat Tooltip](assets/image-2024-7-31_9-51-11.png "Threats Page Threat Tooltip")
+
+### Adding a threat
+
+Users can add a threat to a generic threat with the "Add Threat" button in the row of the generic threat. The new threat is named after the generic threat with the suffix "(new)", takes over the values of the catalogue and is shown below the generic threat right away.
 
 ### Editing a threat
 
-Users can edit a threat scenario by clicking on the respective entry in the threats list which opens the "Edit Threat" dialog.
+Users can edit a threat scenario by clicking on the respective threat in the threats list, which opens the "Edit Threat" dialog. The dialog also stays open when the page is reloaded in the browser.
+
+<!-- Screenshot outdated: shows the dialog before the generic threat rework (with the "Done editing" checkbox). Replace with the current dialog including the status selection. -->
 
 ![Threats Page Edit Threat Dialog](assets/edit-threat-dialog.png "Threats Page Edit Threat Dialog")
 
@@ -447,20 +479,22 @@ The top row of this dialog contains the base information of the threat:
 - **Component-Type:** Type of attack point in the component that is affected by the threat scenario, as used in the 4x6 methodology (data storage infrastructure, processing infrastructure, user interface, user behaviour, communication interface, communication infrastructure)
 - **Component:** Name of the component that is affected by the threat scenario
 
-The main part of the dialog is the "THREAT" tab, where the user can refine the threat during the threat assessment (i.e., refine the generated 4x6 threat scenario to a concrete threat scenario instance that could occur in the system under consideration). The values for "Name", "Description" and "Probability" are filled with the values defined in the catalogue used in the project. When refining a threat, the user can give custom text values for the threat scenario name and description and fill the probability value for the associated risk in a range from 1 to 5 according to the 4x6 probability scale.
+The main part of the dialog is the "THREAT" tab, where the user can refine the threat during the threat assessment (i.e., refine the generated 4x6 threat scenario to a concrete threat scenario instance that could occur in the system under consideration). The values for "Name", "Description" and "Probability" are filled with the values defined in the catalogue used in the project. When refining a threat, the user can give custom text values for the threat scenario name and description and fill the probability value for the associated risk in a range from 1 to 5 according to the 4x6 probability scale. The original description of the generic threat can be shown below the fields with the "Generic threat description" toggle; it cannot be edited.
 
-The "Risk" block on the right of the "THREAT" tab shows a live preview of the gross risk (probability × damage) and the net risk (after the measures assigned to the threat). Both values are color-coded according to the project's line of tolerance and update as the probability or the protection goal toggles change.
+With the "Status" selection, the user sets the assessment status of the threat to "In progress", "Finalized" or "Out of scope". "New" cannot be selected, because a threat that is being edited is in progress: saving a new threat changes its status to "In progress".
+
+The "Risk" block on the right of the "THREAT" tab shows a live preview of the gross risk (probability × damage) and the net risk (after the measures assigned to the threat). Both values are color-coded according to the project's line of tolerance and update as the probability, the protection goal toggles or the status change. For an out-of-scope threat, the net risk is 0.
+
+The "Save" button is only enabled after something has been changed. If the user tries to leave or reload the page with unsaved changes, the browser asks for confirmation.
 
 Tipp:
 
-- It is highly recommended to give extensive descriptions of the real-world instantiations of the threats as well as justifications for the choice of the probability ratings in the description field. This allows other users to get a better understanding of the system and the decisions that have been made during the threat analysis. The default descriptions can be kept in addition to clarify the origin of the refined threat scenarios. It might also be helpful to already note measures as comments during this step if they come up during the discussion.
+- It is highly recommended to give extensive descriptions of the real-world instantiations of the threats as well as justifications for the choice of the probability ratings in the description field. This allows other users to get a better understanding of the system and the decisions that have been made during the threat analysis. It might also be helpful to already note measures as comments during this step if they come up during the discussion.
 - With the toggle switches for the three protection goals confidentiality, integrity and availability, users are able to exclude protection need values of the affected assets from the risk calculation for the specific threat scenario. E.g., if a threat only threatens the confidentiality of the associated assets, the user can disable integrity and availability for the risk calculation. A very common, real-world example for this is unauthorized parties destroying some piece of equipment. This ruins availability but doesn't affect confidentiality at all.
-
-Tipp:
-
-- Disabling the toggle switches for all three protection goals results in a risk value of 0 (due to no impact) but still keeps a threat scenario in the threat list. This can be used to set single threats out of scope.
-- After refining a threat scenario, users can check the "Done editing" checkbox to indicate that the threat has already been processed. As described earlies, threat scenarios that have been marked as edited are displayed in light grey in the overall threat list.
+- To exclude a single threat from the assessment, set its status to "Out of scope" instead of disabling all protection goals.
 - The "ASSETS" tab within the edit threat dialog is an additional informative tab that quickly allows the user to see an overview of the assets that are impacted by the threat scenario, including their protection need values.
+
+<!-- Screenshot outdated: shows the "ASSETS" tab of the dialog before the generic threat rework. Replace with the current dialog. -->
 
 ![Threats Page Edit Threat Assets](assets/image-2024-7-31_9-53-53.png "Threats Page Edit Threat Assets")
 
@@ -468,11 +502,11 @@ Tipp:
 
 In some cases it is necessary to duplicate a threat. This usually happens when there are different threat scenarios which greatly differ in their probability for the different protection goals. In most cases it is sufficient to focus on the worst-case scenario but sometimes it might be necessary to explicitly highlight this difference in the threat list and to duplicate the threat scenario. E.g., given above example about destroying equipment, there might also be other physical attacks from unauthorized parties which actually pose a risk to confidentiality but are more difficult to execute than simply swinging a hammer at the equipment and therefore have a lesser probability of occurrence.
 
-Users can duplicate a threat scenario by using the <img src="../assets/content-copy.png" alt="Assets Page Copy Icon" style="height:1em; width:auto; vertical-align:middle;"> button in the row of the respective threat scenario. After confirming a safety dialog, the threat is duplicated with all values including the description copied, but the name being augmented with an incremented number in parenthesis, starting with 1 for the first copy.
+Users can duplicate a threat scenario by using the <img src="../assets/content-copy.png" alt="Assets Page Copy Icon" style="height:1em; width:auto; vertical-align:middle;"> button in the row of the respective threat. After confirming a safety dialog, the threat is duplicated below the same generic threat with all values including the description copied. The name of the copy gets the suffix "(Copy)" and its status is "New".
 
 ### Deleting a threat
 
-Users can delete a threat scenario by using the <img src="../assets/images_2_.png" alt="Assets Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> button in the row of the respective threat scenario. After confirming the safety dialog, **this action cannot be reverted and the threat scenario can only be regenerated by recreating the component containing the attack point the threat originally was referring to.**
+Users can delete a threat scenario by using the <img src="../assets/images_2_.png" alt="Assets Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> button in the row of the respective threat. After confirming the safety dialog, **this action cannot be reverted.** The only threat of a generic threat cannot be deleted; ThreatSea shows a notice instead, so that every generic threat keeps at least one threat.
 
 ## Measures
 
@@ -576,7 +610,7 @@ The risks are color-coded in the three risk categories <span style="color: rgb(5
 
 ![Risk Page Risk Matrix](assets/image-2023-11-11_11-25-47.png "Risk Page Risk Matrix")
 
-The risk matrix shows the absolute number of risks in a 5x5 matrix based on the 4x6 scales. While by default all threats are displayed in the "Threats" scroll panel in the middle of the screen, users can use the risk matrix to filter the threat list for all threats with risks of a specific probability/impact combination. For example, by clicking in the panel at position probability 3 and impact 3, the threat list is filtered for all threats with an occurrence probability of 3 and impact 3. Since the risk matrix is generated to reflect the selected point within the timeline, the filter does so too, meaning if a specific date is selected on the timeline and the user filters for a specific field of the risk matrix, the net probability and net impact values at this point within the timeline are used for the filter calculation. Clicking on an already selected field of the matrix resets the filter to show all risks.
+The risk matrix shows the absolute number of risks in a 5x5 matrix based on the 4x6 scales. While by default all threats are displayed in the "Threats" scroll panel in the middle of the screen, users can use the risk matrix to filter the threat list for all threats with risks of a specific probability/impact combination. For example, by clicking in the panel at position probability 3 and impact 3, the threat list is filtered for all threats with an occurrence probability of 3 and impact 3. Since the risk matrix is generated to reflect the selected point within the timeline, the filter does so too, meaning if a specific date is selected on the timeline and the user filters for a specific field of the risk matrix, the net probability and net impact values at this point within the timeline are used for the filter calculation. Clicking on an already selected field of the matrix resets the filter to show all risks. Threats that are out of scope are not shown in the risk matrix, and threats without assets and without risk are not listed.
 
 ![Risk Page Risk Matrix Selected Threats](assets/image-2023-11-11_11-14-26.png "Risk Page Risk Matrix Selected Threats")
 
@@ -623,7 +657,7 @@ It doesn't make sense to apply a measure to a threat twice, so ThreatSea doesn't
 
 After selecting the measure to apply, the user may give a detailed description how the measure impacts the threat. Users can select if the measure influences probability and/or damage values of the threat scenario by ticking the respective checkboxes. Typically measures only influence probability values which only "Influences Probability" is selected by default. The user then can give net probability and/or damage values in a range from 1 to 5 according to the 4x6 scales. Both input fields for these values show the current gross probability and damage values of the risk greyed out and in the label. The actual value or values have always to be entered, even if there is no change, i.e. the measure has not enough impact to change the rating on the 4x6 scale at least one step.
 
-With the "Sets the threat out of scope", the user can indicate that after the measure has been applied, the threat is no longer in scope of the threat assessment. This feature can be used to indicate a risk transfer, if for example the risk ownership is transferred to a different party.
+With the "Sets the threat out of scope", the user can indicate that after the measure has been applied, the threat is no longer in scope of the threat assessment. This feature can be used to indicate a risk transfer, if for example the risk ownership is transferred to a different party. Applying such a measure sets the status of the threat to "Finalized", and its net risk becomes 0.
 
 ### Unapplying a measure from a risk
 
@@ -646,7 +680,7 @@ The "Page Settings" panel provides the user with the possibility to select which
 - **Show Component Page:** A list of all system components together with their descriptions. Each threat in the threat details links to the component it affects on this page
 - **Show Asset Page:** A list of all analyzed assets together with their description and their protection need
 - **Show Measures Page:** A list of all (planned) measures together with their descriptions, their (planned) implementation date and the threats to which they are applied
-- **Show List of Threats:** A list overview of all threats and the component to which they apply, color-coded according to their gross or net risk value. This behaviour can be changed in the "Sort (Threats)" section. The list of threats also serves as a table of contents for the threat details.
+- **Show List of Threats:** A list overview of all threats, grouped by their generic threats, and the component to which they apply, color-coded according to their gross or net risk value. This behaviour can be changed in the "Sort (Threats)" section. The list of threats also serves as a table of contents for the threat details.
 - **Show Threats Page:** Details for all single threats, including the following information.
   - Name of threat
   - Protection goals that are impacted by the threat scenario
@@ -657,6 +691,7 @@ The "Page Settings" panel provides the user with the possibility to select which
   - Measures implemented or planned to mitigate the risk associated to the threat scenario
   - Gross and net risk values together with probability and damage
   - Detailed description of the threat scenario
+  - For out-of-scope threats, the label "Out of scope" or "Out of scope by measure" instead of a net risk
 - **System Image on separate page:** The switch allows the user to create a dedicated page within the report for the system image. When deactivated, the system image is integrated into the cover page.
 
 ### Risk Matrices for Milestones

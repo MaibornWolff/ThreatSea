@@ -16,6 +16,8 @@
   "after": "After",
   "gross": "gross",
   "net": "net",
+  "outOfScope": "Out of scope",
+  "outOfScopeByMeasure": "Out of scope by measure",
   "matrixLegend": "G = green (low risk), Y = yellow (medium risk), R = red (high risk). Count shown when threats present.",
   "matrixAxisLegend": "P = Probability (1 = low, 5 = high), D = Damage (1 = low, 5 = high)",
 

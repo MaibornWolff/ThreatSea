@@ -5,31 +5,33 @@ import { and, eq, getTableColumns } from "drizzle-orm";
 import { db, TransactionType } from "#db/index.js";
 import {
     Asset,
+    Threat,
+    MeasureImpact,
     CreateProject,
     Measure,
-    MeasureImpact,
     Project,
     projects,
-    Threat,
     UpdateProject,
     usersProjects,
 } from "#db/schema.js";
-import { ExtendedThreat, getThreats } from "#services/threats.service.js";
+import { getGenericThreatsWithExtendedThreats } from "#services/generic-threats.service.js";
 import { getPointsOfAttack } from "#services/points-of-attack.service.js";
 import { findSystem } from "#services/system.service.js";
 import { getAssets } from "#services/assets.service.js";
 import { getMeasures } from "#services/measures.service.js";
 import { getMeasureImpactsByProject } from "#services/measureImpacts.service.js";
+import { ComponentType } from "#types/system.types.js";
+import { THREAT_STATUSES } from "#types/threat-statuses.types.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
 
 /**
  * Calculates the damage produced for the assets by a threat.
  *
- * @param {ExtendedThreat} threat - Data of the current threat.
+ * @param {ReportThreat} threat - Data of the current threat.
  * @returns The max value of the security aspects of the assets.
  *     or 0 if none are specified.
  */
-function calcDamage(threat: ExtendedThreat) {
+function calcDamage(threat: ReportThreat) {
     const { confidentiality, integrity, availability, assets } = threat;
 
     return assets.reduce((value, asset) => {
@@ -57,7 +59,7 @@ function calcDamage(threat: ExtendedThreat) {
  * @returns Array of object of the transformed threat data.
  */
 function transformThreats(
-    threats: ExtendedThreat[],
+    threats: ReportThreat[],
     measuresWithIds: ExtendedMeasure[],
     assetsWithId: ExtendedAsset[],
     measureImpacts: MeasureImpact[]
@@ -96,6 +98,12 @@ function transformThreats(
             };
         })
         .map((threat) => {
+            // A threat the user put out of scope carries no residual risk, no matter which
+            // measures are applied to it. The gross values are not affected.
+            if (threat.status === THREAT_STATUSES.OUTOFSCOPE) {
+                return { ...threat, netProbability: 0, netDamage: 0, netRisk: 0 };
+            }
+
             const [netProbability, netDamage] = threat.measures.reduce(
                 (arr, measure) => {
                     const [netProbability, netDamage] = arr;
@@ -155,6 +163,13 @@ function transformMeasures(
 
 type ExtendedAsset = Asset & { reportId: string };
 type ExtendedMeasure = Measure & { reportId: string };
+type ReportThreat = Threat & {
+    assets: Asset[];
+    componentName: string | null;
+    componentType: number | ComponentType | null;
+    componentReportId: string | null;
+    interfaceName: string | null;
+};
 
 /**
  * Fetches the necessary data for creating a report of
@@ -190,24 +205,39 @@ export async function getReportData(projectId: number) {
             };
         });
 
-    // Get all the threats of the project.
-    let threats = await getThreats(projectId);
-
+    // Maps each point of attack to its component's report id so a threat can link
+    // to the component it targets.
     const pointsOfAttack = await getPointsOfAttack(projectId);
+    const componentReportIdByPointOfAttackId = new Map(
+        pointsOfAttack.map((pointOfAttack) => [
+            pointOfAttack.id,
+            pointOfAttack.componentId ? (componentReportIdsDict.get(pointOfAttack.componentId) ?? null) : null,
+        ])
+    );
 
-    threats = threats.map((threat) => {
-        const pointOfAttack = pointsOfAttack.find((pointOfAttack) => pointOfAttack.id === threat.pointOfAttackId);
+    // Get all generic threats of the project with their threats.
+    const genericThreatsWithThreats = await getGenericThreatsWithExtendedThreats(projectId);
 
-        if (pointOfAttack?.type === "COMMUNICATION_INTERFACES") {
-            threat.componentName = pointOfAttack.componentName + " > " + pointOfAttack.name;
-        }
+    // For communication-interface points of attack the displayed component name
+    // includes the interface name.
+    const withInterfaceComponentName = <T extends ReportThreat>(threat: T): T =>
+        threat.pointOfAttack === "COMMUNICATION_INTERFACES" && threat.interfaceName
+            ? {
+                  ...threat,
+                  componentName: threat.componentName
+                      ? `${threat.componentName} > ${threat.interfaceName}`
+                      : threat.interfaceName,
+              }
+            : threat;
 
-        threat.componentReportId = pointOfAttack?.componentId
-            ? (componentReportIdsDict.get(pointOfAttack.componentId) ?? null)
-            : null;
-
-        return threat;
-    });
+    // Flat list of all threats (needed for measure-impact filtering and transforms).
+    const threats: ReportThreat[] = genericThreatsWithThreats
+        .flatMap((genericThreat) => genericThreat.threats)
+        .map((threat) => ({
+            ...threat,
+            componentReportId: componentReportIdByPointOfAttackId.get(threat.pointOfAttackId) ?? null,
+        }))
+        .map(withInterfaceComponentName);
 
     //Get all the assets of the project
     const assets = await getAssets(projectId);
@@ -238,15 +268,49 @@ export async function getReportData(projectId: number) {
         threats.some((threat) => threat.id === measureImpact.threatId)
     );
 
-    const threatsWithIds = transformThreats(threats, measuresWithIds, assetsWithIds, measureImpacts)
-        .sort((a, b) => b.netRisk - a.netRisk)
-        .map((threat, index) => {
-            threatReportIdsDict.set(threat.id, "T." + (index + 1));
-            return {
-                ...threat,
-                reportId: threatReportIdsDict.get(threat.id)!,
-            };
+    const transformedThreats = transformThreats(threats, measuresWithIds, assetsWithIds, measureImpacts);
+    const transformedThreatsById = new Map(transformedThreats.map((threat) => [threat.id, threat]));
+
+    // Group threats under their generic threat. Generic threats are ordered by their
+    // top threat's net risk, threats by net risk within a generic threat (both descending). Report
+    // ids follow this canonical order — generic threat "T.g", threat "T.g.t" — and stay stable
+    // regardless of any display sorting the client applies. Cross-references point at threats.
+    const orderedGroups = genericThreatsWithThreats
+        .map((genericThreat) => {
+            const sortedThreats = genericThreat.threats
+                .map((threat) => transformedThreatsById.get(threat.id))
+                .filter((threat): threat is (typeof transformedThreats)[number] => threat !== undefined)
+                .sort((a, b) => b.netRisk - a.netRisk);
+            const topNetRisk = sortedThreats.reduce((max, threat) => Math.max(max, threat.netRisk), 0);
+            return { genericThreat, threats: sortedThreats, topNetRisk };
+        })
+        .filter((group) => group.threats.length > 0)
+        .sort((a, b) => b.topNetRisk - a.topNetRisk);
+
+    const threatsWithIds: ((typeof transformedThreats)[number] & { reportId: string })[] = [];
+    const threatGroups = orderedGroups.map((group, genericThreatIndex) => {
+        const genericThreatReportId = "T." + (genericThreatIndex + 1);
+        const threatIds: number[] = [];
+        group.threats.forEach((threat, threatIndex) => {
+            const reportId = genericThreatReportId + "." + (threatIndex + 1);
+            threatReportIdsDict.set(threat.id, reportId);
+            threatsWithIds.push({ ...threat, reportId });
+            threatIds.push(threat.id);
         });
+        const firstThreat = group.threats[0];
+        return {
+            reportId: genericThreatReportId,
+            genericThreatId: group.genericThreat.id,
+            name: group.genericThreat.name,
+            description: group.genericThreat.description,
+            componentName: firstThreat?.componentName ?? null,
+            componentType: firstThreat?.componentType ?? null,
+            interfaceName: firstThreat?.interfaceName ?? null,
+            pointOfAttack: group.genericThreat.pointOfAttack,
+            attacker: group.genericThreat.attacker,
+            threatIds,
+        };
+    });
 
     const measureImpactsWithIds = measureImpacts.map((measureImpact) => {
         return {
@@ -259,9 +323,10 @@ export async function getReportData(projectId: number) {
     return {
         systemImage: image,
         project: project,
-        components: components,
         assets: assetsWithIds,
+        components: components,
         threats: threatsWithIds,
+        threatGroups,
         measures: transformMeasures(measuresWithIds, threatsWithIds, measureImpacts),
         measureImpacts: measureImpactsWithIds,
     };

@@ -10,6 +10,7 @@ import { MATRIX_COLOR } from "#view/colors/matrix.ts";
 import type { MatrixColorKey } from "#view/colors/matrix.ts";
 import type { IndexCallback, ProjectReport, ThreatReport } from "#api/types/project.types.ts";
 import { colors } from "#view/wrappers/color-tokens.ts";
+import { getOutOfScopeReason, type OutOfScopeReason } from "#utils/report-risk.ts";
 
 type ReportThreat = ProjectReport["threats"][number];
 type ThreatAsset = ReportThreat["assets"][number];
@@ -22,6 +23,7 @@ interface ThreatsDetailsPageProps {
     logo: string | undefined;
     date: string;
     threats: ThreatReport[];
+    threatGroups: ProjectReport["threatGroups"];
     showComponentsPage: boolean;
     showAssetsPage: boolean;
     showMeasuresPage: boolean;
@@ -36,6 +38,7 @@ interface ThreatCardProps extends ThreatReport {
 
 interface RiskInfoProps {
     language: string;
+    outOfScopeReason: OutOfScopeReason;
     bruttoColor: MatrixColorKey;
     nettoColor: MatrixColorKey;
     damage: number;
@@ -90,12 +93,14 @@ export const ThreatsDetailsPage = ({
     logo,
     date,
     threats,
+    threatGroups,
     showComponentsPage,
     showAssetsPage,
     showMeasuresPage,
 }: ThreatsDetailsPageProps) => {
     const linkId = "riskDetails";
     const { t } = useTranslation("report", { lng: language });
+    const threatsById = new Map(threats.map((threat) => [threat.id, threat]));
     return (
         <Page
             logo={logo}
@@ -118,23 +123,61 @@ export const ThreatsDetailsPage = ({
             >
                 {t("threats")}
             </Text>
-            {threats.map((threat, i) => {
+            {threatGroups.map((group) => {
+                const groupThreats = group.threatIds
+                    .map((id) => threatsById.get(id))
+                    .filter((threat): threat is ThreatReport => threat !== undefined);
                 return (
-                    <Fragment key={i}>
-                        {/* Pushes the card to the next page when less than a header's height
-                            remains, so a card never starts as a squashed sliver at the bottom. */}
-                        <View minPresenceAhead={180} />
-                        <ThreatCard
+                    <View key={group.reportId}>
+                        <GenericThreatHeader
                             language={language}
-                            showComponentsPage={showComponentsPage}
-                            showAssetsPage={showAssetsPage}
-                            showMeasuresPage={showMeasuresPage}
-                            {...threat}
+                            reportId={group.reportId}
+                            name={group.name}
+                            description={group.description}
                         />
-                    </Fragment>
+                        {groupThreats.map((threat, i) => (
+                            <Fragment key={i}>
+                                {/* Pushes the card to the next page when less than a header's height
+                                    remains, so a card never starts as a squashed sliver at the bottom. */}
+                                <View minPresenceAhead={180} />
+                                <ThreatCard
+                                    language={language}
+                                    showComponentsPage={showComponentsPage}
+                                    showAssetsPage={showAssetsPage}
+                                    showMeasuresPage={showMeasuresPage}
+                                    {...threat}
+                                />
+                            </Fragment>
+                        ))}
+                    </View>
                 );
             })}
         </Page>
+    );
+};
+
+interface GenericThreatHeaderProps {
+    reportId: string;
+    name: string;
+    description: string;
+    language: string;
+}
+
+// A generic threat rendered as a group heading: its report id, name and
+// catalogue description, with no risk of its own.
+const GenericThreatHeader = ({ reportId, name, description, language }: GenericThreatHeaderProps) => {
+    return (
+        <View wrap={false} style={{ marginTop: s2, marginBottom: s1 }}>
+            <View style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+                <Text style={{ marginRight: s1, fontSize: 8 }}>{reportId}</Text>
+                <Text style={{ fontWeight: 600 }}>{name}</Text>
+            </View>
+            {description ? (
+                <Description style={{ marginTop: 2 }} language={language}>
+                    {description}
+                </Description>
+            ) : null}
+        </View>
     );
 };
 
@@ -146,6 +189,7 @@ const ThreatCard = ({
     confidentiality,
     integrity,
     availability,
+    status,
     measures,
     assets,
     componentName,
@@ -207,6 +251,7 @@ const ThreatCard = ({
                     />
                     <RiskInfo
                         language={language}
+                        outOfScopeReason={getOutOfScopeReason({ status, measures })}
                         bruttoColor={bruttoColor}
                         nettoColor={nettoColor}
                         damage={damage}
@@ -263,6 +308,7 @@ const ThreatCard = ({
 
 const RiskInfo = ({
     language,
+    outOfScopeReason,
     bruttoColor,
     nettoColor,
     damage,
@@ -365,31 +411,57 @@ const RiskInfo = ({
                         backgroundColor: MATRIX_COLOR[nettoColor]?.light,
                     }}
                 >
-                    <Text size="small" style={{ width: 60, textAlign: "center" }}>
-                        {netProbability}
-                    </Text>
-                    <Text size="small" style={{ width: 60, textAlign: "center" }}>
-                        {netDamage}
-                    </Text>
-                    <View
-                        style={{
-                            display: "flex",
-                            flexDirection: "row",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            width: 60,
-                        }}
-                    >
-                        <Text size="small">{netRisk}</Text>
-                        <Text
+                    {outOfScopeReason ? (
+                        <View
                             style={{
-                                paddingLeft: 2,
-                                fontSize: 8,
+                                display: "flex",
+                                flexDirection: "row",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                width: 180,
                             }}
                         >
-                            ({t("net")})
-                        </Text>
-                    </View>
+                            <Text size="small" style={{ textAlign: "center", fontSize: 8, flexShrink: 1 }}>
+                                {outOfScopeReason === "measure" ? t("outOfScopeByMeasure") : t("outOfScope")}
+                            </Text>
+                            <Text
+                                style={{
+                                    paddingLeft: 2,
+                                    fontSize: 8,
+                                }}
+                            >
+                                ({t("net")})
+                            </Text>
+                        </View>
+                    ) : (
+                        <>
+                            <Text size="small" style={{ width: 60, textAlign: "center" }}>
+                                {netProbability}
+                            </Text>
+                            <Text size="small" style={{ width: 60, textAlign: "center" }}>
+                                {netDamage}
+                            </Text>
+                            <View
+                                style={{
+                                    display: "flex",
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    width: 60,
+                                }}
+                            >
+                                <Text size="small">{netRisk}</Text>
+                                <Text
+                                    style={{
+                                        paddingLeft: 2,
+                                        fontSize: 8,
+                                    }}
+                                >
+                                    ({t("net")})
+                                </Text>
+                            </View>
+                        </>
+                    )}
                 </View>
             </View>
         </View>

@@ -1,47 +1,79 @@
+import Visibility from "@mui/icons-material/Visibility";
+import UnfoldMore from "@mui/icons-material/UnfoldMore";
+import UnfoldLess from "@mui/icons-material/UnfoldLess";
+import FilterAltOff from "@mui/icons-material/FilterAltOff";
 import {
     Box,
-    LinearProgress,
-    Popper,
-    Typography,
     Button,
-    Menu,
-    MenuItem,
     Checkbox,
     FormControlLabel,
+    IconButton,
+    LinearProgress,
+    Menu,
+    MenuItem,
+    Popper,
+    Tooltip,
+    Typography,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { DataGrid, GridRow, type GridColumnVisibilityModel, type GridRowProps } from "@mui/x-data-grid";
-import Visibility from "@mui/icons-material/Visibility";
 import { memo, useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router";
-import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
-import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
-import { useEditor } from "#application/hooks/use-editor.hook.ts";
-import { useLoadThreatsOnce } from "#application/hooks/use-load-threats-once.hook.ts";
-import { useThreatsList, type ThreatListItem } from "#application/hooks/use-threats-list.hook.ts";
+import { ThreatsActions } from "#application/actions/threats.actions.ts";
 import { useColumnFilters } from "#application/hooks/use-column-filters.hook.ts";
 import { getToggleableColumns, useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
 import { applyColumnWidths, useColumnWidths } from "#application/hooks/use-column-widths.hook.ts";
-import { applyColumnFilters } from "#utils/column-filters.ts";
-import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
+import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
+import { useEditor } from "#application/hooks/use-editor.hook.ts";
+import { useLoadThreatsOnce } from "#application/hooks/use-load-threats-once.hook.ts";
+import {
+    useGenericThreatsList,
+    type ExtendedThreatWithMetrics,
+} from "#application/hooks/use-generic-threats-list.hook.ts";
 import { NoRowsOverlay } from "#view/components/no-rows-overlay.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
 import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
 import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
-import { withProject } from "#view/components/with-project.hoc.tsx";
 import ThreatDialogPage from "./threat-dialog.page";
 import { MeasureImpactByMeasureDialogPage } from "./measure-impact-by-measure-dialog.page";
 import AddMeasureDialogPage from "./add-measure-dialog.page";
-import { createThreatsColumns } from "./create-threats-columns";
+import { withProject } from "#view/components/with-project.hoc.tsx";
+import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
+import type { Threat, ExtendedThreat } from "#api/types/threat.types.ts";
+import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat.types.ts";
+import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
+import {
+    createThreatsColumns,
+    formatComponentName,
+    GENERIC_THREAT_ROW_PREFIX,
+    THREAT_ROW_PREFIX,
+    type ThreatsGridRow,
+} from "./create-threats-columns";
 
-// The e2e page objects count rows via a row-level test id, so it must live on the grid
-// row element itself (same pattern as the assets and measures pages).
-const ThreatsGridRowSlot = (props: GridRowProps) => (
-    <GridRow {...props} data-testid="threats-page_threats-list-entry" />
-);
+// Fields whose values only exist on threats; a filter on them can never
+// match a generic threat directly.
+const threatOnlyFilterFields = ["description", "assets", "probability", "damage", "risk", "status"] as const;
 
+// The e2e page objects locate action buttons inside the row-level test ids, so
+// the ids must live on the grid row element itself, not on a single cell.
+const ThreatsGridRowSlot = (props: GridRowProps) => {
+    const rowId = String(props.rowId);
+    const testId = rowId.startsWith(GENERIC_THREAT_ROW_PREFIX)
+        ? "threats-page_generic-threats-list-entry"
+        : rowId.startsWith(THREAT_ROW_PREFIX)
+          ? "threats-page_threats-list-entry"
+          : undefined;
+    return <GridRow {...props} data-testid={testId} />;
+};
+
+/**
+ * on this page all threats are listed
+ * @component
+ * @category Pages
+ */
 const DEFAULT_COLUMN_VISIBILITY: GridColumnVisibilityModel = {
     name: true,
     // Descriptions are long free text; the column is opt-in via Customize view.
@@ -53,28 +85,30 @@ const DEFAULT_COLUMN_VISIBILITY: GridColumnVisibilityModel = {
     probability: true,
     damage: true,
     risk: true,
-    doneEditing: true,
+    status: true,
     actions: true,
 };
 
-/**
- * on this page all threats are listed
- * @component
- * @category Pages
- */
 const ThreatsPageBody = () => {
     const { projectId: projectIdParam = "0" } = useParams<{ projectId?: string }>();
     const projectId = Number.parseInt(projectIdParam, 10);
-    const { openConfirm } = useConfirm<ExtendedThreat>();
+    const { openConfirm } = useConfirm<Threat>();
     const navigate = useNavigate();
     const { t } = useTranslation("threatsPage");
     usePageTitle(t("threats"));
-
-    const NoRowsOverlayWithMessage = useCallback(() => <NoRowsOverlay message={t("noThreatsFound")} />, [t]);
-
-    const { duplicateThreat, deleteThreat, loadThreats, isPending, threats } = useThreatsList({ projectId: projectId });
+    const theme = useTheme();
 
     const { autoSaveStatus } = useEditor({ projectId: projectId });
+
+    const {
+        loadGenericThreats,
+        isPending: isGenericThreatsPending,
+        genericThreats,
+        expandedGenericThreatIds,
+        threatsByGenericThreatId,
+        toggleGenericThreat,
+        setAllGenericThreatsExpanded,
+    } = useGenericThreatsList({ projectId });
 
     const userRole = useAppSelector((state) => state.projects.current?.role);
 
@@ -91,6 +125,130 @@ const ThreatsPageBody = () => {
         );
     }, [dispatch]);
 
+    useLoadThreatsOnce({ projectId, autoSaveStatus, load: loadGenericThreats });
+
+    const [assetAnchorEl, setAssetAnchorEl] = useState<HTMLElement | null>(null);
+    const [currentAssetList, setCurrentAssetList] = useState<ExtendedThreat["assets"] | null>(null);
+
+    const handleAssetHover = useCallback(
+        (event: React.SyntheticEvent<HTMLElement>, assets: ExtendedThreat["assets"]) => {
+            setCurrentAssetList(assets);
+            setAssetAnchorEl(event.currentTarget);
+        },
+        []
+    );
+
+    const handleAssetHoverEnd = useCallback(() => {
+        setAssetAnchorEl(null);
+    }, []);
+
+    const onClickEditThreat = useCallback(
+        (event: React.MouseEvent<HTMLElement>, threat: ExtendedThreat | undefined) => {
+            event.preventDefault();
+            if (threat) {
+                navigate(`/projects/${projectId}/threats/edit?threatId=${threat.id}`, { state: { threat } });
+            }
+        },
+        [navigate, projectId]
+    );
+
+    const handleAddThreat = useCallback(
+        async (event: React.MouseEvent<HTMLElement>, genericThreat: GenericThreatWithExtendedThreats) => {
+            event.preventDefault();
+            // Keep the add button from toggling the generic threat row's expand/collapse.
+            event.stopPropagation();
+            try {
+                // Only the name is overridden; identity and assessment defaults come
+                // from the generic threat and its catalogue threat on the backend.
+                await dispatch(
+                    ThreatsActions.createThreat({
+                        projectId: Number(projectId),
+                        genericThreatId: genericThreat.id,
+                        name: `${genericThreat.name} (${t("newThreatSuffix")})`,
+                    })
+                ).unwrap();
+                if (!expandedGenericThreatIds[genericThreat.id]) {
+                    toggleGenericThreat(genericThreat.id);
+                }
+                void loadGenericThreats();
+            } catch {
+                // handled globally
+            }
+        },
+        [dispatch, projectId, t, expandedGenericThreatIds, toggleGenericThreat, loadGenericThreats]
+    );
+
+    const handleDuplicateThreat = useCallback(
+        (event: React.MouseEvent<HTMLElement>, threat: Threat) => {
+            event.preventDefault();
+            openConfirm({
+                state: threat,
+                message: t("duplicateMessage", { threatName: threat.name }),
+                acceptText: t("duplicate"),
+                cancelText: t("cancel"),
+                acceptColor: "secondary",
+                onAccept: async (threat) => {
+                    try {
+                        const payload = {
+                            projectId: Number(projectId),
+                            genericThreatId: threat.genericThreatId,
+                            name: `${threat.name} (${t("duplicateSuffix")})`,
+                            description: threat.description,
+                            probability: threat.probability,
+                            confidentiality: threat.confidentiality,
+                            integrity: threat.integrity,
+                            availability: threat.availability,
+                            status: THREAT_STATUSES.NEW,
+                        };
+
+                        await dispatch(ThreatsActions.createThreat(payload)).unwrap();
+                        void loadGenericThreats();
+                    } catch {
+                        // swallow; error handling via global error handler
+                    }
+                },
+            });
+        },
+        [openConfirm, t, dispatch, projectId, loadGenericThreats]
+    );
+
+    const handleDeleteThreat = useCallback(
+        (event: React.MouseEvent<HTMLElement>, threat: Threat) => {
+            event.preventDefault();
+            // Prevent deleting the only threat of a generic threat
+            const siblings = threatsByGenericThreatId[threat.genericThreatId] ?? [];
+            if (siblings.length <= 1) {
+                openConfirm({
+                    state: threat,
+                    message: t("cannotDeleteOnlyThreat", { threatName: threat.name }),
+                    acceptText: t("ok"),
+                    // Informational dialog — no action to cancel (same pattern as the
+                    // member page's warning dialogs).
+                    cancelText: null,
+                });
+                return;
+            }
+
+            openConfirm({
+                state: threat,
+                message: t("deleteMessage", { threatName: threat.name }),
+                acceptText: t("delete"),
+                cancelText: t("cancel"),
+                onAccept: async (threat) => {
+                    try {
+                        await dispatch(
+                            ThreatsActions.deleteThreat({ id: threat.id, projectId: Number(projectId) })
+                        ).unwrap();
+                        void loadGenericThreats();
+                    } catch {
+                        // handled globally
+                    }
+                },
+            });
+        },
+        [threatsByGenericThreatId, openConfirm, t, dispatch, projectId, loadGenericThreats]
+    );
+
     const { columnVisibility, toggleColumnVisibility } = useColumnVisibility(
         `threats-column-visibility-${projectId}`,
         DEFAULT_COLUMN_VISIBILITY
@@ -99,13 +257,8 @@ const ThreatsPageBody = () => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
-    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
+    const handleClose = () => setAnchorEl(null);
 
     const columnLabels: Record<string, string> = {
         name: t("name"),
@@ -117,86 +270,130 @@ const ThreatsPageBody = () => {
         probability: t("probability"),
         damage: t("damage"),
         risk: t("risk"),
-        doneEditing: t("edited"),
+        status: t("status"),
         actions: t("actions"),
     };
 
-    const onClickEditThreat = (threat: ThreatListItem) => {
-        navigate(`/projects/${projectId}/threats/edit`, {
-            state: { threat },
-        });
-    };
+    const { columnFilters, expandedFilters, handleFilterChange, toggleFilterExpanded, clearColumnFilters } =
+        useColumnFilters();
 
-    const handleDuplicateThreat = useCallback(
-        (threat: ThreatListItem) => {
-            openConfirm({
-                state: threat,
-                message: t("duplicateMessage", { threatName: threat.name }),
-                acceptText: t("duplicate"),
-                cancelText: t("cancel"),
-                acceptColor: "secondary",
-                onAccept: (threat) => {
-                    duplicateThreat(threat);
-                },
-            });
-        },
-        [openConfirm, t, duplicateThreat]
-    );
+    const hasActiveFilter = Object.values(columnFilters).some((value) => value.trim() !== "");
 
-    const handleDeleteThreat = useCallback(
-        (threat: ThreatListItem) => {
-            openConfirm({
-                state: threat,
-                message: t("deleteMessage", { threatName: threat.name }),
-                acceptText: t("delete"),
-                cancelText: t("cancel"),
-                onAccept: (threat) => {
-                    deleteThreat(threat);
-                },
-            });
-        },
-        [openConfirm, t, deleteThreat]
-    );
+    const allThreatsExpanded =
+        genericThreats.length > 0 &&
+        genericThreats.every((genericThreat) => expandedGenericThreatIds[genericThreat.id]);
 
-    useLoadThreatsOnce({ projectId, autoSaveStatus, load: loadThreats });
-
-    const [assetAnchorEl, setAssetAnchorEl] = useState<HTMLElement | null>(null);
-    const [currentAssetList, setCurrentAssetList] = useState<ExtendedThreat["assets"] | null>(null);
-    const { columnFilters, expandedFilters, handleFilterChange, toggleFilterExpanded } = useColumnFilters();
-
-    /**
-     * Make the Popper show the asset list for the threat the mouse is over
-     */
-    const handleAssetHover = (event: React.MouseEvent<HTMLElement>, assets: ExtendedThreat["assets"]) => {
-        setCurrentAssetList(assets);
-        setAssetAnchorEl(event.currentTarget);
-    };
-
-    // Filtered in JS: the community DataGrid applies at most one controlled
-    // filter-model item, which silently breaks combined column filters. The value
-    // getters mirror each column's displayed text.
-    const filteredThreats = useMemo(
-        () =>
-            applyColumnFilters(
-                threats,
-                columnFilters,
-                {
-                    assets: (threat) => String(threat.assets.length),
-                    componentName: (threat) =>
-                        threat.pointOfAttack === "COMMUNICATION_INTERFACES"
-                            ? `${threat.componentName || t("unknown")} > ${threat.interfaceName}`
-                            : (threat.componentName ?? ""),
-                    pointOfAttack: (threat) => t(`pointsOfAttackList.${threat.pointOfAttack}`),
-                    attacker: (threat) => t(`attackerList.${threat.attacker}`),
-                },
-                {
-                    // The header select stores "edited"/"notEdited"; a contains match cannot
-                    // separate them ("notedited" contains "edited"), so match exactly.
-                    doneEditing: (threat, filterValue) => (threat.doneEditing ? "edited" : "notedited") === filterValue,
+    // The grid's own filtering would treat generic threat and threat rows independently and
+    // tear the hierarchy apart, so filters are applied here while building the rows.
+    const matchesThreatFilters = useCallback(
+        (threat: ExtendedThreatWithMetrics): boolean => {
+            return Object.entries(columnFilters).every(([field, value]) => {
+                const filterValue = value.trim().toLowerCase();
+                if (!filterValue) {
+                    return true;
                 }
-            ),
-        [threats, columnFilters, t]
+                switch (field) {
+                    case "name":
+                        return threat.name.toLowerCase().includes(filterValue);
+                    case "description":
+                        return threat.description.toLowerCase().includes(filterValue);
+                    case "assets":
+                        return String(threat.assets.length).includes(filterValue);
+                    case "componentName":
+                        return formatComponentName(threat, t).toLowerCase().includes(filterValue);
+                    case "pointOfAttack":
+                        return t(`pointsOfAttackList.${threat.pointOfAttack}`).toLowerCase().includes(filterValue);
+                    case "attacker":
+                        return t(`attackerList.${threat.attacker}`).toLowerCase().includes(filterValue);
+                    case "probability":
+                        return String(threat.probability).includes(filterValue);
+                    case "damage":
+                        return String(threat.damage).includes(filterValue);
+                    case "risk":
+                        return String(threat.risk).includes(filterValue);
+                    case "status":
+                        return threat.status === value;
+                    default:
+                        return true;
+                }
+            });
+        },
+        [columnFilters, t]
     );
+
+    const matchesGenericThreatFilters = useCallback(
+        (genericThreat: GenericThreatWithExtendedThreats): boolean => {
+            return Object.entries(columnFilters).every(([field, value]) => {
+                const filterValue = value.trim().toLowerCase();
+                if (!filterValue) {
+                    return true;
+                }
+                switch (field) {
+                    case "name":
+                        return genericThreat.name.toLowerCase().includes(filterValue);
+                    case "componentName":
+                        return formatComponentName(genericThreat, t).toLowerCase().includes(filterValue);
+                    case "pointOfAttack":
+                        return t(`pointsOfAttackList.${genericThreat.pointOfAttack}`)
+                            .toLowerCase()
+                            .includes(filterValue);
+                    case "attacker":
+                        return t(`attackerList.${genericThreat.attacker}`).toLowerCase().includes(filterValue);
+                    default:
+                        return true;
+                }
+            });
+        },
+        [columnFilters, t]
+    );
+
+    const rows = useMemo<ThreatsGridRow[]>(() => {
+        const hasThreatOnlyFilter = threatOnlyFilterFields.some((field) => (columnFilters[field] ?? "").trim() !== "");
+
+        const result: ThreatsGridRow[] = [];
+        for (const genericThreat of genericThreats) {
+            const threats = threatsByGenericThreatId[genericThreat.id] ?? [];
+            const visibleThreats = threats.filter(matchesThreatFilters);
+
+            const genericThreatVisible =
+                visibleThreats.length > 0 || (!hasThreatOnlyFilter && matchesGenericThreatFilters(genericThreat));
+            if (!genericThreatVisible) {
+                continue;
+            }
+
+            const isExpanded = expandedGenericThreatIds[genericThreat.id] ?? false;
+            result.push({
+                rowType: "genericThreat",
+                rowId: `${GENERIC_THREAT_ROW_PREFIX}${genericThreat.id}`,
+                genericThreat,
+                threatCount: visibleThreats.length,
+                isExpanded,
+            });
+            if (isExpanded) {
+                if (visibleThreats.length === 0) {
+                    result.push({ rowType: "noThreats", rowId: `empty-${genericThreat.id}` });
+                } else {
+                    for (const threat of visibleThreats) {
+                        result.push({
+                            rowType: "threat",
+                            rowId: `${THREAT_ROW_PREFIX}${threat.id}`,
+                            threat,
+                        });
+                    }
+                }
+            }
+        }
+        return result;
+    }, [
+        genericThreats,
+        threatsByGenericThreatId,
+        expandedGenericThreatIds,
+        columnFilters,
+        matchesThreatFilters,
+        matchesGenericThreatFilters,
+    ]);
+
+    const NoRowsOverlayWithMessage = useCallback(() => <NoRowsOverlay message={t("noThreatsFound")} />, [t]);
 
     const columns = useMemo(
         () =>
@@ -205,13 +402,16 @@ const ThreatsPageBody = () => {
                     t,
                     userRole,
                     columnFilters,
-                    handleFilterChange,
-                    handleAssetHover,
-                    setAssetAnchorEl,
-                    handleDuplicateThreat,
-                    handleDeleteThreat,
+                    onFilterChange: handleFilterChange,
                     expandedFilters,
-                    toggleFilterExpanded,
+                    onToggleFilterExpanded: toggleFilterExpanded,
+                    onToggleGenericThreat: toggleGenericThreat,
+                    onAssetHover: handleAssetHover,
+                    onAssetHoverEnd: handleAssetHoverEnd,
+                    onAddThreat: (event, genericThreat) => void handleAddThreat(event, genericThreat),
+                    onEditThreat: onClickEditThreat,
+                    onDuplicateThreat: handleDuplicateThreat,
+                    onDeleteThreat: handleDeleteThreat,
                 }),
                 columnWidths
             ),
@@ -220,23 +420,30 @@ const ThreatsPageBody = () => {
             userRole,
             columnFilters,
             handleFilterChange,
-            handleDuplicateThreat,
-            handleDeleteThreat,
             expandedFilters,
             toggleFilterExpanded,
+            toggleGenericThreat,
+            handleAssetHover,
+            handleAssetHoverEnd,
+            handleAddThreat,
+            onClickEditThreat,
+            handleDuplicateThreat,
+            handleDeleteThreat,
             columnWidths,
         ]
     );
 
+    // Count what the grid actually shows: the generic threats surviving the
+    // column filters (not the unfiltered hook result).
+    const genericThreatsCount = useMemo(() => rows.filter((row) => row.rowType === "genericThreat").length, [rows]);
+
     return (
         <Box sx={{ overflow: "hidden", height: "100%", boxSizing: "border-box" }}>
-            {
-                <LinearProgress
-                    sx={{
-                        visibility: isPending || autoSaveStatus === "saving" ? "visible" : "hidden",
-                    }}
-                />
-            }
+            <LinearProgress
+                sx={{
+                    visibility: isGenericThreatsPending || autoSaveStatus === "saving" ? "visible" : "hidden",
+                }}
+            />
             <Page
                 sx={{
                     display: "flex",
@@ -279,6 +486,7 @@ const ThreatsPageBody = () => {
                         ))}
                     </ul>
                 </Popper>
+
                 <Box
                     sx={{
                         display: "flex",
@@ -296,16 +504,28 @@ const ThreatsPageBody = () => {
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "space-between",
-                            paddingTop: 1,
-                            paddingBottom: 2,
+                            marginBottom: 2,
                         }}
                     >
                         <Box sx={{ display: "flex", alignItems: "center" }}>
+                            <Tooltip title={allThreatsExpanded ? t("collapseAllThreats") : t("expandAllThreats")}>
+                                <IconButton
+                                    onClick={() => setAllGenericThreatsExpanded(!allThreatsExpanded)}
+                                    aria-label={allThreatsExpanded ? t("collapseAllThreats") : t("expandAllThreats")}
+                                    data-testid="ToggleExpandAllThreats"
+                                    sx={{ mr: 1, color: theme.vars.palette.text.primary }}
+                                >
+                                    {allThreatsExpanded ? (
+                                        <UnfoldLess sx={{ fontSize: 20 }} />
+                                    ) : (
+                                        <UnfoldMore sx={{ fontSize: 20 }} />
+                                    )}
+                                </IconButton>
+                            </Tooltip>
                             <Button
-                                variant="outlined"
-                                startIcon={<Visibility />}
                                 onClick={handleClick}
-                                sx={{ textTransform: "none" }}
+                                startIcon={<Visibility sx={{ fontSize: 18 }} />}
+                                sx={{ ml: 2, textTransform: "none", color: theme.vars.palette.text.primary }}
                             >
                                 {t("customizeView")}
                             </Button>
@@ -313,14 +533,8 @@ const ThreatsPageBody = () => {
                                 anchorEl={anchorEl}
                                 open={open}
                                 onClose={handleClose}
-                                anchorOrigin={{
-                                    vertical: "bottom",
-                                    horizontal: "left",
-                                }}
-                                transformOrigin={{
-                                    vertical: "top",
-                                    horizontal: "left",
-                                }}
+                                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                                transformOrigin={{ vertical: "top", horizontal: "left" }}
                                 slotProps={{
                                     list: {
                                         sx: { bgcolor: "background.mainIntransparent" },
@@ -347,94 +561,111 @@ const ThreatsPageBody = () => {
                                 ))}
                             </Menu>
                         </Box>
-                        {threats.length > 0 && (
-                            <Box sx={{ display: "flex", alignItems: "center" }}>
-                                <Typography
-                                    sx={{
-                                        mr: 0.5,
-                                        fontWeight: "bold",
-                                        color: "primary.text",
-                                    }}
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                            {hasActiveFilter && (
+                                <Button
+                                    onClick={clearColumnFilters}
+                                    startIcon={<FilterAltOff sx={{ fontSize: 18 }} />}
+                                    data-testid="ClearThreatFilters"
+                                    sx={{ mr: 2, textTransform: "none", color: theme.vars.palette.text.primary }}
                                 >
-                                    {filteredThreats.length}
-                                </Typography>
-                                <Typography>{t("threatsFound")}</Typography>
-                            </Box>
-                        )}
+                                    {t("clearFilters")}
+                                </Button>
+                            )}
+                            {(genericThreatsCount > 0 || hasActiveFilter) && (
+                                <>
+                                    <Typography sx={{ mr: 0.5, fontWeight: "bold", color: "primary.text" }}>
+                                        {genericThreatsCount}
+                                    </Typography>
+                                    <Typography>{t("threatsFound")}</Typography>
+                                </>
+                            )}
+                        </Box>
                     </Box>
 
                     <DataGrid
-                        rows={filteredThreats}
+                        rows={rows}
                         columns={columns}
-                        loading={isPending}
+                        getRowId={(row) => row.rowId}
+                        loading={isGenericThreatsPending}
                         disableRowSelectionOnClick
                         disableColumnFilter
                         disableColumnMenu
                         disableColumnSelector
-                        onCellClick={(params) => {
-                            if (params.field !== "actions") {
-                                onClickEditThreat(params.row);
+                        onCellClick={(params, event) => {
+                            const row = params.row as ThreatsGridRow;
+                            // A generic threat row toggles from any cell (including the "n threats" text in
+                            // the actions cell); its add button stops propagation to keep its action.
+                            if (row.rowType === "genericThreat") {
+                                toggleGenericThreat(row.genericThreat.id);
+                            } else if (row.rowType === "threat" && params.field !== "actions") {
+                                onClickEditThreat(event as unknown as React.MouseEvent<HTMLElement>, row.threat);
                             }
                         }}
                         onCellKeyDown={(params, event) => {
                             // Keyboard equivalent of the cell click; skip events coming from
-                            // interactive elements inside a cell (they handle Enter natively).
+                            // interactive elements inside a cell (they handle Enter natively —
+                            // acting here as well would double-trigger their action).
                             if (event.key !== "Enter" && event.key !== " ") {
                                 return;
                             }
                             if ((event.target as HTMLElement).closest("button, a, input")) {
                                 return;
                             }
-                            if (params.field !== "actions") {
+                            const row = params.row as ThreatsGridRow;
+                            if (row.rowType === "genericThreat") {
                                 event.preventDefault();
-                                onClickEditThreat(params.row);
+                                toggleGenericThreat(row.genericThreat.id);
+                            } else if (row.rowType === "threat" && params.field !== "actions") {
+                                event.preventDefault();
+                                onClickEditThreat(event as unknown as React.MouseEvent<HTMLElement>, row.threat);
                             }
                         }}
-                        getRowClassName={(params) => (params.row.doneEditing ? "row-done-editing" : "")}
+                        getRowClassName={(params) => {
+                            const row = params.row as ThreatsGridRow;
+                            // Finalized / out-of-scope threats are visually de-emphasised as a hint,
+                            // but nothing is actually blocked — the status and the action buttons stay
+                            // at full opacity (see the per-cell overrides below) so they remain
+                            // clearly readable and usable.
+                            if (
+                                row.rowType === "threat" &&
+                                (row.threat.status === THREAT_STATUSES.FINALIZED ||
+                                    row.threat.status === THREAT_STATUSES.OUTOFSCOPE)
+                            ) {
+                                return "threats-grid--dimmed";
+                            }
+                            return "";
+                        }}
                         columnHeaderHeight={90}
                         columnVisibilityModel={columnVisibility}
                         onColumnWidthChange={handleColumnWidthChange}
-                        // Two-state sort like the tables before the DataGrid: a header click toggles asc <-> desc
-                        // instead of also cycling through DataGrid's default third, unsorted state.
-                        sortingOrder={["asc", "desc"]}
                         sx={{
                             borderRadius: 5,
                             boxShadow: 1,
-                            "& .MuiDataGrid-row": {
-                                cursor: "pointer",
-                            },
-                            "& .row-done-editing": {
-                                opacity: 0.6,
-                            },
-                            "& .MuiDataGrid-cell:focus": {
-                                outline: "none",
-                            },
-                            "& .MuiDataGrid-columnHeader:focus": {
-                                outline: "none",
-                            },
-                            "& .MuiDataGrid-columnHeader": {
-                                padding: "8px 16px",
-                            },
-                            "& .MuiDataGrid-cell": {
-                                cursor: "pointer",
-                            },
+                            "& .MuiDataGrid-row": { cursor: "pointer" },
+                            "& .MuiDataGrid-cell:focus": { outline: "none" },
+                            "& .MuiDataGrid-columnHeader:focus": { outline: "none" },
+                            "& .MuiDataGrid-columnHeader": { padding: "8px 16px" },
+                            "& .MuiDataGrid-cell": { cursor: "pointer" },
+                            // Dim per cell (not per row) so the exemptions below can win.
+                            "& .threats-grid--dimmed .MuiDataGrid-cell": { opacity: 0.6 },
+                            "& .threats-grid--dimmed .MuiDataGrid-cell[data-field='status']": { opacity: 1 },
+                            "& .threats-grid--dimmed .MuiDataGrid-cell[data-field='actions']": { opacity: 1 },
                         }}
                         initialState={{
-                            pagination: {
-                                paginationModel: { pageSize: 25, page: 0 },
-                            },
-                            sorting: { sortModel: [{ field: "name", sort: "asc" }] },
+                            pagination: { paginationModel: { pageSize: 25, page: 0 } },
                         }}
                         pageSizeOptions={[10, 25, 50, 100]}
-                        slots={{
-                            noRowsOverlay: NoRowsOverlayWithMessage,
-                            row: ThreatsGridRowSlot,
-                        }}
+                        slots={{ noRowsOverlay: NoRowsOverlayWithMessage, row: ThreatsGridRowSlot }}
                     />
                 </Box>
+
                 <Routes>
-                    <Route path="edit" element={<ThreatDialogPage />} />
-                    <Route path="measureImpacts/edit" element={<MeasureImpactByMeasureDialogPage />}>
+                    <Route path="edit" element={<ThreatDialogPage onSaved={() => void loadGenericThreats()} />} />
+                    <Route
+                        path="measureImpacts/edit"
+                        element={<MeasureImpactByMeasureDialogPage onApplied={() => void loadGenericThreats()} />}
+                    >
                         <Route path="measures/add" element={<AddMeasureDialogPage />} />
                     </Route>
                 </Routes>
