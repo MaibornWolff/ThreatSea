@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { DataGrid, GridRow, type GridColumnVisibilityModel, type GridRowProps } from "@mui/x-data-grid";
-import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useState, type ChangeEvent } from "react";
+import { memo, useCallback, useLayoutEffect, useMemo, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
@@ -27,6 +27,7 @@ import { getToggleableColumns, useColumnVisibility } from "#application/hooks/us
 import { applyColumnWidths, useColumnWidths } from "#application/hooks/use-column-widths.hook.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { useEditor } from "#application/hooks/use-editor.hook.ts";
+import { useLoadThreatsOnce } from "#application/hooks/use-load-threats-once.hook.ts";
 import {
     useGenericThreatsList,
     type ExtendedThreatWithMetrics,
@@ -129,11 +130,7 @@ const ThreatsPageBody = () => {
         );
     }, [dispatch]);
 
-    useEffect(() => {
-        if (autoSaveStatus === "upToDate") {
-            void loadGenericThreats();
-        }
-    }, [autoSaveStatus, loadGenericThreats]);
+    useLoadThreatsOnce({ projectId, autoSaveStatus, load: loadGenericThreats });
 
     const [assetAnchorEl, setAssetAnchorEl] = useState<HTMLElement | null>(null);
     const [currentAssetList, setCurrentAssetList] = useState<ExtendedThreat["assets"] | null>(null);
