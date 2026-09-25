@@ -119,6 +119,13 @@ describe("createThreatsColumns — structure", () => {
         ]);
     });
 
+    it("keeps the probability column wide enough for its German header", () => {
+        const { columns } = buildColumns();
+        // "Eintrittswahrscheinlichkeit" measures about 181px in the header font; with the filter
+        // toggle and the header padding the column needs about 239px.
+        expect(columns.find((column) => column.field === "probability")!.width).toBeGreaterThanOrEqual(240);
+    });
+
     it("disables sorting on every column (custom hierarchy ordering)", () => {
         const { columns } = buildColumns();
         expect(columns.every((column) => column.sortable === false)).toBe(true);

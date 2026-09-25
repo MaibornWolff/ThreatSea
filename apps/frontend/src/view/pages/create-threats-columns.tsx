@@ -315,7 +315,8 @@ export const createThreatsColumns = ({
     {
         field: "probability",
         headerName: t("probability"),
-        width: 150,
+        // Fits the German header "Eintrittswahrscheinlichkeit" next to its filter toggle.
+        width: 240,
         sortable: false,
         align: "center",
         headerAlign: "center",
@@ -381,7 +382,8 @@ export const createThreatsColumns = ({
     {
         field: "status",
         headerName: t("status"),
-        width: 160,
+        // Fits every status label with its icon, in German and English.
+        width: 145,
         sortable: false,
         align: "center",
         headerAlign: "center",
