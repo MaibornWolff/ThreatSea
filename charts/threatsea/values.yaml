@@ -46,9 +46,10 @@ config:
   # -- Log level: 0 (debug), 1 (info), 2 (warning), 3 (error)
   logLevel: "3"
 
-  # -- Origin of the frontend (used for CORS)
+  # -- Origin of the frontend (used for CORS and as the post-login redirect target)
   originApp: ""
-  # -- Origin of the backend (used for CORS)
+  # -- Origin of the backend (used to build the OIDC redirect/callback URL).
+  # Must be the externally reachable backend URL, otherwise OIDC login fails.
   originBackend: ""
 
   authMethod: "oidc"
@@ -150,13 +151,14 @@ ingress:
 # ──────────────────────────────────────────────
 # Gateway API (alternative to Ingress)
 # Requires the Gateway API CRDs to be installed in the cluster.
+# TLS is not configured here: with the Gateway API it terminates on the
+# Gateway's listener, which is owned by the cluster operator, not by this chart.
 # ──────────────────────────────────────────────
 gateway:
   enabled: false
   gatewayName: ""
   gatewayNamespace: ""
   hostname: threatsea.example.com
-  tlsSecretName: ""
 
 # ──────────────────────────────────────────────
 # Resources

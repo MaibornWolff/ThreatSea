@@ -46,6 +46,11 @@ export function getDatabaseTlsConfig(databaseTls: string | undefined): PoolConfi
     return true;
 }
 
+/**
+ * Port of the backend server.
+ */
+export const PORT = getOptionalPositiveNumber("PORT", 8000);
+
 export const JWT_SECRET = new TextEncoder().encode(getEnvironmentVariable("JWT_SECRET"));
 export const JWT_ISSUER = "threatsea";
 export const JWT_AUDIENCE = "threatsea-api";
@@ -79,6 +84,7 @@ export const originConfig = {
 export const databaseConfig: PoolConfig = {
     user: getEnvironmentVariable("DATABASE_USER"),
     host: getEnvironmentVariable("DATABASE_HOST"),
+    port: getOptionalPositiveNumber("DATABASE_PORT", 5432),
     database: getEnvironmentVariable("DATABASE_NAME"),
     password: getEnvironmentVariable("DATABASE_PASSWORD"),
     ssl: getDatabaseTlsConfig(process.env["DATABASE_TLS"]),
