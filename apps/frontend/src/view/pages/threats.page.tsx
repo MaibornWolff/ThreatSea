@@ -23,7 +23,8 @@ import { Route, Routes, useNavigate, useParams } from "react-router";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { ThreatsActions } from "#application/actions/threats.actions.ts";
 import { useColumnFilters } from "#application/hooks/use-column-filters.hook.ts";
-import { useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
+import { getToggleableColumns, useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
+import { applyColumnWidths, useColumnWidths } from "#application/hooks/use-column-widths.hook.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { useEditor } from "#application/hooks/use-editor.hook.ts";
 import {
@@ -260,6 +261,7 @@ const ThreatsPageBody = () => {
         `threats-column-visibility-${projectId}`,
         DEFAULT_COLUMN_VISIBILITY
     );
+    const { columnWidths, handleColumnWidthChange } = useColumnWidths(`threats-column-widths-${projectId}`);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
@@ -406,21 +408,24 @@ const ThreatsPageBody = () => {
 
     const columns = useMemo(
         () =>
-            createThreatsColumns({
-                t,
-                userRole,
-                columnFilters,
-                onFilterChange: handleFilterChange,
-                expandedFilters,
-                onToggleFilterExpanded: toggleFilterExpanded,
-                onToggleGenericThreat: toggleGenericThreat,
-                onAssetHover: handleAssetHover,
-                onAssetHoverEnd: handleAssetHoverEnd,
-                onAddThreat: (event, genericThreat) => void handleAddThreat(event, genericThreat),
-                onEditThreat: onClickEditThreat,
-                onDuplicateThreat: handleDuplicateThreat,
-                onDeleteThreat: handleDeleteThreat,
-            }),
+            applyColumnWidths(
+                createThreatsColumns({
+                    t,
+                    userRole,
+                    columnFilters,
+                    onFilterChange: handleFilterChange,
+                    expandedFilters,
+                    onToggleFilterExpanded: toggleFilterExpanded,
+                    onToggleGenericThreat: toggleGenericThreat,
+                    onAssetHover: handleAssetHover,
+                    onAssetHoverEnd: handleAssetHoverEnd,
+                    onAddThreat: (event, genericThreat) => void handleAddThreat(event, genericThreat),
+                    onEditThreat: onClickEditThreat,
+                    onDuplicateThreat: handleDuplicateThreat,
+                    onDeleteThreat: handleDeleteThreat,
+                }),
+                columnWidths
+            ),
         [
             t,
             userRole,
@@ -435,6 +440,7 @@ const ThreatsPageBody = () => {
             onClickEditThreat,
             handleDuplicateThreat,
             handleDeleteThreat,
+            columnWidths,
         ]
     );
 
@@ -554,7 +560,7 @@ const ThreatsPageBody = () => {
                                     },
                                 }}
                             >
-                                {Object.entries(columnLabels).map(([field, label]) => (
+                                {getToggleableColumns(columnLabels, columns).map(([field, label]) => (
                                     <MenuItem
                                         key={field}
                                         onClick={() => toggleColumnVisibility(field)}
@@ -648,6 +654,7 @@ const ThreatsPageBody = () => {
                         }}
                         columnHeaderHeight={90}
                         columnVisibilityModel={columnVisibility}
+                        onColumnWidthChange={handleColumnWidthChange}
                         sx={{
                             borderRadius: 5,
                             boxShadow: 1,
