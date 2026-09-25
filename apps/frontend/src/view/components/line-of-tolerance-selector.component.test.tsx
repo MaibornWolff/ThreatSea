@@ -26,6 +26,7 @@ const setup = (role: USER_ROLES | undefined, props: Partial<ComponentProps<typeo
             greenValue={3}
             redValue={6}
             isDirty={false}
+            isSaving={false}
             onLoTChange={onLoTChange}
             onSave={onSave}
             onReset={onReset}
@@ -106,6 +107,13 @@ describe("LineOfToleranceSelector — save & reset", () => {
 
     it.each([USER_ROLES.EDITOR, USER_ROLES.OWNER])("disables save and reset for %s without changes", (role) => {
         setup(role, { isDirty: false });
+
+        expect(getSaveButton()).toBeDisabled();
+        expect(getResetButton()).toBeDisabled();
+    });
+
+    it("disables save and reset while a save is in progress", () => {
+        setup(USER_ROLES.EDITOR, { isDirty: true, isSaving: true });
 
         expect(getSaveButton()).toBeDisabled();
         expect(getResetButton()).toBeDisabled();

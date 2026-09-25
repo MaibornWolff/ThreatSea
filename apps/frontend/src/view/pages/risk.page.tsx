@@ -249,20 +249,24 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
             nextLocation.pathname !== riskPath &&
             !nextLocation.pathname.startsWith(`${riskPath}/`)
     );
-    const [isSavingBeforeLeave, setIsSavingBeforeLeave] = useState<boolean>(false);
+    const [isSavingLineOfTolerance, setIsSavingLineOfTolerance] = useState<boolean>(false);
 
     const handleChangeLineOfTolerance = ([newGreenValue, newRedValue]: [number, number]) => {
         setLineOfTolerance(newGreenValue, newRedValue);
     };
 
-    const saveLineOfTolerance = () =>
-        dispatch(
+    const saveLineOfTolerance = async () => {
+        setIsSavingLineOfTolerance(true);
+        const result = await dispatch(
             ProjectsActions.updateProjectLineOfTolerance({
                 id: project.id,
                 lineOfToleranceGreen: currentGreenValue,
                 lineOfToleranceRed: currentRedValue,
             })
         );
+        setIsSavingLineOfTolerance(false);
+        return result;
+    };
 
     const handleSaveLineOfTolerance = () => {
         void saveLineOfTolerance();
@@ -282,9 +286,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
     };
 
     const handleSaveAndLeave = async () => {
-        setIsSavingBeforeLeave(true);
         const result = await saveLineOfTolerance();
-        setIsSavingBeforeLeave(false);
         if (ProjectsActions.updateProjectLineOfTolerance.fulfilled.match(result)) {
             unsavedChangesBlocker.proceed?.();
         } else {
@@ -353,6 +355,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                             greenValue={currentGreenValue}
                             redValue={currentRedValue}
                             isDirty={isLineOfToleranceDirty}
+                            isSaving={isSavingLineOfTolerance}
                             onLoTChange={handleChangeLineOfTolerance}
                             onSave={handleSaveLineOfTolerance}
                             onReset={handleResetLineOfTolerance}
@@ -924,7 +927,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
             )}
             <UnsavedLineOfToleranceDialog
                 open={unsavedChangesBlocker.state === "blocked"}
-                isSaving={isSavingBeforeLeave}
+                isSaving={isSavingLineOfTolerance}
                 onStay={handleStayOnPage}
                 onDiscard={handleDiscardAndLeave}
                 onSave={() => void handleSaveAndLeave()}
