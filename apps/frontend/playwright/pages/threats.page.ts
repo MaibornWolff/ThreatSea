@@ -50,6 +50,17 @@ export class ThreatsPage extends BasePage {
         return this.page.getByText(`You cannot delete the only threat '${threatName}'.`);
     }
 
+    /** Shows a column that is hidden by default, through the Customize view menu. */
+    async showColumn(label: string): Promise<void> {
+        await this.page.getByRole("button", { name: "Customize view" }).click();
+        await this.page.getByRole("menuitem", { name: label }).click();
+        await this.page.keyboard.press("Escape");
+    }
+
+    columnFilterInput(field: string): Locator {
+        return this.page.locator(`.MuiDataGrid-columnHeader[data-field="${field}"] input`);
+    }
+
     threatListEntry(name: string): Locator {
         return this.threatListEntries.filter({
             has: this.page.locator('[data-testid="threats-page_threats-list-entry_name"]', { hasText: name }),
