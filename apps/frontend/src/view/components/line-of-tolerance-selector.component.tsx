@@ -57,6 +57,7 @@ interface LineOfToleranceSelectorProps {
     greenValue: number;
     redValue: number;
     isDirty: boolean;
+    isSaving: boolean;
     onLoTChange: (values: [number, number]) => void;
     onSave: () => void;
     onReset: () => void;
@@ -67,6 +68,7 @@ export const LineOfToleranceSelector = ({
     greenValue,
     redValue,
     isDirty,
+    isSaving,
     onLoTChange,
     onSave,
     onReset,
@@ -220,7 +222,7 @@ export const LineOfToleranceSelector = ({
                 <Box sx={{ display: "flex", gap: 1, marginTop: 1 }}>
                     <Button
                         sx={{ marginRight: 0 }}
-                        disabled={!isDirty}
+                        disabled={!isDirty || isSaving}
                         onClick={onReset}
                         data-testid="risk-page_line-of-tolerance-reset-button"
                     >
@@ -229,7 +231,7 @@ export const LineOfToleranceSelector = ({
                     <Button
                         sx={{ marginRight: 0 }}
                         color="success"
-                        disabled={!isDirty}
+                        disabled={!isDirty || isSaving}
                         onClick={onSave}
                         data-testid="risk-page_line-of-tolerance-save-button"
                     >
