@@ -1,5 +1,5 @@
 import { createReducer } from "@reduxjs/toolkit";
-import type { ExtendedProject } from "#api/types/project.types.ts";
+import type { ExtendedProject, LineOfToleranceDraft } from "#api/types/project.types.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 import { ProjectsActions } from "#application/actions/projects.actions.ts";
 import { projectsAdapter } from "#application/adapters/project.adapter.ts";
@@ -11,6 +11,7 @@ export type ProjectsState = ProjectsAdapterState & {
     isLoadingAll: boolean;
     current: ExtendedProject | undefined;
     deletingProjectId: number | undefined;
+    lineOfToleranceDraft: LineOfToleranceDraft | undefined;
 };
 
 const defaultState: ProjectsState = {
@@ -19,6 +20,7 @@ const defaultState: ProjectsState = {
     isLoadingAll: false,
     current: undefined,
     deletingProjectId: undefined,
+    lineOfToleranceDraft: undefined,
 };
 
 const projectsReducer = createReducer(defaultState, (builder) => {
@@ -92,6 +94,24 @@ const projectsReducer = createReducer(defaultState, (builder) => {
 
         projectsAdapter.upsertOne(state, extendedProject);
         state.isPending = false;
+
+        // Only a draft matching the saved values is done; one edited while the save was in flight stays.
+        const draft = state.lineOfToleranceDraft;
+        if (
+            draft?.projectId === extendedProject.id &&
+            draft.lineOfToleranceGreen === extendedProject.lineOfToleranceGreen &&
+            draft.lineOfToleranceRed === extendedProject.lineOfToleranceRed
+        ) {
+            state.lineOfToleranceDraft = undefined;
+        }
+    });
+
+    builder.addCase(ProjectsActions.setLineOfToleranceDraft, (state, action) => {
+        state.lineOfToleranceDraft = action.payload;
+    });
+
+    builder.addCase(ProjectsActions.clearLineOfToleranceDraft, (state) => {
+        state.lineOfToleranceDraft = undefined;
     });
 
     builder.addCase(ProjectsActions.setProjectFolder, (state, action) => {

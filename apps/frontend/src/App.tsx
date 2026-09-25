@@ -1,4 +1,5 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router";
+import { createBrowserRouter, Navigate, Route, Routes } from "react-router";
+import { RouterProvider } from "react-router/dom";
 import { Translations } from "./view/wrappers/translations.wrapper";
 import { Alert } from "./view/components/alert.component";
 import { Confirm } from "./view/components/confirm.component";
@@ -45,8 +46,145 @@ const PageLoader = () => (
 );
 
 /**
+ * all routes of the app
+ * @component
+ * @category Component
+ */
+const AppRoutes = (): JSX.Element => (
+    <ErrorBoundary>
+        <Theme>
+            <Translations>
+                <Suspense fallback={<PageLoader />}>
+                    <Routes>
+                        <Route path="/login/*" element={<LoginPage />} />
+
+                        <Route
+                            path="/projects/*"
+                            element={
+                                <RequireAuth redirectTo={"/login"}>
+                                    <ProjectsPage />
+                                </RequireAuth>
+                            }
+                        >
+                            <Route path="add" element={<ProjectDialogPage />} />
+                            <Route path=":projectId" element={<ProjectDialogPage />} />
+                        </Route>
+                        <Route
+                            path="/projects/:projectId/system/*"
+                            element={
+                                <RequireAuth redirectTo={"/login"}>
+                                    <EditorPage />
+                                </RequireAuth>
+                            }
+                        />
+                        <Route
+                            path="/projects/:projectId/members/*"
+                            element={
+                                <RequireAuth redirectTo={"/login"}>
+                                    <MemberPage />
+                                </RequireAuth>
+                            }
+                        />
+                        <Route
+                            path="/projects/:projectId/report/*"
+                            element={
+                                <RequireAuth redirectTo={"/login"}>
+                                    <ReportPage />
+                                </RequireAuth>
+                            }
+                        />
+                        <Route
+                            path="/projects/:projectId/measures/*"
+                            element={
+                                <RequireAuth redirectTo={"/login"}>
+                                    <MeasuresPage />
+                                </RequireAuth>
+                            }
+                        />
+                        <Route
+                            path="/projects/:projectId/risk/*"
+                            element={
+                                <RequireAuth redirectTo={"/login"}>
+                                    <RiskPage />
+                                </RequireAuth>
+                            }
+                        />
+                        <Route
+                            path="/projects/:projectId/assets/*"
+                            element={
+                                <RequireAuth redirectTo={"/login"}>
+                                    <AssetsPage />
+                                </RequireAuth>
+                            }
+                        />
+                        <Route
+                            path="/projects/:projectId/threats/*"
+                            element={
+                                <RequireAuth redirectTo={"/login"}>
+                                    <ThreatsPage />
+                                </RequireAuth>
+                            }
+                        />
+                        <Route path="/catalogs/*">
+                            <Route
+                                path="*"
+                                element={
+                                    <RequireAuth redirectTo={"/login"}>
+                                        <CatalogsPage />
+                                    </RequireAuth>
+                                }
+                            >
+                                <Route path="edit" element={<CatalogDialogPage />} />
+                            </Route>
+                            <Route
+                                path=":catalogId/*"
+                                element={
+                                    <RequireAuth redirectTo={"/login"}>
+                                        <CatalogPage />
+                                    </RequireAuth>
+                                }
+                            />
+                            <Route
+                                path=":catalogId/members/*"
+                                element={
+                                    <RequireAuth redirectTo={"/login"}>
+                                        <MemberPage />
+                                    </RequireAuth>
+                                }
+                            />
+                        </Route>
+                        <Route path="/imprint" element={<ImprintPage />} />
+                        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                        <Route
+                            path="/*"
+                            element={
+                                <RequireAuth redirectTo={"/login"}>
+                                    <Navigate replace to="/projects" />
+                                </RequireAuth>
+                            }
+                        />
+                        <Route
+                            path=""
+                            element={
+                                <RequireAuth redirectTo={"/login"}>
+                                    <Navigate replace to="/projects" />
+                                </RequireAuth>
+                            }
+                        />
+                    </Routes>
+                </Suspense>
+                <Alert />
+                <Confirm />
+            </Translations>
+        </Theme>
+    </ErrorBoundary>
+);
+
+// A data router is required for navigation blocking (useBlocker); the splat route keeps the component routes as they are.
+const router = createBrowserRouter([{ path: "*", element: <AppRoutes /> }]);
+
+/**
  * main component in the app
- * including all routes
  * @component
  * @category Component
  */
@@ -62,135 +200,5 @@ export function App(): JSX.Element {
         dispatch(UserActions.getAuthStatus());
     }, [dispatch]);
 
-    return (
-        <BrowserRouter>
-            <ErrorBoundary>
-                <Theme>
-                    <Translations>
-                        <Suspense fallback={<PageLoader />}>
-                            <Routes>
-                                <Route path="/login/*" element={<LoginPage />} />
-
-                                <Route
-                                    path="/projects/*"
-                                    element={
-                                        <RequireAuth redirectTo={"/login"}>
-                                            <ProjectsPage />
-                                        </RequireAuth>
-                                    }
-                                >
-                                    <Route path="add" element={<ProjectDialogPage />} />
-                                    <Route path=":projectId" element={<ProjectDialogPage />} />
-                                </Route>
-                                <Route
-                                    path="/projects/:projectId/system/*"
-                                    element={
-                                        <RequireAuth redirectTo={"/login"}>
-                                            <EditorPage />
-                                        </RequireAuth>
-                                    }
-                                />
-                                <Route
-                                    path="/projects/:projectId/members/*"
-                                    element={
-                                        <RequireAuth redirectTo={"/login"}>
-                                            <MemberPage />
-                                        </RequireAuth>
-                                    }
-                                />
-                                <Route
-                                    path="/projects/:projectId/report/*"
-                                    element={
-                                        <RequireAuth redirectTo={"/login"}>
-                                            <ReportPage />
-                                        </RequireAuth>
-                                    }
-                                />
-                                <Route
-                                    path="/projects/:projectId/measures/*"
-                                    element={
-                                        <RequireAuth redirectTo={"/login"}>
-                                            <MeasuresPage />
-                                        </RequireAuth>
-                                    }
-                                />
-                                <Route
-                                    path="/projects/:projectId/risk/*"
-                                    element={
-                                        <RequireAuth redirectTo={"/login"}>
-                                            <RiskPage />
-                                        </RequireAuth>
-                                    }
-                                />
-                                <Route
-                                    path="/projects/:projectId/assets/*"
-                                    element={
-                                        <RequireAuth redirectTo={"/login"}>
-                                            <AssetsPage />
-                                        </RequireAuth>
-                                    }
-                                />
-                                <Route
-                                    path="/projects/:projectId/threats/*"
-                                    element={
-                                        <RequireAuth redirectTo={"/login"}>
-                                            <ThreatsPage />
-                                        </RequireAuth>
-                                    }
-                                />
-                                <Route path="/catalogs/*">
-                                    <Route
-                                        path="*"
-                                        element={
-                                            <RequireAuth redirectTo={"/login"}>
-                                                <CatalogsPage />
-                                            </RequireAuth>
-                                        }
-                                    >
-                                        <Route path="edit" element={<CatalogDialogPage />} />
-                                    </Route>
-                                    <Route
-                                        path=":catalogId/*"
-                                        element={
-                                            <RequireAuth redirectTo={"/login"}>
-                                                <CatalogPage />
-                                            </RequireAuth>
-                                        }
-                                    />
-                                    <Route
-                                        path=":catalogId/members/*"
-                                        element={
-                                            <RequireAuth redirectTo={"/login"}>
-                                                <MemberPage />
-                                            </RequireAuth>
-                                        }
-                                    />
-                                </Route>
-                                <Route path="/imprint" element={<ImprintPage />} />
-                                <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-                                <Route
-                                    path="/*"
-                                    element={
-                                        <RequireAuth redirectTo={"/login"}>
-                                            <Navigate replace to="/projects" />
-                                        </RequireAuth>
-                                    }
-                                />
-                                <Route
-                                    path=""
-                                    element={
-                                        <RequireAuth redirectTo={"/login"}>
-                                            <Navigate replace to="/projects" />
-                                        </RequireAuth>
-                                    }
-                                />
-                            </Routes>
-                        </Suspense>
-                        <Alert />
-                        <Confirm />
-                    </Translations>
-                </Theme>
-            </ErrorBoundary>
-        </BrowserRouter>
-    );
+    return <RouterProvider router={router} />;
 }

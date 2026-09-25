@@ -8,8 +8,9 @@ import { useCatalogMeasures } from "./use-catalog-measures.hook.ts";
 import { useMeasureImpacts } from "./use-measureImpacts.hook.ts";
 import { useMeasures } from "./use-measures.hook.ts";
 import { useThreats } from "./use-threats.hook.ts";
-import { useAppSelector } from "./use-app-redux.hook.ts";
+import { useAppDispatch, useAppSelector } from "./use-app-redux.hook.ts";
 import { projectsSelectors } from "#application/selectors/projects.selectors.ts";
+import { ProjectsActions } from "#application/actions/projects.actions.ts";
 import type { SortDirection } from "#application/actions/list.actions.ts";
 import type { MatrixColorKey } from "#view/colors/matrix.ts";
 import { calcDamage } from "#utils/helpers.ts";
@@ -77,17 +78,18 @@ const searchableThreatFields: (keyof Pick<ThreatWithMetrics, "name" | "descripti
 
 export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
     const { t } = useTranslation("common");
+    const dispatch = useAppDispatch();
     const project = useAppSelector((state) => projectsSelectors.selectById(state, projectId));
-    const defaultGreen = project?.lineOfToleranceGreen ?? 6;
-    const defaultRed = project?.lineOfToleranceRed ?? 15;
+    const lineOfToleranceDraft = useAppSelector((state) => state.projects.lineOfToleranceDraft);
+    const projectDraft = lineOfToleranceDraft?.projectId === projectId ? lineOfToleranceDraft : undefined;
+    const currentGreenValue = projectDraft?.lineOfToleranceGreen ?? project?.lineOfToleranceGreen ?? 6;
+    const currentRedValue = projectDraft?.lineOfToleranceRed ?? project?.lineOfToleranceRed ?? 15;
 
     const { items: threatsRaw, loadThreats } = useThreats({ projectId });
     const { loadCatalogMeasures } = useCatalogMeasures({ catalogId });
     const { items: measureImpacts, loadMeasureImpacts, deleteMeasureImpact } = useMeasureImpacts({ projectId });
     const { items: measures, loadMeasures, deleteMeasure } = useMeasures({ projectId });
 
-    const [currentGreenValue, setCurrentGreenValue] = useState<number>(defaultGreen);
-    const [currentRedValue, setCurrentRedValue] = useState<number>(defaultRed);
     const [selectedCell, setSelectedCell] = useState<SelectedMatrixCell | null>(null);
     const [timelineDate, setTimelineDate] = useState<string | null>(null);
     const [threatSearchValue, setThreatSearchValue] = useState<string>("");
@@ -290,6 +292,14 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
         loadMeasures();
     }, [projectId, loadMeasures]);
 
+    const setLineOfTolerance = (lineOfToleranceGreen: number, lineOfToleranceRed: number) => {
+        dispatch(ProjectsActions.setLineOfToleranceDraft({ projectId, lineOfToleranceGreen, lineOfToleranceRed }));
+    };
+
+    const resetLineOfTolerance = () => {
+        dispatch(ProjectsActions.clearLineOfToleranceDraft());
+    };
+
     return {
         setSelectedCell,
         setTimelineDate,
@@ -298,8 +308,8 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
         setThreatSearchValue,
         deleteMeasure,
         deleteMeasureImpact,
-        setCurrentGreenValue,
-        setCurrentRedValue,
+        setLineOfTolerance,
+        resetLineOfTolerance,
         loadMeasures,
         loadThreats,
         loadCatalogMeasures,

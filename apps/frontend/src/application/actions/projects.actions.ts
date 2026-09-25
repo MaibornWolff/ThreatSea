@@ -8,6 +8,7 @@ import { ProjectsAPI } from "#api/projects.api.ts";
 import { ExportsApi } from "#api/export.api.ts";
 import type {
     CreateProjectRequest,
+    LineOfToleranceDraft,
     Project,
     UpdateProjectLineOfToleranceRequest,
     UpdateProjectRequest,
@@ -138,6 +139,22 @@ export class ProjectsActions {
      * @returns Action function for updating a project's folder id.
      */
     static setProjectFolder = createAction<{ id: number; folderId: number | null }>("[projects] set project folder");
+
+    /**
+     * Action that stores unsaved line of tolerance values, so they survive leaving the risk page.
+     * @function setLineOfToleranceDraft
+     * @param {string} type - Action type.
+     * @returns Action function for setting the line of tolerance draft.
+     */
+    static setLineOfToleranceDraft = createAction<LineOfToleranceDraft>("[projects] set line of tolerance draft");
+
+    /**
+     * Action that discards the unsaved line of tolerance values.
+     * @function clearLineOfToleranceDraft
+     * @param {string} type - Action type.
+     * @returns Action function for clearing the line of tolerance draft.
+     */
+    static clearLineOfToleranceDraft = createAction("[projects] clear line of tolerance draft");
 
     /**
      * Action that changes the role of the user for the current project.

@@ -35,7 +35,7 @@ export type ThreatTab = "MAIN" | "ASSETS" | "MEASURES";
 
 export type ThreatDialogHostRoute = "threats" | "measures" | "risk";
 
-interface AddThreatDialogProps extends DialogProps {
+export interface AddThreatDialogProps extends DialogProps {
     threat: ExtendedThreat;
     project: ExtendedProject;
     userRole: USER_ROLES | undefined;

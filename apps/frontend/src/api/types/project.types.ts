@@ -23,6 +23,8 @@ export type UpdateProjectRequest = Partial<Omit<CreateProjectRequest, "catalogId
 
 export type UpdateProjectLineOfToleranceRequest = Pick<Project, "id" | "lineOfToleranceGreen" | "lineOfToleranceRed">;
 
+export type LineOfToleranceDraft = Pick<Project, "lineOfToleranceGreen" | "lineOfToleranceRed"> & { projectId: number };
+
 export interface Project {
     id: number;
     catalogId: number;
