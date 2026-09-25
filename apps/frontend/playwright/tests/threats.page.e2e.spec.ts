@@ -150,10 +150,10 @@ test.describe("Threats Page Tests", () => {
         await expect(pg.threatListEntryComponents).toHaveText([SERVER, SERVER]);
     });
 
-    test("Should keep a generic threat listed when the search matches one of its threats", async ({ page }) => {
+    test("Should keep a generic threat listed when the name filter matches one of its threats", async ({ page }) => {
         const pg = new ThreatsPage(page);
 
-        await pg.searchInput.fill("server rack");
+        await pg.columnFilterInput("name").fill("server rack");
 
         await expect(pg.genericThreatListEntries).toHaveCount(1);
         await expect(pg.genericThreatListEntry(PHYSICAL_ATTACK, SERVER)).toHaveCount(1);

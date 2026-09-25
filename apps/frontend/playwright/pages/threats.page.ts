@@ -7,7 +7,6 @@ export class ThreatsPage extends BasePage {
     readonly threatListEntries: Locator;
     readonly threatListEntryNames: Locator;
     readonly threatListEntryComponents: Locator;
-    readonly searchInput: Locator;
     readonly confirmButton: Locator;
     readonly cancelButton: Locator;
 
@@ -18,7 +17,6 @@ export class ThreatsPage extends BasePage {
         this.threatListEntries = page.locator('[data-testid="threats-page_threats-list-entry"]');
         this.threatListEntryNames = page.locator('[data-testid="threats-page_threats-list-entry_name"]');
         this.threatListEntryComponents = page.locator('[data-testid="threats-page_threats-list-entry_component"]');
-        this.searchInput = page.locator('[data-testid="ThreatSearch"] input');
         this.confirmButton = page.locator('[data-testid="confirm-button"]');
         this.cancelButton = page.locator('[data-testid="cancel-button"]');
     }

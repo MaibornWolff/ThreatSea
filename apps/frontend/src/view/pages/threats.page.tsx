@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { DataGrid, GridRow, type GridColumnVisibilityModel, type GridRowProps } from "@mui/x-data-grid";
-import { memo, useCallback, useLayoutEffect, useMemo, useState, type ChangeEvent } from "react";
+import { memo, useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
@@ -34,7 +34,6 @@ import {
 } from "#application/hooks/use-generic-threats-list.hook.ts";
 import { NoRowsOverlay } from "#view/components/no-rows-overlay.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
-import { SearchField } from "#view/components/search-field.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
 import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
 import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
@@ -102,8 +101,6 @@ const ThreatsPageBody = () => {
     const { autoSaveStatus } = useEditor({ projectId: projectId });
 
     const {
-        searchValue: genericThreatSearchValue,
-        setSearchValue: setGenericThreatSearchValue,
         loadGenericThreats,
         isPending: isGenericThreatsPending,
         genericThreats,
@@ -114,10 +111,6 @@ const ThreatsPageBody = () => {
     } = useGenericThreatsList({ projectId });
 
     const userRole = useAppSelector((state) => state.projects.current?.role);
-
-    const onChangeSearchValue = (event: ChangeEvent<HTMLInputElement>) => {
-        setGenericThreatSearchValue(event.target.value);
-    };
 
     const dispatch = useAppDispatch();
 
@@ -284,13 +277,7 @@ const ThreatsPageBody = () => {
     const { columnFilters, expandedFilters, handleFilterChange, toggleFilterExpanded, clearColumnFilters } =
         useColumnFilters();
 
-    const hasActiveFilter =
-        genericThreatSearchValue.trim() !== "" || Object.values(columnFilters).some((value) => value.trim() !== "");
-
-    const clearFilters = useCallback(() => {
-        clearColumnFilters();
-        setGenericThreatSearchValue("");
-    }, [clearColumnFilters, setGenericThreatSearchValue]);
+    const hasActiveFilter = Object.values(columnFilters).some((value) => value.trim() !== "");
 
     const allThreatsExpanded =
         genericThreats.length > 0 &&
@@ -446,8 +433,8 @@ const ThreatsPageBody = () => {
         ]
     );
 
-    // Count what the grid actually shows: generic threats surviving both the
-    // top search and the column filters (not the unfiltered hook result).
+    // Count what the grid actually shows: the generic threats surviving the
+    // column filters (not the unfiltered hook result).
     const genericThreatsCount = useMemo(() => rows.filter((row) => row.rowType === "genericThreat").length, [rows]);
 
     return (
@@ -535,11 +522,6 @@ const ThreatsPageBody = () => {
                                     )}
                                 </IconButton>
                             </Tooltip>
-                            <SearchField
-                                value={genericThreatSearchValue}
-                                onChange={onChangeSearchValue}
-                                data-testid="ThreatSearch"
-                            />
                             <Button
                                 onClick={handleClick}
                                 startIcon={<Visibility sx={{ fontSize: 18 }} />}
@@ -582,7 +564,7 @@ const ThreatsPageBody = () => {
                         <Box sx={{ display: "flex", alignItems: "center" }}>
                             {hasActiveFilter && (
                                 <Button
-                                    onClick={clearFilters}
+                                    onClick={clearColumnFilters}
                                     startIcon={<FilterAltOff sx={{ fontSize: 18 }} />}
                                     data-testid="ClearThreatFilters"
                                     sx={{ mr: 2, textTransform: "none", color: theme.vars.palette.text.primary }}
