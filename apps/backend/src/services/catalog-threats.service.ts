@@ -60,10 +60,10 @@ function getDefaultCatalogThreats(catalogId: number, language = "DE"): CreateCat
 }
 
 /**
- * Gets the threads of the current catalogue used.
+ * Gets the threats of the catalogue the project uses.
  *
  * @param {number} projectId - id of the current project.
- * @returns Array of threads from the database.
+ * @returns Array of catalog threats from the database.
  */
 export async function getCatalogThreatsByProjectId(
     projectId: number,
