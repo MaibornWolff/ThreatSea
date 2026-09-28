@@ -503,10 +503,59 @@ describe("applying an out-of-scope measure finalizes the threat", () => {
         expect(await getThreatStatus(threatId)).toBe(THREAT_STATUSES.FINALIZED);
     });
 
-    it("finalizes regardless of the threat's current status", async () => {
+    const putImpact = async (
+        measureImpactId: number,
+        body: Omit<InstanceType<typeof CreateMeasureImpactRequest>, "measureId" | "threatId">
+    ) =>
+        await request(app)
+            .put(`/api/projects/${projectId}/system/measureImpacts/${measureImpactId}`)
+            .send({ ...body, threatId, measureId })
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+
+    it("finalizes an in-progress threat", async () => {
         await setThreatStatus(threatId, THREAT_STATUSES.IN_PROGRESS);
 
         await postImpact(VALID_MEASURE_IMPACT_2);
         expect(await getThreatStatus(threatId)).toBe(THREAT_STATUSES.FINALIZED);
+    });
+
+    it("keeps a threat the user set out of scope out of scope", async () => {
+        await setThreatStatus(threatId, THREAT_STATUSES.OUTOFSCOPE);
+
+        const res = await postImpact(VALID_MEASURE_IMPACT_2);
+        expect(res.statusCode).toEqual(200);
+        expect(await getThreatStatus(threatId)).toBe(THREAT_STATUSES.OUTOFSCOPE);
+    });
+
+    it("does not re-finalize a reopened threat when its out-of-scope impact is edited", async () => {
+        const created = await postImpact(VALID_MEASURE_IMPACT_2);
+        expect(await getThreatStatus(threatId)).toBe(THREAT_STATUSES.FINALIZED);
+        await setThreatStatus(threatId, THREAT_STATUSES.IN_PROGRESS);
+
+        const res = await putImpact(created.body.id, { ...VALID_MEASURE_IMPACT_2, description: "Reworded" });
+        expect(res.statusCode).toEqual(200);
+        expect(await getThreatStatus(threatId)).toBe(THREAT_STATUSES.IN_PROGRESS);
+    });
+
+    it("does not re-finalize a reopened threat when an ordinary impact is added", async () => {
+        await postImpact(VALID_MEASURE_IMPACT_2);
+        await setThreatStatus(threatId, THREAT_STATUSES.IN_PROGRESS);
+
+        // a measure applies to a threat at most once, so the ordinary impact needs another measure
+        const clonedValidMeasure: CreateMeasure = JSON.parse(JSON.stringify(VALID_MEASURE_1));
+        const otherMeasure = (
+            await db
+                .insert(measures)
+                .values({ ...clonedValidMeasure, catalogMeasureId, projectId })
+                .returning()
+        ).at(0)!;
+        const res = await request(app)
+            .post(`/api/projects/${projectId}/system/measureImpacts`)
+            .send({ ...VALID_MEASURE_IMPACT_1, threatId, measureId: otherMeasure.id })
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(200);
+        expect(await getThreatStatus(threatId)).toBe(THREAT_STATUSES.IN_PROGRESS);
     });
 });

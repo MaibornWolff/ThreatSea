@@ -106,7 +106,9 @@ export async function createMeasureImpact(
     try {
         const measureImpact = await db.transaction(async (tx) => {
             const createdMeasureImpact = await MeasureImpactsService.createMeasureImpact(request.body, tx);
-            await MeasureImpactsService.finalizeThreatWhenOutOfScopeApplied(threatId, tx);
+            if (createdMeasureImpact.setsOutOfScope) {
+                await MeasureImpactsService.finalizeThreatWhenOutOfScopeApplied(threatId, tx);
+            }
 
             return createdMeasureImpact;
         });
@@ -160,7 +162,11 @@ export async function updateMeasureImpact(
                 },
                 tx
             );
-            await MeasureImpactsService.finalizeThreatWhenOutOfScopeApplied(updated.threatId!, tx);
+            // Only the edit that newly sets the threat out of scope applies the measure; other edits
+            // of such an impact must not re-finalize a threat the user has reopened since.
+            if (updated.setsOutOfScope && !measureImpact.setsOutOfScope) {
+                await MeasureImpactsService.finalizeThreatWhenOutOfScopeApplied(updated.threatId!, tx);
+            }
 
             return updated;
         });

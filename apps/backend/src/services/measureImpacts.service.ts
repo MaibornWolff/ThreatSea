@@ -2,7 +2,7 @@
  * Module that defines the access and manipulation
  * for the MeasureImpact of a project.
  */
-import { and, eq, getTableColumns } from "drizzle-orm";
+import { and, eq, getTableColumns, inArray } from "drizzle-orm";
 import { db, TransactionType } from "#db/index.js";
 import {
     CreateMeasureImpact,
@@ -116,28 +116,25 @@ export async function deleteMeasureImpactsByThreat(threatId: number): Promise<vo
 }
 
 /**
- * Finalizes a threat when an out-of-scope measure has been applied to it.
+ * Finalizes a threat because an out-of-scope measure has just been applied to it.
  *
- * Applying (or editing an impact into) a measure that sets the threat out of scope marks the threat
- * as handled, so its status becomes "finalized". This is one-way: removing the measure never reverts
- * the status.
+ * Call this only at the moment of applying: when an impact is created with `setsOutOfScope`, or
+ * edited from not setting it to setting it. Later edits of that impact must not re-finalize a threat
+ * the user has reopened since. Only an open threat ("new" or "in progress") advances; "out of scope"
+ * is the user's own decision and stays. This is one-way: removing the measure never reverts the status.
  *
  * @param {number} threatId - The id of the threat the measure impact belongs to.
  * @param {TransactionType} [transaction] - An optional transaction to run the queries in.
- * @returns {Promise<void>} A promise that resolves once the status has been reconciled.
+ * @returns {Promise<void>} A promise that resolves once the status has been updated.
  */
 export async function finalizeThreatWhenOutOfScopeApplied(
     threatId: number,
     transaction: TransactionType | undefined = undefined
 ): Promise<void> {
-    const outOfScopeImpact = await (transaction ?? db).query.measureImpacts.findFirst({
-        where: and(eq(measureImpacts.threatId, threatId), eq(measureImpacts.setsOutOfScope, true)),
-    });
-
-    if (outOfScopeImpact) {
-        await (transaction ?? db)
-            .update(threats)
-            .set({ status: THREAT_STATUSES.FINALIZED })
-            .where(eq(threats.id, threatId));
-    }
+    await (transaction ?? db)
+        .update(threats)
+        .set({ status: THREAT_STATUSES.FINALIZED })
+        .where(
+            and(eq(threats.id, threatId), inArray(threats.status, [THREAT_STATUSES.NEW, THREAT_STATUSES.IN_PROGRESS]))
+        );
 }
