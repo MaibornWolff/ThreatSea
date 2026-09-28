@@ -16,6 +16,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useLocation } from "react-router";
 import { useAppDispatch } from "#application/hooks/use-app-redux.hook.ts";
 import { ThreatsActions } from "#application/actions/threats.actions.ts";
+import { ThreatsAPI } from "#api/threats.api.ts";
 import { Button } from "#view/components/button.component.tsx";
 import { Dialog } from "#view/components/dialog.component.tsx";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
@@ -71,6 +72,8 @@ const AddThreatDialog = ({
         control,
         register,
         handleSubmit,
+        getFieldState,
+        resetField,
         formState: { errors, isSubmitting, isDirty },
     } = useForm<ThreatFormValues>({
         defaultValues: {
@@ -85,6 +88,27 @@ const AddThreatDialog = ({
             status: initialStatus,
         },
     });
+
+    // The threat prop is a navigation-state snapshot, and returning from a child dialog (e.g. Apply
+    // measure) re-mounts this dialog from that same snapshot. Meanwhile the backend may have changed
+    // the status — applying an out-of-scope measure finalizes the threat — so re-read it; otherwise
+    // the Status select shows the old value and the next save writes it back.
+    useEffect(() => {
+        let cancelled = false;
+        ThreatsAPI.getThreat({ projectId, id: threatId })
+            .then((storedThreat) => {
+                // A status the user already picked wins over the stored one.
+                if (!cancelled && !getFieldState("status").isDirty) {
+                    resetField("status", { defaultValue: storedThreat.status });
+                }
+            })
+            .catch(() => {
+                // keep the snapshot's status; the save itself still reports errors globally
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, [projectId, threatId, getFieldState, resetField]);
 
     // Warn before a browser reload/close/external navigation while the form has unsaved
     // changes. (In-app navigation, e.g. Cancel, intentionally discards the dialog.)

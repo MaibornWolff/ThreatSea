@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import AddThreatDialog, { type ThreatDialogHostRoute } from "./add-threat.dialog";
 
@@ -32,6 +32,7 @@ mockUseThreatMeasuresList();
 // restoreMocks removes spies after every test, so install them in beforeEach.
 beforeEach(() => {
     vi.spyOn(ThreatsAPI, "updateThreat").mockResolvedValue(createThreat({ id: 42 }));
+    vi.spyOn(ThreatsAPI, "getThreat");
 });
 
 const navigate = vi.fn();
@@ -52,6 +53,9 @@ const setup = (
         assets: [createAsset({ confidentiality: 4, integrity: 2, availability: 1 })],
         ...threatOverrides,
     });
+    // By default the backend still holds the snapshot the dialog was opened with; tests
+    // simulate a newer stored threat by queueing mockResolvedValueOnce before setup.
+    vi.mocked(ThreatsAPI.getThreat).mockResolvedValue(threat);
     const user = userEvent.setup();
     renderWithProviders(
         <AddThreatDialog
@@ -336,6 +340,45 @@ describe("AddThreatDialog — Save", () => {
         expect(ThreatsAPI.updateThreat).toHaveBeenCalledWith(
             expect.objectContaining({ id: 42, status: THREAT_STATUSES.OUTOFSCOPE })
         );
+    });
+
+    it("shows the stored status and keeps it on save when the threat was finalized after the dialog's snapshot", async () => {
+        // e.g. an out-of-scope measure was applied from the Measures tab, which re-mounts the
+        // dialog from the navigation-state snapshot taken while the threat was still in progress
+        vi.mocked(ThreatsAPI.getThreat).mockResolvedValueOnce(
+            createThreat({ id: 42, status: THREAT_STATUSES.FINALIZED })
+        );
+        const { user } = setup(USER_ROLES.EDITOR, "threats", undefined, { status: THREAT_STATUSES.IN_PROGRESS });
+
+        await waitFor(() => expect(screen.getByRole("combobox")).toHaveTextContent("Finalized"));
+        expect(ThreatsAPI.getThreat).toHaveBeenCalledWith({ projectId: 7, id: 42 });
+
+        await makeDirty(user);
+        await user.click(screen.getByTestId("EditThreatSave"));
+
+        await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled());
+        expect(ThreatsAPI.updateThreat).toHaveBeenCalledWith(
+            expect.objectContaining({ id: 42, status: THREAT_STATUSES.FINALIZED })
+        );
+    });
+
+    it("keeps a status the user picked before the stored threat arrived", async () => {
+        let resolveStoredThreat!: (threat: ReturnType<typeof createThreat>) => void;
+        vi.mocked(ThreatsAPI.getThreat).mockReturnValueOnce(
+            new Promise((resolve) => {
+                resolveStoredThreat = resolve;
+            })
+        );
+        const { user } = setup(USER_ROLES.EDITOR, "threats", undefined, { status: THREAT_STATUSES.IN_PROGRESS });
+
+        await user.click(screen.getByRole("combobox"));
+        await user.click(screen.getByRole("option", { name: "Out of scope" }));
+        // act flushes the stored-threat handler before the assertion
+        await act(async () => {
+            resolveStoredThreat(createThreat({ id: 42, status: THREAT_STATUSES.FINALIZED }));
+        });
+
+        expect(screen.getByRole("combobox")).toHaveTextContent("Out of scope");
     });
 
     it("keeps the dialog open and does not notify the host when the update fails", async () => {
