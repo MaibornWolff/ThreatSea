@@ -42,6 +42,7 @@ const setup = (propsOverride: Partial<EditorSidebarSelectedComponentProps> = {})
         handleDeleteCommunicationInterface: vi.fn(),
         handlePointOfAttackLabelClick: vi.fn(),
         handleAssetNameClick: vi.fn(),
+        handleAddAssetClick: vi.fn(),
         handleSelectConnectedComponent: vi.fn(),
         ...propsOverride,
     };
@@ -186,6 +187,7 @@ describe("EditorSidebarSelectedComponent — new click handlers", () => {
                 handleDeleteCommunicationInterface: vi.fn(),
                 handlePointOfAttackLabelClick: vi.fn(),
                 handleAssetNameClick: vi.fn(),
+                handleAddAssetClick: vi.fn(),
                 handleSelectConnectedComponent: vi.fn(),
             };
 
@@ -231,6 +233,7 @@ describe("EditorSidebarSelectedComponent — new click handlers", () => {
             handleDeleteCommunicationInterface: vi.fn(),
             handlePointOfAttackLabelClick: vi.fn(),
             handleAssetNameClick: vi.fn(),
+            handleAddAssetClick: vi.fn(),
             handleSelectConnectedComponent: vi.fn(),
         };
 
