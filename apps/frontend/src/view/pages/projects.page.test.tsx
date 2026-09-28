@@ -1,11 +1,30 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ExtendedProject } from "#api/types/project.types.ts";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { createProject } from "#test-utils/builders.ts";
 import { mockUseConfirm, mockUseFolders, mockUseProjects } from "#test-utils/mock-hooks.ts";
 
 vi.mock("../components/create-page.component", () => ({
     CreatePage: (_Header: unknown, Body: unknown) => Body,
+}));
+
+vi.mock("../components/header-utility-controls.component", () => ({
+    HeaderUtilityControls: () => null,
+}));
+
+vi.mock("../components/projects-grid.component", () => ({
+    ProjectsGridComponent: ({ projects }: { projects: ExtendedProject[] }) => (
+        <ul>
+            {projects.map((project) => (
+                <li key={project.id}>{project.name}</li>
+            ))}
+        </ul>
+    ),
+}));
+
+vi.mock("../components/folders-accordion.component", () => ({
+    FoldersAccordion: () => null,
 }));
 
 import { ProjectsPage } from "./projects.page";
