@@ -19,15 +19,14 @@ import { useTheme } from "@mui/material/styles";
 import { DataGrid, GridRow, type GridColumnVisibilityModel, type GridRowProps } from "@mui/x-data-grid";
 import { memo, useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Route, Routes, useNavigate, useParams } from "react-router";
+import { Route, Routes, useParams } from "react-router";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
-import { ThreatsActions } from "#application/actions/threats.actions.ts";
 import { useColumnFilters } from "#application/hooks/use-column-filters.hook.ts";
 import { getToggleableColumns, useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
 import { applyColumnWidths, useColumnWidths } from "#application/hooks/use-column-widths.hook.ts";
-import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { useEditor } from "#application/hooks/use-editor.hook.ts";
 import { useLoadThreatsOnce } from "#application/hooks/use-load-threats-once.hook.ts";
+import { useThreatActions } from "#application/hooks/use-threat-actions.hook.ts";
 import { useGenericThreatsList } from "#application/hooks/use-generic-threats-list.hook.ts";
 import { NoRowsOverlay } from "#view/components/no-rows-overlay.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
@@ -39,8 +38,7 @@ import { MeasureImpactByMeasureDialogPage } from "./measure-impact-by-measure-di
 import AddMeasureDialogPage from "./add-measure-dialog.page";
 import { withProject } from "#view/components/with-project.hoc.tsx";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
-import type { Threat, ExtendedThreat } from "#api/types/threat.types.ts";
-import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat.types.ts";
+import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import {
     createThreatsColumns,
@@ -85,8 +83,6 @@ const DEFAULT_COLUMN_VISIBILITY: GridColumnVisibilityModel = {
 const ThreatsPageBody = () => {
     const { projectId: projectIdParam = "0" } = useParams<{ projectId?: string }>();
     const projectId = Number.parseInt(projectIdParam, 10);
-    const { openConfirm } = useConfirm<Threat>();
-    const navigate = useNavigate();
     const { t } = useTranslation("threatsPage");
     usePageTitle(t("threats"));
     const theme = useTheme();
@@ -135,116 +131,13 @@ const ThreatsPageBody = () => {
         setAssetAnchorEl(null);
     }, []);
 
-    const onClickEditThreat = useCallback(
-        (event: React.MouseEvent<HTMLElement>, threat: ExtendedThreat | undefined) => {
-            event.preventDefault();
-            if (threat) {
-                navigate(`/projects/${projectId}/threats/edit?threatId=${threat.id}`, { state: { threat } });
-            }
-        },
-        [navigate, projectId]
-    );
-
-    const handleAddThreat = useCallback(
-        async (event: React.MouseEvent<HTMLElement>, genericThreat: GenericThreatWithExtendedThreats) => {
-            event.preventDefault();
-            // Keep the add button from toggling the generic threat row's expand/collapse.
-            event.stopPropagation();
-            try {
-                // Only the name is overridden; identity and assessment defaults come
-                // from the generic threat and its catalogue threat on the backend.
-                await dispatch(
-                    ThreatsActions.createThreat({
-                        projectId: Number(projectId),
-                        genericThreatId: genericThreat.id,
-                        name: `${genericThreat.name} (${t("newThreatSuffix")})`,
-                    })
-                ).unwrap();
-                if (!expandedGenericThreatIds[genericThreat.id]) {
-                    toggleGenericThreat(genericThreat.id);
-                }
-                void loadGenericThreats();
-            } catch {
-                // handled globally
-            }
-        },
-        [dispatch, projectId, t, expandedGenericThreatIds, toggleGenericThreat, loadGenericThreats]
-    );
-
-    const handleDuplicateThreat = useCallback(
-        (event: React.MouseEvent<HTMLElement>, threat: Threat) => {
-            event.preventDefault();
-            openConfirm({
-                state: threat,
-                message: t("duplicateMessage", { threatName: threat.name }),
-                acceptText: t("duplicate"),
-                cancelText: t("cancel"),
-                acceptColor: "secondary",
-                onAccept: async (threat) => {
-                    try {
-                        const payload = {
-                            projectId: Number(projectId),
-                            genericThreatId: threat.genericThreatId,
-                            name: `${threat.name} (${t("duplicateSuffix")})`,
-                            description: threat.description,
-                            probability: threat.probability,
-                            confidentiality: threat.confidentiality,
-                            integrity: threat.integrity,
-                            availability: threat.availability,
-                            status: THREAT_STATUSES.NEW,
-                        };
-
-                        await dispatch(ThreatsActions.createThreat(payload)).unwrap();
-                        void loadGenericThreats();
-                    } catch {
-                        // swallow; error handling via global error handler
-                    }
-                },
-            });
-        },
-        [openConfirm, t, dispatch, projectId, loadGenericThreats]
-    );
-
-    const handleDeleteThreat = useCallback(
-        (event: React.MouseEvent<HTMLElement>, threat: Threat) => {
-            event.preventDefault();
-            // Prevent deleting the only threat of a generic threat
-            const siblings = threatsByGenericThreatId[threat.genericThreatId] ?? [];
-            if (siblings.length <= 1) {
-                openConfirm({
-                    state: threat,
-                    message: t("cannotDeleteOnlyThreat", { threatName: threat.name }),
-                    acceptText: t("ok"),
-                    // Informational dialog — no action to cancel (same pattern as the
-                    // member page's warning dialogs).
-                    cancelText: null,
-                });
-                return;
-            }
-
-            openConfirm({
-                state: threat,
-                message: t("deleteMessage", { threatName: threat.name }),
-                acceptText: t("delete"),
-                cancelText: t("cancel"),
-                onAccept: async (threat) => {
-                    try {
-                        await dispatch(
-                            ThreatsActions.deleteThreat({
-                                id: threat.id,
-                                projectId: Number(projectId),
-                                name: threat.name,
-                            })
-                        ).unwrap();
-                        void loadGenericThreats();
-                    } catch {
-                        // handled globally
-                    }
-                },
-            });
-        },
-        [threatsByGenericThreatId, openConfirm, t, dispatch, projectId, loadGenericThreats]
-    );
+    const { onClickEditThreat, handleAddThreat, handleDuplicateThreat, handleDeleteThreat } = useThreatActions({
+        projectId,
+        threatsByGenericThreatId,
+        expandedGenericThreatIds,
+        toggleGenericThreat,
+        loadGenericThreats,
+    });
 
     const { columnVisibility, toggleColumnVisibility } = useColumnVisibility(
         `threats-column-visibility-${projectId}`,
