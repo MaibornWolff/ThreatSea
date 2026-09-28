@@ -82,6 +82,22 @@ describe("AddThreatMainTab", () => {
         expect(screen.getByRole("spinbutton")).toBeInTheDocument();
     });
 
+    it("shows a new threat's status without offering New, and without an MUI out-of-range warning", async () => {
+        const warn = vi.spyOn(console, "warn");
+        const { user } = renderMainTab({ defaultValues: { status: THREAT_STATUSES.NEW } });
+
+        expect(screen.getByRole("combobox")).toHaveTextContent("New");
+        await user.click(screen.getByRole("combobox"));
+
+        expect(screen.queryByRole("option", { name: "New" })).not.toBeInTheDocument();
+        expect(screen.getAllByRole("option").map((option) => option.textContent)).toEqual([
+            "In progress",
+            "Finalized",
+            "Out of scope",
+        ]);
+        expect(warn).not.toHaveBeenCalledWith(expect.stringContaining("out-of-range value"));
+    });
+
     it("lets the user change the status", async () => {
         const { user } = renderMainTab({ defaultValues: { status: THREAT_STATUSES.NEW } });
 

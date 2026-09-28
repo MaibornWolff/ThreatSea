@@ -288,21 +288,23 @@ export const AddThreatMainTab = ({
                                     labelId="threat-status-label"
                                     label={t("status")}
                                     data-testid="ThreatStatusSelect"
-                                    // Render the current status in the closed select even when it has
-                                    // no matching option below (a "new" threat still shows as New).
-                                    renderValue={(status) => t(`statusList.${status}`)}
                                 >
-                                    {/* NEW is machine-assigned only, so it is not offered as an option:
-                                        a user can move a threat forward but never back to NEW. It is still
-                                        displayed via renderValue above, and saving a non-terminal threat
-                                        advances it to IN_PROGRESS (see handleConfirmDialog). */}
-                                    {Object.values(THREAT_STATUSES)
-                                        .filter((status) => status !== THREAT_STATUSES.NEW)
-                                        .map((status) => (
+                                    {/* NEW is machine-assigned only: a user can move a threat forward but
+                                        never back to NEW, and saving a non-terminal threat advances it to
+                                        IN_PROGRESS (see handleConfirmDialog). Its item is hidden and disabled,
+                                        so it is never offered, but still gives the select a matching option
+                                        to display a new threat's status (MUI warns about values without one). */}
+                                    {Object.values(THREAT_STATUSES).map((status) =>
+                                        status === THREAT_STATUSES.NEW ? (
+                                            <MenuItem key={status} value={status} disabled sx={{ display: "none" }}>
+                                                {t(`statusList.${status}`)}
+                                            </MenuItem>
+                                        ) : (
                                             <MenuItem key={status} value={status}>
                                                 {t(`statusList.${status}`)}
                                             </MenuItem>
-                                        ))}
+                                        )
+                                    )}
                                 </Select>
                             )}
                         />
