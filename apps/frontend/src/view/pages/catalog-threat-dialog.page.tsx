@@ -5,7 +5,7 @@
 
 import { useParams, useLocation, Navigate, type Location } from "react-router";
 import type { CatalogThreat } from "#api/types/catalog-threat.types.ts";
-import CatalogThreatDialog from "#view/dialogs/catalog-threat.dialog.tsx";
+import CatalogItemDialog from "#view/dialogs/catalog-item.dialog.tsx";
 
 interface CatalogThreatDialogLocationState {
     catalogThreat: Partial<CatalogThreat> | undefined;
@@ -23,7 +23,7 @@ const CatalogThreatDialogPage = () => {
     if (state) {
         const { catalogThreat, isNew = false } = state;
 
-        return <CatalogThreatDialog open={true} isNew={isNew} catalogThreat={catalogThreat} />;
+        return <CatalogItemDialog open={true} type="threat" isNew={isNew} item={catalogThreat} />;
     } else {
         return <Navigate to={`/catalogs/${catalogId ?? ""}`} replace />;
     }

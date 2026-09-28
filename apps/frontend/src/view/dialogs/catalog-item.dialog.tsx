@@ -1,6 +1,6 @@
 /**
- * @module catalog-threat.dialog - Defines the dialog
- *     for the catalogue threats.
+ * @module catalog-item.dialog - Defines the dialog
+ *     for catalogue threats and measures.
  */
 
 import {
@@ -29,59 +29,85 @@ import { Dialog } from "#view/components/dialog.component.tsx";
 import { DialogTextField } from "#view/components/dialog.textfield.component.tsx";
 import { NameTextField } from "#view/components/name-textfield.component.tsx";
 import { DescriptionTextField } from "#view/components/description-textfield.component.tsx";
-import type { CatalogThreat } from "#api/types/catalog-threat.types.ts";
+import type { CatalogItem, CatalogItemType } from "#api/types/catalog-item.types.ts";
 import type { DialogValue } from "#application/reducers/dialogs.reducer.ts";
 
-type CatalogThreatAttacker = ATTACKERS | ATTACKERS[] | null;
-type CatalogThreatPointOfAttack = POINTS_OF_ATTACK | POINTS_OF_ATTACK[] | null;
+type CatalogItemAttacker = ATTACKERS | ATTACKERS[] | null;
+type CatalogItemPointOfAttack = POINTS_OF_ATTACK | POINTS_OF_ATTACK[] | null;
 
 interface FormValues {
     id: number | undefined;
     name: string;
     description: string;
-    attacker: CatalogThreatAttacker;
-    pointOfAttack: CatalogThreatPointOfAttack;
+    attacker: CatalogItemAttacker;
+    pointOfAttack: CatalogItemPointOfAttack;
     probability: number | "";
     confidentiality: boolean;
     integrity: boolean;
     availability: boolean;
 }
 
-interface CatalogThreatFormValues extends FormValues, Omit<Partial<CatalogThreat>, keyof FormValues>, DialogValue {}
+interface CatalogItemFormValues extends FormValues, Omit<Partial<CatalogItem>, keyof FormValues>, DialogValue {}
 
-interface CatalogThreatDialogProps extends DialogProps {
-    catalogThreat: Partial<CatalogThreat> | undefined;
+// Per-type differences, kept exactly as the former separate dialogs had them.
+const TYPE_CONFIG = {
+    threat: {
+        dialogNameSpace: "catalogThreats",
+        addTitleKey: "addThreat",
+        editTitleKey: "editThreat",
+        probabilityErrorNamespace: "",
+        hasNameCheckProps: false,
+        attackerTestId: undefined,
+    },
+    measure: {
+        dialogNameSpace: "catalogMeasures",
+        addTitleKey: "addMeasure",
+        editTitleKey: "editMeasure",
+        probabilityErrorNamespace: "catalogMeasureDialogPage:",
+        hasNameCheckProps: true,
+        attackerTestId: "AttackerError",
+    },
+} as const satisfies Record<CatalogItemType, unknown>;
+
+interface CatalogItemDialogProps extends DialogProps {
+    type: CatalogItemType;
+    item: Partial<CatalogItem> | undefined;
     isNew: boolean;
+    catalogId?: number;
 }
 
 /**
- * Creates a dialog for adding/editing catalogue threats.
+ * Creates a dialog for adding/editing catalogue threats and measures.
  *
- * @param {object} catalogThreat - The threat data.
- * @param {boolean} isNew - Indicator if the threat is a new one to be added.
+ * @param {string} type - Whether the item is a threat or a measure.
+ * @param {object} item - The threat or measure data.
+ * @param {boolean} isNew - Indicator if the item is a new one to be added.
  * @param {object} props - Dialog properties.
- * @returns React component for the catalogue threats dialog.
+ * @returns React component for the catalogue item dialog.
  */
-const CatalogThreatDialog = ({ catalogThreat, isNew, ...props }: CatalogThreatDialogProps) => {
+const CatalogItemDialog = ({ type, item, isNew, catalogId, ...props }: CatalogItemDialogProps) => {
+    const { dialogNameSpace, addTitleKey, editTitleKey, probabilityErrorNamespace, hasNameCheckProps, attackerTestId } =
+        TYPE_CONFIG[type];
+    const testIdPrefix = `catalog-${type}-creation-modal_`;
     const navigate = useNavigate();
-    const { confirmDialog, cancelDialog } = useDialog<CatalogThreatFormValues | null>("catalogThreats");
+    const { confirmDialog, cancelDialog } = useDialog<CatalogItemFormValues | null>(dialogNameSpace);
     const {
         register,
         handleSubmit,
         control,
         formState: { errors },
-    } = useForm<CatalogThreatFormValues>({
+    } = useForm<CatalogItemFormValues>({
         defaultValues: {
-            ...catalogThreat,
-            id: catalogThreat?.id,
-            name: catalogThreat?.name ?? "",
-            description: catalogThreat?.description ?? "",
-            attacker: catalogThreat?.attacker ?? null,
-            pointOfAttack: catalogThreat?.pointOfAttack ?? null,
-            probability: catalogThreat?.probability ?? "",
-            confidentiality: catalogThreat?.confidentiality ?? false,
-            integrity: catalogThreat?.integrity ?? false,
-            availability: catalogThreat?.availability ?? false,
+            ...item,
+            id: item?.id,
+            name: item?.name ?? "",
+            description: item?.description ?? "",
+            attacker: item?.attacker ?? null,
+            pointOfAttack: item?.pointOfAttack ?? null,
+            probability: item?.probability ?? "",
+            confidentiality: item?.confidentiality ?? false,
+            integrity: item?.integrity ?? false,
+            availability: item?.availability ?? false,
         },
     });
     const { t } = useTranslation("catalogPage");
@@ -97,14 +123,14 @@ const CatalogThreatDialog = ({ catalogThreat, isNew, ...props }: CatalogThreatDi
     };
 
     /**
-     * Adds or changes a catalogue threat.
+     * Adds or changes a catalogue item.
      *
      * @event Box#onSubmit
-     * @param {object} catalogThreat - Data of the catalogue threat
+     * @param {object} formValues - Data of the catalogue item
      *     from the dialog.
      */
-    const handleConfirmDialog = (catalogThreat: CatalogThreatFormValues) => {
-        const { probability, ...data } = catalogThreat;
+    const handleConfirmDialog = (formValues: CatalogItemFormValues) => {
+        const { probability, ...data } = formValues;
 
         if (isNew) {
             const { attacker, pointOfAttack, ...rest } = data;
@@ -157,7 +183,7 @@ const CatalogThreatDialog = ({ catalogThreat, isNew, ...props }: CatalogThreatDi
                     fontWeight: "bold",
                 }}
             >
-                {isNew ? t("addThreat") : t("editThreat")}
+                {isNew ? t(addTitleKey) : t(editTitleKey)}
             </DialogTitle>
             <Box
                 component="form"
@@ -167,13 +193,14 @@ const CatalogThreatDialog = ({ catalogThreat, isNew, ...props }: CatalogThreatDi
                 <NameTextField
                     register={register}
                     error={errors?.name}
-                    data-testid="catalog-threat-creation-modal_name-input"
+                    {...(hasNameCheckProps && { ownId: item?.id, type, catalogId })}
+                    data-testid={`${testIdPrefix}name-input`}
                 />
 
                 <DescriptionTextField
                     register={register}
                     error={errors?.description}
-                    data-testid="catalog-threat-creation-modal_description-input"
+                    data-testid={`${testIdPrefix}description-input`}
                 />
 
                 <Box sx={{ display: "flex", alignItems: "center", mt: 2, mb: 1 }}>
@@ -183,6 +210,7 @@ const CatalogThreatDialog = ({ catalogThreat, isNew, ...props }: CatalogThreatDi
                             mr: 1,
                         }}
                         error={!!errors?.attacker}
+                        data-testid={attackerTestId}
                     >
                         <InputLabel shrink sx={{ marginLeft: 1, fontSize: "1rem" }} id="select-attacker-label">
                             {t("attackersHeading")}
@@ -237,29 +265,29 @@ const CatalogThreatDialog = ({ catalogThreat, isNew, ...props }: CatalogThreatDi
                                             borderColor: `${theme.vars.palette.secondary.main} !important`,
                                         },
                                     }}
-                                    data-testid="catalog-threat-creation-modal_attacker-selection"
+                                    data-testid={`${testIdPrefix}attacker-selection`}
                                 >
                                     <MenuItem
                                         value={ATTACKERS.UNAUTHORISED_PARTIES}
-                                        data-testid="catalog-threat-creation-modal_attacker-selection_un-par"
+                                        data-testid={`${testIdPrefix}attacker-selection_un-par`}
                                     >
                                         {t("attackerList.UNAUTHORISED_PARTIES")}
                                     </MenuItem>
                                     <MenuItem
                                         value={ATTACKERS.SYSTEM_USERS}
-                                        data-testid="catalog-threat-creation-modal_attacker-selection_sys-us"
+                                        data-testid={`${testIdPrefix}attacker-selection_sys-us`}
                                     >
                                         {t("attackerList.SYSTEM_USERS")}
                                     </MenuItem>
                                     <MenuItem
                                         value={ATTACKERS.APPLICATION_USERS}
-                                        data-testid="catalog-threat-creation-modal_attacker-selection_app-us"
+                                        data-testid={`${testIdPrefix}attacker-selection_app-us`}
                                     >
                                         {t("attackerList.APPLICATION_USERS")}
                                     </MenuItem>
                                     <MenuItem
                                         value={ATTACKERS.ADMINISTRATORS}
-                                        data-testid="catalog-threat-creation-modal_attacker-selection_adm-us"
+                                        data-testid={`${testIdPrefix}attacker-selection_adm-us`}
                                     >
                                         {t("attackerList.ADMINISTRATORS")}
                                     </MenuItem>
@@ -323,41 +351,41 @@ const CatalogThreatDialog = ({ catalogThreat, isNew, ...props }: CatalogThreatDi
                                             borderColor: `${theme.vars.palette.secondary.main} !important`,
                                         },
                                     }}
-                                    data-testid="catalog-threat-creation-modal_poa-selection"
+                                    data-testid={`${testIdPrefix}poa-selection`}
                                 >
                                     <MenuItem
                                         value={POINTS_OF_ATTACK.DATA_STORAGE_INFRASTRUCTURE}
-                                        data-testid="catalog-threat-creation-modal_PoA-selection_da-sto-infra"
+                                        data-testid={`${testIdPrefix}PoA-selection_da-sto-infra`}
                                     >
                                         {t("pointsOfAttackList.DATA_STORAGE_INFRASTRUCTURE")}
                                     </MenuItem>
                                     <MenuItem
                                         value={POINTS_OF_ATTACK.PROCESSING_INFRASTRUCTURE}
-                                        data-testid="catalog-threat-creation-modal_PoA-selection_pro-infra"
+                                        data-testid={`${testIdPrefix}PoA-selection_pro-infra`}
                                     >
                                         {t("pointsOfAttackList.PROCESSING_INFRASTRUCTURE")}
                                     </MenuItem>
                                     <MenuItem
                                         value={POINTS_OF_ATTACK.COMMUNICATION_INFRASTRUCTURE}
-                                        data-testid="catalog-threat-creation-modal_PoA-selection_com-infra"
+                                        data-testid={`${testIdPrefix}PoA-selection_com-infra`}
                                     >
                                         {t("pointsOfAttackList.COMMUNICATION_INFRASTRUCTURE")}
                                     </MenuItem>
                                     <MenuItem
                                         value={POINTS_OF_ATTACK.COMMUNICATION_INTERFACES}
-                                        data-testid="catalog-threat-creation-modal_PoA-selection_com-inter"
+                                        data-testid={`${testIdPrefix}PoA-selection_com-inter`}
                                     >
                                         {t("pointsOfAttackList.COMMUNICATION_INTERFACES")}
                                     </MenuItem>
                                     <MenuItem
                                         value={POINTS_OF_ATTACK.USER_INTERFACE}
-                                        data-testid="catalog-threat-creation-modal_PoA-selection_us-inter"
+                                        data-testid={`${testIdPrefix}PoA-selection_us-inter`}
                                     >
                                         {t("pointsOfAttackList.USER_INTERFACE")}
                                     </MenuItem>
                                     <MenuItem
                                         value={POINTS_OF_ATTACK.USER_BEHAVIOUR}
-                                        data-testid="catalog-threat-creation-modal_PoA-selection_us-beh"
+                                        data-testid={`${testIdPrefix}PoA-selection_us-beh`}
                                     >
                                         {t("pointsOfAttackList.USER_BEHAVIOUR")}
                                     </MenuItem>
@@ -372,20 +400,20 @@ const CatalogThreatDialog = ({ catalogThreat, isNew, ...props }: CatalogThreatDi
                     type="number"
                     margin="normal"
                     {...register("probability", {
-                        required: t("errorMessages.probabilityRequired"),
+                        required: t(`${probabilityErrorNamespace}errorMessages.probabilityRequired`),
                         valueAsNumber: true,
                         min: {
                             value: 1,
-                            message: t("errorMessages.probabilityMin"),
+                            message: t(`${probabilityErrorNamespace}errorMessages.probabilityMin`),
                         },
                         max: {
                             value: 5,
-                            message: t("errorMessages.probabilityMax"),
+                            message: t(`${probabilityErrorNamespace}errorMessages.probabilityMax`),
                         },
                     })}
                     error={!!errors?.probability}
                     helperText={errors?.probability?.message}
-                    data-testid="catalog-threat-creation-modal_probability-input"
+                    data-testid={`${testIdPrefix}probability-input`}
                 />
                 <Box
                     sx={{
@@ -402,7 +430,7 @@ const CatalogThreatDialog = ({ catalogThreat, isNew, ...props }: CatalogThreatDi
                                         <Switch
                                             {...field}
                                             checked={!!field?.value}
-                                            data-testid="catalog-threat-creation-modal_confidentiality-switch"
+                                            data-testid={`${testIdPrefix}confidentiality-switch`}
                                         />
                                     )}
                                     {...register("confidentiality", {
@@ -427,7 +455,7 @@ const CatalogThreatDialog = ({ catalogThreat, isNew, ...props }: CatalogThreatDi
                                         <Switch
                                             {...field}
                                             checked={!!field?.value}
-                                            data-testid="catalog-threat-creation-modal_integrity-switch"
+                                            data-testid={`${testIdPrefix}integrity-switch`}
                                         />
                                     )}
                                     {...register("integrity", {
@@ -452,7 +480,7 @@ const CatalogThreatDialog = ({ catalogThreat, isNew, ...props }: CatalogThreatDi
                                         <Switch
                                             {...field}
                                             checked={!!field?.value}
-                                            data-testid="catalog-threat-creation-modal_availability-switch"
+                                            data-testid={`${testIdPrefix}availability-switch`}
                                         />
                                     )}
                                     {...register("availability", {
@@ -502,4 +530,4 @@ const CatalogThreatDialog = ({ catalogThreat, isNew, ...props }: CatalogThreatDi
     );
 };
 
-export default CatalogThreatDialog;
+export default CatalogItemDialog;
