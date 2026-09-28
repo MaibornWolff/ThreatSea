@@ -56,38 +56,41 @@ const build = ({
         t: englishT,
     });
 
+// A generic threat row reads "rowId (shown/total)".
 const summarize = (rows: ReturnType<typeof buildThreatsRows>) =>
-    rows.map((row) => (row.rowType === "genericThreat" ? `${row.rowId} (${row.threatCount})` : row.rowId));
+    rows.map((row) =>
+        row.rowType === "genericThreat" ? `${row.rowId} (${row.threatCount}/${row.totalThreatCount})` : row.rowId
+    );
 
 describe("buildThreatsRows", () => {
     it("lists every generic threat with its threat count while collapsed", () => {
-        expect(summarize(build())).toEqual(["generic-1 (2)", "generic-2 (1)"]);
+        expect(summarize(build())).toEqual(["generic-1 (2/2)", "generic-2 (1/1)"]);
     });
 
     it("lists an expanded generic threat's threats under it", () => {
         expect(summarize(build({ expanded: { 1: true } }))).toEqual([
-            "generic-1 (2)",
+            "generic-1 (2/2)",
             "threat-11",
             "threat-12",
-            "generic-2 (1)",
+            "generic-2 (1/1)",
         ]);
     });
 
     it("shows the empty placeholder under an expanded generic threat without threats", () => {
         expect(summarize(build({ expanded: { 2: true }, threats: { ...threatsByGenericThreatId, 2: [] } }))).toEqual([
-            "generic-1 (2)",
-            "generic-2 (0)",
+            "generic-1 (2/2)",
+            "generic-2 (0/0)",
             "empty-2",
         ]);
     });
 
     it("hides a generic threat when neither it nor any of its threats matches a filter", () => {
-        expect(summarize(build({ columnFilters: { name: "spoofing" } }))).toEqual(["generic-1 (2)"]);
+        expect(summarize(build({ columnFilters: { name: "spoofing" } }))).toEqual(["generic-1 (2/2)"]);
     });
 
     it("keeps a generic threat for a matching threat and lists only the matching threats", () => {
         expect(summarize(build({ columnFilters: { name: "duplicate" }, expanded: { 1: true } }))).toEqual([
-            "generic-1 (1)",
+            "generic-1 (1/2)",
             "threat-12",
         ]);
     });
@@ -95,13 +98,28 @@ describe("buildThreatsRows", () => {
     it("never matches a generic threat itself on a threat-only filter", () => {
         expect(
             summarize(build({ columnFilters: { status: THREAT_STATUSES.FINALIZED }, expanded: { 1: true } }))
-        ).toEqual(["generic-1 (1)", "threat-11"]);
+        ).toEqual(["generic-1 (1/2)", "threat-11"]);
     });
 
-    it("keeps a generic threat matching the name filter even when none of its threats does", () => {
+    it("lists all threats of a generic threat matching the name filter, even renamed ones", () => {
         expect(summarize(build({ columnFilters: { name: "tampering" }, expanded: { 2: true } }))).toEqual([
-            "generic-2 (0)",
-            "empty-2",
+            "generic-2 (1/1)",
+            "threat-21",
         ]);
+    });
+
+    it("still applies threat-only filters to the threats of a generic threat matching the name filter", () => {
+        expect(
+            summarize(
+                build({
+                    columnFilters: { name: "spoofing", status: THREAT_STATUSES.FINALIZED },
+                    expanded: { 1: true },
+                })
+            )
+        ).toEqual(["generic-1 (1/2)", "threat-11"]);
+        // Tampering matches the name, but its only threat is not finalized.
+        expect(summarize(build({ columnFilters: { name: "tampering", status: THREAT_STATUSES.FINALIZED } }))).toEqual(
+            []
+        );
     });
 });

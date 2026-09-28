@@ -79,6 +79,7 @@ const genericRow: ThreatsGridRow = {
     rowId: "generic-7",
     genericThreat,
     threatCount: 1,
+    totalThreatCount: 1,
     isExpanded: false,
 };
 
@@ -147,11 +148,17 @@ describe("createThreatsColumns — generic threat rows carry no risk", () => {
 
     it("shows the threat count and an add-threat button on the generic threat actions cell", async () => {
         const { byField, handlers } = columnByField();
-        renderCell(byField["actions"], { ...genericRow, threatCount: 3 });
+        renderCell(byField["actions"], { ...genericRow, threatCount: 3, totalThreatCount: 3 });
         expect(screen.getByText("3 threats")).toBeInTheDocument();
 
         await userEvent.click(screen.getByRole("button", { name: "Add Threat" }));
         expect(handlers.onAddThreat).toHaveBeenCalledTimes(1);
+    });
+
+    it("shows how many of the generic threat's threats match while filters hide some", () => {
+        const { byField } = columnByField();
+        renderCell(byField["actions"], { ...genericRow, threatCount: 1, totalThreatCount: 3 });
+        expect(screen.getByText("1 of 3 threats")).toBeInTheDocument();
     });
 
     it("hides the add-threat button from viewers", () => {

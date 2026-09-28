@@ -25,7 +25,9 @@ export type ThreatsGridRow =
           rowType: "genericThreat";
           rowId: string;
           genericThreat: GenericThreatWithExtendedThreats;
+          // threats shown under the current column filters
           threatCount: number;
+          totalThreatCount: number;
           isExpanded: boolean;
       }
     | { rowType: "threat"; rowId: string; threat: ExtendedThreatWithMetrics }
@@ -461,7 +463,11 @@ export const createThreatsColumns = ({
                             paddingRight: 1,
                         }}
                     >
-                        <Typography sx={cellText}>{t("threatsCount", { count: row.threatCount })}</Typography>
+                        <Typography sx={cellText}>
+                            {row.threatCount < row.totalThreatCount
+                                ? t("threatsCountFiltered", { visible: row.threatCount, count: row.totalThreatCount })
+                                : t("threatsCount", { count: row.totalThreatCount })}
+                        </Typography>
                         {checkUserRole(userRole, USER_ROLES.EDITOR) && (
                             <IconButton
                                 title={t("addThreat")}

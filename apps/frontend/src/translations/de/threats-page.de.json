@@ -22,6 +22,8 @@
   "noThreats": "Keine Bedrohungen zu dieser generischen Bedrohung.",
   "threatsCount_one": "{{count}} Bedrohung",
   "threatsCount_other": "{{count}} Bedrohungen",
+  "threatsCountFiltered_one": "{{visible}} von {{count}} Bedrohung",
+  "threatsCountFiltered_other": "{{visible}} von {{count}} Bedrohungen",
   "threatsLoading": "Bedrohungen werden geladen...",
   "deleteMessage": "Wollen Sie die Bedrohung '{{ threatName }}' wirklich löschen?",
   "cannotDeleteOnlyThreat": "Sie können die einzige Bedrohung '{{ threatName }}' nicht löschen.",

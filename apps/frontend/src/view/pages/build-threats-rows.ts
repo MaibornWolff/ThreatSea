@@ -12,70 +12,73 @@ import {
 // match a generic threat directly.
 const threatOnlyFilterFields = ["description", "assets", "probability", "damage", "risk", "status"] as const;
 
-const matchesThreatFilters = (
-    threat: ExtendedThreatWithMetrics,
-    columnFilters: Record<string, string>,
-    t: TFunction
-): boolean =>
-    Object.entries(columnFilters).every(([field, value]) => {
-        const filterValue = value.trim().toLowerCase();
-        if (!filterValue) {
-            return true;
-        }
-        switch (field) {
-            case "name":
-                return threat.name.toLowerCase().includes(filterValue);
-            case "description":
-                return threat.description.toLowerCase().includes(filterValue);
-            case "assets":
-                return String(threat.assets.length).includes(filterValue);
-            case "componentName":
-                return formatComponentName(threat, t).toLowerCase().includes(filterValue);
-            case "pointOfAttack":
-                return t(`pointsOfAttackList.${threat.pointOfAttack}`).toLowerCase().includes(filterValue);
-            case "attacker":
-                return t(`attackerList.${threat.attacker}`).toLowerCase().includes(filterValue);
-            case "probability":
-                return String(threat.probability).includes(filterValue);
-            case "damage":
-                return String(threat.damage).includes(filterValue);
-            case "risk":
-                return String(threat.risk).includes(filterValue);
-            case "status":
-                return threat.status === value;
-            default:
-                return true;
-        }
-    });
+interface ActiveFilter {
+    field: string;
+    // the raw value, for exact matches (status)
+    value: string;
+    // trimmed and lower-cased, for substring matches
+    search: string;
+}
 
-const matchesGenericThreatFilters = (
-    genericThreat: GenericThreatWithExtendedThreats,
-    columnFilters: Record<string, string>,
+const threatMatchesFilter = (
+    threat: ExtendedThreatWithMetrics,
+    { field, value, search }: ActiveFilter,
     t: TFunction
-): boolean =>
-    Object.entries(columnFilters).every(([field, value]) => {
-        const filterValue = value.trim().toLowerCase();
-        if (!filterValue) {
+) => {
+    switch (field) {
+        case "name":
+            return threat.name.toLowerCase().includes(search);
+        case "description":
+            return threat.description.toLowerCase().includes(search);
+        case "assets":
+            return String(threat.assets.length).includes(search);
+        case "componentName":
+            return formatComponentName(threat, t).toLowerCase().includes(search);
+        case "pointOfAttack":
+            return t(`pointsOfAttackList.${threat.pointOfAttack}`).toLowerCase().includes(search);
+        case "attacker":
+            return t(`attackerList.${threat.attacker}`).toLowerCase().includes(search);
+        case "probability":
+            return String(threat.probability).includes(search);
+        case "damage":
+            return String(threat.damage).includes(search);
+        case "risk":
+            return String(threat.risk).includes(search);
+        case "status":
+            return threat.status === value;
+        default:
             return true;
-        }
-        switch (field) {
-            case "name":
-                return genericThreat.name.toLowerCase().includes(filterValue);
-            case "componentName":
-                return formatComponentName(genericThreat, t).toLowerCase().includes(filterValue);
-            case "pointOfAttack":
-                return t(`pointsOfAttackList.${genericThreat.pointOfAttack}`).toLowerCase().includes(filterValue);
-            case "attacker":
-                return t(`attackerList.${genericThreat.attacker}`).toLowerCase().includes(filterValue);
-            default:
-                return true;
-        }
-    });
+    }
+};
+
+// undefined for fields a generic threat has no value for (the threat-only fields).
+const genericThreatMatchesFilter = (
+    genericThreat: GenericThreatWithExtendedThreats,
+    { field, search }: ActiveFilter,
+    t: TFunction
+): boolean | undefined => {
+    switch (field) {
+        case "name":
+            return genericThreat.name.toLowerCase().includes(search);
+        case "componentName":
+            return formatComponentName(genericThreat, t).toLowerCase().includes(search);
+        case "pointOfAttack":
+            return t(`pointsOfAttackList.${genericThreat.pointOfAttack}`).toLowerCase().includes(search);
+        case "attacker":
+            return t(`attackerList.${genericThreat.attacker}`).toLowerCase().includes(search);
+        default:
+            return undefined;
+    }
+};
 
 /**
  * Flattens the generic threats and their threats into the grid's rows. The grid's own filtering
  * would treat generic threat and threat rows independently and tear the hierarchy apart, so the
  * column filters are applied here while building the rows.
+ *
+ * A generic threat that matches a filter on its own columns (e.g. its name) passes that filter on
+ * for its threats, so searching for a generic threat lists all of its threats rather than an empty
+ * group. Threat-only filters (e.g. status) still apply to each threat.
  */
 export const buildThreatsRows = ({
     genericThreats,
@@ -90,16 +93,30 @@ export const buildThreatsRows = ({
     columnFilters: Record<string, string>;
     t: TFunction;
 }): ThreatsGridRow[] => {
-    const hasThreatOnlyFilter = threatOnlyFilterFields.some((field) => (columnFilters[field] ?? "").trim() !== "");
+    const activeFilters: ActiveFilter[] = Object.entries(columnFilters)
+        .map(([field, value]) => ({ field, value, search: value.trim().toLowerCase() }))
+        .filter((filter) => filter.search !== "");
+    const hasThreatOnlyFilter = activeFilters.some((filter) =>
+        (threatOnlyFilterFields as readonly string[]).includes(filter.field)
+    );
 
     const result: ThreatsGridRow[] = [];
     for (const genericThreat of genericThreats) {
         const threats = threatsByGenericThreatId[genericThreat.id] ?? [];
-        const visibleThreats = threats.filter((threat) => matchesThreatFilters(threat, columnFilters, t));
+        const genericThreatMatches = activeFilters.map(
+            (filter) => genericThreatMatchesFilter(genericThreat, filter, t) === true
+        );
+        const visibleThreats = threats.filter((threat) =>
+            activeFilters.every(
+                (filter, index) => genericThreatMatches[index] || threatMatchesFilter(threat, filter, t)
+            )
+        );
 
+        // A generic threat without threats can still match on its own columns.
         const genericThreatVisible =
             visibleThreats.length > 0 ||
-            (!hasThreatOnlyFilter && matchesGenericThreatFilters(genericThreat, columnFilters, t));
+            (!hasThreatOnlyFilter &&
+                activeFilters.every((filter) => genericThreatMatchesFilter(genericThreat, filter, t) ?? true));
         if (!genericThreatVisible) {
             continue;
         }
@@ -110,6 +127,7 @@ export const buildThreatsRows = ({
             rowId: `${GENERIC_THREAT_ROW_PREFIX}${genericThreat.id}`,
             genericThreat,
             threatCount: visibleThreats.length,
+            totalThreatCount: threats.length,
             isExpanded,
         });
         if (isExpanded) {
