@@ -1413,9 +1413,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                         </Layer>
 
                         <Layer x={layerPosition.x} y={layerPosition.y} ref={componentLayerRef}>
-                            {connections.map((connection, i) => {
+                            {connections.map((connection) => {
                                 if (connection.visible === false) {
-                                    return <Group key={i}></Group>;
+                                    return <Group key={connection.id}></Group>;
                                 }
 
                                 // A connection whose endpoint component is gone has no valid line.
@@ -1427,7 +1427,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                 }
 
                                 return (
-                                    <Group key={i}>
+                                    <Group key={connection.id}>
                                         <SystemComponentConnection
                                             {...connection}
                                             onClick={handleSelectConnection}
@@ -1471,9 +1471,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                 color={annotationColor}
                                 strokeWidth={ANNOTATION_STROKE_WIDTH}
                             />
-                            {components.map((component, i) => (
+                            {components.map((component) => (
                                 <SystemComponent
-                                    key={i}
+                                    key={component.id}
                                     {...component}
                                     onSelectAnchor={handleSelectAnchor}
                                     selectedAnchor={
