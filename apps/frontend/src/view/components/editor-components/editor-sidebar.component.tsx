@@ -58,6 +58,7 @@ export interface EditorSidebarProps {
     ) => void;
     handlePointOfAttackLabelClick: (pointOfAttackId: string, componentId?: string) => void;
     handleAssetNameClick: (asset: Asset) => void;
+    handleAddAssetClick: () => void;
     handleSelectConnectedComponent: (componentId: string, communicationInterfaceId?: string | null) => void;
     handleComponentBreadcrumbClick: () => void;
     handleInterfaceBreadcrumbClick: () => void;
@@ -99,6 +100,7 @@ export const EditorSidebar = ({
     handleDeleteCommunicationInterface,
     handlePointOfAttackLabelClick,
     handleAssetNameClick,
+    handleAddAssetClick,
     handleSelectConnectedComponent,
     handleComponentBreadcrumbClick,
     handleInterfaceBreadcrumbClick,
@@ -167,6 +169,7 @@ export const EditorSidebar = ({
                             handleDeleteCommunicationInterface={handleDeleteCommunicationInterface}
                             handlePointOfAttackLabelClick={handlePointOfAttackLabelClick}
                             handleAssetNameClick={handleAssetNameClick}
+                            handleAddAssetClick={handleAddAssetClick}
                             handleSelectConnectedComponent={handleSelectConnectedComponent}
                         />
                     )}

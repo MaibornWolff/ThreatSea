@@ -38,7 +38,8 @@
       "title": "Angriffspunkte"
     },
     "assets": {
-      "title": "Assets"
+      "title": "Assets",
+      "create": "Asset erstellen"
     },
     "connection": {
       "title": "Kommunikationsinfrastruktur",
