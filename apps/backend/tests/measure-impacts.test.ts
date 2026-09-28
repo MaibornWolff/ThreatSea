@@ -272,6 +272,26 @@ describe("get or create measure impacts", () => {
         expect(res.body.damage).toBe(VALID_MEASURE_IMPACT_1.damage);
     });
 
+    it("ignores an id and timestamps sent by the client when creating a measure impact", async () => {
+        const res = await request(app)
+            .post(`/api/projects/${projectId}/system/measureImpacts`)
+            .send({
+                ...VALID_MEASURE_IMPACT_1,
+                threatId,
+                measureId,
+                id: 987654,
+                createdAt: "2000-01-01T00:00:00.000Z",
+                updatedAt: "2000-01-01T00:00:00.000Z",
+            })
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.id).not.toBe(987654);
+        expect(res.body.createdAt.startsWith("2000")).toBe(false);
+        expect(res.body.updatedAt.startsWith("2000")).toBe(false);
+    });
+
     it("should not create a measure impacts (probability null)", async () => {
         const res = await request(app)
             .post(`/api/projects/${projectId}/system/measureImpacts`)

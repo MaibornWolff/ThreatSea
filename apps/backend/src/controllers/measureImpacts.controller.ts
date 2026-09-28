@@ -103,9 +103,23 @@ export async function createMeasureImpact(
         return;
     }
 
+    const data = request.body;
     try {
         const measureImpact = await db.transaction(async (tx) => {
-            const createdMeasureImpact = await MeasureImpactsService.createMeasureImpact(request.body, tx);
+            // Pass only the request's own fields, so a client can't set id, createdAt or updatedAt.
+            const createdMeasureImpact = await MeasureImpactsService.createMeasureImpact(
+                {
+                    measureId: data.measureId,
+                    threatId: data.threatId,
+                    description: data.description,
+                    setsOutOfScope: data.setsOutOfScope,
+                    impactsProbability: data.impactsProbability,
+                    impactsDamage: data.impactsDamage,
+                    probability: data.probability,
+                    damage: data.damage,
+                },
+                tx
+            );
             if (createdMeasureImpact.setsOutOfScope) {
                 await MeasureImpactsService.finalizeThreatWhenOutOfScopeApplied(threatId, tx);
             }
