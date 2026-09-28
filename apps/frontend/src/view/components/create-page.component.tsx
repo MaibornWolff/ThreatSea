@@ -55,7 +55,16 @@ export const CreatePage = <P extends object>(
         const catalog = useAppSelector((state) => state.catalogs.current);
 
         const autoSaveStatus = useAppSelector(editorSelectors.selectAutoSaveStatus);
-        const autoSaveText = useAppSelector(editorSelectors.selectAutoSaveHelperText);
+        const autoSaveMessage = useAppSelector(editorSelectors.selectAutoSaveMessage);
+        const { t: tEditor } = useTranslation("editorPage");
+        let autoSaveText = "";
+        if (autoSaveMessage?.type === "failed") {
+            autoSaveText = tEditor("autoSave.failed", { error: autoSaveMessage.error });
+        } else if (autoSaveMessage) {
+            autoSaveText = tEditor(`autoSave.${autoSaveMessage.type}`, {
+                date: autoSaveMessage.date,
+            });
+        }
         const [autoSaveOnClick, setAutoSaveOnClick] = useState<(() => void) | undefined>(undefined);
         const [aboutOpen, setAboutOpen] = useState(false);
 

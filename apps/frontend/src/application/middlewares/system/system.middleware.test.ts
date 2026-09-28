@@ -361,6 +361,48 @@ describe("system.middleware — getSystem replaces legacy standard icon paths", 
     });
 });
 
+describe("system.middleware — auto save message", () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    it("stores the loaded save date for the view to translate", async () => {
+        const store = createStore({ projects: buildProjectsState(USER_ROLES.EDITOR) });
+        vi.spyOn(SystemAPI, "getSystem").mockResolvedValue({
+            id: 5,
+            projectId: 5,
+            data: {
+                components: [],
+                connections: [],
+                connectionPoints: [],
+                pointsOfAttack: [],
+                annotations: [],
+                lastAutoSaveDate: "31.7.2026, 16:26:56",
+            },
+            image: null,
+        });
+        store.dispatch(SystemActions.getSystem({ projectId: 5 }));
+
+        await vi.waitFor(() =>
+            expect(store.getState().editor.autoSaveMessage).toEqual({
+                type: "upToDate",
+                date: "31.7.2026, 16:26:56",
+            })
+        );
+    });
+
+    it("stores the error message when saving fails", async () => {
+        const store = createStore({ projects: buildProjectsState(USER_ROLES.EDITOR) });
+        vi.spyOn(SystemAPI, "updateSystem").mockRejectedValue(new Error("Network down"));
+
+        store.dispatch(SystemActions.saveSystem({ projectId: 1, image: undefined }));
+
+        await vi.waitFor(() =>
+            expect(store.getState().editor.autoSaveMessage).toEqual({ type: "failed", error: "Network down" })
+        );
+    });
+});
+
 describe("system.middleware — compareConnections", () => {
     it("treats identical connections as unchanged", () => {
         expect(compareConnections(makeConnection({}), makeConnection({}) as unknown as SystemConnection)).toBe(true);
