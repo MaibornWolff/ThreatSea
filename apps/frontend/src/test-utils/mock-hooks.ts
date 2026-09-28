@@ -12,6 +12,8 @@ import * as catalogMeasuresHook from "#application/hooks/use-catalog-measures.ho
 import * as projectExportHook from "#application/hooks/use-export.hook.ts";
 import * as foldersHook from "#application/hooks/use-folders.hook.ts";
 import * as projectsHook from "#application/hooks/use-projects.hook.ts";
+import * as catalogThreatsListHook from "#application/hooks/use-catalog-threats-list.hook.ts";
+import * as catalogMeasuresListHook from "#application/hooks/use-catalog-measures-list.hook.ts";
 
 /**
  * @module mock-hooks - Reusable hook spies.
@@ -39,6 +41,8 @@ type UseCatalogMeasuresResult = ReturnType<typeof catalogMeasuresHook.useCatalog
 type UseProjectExportResult = ReturnType<typeof projectExportHook.useProjectExport>;
 type UseFoldersResult = ReturnType<typeof foldersHook.useFolders>;
 type UseProjectsResult = ReturnType<typeof projectsHook.useProjects>;
+type UseCatalogThreatsListResult = ReturnType<typeof catalogThreatsListHook.useCatalogThreatsList>;
+type UseCatalogMeasuresListResult = ReturnType<typeof catalogMeasuresListHook.useCatalogMeasuresList>;
 
 export const mockUseDialog = (config?: Partial<UseDialogResult>): MockInstance => {
     return vi.spyOn(dialogHook, "useDialog").mockImplementation(() => ({
@@ -246,6 +250,36 @@ export const mockUseProjects = (config?: Partial<UseProjectsResult>): MockInstan
         isPending: false,
         loadProjects: vi.fn(),
         deleteProject: vi.fn(),
+        ...config,
+    }));
+};
+
+export const mockUseCatalogThreatsList = (config?: Partial<UseCatalogThreatsListResult>): MockInstance => {
+    return vi.spyOn(catalogThreatsListHook, "useCatalogThreatsList").mockImplementation(() => ({
+        catalogThreats: [],
+        isPending: false,
+        deleteCatalogThreat: vi.fn(),
+        setSortDirection: vi.fn(),
+        setSearchValue: vi.fn(),
+        setSortBy: vi.fn(),
+        sortDirection: "asc",
+        searchValue: "",
+        sortBy: "name",
+        ...config,
+    }));
+};
+
+export const mockUseCatalogMeasuresList = (config?: Partial<UseCatalogMeasuresListResult>): MockInstance => {
+    return vi.spyOn(catalogMeasuresListHook, "useCatalogMeasuresList").mockImplementation(() => ({
+        catalogMeasures: [],
+        isPending: false,
+        deleteCatalogMeasure: vi.fn(),
+        setSortDirection: vi.fn(),
+        setSearchValue: vi.fn(),
+        setSortBy: vi.fn(),
+        sortDirection: "asc",
+        searchValue: "",
+        sortBy: "name",
         ...config,
     }));
 };
