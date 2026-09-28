@@ -13,8 +13,7 @@ import { ATTACKERS } from "#api/types/attackers.types.ts";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
-import { CatalogMeasuresListBox } from "#view/components/catalog-measures-list-box.component.tsx";
-import { CatalogThreatsListBox } from "#view/components/catalog-threats-list-box.component.tsx";
+import { CatalogItemsListBox } from "#view/components/catalog-items-list-box.component.tsx";
 import { MatrixFilterToggleButtonGroup } from "#view/components/matrix-filter-toggle-button-group.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
@@ -207,13 +206,15 @@ const CatalogPageBody = () => {
                     flex: 1,
                 }}
             >
-                <CatalogThreatsListBox
+                <CatalogItemsListBox
+                    type="threat"
                     catalogId={catalogId}
                     attacker={attacker}
                     pointOfAttack={pointOfAttack}
                     userRole={userRole}
                 />
-                <CatalogMeasuresListBox
+                <CatalogItemsListBox
+                    type="measure"
                     catalogId={catalogId}
                     attacker={attacker}
                     pointOfAttack={pointOfAttack}

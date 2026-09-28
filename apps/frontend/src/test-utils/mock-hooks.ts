@@ -11,6 +11,8 @@ import * as measureImpactsHook from "#application/hooks/use-measureImpacts.hook.
 import * as catalogMeasuresHook from "#application/hooks/use-catalog-measures.hook.ts";
 import * as projectExportHook from "#application/hooks/use-export.hook.ts";
 import * as foldersHook from "#application/hooks/use-folders.hook.ts";
+import * as catalogThreatsListHook from "#application/hooks/use-catalog-threats-list.hook.ts";
+import * as catalogMeasuresListHook from "#application/hooks/use-catalog-measures-list.hook.ts";
 
 /**
  * @module mock-hooks - Reusable hook spies.
@@ -37,6 +39,8 @@ type UseMeasureImpactsResult = ReturnType<typeof measureImpactsHook.useMeasureIm
 type UseCatalogMeasuresResult = ReturnType<typeof catalogMeasuresHook.useCatalogMeasures>;
 type UseProjectExportResult = ReturnType<typeof projectExportHook.useProjectExport>;
 type UseFoldersResult = ReturnType<typeof foldersHook.useFolders>;
+type UseCatalogThreatsListResult = ReturnType<typeof catalogThreatsListHook.useCatalogThreatsList>;
+type UseCatalogMeasuresListResult = ReturnType<typeof catalogMeasuresListHook.useCatalogMeasuresList>;
 
 export const mockUseDialog = (config?: Partial<UseDialogResult>): MockInstance => {
     return vi.spyOn(dialogHook, "useDialog").mockImplementation(() => ({
@@ -236,6 +240,36 @@ export const mockUseFolders = (config?: Partial<UseFoldersResult>): MockInstance
         loadFolders: vi.fn(),
         deleteFolder: vi.fn(),
         moveProject: vi.fn(),
+        ...config,
+    }));
+};
+
+export const mockUseCatalogThreatsList = (config?: Partial<UseCatalogThreatsListResult>): MockInstance => {
+    return vi.spyOn(catalogThreatsListHook, "useCatalogThreatsList").mockImplementation(() => ({
+        catalogThreats: [],
+        isPending: false,
+        deleteCatalogThreat: vi.fn(),
+        setSortDirection: vi.fn(),
+        setSearchValue: vi.fn(),
+        setSortBy: vi.fn(),
+        sortDirection: "asc",
+        searchValue: "",
+        sortBy: "name",
+        ...config,
+    }));
+};
+
+export const mockUseCatalogMeasuresList = (config?: Partial<UseCatalogMeasuresListResult>): MockInstance => {
+    return vi.spyOn(catalogMeasuresListHook, "useCatalogMeasuresList").mockImplementation(() => ({
+        catalogMeasures: [],
+        isPending: false,
+        deleteCatalogMeasure: vi.fn(),
+        setSortDirection: vi.fn(),
+        setSearchValue: vi.fn(),
+        setSortBy: vi.fn(),
+        sortDirection: "asc",
+        searchValue: "",
+        sortBy: "name",
         ...config,
     }));
 };
