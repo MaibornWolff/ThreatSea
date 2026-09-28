@@ -13,7 +13,7 @@ import { useAppDispatch } from "#application/hooks/use-app-redux.hook.ts";
 interface EditorStageProps {
     children: ReactNode;
     onContextMenuOpen: () => void;
-    onContextMenuAction: (component: EditorComponentType) => void;
+    onContextMenuAction: (component: EditorComponentType, position: Coordinate) => void;
     onClick?: (event: KonvaEventObject<MouseEvent>) => void;
     handleMouseDown: (event: KonvaEventObject<MouseEvent>) => void;
     handleMouseMove: (event: KonvaEventObject<MouseEvent>) => void;
@@ -52,6 +52,8 @@ export const EditorStage = ({
     const stageRef = useRef<KonvaStage | null>(null);
     useImperativeHandle(ref, () => stageRef.current!);
     const contextMenuRef = useRef<HTMLDivElement | null>(null);
+    // Konva clears the pointer once it moves onto the HTML menu, so capture it on open.
+    const contextMenuPositionRef = useRef<Coordinate | null>(null);
     const boxRef = useRef<HTMLDivElement | null>(null);
     const dispatch = useAppDispatch();
 
@@ -104,6 +106,8 @@ export const EditorStage = ({
                 return;
             }
 
+            contextMenuPositionRef.current = stage.getRelativePointerPosition();
+
             let { x, y } = pointer;
 
             if (x + contextMenu.clientWidth >= stage.width()) {
@@ -137,7 +141,10 @@ export const EditorStage = ({
     const handleClickAction = useCallback(
         (component: EditorComponentType) => {
             dispatch(EditorActions.setOpenContextMenu(false));
-            onContextMenuAction(component);
+            const position = contextMenuPositionRef.current;
+            if (position) {
+                onContextMenuAction(component, position);
+            }
         },
         [dispatch, onContextMenuAction]
     );

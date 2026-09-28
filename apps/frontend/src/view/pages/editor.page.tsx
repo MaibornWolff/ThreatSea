@@ -759,13 +759,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         }
     };
 
-    const handleContextMenuAction = (componentType: EditorComponentType): void => {
-        const pointerPosition = stageRef.current?.getRelativePointerPosition();
-        if (!pointerPosition) {
-            return;
-        }
-        const { x, y } = pointerPosition;
-
+    const handleContextMenuAction = (componentType: EditorComponentType, { x, y }: Coordinate): void => {
         const gridPositionX = Math.floor((x - layerPosition.x) / GRID_CONFIG.gridSizeX);
         const gridPositionY = Math.floor((y - layerPosition.y) / GRID_CONFIG.gridSizeY);
 
