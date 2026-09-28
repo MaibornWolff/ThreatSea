@@ -10,11 +10,11 @@ export interface MeasureThreat {
     setsOutOfScope: boolean;
     netProbability: number | null;
     netDamage: number | null;
-    threatId: number | undefined;
-    threatName: string | undefined;
-    threatDescription: string | undefined;
+    threatId: number;
+    threatName: string;
+    threatDescription: string;
     componentName: string | null;
-    threat: ExtendedThreat | undefined;
+    threat: ExtendedThreat;
     measureImpact: MeasureImpact;
 }
 
@@ -58,24 +58,31 @@ export const useMeasureThreatsList = ({ projectId, measureId }: { projectId: num
             //wait until all data is loaded
             return [];
         }
-        return measureImpacts
-            .filter((measureImpact) => measureImpact.measureId === measureId)
-            .map((measureImpact) => {
-                const threat = threats.find((item) => item.id === measureImpact.threatId);
-
-                return {
+        return measureImpacts.flatMap((measureImpact) => {
+            if (measureImpact.measureId !== measureId) {
+                return [];
+            }
+            // Threats whose point of attack has no assets are left out of the loaded threats (hidden,
+            // not deleted), but their measure impacts are kept; such an impact has no threat to list.
+            const threat = threats.find((item) => item.id === measureImpact.threatId);
+            if (!threat) {
+                return [];
+            }
+            return [
+                {
                     measureImpactId: measureImpact.id,
                     setsOutOfScope: measureImpact.setsOutOfScope,
                     netProbability: measureImpact.probability,
                     netDamage: measureImpact.damage,
-                    threatId: threat?.id,
-                    threatName: threat?.name,
-                    threatDescription: threat?.description,
-                    componentName: threat?.componentName ?? null,
+                    threatId: threat.id,
+                    threatName: threat.name,
+                    threatDescription: threat.description,
+                    componentName: threat.componentName ?? null,
                     threat,
                     measureImpact,
-                };
-            });
+                },
+            ];
+        });
     }, [measureImpacts, threats, threatsPending, measureImpactsPending, measureId]);
 
     const filteredItems = useMemo(() => {
