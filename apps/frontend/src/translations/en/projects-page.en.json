@@ -2,6 +2,7 @@
   "addProjectBtn": "Add Project",
   "projectList.sortBy.nameToggleBtn": "Name",
   "projectList.sortBy.createdAtToggleBtn": "Date",
+  "projectList.noSearchResults": "No projects match \"{{ searchValue }}\"",
   "deleteProject": "Delete Project",
   "members": "Members",
   "importProject": "Import Project",

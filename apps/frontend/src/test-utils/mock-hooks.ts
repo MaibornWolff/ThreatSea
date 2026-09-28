@@ -11,6 +11,7 @@ import * as measureImpactsHook from "#application/hooks/use-measureImpacts.hook.
 import * as catalogMeasuresHook from "#application/hooks/use-catalog-measures.hook.ts";
 import * as projectExportHook from "#application/hooks/use-export.hook.ts";
 import * as foldersHook from "#application/hooks/use-folders.hook.ts";
+import * as projectsHook from "#application/hooks/use-projects.hook.ts";
 
 /**
  * @module mock-hooks - Reusable hook spies.
@@ -37,6 +38,7 @@ type UseMeasureImpactsResult = ReturnType<typeof measureImpactsHook.useMeasureIm
 type UseCatalogMeasuresResult = ReturnType<typeof catalogMeasuresHook.useCatalogMeasures>;
 type UseProjectExportResult = ReturnType<typeof projectExportHook.useProjectExport>;
 type UseFoldersResult = ReturnType<typeof foldersHook.useFolders>;
+type UseProjectsResult = ReturnType<typeof projectsHook.useProjects>;
 
 export const mockUseDialog = (config?: Partial<UseDialogResult>): MockInstance => {
     return vi.spyOn(dialogHook, "useDialog").mockImplementation(() => ({
@@ -236,6 +238,16 @@ export const mockUseFolders = (config?: Partial<UseFoldersResult>): MockInstance
         loadFolders: vi.fn(),
         deleteFolder: vi.fn(),
         moveProject: vi.fn(),
+        ...config,
+    }));
+};
+
+export const mockUseProjects = (config?: Partial<UseProjectsResult>): MockInstance => {
+    return vi.spyOn(projectsHook, "useProjects").mockImplementation(() => ({
+        items: [],
+        isPending: false,
+        loadProjects: vi.fn(),
+        deleteProject: vi.fn(),
         ...config,
     }));
 };
