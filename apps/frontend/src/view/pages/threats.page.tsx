@@ -11,7 +11,6 @@ import {
     LinearProgress,
     Menu,
     MenuItem,
-    Popper,
     Tooltip,
     Typography,
 } from "@mui/material";
@@ -41,6 +40,7 @@ import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import { createThreatsColumns, type ThreatsGridRow } from "./create-threats-columns";
 import { buildThreatsRows } from "./build-threats-rows";
 import { ThreatsGrid } from "./threats-grid.component";
+import { ThreatAssetsPopper } from "./threat-assets-popper.component";
 
 /**
  * on this page all threats are listed
@@ -226,38 +226,7 @@ const ThreatsPageBody = () => {
                     paddingBottom: 4,
                 }}
             >
-                <Popper
-                    open={assetAnchorEl != null}
-                    anchorEl={assetAnchorEl}
-                    placement="bottom-start"
-                    sx={{
-                        backgroundColor: "background.defaultIntransparent",
-                        borderRadius: 5,
-                        boxShadow: 1,
-                    }}
-                >
-                    <ul
-                        style={{
-                            listStyleType: "none",
-                            textAlign: "left",
-                            padding: 8,
-                            margin: 4,
-                        }}
-                    >
-                        {currentAssetList?.map((asset) => (
-                            <li key={asset.id}>
-                                {asset.name +
-                                    " (C " +
-                                    asset.confidentiality +
-                                    " / I " +
-                                    asset.integrity +
-                                    " / A " +
-                                    asset.availability +
-                                    ")"}
-                            </li>
-                        ))}
-                    </ul>
-                </Popper>
+                <ThreatAssetsPopper anchorEl={assetAnchorEl} assets={currentAssetList} />
 
                 <Box
                     sx={{
