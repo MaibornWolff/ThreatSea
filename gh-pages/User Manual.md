@@ -485,7 +485,7 @@ With the "Status" selection, the user sets the assessment status of the threat t
 
 The "Risk" block on the right of the "THREAT" tab shows a live preview of the gross risk (probability × damage) and the net risk (after the measures assigned to the threat). Both values are color-coded according to the project's line of tolerance and update as the probability, the protection goal toggles or the status change. For an out-of-scope threat, the net risk is 0.
 
-The "Save" button is only enabled after something has been changed. If the user tries to leave or reload the page with unsaved changes, the browser asks for confirmation.
+The "Save" button is only enabled after something has been changed. If the user tries to reload or close the page, or to leave ThreatSea, with unsaved changes, the browser asks for confirmation. Closing the dialog with "Cancel" or by clicking outside of it discards unsaved changes without asking.
 
 Tipp:
 
