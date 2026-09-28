@@ -1,6 +1,5 @@
 import type { AppMiddleware } from "#application/middlewares/types.ts";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
-import { translationUtil } from "#utils/translations.ts";
 import { AlertActions } from "#application/actions/alert.actions.ts";
 import { EditorActions } from "#application/actions/editor.actions.ts";
 import { PointsOfAttackActions } from "#application/actions/points-of-attack.actions.ts";
@@ -65,7 +64,7 @@ const handleSaveSystem: AppMiddleware =
                 (data as UpdateSystemRequest & { id: number | null }).id = id;
             }
             dispatch(EditorActions.setAutoSaveStatus("saving"));
-            dispatch(EditorActions.setAutoSaveText(""));
+            dispatch(EditorActions.setAutoSaveMessage(null));
             const dispatched = dispatch(SystemActions.updateSystem(data));
             trackInFlightSave(dispatched);
             dispatched
@@ -75,23 +74,16 @@ const handleSaveSystem: AppMiddleware =
                         // Server error
                         dispatch(EditorActions.setAutoSaveStatus("failed"));
                         dispatch(
-                            EditorActions.setAutoSaveText(
-                                translationUtil.t("editorPage:autoSave.failed", {
-                                    error: (result as { message?: string } | undefined)?.message ?? "",
-                                })
-                            )
+                            EditorActions.setAutoSaveMessage({
+                                type: "failed",
+                                error: (result as { message?: string } | undefined)?.message ?? "",
+                            })
                         );
                     }
                 })
                 .catch((error: Error) => {
                     dispatch(EditorActions.setAutoSaveStatus("failed"));
-                    dispatch(
-                        EditorActions.setAutoSaveText(
-                            translationUtil.t("editorPage:autoSave.failed", {
-                                error: error.message,
-                            })
-                        )
-                    );
+                    dispatch(EditorActions.setAutoSaveMessage({ type: "failed", error: error.message }));
                 });
         }
     };
@@ -194,13 +186,7 @@ const handleUserDidSomething: AppMiddleware =
 
             if (autoSaveStatus !== "notUpToDate" && autoSaveStatus !== "saving") {
                 dispatch(EditorActions.setAutoSaveStatus("notUpToDate"));
-                dispatch(
-                    EditorActions.setAutoSaveText(
-                        translationUtil.t("editorPage:autoSave.notUpToDate", {
-                            date: lastAutoSaveDate,
-                        })
-                    )
-                );
+                dispatch(EditorActions.setAutoSaveMessage({ type: "notUpToDate", date: lastAutoSaveDate }));
                 dispatch(SystemActions.setAutoSavedBlocked(true));
             }
         }
@@ -267,13 +253,7 @@ const handleSuccessfulRequest: AppMiddleware =
             dispatch(SystemActions.setInitialized(true));
             dispatch(SystemActions.setLoadedProjectId(action.meta.arg.projectId));
             dispatch(EditorActions.setAutoSaveStatus("upToDate"));
-            dispatch(
-                EditorActions.setAutoSaveText(
-                    translationUtil.t("editorPage:autoSave.upToDate", {
-                        date: lastAutoSaveDate,
-                    })
-                )
-            );
+            dispatch(EditorActions.setAutoSaveMessage({ type: "upToDate", date: lastAutoSaveDate }));
         } else if (SystemActions.updateSystem.fulfilled.match(action)) {
             const { system, editor } = getState();
             // TODO: Bug? Should blockAutoSave come from SystemState instead?
@@ -311,22 +291,10 @@ const handleSuccessfulRequest: AppMiddleware =
 
             if (equal) {
                 dispatch(EditorActions.setAutoSaveStatus("upToDate"));
-                dispatch(
-                    EditorActions.setAutoSaveText(
-                        translationUtil.t("editorPage:autoSave.upToDate", {
-                            date: lastAutoSaveDate,
-                        })
-                    )
-                );
+                dispatch(EditorActions.setAutoSaveMessage({ type: "upToDate", date: lastAutoSaveDate }));
             } else {
                 dispatch(EditorActions.setAutoSaveStatus("notUpToDate"));
-                dispatch(
-                    EditorActions.setAutoSaveText(
-                        translationUtil.t("editorPage:autoSave.notUpToDate", {
-                            date: lastAutoSaveDate,
-                        })
-                    )
-                );
+                dispatch(EditorActions.setAutoSaveMessage({ type: "notUpToDate", date: lastAutoSaveDate }));
                 dispatch(SystemActions.setAutoSavedBlocked(!blockAutoSave)); // Trigger another auto save
             }
         }

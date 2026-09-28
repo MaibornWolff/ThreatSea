@@ -13,6 +13,9 @@ import type { AnchorOrientation, AnnotationType, Coordinate } from "#api/types/s
 
 export type EditorEntityId = string | number;
 
+// Translated and formatted at render time so the text follows the current language.
+export type AutoSaveMessage = { type: "upToDate" | "notUpToDate"; date: string } | { type: "failed"; error: string };
+
 export interface EditorConnection {
     from: {
         id: string;
@@ -46,7 +49,7 @@ export interface EditorState {
     openContextMenu: boolean;
     inUseComponents: EditorEntityId[];
     autoSaveStatus: string;
-    autoSaveHelperText: string;
+    autoSaveMessage: AutoSaveMessage | null;
     lastAutoSaveDate: string;
     makeScreenShot: boolean;
     componentTypes: ComponentTypesState;
@@ -149,7 +152,7 @@ const defaultState: EditorState = {
     openContextMenu: false,
     inUseComponents: [],
     autoSaveStatus: "uninitialized",
-    autoSaveHelperText: "",
+    autoSaveMessage: null,
     lastAutoSaveDate: "",
     makeScreenShot: false,
     componentTypes: componentTypesInitialState,
@@ -279,8 +282,8 @@ const editorReducer = createReducer(defaultState, (builder) => {
         state.makeScreenShot = !state.makeScreenShot;
     });
 
-    builder.addCase(EditorActions.setAutoSaveText, (state, action) => {
-        state.autoSaveHelperText = action.payload;
+    builder.addCase(EditorActions.setAutoSaveMessage, (state, action) => {
+        state.autoSaveMessage = action.payload;
     });
 
     builder.addCase(EditorActions.setLastAutoSaveDate, (state, action) => {
