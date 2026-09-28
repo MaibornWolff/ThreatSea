@@ -438,7 +438,7 @@ The status of a threat shows how far its assessment has progressed:
 
 - <span style="color: rgb(48, 113, 176)">**New:**</span> The threat was generated or added and has not been assessed yet.
 - <span style="color: rgb(252, 172, 12)">**In progress:**</span> The threat is being refined. A new threat changes to "In progress" as soon as it is saved in the "Edit Threat" dialog.
-- <span style="color: rgb(103, 173, 91)">**Finalized:**</span> The assessment of the threat is complete. Applying a measure that sets the threat out of scope also finalizes the threat.
+- <span style="color: rgb(103, 173, 91)">**Finalized:**</span> The assessment of the threat is complete. Applying a measure that sets the threat out of scope also finalizes a new or in-progress threat.
 - <span style="color: rgb(84, 101, 129)">**Out of scope:**</span> The user decided that the threat is not part of the assessment. Its net risk is 0 and it is not shown in the risk matrix.
 
 Finalized and out-of-scope threats are displayed dimmed in the list.
@@ -657,7 +657,7 @@ It doesn't make sense to apply a measure to a threat twice, so ThreatSea doesn't
 
 After selecting the measure to apply, the user may give a detailed description how the measure impacts the threat. Users can select if the measure influences probability and/or damage values of the threat scenario by ticking the respective checkboxes. Typically measures only influence probability values which only "Influences Probability" is selected by default. The user then can give net probability and/or damage values in a range from 1 to 5 according to the 4x6 scales. Both input fields for these values show the current gross probability and damage values of the risk greyed out and in the label. The actual value or values have always to be entered, even if there is no change, i.e. the measure has not enough impact to change the rating on the 4x6 scale at least one step.
 
-With the "Sets the threat out of scope", the user can indicate that after the measure has been applied, the threat is no longer in scope of the threat assessment. This feature can be used to indicate a risk transfer, if for example the risk ownership is transferred to a different party. Applying such a measure sets the status of the threat to "Finalized", and its net risk becomes 0.
+With the "Sets the threat out of scope", the user can indicate that after the measure has been applied, the threat is no longer in scope of the threat assessment. This feature can be used to indicate a risk transfer, if for example the risk ownership is transferred to a different party. The net risk of the threat becomes 0. Applying such a measure changes the status of a new or in-progress threat to "Finalized"; a threat the user set to "Out of scope" keeps that status. Only applying the measure changes the status: later edits of the measure's impact leave it as it is, so a threat the user has set back to "In progress" stays in progress.
 
 ### Unapplying a measure from a risk
 
