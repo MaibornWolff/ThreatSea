@@ -3,7 +3,8 @@ import { Provider } from "react-redux";
 import type { ReactNode } from "react";
 import { useMatrix } from "./use-matrix.hook";
 import { createStore } from "#application/store.ts";
-import { createMeasure, createMeasureImpact, createThreat } from "#test-utils/builders.ts";
+import { createMeasure, createMeasureImpact, createProject, createThreat } from "#test-utils/builders.ts";
+import { ProjectsActions } from "#application/actions/projects.actions.ts";
 import {
     mockUseCatalogMeasures,
     mockUseMeasureImpacts,
@@ -18,15 +19,20 @@ interface SetupArgs {
     threats?: ExtendedThreat[];
     measures?: Measure[];
     measureImpacts?: MeasureImpact[];
+    store?: ReturnType<typeof createStore>;
 }
 
-const renderUseMatrix = ({ threats = [], measures = [], measureImpacts = [] }: SetupArgs = {}) => {
+const renderUseMatrix = ({
+    threats = [],
+    measures = [],
+    measureImpacts = [],
+    store = createStore(),
+}: SetupArgs = {}) => {
     mockUseThreats({ items: threats });
     mockUseMeasures({ items: measures });
     mockUseMeasureImpacts({ items: measureImpacts });
     mockUseCatalogMeasures();
 
-    const store = createStore();
     const wrapper = ({ children }: { children: ReactNode }) => <Provider store={store}>{children}</Provider>;
     return renderHook(() => useMatrix({ projectId: 1, catalogId: 1, language: "en" }), { wrapper });
 };
@@ -144,6 +150,81 @@ describe("useMatrix", () => {
             });
 
             expect(result.current.threats[0]?.measures[0]?.active).toBe(true);
+        });
+    });
+
+    describe("line of tolerance", () => {
+        const createStoreWithProject = () => {
+            const store = createStore();
+            store.dispatch(
+                ProjectsActions.getProjects.fulfilled(
+                    [createProject({ id: 1, lineOfToleranceGreen: 6, lineOfToleranceRed: 15 })],
+                    "req",
+                    undefined
+                )
+            );
+            return store;
+        };
+
+        it("starts from the saved values", () => {
+            const { result } = renderUseMatrix({ store: createStoreWithProject() });
+
+            expect(result.current.currentGreenValue).toBe(6);
+            expect(result.current.currentRedValue).toBe(15);
+        });
+
+        it("keeps unsaved values after the page is left and reopened", () => {
+            const store = createStoreWithProject();
+            const first = renderUseMatrix({ store });
+
+            act(() => first.result.current.setLineOfTolerance(3, 10));
+            first.unmount();
+            const { result } = renderUseMatrix({ store });
+
+            expect(result.current.currentGreenValue).toBe(3);
+            expect(result.current.currentRedValue).toBe(10);
+        });
+
+        it("goes back to the saved values on reset", () => {
+            const { result } = renderUseMatrix({ store: createStoreWithProject() });
+
+            act(() => result.current.setLineOfTolerance(3, 10));
+            act(() => result.current.resetLineOfTolerance());
+
+            expect(result.current.currentGreenValue).toBe(6);
+            expect(result.current.currentRedValue).toBe(15);
+        });
+
+        it("ignores unsaved values of another project", () => {
+            const store = createStoreWithProject();
+            store.dispatch(
+                ProjectsActions.setLineOfToleranceDraft({
+                    projectId: 2,
+                    lineOfToleranceGreen: 3,
+                    lineOfToleranceRed: 10,
+                })
+            );
+
+            const { result } = renderUseMatrix({ store });
+
+            expect(result.current.currentGreenValue).toBe(6);
+            expect(result.current.currentRedValue).toBe(15);
+        });
+
+        it("follows the saved values when they change and nothing is unsaved", () => {
+            const store = createStoreWithProject();
+            const { result } = renderUseMatrix({ store });
+
+            act(() => {
+                store.dispatch(
+                    ProjectsActions.setProject(
+                        createProject({ id: 1, lineOfToleranceGreen: 4, lineOfToleranceRed: 12 })
+                    )
+                );
+            });
+
+            expect(result.current.currentGreenValue).toBe(4);
+            expect(result.current.currentRedValue).toBe(12);
         });
     });
 });

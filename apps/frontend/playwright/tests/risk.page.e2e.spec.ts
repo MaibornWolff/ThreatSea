@@ -7,7 +7,6 @@ import { getThreats } from "../utils/threat.api.ts";
 import { getMeasures } from "../utils/measure.api.ts";
 import { createMeasureImpact } from "../utils/measure-impact.api.ts";
 import { addMember, findAddableMemberId } from "../utils/member.api.ts";
-import { fetchApiRaw } from "../utils/api.utils.ts";
 import { SECONDARY_TEST_USER_A, loginAsFixedTestUser, provisionFixedTestUser } from "../utils/auth.api.ts";
 import riskFixture from "../fixtures/threats.json" with { type: "json" };
 
@@ -121,6 +120,7 @@ test.describe("Risk page tests", () => {
 
         await expect(pg.lineOfToleranceThumbs.nth(0)).toBeDisabled();
         await expect(pg.lineOfToleranceThumbs.nth(1)).toBeDisabled();
+        await expect(pg.lineOfToleranceSaveButton).toHaveCount(0);
 
         const urlBeforeClick = page.url();
         await pg.editThreat("Physical attack");
@@ -307,7 +307,7 @@ test.describe("Risk page tests", () => {
         await expect(pg.threatRows).toHaveCount(4);
     });
 
-    test("Should let an Owner adjust the line of tolerance and have it persist", async ({ page }) => {
+    test("Should let an Owner save a line-of-tolerance change explicitly", async ({ page }) => {
         const pg = new RiskPage(page);
         await pg.goto(projectId);
 
@@ -315,50 +315,84 @@ test.describe("Risk page tests", () => {
         // back to the schema defaults), so read the actual starting value instead of assuming one.
         const greenThumb = pg.lineOfToleranceThumbs.nth(0);
         const initialValue = Number(await greenThumb.getAttribute("aria-valuenow"));
+        await expect(pg.lineOfToleranceSaveButton).toBeDisabled();
 
         await greenThumb.focus();
+        await page.keyboard.press("ArrowLeft");
+        await expect(greenThumb).toHaveAttribute("aria-valuenow", String(initialValue - 1));
+        await expect(pg.lineOfToleranceSaveButton).toBeEnabled();
+
         await Promise.all([
             page.waitForResponse(
                 (response) =>
-                    response.url().includes(`/api/projects/${projectId}`) && response.request().method() === "PUT"
+                    response.url().includes(`/api/projects/${projectId}/lineOfTolerance`) &&
+                    response.request().method() === "PUT" &&
+                    response.ok()
             ),
-            page.keyboard.press("ArrowLeft"),
+            pg.lineOfToleranceSaveButton.click(),
         ]);
-        await expect(greenThumb).toHaveAttribute("aria-valuenow", String(initialValue - 1));
+        await expect(pg.lineOfToleranceSaveButton).toBeDisabled();
 
         await page.reload();
         await expect(pg.lineOfToleranceThumbs.nth(0)).toHaveAttribute("aria-valuenow", String(initialValue - 1));
     });
 
-    // Confirmed bug, reported to the dev team: manually reproduced in the browser (Editor role,
-    // dragging the line-of-tolerance control shows a "Forbidden: User is not authorized to
-    // perform this action" alert, and the value reverts on reload) — this is not a StrictMode/
-    // automation artifact like the measure-required issue; the role-check code involved runs
-    // identically in every environment and build mode. The UI enables an Editor to drag and
-    // commit a line-of-tolerance change (checkUserRole(..., EDITOR) in
-    // line-of-tolerance-selector.component.tsx and risk.page.tsx), matching the documented Risk
-    // permissions ("move controller on line of tolerance": Editor+). But persisting it goes
-    // through PUT /api/projects/:id, which requires the OWNER role (see projects.router.ts), so
-    // an Editor following the UI's own affordance gets a 403. Needs a product decision — relax
-    // the backend check to EDITOR, or restrict the UI control to Owner-only. Replace this with a
-    // real assertion once a tracking issue exists and a direction is decided; quarantined until
-    // then per the flake/known-gap process in TESTING.md.
-    test.fixme("Should let an Editor persist a line-of-tolerance change", async ({ page, request }) => {
+    test("Should not persist an unsaved line-of-tolerance change", async ({ page }) => {
+        const pg = new RiskPage(page);
+        await pg.goto(projectId);
+
+        const greenThumb = pg.lineOfToleranceThumbs.nth(0);
+        const initialValue = Number(await greenThumb.getAttribute("aria-valuenow"));
+
+        await greenThumb.focus();
+        await page.keyboard.press("ArrowLeft");
+        await expect(greenThumb).toHaveAttribute("aria-valuenow", String(initialValue - 1));
+
+        await page.reload();
+        await expect(pg.lineOfToleranceThumbs.nth(0)).toHaveAttribute("aria-valuenow", String(initialValue));
+    });
+
+    test("Should reset an unsaved line-of-tolerance change", async ({ page }) => {
+        const pg = new RiskPage(page);
+        await pg.goto(projectId);
+
+        const greenThumb = pg.lineOfToleranceThumbs.nth(0);
+        const initialValue = Number(await greenThumb.getAttribute("aria-valuenow"));
+
+        await greenThumb.focus();
+        await page.keyboard.press("ArrowLeft");
+        await pg.lineOfToleranceResetButton.click();
+
+        await expect(greenThumb).toHaveAttribute("aria-valuenow", String(initialValue));
+        await expect(pg.lineOfToleranceResetButton).toBeDisabled();
+        await expect(pg.lineOfToleranceSaveButton).toBeDisabled();
+    });
+
+    // Regression guard for #1167: Editors could move the slider but saving returned 403.
+    test("Should let an Editor persist a line-of-tolerance change", async ({ page, request }) => {
         await addSecondaryMember(request, USER_ROLES.EDITOR);
-        const currentProject = (await getProjects(request, ownerToken)).find((project) => project.id === projectId)!;
-
         await loginAsFixedTestUser(page, SECONDARY_TEST_USER_A.testUserIndex);
-        const editorToken = await new RiskPage(page).getCsrfToken();
 
-        const response = await fetchApiRaw(page.request, editorToken, "PUT", `/projects/${projectId}`, {
-            name: currentProject.name,
-            description: currentProject.description ?? "",
-            confidentialityLevel: currentProject.confidentialityLevel,
-            lineOfToleranceGreen: 3,
-            lineOfToleranceRed: currentProject.lineOfToleranceRed,
-        });
+        const pg = new RiskPage(page);
+        await pg.goto(projectId);
 
-        expect(response.status()).toBe(200);
+        const greenThumb = pg.lineOfToleranceThumbs.nth(0);
+        const initialValue = Number(await greenThumb.getAttribute("aria-valuenow"));
+
+        await greenThumb.focus();
+        await page.keyboard.press("ArrowLeft");
+        await Promise.all([
+            page.waitForResponse(
+                (response) =>
+                    response.url().includes(`/api/projects/${projectId}/lineOfTolerance`) &&
+                    response.request().method() === "PUT" &&
+                    response.ok()
+            ),
+            pg.lineOfToleranceSaveButton.click(),
+        ]);
+
+        await page.reload();
+        await expect(pg.lineOfToleranceThumbs.nth(0)).toHaveAttribute("aria-valuenow", String(initialValue - 1));
     });
 
     test("Should search and sort the threat list", async ({ page }) => {

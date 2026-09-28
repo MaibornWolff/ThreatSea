@@ -6,7 +6,13 @@ import { createAsyncThunk, createAction } from "@reduxjs/toolkit";
 import { ImportsApi } from "#api/import.api.ts";
 import { ProjectsAPI } from "#api/projects.api.ts";
 import { ExportsApi } from "#api/export.api.ts";
-import type { CreateProjectRequest, Project, UpdateProjectRequest } from "#api/types/project.types.ts";
+import type {
+    CreateProjectRequest,
+    LineOfToleranceDraft,
+    Project,
+    UpdateProjectLineOfToleranceRequest,
+    UpdateProjectRequest,
+} from "#api/types/project.types.ts";
 import type { USER_ROLES } from "#api/types/user-roles.types.ts";
 
 /**
@@ -88,6 +94,21 @@ export class ProjectsActions {
     });
 
     /**
+     * Action that updates the lines of tolerance of a project using the backend api.
+     * @function updateProjectLineOfTolerance
+     * @param {string} type - Action type.
+     * @param {function} payloadCreator - Async callback function
+     *      to update the lines of tolerance.
+     * @returns Action function for updating the lines of tolerance.
+     */
+    static updateProjectLineOfTolerance = createAsyncThunk(
+        "[projects] update project line of tolerance",
+        async (data: UpdateProjectLineOfToleranceRequest) => {
+            return await ProjectsAPI.updateProjectLineOfTolerance(data);
+        }
+    );
+
+    /**
      * Action that fetches the data of a single project from the redux store.
      * @function getProjectFromRedux
      * @param {string} type - Action type.
@@ -118,6 +139,22 @@ export class ProjectsActions {
      * @returns Action function for updating a project's folder id.
      */
     static setProjectFolder = createAction<{ id: number; folderId: number | null }>("[projects] set project folder");
+
+    /**
+     * Action that stores unsaved line of tolerance values, so they survive leaving the risk page.
+     * @function setLineOfToleranceDraft
+     * @param {string} type - Action type.
+     * @returns Action function for setting the line of tolerance draft.
+     */
+    static setLineOfToleranceDraft = createAction<LineOfToleranceDraft>("[projects] set line of tolerance draft");
+
+    /**
+     * Action that discards the unsaved line of tolerance values.
+     * @function clearLineOfToleranceDraft
+     * @param {string} type - Action type.
+     * @returns Action function for clearing the line of tolerance draft.
+     */
+    static clearLineOfToleranceDraft = createAction("[projects] clear line of tolerance draft");
 
     /**
      * Action that changes the role of the user for the current project.

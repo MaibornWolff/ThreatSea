@@ -25,13 +25,14 @@ import type { ThreatWithMetrics, SelectedMatrixCell, ThreatMeasure } from "#appl
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
-import { ProjectsActions } from "#application/actions/projects.actions.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { useLoadThreatsOnce } from "#application/hooks/use-load-threats-once.hook.ts";
 import { useMatrix } from "#application/hooks/use-matrix.hook.ts";
+import { useLineOfToleranceEditor } from "#application/hooks/use-line-of-tolerance-editor.hook.ts";
 import { MATRIX_COLOR } from "#view/colors/matrix.ts";
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { LineOfToleranceSelector } from "#view/components/line-of-tolerance-selector.component.tsx";
+import { UnsavedLineOfToleranceDialog } from "#view/dialogs/unsaved-line-of-tolerance.dialog.tsx";
 import { Matrix } from "#view/components/matrix.component.tsx";
 import { MeasureTimeline } from "#view/components/measure-timeline.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
@@ -45,7 +46,6 @@ import { MeasureImpactByMeasureDialogPage } from "./measure-impact-by-measure-di
 import { useEditor } from "#application/hooks/use-editor.hook.ts";
 import ThreatDialogPage from "./threat-dialog.page";
 import AddMeasureDialogPage from "./add-measure-dialog.page";
-import { AlertActions } from "#application/actions/alert.actions.ts";
 import MeasureDetailsDialogPage from "./measure-details-dialog.page";
 import type { SortDirection } from "#application/actions/list.actions.ts";
 
@@ -75,8 +75,8 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
         setThreatSearchValue,
         currentGreenValue,
         currentRedValue,
-        setCurrentGreenValue,
-        setCurrentRedValue,
+        setLineOfTolerance,
+        resetLineOfTolerance,
         setSortDirection,
         setSortBy,
         setSelectedCell,
@@ -89,7 +89,13 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
         language,
     });
 
-    const { lineOfToleranceGreen, lineOfToleranceRed } = project;
+    const lineOfTolerance = useLineOfToleranceEditor({
+        project,
+        currentGreenValue,
+        currentRedValue,
+        setLineOfTolerance,
+        resetLineOfTolerance,
+    });
     const { openConfirm } = useConfirm<MeasureImpact>();
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
@@ -219,30 +225,6 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
         });
     };
 
-    const handleChangeLineOfTolerance = (newValue: [number, number], save: boolean) => {
-        if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
-            const newGreenValue = newValue[0];
-            const newRedValue = newValue[1];
-            setCurrentGreenValue(newGreenValue);
-            setCurrentRedValue(newRedValue);
-            if (save && (newGreenValue !== lineOfToleranceGreen || newRedValue !== lineOfToleranceRed)) {
-                dispatch(
-                    ProjectsActions.updateProject({
-                        ...project,
-                        lineOfToleranceGreen: newGreenValue,
-                        lineOfToleranceRed: newRedValue,
-                    })
-                );
-            }
-        } else {
-            dispatch(
-                AlertActions.openErrorAlert({
-                    text: "Users with Viewer role may not change the slider for the line of tolerance.",
-                })
-            );
-        }
-    };
-
     const handleSelectThreat = (threatIndex: number) => {
         setSelectedThreat(threatIndex);
     };
@@ -303,7 +285,11 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                             title={t("lineOfTolerance.title")}
                             greenValue={currentGreenValue}
                             redValue={currentRedValue}
-                            onLoTChange={handleChangeLineOfTolerance}
+                            isDirty={lineOfTolerance.isDirty}
+                            isSaving={lineOfTolerance.isSaving}
+                            onLoTChange={lineOfTolerance.handleChange}
+                            onSave={lineOfTolerance.handleSave}
+                            onReset={lineOfTolerance.handleReset}
                         />
                     </Box>
                 </Box>
@@ -870,6 +856,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                     <Route path="appliedMeasure/edit" element={<MeasureDetailsDialogPage />} />
                 </Routes>
             )}
+            <UnsavedLineOfToleranceDialog {...lineOfTolerance.unsavedChangesDialogProps} />
         </Page>
     );
 };

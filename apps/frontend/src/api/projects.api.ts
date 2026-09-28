@@ -7,6 +7,7 @@ import type {
     ExtendedProject,
     Project,
     ProjectReport,
+    UpdateProjectLineOfToleranceRequest,
     UpdateProjectRequest,
 } from "#api/types/project.types.ts";
 import { fetchAPI } from "#api/utils.ts";
@@ -56,6 +57,23 @@ export class ProjectsAPI {
         const { id, ...body } = data;
 
         return await fetchAPI(`/projects/${id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body),
+        });
+    }
+
+    /**
+     * Updates the lines of tolerance of a project inside the backend api.
+     * @param {UpdateProjectLineOfToleranceRequest} data - The new lines of tolerance.
+     * @returns The updated project.
+     */
+    static async updateProjectLineOfTolerance(data: UpdateProjectLineOfToleranceRequest): Promise<Project> {
+        const { id, ...body } = data;
+
+        return await fetchAPI(`/projects/${id}/lineOfTolerance`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
