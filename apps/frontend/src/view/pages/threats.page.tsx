@@ -16,7 +16,7 @@ import {
     Typography,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { DataGrid, GridRow, type GridColumnVisibilityModel, type GridRowProps } from "@mui/x-data-grid";
+import type { GridColumnVisibilityModel } from "@mui/x-data-grid";
 import { memo, useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useParams } from "react-router";
@@ -28,7 +28,6 @@ import { useEditor } from "#application/hooks/use-editor.hook.ts";
 import { useLoadThreatsOnce } from "#application/hooks/use-load-threats-once.hook.ts";
 import { useThreatActions } from "#application/hooks/use-threat-actions.hook.ts";
 import { useGenericThreatsList } from "#application/hooks/use-generic-threats-list.hook.ts";
-import { NoRowsOverlay } from "#view/components/no-rows-overlay.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
 import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
@@ -39,26 +38,9 @@ import AddMeasureDialogPage from "./add-measure-dialog.page";
 import { withProject } from "#view/components/with-project.hoc.tsx";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
-import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
-import {
-    createThreatsColumns,
-    GENERIC_THREAT_ROW_PREFIX,
-    THREAT_ROW_PREFIX,
-    type ThreatsGridRow,
-} from "./create-threats-columns";
+import { createThreatsColumns, type ThreatsGridRow } from "./create-threats-columns";
 import { buildThreatsRows } from "./build-threats-rows";
-
-// The e2e page objects locate action buttons inside the row-level test ids, so
-// the ids must live on the grid row element itself, not on a single cell.
-const ThreatsGridRowSlot = (props: GridRowProps) => {
-    const rowId = String(props.rowId);
-    const testId = rowId.startsWith(GENERIC_THREAT_ROW_PREFIX)
-        ? "threats-page_generic-threats-list-entry"
-        : rowId.startsWith(THREAT_ROW_PREFIX)
-          ? "threats-page_threats-list-entry"
-          : undefined;
-    return <GridRow {...props} data-testid={testId} />;
-};
+import { ThreatsGrid } from "./threats-grid.component";
 
 /**
  * on this page all threats are listed
@@ -184,8 +166,6 @@ const ThreatsPageBody = () => {
             }),
         [genericThreats, threatsByGenericThreatId, expandedGenericThreatIds, columnFilters, t]
     );
-
-    const NoRowsOverlayWithMessage = useCallback(() => <NoRowsOverlay message={t("noThreatsFound")} />, [t]);
 
     const columns = useMemo(
         () =>
@@ -375,80 +355,14 @@ const ThreatsPageBody = () => {
                         </Box>
                     </Box>
 
-                    <DataGrid
+                    <ThreatsGrid
                         rows={rows}
                         columns={columns}
-                        getRowId={(row) => row.rowId}
                         loading={isGenericThreatsPending}
-                        disableRowSelectionOnClick
-                        disableColumnFilter
-                        disableColumnMenu
-                        disableColumnSelector
-                        onCellClick={(params, event) => {
-                            const row = params.row as ThreatsGridRow;
-                            // A generic threat row toggles from any cell (including the "n threats" text in
-                            // the actions cell); its add button stops propagation to keep its action.
-                            if (row.rowType === "genericThreat") {
-                                toggleGenericThreat(row.genericThreat.id);
-                            } else if (row.rowType === "threat" && params.field !== "actions") {
-                                onClickEditThreat(event as unknown as React.MouseEvent<HTMLElement>, row.threat);
-                            }
-                        }}
-                        onCellKeyDown={(params, event) => {
-                            // Keyboard equivalent of the cell click; skip events coming from
-                            // interactive elements inside a cell (they handle Enter natively —
-                            // acting here as well would double-trigger their action).
-                            if (event.key !== "Enter" && event.key !== " ") {
-                                return;
-                            }
-                            if ((event.target as HTMLElement).closest("button, a, input")) {
-                                return;
-                            }
-                            const row = params.row as ThreatsGridRow;
-                            if (row.rowType === "genericThreat") {
-                                event.preventDefault();
-                                toggleGenericThreat(row.genericThreat.id);
-                            } else if (row.rowType === "threat" && params.field !== "actions") {
-                                event.preventDefault();
-                                onClickEditThreat(event as unknown as React.MouseEvent<HTMLElement>, row.threat);
-                            }
-                        }}
-                        getRowClassName={(params) => {
-                            const row = params.row as ThreatsGridRow;
-                            // Finalized / out-of-scope threats are visually de-emphasised as a hint,
-                            // but nothing is actually blocked — the status and the action buttons stay
-                            // at full opacity (see the per-cell overrides below) so they remain
-                            // clearly readable and usable.
-                            if (
-                                row.rowType === "threat" &&
-                                (row.threat.status === THREAT_STATUSES.FINALIZED ||
-                                    row.threat.status === THREAT_STATUSES.OUTOFSCOPE)
-                            ) {
-                                return "threats-grid--dimmed";
-                            }
-                            return "";
-                        }}
-                        columnHeaderHeight={90}
                         columnVisibilityModel={columnVisibility}
                         onColumnWidthChange={handleColumnWidthChange}
-                        sx={{
-                            borderRadius: 5,
-                            boxShadow: 1,
-                            "& .MuiDataGrid-row": { cursor: "pointer" },
-                            "& .MuiDataGrid-cell:focus": { outline: "none" },
-                            "& .MuiDataGrid-columnHeader:focus": { outline: "none" },
-                            "& .MuiDataGrid-columnHeader": { padding: "8px 16px" },
-                            "& .MuiDataGrid-cell": { cursor: "pointer" },
-                            // Dim per cell (not per row) so the exemptions below can win.
-                            "& .threats-grid--dimmed .MuiDataGrid-cell": { opacity: 0.6 },
-                            "& .threats-grid--dimmed .MuiDataGrid-cell[data-field='status']": { opacity: 1 },
-                            "& .threats-grid--dimmed .MuiDataGrid-cell[data-field='actions']": { opacity: 1 },
-                        }}
-                        initialState={{
-                            pagination: { paginationModel: { pageSize: 25, page: 0 } },
-                        }}
-                        pageSizeOptions={[10, 25, 50, 100]}
-                        slots={{ noRowsOverlay: NoRowsOverlayWithMessage, row: ThreatsGridRowSlot }}
+                        onToggleGenericThreat={toggleGenericThreat}
+                        onEditThreat={onClickEditThreat}
                     />
                 </Box>
 
