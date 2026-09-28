@@ -57,6 +57,11 @@ describe("ProjectActionsMenu", () => {
         expect(screen.getByTestId(triggerId)).toBeInTheDocument();
     });
 
+    it("gives the trigger button an accessible name", () => {
+        setup();
+        expect(screen.getByRole("button", { name: "Project actions" })).toBe(screen.getByTestId(triggerId));
+    });
+
     it("keeps the menu closed until the trigger is clicked", () => {
         setup();
         expect(screen.queryByTestId(editItemId)).not.toBeInTheDocument();

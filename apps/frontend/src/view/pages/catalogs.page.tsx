@@ -216,11 +216,13 @@ const CatalogsPageBody = () => {
                             buttons={[
                                 {
                                     icon: ArrowUpward,
+                                    "aria-label": t("sortAscending"),
                                     value: "asc",
                                     "data-testid": "catalogs-page_ascending-catalogs-sort-button",
                                 },
                                 {
                                     icon: ArrowDownward,
+                                    "aria-label": t("sortDescending"),
                                     value: "desc",
                                     "data-testid": "catalogs-page_descending-catalogs-sort-button",
                                 },

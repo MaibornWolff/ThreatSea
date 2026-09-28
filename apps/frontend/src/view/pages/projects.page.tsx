@@ -225,11 +225,13 @@ export const ProjectsPage = CreatePage(HeaderUtilityControls, () => {
                             buttons={[
                                 {
                                     icon: ArrowUpward,
+                                    "aria-label": t("sortAscending"),
                                     value: "asc",
                                     "data-testid": "projects-page_ascending-projects-sort-button",
                                 },
                                 {
                                     icon: ArrowDownward,
+                                    "aria-label": t("sortDescending"),
                                     value: "desc",
                                     "data-testid": "projects-page_descending-projects-sort-button",
                                 },

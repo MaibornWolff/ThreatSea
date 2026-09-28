@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { SearchField } from "./search-field.component";
 
 describe("SearchField", () => {
@@ -39,5 +40,12 @@ describe("SearchField", () => {
     it("should render the search icon button", () => {
         render(<SearchField />);
         expect(screen.getByRole("button")).toBeInTheDocument();
+    });
+
+    it("gives the input and the icon button an accessible name", () => {
+        renderWithProviders(<SearchField />);
+
+        expect(screen.getByRole("textbox", { name: "Search" })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: "Search" })).toBeInTheDocument();
     });
 });
