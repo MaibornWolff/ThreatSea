@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Box, Typography } from "@mui/material";
+import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import ArrowUpward from "@mui/icons-material/ArrowUpward";
 import ArrowDownward from "@mui/icons-material/ArrowDownward";
+import Add from "@mui/icons-material/Add";
 import { SearchField } from "#view/components/search-field.component.tsx";
 import { ToggleButtons } from "#view/components/toggle-buttons.component.tsx";
 import { AssetSecurityNeedsPopper } from "./asset-security-needs-popper.component";
@@ -11,6 +12,7 @@ import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { POA_COLORS } from "#view/colors/pointsOfAttack.colors.ts";
 import { useAssetHoverPopper } from "#application/hooks/useAssetHoverPopper.ts";
 import { matchesAssetSearch } from "#utils/asset-search.ts";
+import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import type { ChangeEvent } from "react";
 import type { SortDirection } from "#application/actions/list.actions.ts";
 import type { Asset } from "#api/types/asset.types.ts";
@@ -24,6 +26,8 @@ export interface EditorSidebarSelectedComponentAssetsProps {
     handleAssetNameClick: (asset: Asset) => void;
     handleAddAssetToAllPointsOfAttack: (event: React.MouseEvent<HTMLElement>, asset: Asset) => void;
     handleRemoveAssetFromAllPointsOfAttack: (event: React.MouseEvent<HTMLElement>, asset: Asset) => void;
+    handleAddAssetClick: () => void;
+    userRole: USER_ROLES | undefined;
 }
 
 export const EditorSidebarSelectedComponentAssets = ({
@@ -34,6 +38,8 @@ export const EditorSidebarSelectedComponentAssets = ({
     handleAssetNameClick,
     handleAddAssetToAllPointsOfAttack,
     handleRemoveAssetFromAllPointsOfAttack,
+    handleAddAssetClick,
+    userRole,
 }: EditorSidebarSelectedComponentAssetsProps) => {
     const { t } = useTranslation("editorPage");
     const theme = useTheme();
@@ -64,7 +70,7 @@ export const EditorSidebarSelectedComponentAssets = ({
                     borderRadius: 15,
                     height: "31px",
                     paddingLeft: 8,
-                    paddingRight: 0,
+                    paddingRight: 8,
                     alignItems: "center",
                     justifyContent: "space-between",
                     marginTop: 4,
@@ -82,6 +88,23 @@ export const EditorSidebarSelectedComponentAssets = ({
                 >
                     {t("sidebar.assets.title")}
                 </Typography>
+                {checkUserRole(userRole, USER_ROLES.EDITOR) && (
+                    <Tooltip title={t("sidebar.assets.create")}>
+                        <IconButton
+                            onClick={handleAddAssetClick}
+                            aria-label={t("sidebar.assets.create")}
+                            data-testid="selected-component-add-asset-button"
+                            size="small"
+                            sx={{
+                                "&:hover": {
+                                    backgroundColor: theme.vars.palette.background.mainIntransparent,
+                                },
+                            }}
+                        >
+                            <Add sx={{ fontSize: 18 }} />
+                        </IconButton>
+                    </Tooltip>
+                )}
             </Box>
             <Box
                 sx={{

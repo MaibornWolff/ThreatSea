@@ -190,6 +190,19 @@ describe("EditorPage", () => {
             });
         });
 
+        describe("handleAddAssetClick", () => {
+            it("navigates to the asset create route", () => {
+                renderEditorPage();
+                const props = getSidebarProps();
+
+                act(() => {
+                    props.handleAddAssetClick();
+                });
+
+                expect(screen.getByTestId("asset-dialog-page")).toBeInTheDocument();
+            });
+        });
+
         describe("handleComponentBreadcrumbClick", () => {
             it("deselects the point of attack", () => {
                 renderEditorPage();
