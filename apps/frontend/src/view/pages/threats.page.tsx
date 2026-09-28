@@ -237,7 +237,11 @@ const ThreatsPageBody = () => {
                 onAccept: async (threat) => {
                     try {
                         await dispatch(
-                            ThreatsActions.deleteThreat({ id: threat.id, projectId: Number(projectId) })
+                            ThreatsActions.deleteThreat({
+                                id: threat.id,
+                                projectId: Number(projectId),
+                                name: threat.name,
+                            })
                         ).unwrap();
                         void loadGenericThreats();
                     } catch {

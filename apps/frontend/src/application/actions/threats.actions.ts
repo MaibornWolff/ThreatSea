@@ -11,9 +11,10 @@ export class ThreatsActions {
         return await ThreatsAPI.updateThreat(data);
     });
 
+    // The name is not sent to the backend; it is carried through for the success/failure alerts.
     static deleteThreat = createAsyncThunk(
         "[threats] delete threat",
-        async (data: { id: number; projectId: number }) => {
+        async (data: { id: number; projectId: number; name: string }) => {
             await ThreatsAPI.deleteThreat(data);
             return data;
         }
