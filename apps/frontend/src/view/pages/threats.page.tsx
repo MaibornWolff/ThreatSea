@@ -28,10 +28,7 @@ import { applyColumnWidths, useColumnWidths } from "#application/hooks/use-colum
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { useEditor } from "#application/hooks/use-editor.hook.ts";
 import { useLoadThreatsOnce } from "#application/hooks/use-load-threats-once.hook.ts";
-import {
-    useGenericThreatsList,
-    type ExtendedThreatWithMetrics,
-} from "#application/hooks/use-generic-threats-list.hook.ts";
+import { useGenericThreatsList } from "#application/hooks/use-generic-threats-list.hook.ts";
 import { NoRowsOverlay } from "#view/components/no-rows-overlay.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
@@ -47,15 +44,11 @@ import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat
 import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import {
     createThreatsColumns,
-    formatComponentName,
     GENERIC_THREAT_ROW_PREFIX,
     THREAT_ROW_PREFIX,
     type ThreatsGridRow,
 } from "./create-threats-columns";
-
-// Fields whose values only exist on threats; a filter on them can never
-// match a generic threat directly.
-const threatOnlyFilterFields = ["description", "assets", "probability", "damage", "risk", "status"] as const;
+import { buildThreatsRows } from "./build-threats-rows";
 
 // The e2e page objects locate action buttons inside the row-level test ids, so
 // the ids must live on the grid row element itself, not on a single cell.
@@ -287,115 +280,17 @@ const ThreatsPageBody = () => {
         genericThreats.length > 0 &&
         genericThreats.every((genericThreat) => expandedGenericThreatIds[genericThreat.id]);
 
-    // The grid's own filtering would treat generic threat and threat rows independently and
-    // tear the hierarchy apart, so filters are applied here while building the rows.
-    const matchesThreatFilters = useCallback(
-        (threat: ExtendedThreatWithMetrics): boolean => {
-            return Object.entries(columnFilters).every(([field, value]) => {
-                const filterValue = value.trim().toLowerCase();
-                if (!filterValue) {
-                    return true;
-                }
-                switch (field) {
-                    case "name":
-                        return threat.name.toLowerCase().includes(filterValue);
-                    case "description":
-                        return threat.description.toLowerCase().includes(filterValue);
-                    case "assets":
-                        return String(threat.assets.length).includes(filterValue);
-                    case "componentName":
-                        return formatComponentName(threat, t).toLowerCase().includes(filterValue);
-                    case "pointOfAttack":
-                        return t(`pointsOfAttackList.${threat.pointOfAttack}`).toLowerCase().includes(filterValue);
-                    case "attacker":
-                        return t(`attackerList.${threat.attacker}`).toLowerCase().includes(filterValue);
-                    case "probability":
-                        return String(threat.probability).includes(filterValue);
-                    case "damage":
-                        return String(threat.damage).includes(filterValue);
-                    case "risk":
-                        return String(threat.risk).includes(filterValue);
-                    case "status":
-                        return threat.status === value;
-                    default:
-                        return true;
-                }
-            });
-        },
-        [columnFilters, t]
+    const rows = useMemo<ThreatsGridRow[]>(
+        () =>
+            buildThreatsRows({
+                genericThreats,
+                threatsByGenericThreatId,
+                expandedGenericThreatIds,
+                columnFilters,
+                t,
+            }),
+        [genericThreats, threatsByGenericThreatId, expandedGenericThreatIds, columnFilters, t]
     );
-
-    const matchesGenericThreatFilters = useCallback(
-        (genericThreat: GenericThreatWithExtendedThreats): boolean => {
-            return Object.entries(columnFilters).every(([field, value]) => {
-                const filterValue = value.trim().toLowerCase();
-                if (!filterValue) {
-                    return true;
-                }
-                switch (field) {
-                    case "name":
-                        return genericThreat.name.toLowerCase().includes(filterValue);
-                    case "componentName":
-                        return formatComponentName(genericThreat, t).toLowerCase().includes(filterValue);
-                    case "pointOfAttack":
-                        return t(`pointsOfAttackList.${genericThreat.pointOfAttack}`)
-                            .toLowerCase()
-                            .includes(filterValue);
-                    case "attacker":
-                        return t(`attackerList.${genericThreat.attacker}`).toLowerCase().includes(filterValue);
-                    default:
-                        return true;
-                }
-            });
-        },
-        [columnFilters, t]
-    );
-
-    const rows = useMemo<ThreatsGridRow[]>(() => {
-        const hasThreatOnlyFilter = threatOnlyFilterFields.some((field) => (columnFilters[field] ?? "").trim() !== "");
-
-        const result: ThreatsGridRow[] = [];
-        for (const genericThreat of genericThreats) {
-            const threats = threatsByGenericThreatId[genericThreat.id] ?? [];
-            const visibleThreats = threats.filter(matchesThreatFilters);
-
-            const genericThreatVisible =
-                visibleThreats.length > 0 || (!hasThreatOnlyFilter && matchesGenericThreatFilters(genericThreat));
-            if (!genericThreatVisible) {
-                continue;
-            }
-
-            const isExpanded = expandedGenericThreatIds[genericThreat.id] ?? false;
-            result.push({
-                rowType: "genericThreat",
-                rowId: `${GENERIC_THREAT_ROW_PREFIX}${genericThreat.id}`,
-                genericThreat,
-                threatCount: visibleThreats.length,
-                isExpanded,
-            });
-            if (isExpanded) {
-                if (visibleThreats.length === 0) {
-                    result.push({ rowType: "noThreats", rowId: `empty-${genericThreat.id}` });
-                } else {
-                    for (const threat of visibleThreats) {
-                        result.push({
-                            rowType: "threat",
-                            rowId: `${THREAT_ROW_PREFIX}${threat.id}`,
-                            threat,
-                        });
-                    }
-                }
-            }
-        }
-        return result;
-    }, [
-        genericThreats,
-        threatsByGenericThreatId,
-        expandedGenericThreatIds,
-        columnFilters,
-        matchesThreatFilters,
-        matchesGenericThreatFilters,
-    ]);
 
     const NoRowsOverlayWithMessage = useCallback(() => <NoRowsOverlay message={t("noThreatsFound")} />, [t]);
 
