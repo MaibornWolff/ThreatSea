@@ -10,6 +10,7 @@ import system from "./system.reducer";
 import editor from "./editor.reducer";
 import catalogThreats from "./catalog-threats.reducer";
 import catalogMeasures from "./catalog-measures.reducer";
+import threats from "./threats.reducer";
 import measures from "./measures.reducer";
 import measureImpacts from "./measureImpacts.reducer";
 import { confirmReducer as confirm } from "./confirm.reducer";
@@ -30,6 +31,7 @@ const reducers = {
     editor,
     catalogThreats,
     catalogMeasures,
+    threats,
     measures,
     measureImpacts,
     confirm,

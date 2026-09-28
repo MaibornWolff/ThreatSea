@@ -1,4 +1,4 @@
-import { act, renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { Provider } from "react-redux";
 import { createStore } from "#application/store.ts";
@@ -28,7 +28,7 @@ const deferred = <T,>() => {
     return { promise, resolve };
 };
 
-// The hook dispatches to the global error state, so every render needs a store.
+// The threats live in the store, so every render needs one.
 const makeWrapper = (store: ReturnType<typeof createStore>) =>
     function Wrapper({ children }: { children: ReactNode }) {
         return <Provider store={store}>{children}</Provider>;
@@ -52,38 +52,51 @@ describe("useThreats", () => {
         expect(result.current.isPending).toBe(false);
     });
 
-    it("ignores an older response that resolves after a newer load", async () => {
+    it("shares the loaded threats between instances, with one request for loads started together", async () => {
+        getGenericThreatsSpy.mockResolvedValue([genericThreat(1, [createThreat({ id: 11, name: "shared" })])]);
+        const wrapper = makeWrapper(createStore());
+        const first = renderHook(() => useThreats({ projectId: 1 }), { wrapper });
+        const second = renderHook(() => useThreats({ projectId: 1 }), { wrapper });
+
+        await act(async () => {
+            await Promise.all([first.result.current.loadThreats(), second.result.current.loadThreats()]);
+        });
+
+        expect(getGenericThreatsSpy).toHaveBeenCalledTimes(1);
+        expect(first.result.current.items.map((threat) => threat.name)).toEqual(["shared"]);
+        expect(second.result.current.items.map((threat) => threat.name)).toEqual(["shared"]);
+    });
+
+    it("ignores an older project's response that resolves after a newer project's load", async () => {
         const older = deferred<GenericThreatWithExtendedThreats[]>();
         const newer = deferred<GenericThreatWithExtendedThreats[]>();
         getGenericThreatsSpy.mockReturnValueOnce(older.promise).mockReturnValueOnce(newer.promise);
 
-        const { result } = renderHook(() => useThreats({ projectId: 1 }), {
-            wrapper: makeWrapper(createStore()),
-        });
+        const wrapper = makeWrapper(createStore());
+        const projectOne = renderHook(() => useThreats({ projectId: 1 }), { wrapper });
+        const projectTwo = renderHook(() => useThreats({ projectId: 2 }), { wrapper });
 
         let olderLoad!: Promise<void>;
         let newerLoad!: Promise<void>;
         act(() => {
-            olderLoad = result.current.loadThreats();
-            newerLoad = result.current.loadThreats();
+            olderLoad = projectOne.result.current.loadThreats();
+            newerLoad = projectTwo.result.current.loadThreats();
         });
 
         await act(async () => {
-            newer.resolve([genericThreat(2, [createThreat({ id: 21, name: "fresh" })])]);
+            newer.resolve([genericThreat(2, [createThreat({ id: 21, projectId: 2, name: "fresh" })])]);
             await newerLoad;
         });
-        expect(result.current.items.map((threat) => threat.name)).toEqual(["fresh"]);
+        expect(projectTwo.result.current.items.map((threat) => threat.name)).toEqual(["fresh"]);
 
         await act(async () => {
-            older.resolve([genericThreat(1, [createThreat({ id: 11, name: "stale" })])]);
+            older.resolve([genericThreat(1, [createThreat({ id: 11, projectId: 1, name: "stale" })])]);
             await olderLoad;
         });
 
         // The stale response must not overwrite the newer data or re-flip pending.
-        expect(result.current.items.map((threat) => threat.name)).toEqual(["fresh"]);
-        await waitFor(() => {
-            expect(result.current.isPending).toBe(false);
-        });
+        expect(projectTwo.result.current.items.map((threat) => threat.name)).toEqual(["fresh"]);
+        expect(projectTwo.result.current.isPending).toBe(false);
     });
 
     it("routes a failed refresh into the global error state and keeps prior items", async () => {

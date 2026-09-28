@@ -61,6 +61,7 @@ const asyncThunks = [
     ProjectsActions.exportProjectToJson,
     SystemActions.getSystem,
     SystemActions.updateSystem,
+    ThreatsActions.getThreats,
     ThreatsActions.createThreat,
     ThreatsActions.updateThreat,
     ThreatsActions.deleteThreat,
