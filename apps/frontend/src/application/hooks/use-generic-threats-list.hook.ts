@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { GenericThreatsAPI } from "#api/generic-threats.api.ts";
 import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat.types.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
@@ -22,8 +22,8 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
         Record<number, ExtendedThreatWithMetrics[]>
     >({});
 
-    // loadGenericThreats is fired from mount, the autosave effect, and after every mutation, so
-    // calls can overlap. Track a per-call sequence and apply results only for the latest one, so
+    // The hook does not load by itself: the page loads once via useLoadThreatsOnce (after the
+    // autosave settles) and again after every mutation, so calls can overlap. Track a per-call sequence and apply results only for the latest one, so
     // a slower older response can't overwrite newer data or clear pending while a newer load runs.
     const loadSequenceRef = useRef(0);
 
@@ -75,10 +75,6 @@ export const useGenericThreatsList = ({ projectId }: { projectId: number }) => {
             }
         }
     }, [projectId, dispatch]);
-
-    useEffect(() => {
-        void loadGenericThreats();
-    }, [loadGenericThreats]);
 
     const toggleGenericThreat = useCallback((genericThreatId: number) => {
         setExpandedGenericThreatIds((previous) => ({

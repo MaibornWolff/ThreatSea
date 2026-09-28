@@ -1,4 +1,4 @@
-import { act, renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { I18nextProvider } from "react-i18next";
 import { Provider } from "react-redux";
@@ -29,6 +29,15 @@ const makeWrapper = (store: ReturnType<typeof createStore>) =>
         );
     };
 
+// The hook does not load by itself (the page does, via useLoadThreatsOnce), so load explicitly.
+const renderLoaded = async (store: ReturnType<typeof createStore> = createStore()) => {
+    const rendered = renderHook(() => useGenericThreatsList({ projectId: 1 }), { wrapper: makeWrapper(store) });
+    await act(async () => {
+        await rendered.result.current.loadGenericThreats();
+    });
+    return rendered;
+};
+
 describe("useGenericThreatsList", () => {
     beforeEach(() => {
         vi.clearAllMocks();
@@ -38,12 +47,16 @@ describe("useGenericThreatsList", () => {
         ]);
     });
 
-    it("expands and collapses every loaded generic threat via setAllGenericThreatsExpanded", async () => {
-        const { result } = renderHook(() => useGenericThreatsList({ projectId: 1 }), {
-            wrapper: makeWrapper(createStore()),
-        });
+    it("does not load on mount, leaving the single page load to useLoadThreatsOnce", () => {
+        renderHook(() => useGenericThreatsList({ projectId: 1 }), { wrapper: makeWrapper(createStore()) });
 
-        await waitFor(() => expect(result.current.genericThreats).toHaveLength(2));
+        expect(GenericThreatsAPI.getGenericThreatsWithExtendedThreats).not.toHaveBeenCalled();
+    });
+
+    it("expands and collapses every loaded generic threat via setAllGenericThreatsExpanded", async () => {
+        const { result } = await renderLoaded();
+
+        expect(result.current.genericThreats).toHaveLength(2);
         expect(result.current.expandedGenericThreatIds).toEqual({});
 
         act(() => result.current.setAllGenericThreatsExpanded(true));
@@ -55,11 +68,9 @@ describe("useGenericThreatsList", () => {
 
     it("keeps the expansion map empty when no generic threats are loaded", async () => {
         vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedThreats).mockResolvedValue([]);
-        const { result } = renderHook(() => useGenericThreatsList({ projectId: 1 }), {
-            wrapper: makeWrapper(createStore()),
-        });
+        const { result } = await renderLoaded();
 
-        await waitFor(() => expect(result.current.isPending).toBe(false));
+        expect(result.current.isPending).toBe(false);
         expect(result.current.genericThreats).toEqual([]);
 
         act(() => result.current.setAllGenericThreatsExpanded(true));
@@ -68,10 +79,8 @@ describe("useGenericThreatsList", () => {
 
     it("routes a failed load into the global error state and keeps prior items", async () => {
         const store = createStore();
-        const { result } = renderHook(() => useGenericThreatsList({ projectId: 1 }), {
-            wrapper: makeWrapper(store),
-        });
-        await waitFor(() => expect(result.current.genericThreats).toHaveLength(2));
+        const { result } = await renderLoaded(store);
+        expect(result.current.genericThreats).toHaveLength(2);
 
         vi.mocked(GenericThreatsAPI.getGenericThreatsWithExtendedThreats).mockRejectedValue(new Error("boom"));
         await act(async () => {
@@ -85,10 +94,8 @@ describe("useGenericThreatsList", () => {
     });
 
     it("ignores a stale response that resolves after a newer load", async () => {
-        const { result } = renderHook(() => useGenericThreatsList({ projectId: 1 }), {
-            wrapper: makeWrapper(createStore()),
-        });
-        await waitFor(() => expect(result.current.genericThreats).toHaveLength(2));
+        const { result } = await renderLoaded();
+        expect(result.current.genericThreats).toHaveLength(2);
 
         // Two overlapping loads where the OLDER one resolves LAST.
         let resolveOld!: (value: GenericThreatWithExtendedThreats[]) => void;

@@ -279,10 +279,6 @@ export const useMatrix = ({ projectId, catalogId }: UseMatrixArgs) => {
     );
 
     useEffect(() => {
-        loadThreats();
-    }, [projectId, loadThreats]);
-
-    useEffect(() => {
         loadCatalogMeasures();
     }, [projectId, loadCatalogMeasures]);
 

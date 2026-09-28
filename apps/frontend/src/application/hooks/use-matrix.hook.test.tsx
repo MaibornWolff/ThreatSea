@@ -45,6 +45,22 @@ describe("useMatrix", () => {
         vi.restoreAllMocks();
     });
 
+    it("does not load the threats itself, leaving the single page load to useLoadThreatsOnce", () => {
+        const loadThreats = vi.fn();
+        mockUseMeasures();
+        mockUseMeasureImpacts();
+        mockUseCatalogMeasures();
+        mockUseThreats({ loadThreats });
+        const store = createStore();
+        const wrapper = ({ children }: { children: ReactNode }) => <Provider store={store}>{children}</Provider>;
+
+        const { result } = renderHook(() => useMatrix({ projectId: 1, catalogId: 1, language: "en" }), { wrapper });
+
+        expect(loadThreats).not.toHaveBeenCalled();
+        // the page still gets the loader to hand to useLoadThreatsOnce
+        expect(result.current.loadThreats).toBe(loadThreats);
+    });
+
     describe("timeline", () => {
         it("anchors an empty timeline to an empty date string when there are no measures", () => {
             const { result } = renderUseMatrix({ measures: [] });
