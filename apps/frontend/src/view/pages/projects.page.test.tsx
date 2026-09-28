@@ -34,3 +34,12 @@ describe("ProjectsPage — search", () => {
         expect(screen.queryByText(/No projects match/)).not.toBeInTheDocument();
     });
 });
+
+describe("ProjectsPage — sort toggles", () => {
+    it("gives the icon-only sort direction buttons accessible names", () => {
+        renderWithProviders(<ProjectsPage />);
+
+        expect(screen.getByRole("button", { name: "Sort ascending" })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: "Sort descending" })).toBeInTheDocument();
+    });
+});
