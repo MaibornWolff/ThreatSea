@@ -6,6 +6,7 @@ import {
 } from "./editor-sidebar-selected-component-assets.component";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { createAsset } from "#test-utils/builders.ts";
+import { USER_ROLES } from "#api/types/user-roles.types.ts";
 
 const assetNames = () =>
     screen.getAllByTestId("selected-component-asset-search-results").map((element) => element.textContent);
@@ -23,6 +24,8 @@ const setup = (propsOverride: Partial<EditorSidebarSelectedComponentAssetsProps>
         handleAssetNameClick: vi.fn(),
         handleAddAssetToAllPointsOfAttack: vi.fn(),
         handleRemoveAssetFromAllPointsOfAttack: vi.fn(),
+        handleAddAssetClick: vi.fn(),
+        userRole: USER_ROLES.EDITOR,
         ...propsOverride,
     };
     const user = userEvent.setup();
@@ -71,5 +74,27 @@ describe("EditorSidebarSelectedComponentAssets — sorting", () => {
         setup({ items: [] });
 
         expect(screen.queryAllByTestId("selected-component-asset-search-results")).toHaveLength(0);
+    });
+});
+
+describe("EditorSidebarSelectedComponentAssets — add asset", () => {
+    it("calls handleAddAssetClick when the add button is clicked", async () => {
+        const { props, user } = setup();
+
+        await user.click(screen.getByTestId("selected-component-add-asset-button"));
+
+        expect(props.handleAddAssetClick).toHaveBeenCalledOnce();
+    });
+
+    it("hides the add button for viewers", () => {
+        setup({ userRole: USER_ROLES.VIEWER });
+
+        expect(screen.queryByTestId("selected-component-add-asset-button")).not.toBeInTheDocument();
+    });
+
+    it("hides the add button when the user role is unknown", () => {
+        setup({ userRole: undefined });
+
+        expect(screen.queryByTestId("selected-component-add-asset-button")).not.toBeInTheDocument();
     });
 });
