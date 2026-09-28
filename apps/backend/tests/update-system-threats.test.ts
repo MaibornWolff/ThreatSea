@@ -8,7 +8,16 @@ import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import { nanoid } from "nanoid";
 import { db } from "#db/index.js";
-import { assets, catalogs, catalogThreats, genericThreats, threats, usersCatalogs } from "#db/schema.js";
+import {
+    assets,
+    catalogs,
+    catalogThreats,
+    genericThreats,
+    measureImpacts,
+    measures,
+    threats,
+    usersCatalogs,
+} from "#db/schema.js";
 import { app } from "#server.js";
 import { eq } from "drizzle-orm";
 import { LANGUAGES } from "#types/languages.type.js";
@@ -168,6 +177,36 @@ describe("updateSystem generic threat/threat generation", () => {
             where: eq(threats.projectId, projectId),
         });
         expect(remainingThreats).toEqual([]);
+    });
+
+    it("deletes the removed threats' measure impacts through the foreign key cascade", async () => {
+        const pointOfAttackId = nanoid();
+        await saveSystem([makePointOfAttack(pointOfAttackId, [1])]);
+        const threat = (await db.query.threats.findFirst({ where: eq(threats.projectId, projectId) }))!;
+        const measure = (
+            await db
+                .insert(measures)
+                .values({ name: "Firewall", description: "d", scheduledAt: "2025-01-01", projectId })
+                .returning()
+        ).at(0)!;
+        await db.insert(measureImpacts).values({
+            threatId: threat.id,
+            measureId: measure.id,
+            description: "d",
+            setsOutOfScope: false,
+            impactsProbability: true,
+            impactsDamage: false,
+            probability: 1,
+            damage: null,
+        });
+
+        const impactsOfThreat = () =>
+            db.query.measureImpacts.findMany({ where: eq(measureImpacts.threatId, threat.id) });
+        expect(await impactsOfThreat()).toHaveLength(1);
+
+        await saveSystem([]);
+
+        expect(await impactsOfThreat()).toEqual([]);
     });
 
     it("omits threats from the extended-threats query when their point of attack has lost all assets", async () => {

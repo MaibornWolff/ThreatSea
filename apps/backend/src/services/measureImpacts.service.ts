@@ -106,16 +106,6 @@ export async function deleteMeasureImpact(
 }
 
 /**
- * Delete all measure impacts that impacting a specified threat.
- *
- * @param {number} threatId - The id of the threat.
- * @returns {Promise<void>} A promise that resolves when the measure impacts are deleted.
- */
-export async function deleteMeasureImpactsByThreat(threatId: number): Promise<void> {
-    await db.delete(measureImpacts).where(eq(measureImpacts.threatId, threatId));
-}
-
-/**
  * Finalizes a threat because an out-of-scope measure has just been applied to it.
  *
  * Call this only at the moment of applying: when an impact is created with `setsOutOfScope`, or
