@@ -2,7 +2,7 @@ import Add from "@mui/icons-material/Add";
 import ArrowDownward from "@mui/icons-material/ArrowDownward";
 import ArrowUpward from "@mui/icons-material/ArrowUpward";
 import CreateNewFolder from "@mui/icons-material/CreateNewFolder";
-import { LinearProgress, useMediaQuery } from "@mui/material";
+import { LinearProgress, Typography, useMediaQuery } from "@mui/material";
 import { Box } from "@mui/system";
 import { useTheme } from "@mui/material/styles";
 import { useEffect, useLayoutEffect, useMemo, type ChangeEvent, type MouseEvent, type SyntheticEvent } from "react";
@@ -258,7 +258,11 @@ export const ProjectsPage = CreatePage(HeaderUtilityControls, () => {
                     </Box>
                 </Box>
 
-                {isSearching ? (
+                {isSearching && projects.length === 0 ? (
+                    <Typography sx={{ paddingTop: 2, paddingLeft: 2, fontSize: "0.75rem", fontStyle: "italic" }}>
+                        {t("projectList.noSearchResults", { searchValue })}
+                    </Typography>
+                ) : isSearching ? (
                     <ProjectsGridComponent
                         projects={projects}
                         columnCount={projectsColumnCount}

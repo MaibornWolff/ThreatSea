@@ -2,6 +2,7 @@
   "addProjectBtn": "Projekt hinzufügen",
   "projectList.sortBy.nameToggleBtn": "Name",
   "projectList.sortBy.createdAtToggleBtn": "Datum",
+  "projectList.noSearchResults": "Keine Projekte zu \"{{ searchValue }}\" gefunden",
   "deleteProject": "Projekt Löschen",
   "members": "Mitglieder",
   "importProject": "Projekt importieren",
