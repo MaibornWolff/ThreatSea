@@ -137,6 +137,37 @@ describe("AddThreatDialog — Apply Measure button", () => {
     });
 });
 
+describe("AddThreatDialog — Delete Measure Impact", () => {
+    it("deletes the impact after confirmation without reloading the host list", async () => {
+        const threatMeasure = createThreatMeasure({
+            measureImpact: createMeasureImpact({ id: 5, threatId: 42, measureId: 1 }),
+        });
+        // Like the dispatched thunk, the result can be unwrapped into a resolved promise.
+        const deleteMeasureImpact = vi.fn().mockReturnValue({ unwrap: () => Promise.resolve() });
+        const openConfirm = vi.fn();
+        mockUseThreatMeasuresList({ threatMeasures: [threatMeasure], deleteMeasureImpact });
+        mockUseConfirm({ openConfirm });
+        const onSaved = vi.fn();
+        const { user } = setup(USER_ROLES.EDITOR, "threats", onSaved);
+
+        await user.click(screen.getByRole("tab", { name: /measures/i }));
+        await user.click(screen.getByRole("button", { name: "Delete Impact" }));
+        expect(deleteMeasureImpact).not.toHaveBeenCalled();
+
+        const { onAccept, state } = openConfirm.mock.lastCall![0];
+        await act(async () => {
+            await onAccept(state);
+        });
+
+        expect(deleteMeasureImpact).toHaveBeenCalledWith(
+            expect.objectContaining({ id: 5, threatId: 42, measureId: 1, projectId: 7 })
+        );
+        // Deleting an impact never changes the threat's status, and the risk page's net values
+        // follow the measure impacts in the store, so the host list is not reloaded.
+        expect(onSaved).not.toHaveBeenCalled();
+    });
+});
+
 describe("AddThreatDialog — Edit Measure Impact routing", () => {
     const threatMeasure = createThreatMeasure();
 
