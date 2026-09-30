@@ -21,7 +21,7 @@ const buildArgs = (overrides: Partial<UseAutoSavePreviewArgs> = {}) => ({
     setAutoSaveStatus: vi.fn(),
     userRole: USER_ROLES.EDITOR,
     systemPending: false,
-    initialized: true,
+    isCurrentProjectLoaded: true,
     isAnyComponentInUse: false,
     autoSaveStatus: "upToDate",
     blockAutoSave: false,
@@ -82,10 +82,10 @@ describe("useAutoSavePreview", () => {
         expect(saveCurrentSystem).not.toHaveBeenCalled();
     });
 
-    it("does not force-save on unmount before the system has been hydrated", () => {
+    it("does not force-save on unmount before the current project's system has been hydrated", () => {
         const saveCurrentSystem = vi.fn();
 
-        const { unmount } = renderUseAutoSavePreview(buildArgs({ saveCurrentSystem, initialized: false }));
+        const { unmount } = renderUseAutoSavePreview(buildArgs({ saveCurrentSystem, isCurrentProjectLoaded: false }));
 
         unmount();
 

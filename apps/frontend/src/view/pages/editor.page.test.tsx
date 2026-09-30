@@ -9,6 +9,7 @@ import { EditorSidebar } from "#view/components/editor-components/editor-sidebar
 import { SystemComponent } from "#view/components/editor-components/system-component.component.tsx";
 import { ConnectionEditHandles } from "#view/components/editor-components/connection-edit-handles.component.tsx";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
+import systemReducer from "#application/reducers/system.reducer.ts";
 
 // --- Hook spies ---
 //
@@ -109,11 +110,13 @@ const getSidebarProps = () => {
 interface RenderEditorPageOptions {
     initialEntries?: string[];
     role?: USER_ROLES;
+    loadedProjectId?: number | null;
 }
 
 const renderEditorPage = ({
     initialEntries = ["/projects/1/system"],
     role = USER_ROLES.EDITOR,
+    loadedProjectId = null,
 }: RenderEditorPageOptions = {}) => {
     return renderWithProviders(
         <Routes>
@@ -124,6 +127,7 @@ const renderEditorPage = ({
             preloadedState: {
                 projects: { ids: [], entities: {}, current: { role } } as never,
                 editor: { stageScale: 1, stagePosition: { x: 0, y: 0 } } as never,
+                system: { ...systemReducer(undefined, { type: "@@INIT" }), loadedProjectId },
             },
         }
     );
@@ -476,6 +480,35 @@ describe("EditorPage", () => {
             });
 
             expect(updateConnectionsOfComponent).toHaveBeenCalledWith("comp-abc");
+        });
+    });
+
+    describe("force-save on unmount", () => {
+        it("saves when the route's project is the one loaded in the store", () => {
+            const { unmount } = renderEditorPage({ loadedProjectId: 1 });
+            const mockEditor = getEditorMock();
+
+            unmount();
+
+            expect(mockEditor.saveCurrentSystem).toHaveBeenCalledOnce();
+        });
+
+        it("does not save while another project's system is still in the store", () => {
+            const { unmount } = renderEditorPage({ loadedProjectId: 2 });
+            const mockEditor = getEditorMock();
+
+            unmount();
+
+            expect(mockEditor.saveCurrentSystem).not.toHaveBeenCalled();
+        });
+
+        it("does not save before any system has been loaded", () => {
+            const { unmount } = renderEditorPage({ loadedProjectId: null });
+            const mockEditor = getEditorMock();
+
+            unmount();
+
+            expect(mockEditor.saveCurrentSystem).not.toHaveBeenCalled();
         });
     });
 });
