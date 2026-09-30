@@ -28,7 +28,7 @@ const STANDARD_ICON_IMAGE_TO_TYPE = new Map<string, STANDARD_COMPONENT_TYPES>(
 
 // e.g. "/user.png", webpack "/user.5004f23f.png", Vite "https://host/assets/user-hjWurOPg.png?v=2".
 const LEGACY_STANDARD_ICON_PATH_PATTERN = new RegExp(
-    `/(${Object.keys(STANDARD_ICON_FILENAME_TO_TYPE).join("|")})(?:[.-][\\w-]+)?\\.png(?:[?#].*)?$`,
+    `/(${Object.keys(STANDARD_ICON_FILENAME_TO_TYPE).join("|")})(?:[.-][\\w-]+)?\\.png$`,
     "i"
 );
 
@@ -45,7 +45,8 @@ export const standardIconTypeForSymbol = (symbol: string | null | undefined): ST
     if (byDataUrl) {
         return byDataUrl;
     }
-    const filename = symbol.match(LEGACY_STANDARD_ICON_PATH_PATTERN)?.[1]?.toLowerCase();
+    const pathname = symbol.replace(/[?#].*$/, "");
+    const filename = pathname.match(LEGACY_STANDARD_ICON_PATH_PATTERN)?.[1]?.toLowerCase();
     return filename ? (STANDARD_ICON_FILENAME_TO_TYPE[filename] ?? null) : null;
 };
 

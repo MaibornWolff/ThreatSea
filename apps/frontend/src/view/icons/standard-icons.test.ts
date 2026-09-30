@@ -95,6 +95,13 @@ describe("standardIconTypeForSymbol", () => {
         expect(standardIconTypeForSymbol("/assets/server.jpg?name=server.png")).toBeNull();
     });
 
+    it.each(["/assets/custom.png?next=/server.png", "/assets/custom.png#/user.png"])(
+        "ignores a standard icon path inside the query or fragment of %s",
+        (symbol) => {
+            expect(standardIconTypeForSymbol(symbol)).toBeNull();
+        }
+    );
+
     it("does not treat the white icon variant as a standard icon", () => {
         expect(standardIconTypeForSymbol("/static/media/server_white.png")).toBeNull();
     });
