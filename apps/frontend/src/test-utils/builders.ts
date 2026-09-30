@@ -1,5 +1,6 @@
 import type { Asset } from "#api/types/asset.types.ts";
 import type { CatalogWithRole } from "#api/types/catalogs.types.ts";
+import type { ComponentType } from "#api/types/component-types.types.ts";
 import type { Folder } from "#api/types/folder.types.ts";
 import type { ExtendedProject, ProjectReport, ThreatReport } from "#api/types/project.types.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
@@ -97,6 +98,18 @@ export const createComponentPayload = (
     gridY: 0,
     projectId: 1,
     symbol: null,
+    ...overrides,
+});
+
+export const createComponentType = (overrides: Partial<ComponentType> = {}): ComponentType => ({
+    id: 1,
+    name: "Test Component Type",
+    pointsOfAttack: [],
+    symbol: null,
+    standardIcon: null,
+    projectId: 1,
+    createdAt: new Date("2025-01-01"),
+    updatedAt: new Date("2025-01-01"),
     ...overrides,
 });
 

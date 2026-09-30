@@ -7,6 +7,7 @@ import { PointsOfAttackActions } from "#application/actions/points-of-attack.act
 import { SystemActions, trackInFlightSave } from "#application/actions/system.actions.ts";
 import type { Connection, SystemComponent, SystemConnection, UpdateSystemRequest } from "#api/types/system.types.ts";
 import type { EditorState } from "#application/reducers/editor.reducer.ts";
+import { normalizeLegacyStandardSymbol } from "#view/icons/standard-icons.ts";
 
 const handleSaveSystem: AppMiddleware =
     ({ dispatch, getState }) =>
@@ -221,7 +222,14 @@ const handleSuccessfulRequest: AppMiddleware =
                         dispatch(SystemActions.setSystemId(id));
                     }
                     if (components) {
-                        dispatch(SystemActions.setComponents(components));
+                        dispatch(
+                            SystemActions.setComponents(
+                                components.map((component) => ({
+                                    ...component,
+                                    symbol: normalizeLegacyStandardSymbol(component.symbol),
+                                }))
+                            )
+                        );
                     }
                     if (connections) {
                         dispatch(SystemActions.setConnections(connections));
