@@ -6,6 +6,9 @@ import projectsReducer, { type ProjectsState } from "#application/reducers/proje
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 import { compareConnections } from "./system.middleware";
 import type { Connection, SystemConnection } from "#api/types/system.types.ts";
+import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
+import { createSystemComponent } from "#test-utils/builders.ts";
+import { STANDARD_ICON_IMAGES } from "#view/icons/standard-icons.ts";
 
 const buildProjectsState = (role: USER_ROLES) => {
     const base = projectsReducer(undefined, { type: "@@INIT" });
@@ -242,6 +245,67 @@ describe("system.middleware — getSystem hydrates the per-project default annot
         await vi.waitFor(() =>
             expect(store.getState().system.defaultAnnotationColorByProject).toEqual({ 1: "#ff00aa" })
         );
+    });
+});
+
+describe("system.middleware — getSystem replaces legacy standard icon paths", () => {
+    const legacyUserPath = "https://example.com/assets/user-hjWurOPg.png";
+    const customUpload = "data:image/png;base64,AAAA";
+
+    const loadProjectWithSymbols = async () => {
+        const store = createStore({ projects: buildProjectsState(USER_ROLES.EDITOR) });
+        vi.spyOn(SystemAPI, "getSystem").mockResolvedValue({
+            id: 5,
+            projectId: 5,
+            data: {
+                components: [
+                    createSystemComponent({ id: "legacy", projectId: 5, symbol: legacyUserPath }),
+                    createSystemComponent({ id: "custom", projectId: 5, symbol: customUpload }),
+                    createSystemComponent({ id: "none", projectId: 5, symbol: null }),
+                ],
+                connections: [],
+                connectionPoints: [],
+                pointsOfAttack: [],
+                annotations: [],
+                lastAutoSaveDate: "",
+            },
+            image: null,
+        });
+        store.dispatch(SystemActions.getSystem({ projectId: 5 }));
+        await vi.waitFor(() => expect(store.getState().system.loadedProjectId).toBe(5));
+        return store;
+    };
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    it("stores the inline standard icon for a legacy path and keeps other symbols", async () => {
+        const store = await loadProjectWithSymbols();
+        const { entities } = store.getState().system.components;
+
+        expect(entities["legacy"]?.symbol).toBe(STANDARD_ICON_IMAGES[STANDARD_COMPONENT_TYPES.USERS]);
+        expect(entities["custom"]?.symbol).toBe(customUpload);
+        expect(entities["none"]?.symbol).toBeNull();
+    });
+
+    it("saves the inline standard icon instead of the legacy path", async () => {
+        const updateSystemSpy = vi.spyOn(SystemAPI, "updateSystem").mockResolvedValue({
+            id: 5,
+            projectId: 5,
+            data: null,
+            image: null,
+        });
+        const store = await loadProjectWithSymbols();
+
+        store.dispatch(SystemActions.saveSystem({ projectId: 5, image: undefined }));
+        await vi.waitFor(() => expect(updateSystemSpy).toHaveBeenCalledTimes(1));
+
+        const savedSymbols = (updateSystemSpy.mock.calls[0]![0].data?.components ?? []).map(
+            (component) => component.symbol
+        );
+        expect(savedSymbols).not.toContain(legacyUserPath);
+        expect(savedSymbols).toContain(STANDARD_ICON_IMAGES[STANDARD_COMPONENT_TYPES.USERS]);
     });
 });
 
