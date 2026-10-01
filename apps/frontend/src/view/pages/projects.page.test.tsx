@@ -41,7 +41,7 @@ describe("ProjectsPage — search", () => {
 
         await userEvent.type(screen.getByRole("textbox"), "zzz");
 
-        expect(screen.getByText('No projects match "zzz"')).toBeInTheDocument();
+        expect(screen.getByRole("status")).toHaveTextContent('No projects match "zzz"');
     });
 
     it("shows matching projects instead of the no-results message", async () => {
@@ -50,6 +50,24 @@ describe("ProjectsPage — search", () => {
         await userEvent.type(screen.getByRole("textbox"), "shop");
 
         expect(screen.getByText("Online Shop")).toBeInTheDocument();
+        expect(screen.queryByText(/No projects match/)).not.toBeInTheDocument();
+    });
+
+    it("ignores leading and trailing spaces in the search", async () => {
+        renderWithProviders(<ProjectsPage />);
+
+        await userEvent.type(screen.getByRole("textbox"), " shop ");
+
+        expect(screen.getByText("Online Shop")).toBeInTheDocument();
+        expect(screen.queryByText(/No projects match/)).not.toBeInTheDocument();
+    });
+
+    it("shows no no-results message while projects are still loading", async () => {
+        mockUseProjects({ items: [], isPending: true });
+        renderWithProviders(<ProjectsPage />);
+
+        await userEvent.type(screen.getByRole("textbox"), "shop");
+
         expect(screen.queryByText(/No projects match/)).not.toBeInTheDocument();
     });
 });
