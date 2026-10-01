@@ -27,6 +27,11 @@ vi.mock("../components/folders-accordion.component", () => ({
     FoldersAccordion: () => null,
 }));
 
+// Loading the real dialogs here would cache them for folder.dialog.test, bypassing its react-router mock.
+vi.mock("./project-dialog.page", () => ({ default: () => null }));
+vi.mock("./folder-dialog.page", () => ({ default: () => null }));
+vi.mock("./move-dialog.page", () => ({ default: () => null }));
+
 import { ProjectsPage } from "./projects.page";
 
 beforeEach(() => {
