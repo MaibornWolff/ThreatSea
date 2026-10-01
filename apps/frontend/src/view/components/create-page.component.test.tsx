@@ -271,11 +271,12 @@ describe("CreatePage — footer", () => {
 });
 
 describe("CreatePage — auto save info", () => {
-    const renderWithAutoSaveMessage = (autoSaveMessage: AutoSaveMessage) => {
+    const renderWithAutoSaveMessage = (autoSaveMessage: AutoSaveMessage, i18n = translationUtil.cloneInstance()) => {
         mockUseConfirm({ openConfirm });
         const Page = CreatePage(HeaderRightSlot, PageBody, true);
 
         renderWithProviders(<Page />, {
+            i18n,
             preloadedState: {
                 projects: {
                     ...projectsReducer(undefined, { type: "@@INIT" }),
@@ -288,16 +289,13 @@ describe("CreatePage — auto save info", () => {
         });
     };
 
-    afterEach(async () => {
-        await act(() => translationUtil.changeLanguage("en"));
-    });
-
     it("re-renders the saved label in the newly selected language", async () => {
-        renderWithAutoSaveMessage({ type: "upToDate", date: "31.7.2026, 16:26:56" });
+        const i18n = translationUtil.cloneInstance();
+        renderWithAutoSaveMessage({ type: "upToDate", date: "31.7.2026, 16:26:56" }, i18n);
 
         expect(screen.getByText("Saved: 31.7.2026, 16:26:56")).toBeInTheDocument();
 
-        await act(() => translationUtil.changeLanguage("de"));
+        await act(() => i18n.changeLanguage("de"));
 
         expect(screen.getByText("Stand: 31.7.2026, 16:26:56")).toBeInTheDocument();
     });
