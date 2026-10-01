@@ -260,8 +260,11 @@ export const ProjectsPage = CreatePage(HeaderUtilityControls, () => {
                     </Box>
                 </Box>
 
-                {isSearching && projects.length === 0 ? (
-                    <Typography sx={{ paddingTop: 2, paddingLeft: 2, fontSize: "0.75rem", fontStyle: "italic" }}>
+                {isSearching && !isPending && projects.length === 0 ? (
+                    <Typography
+                        role="status"
+                        sx={{ paddingTop: 2, paddingLeft: 2, fontSize: "0.75rem", fontStyle: "italic" }}
+                    >
                         {t("projectList.noSearchResults", { searchValue })}
                     </Typography>
                 ) : isSearching ? (
