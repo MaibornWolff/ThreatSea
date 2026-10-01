@@ -26,9 +26,15 @@ const STANDARD_ICON_IMAGE_TO_TYPE = new Map<string, STANDARD_COMPONENT_TYPES>(
     Object.entries(STANDARD_ICON_IMAGES).map(([type, image]) => [image, type as STANDARD_COMPONENT_TYPES])
 );
 
+// e.g. "/user.png", webpack "/user.5004f23f.png", Vite "https://host/assets/user-hjWurOPg.png?v=2".
+const LEGACY_STANDARD_ICON_PATH_PATTERN = new RegExp(
+    `/(${Object.keys(STANDARD_ICON_FILENAME_TO_TYPE).join("|")})(?:[.-][\\w-]+)?\\.png$`,
+    "i"
+);
+
 /**
  * Resolves a `symbol` to its standard icon type, or null for a custom image. Handles all stored
- * forms (inline data URL, prod hashed path, dev path) — a direct compare to STANDARD_ICON_IMAGES
+ * forms (inline data URL and legacy asset paths) — a direct compare to STANDARD_ICON_IMAGES
  * matches only the data-URL form.
  */
 export const standardIconTypeForSymbol = (symbol: string | null | undefined): STANDARD_COMPONENT_TYPES | null => {
@@ -39,14 +45,20 @@ export const standardIconTypeForSymbol = (symbol: string | null | undefined): ST
     if (byDataUrl) {
         return byDataUrl;
     }
-    // Trailing "/<name>.<hash>.png" asset path.
-    const filename = symbol.match(/\/([a-z-]+)(?:\.[a-f0-9]+)?\.png$/i)?.[1]?.toLowerCase();
+    const pathname = symbol.replace(/[?#].*$/, "");
+    const filename = pathname.match(LEGACY_STANDARD_ICON_PATH_PATTERN)?.[1]?.toLowerCase();
     return filename ? (STANDARD_ICON_FILENAME_TO_TYPE[filename] ?? null) : null;
 };
 
 /** True when the symbol is any of the standard icons, in any stored form. */
 export const isStandardIconSymbol = (symbol: string | null | undefined): boolean =>
     standardIconTypeForSymbol(symbol) !== null;
+
+// Old builds stored asset paths; the hashed files are gone and absolute URLs fail backend validation.
+export const normalizeLegacyStandardSymbol = <T extends string | null | undefined>(symbol: T): T | string => {
+    const type = standardIconTypeForSymbol(symbol);
+    return type ? STANDARD_ICON_IMAGES[type] : symbol;
+};
 
 export const SELECTABLE_STANDARD_ICONS: StandardIcon[] = [
     STANDARD_COMPONENT_TYPES.USERS,

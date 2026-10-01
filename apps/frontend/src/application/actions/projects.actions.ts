@@ -8,6 +8,38 @@ import { ProjectsAPI } from "#api/projects.api.ts";
 import { ExportsApi } from "#api/export.api.ts";
 import type { CreateProjectRequest, Project, UpdateProjectRequest } from "#api/types/project.types.ts";
 import type { USER_ROLES } from "#api/types/user-roles.types.ts";
+import { normalizeLegacyStandardSymbol } from "#view/icons/standard-icons.ts";
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+    typeof value === "object" && value !== null && !Array.isArray(value);
+
+const withNormalizedSymbols = (items: unknown): unknown =>
+    Array.isArray(items)
+        ? items.map((item) =>
+              isRecord(item) && typeof item["symbol"] === "string"
+                  ? { ...item, symbol: normalizeLegacyStandardSymbol(item["symbol"]) }
+                  : item
+          )
+        : items;
+
+// Old exports carry legacy icon paths the backend import rejects; malformed files pass through for the backend to report.
+const normalizeLegacyImportSymbols = (data: object): object => {
+    if (!isRecord(data)) {
+        return data;
+    }
+    const exported = { ...data };
+    const { system } = data;
+    if (isRecord(system) && isRecord(system["data"]) && "components" in system["data"]) {
+        exported["system"] = {
+            ...system,
+            data: { ...system["data"], components: withNormalizedSymbols(system["data"]["components"]) },
+        };
+    }
+    if ("componentTypes" in data) {
+        exported["componentTypes"] = withNormalizedSymbols(data["componentTypes"]);
+    }
+    return exported;
+};
 
 /**
  * Wrapper class that exposes functions for
@@ -134,7 +166,7 @@ export class ProjectsActions {
      * @returns Action function for changing the users role.
      */
     static importProjectFromJson = createAsyncThunk("[projects] import project from json", async (data: object) => {
-        await ImportsApi.importProjectFromJson(data);
+        await ImportsApi.importProjectFromJson(normalizeLegacyImportSymbols(data));
     });
 
     /**
