@@ -51,9 +51,11 @@ export const SearchField = ({ iconButtonProps = {}, sx = {}, inputSx = {}, ...pr
                 slotProps={{ input: { "aria-label": t("search") } }}
                 {...props}
             />
+            {/* Has no action, so hidden from keyboard and screen readers. */}
             <IconButton
                 className="search-icon-button"
-                aria-label={t("search")}
+                aria-hidden
+                tabIndex={-1}
                 sx={{
                     "&:hover": {
                         bgcolor: "primary.dark",

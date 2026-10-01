@@ -37,15 +37,29 @@ describe("SearchField", () => {
         expect(parentKeyUp).not.toHaveBeenCalled();
     });
 
-    it("should render the search icon button", () => {
-        render(<SearchField />);
-        expect(screen.getByRole("button")).toBeInTheDocument();
-    });
-
-    it("gives the input and the icon button an accessible name", () => {
+    it("gives the input an accessible name", () => {
         renderWithProviders(<SearchField />);
 
         expect(screen.getByRole("textbox", { name: "Search" })).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: "Search" })).toBeInTheDocument();
+    });
+
+    it("keeps the actionless search icon out of the accessibility tree", () => {
+        renderWithProviders(<SearchField />);
+
+        expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    });
+
+    it("skips the search icon when tabbing", async () => {
+        renderWithProviders(
+            <>
+                <SearchField />
+                <button>Next</button>
+            </>
+        );
+
+        await userEvent.tab();
+        expect(screen.getByRole("textbox", { name: "Search" })).toHaveFocus();
+        await userEvent.tab();
+        expect(screen.getByRole("button", { name: "Next" })).toHaveFocus();
     });
 });
