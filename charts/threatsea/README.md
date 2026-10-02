@@ -26,6 +26,14 @@ helm install threatsea oci://ghcr.io/maibornwolff/charts/threatsea --version <ve
   --values my-values.yaml
 ```
 
+Verify the signature before installing:
+
+```bash
+cosign verify ghcr.io/maibornwolff/charts/threatsea:<version> \
+  --certificate-identity-regexp '^https://github\.com/MaibornWolff/ThreatSea/\.github/workflows/release\.yml@refs/heads/(main|next)$' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+```
+
 Pre-releases are published from the `next` branch. Pass `--devel` (or an explicit pre-release `--version`) to install one.
 
 ## Required values
@@ -55,6 +63,8 @@ There are two ways to supply the secrets:
 > Secrets passed through values are stored in plaintext in the Helm release Secret. They are visible to anyone who can read Secrets in the namespace or run `helm get values`. Use `secret.existingSecret` to avoid this, for example with a Secret managed by External Secrets Operator or Sealed Secrets.
 
 The chart cannot look inside an existing Secret. If one of the keys is missing, the pod starts and then crash-loops with `Environment variable ... has to be defined`.
+
+With `postgresql.enabled=true` the `database-password` key is not read. The bundled database's password comes from `postgresql.auth.*`.
 
 ```bash
 kubectl create secret generic threatsea-secrets \
@@ -111,7 +121,13 @@ postgresql:
     password: change-me
 ```
 
-With the bundled database enabled, `database.host` is not used and `database.tls` is forced off.
+With the bundled database enabled, `database.host` is not used and `database.tls` is forced off. The app always connects to port 5432 of the bundled Service, so `database.port` is ignored.
+
+Things to know before relying on it, even for an evaluation:
+
+- **Credentials are fixed on first start.** PostgreSQL initialises the data directory once. Changing `postgresql.auth.password`, `database.name` or `database.user` afterwards has no effect on the existing PVC. A changed password only breaks the app's login.
+- **The PVC survives `helm uninstall`.** Reinstalling with a different password then fails authentication. Delete the PVC (`kubectl delete pvc -l app.kubernetes.io/instance=<release>`) to start fresh, which also deletes the data.
+- **Storage settings are immutable.** `postgresql.persistence.enabled`, `size` and `storageClass` end up in the StatefulSet's `volumeClaimTemplates`, which Kubernetes does not allow to change on upgrade.
 
 ## Authentication
 
