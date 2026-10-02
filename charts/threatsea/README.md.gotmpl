@@ -1,0 +1,119 @@
+{{ template "chart.header" . }}
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "chart.homepageLine" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+## Installing
+
+The chart is published as an OCI artifact and signed with cosign. Its version is the same as the ThreatSea release it deploys.
+
+```bash
+helm install threatsea oci://ghcr.io/maibornwolff/charts/threatsea --version <version> \
+  --namespace threatsea --create-namespace \
+  --values my-values.yaml
+```
+
+Pre-releases are published from the `next` branch. Pass `--devel` (or an explicit pre-release `--version`) to install one.
+
+## Required values
+
+| Value | Description |
+| ----- | ----------- |
+| `config.originApp` | Origin of the frontend, for example `https://threatsea.example.com` |
+| `config.originBackend` | Externally reachable origin of the backend, used to build the OIDC callback URL |
+| `config.oidc.issuerUrl` | OIDC issuer URL |
+| `config.oidc.clientId` | OIDC client ID |
+| `secret.values.jwtSecret` | JWT signing secret |
+| `secret.values.sessionSecret` | Express session secret |
+| `secret.values.oidcClientSecret` | OIDC client secret |
+| `secret.values.databasePassword` | Password for `database.user` on the external database |
+| `database.host` | Hostname of the external PostgreSQL server (not needed with the bundled database) |
+
+Rendering fails with a message naming the missing value. When `secret.existingSecret` is set, the `secret.values.*` entries are not needed.
+
+## Secrets
+
+There are two ways to supply the secrets:
+
+1. **Through values.** Set `secret.values.*` and the chart creates the Secret.
+2. **Through an existing Secret.** Set `secret.existingSecret` to the name of a Secret you manage. The chart then creates no Secret and reads the entries named by `secret.keys` (by default `jwt-secret`, `session-secret`, `oidc-client-secret` and `database-password`).
+
+> [!WARNING]
+> Secrets passed through values are stored in plaintext in the Helm release Secret. They are visible to anyone who can read Secrets in the namespace or run `helm get values`. Use `secret.existingSecret` to avoid this, for example with a Secret managed by External Secrets Operator or Sealed Secrets.
+
+The chart cannot look inside an existing Secret. If one of the keys is missing, the pod starts and then crash-loops with `Environment variable ... has to be defined`.
+
+```bash
+kubectl create secret generic threatsea-secrets \
+  --from-literal=jwt-secret="$(openssl rand -hex 32)" \
+  --from-literal=session-secret="$(openssl rand -hex 32)" \
+  --from-literal=oidc-client-secret='<client secret>' \
+  --from-literal=database-password='<database password>'
+
+helm install threatsea oci://ghcr.io/maibornwolff/charts/threatsea --version <version> \
+  --set secret.existingSecret=threatsea-secrets \
+  --values my-values.yaml
+```
+
+## External database
+
+An external PostgreSQL server is the documented production setup. Point the chart at it with the `database.*` values:
+
+```yaml
+database:
+  host: postgres.example.com
+  port: 5432
+  name: threatsea
+  user: threatsea
+  tls: true
+```
+
+`database.tls` is `true` by default. If the server certificate is signed by a private CA, mount the CA bundle with `extraVolumes` and `extraVolumeMounts` and point Node.js at it with `NODE_EXTRA_CA_CERTS`. The root filesystem is read-only, so the bundle has to come from a volume:
+
+```yaml
+extraVolumes:
+  - name: db-ca
+    secret:
+      secretName: my-db-ca
+extraVolumeMounts:
+  - name: db-ca
+    mountPath: /etc/ssl/db-ca
+    readOnly: true
+extraEnv:
+  - name: NODE_EXTRA_CA_CERTS
+    value: /etc/ssl/db-ca/ca.crt
+```
+
+`extraEnv` cannot redefine variables the chart manages itself, such as `DATABASE_TLS` or `PORT`; rendering fails if you try.
+
+## Bundled database
+
+> [!WARNING]
+> `postgresql.enabled: true` deploys a PostgreSQL StatefulSet for **evaluation only**. It runs a single replica, has no backups, serves plaintext connections (no TLS), and has no supported upgrade path between PostgreSQL major versions. For production use an external database, for example a managed service or [CloudNativePG](https://cloudnative-pg.io/).
+
+```yaml
+postgresql:
+  enabled: true
+  auth:
+    password: change-me
+```
+
+With the bundled database enabled, `database.host` is not used and `database.tls` is forced off.
+
+## Authentication
+
+`config.authMethod` defaults to `oidc`. Any other value means fixed-profile authentication with hardcoded test users. That mode is for development only and must never be exposed to real users.
+
+## Testing the release
+
+`helm test <release>` runs a pod that checks, with `pg_isready`, that the configured database is reachable. It checks reachability only and does not verify the credentials.
+
+{{ template "chart.valuesSection" . }}

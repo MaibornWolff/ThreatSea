@@ -1,6 +1,5 @@
 .git
 .gitignore
-*.md
 ci/
 /tests/
 .DS_Store

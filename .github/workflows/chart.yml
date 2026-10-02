@@ -32,6 +32,12 @@ jobs:
         run: |
           helm plugin install https://github.com/helm-unittest/helm-unittest --version 1.1.2 --verify=false
           curl -sSfL https://github.com/yannh/kubeconform/releases/download/v0.8.0/kubeconform-linux-amd64.tar.gz | tar -xz -C /usr/local/bin kubeconform
+      - name: Check chart README is up to date
+        run: |
+          curl -sSfL https://github.com/norwoodj/helm-docs/releases/download/v1.14.2/helm-docs_1.14.2_Linux_x86_64.tar.gz | tar -xz -C /usr/local/bin helm-docs
+          helm-docs --chart-search-root charts --template-files README.md.gotmpl
+          git diff --exit-code -- charts/threatsea/README.md \
+            || { echo "::error::charts/threatsea/README.md is stale — run helm-docs and commit the result"; exit 1; }
       - name: Lint chart
         run: helm lint charts/threatsea
       - name: Run chart unit tests
