@@ -1,0 +1,151 @@
+suite: bundled postgresql
+templates:
+  - deployment.yaml
+  - secret.yaml
+  - postgresql-statefulset.yaml
+  - postgresql-service.yaml
+  - postgresql-secret.yaml
+set:
+  config.originApp: https://app.example.com
+  config.originBackend: https://api.example.com
+  config.oidc.issuerUrl: https://idp.example.com
+  config.oidc.clientId: threatsea
+  secret.values.jwtSecret: jwt
+  secret.values.sessionSecret: session
+  secret.values.oidcClientSecret: oidc
+  secret.values.databasePassword: dbpw
+tests:
+  - it: renders no database resources by default
+    templates: [postgresql-statefulset.yaml, postgresql-service.yaml, postgresql-secret.yaml]
+    set:
+      database.host: db.example.com
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: requires database.host when the bundled database is off
+    template: deployment.yaml
+    set:
+      database.host: ""
+    asserts:
+      - failedTemplate:
+          errorPattern: database.host must be set when postgresql.enabled=false
+
+  - it: sends DATABASE_TLS=enabled to an external database
+    template: deployment.yaml
+    set:
+      database.host: db.example.com
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: DATABASE_TLS, value: "enabled"}
+
+  # Finding 1: the bundled database serves plaintext, so TLS must be off or the
+  # backend never connects, migrations never finish and the pod never becomes ready.
+  - it: forces DATABASE_TLS=disabled for the bundled database
+    template: deployment.yaml
+    set:
+      postgresql.enabled: true
+      postgresql.auth.password: secret
+      database.tls: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: DATABASE_TLS, value: "disabled"}
+
+  - it: points DATABASE_HOST at the bundled service
+    template: deployment.yaml
+    release: {name: rel}
+    set:
+      postgresql.enabled: true
+      postgresql.auth.password: secret
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: DATABASE_HOST, value: rel-threatsea-postgresql}
+
+  - it: requires a password for the bundled database
+    template: postgresql-secret.yaml
+    set:
+      postgresql.enabled: true
+    asserts:
+      - failedTemplate:
+          errorPattern: postgresql.auth.password must be set
+
+  - it: reads the password from an existing secret when given one
+    template: postgresql-statefulset.yaml
+    set:
+      postgresql.enabled: true
+      postgresql.auth.existingSecret: my-pg-secret
+      postgresql.auth.existingSecretPasswordKey: pw
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name=="POSTGRES_PASSWORD")].valueFrom.secretKeyRef.name
+          value: my-pg-secret
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name=="POSTGRES_PASSWORD")].valueFrom.secretKeyRef.key
+          value: pw
+
+  # Finding 7: database.name/user are the single source of truth. The bundled
+  # database creates exactly what the app is told to connect to, so no mismatch exists.
+  - it: creates the database and user the app connects with
+    template: postgresql-statefulset.yaml
+    set:
+      postgresql.enabled: true
+      postgresql.auth.password: secret
+      database.name: appdb
+      database.user: appuser
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: POSTGRES_DB, value: appdb}
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: POSTGRES_USER, value: appuser}
+
+  # Verified image facts: PG 18 moved PGDATA and the volume mount point.
+  - it: mounts the volume where the postgres 18 image expects it
+    template: postgresql-statefulset.yaml
+    set:
+      postgresql.enabled: true
+      postgresql.auth.password: secret
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[?(@.name=="data")].mountPath
+          value: /var/lib/postgresql
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: PGDATA, value: /var/lib/postgresql/18/docker}
+
+  - it: runs the database as uid 70 on a read-only root filesystem
+    template: postgresql-statefulset.yaml
+    set:
+      postgresql.enabled: true
+      postgresql.auth.password: secret
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.runAsUser
+          value: 70
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 70
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem
+          value: true
+
+  # Review Focus 4: a 63-character fullnameOverride must not make the database's
+  # Service name collide with the app's Service name. The app name below is 63
+  # a's; the database name must be 52 a's + "-postgresql", also exactly 63.
+  - it: keeps the database service name distinct from the app service name
+    template: postgresql-service.yaml
+    set:
+      postgresql.enabled: true
+      postgresql.auth.password: secret
+      fullnameOverride: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    asserts:
+      - equal:
+          path: metadata.name
+          value: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-postgresql
+      - matchRegex:
+          path: metadata.name
+          pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$

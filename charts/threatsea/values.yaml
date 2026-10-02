@@ -97,31 +97,46 @@ secret:
     databasePassword: ""
 
 # ──────────────────────────────────────────────
-# Database (external)
+# Database
 # ──────────────────────────────────────────────
 database:
+  # -- Hostname of an external PostgreSQL server. Required unless postgresql.enabled=true.
   host: ""
-  name: "threatsea"
-  user: "threatsea"
-  tls: "enabled"
   port: 5432
+  # -- Database name. Also the database the bundled PostgreSQL creates.
+  name: threatsea
+  # -- Database user. Also the user the bundled PostgreSQL creates.
+  user: threatsea
+  # -- Connect over TLS. Forced off when postgresql.enabled=true, which serves plaintext.
+  tls: true
 
 # ──────────────────────────────────────────────
-# PostgreSQL subchart (Bitnami)
-# Set postgresql.enabled=true to deploy PostgreSQL as a sidecar dependency.
-# When enabled, database.host is automatically set to the subchart service.
+# Bundled PostgreSQL (evaluation only)
 # ──────────────────────────────────────────────
 postgresql:
-  enabled: true
+  # -- Deploy a single-replica PostgreSQL StatefulSet. EVALUATION ONLY: no backups,
+  # no replication, no TLS, and no supported upgrade path between major versions.
+  enabled: false
+  image:
+    repository: postgres
+    tag: "18.6-alpine"
+    pullPolicy: IfNotPresent
   auth:
-    database: threatsea
-    username: threatsea
+    # -- Password for database.user. Required when enabled=true and existingSecret is empty.
     password: ""
+    # -- Existing Secret holding the password, instead of auth.password.
     existingSecret: ""
-  primary:
-    persistence:
-      enabled: true
-      size: 8Gi
+    existingSecretPasswordKey: password
+  persistence:
+    enabled: true
+    size: 8Gi
+    storageClass: ""
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 1Gi
 
 # ──────────────────────────────────────────────
 # Service

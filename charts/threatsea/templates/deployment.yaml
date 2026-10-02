@@ -102,7 +102,7 @@ spec:
             - name: DATABASE_USER
               value: {{ .Values.database.user | quote }}
             - name: DATABASE_TLS
-              value: {{ .Values.database.tls | quote }}
+              value: {{ include "threatsea.databaseTls" . | quote }}
             - name: DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:

@@ -9,3 +9,6 @@ secret:
     jwtSecret: jwt
     sessionSecret: session
     oidcClientSecret: oidc
+    databasePassword: dbpw
+database:
+  host: db.example.com

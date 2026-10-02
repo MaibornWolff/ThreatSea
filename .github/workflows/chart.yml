@@ -32,10 +32,6 @@ jobs:
         run: |
           helm plugin install https://github.com/helm-unittest/helm-unittest --version 1.1.2 --verify=false
           curl -sSfL https://github.com/yannh/kubeconform/releases/download/v0.8.0/kubeconform-linux-amd64.tar.gz | tar -xz -C /usr/local/bin kubeconform
-      - name: Build chart dependencies
-        run: |
-          helm repo add bitnami https://charts.bitnami.com/bitnami
-          helm dependency build charts/threatsea
       - name: Lint chart
         run: helm lint charts/threatsea
       - name: Run chart unit tests

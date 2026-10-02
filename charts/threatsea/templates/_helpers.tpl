@@ -71,34 +71,61 @@ Secret name – resolves to either the chart-managed secret or the user-supplied
 {{- end }}
 
 {{/*
-Database host – resolves to the subchart service when postgresql.enabled=true.
+Bundled PostgreSQL resource name. The app fullname is truncated to 52 characters
+before the 11-character suffix is appended, so the result never exceeds 63 and
+never equals the app fullname.
+*/}}
+{{- define "threatsea.postgresql.fullname" -}}
+{{- printf "%s-postgresql" (include "threatsea.fullname" . | trunc 52 | trimSuffix "-") }}
+{{- end }}
+
+{{/*
+Bundled PostgreSQL selector labels.
+*/}}
+{{- define "threatsea.postgresql.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "threatsea.name" . | trunc 52 | trimSuffix "-" }}-postgresql
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+Database host – the bundled Service when postgresql.enabled=true, else database.host.
 */}}
 {{- define "threatsea.databaseHost" -}}
 {{- if .Values.postgresql.enabled }}
-{{- printf "%s-postgresql" .Release.Name }}
+{{- include "threatsea.postgresql.fullname" . }}
 {{- else }}
 {{- required "database.host must be set when postgresql.enabled=false" .Values.database.host }}
 {{- end }}
 {{- end }}
 
 {{/*
-Database password secret key reference.
-When using the Bitnami postgresql subchart, it manages its own secret.
+DATABASE_TLS literal read by the backend. The bundled database serves plaintext.
+*/}}
+{{- define "threatsea.databaseTls" -}}
+{{- if .Values.postgresql.enabled }}
+{{- print "disabled" }}
+{{- else }}
+{{- ternary "enabled" "disabled" .Values.database.tls }}
+{{- end }}
+{{- end }}
+
+{{/*
+Database password secret reference.
 */}}
 {{- define "threatsea.databasePasswordSecretName" -}}
-{{- if .Values.postgresql.enabled }}
 {{- if .Values.postgresql.auth.existingSecret }}
 {{- .Values.postgresql.auth.existingSecret }}
-{{- else }}
-{{- printf "%s-postgresql" .Release.Name }}
-{{- end }}
+{{- else if .Values.postgresql.enabled }}
+{{- include "threatsea.postgresql.fullname" . }}
 {{- else }}
 {{- include "threatsea.secretName" . }}
 {{- end }}
 {{- end }}
 
 {{- define "threatsea.databasePasswordSecretKey" -}}
-{{- if .Values.postgresql.enabled }}
+{{- if .Values.postgresql.auth.existingSecret }}
+{{- .Values.postgresql.auth.existingSecretPasswordKey }}
+{{- else if .Values.postgresql.enabled }}
 {{- print "password" }}
 {{- else }}
 {{- .Values.secret.keys.databasePassword }}

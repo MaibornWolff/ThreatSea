@@ -11,6 +11,8 @@ set:
   secret.values.jwtSecret: jwt
   secret.values.sessionSecret: session
   secret.values.oidcClientSecret: oidc
+  secret.values.databasePassword: dbpw
+  database.host: db.example.com
 tests:
   - it: names resources after the release and chart
     template: service.yaml

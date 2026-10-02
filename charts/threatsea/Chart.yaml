@@ -18,9 +18,3 @@ sources:
 maintainers:
   - name: MaibornWolff GmbH
     url: https://www.maibornwolff.de/en
-
-dependencies:
-  - name: postgresql
-    version: "18.x.x"
-    repository: "https://charts.bitnami.com/bitnami"
-    condition: postgresql.enabled
