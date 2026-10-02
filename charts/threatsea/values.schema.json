@@ -329,6 +329,15 @@
     },
     "extraEnv": {
       "type": "array"
+    },
+    "extraEnvFrom": {
+      "type": "array"
+    },
+    "extraVolumes": {
+      "type": "array"
+    },
+    "extraVolumeMounts": {
+      "type": "array"
     }
   }
 }

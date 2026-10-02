@@ -141,3 +141,17 @@ Image tag – falls back to appVersion.
 {{- define "threatsea.imageTag" -}}
 {{- .Values.image.tag | default .Chart.AppVersion }}
 {{- end }}
+
+{{/*
+Reject extraEnv entries that redefine a variable the chart already sets; Kubernetes
+would silently keep the last duplicate. The list mirrors the env block in
+deployment.yaml and must be updated whenever a variable is added or removed there.
+*/}}
+{{- define "threatsea.checkExtraEnv" -}}
+{{- $managed := list "PORT" "LOG_LEVEL" "ORIGIN_APP" "ORIGIN_BACKEND" "AUTH_METHOD" "OIDC_ISSUER_URL" "OIDC_CLIENT_ID" "OIDC_ALLOW_HTTP" "OIDC_CLIENT_SECRET" "COOKIES_SECURE_OPTION" "USE_PROXY" "JWT_SECRET" "EXPRESS_SESSION_SECRET" "DATABASE_HOST" "DATABASE_PORT" "DATABASE_NAME" "DATABASE_USER" "DATABASE_TLS" "DATABASE_PASSWORD" -}}
+{{- range .Values.extraEnv }}
+{{- if has .name $managed }}
+{{- fail (printf "extraEnv must not redefine the chart-managed variable %s" .name) }}
+{{- end }}
+{{- end }}
+{{- end }}

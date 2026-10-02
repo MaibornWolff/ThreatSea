@@ -225,3 +225,12 @@ affinity: {}
 
 # -- Extra environment variables to inject into the container
 extraEnv: []
+
+# -- Extra environment sources (configMapRef / secretRef) added to the container's `envFrom`
+extraEnvFrom: []
+
+# -- Extra volumes added to the pod, e.g. to mount a private CA bundle (the root filesystem is read-only)
+extraVolumes: []
+
+# -- Extra volume mounts added to the container; each must match a volume in `extraVolumes`
+extraVolumeMounts: []

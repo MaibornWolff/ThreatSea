@@ -1,0 +1,72 @@
+suite: extra volumes, mounts and env sources
+templates:
+  - deployment.yaml
+  - secret.yaml
+set:
+  config.originApp: https://app.example.com
+  config.originBackend: https://api.example.com
+  config.oidc.issuerUrl: https://idp.example.com
+  config.oidc.clientId: threatsea
+  secret.values.jwtSecret: jwt
+  secret.values.sessionSecret: session
+  secret.values.oidcClientSecret: oidc
+  secret.values.databasePassword: dbpw
+  database.host: db.example.com
+tests:
+  - it: mounts an extra volume
+    template: deployment.yaml
+    set:
+      extraVolumes:
+        - name: custom-ca
+          configMap: {name: my-ca}
+      extraVolumeMounts:
+        - name: custom-ca
+          mountPath: /etc/ssl/certs/custom
+          readOnly: true
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content: {name: custom-ca, configMap: {name: my-ca}}
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content: {name: custom-ca, mountPath: "/etc/ssl/certs/custom", readOnly: true}
+
+  - it: adds extra env sources
+    template: deployment.yaml
+    set:
+      extraEnvFrom:
+        - configMapRef: {name: my-config}
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content: {configMapRef: {name: my-config}}
+
+  - it: omits the keys entirely when nothing is set
+    template: deployment.yaml
+    asserts:
+      - notExists: {path: "spec.template.spec.containers[0].envFrom"}
+      - notExists: {path: "spec.template.spec.containers[0].volumeMounts"}
+      - notExists: {path: "spec.template.spec.volumes"}
+
+  # Review Focus 1: a duplicate env name is silently resolved by Kubernetes
+  # keeping the last entry, so the chart must reject the collision.
+  - it: rejects an extraEnv entry that shadows a chart-managed variable
+    template: deployment.yaml
+    set:
+      extraEnv:
+        - name: DATABASE_TLS
+          value: disabled
+    asserts:
+      - failedTemplate:
+          errorPattern: extraEnv must not redefine the chart-managed variable DATABASE_TLS
+
+  - it: accepts an extraEnv entry the chart does not manage
+    template: deployment.yaml
+    set:
+      extraEnv:
+        - name: OIDC_SCOPE
+          value: openid profile email groups
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: OIDC_SCOPE, value: openid profile email groups}
