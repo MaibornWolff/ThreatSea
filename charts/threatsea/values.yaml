@@ -75,28 +75,25 @@ config:
 # Secrets
 # ──────────────────────────────────────────────
 secret:
-  # -- If true, the chart creates a Kubernetes Secret from the values below.
-  # If false, provide an existing secret via existingSecret.
-  create: true
-
-  # -- Name of an existing Secret to use (when create=false).
-  # The secret must contain the keys defined in secret.keys.
+  # -- Name of an existing Secret to use. When empty, the chart creates a Secret
+  # from secret.values. When set, the chart creates none and the Secret must
+  # contain the keys defined in secret.keys.
   existingSecret: ""
 
-  # -- Key names inside the existing Secret (only relevant when create=false)
+  # -- Key names inside the existing Secret (the key names the chart reads from the Secret)
   keys:
     jwtSecret: jwt-secret
     sessionSecret: session-secret
     oidcClientSecret: oidc-client-secret
     databasePassword: database-password
 
-  # -- Values used when secret.create=true
+  # -- Values for the chart-created Secret (used only when existingSecret is empty)
   values:
     jwtSecret: ""
     sessionSecret: ""
     # -- OIDC client secret (only required when config.authMethod=oidc)
     oidcClientSecret: ""
-    # -- Database password (only used when postgresql.enabled=false)
+    # -- Database password (used only when postgresql.enabled=false and secret.existingSecret is empty)
     databasePassword: ""
 
 # ──────────────────────────────────────────────

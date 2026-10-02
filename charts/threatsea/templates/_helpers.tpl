@@ -60,13 +60,13 @@ ServiceAccount name.
 {{- end }}
 
 {{/*
-Secret name – resolves to either the chart-managed secret or the user-supplied one.
+Secret name – the user-supplied Secret when secret.existingSecret is set, otherwise the chart-managed one.
 */}}
 {{- define "threatsea.secretName" -}}
-{{- if .Values.secret.create }}
-{{- include "threatsea.fullname" . }}
+{{- if .Values.secret.existingSecret }}
+{{- .Values.secret.existingSecret }}
 {{- else }}
-{{- required "secret.existingSecret must be set when secret.create=false" .Values.secret.existingSecret }}
+{{- include "threatsea.fullname" . }}
 {{- end }}
 {{- end }}
 

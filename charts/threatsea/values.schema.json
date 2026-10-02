@@ -121,9 +121,6 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "create": {
-          "type": "boolean"
-        },
         "existingSecret": {
           "type": "string"
         },
