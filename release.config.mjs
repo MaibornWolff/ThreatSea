@@ -17,6 +17,10 @@ export default {
                 preset: "conventionalcommits",
                 releaseRules: [
                     {
+                        breaking: true,
+                        release: "major",
+                    },
+                    {
                         type: "feat",
                         release: "minor",
                     },
