@@ -2,9 +2,13 @@
 # ThreatSea Helm Chart – Default Values
 # ──────────────────────────────────────────────
 
-# -- Number of replicas. Note: ThreatSea should not be scaled horizontally
-# unless session affinity or an external session store is configured.
+# -- Number of replicas. Sessions are stored in PostgreSQL and survive across
+# replicas, but whether other in-process state prevents horizontal scaling has
+# not been verified, so `1` is the tested configuration.
 replicaCount: 1
+
+# -- Deployment update strategy. Kubernetes default (RollingUpdate) when empty.
+strategy: {}
 
 image:
   # -- ThreatSea container image repository
@@ -176,6 +180,8 @@ service:
   port: 80
   # -- Port the ThreatSea container listens on
   containerPort: 8000
+  # -- Annotations for the Service
+  annotations: {}
 
 # ──────────────────────────────────────────────
 # Ingress
@@ -212,8 +218,13 @@ gateway:
   gatewayName: ""
   # -- Namespace of the Gateway. Release namespace when empty.
   gatewayNamespace: ""
-  # -- Hostname matched by the HTTPRoute
-  hostname: threatsea.example.com
+  # -- Hostnames matched by the HTTPRoute
+  hostnames:
+    - threatsea.example.com
+  # -- Name of the Gateway listener (sectionName) to attach to. All listeners when empty.
+  sectionName: ""
+  # -- Annotations for the HTTPRoute
+  annotations: {}
 
 # ──────────────────────────────────────────────
 # Resources
@@ -234,7 +245,6 @@ livenessProbe:
   httpGet:
     path: /api/health
     port: http
-  initialDelaySeconds: 30
   periodSeconds: 30
   timeoutSeconds: 5
   failureThreshold: 3
@@ -244,7 +254,6 @@ readinessProbe:
   httpGet:
     path: /api/health
     port: http
-  initialDelaySeconds: 10
   periodSeconds: 10
   timeoutSeconds: 5
   failureThreshold: 3

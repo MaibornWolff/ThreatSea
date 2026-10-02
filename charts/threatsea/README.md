@@ -146,10 +146,12 @@ With the bundled database enabled, `database.host` is not used and `database.tls
 | extraVolumeMounts | list | `[]` | Extra volume mounts added to the container; each must match a volume in `extraVolumes` |
 | extraVolumes | list | `[]` | Extra volumes added to the pod, e.g. to mount a private CA bundle (the root filesystem is read-only) |
 | fullnameOverride | string | `""` | Override the full resource name prefix |
+| gateway.annotations | object | `{}` | Annotations for the HTTPRoute |
 | gateway.enabled | bool | `false` | Create an HTTPRoute attached to an existing Gateway |
 | gateway.gatewayName | string | `""` | Name of the Gateway to attach the HTTPRoute to |
 | gateway.gatewayNamespace | string | `""` | Namespace of the Gateway. Release namespace when empty. |
-| gateway.hostname | string | `"threatsea.example.com"` | Hostname matched by the HTTPRoute |
+| gateway.hostnames | list | `["threatsea.example.com"]` | Hostnames matched by the HTTPRoute |
+| gateway.sectionName | string | `""` | Name of the Gateway listener (sectionName) to attach to. All listeners when empty. |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | image.repository | string | `"ghcr.io/maibornwolff/threatsea"` | ThreatSea container image repository |
 | image.tag | string | `""` | Image tag. Defaults to the chart's appVersion when empty. |
@@ -159,7 +161,7 @@ With the bundled database enabled, `database.host` is not used and `database.tls
 | ingress.enabled | bool | `false` | Create an Ingress |
 | ingress.hosts | list | `[{"host":"threatsea.example.com","paths":[{"path":"/","pathType":"Prefix"}]}]` | Ingress hosts and paths |
 | ingress.tls | list | `[]` | Ingress TLS configuration |
-| livenessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/api/health","port":"http"},"initialDelaySeconds":30,"periodSeconds":30,"timeoutSeconds":5}` | Liveness probe of the ThreatSea container |
+| livenessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/api/health","port":"http"},"periodSeconds":30,"timeoutSeconds":5}` | Liveness probe of the ThreatSea container |
 | nameOverride | string | `""` | Override the chart name used in resource names |
 | nodeSelector | object | `{}` | Node selector |
 | podAnnotations | object | `{}` | Annotations added to the pods |
@@ -176,8 +178,8 @@ With the bundled database enabled, `database.host` is not used and `database.tls
 | postgresql.persistence.size | string | `"8Gi"` | Size of the PersistentVolumeClaim |
 | postgresql.persistence.storageClass | string | `""` | StorageClass of the PersistentVolumeClaim. Cluster default when empty. |
 | postgresql.resources | object | `{"limits":{"memory":"1Gi"},"requests":{"cpu":"100m","memory":"256Mi"}}` | Resource requests and limits of the bundled PostgreSQL container |
-| readinessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/api/health","port":"http"},"initialDelaySeconds":10,"periodSeconds":10,"timeoutSeconds":5}` | Readiness probe of the ThreatSea container |
-| replicaCount | int | `1` | Number of replicas. Note: ThreatSea should not be scaled horizontally unless session affinity or an external session store is configured. |
+| readinessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/api/health","port":"http"},"periodSeconds":10,"timeoutSeconds":5}` | Readiness probe of the ThreatSea container |
+| replicaCount | int | `1` | Number of replicas. Sessions are stored in PostgreSQL and survive across replicas, but whether other in-process state prevents horizontal scaling has not been verified, so `1` is the tested configuration. |
 | resources | object | `{"limits":{"memory":"512Mi"},"requests":{"cpu":"100m","memory":"256Mi"}}` | Resource requests and limits of the ThreatSea container |
 | secret.existingSecret | string | `""` | Name of an existing Secret to use. When empty, the chart creates a Secret from secret.values. When set, the chart creates none and the Secret must contain the keys defined in secret.keys. |
 | secret.keys | object | `{"databasePassword":"database-password","jwtSecret":"jwt-secret","oidcClientSecret":"oidc-client-secret","sessionSecret":"session-secret"}` | Key names of the four secret entries. The chart uses these names both in the Secret it creates and when reading an existing Secret, so an existing Secret must contain exactly these keys. |
@@ -186,6 +188,7 @@ With the bundled database enabled, `database.host` is not used and `database.tls
 | secret.values.jwtSecret | string | `""` | Secret used to sign JWTs |
 | secret.values.oidcClientSecret | string | `""` | OIDC client secret (only required when config.authMethod=oidc) |
 | secret.values.sessionSecret | string | `""` | Secret used to sign Express session cookies |
+| service.annotations | object | `{}` | Annotations for the Service |
 | service.containerPort | int | `8000` | Port the ThreatSea container listens on |
 | service.port | int | `80` | Service port |
 | service.type | string | `"ClusterIP"` | Service type |
@@ -194,4 +197,5 @@ With the bundled database enabled, `database.host` is not used and `database.tls
 | serviceAccount.create | bool | `false` | Create a ServiceAccount for the pods |
 | serviceAccount.name | string | `""` | ServiceAccount name. Generated from the fullname when empty and create=true. |
 | startupProbe | object | `{"failureThreshold":30,"httpGet":{"path":"/api/health","port":"http"},"initialDelaySeconds":5,"periodSeconds":5}` | Startup probe of the ThreatSea container |
+| strategy | object | `{}` | Deployment update strategy. Kubernetes default (RollingUpdate) when empty. |
 | tolerations | list | `[]` | Tolerations |

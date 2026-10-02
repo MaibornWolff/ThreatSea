@@ -1,6 +1,5 @@
 🌊 ThreatSea has been deployed!
 
-
 {{- if .Values.ingress.enabled }}
 Access ThreatSea via:
 {{- range .Values.ingress.hosts }}
@@ -9,7 +8,9 @@ Access ThreatSea via:
 
 {{- else if .Values.gateway.enabled }}
 Access ThreatSea via Gateway:
-  https://{{ .Values.gateway.hostname }}
+{{- range .Values.gateway.hostnames }}
+  https://{{ . }}
+{{- end }}
 
 {{- else }}
 ThreatSea is not exposed externally. To access it locally, run:

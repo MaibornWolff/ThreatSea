@@ -264,6 +264,9 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 65535
+        },
+        "annotations": {
+          "type": "object"
         }
       }
     },
@@ -301,12 +304,24 @@
         "gatewayNamespace": {
           "type": "string"
         },
-        "hostname": {
+        "hostnames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sectionName": {
           "type": "string"
+        },
+        "annotations": {
+          "type": "object"
         }
       }
     },
     "resources": {
+      "type": "object"
+    },
+    "strategy": {
       "type": "object"
     },
     "livenessProbe": {

@@ -1,0 +1,22 @@
+config:
+  originApp: https://app.example.com
+  originBackend: https://api.example.com
+  oidc:
+    issuerUrl: https://idp.example.com
+    clientId: threatsea
+secret:
+  values:
+    jwtSecret: jwt
+    sessionSecret: session
+    oidcClientSecret: oidc
+    databasePassword: dbpw
+database:
+  host: db.example.com
+gateway:
+  enabled: true
+  gatewayName: gw
+  gatewayNamespace: gateway-system
+  sectionName: https
+  hostnames:
+    - app.example.com
+    - api.example.com

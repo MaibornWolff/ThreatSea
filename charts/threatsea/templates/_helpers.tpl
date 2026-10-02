@@ -155,3 +155,12 @@ deployment.yaml and must be updated whenever a variable is added or removed ther
 {{- end }}
 {{- end }}
 {{- end }}
+
+{{/*
+Fail when both routing options are enabled.
+*/}}
+{{- define "threatsea.validateRouting" -}}
+{{- if and .Values.ingress.enabled .Values.gateway.enabled -}}
+{{- fail "ingress.enabled and gateway.enabled are mutually exclusive; enable only one" -}}
+{{- end -}}
+{{- end }}

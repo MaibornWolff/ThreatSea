@@ -13,6 +13,9 @@ keywords:
   - security
   - risk-management
 
+kubeVersion: ">=1.25.0-0"
+icon: https://raw.githubusercontent.com/MaibornWolff/ThreatSea/main/apps/frontend/public/logo256.png
+
 home: https://github.com/MaibornWolff/ThreatSea
 sources:
   - https://github.com/MaibornWolff/ThreatSea
