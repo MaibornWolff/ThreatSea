@@ -44,3 +44,14 @@ tests:
     set:
       postgresql.enabled: false
       database.host: db.example.com
+
+  - it: tests the bundled service port regardless of database.port
+    set:
+      postgresql.enabled: true
+      postgresql.auth.password: pw
+      database.host: ""
+      database.port: 6543
+    asserts:
+      - contains:
+          path: spec.containers[0].env
+          content: {name: PGPORT, value: "5432"}

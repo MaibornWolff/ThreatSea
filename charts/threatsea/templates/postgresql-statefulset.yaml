@@ -52,22 +52,14 @@ spec:
           readinessProbe:
             exec:
               command:
-                - pg_isready
-                - -U
-                - {{ .Values.database.user | quote }}
-                - -d
-                - {{ .Values.database.name | quote }}
+                {{- include "threatsea.postgresql.isReady" . | nindent 16 }}
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
           startupProbe:
             exec:
               command:
-                - pg_isready
-                - -U
-                - {{ .Values.database.user | quote }}
-                - -d
-                - {{ .Values.database.name | quote }}
+                {{- include "threatsea.postgresql.isReady" . | nindent 16 }}
             periodSeconds: 5
             timeoutSeconds: 5
             failureThreshold: 30

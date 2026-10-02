@@ -30,7 +30,7 @@ spec:
         - name: PGHOST
           value: {{ include "threatsea.databaseHost" . | quote }}
         - name: PGPORT
-          value: {{ .Values.database.port | quote }}
+          value: {{ include "threatsea.databasePort" . | quote }}
         - name: PGUSER
           value: {{ .Values.database.user | quote }}
         - name: PGDATABASE

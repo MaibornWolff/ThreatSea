@@ -102,7 +102,7 @@ spec:
             - name: DATABASE_HOST
               value: {{ include "threatsea.databaseHost" . | quote }}
             - name: DATABASE_PORT
-              value: {{ .Values.database.port | quote }}
+              value: {{ include "threatsea.databasePort" . | quote }}
             - name: DATABASE_NAME
               value: {{ .Values.database.name | quote }}
             - name: DATABASE_USER

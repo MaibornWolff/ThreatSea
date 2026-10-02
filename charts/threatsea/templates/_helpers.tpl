@@ -71,12 +71,15 @@ Secret name – the user-supplied Secret when secret.existingSecret is set, othe
 {{- end }}
 
 {{/*
-Bundled PostgreSQL resource name. The app fullname is truncated to 52 characters
-before the 11-character suffix is appended, so the result never exceeds 63 and
-never equals the app fullname.
+Bundled PostgreSQL resource name. The app fullname is truncated to 41 characters
+before the 11-character suffix is appended, so the result never exceeds 52 and
+never equals the app fullname. 52 (not 63) because the StatefulSet controller
+adds pod labels such as controller-revision-hash (<sts-name>-<hash>) that must
+stay within 63 characters; longer StatefulSet names yield no pods
+(kubernetes/kubernetes#64023).
 */}}
 {{- define "threatsea.postgresql.fullname" -}}
-{{- printf "%s-postgresql" (include "threatsea.fullname" . | trunc 52 | trimSuffix "-") }}
+{{- printf "%s-postgresql" (include "threatsea.fullname" . | trunc 41 | trimSuffix "-") }}
 {{- end }}
 
 {{/*
@@ -99,6 +102,32 @@ Database host – the bundled Service when postgresql.enabled=true, else databas
 {{- else }}
 {{- required "database.host must be set when postgresql.enabled=false" .Values.database.host }}
 {{- end }}
+{{- end }}
+
+{{/*
+Database port – the bundled Service always listens on 5432, else database.port.
+*/}}
+{{- define "threatsea.databasePort" -}}
+{{- if .Values.postgresql.enabled }}
+{{- print 5432 }}
+{{- else }}
+{{- .Values.database.port }}
+{{- end }}
+{{- end }}
+
+{{/*
+Bundled PostgreSQL readiness check. Connects over TCP (-h 127.0.0.1): without -h
+pg_isready probes the Unix socket, which the image's temporary initdb server also
+serves, so the probe could pass during first-time initialisation.
+*/}}
+{{- define "threatsea.postgresql.isReady" -}}
+- pg_isready
+- -h
+- 127.0.0.1
+- -U
+- {{ .Values.database.user | quote }}
+- -d
+- {{ .Values.database.name | quote }}
 {{- end }}
 
 {{/*
