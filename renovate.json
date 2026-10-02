@@ -20,18 +20,32 @@
       "datasourceTemplate": "npm"
     },
     {
-      "description": "Update GitHub-release pins inline in workflow run commands (helm plugin install <url> --version X, and releases/download/vX/ tarball URLs). No built-in manager reads versions out of run: commands, so without this the pins drift silently.",
+      "description": "Update GitHub-release pins inline in workflow run commands (helm plugin install <url> --version X). No built-in manager reads versions out of run: commands, so without this the pins drift silently.",
       "customType": "regex",
       "managerFilePatterns": ["/^\\.github/workflows/.+\\.ya?ml$/"],
       "matchStrings": [
-        "helm plugin install https://github\\.com/(?<depName>[^/\\s]+/[^/\\s]+) --version (?<currentValue>[\\w.+-]+)",
-        "https://github\\.com/(?<depName>[^/\\s]+/[^/\\s]+)/releases/download/v(?<currentValue>[\\w.+-]+)/"
+        "helm plugin install https://github\\.com/(?<depName>[^/\\s]+/[^/\\s]+) --version (?<currentValue>[\\w.+-]+)"
       ],
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v?(?<version>.+)$"
+    },
+    {
+      "description": "Update tool versions declared as `# renovate: datasource=... depName=...` followed by a `key: vX.Y.Z` line in workflows (setup-helm version, kubeconform and helm-docs downloads). The version is declared once, so URLs built from it can never end up half-updated. The SHA-256 next to a downloaded tool is not updated automatically: take it from the release's checksum file, otherwise CI fails the checksum check.",
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/.+\\.ya?ml$/"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>\\S+)\\s+\\w+: \"?(?<currentValue>v?[\\w.+-]+)\"?\\s"
+      ]
     }
   ],
   "packageRules": [
+    {
+      "description": "No major postgres image updates in the Helm chart. The bundled database hardcodes PGDATA=/var/lib/postgresql/18/docker, so a major bump breaks existing PVCs. Minor and patch bumps are allowed but need the chart README regenerated (helm-docs) because the image tag appears in it.",
+      "matchFileNames": ["charts/**"],
+      "matchPackageNames": ["postgres"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
     {
       "description": "minimumReleaseAge cannot be enforced for these update types (the package manager performs the resolution); without this they would be filtered as permanently pending and never raised as PRs",
       "matchUpdateTypes": ["lockFileMaintenance", "pin", "replacement"],
