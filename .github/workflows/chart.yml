@@ -1,0 +1,50 @@
+name: Chart
+
+on:
+  push:
+    branches:
+      - main
+      - next
+    paths:
+      - "charts/**"
+      - ".github/workflows/chart.yml"
+  pull_request:
+    branches:
+      - "**"
+    paths:
+      - "charts/**"
+      - ".github/workflows/chart.yml"
+
+jobs:
+  chart:
+    name: Lint, Test and Render
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Setup Helm
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
+        with:
+          version: v4.3.0
+      - name: Install helm-unittest and kubeconform
+        run: |
+          helm plugin install https://github.com/helm-unittest/helm-unittest --version 1.1.2 --verify=false
+          curl -sSfL https://github.com/yannh/kubeconform/releases/download/v0.8.0/kubeconform-linux-amd64.tar.gz | tar -xz -C /usr/local/bin kubeconform
+      - name: Build chart dependencies
+        run: helm dependency build charts/threatsea
+      - name: Lint chart
+        run: helm lint charts/threatsea
+      - name: Run chart unit tests
+        run: helm unittest charts/threatsea
+      - name: Render and validate manifests
+        run: |
+          for valuesFile in charts/threatsea/ci/*-values.yaml; do
+            echo "::group::$valuesFile"
+            helm template release-under-test charts/threatsea --values "$valuesFile" \
+              | kubeconform -strict -summary -kubernetes-version 1.30.0 \
+                  -schema-location default \
+                  -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceVersion}}.json'
+            echo "::endgroup::"
+          done

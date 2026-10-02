@@ -18,6 +18,17 @@
       "managerFilePatterns": ["/^\\.github/workflows/.+\\.ya?ml$/"],
       "matchStrings": ["npm (?:install|i) -g (?<depName>@?[^@\\s]+(?:/[^@\\s]+)?)@(?<currentValue>[\\w.+-]+)"],
       "datasourceTemplate": "npm"
+    },
+    {
+      "description": "Update GitHub-release pins inline in workflow run commands (helm plugin install <url> --version X, and releases/download/vX/ tarball URLs). No built-in manager reads versions out of run: commands, so without this the pins drift silently.",
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/.+\\.ya?ml$/"],
+      "matchStrings": [
+        "helm plugin install https://github\\.com/(?<depName>[^/\\s]+/[^/\\s]+) --version (?<currentValue>[\\w.+-]+)",
+        "https://github\\.com/(?<depName>[^/\\s]+/[^/\\s]+)/releases/download/v(?<currentValue>[\\w.+-]+)/"
+      ],
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v?(?<version>.+)$"
     }
   ],
   "packageRules": [
