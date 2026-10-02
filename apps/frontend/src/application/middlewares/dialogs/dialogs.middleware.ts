@@ -5,7 +5,6 @@ import { FoldersActions } from "#application/actions/folders.actions.ts";
 import { DialogsActions } from "#application/actions/dialogs.actions.ts";
 import { CatalogsActions } from "#application/actions/catalogs.actions.ts";
 import { CatalogThreatsActions } from "#application/actions/catalog-threats.actions.ts";
-import { ThreatsActions } from "#application/actions/threats.actions.ts";
 import { CatalogMeasuresActions } from "#application/actions/catalog-measures.actions.ts";
 import { MeasuresActions } from "#application/actions/measures.actions.ts";
 import { MeasureImpactsActions } from "#application/actions/measureImpacts.actions.ts";
@@ -54,11 +53,6 @@ const handleConfirmDialog: AppMiddleware =
                             CatalogMeasuresActions.updateCatalogMeasure(
                                 data as Parameters<typeof CatalogMeasuresActions.updateCatalogMeasure>[0]
                             )
-                        );
-                        break;
-                    case "threats":
-                        dispatch(
-                            ThreatsActions.updateThreat(data as Parameters<typeof ThreatsActions.updateThreat>[0])
                         );
                         break;
                     case "measures":
@@ -128,11 +122,6 @@ const handleConfirmDialog: AppMiddleware =
                             CatalogMeasuresActions.createCatalogMeasure(
                                 data as Parameters<typeof CatalogMeasuresActions.createCatalogMeasure>[0]
                             )
-                        );
-                        break;
-                    case "threats":
-                        dispatch(
-                            ThreatsActions.createThreat(data as Parameters<typeof ThreatsActions.createThreat>[0])
                         );
                         break;
                     case "measures":

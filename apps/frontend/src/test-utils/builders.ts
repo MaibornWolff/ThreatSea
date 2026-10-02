@@ -4,6 +4,7 @@ import type { ComponentType } from "#api/types/component-types.types.ts";
 import type { Folder } from "#api/types/folder.types.ts";
 import type { ExtendedProject, ProjectReport, ThreatReport } from "#api/types/project.types.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
+import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import type { Measure } from "#api/types/measure.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
 import type { ThreatMeasure } from "#application/hooks/use-threat-measures-list.hook.ts";
@@ -47,8 +48,9 @@ export const createAsset = (overrides: Partial<Asset> = {}): Asset => ({
 
 export const createThreat = (overrides: Partial<ExtendedThreat> = {}): ExtendedThreat => ({
     id: 1,
+    projectId: 1,
+    genericThreatId: 1,
     pointOfAttackId: "poa-1",
-    catalogThreatId: 1,
     name: "Test Threat",
     description: "",
     pointOfAttack: POINTS_OF_ATTACK.USER_INTERFACE,
@@ -57,10 +59,10 @@ export const createThreat = (overrides: Partial<ExtendedThreat> = {}): ExtendedT
     confidentiality: true,
     integrity: false,
     availability: false,
-    doneEditing: false,
-    projectId: 1,
-    createdAt: new Date("2025-01-01"),
-    updatedAt: new Date("2025-01-01"),
+    status: THREAT_STATUSES.NEW,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z",
+    genericThreatDescription: "Test Generic Description",
     componentName: "Test Component",
     componentType: null,
     interfaceName: null,
@@ -292,8 +294,9 @@ export const createReportThreatMeasure = (overrides: Partial<ReportThreatMeasure
 
 export const createReportThreat = (overrides: Partial<ThreatReport> = {}): ThreatReport => ({
     id: 1,
+    projectId: 1,
+    genericThreatId: 1,
     pointOfAttackId: "poa-1",
-    catalogThreatId: 1,
     name: "Test Threat",
     description: "",
     pointOfAttack: POINTS_OF_ATTACK.USER_INTERFACE,
@@ -302,10 +305,9 @@ export const createReportThreat = (overrides: Partial<ThreatReport> = {}): Threa
     confidentiality: false,
     integrity: false,
     availability: false,
-    doneEditing: true,
-    projectId: 1,
-    createdAt: new Date("2025-01-01"),
-    updatedAt: new Date("2025-01-01"),
+    status: THREAT_STATUSES.NEW,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z",
     componentName: null,
     componentType: null,
     componentReportId: null,
@@ -337,6 +339,7 @@ export const createProjectReport = (overrides: Partial<ProjectReport> = {}): Pro
     threats: [],
     measures: [],
     measureImpacts: [],
+    threatGroups: [],
     ...overrides,
 });
 

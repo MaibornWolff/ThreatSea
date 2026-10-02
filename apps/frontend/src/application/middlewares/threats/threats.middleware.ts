@@ -3,12 +3,9 @@ import type { AppMiddleware } from "#application/middlewares/types.ts";
 import { AlertActions } from "#application/actions/alert.actions.ts";
 import { ThreatsActions } from "#application/actions/threats.actions.ts";
 
-const asyncThunks = [
-    ThreatsActions.updateThreat,
-    ThreatsActions.createThreat,
-    ThreatsActions.deleteThreat,
-    ThreatsActions.deleteThreat,
-] as const;
+// The threat lists live in page hooks that reload after each mutation, so unlike the other
+// entity middlewares this one only reports the outcome; there is no store entry to update.
+const asyncThunks = [ThreatsActions.updateThreat, ThreatsActions.createThreat, ThreatsActions.deleteThreat] as const;
 
 const isFullfiledAction = isFulfilled(...asyncThunks);
 
@@ -20,17 +17,14 @@ const handleSuccessfulRequest: AppMiddleware =
     (action) => {
         next(action);
         if (isFullfiledAction(action)) {
+            const { payload: threat } = action;
             if (ThreatsActions.deleteThreat.fulfilled.match(action)) {
-                const { payload: threat } = action;
-                dispatch(ThreatsActions.removeThreat(threat));
                 dispatch(
                     AlertActions.openSuccessAlert({
                         text: `Threat '${threat.name}' was deleted successfully`,
                     })
                 );
             } else {
-                const { payload: threat } = action;
-                dispatch(ThreatsActions.setThreat(threat));
                 dispatch(
                     AlertActions.openSuccessAlert({
                         text: `Threat '${threat.name}' was saved successfully`,

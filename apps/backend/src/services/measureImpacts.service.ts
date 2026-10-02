@@ -2,9 +2,17 @@
  * Module that defines the access and manipulation
  * for the MeasureImpact of a project.
  */
-import { eq, getTableColumns } from "drizzle-orm";
+import { and, eq, getTableColumns, inArray } from "drizzle-orm";
 import { db, TransactionType } from "#db/index.js";
-import { CreateMeasureImpact, MeasureImpact, measureImpacts, measures, UpdateMeasureImpact } from "#db/schema.js";
+import {
+    CreateMeasureImpact,
+    MeasureImpact,
+    measureImpacts,
+    measures,
+    threats,
+    UpdateMeasureImpact,
+} from "#db/schema.js";
+import { THREAT_STATUSES } from "#types/threat-statuses.types.js";
 
 /**
  * Gets all measure impacts of the specified project.
@@ -68,9 +76,10 @@ export async function createMeasureImpact(
  */
 export async function updateMeasureImpact(
     measureId: number,
-    updateMeasureImpactData: UpdateMeasureImpact
+    updateMeasureImpactData: UpdateMeasureImpact,
+    transaction: TransactionType | undefined = undefined
 ): Promise<MeasureImpact> {
-    const [measureImpact] = await db
+    const [measureImpact] = await (transaction ?? db)
         .update(measureImpacts)
         .set(updateMeasureImpactData)
         .where(eq(measureImpacts.id, measureId))
@@ -89,16 +98,33 @@ export async function updateMeasureImpact(
  * @param {number} measureImpactId - The id of the measure impact to delete.
  * @returns {Promise<void>} A promise that resolves when the measure impact is deleted.
  */
-export async function deleteMeasureImpact(measureImpactId: number): Promise<void> {
-    await db.delete(measureImpacts).where(eq(measureImpacts.id, measureImpactId));
+export async function deleteMeasureImpact(
+    measureImpactId: number,
+    transaction: TransactionType | undefined = undefined
+): Promise<void> {
+    await (transaction ?? db).delete(measureImpacts).where(eq(measureImpacts.id, measureImpactId));
 }
 
 /**
- * Delete all measure impacts that impacting a specified threat.
+ * Finalizes a threat because an out-of-scope measure has just been applied to it.
  *
- * @param {number} threatId - The id of the threat.
- * @returns {Promise<void>} A promise that resolves when the measure impacts are deleted.
+ * Call this only at the moment of applying: when an impact is created with `setsOutOfScope`, or
+ * edited from not setting it to setting it. Later edits of that impact must not re-finalize a threat
+ * the user has reopened since. Only an open threat ("new" or "in progress") advances; "out of scope"
+ * is the user's own decision and stays. This is one-way: removing the measure never reverts the status.
+ *
+ * @param {number} threatId - The id of the threat the measure impact belongs to.
+ * @param {TransactionType} [transaction] - An optional transaction to run the queries in.
+ * @returns {Promise<void>} A promise that resolves once the status has been updated.
  */
-export async function deleteMeasureImpactsByThreat(threatId: number): Promise<void> {
-    await db.delete(measureImpacts).where(eq(measureImpacts.threatId, threatId));
+export async function finalizeThreatWhenOutOfScopeApplied(
+    threatId: number,
+    transaction: TransactionType | undefined = undefined
+): Promise<void> {
+    await (transaction ?? db)
+        .update(threats)
+        .set({ status: THREAT_STATUSES.FINALIZED })
+        .where(
+            and(eq(threats.id, threatId), inArray(threats.status, [THREAT_STATUSES.NEW, THREAT_STATUSES.IN_PROGRESS]))
+        );
 }

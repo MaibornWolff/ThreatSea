@@ -135,6 +135,12 @@
     "USER_INTERFACE": "User Interface",
     "USER_BEHAVIOUR": "User Behaviour"
   },
+  "statusList": {
+    "new": "New",
+    "in progress": "In progress",
+    "finalized": "Finalized",
+    "out of scope": "Out of scope"
+  },
   "probabilities": {
     "1": {
       "name": "extremely unlikely",

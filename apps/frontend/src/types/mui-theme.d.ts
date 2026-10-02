@@ -85,6 +85,7 @@ declare module "@mui/material/styles" {
         white: string;
         formError: string;
         statusNeutral: string;
+        statusNew: string;
         subtle: string;
     }
 }

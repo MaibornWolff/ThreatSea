@@ -15,7 +15,7 @@ export const useMeasureImpacts = ({ projectId }: { projectId: number }) => {
     }, [projectId, dispatch]);
 
     const deleteMeasureImpact = (data: MeasureImpact) => {
-        dispatch(MeasureImpactsActions.deleteMeasureImpact({ ...data, projectId }));
+        return dispatch(MeasureImpactsActions.deleteMeasureImpact({ ...data, projectId }));
     };
 
     return {

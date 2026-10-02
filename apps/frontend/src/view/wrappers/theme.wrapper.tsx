@@ -92,6 +92,7 @@ const theme = createTheme({
                     white: colors.text.inverse,
                     formError: colors.text.error,
                     statusNeutral: colors.text.statusNeutral,
+                    statusNew: colors.text.statusNew,
                     subtle: colors.text.subtle,
                 },
                 border: {

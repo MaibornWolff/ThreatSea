@@ -3,7 +3,7 @@ import { USER_ROLES } from "#api/types/user-roles.types.ts";
 import { RiskPage } from "../pages/risk.page.ts";
 import { getProjects, importProject, deleteProject } from "../utils/project.api.ts";
 import { deleteCatalog } from "../utils/catalog.api.ts";
-import { getThreats } from "../utils/threat.api.ts";
+import { createThreat, getThreats } from "../utils/threat.api.ts";
 import { getMeasures } from "../utils/measure.api.ts";
 import { createMeasureImpact } from "../utils/measure-impact.api.ts";
 import { addMember, findAddableMemberId } from "../utils/member.api.ts";
@@ -15,16 +15,22 @@ type ExportedProject = typeof riskFixture.project;
 
 // Names/values fixed by fixtures/threats.json — see that file for the underlying assets and
 // catalog content these are computed from:
-// - "Physical attack": probability 2, damage 2 (asset C/I/A all 2) -> gross risk 4.
-// - "Breach of isolation" / "Abuse of privileges": probability 3, damage 2 -> gross risk 6 each.
-// - "Technically conveyed deception, social engineering": probability 4, damage 5 -> gross risk 20.
+// - "Breach of isolation on the server": probability 3, damage 2 -> gross risk 6.
+// - "Physical attack on the client": probability 3, damage 5 -> gross risk 15.
+// - "Physical attack on the server": probability 4, damage 2 -> gross risk 8.
+// - "Physical attack on the server rack": probability 2, damage 2 -> gross risk 4.
+// - "Social engineering against users": probability 5, damage 5 -> gross risk 25.
 // - "Nothing special here": an existing, unapplied project measure with a scheduledAt in the past.
+// Rows are located by substring (hasText), so "Physical attack on the server" also matches the
+// server rack threat; the tests use the unambiguous names.
 const EXISTING_MEASURE_NAME = "Nothing special here";
+const SERVER_RACK_THREAT = "Physical attack on the server rack";
 const THREAT_NAMES_ASC = [
-    "Abuse of privileges",
-    "Breach of isolation",
-    "Physical attack",
-    "Technically conveyed deception, social engineering",
+    "Breach of isolation on the server",
+    "Physical attack on the client",
+    "Physical attack on the server",
+    "Physical attack on the server rack",
+    "Social engineering against users",
 ];
 
 let exportedProject: ExportedProject;
@@ -93,11 +99,11 @@ test.describe("Risk page tests", () => {
     test("Should keep the Risk page read-only for a Viewer", async ({ page, request }) => {
         const threats = await getThreats(request, ownerToken, projectId);
         const measures = await getMeasures(request, ownerToken, projectId);
-        const physicalAttack = threats.find((threat) => threat.name === "Physical attack")!;
+        const serverRackThreat = threats.find((threat) => threat.name === SERVER_RACK_THREAT)!;
         const existingMeasure = measures.find((measure) => measure.name === EXISTING_MEASURE_NAME)!;
         await createMeasureImpact(request, ownerToken, {
             projectId,
-            threatId: physicalAttack.id,
+            threatId: serverRackThreat.id,
             measureId: existingMeasure.id,
             description: "",
             setsOutOfScope: false,
@@ -115,7 +121,7 @@ test.describe("Risk page tests", () => {
 
         await expect(pg.applyMeasureButton).toHaveCount(0);
 
-        await pg.selectThreat("Physical attack");
+        await pg.selectThreat(SERVER_RACK_THREAT);
         await expect(pg.appliedMeasureRows).toHaveCount(1);
         await expect(pg.unapplyButtonFor(EXISTING_MEASURE_NAME)).toHaveCount(0);
 
@@ -123,7 +129,7 @@ test.describe("Risk page tests", () => {
         await expect(pg.lineOfToleranceThumbs.nth(1)).toBeDisabled();
 
         const urlBeforeClick = page.url();
-        await pg.editThreat("Physical attack");
+        await pg.editThreat(SERVER_RACK_THREAT);
         await expect(page).toHaveURL(urlBeforeClick);
 
         await page.goto(`/projects/${projectId}/risk/threats/edit`);
@@ -135,8 +141,8 @@ test.describe("Risk page tests", () => {
         const pg = new RiskPage(page);
         await pg.goto(projectId);
 
-        await pg.selectThreat("Physical attack");
-        await expect(pg.riskCellFor("Physical attack")).toHaveText("4");
+        await pg.selectThreat(SERVER_RACK_THREAT);
+        await expect(pg.riskCellFor(SERVER_RACK_THREAT)).toHaveText("4");
 
         await pg.applyMeasureButton.click();
         await pg.selectExistingMeasure(EXISTING_MEASURE_NAME);
@@ -147,20 +153,20 @@ test.describe("Risk page tests", () => {
         await expect(page).toHaveURL(new RegExp(`/projects/${projectId}/risk$`));
         await expect(pg.appliedMeasureRow(EXISTING_MEASURE_NAME)).toBeVisible();
         // The measure exists and is applied, but isn't "active" until the timeline reaches it.
-        await expect(pg.riskCellFor("Physical attack")).toHaveText("4");
+        await expect(pg.riskCellFor(SERVER_RACK_THREAT)).toHaveText("4");
 
         await pg.moveTimelineForward();
-        await expect(pg.riskCellFor("Physical attack")).toHaveText("2");
+        await expect(pg.riskCellFor(SERVER_RACK_THREAT)).toHaveText("2");
 
         await pg.moveTimelineToStart();
-        await expect(pg.riskCellFor("Physical attack")).toHaveText("4");
+        await expect(pg.riskCellFor(SERVER_RACK_THREAT)).toHaveText("4");
     });
 
     test("Should create a new measure inline while applying it to a threat", async ({ page }) => {
         const pg = new RiskPage(page);
         await pg.goto(projectId);
 
-        await pg.selectThreat("Breach of isolation");
+        await pg.selectThreat("Breach of isolation on the server");
         await pg.applyMeasureButton.click();
         // The "add new measure" shortcut lives inside the measure dropdown's menu.
         await pg.measureSelect.click();
@@ -181,7 +187,7 @@ test.describe("Risk page tests", () => {
     test("Should edit an already-applied measure's impact", async ({ page, request }) => {
         const threats = await getThreats(request, ownerToken, projectId);
         const measures = await getMeasures(request, ownerToken, projectId);
-        const threat = threats.find((threat) => threat.name === "Abuse of privileges")!;
+        const threat = threats.find((threat) => threat.name === "Physical attack on the client")!;
         const measure = measures.find((measure) => measure.name === EXISTING_MEASURE_NAME)!;
         await createMeasureImpact(request, ownerToken, {
             projectId,
@@ -197,7 +203,7 @@ test.describe("Risk page tests", () => {
 
         const pg = new RiskPage(page);
         await pg.goto(projectId);
-        await pg.selectThreat("Abuse of privileges");
+        await pg.selectThreat("Physical attack on the client");
 
         await pg.editMeasureImpact(EXISTING_MEASURE_NAME);
         await expect(pg.measureSelect).toBeDisabled();
@@ -213,7 +219,7 @@ test.describe("Risk page tests", () => {
     });
 
     test("Should unapply a measure impact", async ({ page, request }) => {
-        const threatName = "Technically conveyed deception, social engineering";
+        const threatName = "Social engineering against users";
         const threats = await getThreats(request, ownerToken, projectId);
         const measures = await getMeasures(request, ownerToken, projectId);
         const threat = threats.find((threat) => threat.name === threatName)!;
@@ -264,7 +270,7 @@ test.describe("Risk page tests", () => {
     test.fixme("Should require selecting a measure before applying it", async ({ page }) => {
         const pg = new RiskPage(page);
         await pg.goto(projectId);
-        await pg.selectThreat("Physical attack");
+        await pg.selectThreat(SERVER_RACK_THREAT);
         await pg.applyMeasureButton.click();
 
         await expect(pg.measureSelect).toBeVisible();
@@ -277,7 +283,7 @@ test.describe("Risk page tests", () => {
     test("Should validate the damage input in the Apply Measure dialog", async ({ page }) => {
         const pg = new RiskPage(page);
         await pg.goto(projectId);
-        await pg.selectThreat("Physical attack");
+        await pg.selectThreat(SERVER_RACK_THREAT);
         await pg.applyMeasureButton.click();
         await pg.selectExistingMeasure(EXISTING_MEASURE_NAME);
 
@@ -292,19 +298,35 @@ test.describe("Risk page tests", () => {
         await expect(page).toHaveURL(new RegExp(`/projects/${projectId}/risk/measureImpacts/edit$`));
     });
 
-    test("Should filter the threat list by clicking a matrix cell", async ({ page }) => {
+    test("Should filter the threat list by clicking a matrix cell", async ({ page, request }) => {
+        // A second threat of the same generic threat with the same assessment shares
+        // "Breach of isolation on the server"'s cell (probability 3 / damage 2), so the cell holds two.
+        const breachOfIsolation = (await getThreats(request, ownerToken, projectId)).find(
+            (threat) => threat.name === "Breach of isolation on the server"
+        )!;
+        await createThreat(request, ownerToken, {
+            projectId,
+            genericThreatId: breachOfIsolation.genericThreatId,
+            name: "Breach of isolation on the server backup",
+            probability: breachOfIsolation.probability,
+            confidentiality: breachOfIsolation.confidentiality,
+            integrity: breachOfIsolation.integrity,
+            availability: breachOfIsolation.availability,
+        });
         const pg = new RiskPage(page);
         await pg.goto(projectId);
 
-        await expect(pg.threatRows).toHaveCount(4);
+        await expect(pg.threatRows).toHaveCount(6);
 
-        // Both "Breach of isolation" and "Abuse of privileges" sit at probability 3 / damage 2.
         await pg.matrixCell(3, 2).click();
         await expect(pg.threatRows).toHaveCount(2);
-        await expect(pg.threatNameCells).toHaveText(["Abuse of privileges", "Breach of isolation"]);
+        await expect(pg.threatNameCells).toHaveText([
+            "Breach of isolation on the server",
+            "Breach of isolation on the server backup",
+        ]);
 
         await pg.matrixCell(3, 2).click();
-        await expect(pg.threatRows).toHaveCount(4);
+        await expect(pg.threatRows).toHaveCount(6);
     });
 
     test("Should let an Owner adjust the line of tolerance and have it persist", async ({ page }) => {
@@ -368,11 +390,15 @@ test.describe("Risk page tests", () => {
         await expect(pg.threatNameCells).toHaveText(THREAT_NAMES_ASC);
 
         await pg.threatSearchField.fill("Physical");
-        await expect(pg.threatRows).toHaveCount(1);
-        await expect(pg.threatNameCells).toHaveText(["Physical attack"]);
+        await expect(pg.threatRows).toHaveCount(3);
+        await expect(pg.threatNameCells).toHaveText([
+            "Physical attack on the client",
+            "Physical attack on the server",
+            "Physical attack on the server rack",
+        ]);
 
         await pg.threatSearchField.fill("");
-        await expect(pg.threatRows).toHaveCount(4);
+        await expect(pg.threatRows).toHaveCount(5);
 
         await pg.sortByNameButton.click();
         await expect(pg.threatNameCells).toHaveText(THREAT_NAMES_ASC.toReversed());

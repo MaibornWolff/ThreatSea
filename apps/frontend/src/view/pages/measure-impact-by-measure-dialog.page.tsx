@@ -12,12 +12,16 @@ import MeasureImpactByMeasureDialog, { type ApplyMeasureThreat } from "#view/dia
  * @return {JSX.Element}
  */
 interface MeasureImpactByMeasureDialogLocationState {
-    threat: ApplyMeasureThreat;
+    threat?: ApplyMeasureThreat;
     project: Project;
     measureImpact?: MeasureImpact | null;
 }
 
-export const MeasureImpactByMeasureDialogPage = () => {
+interface MeasureImpactByMeasureDialogPageProps {
+    onApplied?: () => void;
+}
+
+export const MeasureImpactByMeasureDialogPage = ({ onApplied }: MeasureImpactByMeasureDialogPageProps = {}) => {
     const { projectId = "" } = useParams<{ projectId: string }>();
     const { state: locationState } = useLocation() as Location<MeasureImpactByMeasureDialogLocationState | undefined>;
     // Capture the initial location state at mount time so that when the child route
@@ -25,8 +29,10 @@ export const MeasureImpactByMeasureDialogPage = () => {
     // parent dialog retains its original threat/project/measureImpact data.
     const [state] = useState(locationState);
 
-    if (state?.threat) {
-        const { threat, project, measureImpact } = state;
+    const threat = state?.threat;
+
+    if (state && threat) {
+        const { project, measureImpact } = state;
 
         return (
             <>
@@ -35,6 +41,7 @@ export const MeasureImpactByMeasureDialogPage = () => {
                     open={true}
                     threat={threat}
                     measureImpact={measureImpact ?? null}
+                    {...(onApplied !== undefined ? { onApplied } : {})}
                 />
                 <Outlet />
             </>
