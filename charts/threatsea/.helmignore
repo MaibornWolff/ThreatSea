@@ -2,5 +2,5 @@
 .gitignore
 *.md
 ci/
-tests/
+/tests/
 .DS_Store

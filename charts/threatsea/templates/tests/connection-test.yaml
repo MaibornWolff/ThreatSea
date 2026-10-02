@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "threatsea.fullname" . }}-connection-test
+  labels:
+    {{- include "threatsea.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-weight: "1"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  restartPolicy: Never
+  automountServiceAccountToken: false
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 70
+    runAsGroup: 70
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+    - name: pg-isready
+      image: "{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag }}"
+      imagePullPolicy: {{ .Values.postgresql.image.pullPolicy }}
+      command:
+        - pg_isready
+        - -q
+      securityContext:
+        {{- toYaml .Values.containerSecurityContext | nindent 8 }}
+      env:
+        - name: PGHOST
+          value: {{ include "threatsea.databaseHost" . | quote }}
+        - name: PGPORT
+          value: {{ .Values.database.port | quote }}
+        - name: PGUSER
+          value: {{ .Values.database.user | quote }}
+        - name: PGDATABASE
+          value: {{ .Values.database.name | quote }}
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "threatsea.databasePasswordSecretName" . }}
+              key: {{ include "threatsea.databasePasswordSecretKey" . }}

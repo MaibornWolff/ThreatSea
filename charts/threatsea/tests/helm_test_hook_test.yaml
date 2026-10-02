@@ -1,0 +1,46 @@
+suite: helm test hook
+templates:
+  - tests/connection-test.yaml
+set:
+  config.originApp: https://app.example.com
+  config.originBackend: https://api.example.com
+  config.oidc.issuerUrl: https://idp.example.com
+  config.oidc.clientId: threatsea
+  secret.values.jwtSecret: jwt
+  secret.values.sessionSecret: session
+  secret.values.oidcClientSecret: oidc
+  secret.values.databasePassword: dbpw
+tests:
+  - it: renders a test-hook pod that checks the database connection
+    release: {name: rel}
+    asserts:
+      - isKind: {of: Pod}
+      - equal:
+          path: metadata.annotations["helm.sh/hook"]
+          value: test
+      - equal:
+          path: metadata.annotations["helm.sh/hook-delete-policy"]
+          value: before-hook-creation,hook-succeeded
+      - equal:
+          path: spec.restartPolicy
+          value: Never
+      - contains:
+          path: spec.containers[0].env
+          content: {name: PGHOST, value: rel-threatsea-postgresql}
+    set:
+      postgresql.enabled: true
+      postgresql.auth.password: pw
+  - it: targets the external database when the bundled one is disabled
+    asserts:
+      - contains:
+          path: spec.containers[0].env
+          content: {name: PGHOST, value: db.example.com}
+      - equal:
+          path: spec.containers[0].command
+          value: [pg_isready, -q]
+      - equal:
+          path: spec.securityContext.runAsUser
+          value: 70
+    set:
+      postgresql.enabled: false
+      database.host: db.example.com
