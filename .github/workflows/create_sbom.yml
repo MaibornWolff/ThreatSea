@@ -35,7 +35,7 @@ jobs:
           node-version: "24"
 
       - name: Install cdxgen
-        run: npm install -g @cyclonedx/cdxgen@12.8.4
+        run: npm install -g @cyclonedx/cdxgen@12.8.5
 
       - name: Generate SBOM
         env:
