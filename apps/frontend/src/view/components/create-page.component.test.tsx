@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { MouseEvent } from "react";
 import { Provider } from "react-redux";
@@ -11,6 +11,7 @@ import { ProjectsActions } from "#application/actions/projects.actions.ts";
 import catalogsReducer from "#application/reducers/catalogs.reducer.ts";
 import projectsReducer from "#application/reducers/projects.reducer.ts";
 import { navigationReducer } from "#application/reducers/navigation.reducer.ts";
+import editorReducer, { type AutoSaveMessage } from "#application/reducers/editor.reducer.ts";
 import { createStore } from "#application/store.ts";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { translationUtil } from "#utils/translations.ts";
@@ -266,5 +267,42 @@ describe("CreatePage — footer", () => {
 
         const dialog = await screen.findByRole("dialog");
         expect(within(dialog).getByTestId("about-dialog_version")).toHaveTextContent("local dev");
+    });
+});
+
+describe("CreatePage — auto save info", () => {
+    const renderWithAutoSaveMessage = (autoSaveMessage: AutoSaveMessage, i18n = translationUtil.cloneInstance()) => {
+        mockUseConfirm({ openConfirm });
+        const Page = CreatePage(HeaderRightSlot, PageBody, true);
+
+        renderWithProviders(<Page />, {
+            i18n,
+            preloadedState: {
+                projects: {
+                    ...projectsReducer(undefined, { type: "@@INIT" }),
+                    current: createProject({ id: 1, role: USER_ROLES.OWNER }),
+                },
+                navigation: { ...navigationReducer(undefined, { type: "@@INIT" }), showProjectInfo: true },
+                editor: { ...editorReducer(undefined, { type: "@@INIT" }), autoSaveMessage },
+            },
+            initialEntries: ["/projects/1"],
+        });
+    };
+
+    it("re-renders the saved label in the newly selected language", async () => {
+        const i18n = translationUtil.cloneInstance();
+        renderWithAutoSaveMessage({ type: "upToDate", date: "31.7.2026, 16:26:56" }, i18n);
+
+        expect(screen.getByText("Saved: 31.7.2026, 16:26:56")).toBeInTheDocument();
+
+        await act(() => i18n.changeLanguage("de"));
+
+        expect(screen.getByText("Stand: 31.7.2026, 16:26:56")).toBeInTheDocument();
+    });
+
+    it("shows the save error", () => {
+        renderWithAutoSaveMessage({ type: "failed", error: "Network down" });
+
+        expect(screen.getByText("Error: Network down")).toBeInTheDocument();
     });
 });

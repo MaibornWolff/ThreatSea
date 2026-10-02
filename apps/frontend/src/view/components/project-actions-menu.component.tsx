@@ -82,6 +82,7 @@ export const ProjectActionsMenu = ({
                 onClick={handleClick}
                 sx={isHeader ? { ml: 1, color: "text.primary" } : undefined}
                 data-testid={`${testIdPrefix}-button`}
+                title={t("projectActions")}
             >
                 <MoreVert sx={{ fontSize: isHeader ? "1rem" : 18 }} />
             </IconButton>

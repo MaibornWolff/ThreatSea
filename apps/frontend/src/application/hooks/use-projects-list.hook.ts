@@ -16,15 +16,14 @@ export const useProjectsList = () => {
         loadProjects();
     }, [loadProjects]);
 
-    const filteredItems: ExtendedProject[] = useMemo(
-        () =>
-            items.filter((item) =>
-                searchableFields.some((searchField) =>
-                    (item[searchField] ?? "").toLowerCase().includes(searchValue.toLowerCase())
-                )
-            ),
-        [items, searchValue]
-    );
+    const filteredItems: ExtendedProject[] = useMemo(() => {
+        const normalizedSearchValue = searchValue.trim().toLowerCase();
+        return items.filter((item) =>
+            searchableFields.some((searchField) =>
+                (item[searchField] ?? "").toLowerCase().includes(normalizedSearchValue)
+            )
+        );
+    }, [items, searchValue]);
 
     const sortedItems: ExtendedProject[] = useMemo(() => {
         const sortField: ProjectSortField = sortableFields.includes(sortBy as ProjectSortField)
