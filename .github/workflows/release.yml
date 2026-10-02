@@ -205,6 +205,43 @@ jobs:
           subject-digest: ${{ steps.build-main.outputs.digest }}
           push-to-registry: true
 
+  helm-chart:
+    name: Publish Helm Chart
+    runs-on: ubuntu-latest
+    needs: [compute-version, docker]
+    if: needs.compute-version.outputs.publish_new_release == 'true'
+    permissions:
+      contents: read
+      id-token: write # for Sigstore keyless signing
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Helm
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Login to GitHub Container Registry
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REGISTRY_USER: ${{ github.repository_owner }}
+        run: echo "$GITHUB_TOKEN" | helm registry login ghcr.io -u "$REGISTRY_USER" --password-stdin
+
+      - name: Package, push and sign chart
+        env:
+          VERSION: ${{ needs.compute-version.outputs.new_release_version }}
+          COSIGN_YES: "true"
+        run: |
+          helm package charts/threatsea --version "$VERSION" --app-version "$VERSION"
+          helm push "threatsea-${VERSION}.tgz" oci://ghcr.io/maibornwolff/charts 2>&1 | tee push.log
+          DIGEST="$(grep -o 'sha256:[0-9a-f]\{64\}' push.log | head -1)"
+          cosign sign --yes "ghcr.io/maibornwolff/charts/threatsea@${DIGEST}"
+
   github-release:
     name: Create GitHub Release
     runs-on: ubuntu-latest

@@ -1,9 +1,5 @@
 🌊 ThreatSea has been deployed!
 
-{{- if eq .Values.image.tag "" }}
-
-WARNING: image.tag was not provided, so version {{ .Chart.AppVersion }} (the chart's appVersion) has been deployed. Please make sure this was intentional.
-{{- end }}
 
 {{- if .Values.ingress.enabled }}
 Access ThreatSea via:

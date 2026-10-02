@@ -1,0 +1,34 @@
+suite: version stamping
+templates:
+  - deployment.yaml
+  - secret.yaml
+set:
+  config.originApp: https://app.example.com
+  config.originBackend: https://api.example.com
+  config.oidc.issuerUrl: https://idp.example.com
+  config.oidc.clientId: threatsea
+  secret.values.jwtSecret: jwt
+  secret.values.sessionSecret: session
+  secret.values.oidcClientSecret: oidc
+  secret.values.databasePassword: dbpw
+  database.host: db.example.com
+tests:
+  - it: defaults the image tag to the stamped appVersion
+    template: deployment.yaml
+    chart:
+      appVersion: 9.9.9
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: ghcr.io/maibornwolff/threatsea:9.9.9
+
+  - it: lets image.tag override the appVersion
+    template: deployment.yaml
+    chart:
+      appVersion: 9.9.9
+    set:
+      image.tag: sha-abc1234
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: ghcr.io/maibornwolff/threatsea:sha-abc1234

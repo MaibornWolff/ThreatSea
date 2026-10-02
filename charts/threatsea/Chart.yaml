@@ -2,8 +2,10 @@ apiVersion: v2
 name: threatsea
 description: A Helm chart for ThreatSea - an open-source threat modeling tool
 type: application
-version: 0.1.0
-appVersion: 1.0.0
+# Placeholder: release.yml stamps the release version here. Do not hand-edit.
+version: 0.0.0
+# Placeholder: release.yml stamps the release version here. Do not hand-edit.
+appVersion: "0.0.0"
 
 keywords:
   - threatsea
