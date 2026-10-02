@@ -20,7 +20,7 @@ export class MeasureImpactsApi {
      * @returns Array of measures of this project.
      */
     static async getMeasureImpacts({ projectId }: { projectId: number }): Promise<MeasureImpact[]> {
-        return await fetchAPI(`/projects/${projectId}/system/measureImpacts`);
+        return await fetchAPI<MeasureImpact[]>(`/projects/${projectId}/system/measureImpacts`);
     }
 
     /**
@@ -31,7 +31,7 @@ export class MeasureImpactsApi {
     static async createMeasureImpact(data: CreateMeasureImpactRequest): Promise<MeasureImpact> {
         const { projectId, ...body } = data;
 
-        return await fetchAPI(`/projects/${projectId}/system/measureImpacts`, {
+        return await fetchAPI<MeasureImpact>(`/projects/${projectId}/system/measureImpacts`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -48,7 +48,7 @@ export class MeasureImpactsApi {
     static async updateMeasureImpact(data: UpdateMeasureImpactRequest): Promise<MeasureImpact> {
         const { id, projectId, ...body } = data;
 
-        return await fetchAPI(`/projects/${projectId}/system/measureImpacts/${id}`, {
+        return await fetchAPI<MeasureImpact>(`/projects/${projectId}/system/measureImpacts/${id}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",

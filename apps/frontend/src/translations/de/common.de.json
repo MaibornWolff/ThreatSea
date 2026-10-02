@@ -137,6 +137,12 @@
     "USER_INTERFACE": "Benutzerschnittstelle",
     "USER_BEHAVIOUR": "Benutzerverhalten"
   },
+  "statusList": {
+    "new": "Neu",
+    "in progress": "In Bearbeitung",
+    "finalized": "Finalisiert",
+    "out of scope": "Out of Scope"
+  },
   "probabilities": {
     "1": {
       "name": "extrem unwahrscheinlich",

@@ -1,57 +1,45 @@
 import { createReducer } from "@reduxjs/toolkit";
 import { ThreatsActions } from "#application/actions/threats.actions.ts";
 import { threatAdapter } from "#application/adapters/threats.adapter.ts";
-import type { ExtendedThreat } from "#api/types/threat.types.ts";
 
-type ThreatsAdapterState = ReturnType<typeof threatAdapter.getInitialState>;
-
-type ThreatsState = ThreatsAdapterState & {
+type ThreatsState = ReturnType<typeof threatAdapter.getInitialState> & {
     isPending: boolean;
+    // project of the load in flight, so a second load for it is skipped
+    pendingProjectId: number | null;
+    // only the latest load may apply its result; an older one finishing late is ignored
+    latestRequestId: string | null;
 };
 
 const defaultState: ThreatsState = {
     ...threatAdapter.getInitialState(),
     isPending: false,
+    pendingProjectId: null,
+    latestRequestId: null,
 };
 
 const threatsReducer = createReducer(defaultState, (builder) => {
-    builder.addCase(ThreatsActions.getThreats.pending, (state) => {
+    builder.addCase(ThreatsActions.getThreats.pending, (state, action) => {
         state.isPending = true;
+        state.pendingProjectId = action.meta.arg.projectId;
+        state.latestRequestId = action.meta.requestId;
     });
 
     builder.addCase(ThreatsActions.getThreats.fulfilled, (state, action) => {
-        threatAdapter.setAll(state, action);
+        if (action.meta.requestId !== state.latestRequestId) {
+            return;
+        }
+        threatAdapter.setAll(state, action.payload);
         state.isPending = false;
+        state.pendingProjectId = null;
     });
 
-    builder.addCase(ThreatsActions.getThreats.rejected, (state) => {
+    builder.addCase(ThreatsActions.getThreats.rejected, (state, action) => {
+        if (action.meta.requestId !== state.latestRequestId) {
+            return;
+        }
+        // keep the threats already loaded; the error middleware reports the failure
         state.isPending = false;
-    });
-
-    builder.addCase(ThreatsActions.createThreat.pending, (state) => {
-        state.isPending = true;
-    });
-
-    builder.addCase(ThreatsActions.setThreat, (state, action) => {
-        const extendedThreat: ExtendedThreat = {
-            componentName: state.entities[action.payload.id]?.componentName ?? null,
-            componentType: state.entities[action.payload.id]?.componentType ?? null,
-            interfaceName: state.entities[action.payload.id]?.interfaceName ?? null,
-            assets: state.entities[action.payload.id]?.assets ?? [],
-            ...action.payload,
-        };
-
-        threatAdapter.upsertOne(state, extendedThreat);
-        state.isPending = false;
-    });
-
-    builder.addCase(ThreatsActions.removeThreat, (state, action) => {
-        threatAdapter.removeOne(state, action.payload.id);
-        state.isPending = false;
-    });
-
-    builder.addCase(ThreatsActions.createThreat.rejected, (state) => {
-        state.isPending = false;
+        state.pendingProjectId = null;
     });
 });
 
