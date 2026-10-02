@@ -1,6 +1,5 @@
 🌊 ThreatSea has been deployed!
-
-{{- if .Values.ingress.enabled }}
+{{ if .Values.ingress.enabled }}
 Access ThreatSea via:
 {{- range .Values.ingress.hosts }}
   http{{ if $.Values.ingress.tls }}s{{ end }}://{{ .host }}
