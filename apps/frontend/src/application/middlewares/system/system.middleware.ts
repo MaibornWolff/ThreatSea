@@ -212,6 +212,10 @@ const handleSuccessfulRequest: AppMiddleware =
     (action) => {
         next(action);
         if (SystemActions.getSystem.fulfilled.match(action)) {
+            // A slower response for a previously opened project must not mark that project as loaded.
+            if (action.meta.requestId !== getState().system.latestLoadRequestId) {
+                return;
+            }
             if (action.payload) {
                 const { data, id } = action.payload;
 

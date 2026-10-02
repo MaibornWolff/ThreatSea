@@ -31,6 +31,7 @@ export interface SystemState {
     blockAutoSave: boolean;
     refreshCounter: number;
     loadedProjectId: number | null;
+    latestLoadRequestId: string | null;
 }
 
 const defaultState: SystemState = {
@@ -47,11 +48,15 @@ const defaultState: SystemState = {
     blockAutoSave: false,
     refreshCounter: 0,
     loadedProjectId: null,
+    latestLoadRequestId: null,
 };
 
 const systemReducer = createReducer(defaultState, (builder) => {
-    builder.addCase(SystemActions.getSystem.pending, (state) => {
+    builder.addCase(SystemActions.getSystem.pending, (state, action) => {
         state.isPending = true;
+        // No project counts as loaded until this request lands, so nothing is saved from stale state meanwhile.
+        state.loadedProjectId = null;
+        state.latestLoadRequestId = action.meta.requestId;
     });
 
     builder.addCase(SystemActions.createComponent, (state, action) => {
