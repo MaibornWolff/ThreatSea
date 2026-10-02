@@ -170,6 +170,58 @@ describe("system.middleware — getSystem awaits in-flight save", () => {
     });
 });
 
+describe("system.middleware — getSystem marks only the latest requested project as loaded", () => {
+    let getSystemSpy: MockInstance;
+    let resolveGetSystem: (projectId: number) => void;
+
+    beforeEach(() => {
+        const resolvers = new Map<number, () => void>();
+        getSystemSpy = vi.spyOn(SystemAPI, "getSystem").mockImplementation(
+            ({ projectId }) =>
+                new Promise((resolve) => {
+                    resolvers.set(projectId, () => resolve({ id: projectId, projectId, data: null, image: null }));
+                })
+        );
+        resolveGetSystem = (projectId) => resolvers.get(projectId)?.();
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    it("keeps the current project loaded when a previously opened project's slower response lands last", async () => {
+        const store = createStore({ projects: buildProjectsState(USER_ROLES.EDITOR) });
+
+        store.dispatch(SystemActions.getSystem({ projectId: 1 }));
+        store.dispatch(SystemActions.getSystem({ projectId: 2 }));
+        await vi.waitFor(() => expect(getSystemSpy).toHaveBeenCalledTimes(2));
+
+        resolveGetSystem(2);
+        await vi.waitFor(() => expect(store.getState().system.loadedProjectId).toBe(2));
+
+        resolveGetSystem(1);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(store.getState().system.loadedProjectId).toBe(2);
+    });
+
+    it("does not count a project as loaded while its reload is in flight", async () => {
+        const store = createStore({ projects: buildProjectsState(USER_ROLES.EDITOR) });
+        store.dispatch(SystemActions.getSystem({ projectId: 1 }));
+        await vi.waitFor(() => expect(getSystemSpy).toHaveBeenCalledTimes(1));
+        resolveGetSystem(1);
+        await vi.waitFor(() => expect(store.getState().system.loadedProjectId).toBe(1));
+
+        store.dispatch(SystemActions.getSystem({ projectId: 1 }));
+
+        expect(store.getState().system.loadedProjectId).toBeNull();
+
+        await vi.waitFor(() => expect(getSystemSpy).toHaveBeenCalledTimes(2));
+        resolveGetSystem(1);
+        await vi.waitFor(() => expect(store.getState().system.loadedProjectId).toBe(1));
+    });
+});
+
 describe("system.middleware — getSystem hydrates the per-project default annotation color", () => {
     afterEach(() => {
         vi.restoreAllMocks();

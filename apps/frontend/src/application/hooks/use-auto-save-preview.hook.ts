@@ -14,7 +14,7 @@ export interface UseAutoSavePreviewArgs {
     setAutoSaveStatus: (status: string) => void;
     userRole: USER_ROLES | undefined;
     systemPending: boolean;
-    initialized: boolean;
+    isCurrentProjectLoaded: boolean;
     isAnyComponentInUse: boolean;
     autoSaveStatus: string;
     blockAutoSave: boolean;
@@ -35,7 +35,7 @@ export const useAutoSavePreview = ({
     setAutoSaveStatus,
     userRole,
     systemPending,
-    initialized,
+    isCurrentProjectLoaded,
     isAnyComponentInUse,
     autoSaveStatus,
     blockAutoSave,
@@ -128,9 +128,9 @@ export const useAutoSavePreview = ({
         if (!checkUserRole(userRole, USER_ROLES.EDITOR)) {
             return false;
         }
-        // Never save before the system has been hydrated from the backend — otherwise
-        // a forced save (e.g. on unmount) writes an empty Redux state over the real data.
-        if (!initialized) {
+        // Never save before this project's system has been hydrated — otherwise a forced
+        // save (e.g. on unmount) writes empty or another project's state over the real data.
+        if (!isCurrentProjectLoaded) {
             return false;
         }
         if (forceSave === true) {

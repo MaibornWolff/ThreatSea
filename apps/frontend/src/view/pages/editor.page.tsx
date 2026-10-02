@@ -211,7 +211,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         setAutoSaveStatus,
         userRole,
         systemPending,
-        initialized,
+        isCurrentProjectLoaded: loadedProjectId === projectId,
         isAnyComponentInUse,
         autoSaveStatus,
         blockAutoSave,
