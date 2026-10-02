@@ -92,6 +92,9 @@ Database host – the bundled Service when postgresql.enabled=true, else databas
 */}}
 {{- define "threatsea.databaseHost" -}}
 {{- if .Values.postgresql.enabled }}
+{{- if .Values.database.host }}
+{{- fail "database.host must not be set when postgresql.enabled=true" }}
+{{- end }}
 {{- include "threatsea.postgresql.fullname" . }}
 {{- else }}
 {{- required "database.host must be set when postgresql.enabled=false" .Values.database.host }}

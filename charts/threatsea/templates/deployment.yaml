@@ -47,13 +47,13 @@ spec:
 
             # ── Logging ──────────────────────────────────────────────────
             - name: LOG_LEVEL
-              value: {{ .Values.config.logLevel | quote }}
+              value: {{ .Values.config.logLevel | toString | quote }}
 
             # ── Origins ───────────────────────────────────────────────────
             - name: ORIGIN_APP
-              value: {{ .Values.config.originApp | quote }}
+              value: {{ required "config.originApp is required" .Values.config.originApp | quote }}
             - name: ORIGIN_BACKEND
-              value: {{ .Values.config.originBackend | quote }}
+              value: {{ required "config.originBackend is required" .Values.config.originBackend | quote }}
 
             # ── Auth ──────────────────────────────────────────────────────
             - name: AUTH_METHOD
@@ -64,7 +64,7 @@ spec:
             - name: OIDC_CLIENT_ID
               value: {{ required "config.oidc.clientId is required when authMethod=oidc" .Values.config.oidc.clientId | quote }}
             - name: OIDC_ALLOW_HTTP
-              value: {{ .Values.config.oidc.allowHttp | quote }}
+              value: {{ .Values.config.oidc.allowHttp | toString | quote }}
             - name: OIDC_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
@@ -74,11 +74,11 @@ spec:
 
             # ── Cookies ───────────────────────────────────────────────────
             - name: COOKIES_SECURE_OPTION
-              value: {{ .Values.config.cookies.secureOption | quote }}
+              value: {{ ternary "enabled" "disabled" .Values.config.cookies.secure | quote }}
 
             # ── App Proxy ─────────────────────────────────────────────────
             - name: USE_PROXY
-              value: {{ .Values.config.useProxy | quote }}
+              value: {{ .Values.config.useProxy | toString | quote }}
 
             # ── Secrets ───────────────────────────────────────────────────
             - name: JWT_SECRET

@@ -43,8 +43,8 @@ containerSecurityContext:
 # Application Configuration
 # ──────────────────────────────────────────────
 config:
-  # -- Log level: 0 (debug), 1 (info), 2 (warning), 3 (error)
-  logLevel: "3"
+  # -- Log level as an integer: 0 (debug), 1 (info), 2 (warning), 3 (error)
+  logLevel: 3
 
   # -- Origin of the frontend (used for CORS and as the post-login redirect target)
   originApp: ""
@@ -52,21 +52,24 @@ config:
   # Must be the externally reachable backend URL, otherwise OIDC login fails.
   originBackend: ""
 
+  # -- Authentication method, `oidc` or `fixed`. `fixed` enables fixed-profile
+  # authentication with hardcoded test users and is for development only.
   authMethod: "oidc"
   oidc:
     # -- OIDC issuer URL (required when authMethod=oidc)
     issuerUrl: ""
     # -- OIDC client ID
     clientId: ""
-    # -- Allow plain HTTP for OIDC (never enable in production)
-    allowHttp: "false"
+    # -- Allow plain HTTP for OIDC (boolean, never enable in production)
+    allowHttp: false
 
   cookies:
-    # -- Set to "disabled" only in development (non-HTTPS)
-    secureOption: "enabled"
+    # -- Send cookies with the Secure flag (boolean). Set to false only in
+    # development (non-HTTPS).
+    secure: true
 
-  # -- Set to "true" when behind a reverse proxy / ingress (enables trust proxy)
-  useProxy: "true"
+  # -- Set to true (boolean) when behind a reverse proxy / ingress (enables trust proxy)
+  useProxy: true
 
 # ──────────────────────────────────────────────
 # Secrets
@@ -107,7 +110,7 @@ database:
   name: threatsea
   # -- Database user. Also the user the bundled PostgreSQL creates.
   user: threatsea
-  # -- Connect over TLS. Forced off when postgresql.enabled=true, which serves plaintext.
+  # -- Connect over TLS (boolean). Forced off when postgresql.enabled=true, which serves plaintext.
   tls: true
 
 # ──────────────────────────────────────────────
