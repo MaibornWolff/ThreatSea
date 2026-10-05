@@ -181,6 +181,9 @@ export const useEditor = ({
         ...component
     }: { componentType: EditorComponentType } & Pick<Component, "x" | "y" | "gridX" | "gridY">): void => {
         const componentId = nanoid();
+        const defaultName = componentType.isStandard
+            ? t(`contextMenu.${componentType.name}`, { defaultValue: componentType.name })
+            : componentType.name;
         dispatch(
             SystemActions.createComponent({
                 id: componentId,
@@ -190,7 +193,7 @@ export const useEditor = ({
                 gridX: component.gridX,
                 gridY: component.gridY,
                 type: componentType.id,
-                name: componentType.name,
+                name: defaultName,
                 symbol: componentType.symbol,
             })
         );
