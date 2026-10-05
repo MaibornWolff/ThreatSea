@@ -91,7 +91,6 @@ export const createThreatsColumns = ({
         headerName: t("name"),
         flex: 1.4,
         minWidth: 220,
-        sortable: false,
         align: "left",
         headerAlign: "center",
         // The "no threats" placeholder row spans every visible column.
@@ -155,7 +154,6 @@ export const createThreatsColumns = ({
         headerName: t("description"),
         flex: 1,
         minWidth: 200,
-        sortable: false,
         align: "left",
         headerAlign: "center",
         renderHeader: () => (
@@ -181,7 +179,6 @@ export const createThreatsColumns = ({
         field: "assets",
         headerName: t("assets"),
         width: 120,
-        sortable: false,
         align: "center",
         headerAlign: "center",
         renderHeader: () => (
@@ -218,7 +215,6 @@ export const createThreatsColumns = ({
         headerName: t("componentName"),
         flex: 1,
         minWidth: 160,
-        sortable: false,
         align: "center",
         headerAlign: "center",
         renderHeader: () => (
@@ -259,7 +255,6 @@ export const createThreatsColumns = ({
         headerName: t("pointOfAttack"),
         flex: 1,
         minWidth: 160,
-        sortable: false,
         align: "center",
         headerAlign: "center",
         renderHeader: () => (
@@ -290,7 +285,6 @@ export const createThreatsColumns = ({
         headerName: t("attacker"),
         flex: 1,
         minWidth: 150,
-        sortable: false,
         align: "center",
         headerAlign: "center",
         renderHeader: () => (
@@ -319,7 +313,6 @@ export const createThreatsColumns = ({
         headerName: t("probability"),
         // Fits the German header "Eintrittswahrscheinlichkeit" next to its filter toggle.
         width: 240,
-        sortable: false,
         align: "center",
         headerAlign: "center",
         renderHeader: () => (
@@ -341,7 +334,6 @@ export const createThreatsColumns = ({
         field: "damage",
         headerName: t("damage"),
         width: 140,
-        sortable: false,
         align: "center",
         headerAlign: "center",
         renderHeader: () => (
@@ -363,7 +355,6 @@ export const createThreatsColumns = ({
         field: "risk",
         headerName: t("risk"),
         width: 100,
-        sortable: false,
         align: "center",
         headerAlign: "center",
         renderHeader: () => (
@@ -386,7 +377,6 @@ export const createThreatsColumns = ({
         headerName: t("status"),
         // Fits every status label with its icon, in German and English.
         width: 145,
-        sortable: false,
         align: "center",
         headerAlign: "center",
         renderHeader: () => (

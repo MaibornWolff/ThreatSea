@@ -53,6 +53,7 @@ const setup = (
 ) => {
     const onToggleGenericThreat = vi.fn();
     const onEditThreat = vi.fn();
+    const onSortModelChange = vi.fn();
     renderWithProviders(
         <div style={{ height: 600, width: 800 }}>
             <ThreatsGrid
@@ -60,6 +61,8 @@ const setup = (
                 columns={columns}
                 loading={false}
                 columnVisibilityModel={{}}
+                sortModel={[{ field: "name", sort: "asc" }]}
+                onSortModelChange={onSortModelChange}
                 paginationModel={{ page: 0, pageSize }}
                 onPaginationModelChange={vi.fn()}
                 genericThreatCount={genericThreatCount}
@@ -69,7 +72,7 @@ const setup = (
             />
         </div>
     );
-    return { onToggleGenericThreat, onEditThreat, user: userEvent.setup() };
+    return { onToggleGenericThreat, onEditThreat, onSortModelChange, user: userEvent.setup() };
 };
 
 const rowOf = (text: string) => screen.getByText(text).closest<HTMLElement>("[role='row']")!;
@@ -148,5 +151,13 @@ describe("ThreatsGrid", () => {
         // the footer counts generic threats, not rows
         expect(screen.getByText("Generic threats per page:")).toBeInTheDocument();
         expect(screen.getByText("1–10 of 12")).toBeInTheDocument();
+    });
+
+    it("hands sorting to the page when a column header is clicked", async () => {
+        const { onSortModelChange, user } = setup();
+
+        await user.click(screen.getByText("Name"));
+
+        expect(onSortModelChange).toHaveBeenCalledWith([{ field: "name", sort: "desc" }], expect.anything());
     });
 });

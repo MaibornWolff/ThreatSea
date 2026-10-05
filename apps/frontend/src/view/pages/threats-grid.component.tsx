@@ -6,6 +6,7 @@ import {
     type GridColumnVisibilityModel,
     type GridPaginationModel,
     type GridRowProps,
+    type GridSortModel,
 } from "@mui/x-data-grid";
 import { useCallback, type MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
@@ -31,7 +32,9 @@ interface ThreatsGridProps {
     columns: GridColDef<ThreatsGridRow>[];
     loading: boolean;
     columnVisibilityModel: GridColumnVisibilityModel;
-    // pagination is applied to whole generic threats by the row builder
+    // sorting and pagination are applied to whole generic threats by the row builder
+    sortModel: GridSortModel;
+    onSortModelChange: (model: GridSortModel) => void;
     paginationModel: GridPaginationModel;
     onPaginationModelChange: (model: GridPaginationModel) => void;
     genericThreatCount: number;
@@ -44,15 +47,17 @@ interface ThreatsGridProps {
  * The threats table: generic threat rows that expand to their threats. A generic threat row
  * toggles on click or Enter/Space; a threat row opens the threat for editing.
  *
- * Pagination runs in "server" mode: the grid only renders the footer and shows the rows exactly as
- * given. The rows are already cut to the page's generic threats, so a generic threat is never split
- * from its threats across pages.
+ * Sorting and pagination run in "server" mode: the grid only renders the header arrows and the
+ * footer, and shows the rows exactly as given. The rows are already sorted and cut to the page's
+ * generic threats, so a generic threat is never split from its threats across pages.
  */
 export const ThreatsGrid = ({
     rows,
     columns,
     loading,
     columnVisibilityModel,
+    sortModel,
+    onSortModelChange,
     paginationModel,
     onPaginationModelChange,
     genericThreatCount,
@@ -119,6 +124,10 @@ export const ThreatsGrid = ({
             }}
             columnHeaderHeight={90}
             columnVisibilityModel={columnVisibilityModel}
+            sortingMode="server"
+            sortingOrder={["asc", "desc"]}
+            sortModel={sortModel}
+            onSortModelChange={onSortModelChange}
             paginationMode="server"
             paginationModel={paginationModel}
             onPaginationModelChange={onPaginationModelChange}

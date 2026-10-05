@@ -55,6 +55,15 @@ export class ThreatsPage extends BasePage {
         await this.page.keyboard.press("Escape");
     }
 
+    columnHeader(field: string): Locator {
+        return this.page.locator(`.MuiDataGrid-columnHeader[data-field="${field}"]`);
+    }
+
+    // Click the header label: the centre of the header holds the filter toggle.
+    async toggleSort(field: string): Promise<void> {
+        await this.columnHeader(field).locator("p").first().click();
+    }
+
     columnFilterInput(field: string): Locator {
         return this.page.locator(`.MuiDataGrid-columnHeader[data-field="${field}"] input`);
     }

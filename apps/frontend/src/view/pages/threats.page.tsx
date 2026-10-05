@@ -15,7 +15,7 @@ import {
     Typography,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import type { GridColumnVisibilityModel, GridPaginationModel } from "@mui/x-data-grid";
+import type { GridColumnVisibilityModel, GridPaginationModel, GridSortModel } from "@mui/x-data-grid";
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useParams } from "react-router";
@@ -38,7 +38,7 @@ import { withProject } from "#view/components/with-project.hoc.tsx";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import { createThreatsColumns } from "./create-threats-columns";
-import { buildThreatsRows } from "./build-threats-rows";
+import { buildThreatsRows, isThreatOnlySortField, type ThreatsSort, type ThreatsSortField } from "./build-threats-rows";
 import { ThreatsGrid } from "./threats-grid.component";
 import { ThreatAssetsPopper } from "./threat-assets-popper.component";
 
@@ -155,8 +155,17 @@ const ThreatsPageBody = () => {
         genericThreats.length > 0 &&
         genericThreats.every((genericThreat) => expandedGenericThreatIds[genericThreat.id]);
 
-    // Pages hold whole generic threats with their threats (see buildThreatsRows).
+    // Sorted by name by default, like the assets and measures tables; sorting and paging apply to
+    // whole generic threats (see buildThreatsRows).
+    const [sortModel, setSortModel] = useState<GridSortModel>([{ field: "name", sort: "asc" }]);
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
+    const sort = useMemo<ThreatsSort>(
+        () => ({
+            field: (sortModel[0]?.field ?? "name") as ThreatsSortField,
+            direction: sortModel[0]?.sort === "desc" ? "desc" : "asc",
+        }),
+        [sortModel]
+    );
 
     const { rows, genericThreatCount } = useMemo(
         () =>
@@ -165,13 +174,26 @@ const ThreatsPageBody = () => {
                 threatsByGenericThreatId,
                 expandedGenericThreatIds,
                 columnFilters,
+                sort,
                 page: paginationModel,
                 t,
             }),
-        [genericThreats, threatsByGenericThreatId, expandedGenericThreatIds, columnFilters, paginationModel, t]
+        [genericThreats, threatsByGenericThreatId, expandedGenericThreatIds, columnFilters, sort, paginationModel, t]
     );
 
-    // A new filter starts again on the first page.
+    // A new filter or sort order starts again on the first page. Sorting by a column that only threat
+    // rows have values for expands every generic threat, so the sorted values are visible.
+    const handleSortModelChange = useCallback(
+        (model: GridSortModel) => {
+            setSortModel(model);
+            setPaginationModel((previous) => ({ ...previous, page: 0 }));
+            const field = model[0]?.field;
+            if (field !== undefined && isThreatOnlySortField(field)) {
+                setAllGenericThreatsExpanded(true);
+            }
+        },
+        [setAllGenericThreatsExpanded]
+    );
     const handleColumnFilterChange = useCallback(
         (...args: Parameters<typeof handleFilterChange>) => {
             handleFilterChange(...args);
@@ -350,6 +372,8 @@ const ThreatsPageBody = () => {
                         columns={columns}
                         loading={isGenericThreatsPending}
                         columnVisibilityModel={columnVisibility}
+                        sortModel={sortModel}
+                        onSortModelChange={handleSortModelChange}
                         paginationModel={paginationModel}
                         onPaginationModelChange={setPaginationModel}
                         genericThreatCount={genericThreatCount}
