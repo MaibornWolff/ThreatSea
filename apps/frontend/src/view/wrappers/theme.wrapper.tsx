@@ -3,14 +3,16 @@
  */
 
 import type {} from "@mui/material/themeCssVarsAugmentation";
-import type { ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { createTheme, ThemeProvider as MaterialThemeProvider } from "@mui/material/styles";
+import { deDE, enUS } from "@mui/x-data-grid/locales";
+import { translationUtil } from "#utils/translations.ts";
 import { colorPrimitives, colors } from "./color-tokens";
 
 /**
  * Object to customize the mui theme.
  */
-const theme = createTheme({
+const themeOptions: Parameters<typeof createTheme>[0] = {
     cssVariables: true,
     typography: {
         fontFamily: '"Poppins", sans-serif',
@@ -137,7 +139,10 @@ const theme = createTheme({
             },
         },
     },
-});
+};
+
+// The DataGrid's own texts (pagination footer, sort tooltips, empty overlay...) for the app language.
+const dataGridLocale = (language: string) => (language.startsWith("de") ? deDE : enUS);
 
 /**
  * Creates a global material mui theme.
@@ -151,5 +156,13 @@ interface ThemeProps {
 }
 
 export const Theme = ({ children }: ThemeProps) => {
+    // The theme sits outside the translations provider, so follow the i18next instance directly.
+    const [language, setLanguage] = useState(translationUtil.language);
+    useEffect(() => {
+        translationUtil.on("languageChanged", setLanguage);
+        return () => translationUtil.off("languageChanged", setLanguage);
+    }, []);
+
+    const theme = useMemo(() => createTheme(themeOptions, dataGridLocale(language)), [language]);
     return <MaterialThemeProvider theme={theme}>{children}</MaterialThemeProvider>;
 };

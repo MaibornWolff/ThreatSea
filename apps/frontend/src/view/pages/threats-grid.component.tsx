@@ -8,6 +8,8 @@ import {
     type GridRowProps,
     type GridSortModel,
 } from "@mui/x-data-grid";
+import type {} from "@mui/x-data-grid/themeAugmentation";
+import { useTheme } from "@mui/material/styles";
 import { useCallback, type MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
@@ -67,6 +69,9 @@ export const ThreatsGrid = ({
 }: ThreatsGridProps) => {
     const { t } = useTranslation("threatsPage");
     const NoRowsOverlayWithMessage = useCallback(() => <NoRowsOverlay message={t("noThreatsFound")} />, [t]);
+    // A localeText prop replaces the theme's DataGrid texts instead of adding to them, so start from the
+    // theme's (the app language) and only override the page-size label, which counts generic threats.
+    const themeLocaleText = useTheme().components?.MuiDataGrid?.defaultProps?.localeText;
 
     return (
         <DataGrid
@@ -132,7 +137,7 @@ export const ThreatsGrid = ({
             paginationModel={paginationModel}
             onPaginationModelChange={onPaginationModelChange}
             rowCount={genericThreatCount}
-            localeText={{ paginationRowsPerPage: t("genericThreatsPerPage") }}
+            localeText={{ ...themeLocaleText, paginationRowsPerPage: t("genericThreatsPerPage") }}
             onColumnWidthChange={onColumnWidthChange}
             sx={{
                 borderRadius: 5,

@@ -1,4 +1,4 @@
-import { screen, within } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { GridColDef } from "@mui/x-data-grid";
 import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat.types.ts";
@@ -6,6 +6,7 @@ import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import type { ExtendedThreatWithMetrics } from "#application/hooks/use-generic-threats-list.hook.ts";
 import { createThreat } from "#test-utils/builders.ts";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
+import { translationUtil } from "#utils/translations.ts";
 import type { ThreatsGridRow } from "./create-threats-columns";
 import { ThreatsGrid } from "./threats-grid.component";
 
@@ -159,5 +160,21 @@ describe("ThreatsGrid", () => {
         await user.click(screen.getByText("Name"));
 
         expect(onSortModelChange).toHaveBeenCalledWith([{ field: "name", sort: "desc" }], expect.anything());
+    });
+
+    it("keeps the theme's German DataGrid texts next to its own page-size label", async () => {
+        await act(async () => {
+            await translationUtil.changeLanguage("de");
+        });
+        try {
+            setup(rows, { pageSize: 10, genericThreatCount: 12 });
+
+            expect(screen.getByText("Generische Bedrohungen pro Seite:")).toBeInTheDocument();
+            expect(screen.getByText("1–10 von 12")).toBeInTheDocument();
+        } finally {
+            await act(async () => {
+                await translationUtil.changeLanguage("en");
+            });
+        }
     });
 });
