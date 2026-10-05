@@ -1,4 +1,3 @@
-import Add from "@mui/icons-material/Add";
 import Visibility from "@mui/icons-material/Visibility";
 import { Box, Button, Checkbox, FormControlLabel, LinearProgress, Menu, MenuItem, Typography } from "@mui/material";
 import { DataGrid, GridRow, type GridColumnVisibilityModel, type GridRowProps } from "@mui/x-data-grid";
@@ -15,7 +14,6 @@ import { useColumnFilters } from "#application/hooks/use-column-filters.hook.ts"
 import { getToggleableColumns, useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
 import { applyColumnWidths, useColumnWidths } from "#application/hooks/use-column-widths.hook.ts";
 import { useMeasuresList } from "#application/hooks/use-measures-list.hook.ts";
-import { IconButton } from "#view/components/icon-button.component.tsx";
 import { NoRowsOverlay } from "#view/components/no-rows-overlay.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
@@ -27,6 +25,7 @@ import MeasureDetailsDialogPage from "./measure-details-dialog.page";
 import { MeasureImpactByThreatDialogPage } from "./measure-impact-by-threat-dialog.page";
 import ThreatDialogPage from "./threat-dialog.page";
 import { createMeasuresColumns } from "./create-measures-columns";
+import { TableAddButton } from "#view/components/table-add-button.component.tsx";
 
 // The e2e page objects locate rows and the action buttons inside them via a row-level
 // test id, so it must live on the grid row element itself (same pattern as the threats page).
@@ -234,6 +233,13 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                         }}
                     >
                         <Box sx={{ display: "flex", alignItems: "center" }}>
+                            {checkUserRole(userRole, USER_ROLES.EDITOR) && (
+                                <TableAddButton
+                                    label={t("addMeasure")}
+                                    onClick={onClickAddMeasure}
+                                    data-testid="measures-page_add-measure-button"
+                                />
+                            )}
                             <Button
                                 variant="outlined"
                                 startIcon={<Visibility />}
@@ -273,16 +279,6 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                                     </MenuItem>
                                 ))}
                             </Menu>
-                            {checkUserRole(userRole, USER_ROLES.EDITOR) && (
-                                <IconButton
-                                    title={t("addMeasure")}
-                                    sx={{ ml: 1, color: "text.primary" }}
-                                    onClick={onClickAddMeasure}
-                                    data-testid="measures-page_add-measure-button"
-                                >
-                                    <Add sx={{ fontSize: 18 }} />
-                                </IconButton>
-                            )}
                         </Box>
                         {measures.length > 0 && (
                             <Box sx={{ display: "flex", alignItems: "center" }}>

@@ -19,6 +19,7 @@ import {
     loginAsFixedTestUser,
     provisionFixedTestUser,
 } from "../utils/auth.api.ts";
+import { expectReadableAddButtonFirst } from "../utils/toolbar.utils.ts";
 
 const compareAsc = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
 
@@ -203,6 +204,11 @@ function registerMemberManagementTests(memberPath: MemberPath, options: MemberMa
                 await expect(pg.memberRows).toHaveCount(1);
             });
         }
+
+        test("Should show the add button first, labelled and readable on hover", async ({ page }) => {
+            const pg = new MembersPage(page);
+            await expectReadableAddButtonFirst(page, pg.addMemberButton, "Add Member");
+        });
 
         test("Should let the owner add a new member with a chosen role", async ({ page }) => {
             const pg = new MembersPage(page);

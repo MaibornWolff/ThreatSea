@@ -6,6 +6,7 @@ import { buildTestId } from "../builder/test-data.builder.ts";
 import { MeasuresPage } from "../pages/measures.page.ts";
 import { CONFIDENTIALITY_LEVELS } from "#utils/confidentiality.ts";
 import measuresFixture from "../fixtures/measures.json" with { type: "json" };
+import { expectReadableAddButtonFirst } from "../utils/toolbar.utils.ts";
 
 const measures: { name: string; description: string; scheduledAt: string; projectId: number }[] = [];
 const invalidMeasures: { name: string; description: string; scheduledAt: string }[] = [];
@@ -66,6 +67,11 @@ test.afterEach(async ({ page, request, browserName }, { testId }) => {
 });
 
 test.describe("Measures Page tests", () => {
+    test("Should show the add button first, labelled and readable on hover", async ({ page }) => {
+        const pg = new MeasuresPage(page);
+        await expectReadableAddButtonFirst(page, pg.addMeasureButton, "Add Measure");
+    });
+
     test("Should create new measures", async ({ page, browserName }, { testId }) => {
         const pg = new MeasuresPage(page);
         const tid = buildTestId(browserName, testId);
