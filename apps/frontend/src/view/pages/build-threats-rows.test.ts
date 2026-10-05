@@ -3,7 +3,7 @@ import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import type { ExtendedThreatWithMetrics } from "#application/hooks/use-generic-threats-list.hook.ts";
 import { createThreat } from "#test-utils/builders.ts";
 import { translationUtil } from "#utils/translations.ts";
-import { buildThreatsRows } from "./build-threats-rows";
+import { buildThreatsRows, type ThreatsPagination } from "./build-threats-rows";
 
 const englishT = translationUtil.getFixedT("en", "threatsPage");
 
@@ -43,21 +43,24 @@ const build = ({
     columnFilters = {},
     expanded = {},
     threats = threatsByGenericThreatId,
+    page = { page: 0, pageSize: 100 },
 }: {
     columnFilters?: Record<string, string>;
     expanded?: Record<number, boolean>;
     threats?: Record<number, ExtendedThreatWithMetrics[]>;
+    page?: ThreatsPagination;
 } = {}) =>
     buildThreatsRows({
         genericThreats,
         threatsByGenericThreatId: threats,
         expandedGenericThreatIds: expanded,
         columnFilters,
+        page,
         t: englishT,
     });
 
 // A generic threat row reads "rowId (shown/total)".
-const summarize = (rows: ReturnType<typeof buildThreatsRows>) =>
+const summarize = ({ rows }: ReturnType<typeof buildThreatsRows>) =>
     rows.map((row) =>
         row.rowType === "genericThreat" ? `${row.rowId} (${row.threatCount}/${row.totalThreatCount})` : row.rowId
     );
@@ -121,5 +124,25 @@ describe("buildThreatsRows", () => {
         expect(summarize(build({ columnFilters: { name: "tampering", status: THREAT_STATUSES.FINALIZED } }))).toEqual(
             []
         );
+    });
+});
+
+describe("buildThreatsRows — pagination", () => {
+    it("pages by generic threat, keeping an expanded generic threat's threats on its page", () => {
+        const expanded = { 1: true, 2: true };
+
+        const firstPage = build({ expanded, page: { page: 0, pageSize: 1 } });
+        expect(summarize(firstPage)).toEqual(["generic-1 (2/2)", "threat-11", "threat-12"]);
+        expect(firstPage.genericThreatCount).toBe(2);
+
+        expect(summarize(build({ expanded, page: { page: 1, pageSize: 1 } }))).toEqual([
+            "generic-2 (1/1)",
+            "threat-21",
+        ]);
+    });
+
+    it("counts the generic threats matching the filters across all pages", () => {
+        const result = build({ columnFilters: { name: "spoofing" }, page: { page: 0, pageSize: 1 } });
+        expect(result.genericThreatCount).toBe(1);
     });
 });

@@ -2,6 +2,7 @@
   "threatList.sortBy.nameToggleBtn": "Name",
   "threatList.sortBy.createdAtToggleBtn": "Datum",
   "threatsFound": "Bedrohungen gefunden",
+  "genericThreatsPerPage": "Generische Bedrohungen pro Seite:",
   "newProbability": "Neue Eintrittswahrscheinlichkeit",
   "newDamage": "Neuer Schaden",
   "duplicateMessage": "Wollen Sie die Bedrohung '{{ threatName }}' wirklich duplizieren?",

@@ -47,7 +47,10 @@ const rows: ThreatsGridRow[] = [
     { rowType: "threat", rowId: "threat-2", threat: threat(2, "Session hijack", THREAT_STATUSES.FINALIZED) },
 ];
 
-const setup = (gridRows: ThreatsGridRow[] = rows) => {
+const setup = (
+    gridRows: ThreatsGridRow[] = rows,
+    { pageSize = 25, genericThreatCount = 1 }: { pageSize?: number; genericThreatCount?: number } = {}
+) => {
     const onToggleGenericThreat = vi.fn();
     const onEditThreat = vi.fn();
     renderWithProviders(
@@ -57,6 +60,9 @@ const setup = (gridRows: ThreatsGridRow[] = rows) => {
                 columns={columns}
                 loading={false}
                 columnVisibilityModel={{}}
+                paginationModel={{ page: 0, pageSize }}
+                onPaginationModelChange={vi.fn()}
+                genericThreatCount={genericThreatCount}
                 onColumnWidthChange={vi.fn()}
                 onToggleGenericThreat={onToggleGenericThreat}
                 onEditThreat={onEditThreat}
@@ -113,8 +119,34 @@ describe("ThreatsGrid", () => {
     });
 
     it("says that no threats were found when there are no rows", () => {
-        setup([]);
+        setup([], { genericThreatCount: 0 });
 
         expect(screen.getByText("No Threats found")).toBeInTheDocument();
+    });
+
+    it("shows every given row even beyond the page size, so a generic threat keeps its threats on the page", () => {
+        // one generic threat with eleven threats on a page of ten: client-side paging would cut the last two rows
+        const manyThreats = Array.from({ length: 11 }, (_, index) => threat(100 + index, `Threat ${index + 1}`));
+        const groupRows: ThreatsGridRow[] = [
+            {
+                rowType: "genericThreat",
+                rowId: "generic-7",
+                genericThreat,
+                threatCount: 11,
+                totalThreatCount: 11,
+                isExpanded: true,
+            },
+            ...manyThreats.map((item): ThreatsGridRow => ({
+                rowType: "threat",
+                rowId: `threat-${item.id}`,
+                threat: item,
+            })),
+        ];
+        setup(groupRows, { pageSize: 10, genericThreatCount: 12 });
+
+        expect(rowOf("Threat 11")).toBeInTheDocument();
+        // the footer counts generic threats, not rows
+        expect(screen.getByText("Generic threats per page:")).toBeInTheDocument();
+        expect(screen.getByText("1–10 of 12")).toBeInTheDocument();
     });
 });

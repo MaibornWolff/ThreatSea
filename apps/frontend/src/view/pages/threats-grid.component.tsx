@@ -4,6 +4,7 @@ import {
     type GridColDef,
     type GridColumnResizeParams,
     type GridColumnVisibilityModel,
+    type GridPaginationModel,
     type GridRowProps,
 } from "@mui/x-data-grid";
 import { useCallback, type MouseEvent } from "react";
@@ -30,6 +31,10 @@ interface ThreatsGridProps {
     columns: GridColDef<ThreatsGridRow>[];
     loading: boolean;
     columnVisibilityModel: GridColumnVisibilityModel;
+    // pagination is applied to whole generic threats by the row builder
+    paginationModel: GridPaginationModel;
+    onPaginationModelChange: (model: GridPaginationModel) => void;
+    genericThreatCount: number;
     onColumnWidthChange: (params: GridColumnResizeParams) => void;
     onToggleGenericThreat: (genericThreatId: number) => void;
     onEditThreat: (event: MouseEvent<HTMLElement>, threat: ExtendedThreat) => void;
@@ -38,12 +43,19 @@ interface ThreatsGridProps {
 /**
  * The threats table: generic threat rows that expand to their threats. A generic threat row
  * toggles on click or Enter/Space; a threat row opens the threat for editing.
+ *
+ * Pagination runs in "server" mode: the grid only renders the footer and shows the rows exactly as
+ * given. The rows are already cut to the page's generic threats, so a generic threat is never split
+ * from its threats across pages.
  */
 export const ThreatsGrid = ({
     rows,
     columns,
     loading,
     columnVisibilityModel,
+    paginationModel,
+    onPaginationModelChange,
+    genericThreatCount,
     onColumnWidthChange,
     onToggleGenericThreat,
     onEditThreat,
@@ -107,6 +119,11 @@ export const ThreatsGrid = ({
             }}
             columnHeaderHeight={90}
             columnVisibilityModel={columnVisibilityModel}
+            paginationMode="server"
+            paginationModel={paginationModel}
+            onPaginationModelChange={onPaginationModelChange}
+            rowCount={genericThreatCount}
+            localeText={{ paginationRowsPerPage: t("genericThreatsPerPage") }}
             onColumnWidthChange={onColumnWidthChange}
             sx={{
                 borderRadius: 5,
@@ -120,9 +137,6 @@ export const ThreatsGrid = ({
                 "& .threats-grid--dimmed .MuiDataGrid-cell": { opacity: 0.6 },
                 "& .threats-grid--dimmed .MuiDataGrid-cell[data-field='status']": { opacity: 1 },
                 "& .threats-grid--dimmed .MuiDataGrid-cell[data-field='actions']": { opacity: 1 },
-            }}
-            initialState={{
-                pagination: { paginationModel: { pageSize: 25, page: 0 } },
             }}
             pageSizeOptions={[10, 25, 50, 100]}
             slots={{ noRowsOverlay: NoRowsOverlayWithMessage, row: ThreatsGridRowSlot }}

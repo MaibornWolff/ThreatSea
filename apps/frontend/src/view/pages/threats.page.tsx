@@ -15,8 +15,8 @@ import {
     Typography,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import type { GridColumnVisibilityModel } from "@mui/x-data-grid";
-import { memo, useCallback, useLayoutEffect, useMemo, useState } from "react";
+import type { GridColumnVisibilityModel, GridPaginationModel } from "@mui/x-data-grid";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useParams } from "react-router";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
@@ -37,7 +37,7 @@ import AddMeasureDialogPage from "./add-measure-dialog.page";
 import { withProject } from "#view/components/with-project.hoc.tsx";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
-import { createThreatsColumns, type ThreatsGridRow } from "./create-threats-columns";
+import { createThreatsColumns } from "./create-threats-columns";
 import { buildThreatsRows } from "./build-threats-rows";
 import { ThreatsGrid } from "./threats-grid.component";
 import { ThreatAssetsPopper } from "./threat-assets-popper.component";
@@ -155,17 +155,42 @@ const ThreatsPageBody = () => {
         genericThreats.length > 0 &&
         genericThreats.every((genericThreat) => expandedGenericThreatIds[genericThreat.id]);
 
-    const rows = useMemo<ThreatsGridRow[]>(
+    // Pages hold whole generic threats with their threats (see buildThreatsRows).
+    const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
+
+    const { rows, genericThreatCount } = useMemo(
         () =>
             buildThreatsRows({
                 genericThreats,
                 threatsByGenericThreatId,
                 expandedGenericThreatIds,
                 columnFilters,
+                page: paginationModel,
                 t,
             }),
-        [genericThreats, threatsByGenericThreatId, expandedGenericThreatIds, columnFilters, t]
+        [genericThreats, threatsByGenericThreatId, expandedGenericThreatIds, columnFilters, paginationModel, t]
     );
+
+    // A new filter starts again on the first page.
+    const handleColumnFilterChange = useCallback(
+        (...args: Parameters<typeof handleFilterChange>) => {
+            handleFilterChange(...args);
+            setPaginationModel((previous) => ({ ...previous, page: 0 }));
+        },
+        [handleFilterChange]
+    );
+    const handleClearColumnFilters = useCallback(() => {
+        clearColumnFilters();
+        setPaginationModel((previous) => ({ ...previous, page: 0 }));
+    }, [clearColumnFilters]);
+
+    // Deleting threats or reloading can leave fewer pages than the current one; stay on the last page.
+    const lastPage = Math.max(0, Math.ceil(genericThreatCount / paginationModel.pageSize) - 1);
+    useEffect(() => {
+        if (paginationModel.page > lastPage) {
+            setPaginationModel((previous) => ({ ...previous, page: lastPage }));
+        }
+    }, [paginationModel.page, lastPage]);
 
     const columns = useMemo(
         () =>
@@ -174,7 +199,7 @@ const ThreatsPageBody = () => {
                     t,
                     userRole,
                     columnFilters,
-                    onFilterChange: handleFilterChange,
+                    onFilterChange: handleColumnFilterChange,
                     expandedFilters,
                     onToggleFilterExpanded: toggleFilterExpanded,
                     onToggleGenericThreat: toggleGenericThreat,
@@ -191,7 +216,7 @@ const ThreatsPageBody = () => {
             t,
             userRole,
             columnFilters,
-            handleFilterChange,
+            handleColumnFilterChange,
             expandedFilters,
             toggleFilterExpanded,
             toggleGenericThreat,
@@ -204,10 +229,6 @@ const ThreatsPageBody = () => {
             columnWidths,
         ]
     );
-
-    // Count what the grid actually shows: the generic threats surviving the
-    // column filters (not the unfiltered hook result).
-    const genericThreatsCount = useMemo(() => rows.filter((row) => row.rowType === "genericThreat").length, [rows]);
 
     return (
         <Box sx={{ overflow: "hidden", height: "100%", boxSizing: "border-box" }}>
@@ -305,7 +326,7 @@ const ThreatsPageBody = () => {
                         <Box sx={{ display: "flex", alignItems: "center" }}>
                             {hasActiveFilter && (
                                 <Button
-                                    onClick={clearColumnFilters}
+                                    onClick={handleClearColumnFilters}
                                     startIcon={<FilterAltOff sx={{ fontSize: 18 }} />}
                                     data-testid="ClearThreatFilters"
                                     sx={{ mr: 2, textTransform: "none", color: theme.vars.palette.text.primary }}
@@ -313,10 +334,10 @@ const ThreatsPageBody = () => {
                                     {t("clearFilters")}
                                 </Button>
                             )}
-                            {(genericThreatsCount > 0 || hasActiveFilter) && (
+                            {(genericThreatCount > 0 || hasActiveFilter) && (
                                 <>
                                     <Typography sx={{ mr: 0.5, fontWeight: "bold", color: "primary.text" }}>
-                                        {genericThreatsCount}
+                                        {genericThreatCount}
                                     </Typography>
                                     <Typography>{t("threatsFound")}</Typography>
                                 </>
@@ -329,6 +350,9 @@ const ThreatsPageBody = () => {
                         columns={columns}
                         loading={isGenericThreatsPending}
                         columnVisibilityModel={columnVisibility}
+                        paginationModel={paginationModel}
+                        onPaginationModelChange={setPaginationModel}
+                        genericThreatCount={genericThreatCount}
                         onColumnWidthChange={handleColumnWidthChange}
                         onToggleGenericThreat={toggleGenericThreat}
                         onEditThreat={onClickEditThreat}

@@ -71,28 +71,44 @@ const genericThreatMatchesFilter = (
     }
 };
 
+export interface ThreatsPagination {
+    page: number;
+    pageSize: number;
+}
+
+interface ThreatGroup {
+    genericThreat: GenericThreatWithExtendedThreats;
+    visibleThreats: ExtendedThreatWithMetrics[];
+    totalThreatCount: number;
+}
+
 /**
- * Flattens the generic threats and their threats into the grid's rows. The grid's own filtering
- * would treat generic threat and threat rows independently and tear the hierarchy apart, so the
- * column filters are applied here while building the rows.
+ * Flattens the generic threats and their threats into the grid's rows. The grid's own filtering and
+ * pagination would treat generic threat and threat rows independently and tear the hierarchy apart,
+ * so both are done here, on whole groups: filter, then take the page's generic threats with all of
+ * their threats.
  *
  * A generic threat that matches a filter on its own columns (e.g. its name) passes that filter on
  * for its threats, so searching for a generic threat lists all of its threats rather than an empty
  * group. Threat-only filters (e.g. status) still apply to each threat.
+ *
+ * @returns the page's rows, and how many generic threats match the filters on all pages.
  */
 export const buildThreatsRows = ({
     genericThreats,
     threatsByGenericThreatId,
     expandedGenericThreatIds,
     columnFilters,
+    page,
     t,
 }: {
     genericThreats: GenericThreatWithExtendedThreats[];
     threatsByGenericThreatId: Record<number, ExtendedThreatWithMetrics[]>;
     expandedGenericThreatIds: Record<number, boolean>;
     columnFilters: Record<string, string>;
+    page: ThreatsPagination;
     t: TFunction;
-}): ThreatsGridRow[] => {
+}): { rows: ThreatsGridRow[]; genericThreatCount: number } => {
     const activeFilters: ActiveFilter[] = Object.entries(columnFilters)
         .map(([field, value]) => ({ field, value, search: value.trim().toLowerCase() }))
         .filter((filter) => filter.search !== "");
@@ -100,7 +116,7 @@ export const buildThreatsRows = ({
         (threatOnlyFilterFields as readonly string[]).includes(filter.field)
     );
 
-    const result: ThreatsGridRow[] = [];
+    const groups: ThreatGroup[] = [];
     for (const genericThreat of genericThreats) {
         const threats = threatsByGenericThreatId[genericThreat.id] ?? [];
         const genericThreatMatches = activeFilters.map(
@@ -117,25 +133,31 @@ export const buildThreatsRows = ({
             visibleThreats.length > 0 ||
             (!hasThreatOnlyFilter &&
                 activeFilters.every((filter) => genericThreatMatchesFilter(genericThreat, filter, t) ?? true));
-        if (!genericThreatVisible) {
-            continue;
+        if (genericThreatVisible) {
+            groups.push({ genericThreat, visibleThreats, totalThreatCount: threats.length });
         }
+    }
 
+    const pageStart = page.page * page.pageSize;
+    const pageGroups = groups.slice(pageStart, pageStart + page.pageSize);
+
+    const rows: ThreatsGridRow[] = [];
+    for (const { genericThreat, visibleThreats, totalThreatCount } of pageGroups) {
         const isExpanded = expandedGenericThreatIds[genericThreat.id] ?? false;
-        result.push({
+        rows.push({
             rowType: "genericThreat",
             rowId: `${GENERIC_THREAT_ROW_PREFIX}${genericThreat.id}`,
             genericThreat,
             threatCount: visibleThreats.length,
-            totalThreatCount: threats.length,
+            totalThreatCount,
             isExpanded,
         });
         if (isExpanded) {
             if (visibleThreats.length === 0) {
-                result.push({ rowType: "noThreats", rowId: `empty-${genericThreat.id}` });
+                rows.push({ rowType: "noThreats", rowId: `empty-${genericThreat.id}` });
             } else {
                 for (const threat of visibleThreats) {
-                    result.push({
+                    rows.push({
                         rowType: "threat",
                         rowId: `${THREAT_ROW_PREFIX}${threat.id}`,
                         threat,
@@ -144,5 +166,5 @@ export const buildThreatsRows = ({
             }
         }
     }
-    return result;
+    return { rows, genericThreatCount: groups.length };
 };
