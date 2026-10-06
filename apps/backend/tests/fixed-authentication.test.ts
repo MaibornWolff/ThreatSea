@@ -20,4 +20,18 @@ describe("getFixedLoginToken account linking", () => {
         const linkedUser = await db.query.users.findFirst({ where: eq(users.id, existingUser.id) });
         expect(linkedUser?.oidcSub).toBe("testid2");
     });
+
+    it("logs in the WebKit E2E profile (index 4) and creates its user", async () => {
+        const accessToken = await getFixedLoginToken("/login?testUser=4");
+
+        const user = await db.query.users.findFirst({
+            where: eq(users.id, decodeJwt(accessToken)["userId"] as number),
+        });
+        expect(user?.email).toBe("test5@test.test");
+        expect(user?.oidcSub).toBe("testid5");
+    });
+
+    it("rejects an index that has no fixed profile", () => {
+        expect(() => getFixedLoginToken("/login?testUser=5")).toThrow("Invalid test user ID: 5");
+    });
 });
