@@ -2,14 +2,17 @@ import { act, render, screen } from "@testing-library/react";
 import { DataGrid } from "@mui/x-data-grid";
 import { translationUtil } from "#utils/translations.ts";
 import { Theme } from "./theme.wrapper";
+import { Translations } from "./translations.wrapper";
 
 const renderGrid = () =>
     render(
-        <Theme>
-            <div style={{ height: 300, width: 600 }}>
-                <DataGrid rows={[]} columns={[{ field: "name", headerName: "Name" }]} />
-            </div>
-        </Theme>
+        <Translations>
+            <Theme>
+                <div style={{ height: 300, width: 600 }}>
+                    <DataGrid rows={[]} columns={[{ field: "name", headerName: "Name" }]} />
+                </div>
+            </Theme>
+        </Translations>
     );
 
 describe("Theme — DataGrid texts", () => {

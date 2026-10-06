@@ -3,10 +3,10 @@
  */
 
 import type {} from "@mui/material/themeCssVarsAugmentation";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { createTheme, ThemeProvider as MaterialThemeProvider } from "@mui/material/styles";
 import { deDE, enUS } from "@mui/x-data-grid/locales";
-import { translationUtil } from "#utils/translations.ts";
 import { colorPrimitives, colors } from "./color-tokens";
 
 /**
@@ -156,13 +156,9 @@ interface ThemeProps {
 }
 
 export const Theme = ({ children }: ThemeProps) => {
-    // The theme sits outside the translations provider, so follow the i18next instance directly.
-    const [language, setLanguage] = useState(translationUtil.language);
-    useEffect(() => {
-        translationUtil.on("languageChanged", setLanguage);
-        return () => translationUtil.off("languageChanged", setLanguage);
-    }, []);
-
+    // Re-renders on a language change, so the theme follows the app language.
+    const { i18n } = useTranslation();
+    const language = i18n.language;
     const theme = useMemo(() => createTheme(themeOptions, dataGridLocale(language)), [language]);
     return <MaterialThemeProvider theme={theme}>{children}</MaterialThemeProvider>;
 };
