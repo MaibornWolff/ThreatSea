@@ -252,6 +252,16 @@ describe("AddThreatMainTab — generic threat description", () => {
         expect(screen.queryByTestId("GenericThreatDescriptionText")).not.toBeVisible();
     });
 
+    it("Should place the generic description between the name and the editable description", () => {
+        renderMainTab({ genericThreatDescription: "Original generic wording" });
+
+        const name = screen.getByTestId("EditThreatName");
+        const toggle = screen.getByTestId("GenericThreatDescriptionToggle");
+        const description = screen.getByTestId("EditThreatDescription");
+        expect(name.compareDocumentPosition(toggle) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+        expect(toggle.compareDocumentPosition(description) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
     it("Should reveal the generic description when the toggle is clicked", async () => {
         const { user } = renderMainTab({ genericThreatDescription: "Original generic wording" });
 

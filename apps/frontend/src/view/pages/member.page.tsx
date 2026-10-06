@@ -1,16 +1,5 @@
-import Add from "@mui/icons-material/Add";
 import Visibility from "@mui/icons-material/Visibility";
-import {
-    Box,
-    Button,
-    Checkbox,
-    FormControlLabel,
-    LinearProgress,
-    Menu,
-    MenuItem,
-    Tooltip,
-    Typography,
-} from "@mui/material";
+import { Box, Button, Checkbox, FormControlLabel, LinearProgress, Menu, MenuItem, Typography } from "@mui/material";
 import { DataGrid, type GridColumnVisibilityModel } from "@mui/x-data-grid";
 import { memo, useCallback, useLayoutEffect, useMemo, useState, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
@@ -23,7 +12,6 @@ import { useMembersList } from "#application/hooks/use-addedMember-list.hook.ts"
 import { useColumnFilters } from "#application/hooks/use-column-filters.hook.ts";
 import { getToggleableColumns, useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
 import { applyColumnWidths, useColumnWidths } from "#application/hooks/use-column-widths.hook.ts";
-import { IconButton } from "#view/components/icon-button.component.tsx";
 import { MatrixFilterToggleButtonGroup } from "#view/components/matrix-filter-toggle-button-group.component.tsx";
 import { NoRowsOverlay } from "#view/components/no-rows-overlay.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
@@ -38,6 +26,7 @@ import type { NavigationState } from "#application/reducers/navigation.reducer.t
 import type { ConfirmAcceptColor } from "#application/reducers/confirm.reducer.ts";
 import { applyColumnFilters } from "#utils/column-filters.ts";
 import { createMembersColumns } from "./create-members-columns";
+import { TableAddButton } from "#view/components/table-add-button.component.tsx";
 
 type MemberPath = "projects" | "catalogs";
 
@@ -359,6 +348,13 @@ const MemberPageBody = () => {
                         }}
                     >
                         <Box sx={{ display: "flex", alignItems: "center" }}>
+                            {checkUserRole(userRole, USER_ROLES.OWNER) && (
+                                <TableAddButton
+                                    label={t("addMemberBtn")}
+                                    onClick={onClickAddMember}
+                                    data-testid="AddMember"
+                                />
+                            )}
                             <Button
                                 variant="outlined"
                                 startIcon={<Visibility />}
@@ -398,24 +394,6 @@ const MemberPageBody = () => {
                                     </MenuItem>
                                 ))}
                             </Menu>
-                            {checkUserRole(userRole, USER_ROLES.OWNER) && (
-                                <IconButton
-                                    onClick={onClickAddMember}
-                                    sx={{
-                                        ml: 1,
-                                        "&:hover": {
-                                            color: "secondary.main",
-                                            bgcolor: "background.paper",
-                                        },
-                                        color: "text.primary",
-                                    }}
-                                    data-testid="AddMember"
-                                >
-                                    <Tooltip title={t("addMemberBtn")}>
-                                        <Add sx={{ fontSize: 18 }} />
-                                    </Tooltip>
-                                </IconButton>
-                            )}
                         </Box>
                         <Box sx={{ display: "flex", alignItems: "center" }}>
                             <Typography sx={{ mr: 0.5, fontWeight: "bold", color: "primary.text" }}>
