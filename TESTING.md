@@ -21,7 +21,7 @@
 
 ```text
                       ┌───────────────────────────────┐
-                      │  E2E (Playwright, 140 tests)  │
+                      │  E2E (Playwright, 160 tests)  │
                       │  apps/frontend/playwright/    │
                       └───────────────────────────────┘
                                   ▲
@@ -65,11 +65,22 @@ them. Prefer `preloadedState` over mocking `useAppSelector` — a partial fake s
 the real store without anything failing.
 
 **`vitest.config.ts` sets `isolate: false`**, so every test file runs against the same module
-registry. A spy from `vi.spyOn()` therefore mutates a module that later files still see: install
-spies in `beforeEach`, never at module load. For the same reason `react-i18next` must not be
-mocked wholesale — that also strips the `I18nextProvider` which `renderWithProviders` relies on,
-and a real `i18n.changeLanguage()` on the shared singleton flips the language for every file that
-runs after it. `AGENTS.md` has the full rules.
+registry, **and `restoreMocks: true`**, so every spy is restored after each test. Two rules
+follow from that:
+
+- **Never `vi.mock` an `#api/` module — `vi.spyOn` the real one.** Every API module is reachable
+  from `store.ts`, so an earlier test file that renders the store has already cached the real
+  module; a later `vi.mock` never reaches it, and the test silently hits the network, passing or
+  failing depending on file order. `src/test-utils/no-api-module-mocks.test.ts` enforces this;
+  `use-report.hook.test.tsx` shows the pattern.
+- **Install spies per test** (in `beforeEach` or the test itself), never at module load —
+  `restoreMocks` removes a module-level spy after the first test.
+
+For the same reason `react-i18next` must not be mocked wholesale — that also strips the
+`I18nextProvider` which `renderWithProviders` relies on. A real `i18n.changeLanguage()` on the
+shared singleton flips the language for every file that runs after it; to test a language switch,
+render with `renderWithProviders(ui, { i18n: translationUtil.cloneInstance() })` and switch the
+clone instead. `AGENTS.md` has the full rules.
 
 ```bash
 pnpm --filter threatsea_fe test:unit:watch   # while iterating
@@ -115,10 +126,10 @@ testId)` so parallel runs and reruns don't collide.
 apps/frontend/playwright/
 ├── auth.setup.ts       # Per-browser login → tmp/.auth/<browser>-user.json
 ├── pages/               # 12 Page Objects (base.page.ts + one per route)
-├── tests/               # 13 spec files, 140 tests total, e.g.:
+├── tests/               # 13 spec files, 160 tests total, e.g.:
 │   ├── projects.page.e2e.spec.ts   # 7 tests
-│   ├── editor.page.e2e.spec.ts     # 32 tests (some parameterized, e.g. per icon)
-│   ├── members.page.e2e.spec.ts    # 23 tests (most run once for projects, once for catalogs)
+│   ├── editor.page.e2e.spec.ts     # 34 tests (some parameterized, e.g. per icon)
+│   ├── members.page.e2e.spec.ts    # 25 tests (most run once for projects, once for catalogs)
 │   └── risk.page.e2e.spec.ts       # 11 tests (2 quarantined, see 6.1)
 ├── fixtures/            # JSON test data
 ├── builder/             # test-data.builder.ts — buildTestId, buildProject, ...
@@ -141,9 +152,10 @@ for long — this table drifts the moment someone adds a test and forgets to com
 | Test resource name  | always include `buildTestId(...)`              | `` `${project.name}-${tid}` ``                   |
 
 These apply to **new** tests. Parts of the suite predate them: the titles in `editor`,
-`editor-drawing`, `footer-links` and `connection-editing` mostly don't start with `Should`, and a
-number of older `data-testid`s sit outside the pattern (`AddMember`, `add-asset-dialog`). Take this
-table as the reference, not the surrounding code, and don't rewrite existing tests just to conform.
+`editor-drawing`, `footer-links` and `connection-editing` mostly don't start with `Should` (nor
+does one in `catalog`), and a number of older `data-testid`s sit outside the pattern (`AddMember`,
+`add-asset-dialog`). Take this table as the reference, not the surrounding code, and don't rewrite
+existing tests just to conform.
 
 ### 3.4 Running Tests Locally
 
@@ -160,6 +172,12 @@ Locally only Chromium runs. `PW_ALL_BROWSERS=1` (or `=true`) adds the Firefox an
 (Chromium `testUser=2`, Firefox `3`, WebKit `4`), stores its session in
 `tmp/.auth/<browser>-user.json`, and namespaces the resources it creates via
 `buildTestId(browserName, ...)`, so the runs don't collide in a shared database.
+
+The suite targets the Vite dev server on `http://localhost:3000`. If yours runs elsewhere, set
+`PW_BASE_URL` (e.g. `PW_BASE_URL=http://localhost:3100`) and point the backend's `ORIGIN_APP` in
+`apps/backend/.env` at the same origin — the fixed-auth login redirects to `ORIGIN_APP`, and
+`auth.setup.ts` waits for that redirect to land on the base URL, so a mismatch times out the
+login.
 
 **Chromium and Firefox pass; WebKit does not.** The backend defines four fixed profiles, indices
 `0`–`3` (`fixedAuthentication.service.ts`), so WebKit's `testUser=4` does not exist: the login
@@ -300,6 +318,8 @@ EOF
 `AUTH_METHOD=fixed` is not optional for E2E — `auth.setup.ts` logs in via
 `/api/auth/login?testUser=<n>`, a route that only exists in fixed-auth mode. The same fixed
 profiles back the role-based tests in [section 3.5](#35-role-based--multi-identity-testing).
+`ORIGIN_APP` has to match the frontend origin Playwright tests against; change both together (see
+`PW_BASE_URL` in [3.4](#34-running-tests-locally)).
 
 ### 7.3 Start database and backend
 
