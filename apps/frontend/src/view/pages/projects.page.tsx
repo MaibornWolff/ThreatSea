@@ -2,7 +2,7 @@ import Add from "@mui/icons-material/Add";
 import ArrowDownward from "@mui/icons-material/ArrowDownward";
 import ArrowUpward from "@mui/icons-material/ArrowUpward";
 import CreateNewFolder from "@mui/icons-material/CreateNewFolder";
-import { LinearProgress, useMediaQuery } from "@mui/material";
+import { LinearProgress, Typography, useMediaQuery } from "@mui/material";
 import { Box } from "@mui/system";
 import { useTheme } from "@mui/material/styles";
 import { useEffect, useLayoutEffect, useMemo, type ChangeEvent, type MouseEvent, type SyntheticEvent } from "react";
@@ -225,11 +225,13 @@ export const ProjectsPage = CreatePage(HeaderUtilityControls, () => {
                             buttons={[
                                 {
                                     icon: ArrowUpward,
+                                    "aria-label": t("sortAscending"),
                                     value: "asc",
                                     "data-testid": "projects-page_ascending-projects-sort-button",
                                 },
                                 {
                                     icon: ArrowDownward,
+                                    "aria-label": t("sortDescending"),
                                     value: "desc",
                                     "data-testid": "projects-page_descending-projects-sort-button",
                                 },
@@ -258,7 +260,14 @@ export const ProjectsPage = CreatePage(HeaderUtilityControls, () => {
                     </Box>
                 </Box>
 
-                {isSearching ? (
+                {isSearching && !isPending && projects.length === 0 ? (
+                    <Typography
+                        role="status"
+                        sx={{ paddingTop: 2, paddingLeft: 2, fontSize: "0.75rem", fontStyle: "italic" }}
+                    >
+                        {t("projectList.noSearchResults", { searchValue })}
+                    </Typography>
+                ) : isSearching ? (
                     <ProjectsGridComponent
                         projects={projects}
                         columnCount={projectsColumnCount}

@@ -1,4 +1,5 @@
 import type { KeyboardEvent } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Box, IconButton, InputBase } from "@mui/material";
 import Search from "@mui/icons-material/Search";
@@ -12,6 +13,8 @@ type SearchFieldProps = Omit<InputBaseProps, "sx"> & {
 };
 
 export const SearchField = ({ iconButtonProps = {}, sx = {}, inputSx = {}, ...props }: SearchFieldProps) => {
+    const { t } = useTranslation("common");
+
     return (
         <Box
             sx={{
@@ -45,10 +48,14 @@ export const SearchField = ({ iconButtonProps = {}, sx = {}, inputSx = {}, ...pr
                     },
                     ...inputSx,
                 }}
+                slotProps={{ input: { "aria-label": t("search") } }}
                 {...props}
             />
+            {/* Has no action, so hidden from keyboard and screen readers. */}
             <IconButton
                 className="search-icon-button"
+                aria-hidden
+                tabIndex={-1}
                 sx={{
                     "&:hover": {
                         bgcolor: "primary.dark",

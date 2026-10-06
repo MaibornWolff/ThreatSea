@@ -189,5 +189,8 @@
   },
   "filterPlaceholder": "Filtern...",
   "toggleColumnFilter": "Filter für {{column}} umschalten",
-  "ok": "OK"
+  "ok": "OK",
+  "search": "Suchen",
+  "sortAscending": "Aufsteigend sortieren",
+  "sortDescending": "Absteigend sortieren"
 }

@@ -120,10 +120,12 @@ export const OutputSettingsColumn = ({
                             buttons={[
                                 {
                                     icon: ArrowUpward,
+                                    "aria-label": t("sortAscending"),
                                     value: "asc",
                                 },
                                 {
                                     icon: ArrowDownward,
+                                    "aria-label": t("sortDescending"),
                                     value: "desc",
                                 },
                             ]}

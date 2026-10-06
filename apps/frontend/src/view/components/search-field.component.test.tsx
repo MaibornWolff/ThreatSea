@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { SearchField } from "./search-field.component";
 
 describe("SearchField", () => {
@@ -36,8 +37,29 @@ describe("SearchField", () => {
         expect(parentKeyUp).not.toHaveBeenCalled();
     });
 
-    it("should render the search icon button", () => {
-        render(<SearchField />);
-        expect(screen.getByRole("button")).toBeInTheDocument();
+    it("gives the input an accessible name", () => {
+        renderWithProviders(<SearchField />);
+
+        expect(screen.getByRole("textbox", { name: "Search" })).toBeInTheDocument();
+    });
+
+    it("keeps the actionless search icon out of the accessibility tree", () => {
+        renderWithProviders(<SearchField />);
+
+        expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    });
+
+    it("skips the search icon when tabbing", async () => {
+        renderWithProviders(
+            <>
+                <SearchField />
+                <button>Next</button>
+            </>
+        );
+
+        await userEvent.tab();
+        expect(screen.getByRole("textbox", { name: "Search" })).toHaveFocus();
+        await userEvent.tab();
+        expect(screen.getByRole("button", { name: "Next" })).toHaveFocus();
     });
 });

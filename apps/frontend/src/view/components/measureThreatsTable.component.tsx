@@ -118,17 +118,21 @@ export const MeasureThreatsTable = ({
                             {measureThreats === undefined
                                 ? null
                                 : measureThreats.length === 0 && (
-                                      <Typography
-                                          sx={{
-                                              paddingTop: 2,
-                                              paddingLeft: 2,
-                                              minHeight: 60,
-                                              fontSize: "0.75rem",
-                                              fontStyle: "italic",
-                                          }}
-                                      >
-                                          {t("noThreatsFound")}
-                                      </Typography>
+                                      <TableRow>
+                                          <TableCell colSpan={5}>
+                                              <Typography
+                                                  sx={{
+                                                      paddingTop: 2,
+                                                      paddingLeft: 2,
+                                                      minHeight: 60,
+                                                      fontSize: "0.75rem",
+                                                      fontStyle: "italic",
+                                                  }}
+                                              >
+                                                  {t("noThreatsFound")}
+                                              </Typography>
+                                          </TableCell>
+                                      </TableRow>
                                   )}
                             {measureThreats &&
                                 measureThreats.map((measureThreat) => (

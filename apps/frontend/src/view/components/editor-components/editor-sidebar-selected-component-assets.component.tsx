@@ -138,11 +138,13 @@ export const EditorSidebarSelectedComponentAssets = ({
                     buttons={[
                         {
                             icon: ArrowUpward,
+                            "aria-label": t("sortAscending"),
                             value: "asc",
                             "data-testid": "selected-component-asset-ascending-sort-button",
                         },
                         {
                             icon: ArrowDownward,
+                            "aria-label": t("sortDescending"),
                             value: "desc",
                             "data-testid": "selected-component-asset-descending-sort-button",
                         },
