@@ -1,6 +1,6 @@
 import { act, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { GridColDef } from "@mui/x-data-grid";
+import type { GridColDef, GridSortModel } from "@mui/x-data-grid";
 import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat.types.ts";
 import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import type { ExtendedThreatWithMetrics } from "#application/hooks/use-generic-threats-list.hook.ts";
@@ -176,5 +176,75 @@ describe("ThreatsGrid", () => {
                 await translationUtil.changeLanguage("en");
             });
         }
+    });
+
+    it("moves back to the last remaining page when fewer generic threats are left", async () => {
+        // e.g. editing the only matching threat under a filter drops its generic threat after the reload
+        const onPaginationModelChange = vi.fn();
+        // stable props, as on the page: a new sortModel array counts as a sort change and resets the page
+        const sortModel: GridSortModel = [{ field: "name", sort: "asc" }];
+        const paginationModel = { page: 1, pageSize: 10 };
+        const grid = (genericThreatCount: number) => (
+            <div style={{ height: 600, width: 800 }}>
+                <ThreatsGrid
+                    rows={rows}
+                    columns={columns}
+                    loading={false}
+                    columnVisibilityModel={{}}
+                    sortModel={sortModel}
+                    onSortModelChange={vi.fn()}
+                    paginationModel={paginationModel}
+                    onPaginationModelChange={onPaginationModelChange}
+                    genericThreatCount={genericThreatCount}
+                    onColumnWidthChange={vi.fn()}
+                    onToggleGenericThreat={vi.fn()}
+                    onEditThreat={vi.fn()}
+                />
+            </div>
+        );
+        const { rerender } = renderWithProviders(grid(12));
+        rerender(grid(12));
+        await new Promise((resolve) => setTimeout(resolve, 20));
+        expect(onPaginationModelChange).not.toHaveBeenCalled();
+
+        rerender(grid(5));
+
+        await vi.waitFor(() =>
+            expect(onPaginationModelChange).toHaveBeenLastCalledWith({ page: 0, pageSize: 10 }, expect.anything())
+        );
+    });
+
+    it("returns to the first page when the sort order changes", async () => {
+        const onPaginationModelChange = vi.fn();
+        const paginationModel = { page: 1, pageSize: 10 };
+        const grid = (sortModel: GridSortModel) => (
+            <div style={{ height: 600, width: 800 }}>
+                <ThreatsGrid
+                    rows={rows}
+                    columns={columns}
+                    loading={false}
+                    columnVisibilityModel={{}}
+                    sortModel={sortModel}
+                    onSortModelChange={vi.fn()}
+                    paginationModel={paginationModel}
+                    onPaginationModelChange={onPaginationModelChange}
+                    genericThreatCount={12}
+                    onColumnWidthChange={vi.fn()}
+                    onToggleGenericThreat={vi.fn()}
+                    onEditThreat={vi.fn()}
+                />
+            </div>
+        );
+        const ascending: GridSortModel = [{ field: "name", sort: "asc" }];
+        const { rerender } = renderWithProviders(grid(ascending));
+        rerender(grid(ascending));
+        await new Promise((resolve) => setTimeout(resolve, 20));
+        expect(onPaginationModelChange).not.toHaveBeenCalled();
+
+        rerender(grid([{ field: "risk", sort: "desc" }]));
+
+        await vi.waitFor(() =>
+            expect(onPaginationModelChange).toHaveBeenLastCalledWith({ page: 0, pageSize: 10 }, expect.anything())
+        );
     });
 });

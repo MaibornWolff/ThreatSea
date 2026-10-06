@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import type { GridColumnVisibilityModel, GridPaginationModel, GridSortModel } from "@mui/x-data-grid";
-import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { memo, useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useParams } from "react-router";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
@@ -181,12 +181,12 @@ const ThreatsPageBody = () => {
         [genericThreats, threatsByGenericThreatId, expandedGenericThreatIds, columnFilters, sort, paginationModel, t]
     );
 
-    // A new filter or sort order starts again on the first page. Sorting by a column that only threat
-    // rows have values for expands every generic threat, so the sorted values are visible.
+    // Sorting by a column that only threat rows have values for expands every generic threat, so the
+    // sorted values are visible. The grid itself returns to the first page on a new sort order, and to
+    // the last remaining page when fewer generic threats are left.
     const handleSortModelChange = useCallback(
         (model: GridSortModel) => {
             setSortModel(model);
-            setPaginationModel((previous) => ({ ...previous, page: 0 }));
             const field = model[0]?.field;
             if (field !== undefined && isThreatOnlySortField(field)) {
                 setAllGenericThreatsExpanded(true);
@@ -205,14 +205,6 @@ const ThreatsPageBody = () => {
         clearColumnFilters();
         setPaginationModel((previous) => ({ ...previous, page: 0 }));
     }, [clearColumnFilters]);
-
-    // Deleting threats or reloading can leave fewer pages than the current one; stay on the last page.
-    const lastPage = Math.max(0, Math.ceil(genericThreatCount / paginationModel.pageSize) - 1);
-    useEffect(() => {
-        if (paginationModel.page > lastPage) {
-            setPaginationModel((previous) => ({ ...previous, page: lastPage }));
-        }
-    }, [paginationModel.page, lastPage]);
 
     const columns = useMemo(
         () =>
