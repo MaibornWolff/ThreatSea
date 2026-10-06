@@ -4,16 +4,17 @@
 
 1. [Testing Concept](#1-testing-concept)
 2. [Frontend Component Tests (Vitest)](#2-frontend-component-tests-vitest)
-3. [Playwright E2E Tests](#3-playwright-e2e-tests)
-   - 3.1 [Architecture](#31-architecture)
-   - 3.2 [Folder Layout](#32-folder-layout)
-   - 3.3 [Naming Conventions](#33-naming-conventions)
-   - 3.4 [Running Tests Locally](#34-running-tests-locally)
-   - 3.5 [Role-Based / Multi-Identity Testing](#35-role-based--multi-identity-testing)
-4. [Guidelines for New Testers](#4-guidelines-for-new-testers)
-5. [CI/CD Integration](#5-cicd-integration)
-6. [Stability & Maintenance](#6-stability--maintenance)
-7. [Quick Start (Day 1)](#7-quick-start-day-1)
+3. [Backend Tests (Vitest)](#3-backend-tests-vitest)
+4. [Playwright E2E Tests](#4-playwright-e2e-tests)
+   - 4.1 [Architecture](#41-architecture)
+   - 4.2 [Folder Layout](#42-folder-layout)
+   - 4.3 [Naming Conventions](#43-naming-conventions)
+   - 4.4 [Running Tests Locally](#44-running-tests-locally)
+   - 4.5 [Role-Based / Multi-Identity Testing](#45-role-based--multi-identity-testing)
+5. [Guidelines for New Testers](#5-guidelines-for-new-testers)
+6. [CI/CD Integration](#6-cicd-integration)
+7. [Stability & Maintenance](#7-stability--maintenance)
+8. [Quick Start](#8-quick-start)
 
 ---
 
@@ -31,13 +32,17 @@
                 └──────────────────────────────────────────────┘
                                   ▲
                 ┌──────────────────────────────────────────────┐
-                │  Backend Unit/Integration (Vitest)           │  (out of scope here)
+                │  Backend Tests (Vitest)                      │
+                │  apps/backend/tests/**/*.test.ts             │
                 └──────────────────────────────────────────────┘
 ```
 
-Component tests run on every commit and follow a co-location convention (test files live next to
-what they cover). E2E runs locally today (see [section 5](#5-cicd-integration) for why it's not in
-CI yet) and follows the Page Object Model conventions below to stay maintainable and handover-ready.
+Frontend component tests and backend tests run in CI on every pull request and push (see
+[section 6](#6-cicd-integration)) and, with the git hooks enabled, locally on every `git push` —
+the `pre-push` hook runs `pnpm test`, while `pre-commit` only runs `type-check` and `lint-staged`.
+Frontend component tests follow a co-location convention (test files live next to what they
+cover); backend tests live in `apps/backend/tests/`. E2E runs locally only and follows the Page
+Object Model conventions below to stay maintainable and handover-ready.
 
 **Project-wide testing rules** (from `AGENTS.md`):
 
@@ -94,9 +99,38 @@ commands above produce it.
 
 ---
 
-## 3. Playwright E2E Tests
+## 3. Backend Tests (Vitest)
 
-### 3.1 Architecture
+Backend tests live in `apps/backend/tests/` as `<resource>.test.ts`, with shared payloads in
+`tests/testData/`. Unlike the frontend there is no co-location: `vitest.config.ts` only picks up
+`./tests/**/*.{test,spec}.*`, so a test file placed next to the source never runs. Most of them
+are integration tests — they drive the Express app through `supertest` against a real Postgres
+database, so routers, services and the schema are covered together.
+
+**They need Postgres, not a running backend.** `vitest.config.ts` loads `apps/backend/.env` (see
+[8.3](#83-create-the-backend-env)) and overrides `DATABASE_NAME` with `threatsea_test`. The global
+setup creates that database if it is missing, wipes its schema, runs the migrations and seeds one
+user plus a default catalog; the global teardown drops the schema again. The dev database
+`threatsea` is never touched. Since the `pre-push` hook runs these tests too, start Postgres
+before you push.
+
+**Authentication is mocked.** `vitest.setup.ts` mocks `jose`'s `jwtVerify`, so by default every
+request is authenticated as the seeded user and tests don't log in.
+
+```bash
+docker compose up -d postgres
+pnpm --filter threatsea_be test:watch   # while iterating
+pnpm --filter threatsea_be test         # single run
+```
+
+CI runs `test:ci` instead, which adds coverage and writes `apps/backend/junit.xml`. Because it
+runs with coverage, CI fails when coverage drops below the thresholds in `vitest.config.ts`.
+
+---
+
+## 4. Playwright E2E Tests
+
+### 4.1 Architecture
 
 E2E tests run a real browser against the full stack (frontend + backend + Postgres) and follow
 the **Page Object Model**: `tests/` describe behavior only (no selectors, no hard waits) →
@@ -120,7 +154,7 @@ testId)` so parallel runs and reruns don't collide.
 - **UI only for the behavior under test.** Seed 10 projects via API to test sorting; don't click
   through 10 modals to set that up.
 
-### 3.2 Folder Layout
+### 4.2 Folder Layout
 
 ```text
 apps/frontend/playwright/
@@ -130,7 +164,7 @@ apps/frontend/playwright/
 │   ├── projects.page.e2e.spec.ts   # 7 tests
 │   ├── editor.page.e2e.spec.ts     # 34 tests (some parameterized, e.g. per icon)
 │   ├── members.page.e2e.spec.ts    # 25 tests (most run once for projects, once for catalogs)
-│   └── risk.page.e2e.spec.ts       # 11 tests (2 quarantined, see 6.1)
+│   └── risk.page.e2e.spec.ts       # 11 tests (2 quarantined, see 7.1)
 ├── fixtures/            # JSON test data
 ├── builder/             # test-data.builder.ts — buildTestId, buildProject, ...
 ├── enums/               # shared test enums
@@ -140,7 +174,7 @@ apps/frontend/playwright/
 Re-check exact counts with `pnpm --filter threatsea_fe playwright --list` before trusting them
 for long — this table drifts the moment someone adds a test and forgets to come back here.
 
-### 3.3 Naming Conventions
+### 4.3 Naming Conventions
 
 | Element             | Convention                                     | Example                                          |
 | ------------------- | ---------------------------------------------- | ------------------------------------------------ |
@@ -157,7 +191,7 @@ does one in `catalog`), and a number of older `data-testid`s sit outside the pat
 `add-asset-dialog`). Take this table as the reference, not the surrounding code, and don't rewrite
 existing tests just to conform.
 
-### 3.4 Running Tests Locally
+### 4.4 Running Tests Locally
 
 ```bash
 # Prerequisites (separate terminals): docker compose up -d postgres; pnpm dev --filter=threatsea_be
@@ -191,13 +225,13 @@ different index for WebKit; until then use Chromium and Firefox.
 On failure: HTML report in `apps/frontend/playwright-report/`, traces/screenshots/video in
 `apps/frontend/test-results/`.
 
-### 3.5 Role-Based / Multi-Identity Testing
+### 4.5 Role-Based / Multi-Identity Testing
 
 Needed whenever a test verifies what a **different role** (Editor, Viewer) may do, in addition to
 the primary Owner identity `auth.setup.ts` logs in per browser. Pattern (`utils/auth.api.ts`):
 `provisionFixedTestUser(testUserIndex)` creates/logs in one of the backend's fixed E2E profiles
 (indices `0`–`1`, reserved — `2`/`3`/`4` are the browsers' own primary identities, though `4`
-has no profile behind it, see [3.4](#34-running-tests-locally)) via an isolated
+has no profile behind it, see [4.4](#44-running-tests-locally)) via an isolated
 request context, just so it exists to be added as a member; add it with the role under test; then
 `loginAsFixedTestUser(page, testUserIndex)` swaps **`page`'s** identity mid-test.
 
@@ -209,7 +243,7 @@ the swapped-in identity (see `members.page.e2e.spec.ts`'s privilege-escalation t
 
 ---
 
-## 4. Guidelines for New Testers
+## 5. Guidelines for New Testers
 
 **New E2E test:** find or create the page object (`<route>.page.ts` extends `BasePage`) → add any
 missing `data-testid`s (with EN+DE translations) → add `Locator`s to the page object → add an API
@@ -221,6 +255,11 @@ helper if you need to seed/clean data → write `tests/<route>.page.e2e.spec.ts`
 observable behavior (not internals) with at least one edge case → run
 `test:unit:watch` → open a PR.
 
+**New backend test:** add `apps/backend/tests/<resource>.test.ts`, drive the endpoint through
+`supertest` and assert on the response and the resulting database state, including the error
+paths (missing permission, invalid payload, unknown id) → run `test:watch` with Postgres up → open
+a PR.
+
 **Debugging a failing E2E test:** `pnpm --filter threatsea_fe exec playwright show-report` (there
 is no package script for it) → open the failing test's **trace**
 (screenshots, DOM snapshots, console/network logs) → `playwright:ui` to step through → `--headed
@@ -230,28 +269,25 @@ is no package script for it) → open the failing test's **trace**
 **Avoid:** hard waits (`page.waitForTimeout`), raw selectors in specs, shared mutable state
 between tests, asserting on internals instead of user-visible behavior, and `test.only` in
 committed code — nothing catches that one today: `forbidOnly` is tied to `CI`
-(`forbidOnly: !!process.env["CI"]`), and the E2E suite doesn't run there (see §5). Reviewers have
+(`forbidOnly: !!process.env["CI"]`), and the E2E suite doesn't run there (see §6). Reviewers have
 to spot it.
 
 ---
 
-## 5. CI/CD Integration
+## 6. CI/CD Integration
 
 `.github/workflows/ci.yml` runs lint, backend, and frontend build/test (Vitest) on every PR and
 push to `main`/`next`/`v*.*.x`. **Playwright is not wired in** — the E2E suite is local-only.
-Not currently planned; if that changes, mirror `test-backend`'s Postgres service, set
-`AUTH_METHOD=fixed`, install Chromium, start the backend, run
-`pnpm --filter threatsea_fe playwright`, and upload the report/traces as artifacts.
 
 ---
 
-## 6. Stability & Maintenance
+## 7. Stability & Maintenance
 
 **Flake prevention:** `data-testid` locators, auto-waiting/`expect(...).toBeVisible()` (never
 `waitForTimeout`), one test = one behavior, `buildTestId(...)`-namespaced resources, always clean
 up in `afterEach`.
 
-### 6.1 Quarantine: flakes and known gaps
+### 7.1 Quarantine: flakes and known gaps
 
 Two kinds of test end up quarantined: one that is genuinely unstable, and one that fails reliably
 because of a known product gap or an environment artifact. The process below is the same for both
@@ -271,7 +307,7 @@ reproducible manually, and confirmed as no real bug by removing `<StrictMode>` l
 and watching the test pass. That was a diagnostic step, not a change: `<StrictMode>` is still in
 `src/main.tsx`. Cross-check with a manual repro before reporting anything.
 
-### 6.2 Cadence & targets
+### 7.2 Cadence & targets
 
 Per PR: new/changed tests alongside the feature. Weekly: review CI failure trends. Per sprint:
 triage `test.fixme` items. Per quarter: Page Object refactor pass. Targets: E2E suite < 15 min on
@@ -279,19 +315,28 @@ CI, component suite < 3 min (shard with `--shard=1/N` if the E2E suite outgrows 
 
 ---
 
-## 7. Quick Start (Day 1)
+## 8. Quick Start
 
-From a fresh clone to a running test suite. 7.1, 7.2 and 7.4 are one-time setup; 7.3 and 7.5 are
-what you run day to day.
+From a fresh clone to a running test suite. 8.1–8.3 are one-time setup; 8.4 and 8.5 are what you
+run day to day.
 
-### 7.1 Clone and install
+### 8.1 Clone and install
 
 ```bash
 git clone git@github.com:MaibornWolff/ThreatSea.git && cd ThreatSea
 pnpm install
 ```
 
-### 7.2 Create the backend `.env`
+### 8.2 Install the Playwright browsers
+
+Once per machine — and again whenever Playwright is upgraded, since each version pins its own
+browser builds and launching against the old ones fails with "Executable doesn't exist":
+
+```bash
+pnpm --filter threatsea_fe playwright:init
+```
+
+### 8.3 Create the backend `.env`
 
 `apps/backend/.env` is gitignored and has to be created once. It is not optional: `pnpm dev` runs
 the backend as `tsx --env-file .env`, so without the file Node aborts before the first line of
@@ -317,11 +362,11 @@ EOF
 
 `AUTH_METHOD=fixed` is not optional for E2E — `auth.setup.ts` logs in via
 `/api/auth/login?testUser=<n>`, a route that only exists in fixed-auth mode. The same fixed
-profiles back the role-based tests in [section 3.5](#35-role-based--multi-identity-testing).
+profiles back the role-based tests in [section 4.5](#45-role-based--multi-identity-testing).
 `ORIGIN_APP` has to match the frontend origin Playwright tests against; change both together (see
-`PW_BASE_URL` in [3.4](#34-running-tests-locally)).
+`PW_BASE_URL` in [4.4](#44-running-tests-locally)).
 
-### 7.3 Start database and backend
+### 8.4 Start database and backend
 
 ```bash
 docker compose up -d postgres
@@ -331,21 +376,16 @@ pnpm dev --filter=threatsea_be
 Give the backend its own terminal and leave it running. It applies pending Drizzle migrations on
 startup, before it binds port 8000 — there is no separate migration step.
 
-### 7.4 Install the Playwright browsers
-
-Once per machine — and again whenever Playwright is upgraded, since each version pins its own
-browser builds and launching against the old ones fails with "Executable doesn't exist":
-
-```bash
-pnpm --filter threatsea_fe playwright:init
-```
-
-### 7.5 Run the tests
+### 8.5 Run the tests
 
 ```bash
 pnpm --filter threatsea_fe test:unit:watch   # Vitest component tests, watch mode
+pnpm --filter threatsea_be test:watch        # Vitest backend tests, watch mode
 pnpm --filter threatsea_fe playwright:ui     # Playwright UI mode
 ```
+
+The backend tests only need Postgres, not the running backend — see
+[section 3](#3-backend-tests-vitest).
 
 The frontend dev server is not in this list on purpose: Playwright starts it and reuses a running
 one locally (`webServer.reuseExistingServer` in `playwright.config.ts`).
