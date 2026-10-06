@@ -13,6 +13,7 @@
  *   });
  */
 import type { ReactNode } from "react";
+import type { i18n } from "i18next";
 import { render } from "@testing-library/react";
 import type { RenderOptions, RenderResult } from "@testing-library/react";
 import { Provider } from "react-redux";
@@ -28,6 +29,11 @@ interface RenderWithProvidersOptions extends Omit<RenderOptions, "wrapper"> {
     preloadedState?: Partial<RootState>;
     /** Initial URL entries for MemoryRouter. Defaults to ["/"]. */
     initialEntries?: InitialEntry[];
+    /**
+     * i18next instance. Defaults to the shared app instance; pass `translationUtil.cloneInstance()`
+     * to switch languages without affecting other test files.
+     */
+    i18n?: i18n;
 }
 
 /**
@@ -43,7 +49,12 @@ interface RenderWithProvidersOptions extends Omit<RenderOptions, "wrapper"> {
  */
 export function renderWithProviders(
     ui: ReactNode,
-    { preloadedState, initialEntries = ["/"], ...renderOptions }: RenderWithProvidersOptions = {}
+    {
+        preloadedState,
+        initialEntries = ["/"],
+        i18n = translationUtil,
+        ...renderOptions
+    }: RenderWithProvidersOptions = {}
 ): RenderResult & { store: ReturnType<typeof createStore> } {
     const store = createStore(preloadedState);
 
@@ -51,7 +62,7 @@ export function renderWithProviders(
         return (
             <Provider store={store}>
                 <MemoryRouter initialEntries={initialEntries}>
-                    <I18nextProvider i18n={translationUtil}>
+                    <I18nextProvider i18n={i18n}>
                         <Theme>{children}</Theme>
                     </I18nextProvider>
                 </MemoryRouter>

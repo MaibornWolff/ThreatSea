@@ -111,11 +111,13 @@ export const EditorSidebarSelectedComponentConnected = ({
                     buttons={[
                         {
                             icon: ArrowUpward,
+                            "aria-label": t("sortAscending"),
                             value: "asc",
                             "data-testid": "connected-component-ascending-sort-button",
                         },
                         {
                             icon: ArrowDownward,
+                            "aria-label": t("sortDescending"),
                             value: "desc",
                             "data-testid": "connected-component-descending-sort-button",
                         },
