@@ -31,6 +31,13 @@ const profiles: OidcProfile[] = [
         sub: "testid4",
         emailVerified: true,
     },
+    {
+        firstName: "E2E",
+        lastName: "Testing",
+        email: "test5@test.test",
+        sub: "testid5",
+        emailVerified: true,
+    },
 ];
 
 function tryParseInt(str: string, defaultValue = 0) {

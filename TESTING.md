@@ -213,14 +213,14 @@ The suite targets the Vite dev server on `http://localhost:3000`. If yours runs 
 `auth.setup.ts` waits for that redirect to land on the base URL, so a mismatch times out the
 login.
 
-**Chromium and Firefox pass; WebKit does not.** The backend defines four fixed profiles, indices
-`0`–`3` (`fixedAuthentication.service.ts`), so WebKit's `testUser=4` does not exist: the login
-redirects but sets no `accessToken` cookie. `auth.setup.ts` reports success anyway, because the
-`csrfToken` it waits for is written per express-session rather than per identity — the resulting
-`tmp/.auth/webkit-user.json` holds only `threatSea_session_id`. Every WebKit test then fails on
-its first API call. Measured on 2026-09-17 with `projects.page.e2e.spec.ts`: 8/8 passing on
-Chromium and on Firefox, 7/7 failing on WebKit. Fixing it takes a fifth backend profile or a
-different index for WebKit; until then use Chromium and Firefox.
+`auth.setup.ts` checks for the `accessToken` cookie right after the login redirect. A failed
+fixed-auth login still redirects to the frontend, and the `csrfToken` it waits for afterwards is
+scoped to the express session rather than the identity, so the cookie is the only proof the
+browser is logged in; without it the setup project fails instead of writing a logged-out storage
+state. A browser with no profile mapped in `auth.setup.ts` fails the setup as well. The backend's
+fixed profiles are indices `0`–`4` (`fixedAuthentication.service.ts`): `0`/`1` are the secondary
+identities (see §4.5), `2`–`4` the three browsers. A new browser project needs a new backend
+profile, not a reused index.
 
 On failure: HTML report in `apps/frontend/playwright-report/`, traces/screenshots/video in
 `apps/frontend/test-results/`.
