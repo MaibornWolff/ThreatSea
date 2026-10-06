@@ -211,7 +211,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         setAutoSaveStatus,
         userRole,
         systemPending,
-        initialized,
+        isCurrentProjectLoaded: loadedProjectId === projectId,
         isAnyComponentInUse,
         autoSaveStatus,
         blockAutoSave,
@@ -759,13 +759,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         }
     };
 
-    const handleContextMenuAction = (componentType: EditorComponentType): void => {
-        const pointerPosition = stageRef.current?.getRelativePointerPosition();
-        if (!pointerPosition) {
-            return;
-        }
-        const { x, y } = pointerPosition;
-
+    const handleContextMenuAction = (componentType: EditorComponentType, { x, y }: Coordinate): void => {
         const gridPositionX = Math.floor((x - layerPosition.x) / GRID_CONFIG.gridSizeX);
         const gridPositionY = Math.floor((y - layerPosition.y) / GRID_CONFIG.gridSizeY);
 
@@ -942,8 +936,13 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         }
     };
 
+    // Absolute paths: the memoized sidebar can hold a handler whose relative navigate resolves against a stale URL.
     const handleAssetNameClick = (asset: Asset): void => {
-        navigate(`assets/${asset.id}/edit`);
+        navigate(`/projects/${projectId}/system/assets/${asset.id}/edit`);
+    };
+
+    const handleAddAssetClick = (): void => {
+        navigate(`/projects/${projectId}/system/assets/edit`);
     };
 
     const handleComponentBreadcrumbClick = (): void => {
@@ -1558,6 +1557,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                     handleDeleteCommunicationInterface={handleDeleteCommunicationInterfaceDialog}
                     handlePointOfAttackLabelClick={handlePointOfAttackLabelClick}
                     handleAssetNameClick={handleAssetNameClick}
+                    handleAddAssetClick={handleAddAssetClick}
                     handleSelectConnectedComponent={handleSelectConnectedComponent}
                     handleComponentBreadcrumbClick={handleComponentBreadcrumbClick}
                     handleInterfaceBreadcrumbClick={handleInterfaceBreadcrumbClick}
@@ -1570,6 +1570,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
 
                 <Routes>
                     <Route path="components/edit" element={<ComponentDialogPage />} />
+                    <Route path="assets/edit" element={<AssetDialogPage />} />
                     <Route path="assets/:assetId/edit" element={<AssetDialogPage />} />
                 </Routes>
 

@@ -2,7 +2,7 @@ import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { translationUtil } from "#utils/translations.ts";
-import { AboutDialog } from "./about-dialog.component";
+import { AboutDialog } from "#view/dialogs/about.dialog.tsx";
 
 describe("AboutDialog", () => {
     it("shows the app name, version, license and repository link when open", () => {

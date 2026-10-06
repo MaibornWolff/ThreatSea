@@ -1,6 +1,7 @@
 import type { ProjectReport } from "#api/types/project.types.ts";
 import type { MatrixColorKey } from "#view/colors/matrix.ts";
-import { calcNetRisk } from "#utils/calcRisk.ts";
+import { calcThreatNetRisk } from "#utils/calcRisk.ts";
+import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import { dayNumberFromDateString, addThreatsToRiskMatrix } from "#utils/riskMatrix.ts";
 
 export type ReportThreat = ProjectReport["threats"][number];
@@ -48,6 +49,26 @@ const isMeasureWithinScheduledRange = (
     return true;
 };
 
+export type OutOfScopeReason = "status" | "measure" | null;
+
+/**
+ * Why a threat carries no residual risk: because a user put it out of scope, or because one of
+ * its measures does. Derived from the threat itself rather than from a net value of 0, since a
+ * threat with no affected protection goal legitimately has a damage of 0.
+ */
+export const getOutOfScopeReason = (threat: {
+    status: THREAT_STATUSES;
+    measures: { setsOutOfScope: boolean }[];
+}): OutOfScopeReason => {
+    if (threat.status === THREAT_STATUSES.OUTOFSCOPE) {
+        return "status";
+    }
+    if (threat.measures.some((measure) => measure.setsOutOfScope)) {
+        return "measure";
+    }
+    return null;
+};
+
 /**
  * Keeps only the measures scheduled inside the range on each threat and recomputes the threat's
  * net probability/damage/risk from the surviving measures, so the report reflects exactly the
@@ -67,7 +88,7 @@ export const filterThreatsByScheduledRange = (
         const filteredMeasures = threat.measures.filter((measure) =>
             isMeasureWithinScheduledRange(measure, fromDay, tillDay)
         );
-        const { netProbability, netDamage, netRisk } = calcNetRisk(threat.probability, threat.damage, filteredMeasures);
+        const { netProbability, netDamage, netRisk } = calcThreatNetRisk(threat, filteredMeasures);
         return {
             ...threat,
             measures: filteredMeasures,
@@ -106,7 +127,7 @@ export const calcActiveMeasureNetRisk = (threat: ReportThreat, scheduledAt: stri
         const measureScheduledAt = dayNumberFromDateString(measure.scheduledAt);
         return !Number.isNaN(measureScheduledAt) && measureScheduledAt <= dayNumberFromDateString(scheduledAt);
     });
-    return calcNetRisk(threat.probability, threat.damage, activeMeasures);
+    return calcThreatNetRisk(threat, activeMeasures);
 };
 
 export const calcNetRiskMatrix = (

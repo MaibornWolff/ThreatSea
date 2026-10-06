@@ -63,6 +63,13 @@ export function getPreferredLanguage(supported: string[] = ["en", "de"]): string
     return localeFromNavigator ?? "en";
 }
 
+// Keeps <html lang> in sync for screen readers; the worker bundle has no document.
+i18next.on("languageChanged", (language) => {
+    if (typeof document !== "undefined") {
+        document.documentElement.lang = language;
+    }
+});
+
 /**
  * Initialises the translation for english and german
  * with i18next.

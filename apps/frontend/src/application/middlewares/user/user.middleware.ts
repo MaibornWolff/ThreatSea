@@ -2,6 +2,7 @@ import { isFulfilled, isRejected } from "@reduxjs/toolkit";
 import type { AppMiddleware } from "#application/middlewares/types.ts";
 import { UserActions } from "#application/actions/user.actions.ts";
 import { AlertActions } from "#application/actions/alert.actions.ts";
+import { clearTableViewStorage } from "#utils/table-view-storage.ts";
 
 const asyncThunks = [UserActions.logOut, UserActions.getAuthStatus] as const;
 
@@ -16,6 +17,7 @@ const handleSuccessfulRequest: AppMiddleware =
         next(action);
         if (isFullfiledAction(action)) {
             if (UserActions.logOut.fulfilled.match(action)) {
+                clearTableViewStorage();
                 dispatch(UserActions.setUserLoggedOut());
 
                 dispatch(

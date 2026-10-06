@@ -12,6 +12,7 @@ import {
 import { translationUtil } from "#utils/translations.ts";
 import { useReport } from "#application/hooks/use-report.hook.ts";
 import type { ProjectReport } from "#api/types/project.types.ts";
+import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 
 const wrapper = ({ children }: { children: ReactNode }) => (
     <I18nextProvider i18n={translationUtil}>{children}</I18nextProvider>
@@ -120,5 +121,51 @@ describe("useReport", () => {
         act(() => result.current.setRiskMatrixMeasures(["2025-01-01"]));
 
         expect(result.current.milestones?.[0]?.active).toBe(true);
+    });
+
+    describe("out-of-scope threats in the risk matrices", () => {
+        // Probability 4 and damage 5 place a threat in row 5 - 4 = 1, column 5 - 1 = 4.
+        const cellAmount = (matrix: ReturnType<typeof useReport>["bruttoMatrix"]) => matrix?.[1]?.[4]?.amount;
+        const placedThreats = (matrix: ReturnType<typeof useReport>["nettoMatrix"]) =>
+            (matrix ?? []).flat().reduce((sum, cell) => sum + (cell.amount ?? 0), 0);
+
+        it("leaves a threat the user set out of scope out of the before matrix", async () => {
+            const report = createProjectReport({
+                threats: [
+                    createReportThreat({ id: 1, status: THREAT_STATUSES.IN_PROGRESS }),
+                    createReportThreat({
+                        id: 2,
+                        status: THREAT_STATUSES.OUTOFSCOPE,
+                        netProbability: 0,
+                        netDamage: 0,
+                        netRisk: 0,
+                    }),
+                ],
+            });
+            const { result } = renderUseReport(report);
+
+            await waitFor(() => expect(result.current.bruttoMatrix).not.toBeNull());
+            expect(cellAmount(result.current.bruttoMatrix)).toBe(1);
+        });
+
+        it("keeps a threat a measure set out of scope in the before matrix, but not in the after matrix", async () => {
+            const report = createProjectReport({
+                threats: [
+                    createReportThreat({
+                        id: 1,
+                        status: THREAT_STATUSES.FINALIZED,
+                        measures: [createReportThreatMeasure({ setsOutOfScope: true })],
+                        netProbability: 0,
+                        netDamage: 0,
+                        netRisk: 0,
+                    }),
+                ],
+            });
+            const { result } = renderUseReport(report);
+
+            await waitFor(() => expect(result.current.bruttoMatrix).not.toBeNull());
+            expect(cellAmount(result.current.bruttoMatrix)).toBe(1);
+            expect(placedThreats(result.current.nettoMatrix)).toBe(0);
+        });
     });
 });

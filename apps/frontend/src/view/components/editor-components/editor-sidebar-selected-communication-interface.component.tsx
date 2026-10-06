@@ -8,6 +8,7 @@ import { TextField } from "#view/components/textfield.component.tsx";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import Delete from "@mui/icons-material/Delete";
 import { useAssetHoverPopper } from "#application/hooks/useAssetHoverPopper.ts";
+import { matchesAssetSearch } from "#utils/asset-search.ts";
 import type { ChangeEvent } from "react";
 import type { SystemConnectionPoint } from "#application/adapters/system-connection-point.adapter.ts";
 import type { Asset } from "#api/types/asset.types.ts";
@@ -272,17 +273,7 @@ export const EditorSidebarSelectedCommunicationInterface = ({
                     />
 
                     <EditorSidebarAssetList
-                        items={
-                            assetSearchValue != ""
-                                ? items.filter((item) => {
-                                      const lcSearchValue = assetSearchValue.toLowerCase();
-                                      return (
-                                          assetSearchValue === "" ||
-                                          item.name.replace(/_/g, " ").toLowerCase().includes(lcSearchValue)
-                                      );
-                                  })
-                                : items
-                        }
+                        items={items.filter((item) => matchesAssetSearch(item, assetSearchValue))}
                         checkedAssets={selectedPointOfAttack.assets}
                         onChangeHandler={handleOnAssetChanged}
                         onAssetNameClick={handleAssetNameClick}

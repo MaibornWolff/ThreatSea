@@ -261,6 +261,7 @@ test.describe("Projects Page Tests", () => {
         await projectsPage.cancelButton.click();
         await expect(page).toHaveURL("/projects");
 
+        await projectsPage.searchField.fill(tid);
         await projectsPage.actionMenuButton.first().click();
         await expect(projectsPage.editProjectButton).toBeVisible();
         await expect(projectsPage.exportProjectButton).toBeVisible();

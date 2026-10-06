@@ -49,6 +49,15 @@ describe("import a project", () => {
         expect(res.statusCode).toEqual(400);
     });
 
+    it("should reject a malformed v3 body with 400 instead of crashing the upgrade shim", async () => {
+        const res = await request(app)
+            .post("/api/import")
+            .send({ datamodelVersion: 3, threats: {} })
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(400);
+    });
+
     it("should import a bigger project", async () => {
         const res = await request(app)
             .post("/api/import")
@@ -172,5 +181,56 @@ describe("get report from imported project", () => {
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(200);
+    });
+});
+
+describe("import annotations", () => {
+    it("should remap annotation project ids to the new project", async () => {
+        const projectName = "annotation remap project";
+        const project = JSON.parse(JSON.stringify(VALID_TEST_PROJECT));
+        project.project.name = projectName;
+        project.system.data.annotations = [
+            {
+                id: "annotation-rect",
+                type: "rect",
+                projectId: 1,
+                x: 120,
+                y: 240,
+                width: 60,
+                height: 40,
+                stroke: "#000000",
+                strokeWidth: 2,
+            },
+            {
+                id: "annotation-circle",
+                type: "circle",
+                projectId: 1,
+                x: 400,
+                y: 90,
+                radius: 25,
+                stroke: "#ff0000",
+                strokeWidth: 1,
+            },
+        ];
+
+        const res = await request(app)
+            .post("/api/import")
+            .send(project)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(204);
+
+        const importedProject = await db.query.projects.findFirst({
+            where: eq(projects.name, projectName),
+        });
+        const exportRes = await request(app)
+            .get("/api/export/" + importedProject!.id)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+
+        expect(exportRes.body.system.data.annotations).toHaveLength(2);
+        for (const annotation of exportRes.body.system.data.annotations) {
+            expect(annotation.projectId).toEqual(importedProject!.id);
+        }
     });
 });

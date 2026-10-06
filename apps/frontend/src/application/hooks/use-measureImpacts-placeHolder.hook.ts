@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import { useThreats } from "./use-threats.hook";
 
 export const useMeasureImpactPlaceholder = ({ projectId }: { projectId: number }) => {
@@ -17,14 +16,14 @@ export const useMeasureImpactPlaceholder = ({ projectId }: { projectId: number }
         if (currentThreatId === null) {
             return null;
         }
-        const threat = threats.find((candidate) => candidate.id === currentThreatId) as ExtendedThreat | undefined;
+        const threat = threats.find((candidate) => candidate.id === currentThreatId);
 
         if (!threat) {
             return null;
         }
 
-        const { confidentiality, integrity, availability, assets } = threat;
-        return assets.reduce((value, asset) => {
+        const { confidentiality, integrity, availability } = threat;
+        return threat.assets.reduce((value, asset) => {
             if (confidentiality && value < asset.confidentiality) {
                 value = asset.confidentiality;
             }

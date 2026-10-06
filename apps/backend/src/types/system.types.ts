@@ -110,7 +110,7 @@ interface TextAnnotation extends BaseAnnotation {
     underline?: boolean;
 }
 
-type Annotation =
+export type Annotation =
     | RectAnnotation
     | CircleAnnotation
     | LineAnnotation

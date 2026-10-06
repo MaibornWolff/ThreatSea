@@ -1,1 +1,1 @@
-export const DATAMODEL_VERSION = 3;
+export const DATAMODEL_VERSION = 4;

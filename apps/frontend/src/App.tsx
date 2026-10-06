@@ -65,11 +65,11 @@ export function App(): JSX.Element {
     return (
         <BrowserRouter>
             <ErrorBoundary>
-                <Theme>
-                    <Translations>
+                <Translations>
+                    <Theme>
                         <Suspense fallback={<PageLoader />}>
                             <Routes>
-                                <Route path="/login" element={<LoginPage />} />
+                                <Route path="/login/*" element={<LoginPage />} />
 
                                 <Route
                                     path="/projects/*"
@@ -188,8 +188,8 @@ export function App(): JSX.Element {
                         </Suspense>
                         <Alert />
                         <Confirm />
-                    </Translations>
-                </Theme>
+                    </Theme>
+                </Translations>
             </ErrorBoundary>
         </BrowserRouter>
     );

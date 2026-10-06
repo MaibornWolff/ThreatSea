@@ -3,8 +3,10 @@ import { Box } from "@mui/system";
 import { useTranslation } from "react-i18next";
 import { AssetSecurityNeedsPopper } from "./asset-security-needs-popper.component";
 import { EditorSidebarAssetList } from "./editor-sidebar-asset-list.component";
+import { POA_COLORS } from "#view/colors/pointsOfAttack.colors.ts";
 import { SearchField } from "#view/components/search-field.component.tsx";
 import { useAssetHoverPopper } from "#application/hooks/useAssetHoverPopper.ts";
+import { matchesAssetSearch } from "#utils/asset-search.ts";
 import type { ChangeEvent } from "react";
 import type { Asset } from "#api/types/asset.types.ts";
 import type { SystemComponent, SystemPointOfAttack } from "#api/types/system.types.ts";
@@ -41,12 +43,24 @@ export const EditorSidebarSelectedPointOfAttack = ({
                     backgroundColor: "transparent",
                     paddingLeft: 0,
                     paddingRight: 0,
-                    alignItems: "flex-start",
+                    alignItems: "center",
                     marginBottom: "-10px",
                     height: "26px",
                     border: "none",
                 }}
             >
+                <Box
+                    data-testid="poa-type-color-dot"
+                    sx={{
+                        backgroundColor: POA_COLORS[selectedPointOfAttack.type].normal,
+                        width: "16px",
+                        height: "16px",
+                        borderRadius: 50,
+                        marginRight: 1,
+                        marginTop: "1px",
+                        flexShrink: 0,
+                    }}
+                />
                 <Typography
                     sx={{
                         display: "inline",
@@ -119,17 +133,7 @@ export const EditorSidebarSelectedPointOfAttack = ({
             />
 
             <EditorSidebarAssetList
-                items={
-                    assetSearchValue != ""
-                        ? items.filter((item) => {
-                              const lcSearchValue = assetSearchValue.toLowerCase();
-                              return (
-                                  assetSearchValue === "" ||
-                                  item.name.replace(/_/g, " ").toLowerCase().includes(lcSearchValue)
-                              );
-                          })
-                        : items
-                }
+                items={items.filter((item) => matchesAssetSearch(item, assetSearchValue))}
                 checkedAssets={selectedPointOfAttack.assets}
                 onChangeHandler={handleOnAssetChanged}
                 onAssetNameClick={handleAssetNameClick}

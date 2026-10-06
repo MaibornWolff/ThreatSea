@@ -17,6 +17,15 @@ body:
     validations:
       required: true
 
+  - type: input
+    id: affected-versions
+    attributes:
+      label: Affected Version(s)
+      description: Which version(s) of ThreatSea are affected? If you're unsure, check the version in the application or the image tag you deployed.
+      placeholder: e.g. 1.4.0, 1.5.0
+    validations:
+      required: true
+
   - type: textarea
     id: workaround
     attributes:

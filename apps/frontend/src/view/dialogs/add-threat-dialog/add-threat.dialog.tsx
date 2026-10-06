@@ -10,17 +10,20 @@ import {
     Typography,
     type DialogProps,
 } from "@mui/material";
-import { useRef, useState, type ChangeEvent, type MouseEvent, type SyntheticEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type MouseEvent, type SyntheticEvent } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useLocation } from "react-router";
-import { useDialog } from "#application/hooks/use-dialog.hook.ts";
+import { useAppDispatch } from "#application/hooks/use-app-redux.hook.ts";
+import { ThreatsActions } from "#application/actions/threats.actions.ts";
+import { ThreatsAPI } from "#api/threats.api.ts";
 import { Button } from "#view/components/button.component.tsx";
 import { Dialog } from "#view/components/dialog.component.tsx";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { useThreatMeasuresList } from "#application/hooks/use-threat-measures-list.hook.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
+import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import type { ExtendedProject } from "#api/types/project.types.ts";
 import type { ThreatMeasure } from "#application/hooks/use-threat-measures-list.hook.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
@@ -41,6 +44,7 @@ interface AddThreatDialogProps extends DialogProps {
     userRole: USER_ROLES | undefined;
     initialTab?: ThreatTab;
     hostRoute?: ThreatDialogHostRoute;
+    onSaved?: () => void;
 }
 
 const AddThreatDialog = ({
@@ -49,9 +53,10 @@ const AddThreatDialog = ({
     userRole,
     initialTab,
     hostRoute = "threats",
+    onSaved,
     ...props
 }: AddThreatDialogProps) => {
-    const { confirmDialog, cancelDialog } = useDialog<ThreatFormValues | null>("threats");
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const location = useLocation();
     const { t } = useTranslation("threatDialogPage");
@@ -59,11 +64,17 @@ const AddThreatDialog = ({
     const formRef = useRef<HTMLFormElement | null>(null);
     const projectId = project.id;
     const threatId = threat.id;
+    // Seed the form with the threat's real status so the Status select shows it accurately
+    // (a "new" threat displays as New). NEW stays non-selectable in the dropdown, and saving
+    // any non-terminal threat still advances it to IN_PROGRESS (see handleConfirmDialog).
+    const initialStatus = threat?.status ?? THREAT_STATUSES.NEW;
     const {
         control,
         register,
         handleSubmit,
-        formState: { errors },
+        getFieldState,
+        resetField,
+        formState: { errors, isSubmitting, isDirty },
     } = useForm<ThreatFormValues>({
         defaultValues: {
             ...threat,
@@ -74,22 +85,78 @@ const AddThreatDialog = ({
             confidentiality: threat?.confidentiality ?? false,
             integrity: threat?.integrity ?? false,
             availability: threat?.availability ?? false,
-            doneEditing: threat?.doneEditing ?? false,
+            status: initialStatus,
         },
     });
+
+    // The threat prop is a navigation-state snapshot, and returning from a child dialog (e.g. Apply
+    // measure) re-mounts this dialog from that same snapshot. Meanwhile the backend may have changed
+    // the status — applying an out-of-scope measure finalizes the threat — so re-read it; otherwise
+    // the Status select shows the old value and the next save writes it back.
+    useEffect(() => {
+        let cancelled = false;
+        ThreatsAPI.getThreat({ projectId, id: threatId })
+            .then((storedThreat) => {
+                // A status the user already picked wins over the stored one.
+                if (!cancelled && !getFieldState("status").isDirty) {
+                    resetField("status", { defaultValue: storedThreat.status });
+                }
+            })
+            .catch(() => {
+                // keep the snapshot's status; the save itself still reports errors globally
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, [projectId, threatId, getFieldState, resetField]);
+
+    // Warn before a browser reload/close/external navigation while the form has unsaved
+    // changes. (In-app navigation, e.g. Cancel, intentionally discards the dialog.)
+    useEffect(() => {
+        if (!isDirty) {
+            return;
+        }
+        const warnOnUnload = (event: BeforeUnloadEvent) => {
+            // Modern browsers show their generic "unsaved changes" prompt when the default
+            // is prevented; no custom message is possible.
+            event.preventDefault();
+        };
+        window.addEventListener("beforeunload", warnOnUnload);
+        return () => window.removeEventListener("beforeunload", warnOnUnload);
+    }, [isDirty]);
 
     /**
      * Cancel a dialog and closes it.
      * @event Button#onClick
      */
     const handleCancelDialog = () => {
-        cancelDialog();
         closeDialog();
     };
 
-    const handleConfirmDialog = (data: ThreatFormValues) => {
-        confirmDialog(data);
-        closeDialog();
+    const handleConfirmDialog = async (data: ThreatFormValues) => {
+        const status =
+            data.status === THREAT_STATUSES.FINALIZED || data.status === THREAT_STATUSES.OUTOFSCOPE
+                ? data.status
+                : THREAT_STATUSES.IN_PROGRESS;
+        try {
+            await dispatch(
+                ThreatsActions.updateThreat({
+                    name: data.name,
+                    description: data.description,
+                    ...(data.probability === "" ? {} : { probability: data.probability }),
+                    confidentiality: data.confidentiality,
+                    integrity: data.integrity,
+                    availability: data.availability,
+                    status,
+                    id: threatId,
+                    projectId,
+                })
+            ).unwrap();
+            onSaved?.();
+            closeDialog();
+        } catch {
+            // handled globally; keep the dialog open so the user can retry
+        }
     };
 
     const { openConfirm } = useConfirm<ThreatMeasure | null>();
@@ -107,7 +174,7 @@ const AddThreatDialog = ({
         sortBy,
         threatMeasures,
         allThreatMeasures,
-    } = useThreatMeasuresList({ projectId, threatId });
+    } = useThreatMeasuresList({ projectId, threatId: threatId });
 
     const onChangeSortBy = (_event: SyntheticEvent, newSortBy: string | null) => {
         // If the attribute is clicked again, the order is changed.
@@ -291,6 +358,7 @@ const AddThreatDialog = ({
                 <AddThreatMainTab
                     active={tab === "MAIN"}
                     threatId={threatId}
+                    genericThreatDescription={threat.genericThreatDescription}
                     assets={threat.assets}
                     lineOfToleranceGreen={project.lineOfToleranceGreen}
                     lineOfToleranceRed={project.lineOfToleranceRed}
@@ -329,9 +397,9 @@ const AddThreatDialog = ({
                         <Button
                             type="submit"
                             color="success"
-                            sx={{ marginRight: 0 }}
+                            sx={{ marginRight: 0, backgroundColor: "primary.main", color: "text.white" }}
                             data-testid="EditEssetsSave"
-                            disabled={!checkUserRole(userRole, USER_ROLES.EDITOR)}
+                            disabled={isSubmitting || !isDirty || !checkUserRole(userRole, USER_ROLES.EDITOR)}
                         >
                             {t("saveBtn")}
                         </Button>
@@ -340,10 +408,10 @@ const AddThreatDialog = ({
                         <Button
                             type="submit"
                             color="success"
-                            sx={{ marginRight: 0 }}
+                            sx={{ marginRight: 0, backgroundColor: "primary.main", color: "text.white" }}
                             id="submitBtn"
                             data-testid="EditThreatSave"
-                            disabled={!checkUserRole(userRole, USER_ROLES.EDITOR)}
+                            disabled={isSubmitting || !isDirty || !checkUserRole(userRole, USER_ROLES.EDITOR)}
                         >
                             {t("saveBtn")}
                         </Button>

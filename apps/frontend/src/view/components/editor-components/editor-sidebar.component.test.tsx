@@ -56,6 +56,7 @@ const setup = (propsOverride: Partial<EditorSidebarProps> = {}) => {
         handleDeleteCommunicationInterface: vi.fn(),
         handlePointOfAttackLabelClick: vi.fn(),
         handleAssetNameClick: vi.fn(),
+        handleAddAssetClick: vi.fn(),
         handleSelectConnectedComponent: vi.fn(),
         handleComponentBreadcrumbClick: vi.fn(),
         handleInterfaceBreadcrumbClick: vi.fn(),

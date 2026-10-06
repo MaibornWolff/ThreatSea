@@ -10,8 +10,8 @@ export const ROLE_LABELS: Record<USER_ROLES, string> = {
 };
 
 export class MembersPage extends BasePage {
-    // List / filter controls
-    readonly searchField: Locator;
+    // List / filter controls. The members list is a MUI DataGrid, so rows/cells/headers are
+    // located by DataGrid class + data-field rather than semantic table elements.
     readonly addMemberButton: Locator;
     readonly ownerFilterButton: Locator;
     readonly editorFilterButton: Locator;
@@ -23,6 +23,7 @@ export class MembersPage extends BasePage {
     readonly memberNameCells: Locator;
     readonly memberEmailCells: Locator;
     readonly memberRoleCells: Locator;
+    readonly rowActionButtons: Locator;
 
     // Add/edit member dialog
     readonly addableMemberSearchField: Locator;
@@ -42,20 +43,25 @@ export class MembersPage extends BasePage {
     constructor(page: Page) {
         super(page);
 
-        this.searchField = page.locator('[data-testid="MemberSearch"] input');
         this.addMemberButton = page.locator('[data-testid="AddMember"]');
         this.ownerFilterButton = page.locator('[data-testid="memberOwnerFilter"]');
         this.editorFilterButton = page.locator('[data-testid="memberEditorFilter"]');
         // Product code names the viewer filter button "memberEditorViewer" (likely a copy-paste
         // slip); kept verbatim since it is existing, non-test code and out of scope here.
         this.viewerFilterButton = page.locator('[data-testid="memberEditorViewer"]');
-        this.nameHeader = page.locator('[data-testid="MemberName"]');
-        this.emailHeader = page.locator('[data-testid="MemberEmail"]');
-        this.roleHeader = page.locator('[data-testid="MemberRole"]');
-        this.memberRows = page.locator('[data-testid="MembersBody"] tr');
-        this.memberNameCells = page.locator('[data-testid="MembersBody"] tr td:nth-child(1)');
-        this.memberEmailCells = page.locator('[data-testid="MembersBody"] tr td:nth-child(2)');
-        this.memberRoleCells = page.locator('[data-testid="MembersBody"] tr td:nth-child(3)');
+        // Sorting is toggled by clicking a column header's label (a <p>). Clicking the header's
+        // centre can land on the column's filter-toggle icon (which stops propagation), so the
+        // label is targeted specifically — same approach as the assets/measures page objects.
+        this.nameHeader = page.locator('.MuiDataGrid-columnHeader[data-field="name"] p').first();
+        this.emailHeader = page.locator('.MuiDataGrid-columnHeader[data-field="email"] p').first();
+        this.roleHeader = page.locator('.MuiDataGrid-columnHeader[data-field="role"] p').first();
+        this.memberRows = page.locator(".MuiDataGrid-row");
+        this.memberNameCells = page.locator('.MuiDataGrid-cell[data-field="name"]');
+        this.memberEmailCells = page.locator('.MuiDataGrid-cell[data-field="email"]');
+        this.memberRoleCells = page.locator('.MuiDataGrid-cell[data-field="role"]');
+        // Action (delete) buttons live inside the grid's data rows only; used to assert that a
+        // non-owner sees none.
+        this.rowActionButtons = page.locator(".MuiDataGrid-row button");
 
         this.addableMemberSearchField = page.locator('[data-testid="MemberAddableSearch"] input');
         this.addableMemberListItems = page.locator("#addableMemberList li");
@@ -117,5 +123,30 @@ export class MembersPage extends BasePage {
     async selectRole(role: USER_ROLES): Promise<void> {
         await this.roleSelect.click();
         await this.page.locator("role=option").filter({ hasText: ROLE_LABELS[role] }).click();
+    }
+
+    /**
+     * The expand/collapse toggle for a column's per-column filter (in its header). Scoped by the
+     * "Toggle … filter" aria-label so it doesn't also match the DataGrid's native sort button.
+     */
+    columnFilterToggle(field: string): Locator {
+        return this.page.locator(`.MuiDataGrid-columnHeader[data-field="${field}"] button[aria-label^="Toggle"]`);
+    }
+
+    /** The text input of a column's per-column filter (present once the filter is expanded). */
+    columnFilterInput(field: string): Locator {
+        return this.page.locator(`.MuiDataGrid-columnHeader[data-field="${field}"] input`);
+    }
+
+    /**
+     * Filters the list via a column's per-column filter: expands it (if needed) and types the
+     * value. The reworked members list uses per-column filters instead of a single search field.
+     */
+    async setColumnFilter(field: string, value: string): Promise<void> {
+        const input = this.columnFilterInput(field);
+        if (!(await input.isVisible())) {
+            await this.columnFilterToggle(field).click();
+        }
+        await input.fill(value);
     }
 }

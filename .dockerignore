@@ -19,6 +19,7 @@ LICENSE
 mkdocs.yml
 mkdocs_requirements.txt
 README.md
+release.config.mjs
 renovate.json
 SECURITY.md
 **/.env

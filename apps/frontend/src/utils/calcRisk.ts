@@ -4,6 +4,7 @@
 
 import type { MatrixColorKey } from "#view/colors/matrix.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
+import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 
 /**
  * returns the correct color for a risk
@@ -91,4 +92,23 @@ export function calcNetRisk(
     );
 
     return { netProbability, netDamage, netRisk: netProbability * netDamage };
+}
+
+/**
+ * Net risk of a threat, honouring its status: a threat put out of scope carries no residual
+ * risk, no matter which measures are applied to it. The gross values are not affected.
+ *
+ * @param threat the threat with its status and gross probability/damage
+ * @param measureImpacts measure impacts to apply (null/undefined entries are ignored)
+ * @returns the net probability, net damage and net risk
+ */
+export function calcThreatNetRisk(
+    threat: { status: THREAT_STATUSES; probability: number; damage: number },
+    measureImpacts: (MeasureImpact | null | undefined)[]
+): { netProbability: number; netDamage: number; netRisk: number } {
+    if (threat.status === THREAT_STATUSES.OUTOFSCOPE) {
+        return { netProbability: 0, netDamage: 0, netRisk: 0 };
+    }
+
+    return calcNetRisk(threat.probability, threat.damage, measureImpacts);
 }

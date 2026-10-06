@@ -7,6 +7,7 @@ import { AssetsPage } from "../pages/assets.page.ts";
 import type { Asset } from "#api/types/asset.types.ts";
 import { CONFIDENTIALITY_LEVELS } from "#utils/confidentiality.ts";
 import assetsFixture from "../fixtures/assets.json" with { type: "json" };
+import { expectReadableAddButtonFirst } from "../utils/toolbar.utils.ts";
 
 const assets: Omit<Asset, "id" | "updatedAt">[] = [];
 const invalidAssets: Partial<Asset>[] = [];
@@ -60,6 +61,11 @@ test.afterEach(async ({ page, request, browserName }, { testId }) => {
 });
 
 test.describe("Assets Page Tests", () => {
+    test("Should show the add button first, labelled and readable on hover", async ({ page }) => {
+        const pg = new AssetsPage(page);
+        await expectReadableAddButtonFirst(page, pg.addAssetButton, "Add Asset");
+    });
+
     test("Should create new assets", async ({ page }) => {
         const pg = new AssetsPage(page);
         for (const asset of assets.slice(0, 3)) {
@@ -84,7 +90,7 @@ test.describe("Assets Page Tests", () => {
         await expect(pg.sortByNameButton).toHaveAttribute("aria-sort", "ascending");
         expect(await pg.assetListEntryNames.allTextContents()).toEqual(sorted.map((a) => a.name));
 
-        await pg.sortByNameButton.click();
+        await pg.toggleSort("name");
         await expect(pg.sortByNameButton).toHaveAttribute("aria-sort", "descending");
         expect(await pg.assetListEntryNames.allTextContents()).toEqual([...sorted].reverse().map((a) => a.name));
     });
@@ -96,11 +102,11 @@ test.describe("Assets Page Tests", () => {
         await createAssets(request, token, assets);
         await page.reload();
 
-        await pg.sortByDateButton.click();
+        await pg.toggleSort("createdAt");
         await expect(pg.sortByDateButton).toHaveAttribute("aria-sort", "ascending");
         expect(await pg.assetListEntryNames.allTextContents()).toEqual(sorted.map((a) => a.name));
 
-        await pg.sortByDateButton.click();
+        await pg.toggleSort("createdAt");
         await expect(pg.sortByDateButton).toHaveAttribute("aria-sort", "descending");
         expect(await pg.assetListEntryNames.allTextContents()).toEqual([...sorted].reverse().map((a) => a.name));
     });
@@ -114,17 +120,17 @@ test.describe("Assets Page Tests", () => {
         for (const attr of ["confidentiality", "integrity", "availability"] as const) {
             const sorted = [...assets].sort((a, b) => (a[attr] as number) - (b[attr] as number));
 
-            await pg.sortByCiaButton(attr).click();
+            await pg.toggleSort(attr);
             await expect(pg.sortByCiaButton(attr)).toHaveAttribute("aria-sort", "ascending");
             expect(await pg.assetListEntryCia(attr).allTextContents()).toEqual(sorted.map((a) => a[attr].toString()));
 
-            await pg.sortByCiaButton(attr).click();
+            await pg.toggleSort(attr);
             await expect(pg.sortByCiaButton(attr)).toHaveAttribute("aria-sort", "descending");
             expect(await pg.assetListEntryCia(attr).allTextContents()).toEqual(
                 [...sorted].reverse().map((a) => a[attr].toString())
             );
 
-            await pg.sortByCiaButton(attr).click();
+            await pg.toggleSort(attr);
         }
     });
 

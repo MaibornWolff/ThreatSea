@@ -8,8 +8,9 @@ import { getCatalogMeasuresByCatalogId } from "#services/catalog-measures.servic
 import { getComponentTypes } from "#services/component-types.service.js";
 import { getMeasures } from "#services/measures.service.js";
 import { getMeasureImpactsByProject } from "#services/measureImpacts.service.js";
+import { getGenericThreatsByProjectId } from "#services/generic-threats.service.js";
+import { getThreatsByProjectId } from "#services/threats.service.js";
 import { findSystem } from "#services/system.service.js";
-import { getThreatsForExport } from "#services/threats.service.js";
 import { NotFoundError } from "#errors/not-found.error.js";
 import { ProjectIdParam } from "#types/project.types.js";
 
@@ -50,7 +51,9 @@ export async function exportProject(
 
     const system = await findSystem(projectId);
 
-    const threats = await getThreatsForExport(projectId);
+    const genericThreats = await getGenericThreatsByProjectId(projectId);
+
+    const threats = await getThreatsByProjectId(projectId);
 
     const measureImpacts = await getMeasureImpactsByProject(projectId);
 
@@ -64,6 +67,7 @@ export async function exportProject(
         catalogMeasures,
         componentTypes,
         measures,
+        genericThreats,
         threats,
         measureImpacts,
     });

@@ -4,5 +4,6 @@
   "measuresFound": "Measures found",
   "noMeasuresFound": "No Measures found",
   "measuresLoading": "Loading measures...",
-  "delete": "Delete Measure"
+  "delete": "Delete Measure",
+  "actions": "Actions"
 }

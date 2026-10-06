@@ -31,8 +31,8 @@ test.describe("Footer links regression tests", () => {
     test("opens and closes the about dialog from footer", async ({ page }) => {
         const footerLinksPage = new FooterLinksPage(page);
 
-        await expect(footerLinksPage.aboutThreatSeaButton).toBeVisible();
-        await footerLinksPage.aboutThreatSeaButton.click();
+        await expect(footerLinksPage.aboutThreatSeaLink).toBeVisible();
+        await footerLinksPage.aboutThreatSeaLink.click();
 
         await expect(footerLinksPage.aboutDialogVersionLabel).toBeVisible();
         await expect(footerLinksPage.aboutDialogRepositoryLink).toBeVisible();
