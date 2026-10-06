@@ -127,9 +127,20 @@ describe("createThreatsColumns — structure", () => {
         expect(columns.find((column) => column.field === "probability")!.width).toBeGreaterThanOrEqual(240);
     });
 
-    it("disables sorting on every column (custom hierarchy ordering)", () => {
+    it("makes every column with values sortable, but not the actions column", () => {
         const { columns } = buildColumns();
-        expect(columns.every((column) => column.sortable === false)).toBe(true);
+        expect(columns.filter((column) => column.sortable !== false).map((column) => column.field)).toEqual([
+            "name",
+            "description",
+            "assets",
+            "componentName",
+            "pointOfAttack",
+            "attacker",
+            "probability",
+            "damage",
+            "risk",
+            "status",
+        ]);
     });
 });
 

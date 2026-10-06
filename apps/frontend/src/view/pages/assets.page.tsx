@@ -3,7 +3,6 @@
  *     page in the projects.
  */
 
-import Add from "@mui/icons-material/Add";
 import Visibility from "@mui/icons-material/Visibility";
 import { Box, Button, Checkbox, FormControlLabel, LinearProgress, Menu, MenuItem, Typography } from "@mui/material";
 import { DataGrid, GridRow, type GridColumnVisibilityModel, type GridRowProps } from "@mui/x-data-grid";
@@ -20,7 +19,6 @@ import { useColumnFilters } from "#application/hooks/use-column-filters.hook.ts"
 import { getToggleableColumns, useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
 import { applyColumnWidths, useColumnWidths } from "#application/hooks/use-column-widths.hook.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
-import { IconButton } from "#view/components/icon-button.component.tsx";
 import { NoRowsOverlay } from "#view/components/no-rows-overlay.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
@@ -30,6 +28,7 @@ import { withProject } from "#view/components/with-project.hoc.tsx";
 import { applyColumnFilters } from "#utils/column-filters.ts";
 import AssetDialogPage from "./asset-dialog.page";
 import { createAssetsColumns, formatCreationDate } from "./create-assets-columns";
+import { TableAddButton } from "#view/components/table-add-button.component.tsx";
 
 // The e2e page objects locate rows and the action buttons inside them via a row-level
 // test id, so it must live on the grid row element itself (same pattern as the threats page).
@@ -206,6 +205,13 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
                         }}
                     >
                         <Box sx={{ display: "flex", alignItems: "center" }}>
+                            {checkUserRole(userRole, USER_ROLES.EDITOR) && (
+                                <TableAddButton
+                                    label={t("addAsset")}
+                                    onClick={onClickAddAssets}
+                                    data-testid="assets-page_add-asset-button"
+                                />
+                            )}
                             <Button
                                 variant="outlined"
                                 startIcon={<Visibility />}
@@ -245,16 +251,6 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
                                     </MenuItem>
                                 ))}
                             </Menu>
-                            {checkUserRole(userRole, USER_ROLES.EDITOR) && (
-                                <IconButton
-                                    title={t("addAsset")}
-                                    sx={{ ml: 1, color: "text.primary" }}
-                                    onClick={onClickAddAssets}
-                                    data-testid="assets-page_add-asset-button"
-                                >
-                                    <Add sx={{ fontSize: 18 }} />
-                                </IconButton>
-                            )}
                         </Box>
                         {assets.length > 0 && (
                             <Box sx={{ display: "flex", alignItems: "center" }}>

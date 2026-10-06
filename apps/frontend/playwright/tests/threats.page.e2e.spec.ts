@@ -150,6 +150,49 @@ test.describe("Threats Page Tests", () => {
         await expect(pg.threatListEntryComponents).toHaveText([SERVER, SERVER]);
     });
 
+    test("Should sort generic threats by name and keep their threats below them", async ({ page }) => {
+        const pg = new ThreatsPage(page);
+        await expect(pg.genericThreatListEntries).toHaveCount(EXPECTED_GENERIC_THREAT_COUNT, { timeout: 20000 });
+
+        await expect(pg.columnHeader("name")).toHaveAttribute("aria-sort", "ascending");
+        const ascending = await pg.genericThreatListEntryNames.allTextContents();
+        expect(ascending).toEqual(
+            [...ascending].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }))
+        );
+
+        await pg.toggleSort("name");
+        await expect(pg.columnHeader("name")).toHaveAttribute("aria-sort", "descending");
+        await expect(pg.genericThreatListEntryNames).toHaveText([...ascending].reverse());
+
+        // An expanded generic threat's threats are listed directly below it, not sorted in among the others.
+        await pg.toggleButton(pg.genericThreatListEntry(PHYSICAL_ATTACK, SERVER)).click();
+        await expect(pg.threatListEntries).toHaveCount(2);
+        const rowTestIds = await Promise.all(
+            (await page.locator('[data-testid^="threats-page_"][data-testid$="list-entry"]').all()).map((row) =>
+                row.getAttribute("data-testid")
+            )
+        );
+        const firstThreatRow = rowTestIds.indexOf("threats-page_threats-list-entry");
+        expect(rowTestIds.slice(firstThreatRow, firstThreatRow + 2)).toEqual([
+            "threats-page_threats-list-entry",
+            "threats-page_threats-list-entry",
+        ]);
+        expect(rowTestIds[firstThreatRow - 1]).toBe("threats-page_generic-threats-list-entry");
+    });
+
+    test("Should expand every generic threat when sorting by a column only threats have values for", async ({
+        page,
+    }) => {
+        const pg = new ThreatsPage(page);
+        await expect(pg.genericThreatListEntries).toHaveCount(EXPECTED_GENERIC_THREAT_COUNT, { timeout: 20000 });
+        await expect(pg.threatListEntries).toHaveCount(0);
+
+        await pg.toggleSort("risk");
+
+        await expect(pg.columnHeader("risk")).toHaveAttribute("aria-sort", "ascending");
+        await expect(page.getByRole("button", { name: "Collapse" })).toHaveCount(EXPECTED_GENERIC_THREAT_COUNT);
+    });
+
     test("Should keep a generic threat listed when the name filter matches one of its threats", async ({ page }) => {
         const pg = new ThreatsPage(page);
 

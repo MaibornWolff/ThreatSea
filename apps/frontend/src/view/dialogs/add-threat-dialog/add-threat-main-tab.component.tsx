@@ -102,8 +102,7 @@ export const AddThreatMainTab = ({
 
             <BoxNameTextField register={register} error={errors?.name} margin="normal" data-testid="EditThreatName" />
 
-            <DescriptionTextField register={register} error={errors?.description} data-testid="EditThreatDescription" />
-
+            {/* The generic threat's wording comes first: it is what the editable description refines. */}
             <Box sx={{ mt: 0.5 }}>
                 <Box
                     role="button"
@@ -149,6 +148,8 @@ export const AddThreatMainTab = ({
                     </Typography>
                 </Collapse>
             </Box>
+
+            <DescriptionTextField register={register} error={errors?.description} data-testid="EditThreatDescription" />
 
             <DialogTextField
                 sx={{

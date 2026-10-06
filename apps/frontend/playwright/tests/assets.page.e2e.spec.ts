@@ -7,6 +7,7 @@ import { AssetsPage } from "../pages/assets.page.ts";
 import type { Asset } from "#api/types/asset.types.ts";
 import { CONFIDENTIALITY_LEVELS } from "#utils/confidentiality.ts";
 import assetsFixture from "../fixtures/assets.json" with { type: "json" };
+import { expectReadableAddButtonFirst } from "../utils/toolbar.utils.ts";
 
 const assets: Omit<Asset, "id" | "updatedAt">[] = [];
 const invalidAssets: Partial<Asset>[] = [];
@@ -60,6 +61,11 @@ test.afterEach(async ({ page, request, browserName }, { testId }) => {
 });
 
 test.describe("Assets Page Tests", () => {
+    test("Should show the add button first, labelled and readable on hover", async ({ page }) => {
+        const pg = new AssetsPage(page);
+        await expectReadableAddButtonFirst(page, pg.addAssetButton, "Add Asset");
+    });
+
     test("Should create new assets", async ({ page }) => {
         const pg = new AssetsPage(page);
         for (const asset of assets.slice(0, 3)) {

@@ -376,7 +376,7 @@ Users can sort the assets in ascending and descending order according to their n
 
 ### Creating an asset
 
-Users can create new assets by clicking on the + button.
+Users can create new assets with the "Add Asset" button above the list.
 
 ![Assets Page Create Asset Button](assets/image-2024-7-30_14-14-35.png "Assets Page Create Asset Button")
 
@@ -432,6 +432,8 @@ For each threat, the list contains the following information:
 
 Each column header contains a filter field. Text filters match any part of the value, regardless of upper and lower case; the status filter offers a selection. A generic threat stays in the list as long as one of its threats matches the filters, so filtering for a probability, for example, shows the generic threats that have a threat with this probability. If the generic threat itself matches a filter on its name, component, point of attack or attacker, all of its threats are listed for that filter; filters on the other columns still apply to each threat. While the filters hide some of a generic threat's threats, its count shows how many of them are listed, for example "1 of 3 threats". The arrow next to a column name collapses its filter field, and "Clear filters" resets all filters. The number next to "Threats found" counts the listed generic threats.
 
+Clicking a column name sorts the list by that column, ascending first and descending on the next click; by default it is sorted by name. Generic threats always keep their threats directly below them. Sorting by a column of the generic threat itself (name, component, point of attack, attacker) orders the generic threats by that value. Sorting by a column that only the threats have values for (for example risk, probability or status) orders the threats within each generic threat and ranks the generic threats by their first threat in that order, so sorting by risk in descending order lists the generic threat with the highest-risk threat first; all generic threats are expanded so the sorted values are visible. The status is sorted in the order "New", "In progress", "Finalized", "Out of scope". The list is shown in pages of generic threats: each page holds the chosen number of generic threats together with all of their threats, so expanding a generic threat never moves its threats to the next page.
+
 With "Customize view", users can show and hide columns, for example the description column. Columns can be resized by dragging the border of their header. Both settings are kept per project until the browser tab is closed or the user logs out.
 
 The status of a threat shows how far its assessment has progressed:
@@ -479,7 +481,7 @@ The top row of this dialog contains the base information of the threat:
 - **Component-Type:** Type of attack point in the component that is affected by the threat scenario, as used in the 4x6 methodology (data storage infrastructure, processing infrastructure, user interface, user behaviour, communication interface, communication infrastructure)
 - **Component:** Name of the component that is affected by the threat scenario
 
-The main part of the dialog is the "THREAT" tab, where the user can refine the threat during the threat assessment (i.e., refine the generated 4x6 threat scenario to a concrete threat scenario instance that could occur in the system under consideration). The values for "Name", "Description" and "Probability" are filled with the values defined in the catalogue used in the project. When refining a threat, the user can give custom text values for the threat scenario name and description and fill the probability value for the associated risk in a range from 1 to 5 according to the 4x6 probability scale. The original description of the generic threat can be shown below the fields with the "Generic threat description" toggle; it cannot be edited.
+The main part of the dialog is the "THREAT" tab, where the user can refine the threat during the threat assessment (i.e., refine the generated 4x6 threat scenario to a concrete threat scenario instance that could occur in the system under consideration). The values for "Name", "Description" and "Probability" are filled with the values defined in the catalogue used in the project. When refining a threat, the user can give custom text values for the threat scenario name and description and fill the probability value for the associated risk in a range from 1 to 5 according to the 4x6 probability scale. The original description of the generic threat can be shown between the name and the description fields with the "Generic threat description" toggle; it cannot be edited.
 
 With the "Status" selection, the user sets the assessment status of the threat to "In progress", "Finalized" or "Out of scope". "New" cannot be selected, because a threat that is being edited is in progress: saving a new threat changes its status to "In progress".
 
@@ -525,7 +527,7 @@ Tipp:
 
 ### Creating a measure
 
-Users can create new measures by clicking on the + button.
+Users can create new measures with the "Add Measure" button above the list.
 
 ![Measures Page Create Button](assets/image-2024-7-30_13-19-27.png "Measures Page Create Button")
 
@@ -730,7 +732,7 @@ For each project, three different roles can be assigned to users.
 
 ### Adding a member
 
-Project owners can add members to their project with the + button.
+Project owners can add members to their project with the "Add Member" button above the list.
 
 ![Members Page Add Member Button](assets/image-2024-7-30_13-42-42.png "Members Page Add Member Button")
 

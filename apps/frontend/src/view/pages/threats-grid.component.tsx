@@ -4,8 +4,12 @@ import {
     type GridColDef,
     type GridColumnResizeParams,
     type GridColumnVisibilityModel,
+    type GridPaginationModel,
     type GridRowProps,
+    type GridSortModel,
 } from "@mui/x-data-grid";
+import type {} from "@mui/x-data-grid/themeAugmentation";
+import { useTheme } from "@mui/material/styles";
 import { useCallback, type MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
@@ -30,6 +34,12 @@ interface ThreatsGridProps {
     columns: GridColDef<ThreatsGridRow>[];
     loading: boolean;
     columnVisibilityModel: GridColumnVisibilityModel;
+    // sorting and pagination are applied to whole generic threats by the row builder
+    sortModel: GridSortModel;
+    onSortModelChange: (model: GridSortModel) => void;
+    paginationModel: GridPaginationModel;
+    onPaginationModelChange: (model: GridPaginationModel) => void;
+    genericThreatCount: number;
     onColumnWidthChange: (params: GridColumnResizeParams) => void;
     onToggleGenericThreat: (genericThreatId: number) => void;
     onEditThreat: (event: MouseEvent<HTMLElement>, threat: ExtendedThreat) => void;
@@ -38,18 +48,30 @@ interface ThreatsGridProps {
 /**
  * The threats table: generic threat rows that expand to their threats. A generic threat row
  * toggles on click or Enter/Space; a threat row opens the threat for editing.
+ *
+ * Sorting and pagination run in "server" mode: the grid only renders the header arrows and the
+ * footer, and shows the rows exactly as given. The rows are already sorted and cut to the page's
+ * generic threats, so a generic threat is never split from its threats across pages.
  */
 export const ThreatsGrid = ({
     rows,
     columns,
     loading,
     columnVisibilityModel,
+    sortModel,
+    onSortModelChange,
+    paginationModel,
+    onPaginationModelChange,
+    genericThreatCount,
     onColumnWidthChange,
     onToggleGenericThreat,
     onEditThreat,
 }: ThreatsGridProps) => {
     const { t } = useTranslation("threatsPage");
     const NoRowsOverlayWithMessage = useCallback(() => <NoRowsOverlay message={t("noThreatsFound")} />, [t]);
+    // A localeText prop replaces the theme's DataGrid texts instead of adding to them, so start from the
+    // theme's (the app language) and only override the page-size label, which counts generic threats.
+    const themeLocaleText = useTheme().components?.MuiDataGrid?.defaultProps?.localeText;
 
     return (
         <DataGrid
@@ -107,6 +129,15 @@ export const ThreatsGrid = ({
             }}
             columnHeaderHeight={90}
             columnVisibilityModel={columnVisibilityModel}
+            sortingMode="server"
+            sortingOrder={["asc", "desc"]}
+            sortModel={sortModel}
+            onSortModelChange={onSortModelChange}
+            paginationMode="server"
+            paginationModel={paginationModel}
+            onPaginationModelChange={onPaginationModelChange}
+            rowCount={genericThreatCount}
+            localeText={{ ...themeLocaleText, paginationRowsPerPage: t("genericThreatsPerPage") }}
             onColumnWidthChange={onColumnWidthChange}
             sx={{
                 borderRadius: 5,
@@ -120,9 +151,6 @@ export const ThreatsGrid = ({
                 "& .threats-grid--dimmed .MuiDataGrid-cell": { opacity: 0.6 },
                 "& .threats-grid--dimmed .MuiDataGrid-cell[data-field='status']": { opacity: 1 },
                 "& .threats-grid--dimmed .MuiDataGrid-cell[data-field='actions']": { opacity: 1 },
-            }}
-            initialState={{
-                pagination: { paginationModel: { pageSize: 25, page: 0 } },
             }}
             pageSizeOptions={[10, 25, 50, 100]}
             slots={{ noRowsOverlay: NoRowsOverlayWithMessage, row: ThreatsGridRowSlot }}
