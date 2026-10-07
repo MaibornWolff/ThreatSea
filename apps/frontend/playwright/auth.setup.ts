@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import path from "path";
 import fs from "fs";
+import { fixedTestUsersFor } from "./utils/auth.api.ts";
 
 test("authenticate", async ({ page, browserName }) => {
     // PLAYWRIGHT_FRONTEND_ROOT is set in playwright.config.ts (avoids import.meta.url cache dir issues)
@@ -10,20 +11,7 @@ test("authenticate", async ({ page, browserName }) => {
 
     fs.mkdirSync(authDir, { recursive: true });
 
-    let accountId;
-    switch (browserName) {
-        case "chromium":
-            accountId = "2";
-            break;
-        case "firefox":
-            accountId = "3";
-            break;
-        case "webkit":
-            accountId = "4";
-            break;
-        default:
-            throw new Error(`No fixed login profile is mapped to browser "${browserName}".`);
-    }
+    const accountId = fixedTestUsersFor(browserName).ownerIndex;
 
     // Login via backend — follows the redirect to the frontend origin (backend ORIGIN_APP,
     // which must match the base URL resolved in playwright.config.ts).
