@@ -74,7 +74,14 @@ export const OverflowText = ({ text, testId, bold = false, align = "left", conta
                 ...containerSx,
             }}
         >
-            <Tooltip title={text} disableHoverListener={!isTruncated} disableFocusListener={!isTruncated}>
+            {/* Non-interactive: the tooltip overlaps the next grid row, and an interactive one would
+                keep itself open while the pointer moves onto that row, blocking its own tooltip. */}
+            <Tooltip
+                title={text}
+                disableHoverListener={!isTruncated}
+                disableFocusListener={!isTruncated}
+                disableInteractive
+            >
                 <Box
                     ref={textRef}
                     component="span"
