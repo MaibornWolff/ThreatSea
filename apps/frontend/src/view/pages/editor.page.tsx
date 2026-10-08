@@ -1125,7 +1125,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         );
         if (!communicationInterface) {
             showErrorMessage({
-                message: t("errors.noCommunicationInterfaceFound"),
+                message: t("errorMessages.noCommunicationInterfaceFound"),
             });
             return;
         }
