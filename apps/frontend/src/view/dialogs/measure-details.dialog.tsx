@@ -26,6 +26,7 @@ import type { Project } from "#api/types/project.types.ts";
 import type { Measure } from "#api/types/measure.types.ts";
 import type { DialogValue } from "#application/reducers/dialogs.reducer.ts";
 import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
+import { useChainDialogPaths } from "#application/hooks/use-chain-dialog-paths.hook.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 
@@ -58,6 +59,7 @@ export type MeasureDetailsTab = "MAIN" | "THREATS";
 const MeasureDetailsDialog = ({ project, measure, initialTab, ...props }: MeasureDetailsDialogProps) => {
     const navigate = useNavigate();
     const location = useLocation();
+    const { threatPath, measureImpactByThreatPath } = useChainDialogPaths();
     const { confirmDialog, cancelDialog } = useDialog<MeasureDetailsFormValues | null>("measures");
     const userRole = useAppSelector((state) => state.projects.current?.role);
 
@@ -115,7 +117,7 @@ const MeasureDetailsDialog = ({ project, measure, initialTab, ...props }: Measur
         event.preventDefault();
         event.stopPropagation();
         if (threat && checkUserRole(userRole, USER_ROLES.EDITOR)) {
-            navigate(`/projects/${projectId}/measures/threats/edit?threatId=${threat.id}`, {
+            navigate(threatPath(threat.id), {
                 state: { threat },
             });
         }
@@ -138,7 +140,7 @@ const MeasureDetailsDialog = ({ project, measure, initialTab, ...props }: Measur
         });
     };
     const onClickAddMeasureImpact = () => {
-        navigate(`/projects/${projectId}/measures/${measureId}/measureImpacts/edit`, {
+        navigate(measureImpactByThreatPath(measureId), {
             state: { measure, project },
         });
     };
@@ -146,7 +148,7 @@ const MeasureDetailsDialog = ({ project, measure, initialTab, ...props }: Measur
     const onClickEditMeasureImpact = (event: React.MouseEvent<HTMLElement>, measureImpact: MeasureImpact) => {
         event.preventDefault();
         event.stopPropagation();
-        navigate(`/projects/${projectId}/measures/${measureId}/measureImpacts/edit`, {
+        navigate(measureImpactByThreatPath(measureId), {
             state: { measure, measureImpact, project },
         });
     };
