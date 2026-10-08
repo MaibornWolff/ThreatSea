@@ -5,14 +5,53 @@ if (!API_URI_BASE) {
     throw new Error("Environment variable API_URI is not set.");
 }
 
+export interface FixedTestUser {
+    testUserIndex: number;
+    name: string;
+    email: string;
+}
+
+export interface BrowserTestUsers {
+    /** The primary identity auth.setup.ts logs the browser in as; owns everything the tests create. */
+    ownerIndex: number;
+    /** Secondary identities a test adds as members to act as a lower-privileged role. */
+    secondaryA: FixedTestUser;
+    secondaryB: FixedTestUser;
+}
+
 /**
  * Fixed E2E login profiles from the backend's fixedAuthentication.service.ts (indexed the same
- * way as the `testUser` query parameter on `/api/auth/login`). Indices 0 and 1 are never used
- * as the primary browser identity in auth.setup.ts (chromium=2, firefox=3, webkit=4), so they
- * are safe to provision as secondary, addable members without colliding with the acting user.
+ * way as the `testUser` query parameter on `/api/auth/login`). Each browser gets its own owner
+ * and secondary identities, so the three projects can run in parallel without one browser's
+ * tests adding, swapping into or removing another browser's users. Index 0 is deliberately
+ * absent: it's the profile devs log in with locally, and E2E runs must not touch its data.
  */
-export const SECONDARY_TEST_USER_A = { testUserIndex: 0, name: "testfn testsn", email: "test@test.test" } as const;
-export const SECONDARY_TEST_USER_B = { testUserIndex: 1, name: "E2E Testing", email: "test2@test.test" } as const;
+const BROWSER_TEST_USERS: Record<string, BrowserTestUsers> = {
+    chromium: {
+        ownerIndex: 1,
+        secondaryA: { testUserIndex: 4, name: "Chromium Secondary A", email: "test5@test.test" },
+        secondaryB: { testUserIndex: 5, name: "Chromium Secondary B", email: "test6@test.test" },
+    },
+    firefox: {
+        ownerIndex: 2,
+        secondaryA: { testUserIndex: 6, name: "Firefox Secondary A", email: "test7@test.test" },
+        secondaryB: { testUserIndex: 7, name: "Firefox Secondary B", email: "test8@test.test" },
+    },
+    webkit: {
+        ownerIndex: 3,
+        secondaryA: { testUserIndex: 8, name: "WebKit Secondary A", email: "test9@test.test" },
+        secondaryB: { testUserIndex: 9, name: "WebKit Secondary B", email: "test10@test.test" },
+    },
+};
+
+/** Returns the fixed login profiles reserved for the given browser project. */
+export function fixedTestUsersFor(browserName: string): BrowserTestUsers {
+    const users = BROWSER_TEST_USERS[browserName];
+    if (!users) {
+        throw new Error(`No fixed login profiles are mapped to browser "${browserName}".`);
+    }
+    return users;
+}
 
 /**
  * Provisions one of the fixed E2E login profiles at the API level only, using a request

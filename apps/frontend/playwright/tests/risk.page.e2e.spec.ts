@@ -8,7 +8,12 @@ import { getMeasures } from "../utils/measure.api.ts";
 import { createMeasureImpact } from "../utils/measure-impact.api.ts";
 import { addMember, findAddableMemberId } from "../utils/member.api.ts";
 import { fetchApiRaw } from "../utils/api.utils.ts";
-import { SECONDARY_TEST_USER_A, loginAsFixedTestUser, provisionFixedTestUser } from "../utils/auth.api.ts";
+import {
+    type FixedTestUser,
+    fixedTestUsersFor,
+    loginAsFixedTestUser,
+    provisionFixedTestUser,
+} from "../utils/auth.api.ts";
 import riskFixture from "../fixtures/threats.json" with { type: "json" };
 
 type ExportedProject = typeof riskFixture.project;
@@ -40,6 +45,8 @@ let catalogId: number;
 // the project owner regardless of what the page does afterward (the `request` fixture holds its
 // own cookie jar, independent from the browser's `page`).
 let ownerToken: string;
+// This browser's own secondary identity, so parallel browser projects never share one.
+let secondaryUser: FixedTestUser;
 
 async function safeDeleteCatalog(request: APIRequestContext, token: string, catalogId: number): Promise<void> {
     try {
@@ -51,8 +58,8 @@ async function safeDeleteCatalog(request: APIRequestContext, token: string, cata
 
 /** Provisions the fixed secondary test profile and adds it to the project with the given role. */
 async function addSecondaryMember(request: APIRequestContext, role: USER_ROLES): Promise<void> {
-    await provisionFixedTestUser(SECONDARY_TEST_USER_A.testUserIndex);
-    const userId = await findAddableMemberId(request, ownerToken, "projects", projectId, SECONDARY_TEST_USER_A.email);
+    await provisionFixedTestUser(secondaryUser.testUserIndex);
+    const userId = await findAddableMemberId(request, ownerToken, "projects", projectId, secondaryUser.email);
     await addMember(request, ownerToken, "projects", projectId, userId, role);
 }
 
@@ -66,7 +73,8 @@ test.beforeAll(() => {
     };
 });
 
-test.beforeEach(async ({ page, request }) => {
+test.beforeEach(async ({ page, request, browserName }) => {
+    secondaryUser = fixedTestUsersFor(browserName).secondaryA;
     const pg = new RiskPage(page);
     await page.goto("/projects");
     ownerToken = await pg.getCsrfToken();
@@ -114,7 +122,7 @@ test.describe("Risk page tests", () => {
         });
 
         await addSecondaryMember(request, USER_ROLES.VIEWER);
-        await loginAsFixedTestUser(page, SECONDARY_TEST_USER_A.testUserIndex);
+        await loginAsFixedTestUser(page, secondaryUser.testUserIndex);
 
         const pg = new RiskPage(page);
         await pg.goto(projectId);
@@ -369,7 +377,7 @@ test.describe("Risk page tests", () => {
         await addSecondaryMember(request, USER_ROLES.EDITOR);
         const currentProject = (await getProjects(request, ownerToken)).find((project) => project.id === projectId)!;
 
-        await loginAsFixedTestUser(page, SECONDARY_TEST_USER_A.testUserIndex);
+        await loginAsFixedTestUser(page, secondaryUser.testUserIndex);
         const editorToken = await new RiskPage(page).getCsrfToken();
 
         const response = await fetchApiRaw(page.request, editorToken, "PUT", `/projects/${projectId}`, {
