@@ -43,7 +43,6 @@ const setup = (onSaved?: () => void) => {
                     path="/projects/:projectId/measures/:measureId/measureImpacts/edit"
                     element={
                         <MeasureImpactByThreatDialog
-                            open={true}
                             project={project}
                             measure={measure}
                             measureImpact={measureImpact}
@@ -95,7 +94,7 @@ describe("MeasureImpactByThreatDialog", () => {
             })
         );
         expect(onSaved).toHaveBeenCalledTimes(1);
-        expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+        expect(screen.queryByRole("heading", { name: "Encrypt traffic" })).not.toBeInTheDocument();
     });
 
     it("keeps the dialog open and does not notify the host page when the save fails", async () => {
@@ -108,7 +107,7 @@ describe("MeasureImpactByThreatDialog", () => {
 
         await waitFor(() => expect(store.getState().alert.text).toBe("Failed to save Measure Impact"));
         expect(screen.getByTestId("location")).toHaveTextContent(DIALOG_URL);
-        expect(screen.getByRole("dialog")).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Encrypt traffic" })).toBeInTheDocument();
         expect(onSaved).not.toHaveBeenCalled();
     });
 });
