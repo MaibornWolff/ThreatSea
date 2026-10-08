@@ -17,7 +17,6 @@ import {
     Select,
     Tooltip,
 } from "@mui/material";
-import type { DialogProps } from "@mui/material/Dialog";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import { useTheme } from "@mui/material/styles";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
@@ -29,7 +28,7 @@ import { useNavigate } from "react-router";
 import { useAppDispatch } from "#application/hooks/use-app-redux.hook.ts";
 import { MeasureImpactsActions } from "#application/actions/measureImpacts.actions.ts";
 import { Button } from "#view/components/button.component.tsx";
-import { Dialog } from "#view/components/dialog.component.tsx";
+import { ChainDialogContent } from "#view/components/chain-dialog-content.component.tsx";
 import { DialogTextField } from "#view/components/dialog.textfield.component.tsx";
 import { useThreatSuggestions } from "#application/hooks/use-ThreatSuggestions.ts";
 import { useMeasureImpactPlaceholder } from "#application/hooks/use-measureImpacts-placeHolder.hook.ts";
@@ -52,7 +51,7 @@ interface FormValues {
 
 interface MeasureImpactByThreatFormValues extends FormValues, Omit<MeasureImpact, keyof FormValues>, DialogValue {}
 
-interface MeasureImpactByThreatDialogProps extends DialogProps {
+interface MeasureImpactByThreatDialogProps {
     project: Project;
     measure: Measure;
     measureImpact: MeasureImpact | null;
@@ -64,7 +63,6 @@ interface MeasureImpactByThreatDialogProps extends DialogProps {
  *
  * @param {object} project - The current project data.
  * @param {boolean} measureData - The data of the measure.
- * @param {object} props - Dialog properties.
  * @returns JSX.Element component for the measure dialog.
  */
 const MeasureImpactByThreatDialog = ({
@@ -72,7 +70,6 @@ const MeasureImpactByThreatDialog = ({
     measure,
     measureImpact,
     onSaved,
-    ...props
 }: MeasureImpactByThreatDialogProps) => {
     const projectId = parseInt(String(project.id), 10);
     const navigate = useNavigate();
@@ -173,17 +170,7 @@ const MeasureImpactByThreatDialog = ({
     };
 
     return (
-        <Dialog
-            onClose={(_event, reason) => {
-                if (reason === "backdropClick") {
-                    handleCancelDialog?.();
-                }
-            }}
-            maxWidth="sm"
-            fullWidth
-            {...props}
-            open={true}
-        >
+        <ChainDialogContent size="sm">
             <DialogTitle
                 sx={{
                     padding: 0,
@@ -576,7 +563,7 @@ const MeasureImpactByThreatDialog = ({
                     </Button>
                 </DialogActions>
             </Box>
-        </Dialog>
+        </ChainDialogContent>
     );
 };
 

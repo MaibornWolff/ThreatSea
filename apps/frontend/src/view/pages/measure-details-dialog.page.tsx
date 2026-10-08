@@ -27,7 +27,6 @@ const MeasureDetailsDialogPage = () => {
         return (
             <MeasureDetailsDialog
                 project={project}
-                open={true}
                 measure={measure}
                 {...(returnToTab !== undefined ? { initialTab: returnToTab } : {})}
             />

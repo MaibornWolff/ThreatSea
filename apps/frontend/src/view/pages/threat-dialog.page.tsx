@@ -1,3 +1,4 @@
+import { Box, CircularProgress } from "@mui/material";
 import { Navigate, useLocation, useParams, useSearchParams, type Location } from "react-router";
 import { useEffect, useState } from "react";
 import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
@@ -5,6 +6,7 @@ import { useChainDialogPaths } from "#application/hooks/use-chain-dialog-paths.h
 import { GenericThreatsAPI } from "#api/generic-threats.api.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import AddThreatDialog, { type ThreatTab } from "#view/dialogs/add-threat-dialog/add-threat.dialog.tsx";
+import { ChainDialogContent } from "#view/components/chain-dialog-content.component.tsx";
 
 interface ThreatDialogLocationState {
     threat?: ExtendedThreat;
@@ -78,7 +80,6 @@ const ThreatDialogPage = ({ onSaved }: ThreatDialogPageProps) => {
         const returnToTab = state?.returnToTab;
         return (
             <AddThreatDialog
-                open={true}
                 threat={threat}
                 project={project}
                 userRole={userRole}
@@ -93,8 +94,14 @@ const ThreatDialogPage = ({ onSaved }: ThreatDialogPageProps) => {
         return <Navigate to={hostPath} replace />;
     }
 
-    // A fresh URL is being reconstructed; the host page shows behind until the fetch resolves.
-    return null;
+    // A fresh URL is being reconstructed; fill the shell until the fetch resolves.
+    return (
+        <ChainDialogContent size="md">
+            <Box sx={{ display: "flex", justifyContent: "center" }}>
+                <CircularProgress size={24} />
+            </Box>
+        </ChainDialogContent>
+    );
 };
 
 export default ThreatDialogPage;

@@ -32,7 +32,6 @@ export const MeasureImpactByThreatDialogPage = ({ onSaved }: MeasureImpactByThre
         return (
             <MeasureImpactByThreatDialog
                 project={project}
-                open={true}
                 measure={measure}
                 measureImpact={measureImpact ?? null}
                 {...(onSaved !== undefined ? { onSaved } : {})}

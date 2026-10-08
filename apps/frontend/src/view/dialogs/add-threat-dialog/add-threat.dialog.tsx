@@ -1,15 +1,4 @@
-import {
-    Box,
-    DialogActions,
-    DialogTitle,
-    List,
-    ListItem,
-    ListItemText,
-    Tab,
-    Tabs,
-    Typography,
-    type DialogProps,
-} from "@mui/material";
+import { Box, DialogActions, DialogTitle, List, ListItem, ListItemText, Tab, Tabs, Typography } from "@mui/material";
 import { useEffect, useRef, useState, type ChangeEvent, type MouseEvent, type SyntheticEvent } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -19,7 +8,7 @@ import { useChainDialogPaths } from "#application/hooks/use-chain-dialog-paths.h
 import { ThreatsActions } from "#application/actions/threats.actions.ts";
 import { ThreatsAPI } from "#api/threats.api.ts";
 import { Button } from "#view/components/button.component.tsx";
-import { Dialog } from "#view/components/dialog.component.tsx";
+import { ChainDialogContent } from "#view/components/chain-dialog-content.component.tsx";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { useThreatMeasuresList } from "#application/hooks/use-threat-measures-list.hook.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
@@ -37,7 +26,7 @@ import { AddThreatMeasuresTab } from "./add-threat-measures-tab.component.tsx";
 
 export type ThreatTab = "MAIN" | "ASSETS" | "MEASURES";
 
-interface AddThreatDialogProps extends DialogProps {
+interface AddThreatDialogProps {
     threat: ExtendedThreat;
     project: ExtendedProject;
     userRole: USER_ROLES | undefined;
@@ -45,7 +34,7 @@ interface AddThreatDialogProps extends DialogProps {
     onSaved?: () => void;
 }
 
-const AddThreatDialog = ({ threat, project, userRole, initialTab, onSaved, ...props }: AddThreatDialogProps) => {
+const AddThreatDialog = ({ threat, project, userRole, initialTab, onSaved }: AddThreatDialogProps) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const location = useLocation();
@@ -261,18 +250,7 @@ const AddThreatDialog = ({ threat, project, userRole, initialTab, onSaved, ...pr
     };
 
     return (
-        <Dialog
-            onClose={(_event, reason) => {
-                if (reason === "backdropClick") {
-                    handleCancelDialog?.();
-                }
-            }}
-            maxWidth="md"
-            fullWidth
-            {...props}
-            open={true}
-            data-testid="ThreatsDialogCancel"
-        >
+        <ChainDialogContent size="md">
             <DialogTitle
                 sx={{
                     padding: 0,
@@ -397,7 +375,7 @@ const AddThreatDialog = ({ threat, project, userRole, initialTab, onSaved, ...pr
                     )}
                 </DialogActions>
             </Box>
-        </Dialog>
+        </ChainDialogContent>
     );
 };
 
