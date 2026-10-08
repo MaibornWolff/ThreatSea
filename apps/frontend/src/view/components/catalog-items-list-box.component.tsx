@@ -306,9 +306,9 @@ export const CatalogItemsListBox = ({
                 }}
             >
                 {items.length > 0 ? (
-                    items.map((item, index) => (
+                    items.map((item) => (
                         <ListItem
-                            key={index}
+                            key={item.id}
                             onClick={() => handleEdit(item)}
                             sx={{
                                 display: "flex",
