@@ -39,7 +39,6 @@ export const MeasureImpactByMeasureDialogPage = ({ onApplied }: MeasureImpactByM
             <>
                 <MeasureImpactByMeasureDialog
                     project={project}
-                    open={true}
                     threat={threat}
                     measureImpact={measureImpact ?? null}
                     {...(onApplied !== undefined ? { onApplied } : {})}

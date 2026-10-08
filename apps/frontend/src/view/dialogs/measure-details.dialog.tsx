@@ -4,14 +4,13 @@
  */
 
 import { Box, DialogActions, DialogTitle, Tab, Tabs, Typography } from "@mui/material";
-import type { DialogProps } from "@mui/material/Dialog";
 import { useState, type ChangeEvent, type SyntheticEvent } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useLocation } from "react-router";
 import { useDialog } from "#application/hooks/use-dialog.hook.ts";
 import { Button } from "#view/components/button.component.tsx";
-import { Dialog } from "#view/components/dialog.component.tsx";
+import { ChainDialogContent } from "#view/components/chain-dialog-content.component.tsx";
 import { DialogTextField } from "#view/components/dialog.textfield.component.tsx";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { useMeasureThreatsList, type MeasureThreat } from "#application/hooks/use-measure-threats-list.hook.ts";
@@ -40,7 +39,7 @@ interface FormValues {
 
 interface MeasureDetailsFormValues extends FormValues, Omit<Measure, keyof FormValues>, DialogValue {}
 
-interface MeasureDetailsDialogProps extends DialogProps {
+interface MeasureDetailsDialogProps {
     project: Project;
     measure: Measure;
     initialTab?: MeasureDetailsTab;
@@ -53,10 +52,9 @@ export type MeasureDetailsTab = "MAIN" | "THREATS";
  *
  * @param {object} project - The current project data.
  * @param {boolean} measureData - The data of the measure.
- * @param {object} props - Dialog properties.
  * @returns React component for the measure dialog.
  */
-const MeasureDetailsDialog = ({ project, measure, initialTab, ...props }: MeasureDetailsDialogProps) => {
+const MeasureDetailsDialog = ({ project, measure, initialTab }: MeasureDetailsDialogProps) => {
     const navigate = useNavigate();
     const location = useLocation();
     const { threatPath, measureImpactByThreatPath } = useChainDialogPaths();
@@ -196,17 +194,7 @@ const MeasureDetailsDialog = ({ project, measure, initialTab, ...props }: Measur
     };
 
     return (
-        <Dialog
-            onClose={(_event, reason) => {
-                if (reason === "backdropClick") {
-                    handleCancelDialog?.();
-                }
-            }}
-            maxWidth="md"
-            fullWidth
-            {...props}
-            open={true}
-        >
+        <ChainDialogContent size="md">
             <DialogTitle
                 sx={{
                     padding: 0,
@@ -394,7 +382,7 @@ const MeasureDetailsDialog = ({ project, measure, initialTab, ...props }: Measur
                     )}
                 </DialogActions>
             </Box>
-        </Dialog>
+        </ChainDialogContent>
     );
 };
 
