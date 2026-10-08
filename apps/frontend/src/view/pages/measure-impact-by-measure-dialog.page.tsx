@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useParams, useLocation, Navigate, Outlet, type Location } from "react-router";
+import { useLocation, Navigate, Outlet, type Location } from "react-router";
+import { useChainDialogPaths } from "#application/hooks/use-chain-dialog-paths.hook.ts";
 import type { Project } from "#api/types/project.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
 import MeasureImpactByMeasureDialog, { type ApplyMeasureThreat } from "#view/dialogs/measureImpactByMeasure.dialog.tsx";
@@ -22,7 +23,7 @@ interface MeasureImpactByMeasureDialogPageProps {
 }
 
 export const MeasureImpactByMeasureDialogPage = ({ onApplied }: MeasureImpactByMeasureDialogPageProps = {}) => {
-    const { projectId = "" } = useParams<{ projectId: string }>();
+    const { hostPath } = useChainDialogPaths();
     const { state: locationState } = useLocation() as Location<MeasureImpactByMeasureDialogLocationState | undefined>;
     // Capture the initial location state at mount time so that when the child route
     // (measures/add) is active and useLocation() reflects the child's state, the
@@ -47,6 +48,6 @@ export const MeasureImpactByMeasureDialogPage = ({ onApplied }: MeasureImpactByM
             </>
         );
     } else {
-        return <Navigate to={`/projects/${projectId}/risk`} replace />;
+        return <Navigate to={hostPath} replace />;
     }
 };

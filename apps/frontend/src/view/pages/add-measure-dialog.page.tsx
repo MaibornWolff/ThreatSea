@@ -1,4 +1,5 @@
-import { useParams, useLocation, Navigate, type Location } from "react-router";
+import { useLocation, Navigate, type Location } from "react-router";
+import { useChainDialogPaths } from "#application/hooks/use-chain-dialog-paths.hook.ts";
 import type { Measure } from "#api/types/measure.types.ts";
 import type { Project } from "#api/types/project.types.ts";
 import AddMeasureDialog from "#view/dialogs/add-measure.dialog.tsx";
@@ -16,7 +17,7 @@ interface AddMeasureDialogLocationState {
  * @return {JSX.Element}
  */
 const AddMeasureDialogPage = () => {
-    const { projectId = "" } = useParams<{ projectId?: string }>();
+    const { hostPath } = useChainDialogPaths();
     const { state } = useLocation() as Location<AddMeasureDialogLocationState | undefined>;
 
     if (state) {
@@ -24,7 +25,7 @@ const AddMeasureDialogPage = () => {
 
         return <AddMeasureDialog project={project} measure={measure} open={true} />;
     } else {
-        return <Navigate to={`/projects/${projectId}/risk`} replace />;
+        return <Navigate to={hostPath} replace />;
     }
 };
 
