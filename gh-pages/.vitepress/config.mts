@@ -1,4 +1,16 @@
+import path from "node:path";
 import { defineConfig } from "vitepress";
+
+const srcDir = path.resolve(import.meta.dirname, "..");
+
+// Keep the directory-style URLs (e.g. /ThreatSea/User%20Manual/) that mkdocs produced
+function toPagePath(page: string): string {
+  return page === "README.md" ? "index.md" : page.replace(/\.md$/, "/index.md");
+}
+
+function toPageUrl(page: string): string {
+  return "/" + encodeURI(toPagePath(page).replace(/index\.md$/, ""));
+}
 
 export default defineConfig({
   title: "ThreatSea",
@@ -8,12 +20,25 @@ export default defineConfig({
   appearance: "force-dark",
   // The OIDC guide links to local dev services (http://localhost:...)
   ignoreDeadLinks: "localhostLinks",
-  // Keep the directory-style URLs (e.g. /ThreatSea/User%20Manual/) that mkdocs produced
-  rewrites: {
-    "README.md": "index.md",
-    "User Manual.md": "User Manual/index.md",
-    "Developer Setup.md": "Developer Setup/index.md",
-    "Technical Documentation/:page.md": "Technical Documentation/:page/index.md",
+  rewrites: toPagePath,
+  markdown: {
+    // VitePress resolves relative links against the rewritten page path. Resolve relative
+    // links to other .md files against the source file instead, so they stay valid when
+    // the markdown is read on GitHub or in an IDE.
+    config(md) {
+      md.core.ruler.push("source-relative-md-links", (state) => {
+        const sourceFile: string | undefined = state.env.realPath ?? state.env.path;
+        if (!sourceFile) return;
+        for (const token of state.tokens.flatMap((t) => t.children ?? [])) {
+          const href = token.type === "link_open" ? token.attrGet("href") : null;
+          const match = href?.match(/^(\.{1,2}\/[^#?]*\.md)(#.*)?$/);
+          if (!match) continue;
+          const target = path.resolve(path.dirname(sourceFile), decodeURI(match[1]));
+          const page = path.relative(srcDir, target).split(path.sep).join("/");
+          token.attrSet("href", toPageUrl(page) + (match[2] ?? ""));
+        }
+      });
+    },
   },
   themeConfig: {
     nav: [
