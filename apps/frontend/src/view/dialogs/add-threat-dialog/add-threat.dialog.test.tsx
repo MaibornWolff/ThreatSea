@@ -65,7 +65,8 @@ const setup = (
             open={true}
             hostRoute={hostRoute}
             {...(onSaved !== undefined ? { onSaved } : {})}
-        />
+        />,
+        { initialEntries: [`/projects/${project.id}/threats/edit?threatId=${threat.id}`] }
     );
     return { project, threat, user };
 };
@@ -134,6 +135,23 @@ describe("AddThreatDialog — Apply Measure button", () => {
                 project,
             },
         });
+    });
+});
+
+describe("AddThreatDialog — Tabs", () => {
+    beforeEach(() => {
+        mockUseThreatMeasuresList();
+    });
+
+    it("keeps the threatId in the URL when switching tabs", async () => {
+        const { user } = setup(USER_ROLES.EDITOR);
+
+        await user.click(screen.getByRole("tab", { name: /assets/i }));
+
+        expect(navigate).toHaveBeenLastCalledWith(
+            { pathname: "/projects/7/threats/edit", search: "?threatId=42" },
+            { replace: true, state: { returnToTab: "ASSETS" } }
+        );
     });
 });
 

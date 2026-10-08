@@ -268,10 +268,10 @@ const AddThreatDialog = ({
      */
     const handleChangeTab = (_event: SyntheticEvent, newTab: ThreatTab) => {
         setTab(newTab);
-        navigate(location.pathname, {
-            replace: true,
-            state: { ...location.state, returnToTab: newTab },
-        });
+        navigate(
+            { pathname: location.pathname, search: location.search },
+            { replace: true, state: { ...location.state, returnToTab: newTab } }
+        );
     };
 
     /**
