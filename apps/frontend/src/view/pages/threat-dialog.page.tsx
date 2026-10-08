@@ -1,12 +1,10 @@
 import { Navigate, useLocation, useParams, useSearchParams, type Location } from "react-router";
 import { useEffect, useState } from "react";
 import { useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
+import { useChainDialogPaths } from "#application/hooks/use-chain-dialog-paths.hook.ts";
 import { GenericThreatsAPI } from "#api/generic-threats.api.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
-import AddThreatDialog, {
-    type ThreatDialogHostRoute,
-    type ThreatTab,
-} from "#view/dialogs/add-threat-dialog/add-threat.dialog.tsx";
+import AddThreatDialog, { type ThreatTab } from "#view/dialogs/add-threat-dialog/add-threat.dialog.tsx";
 
 interface ThreatDialogLocationState {
     threat?: ExtendedThreat;
@@ -29,18 +27,13 @@ const ThreatDialogPage = ({ onSaved }: ThreatDialogPageProps) => {
     const [searchParams] = useSearchParams();
     const threatIdParam = searchParams.get("threatId");
     const userRole = useAppSelector((state) => state.projects.current?.role);
-    const { state, pathname } = useLocation() as Location<ThreatDialogLocationState | undefined>;
+    const { state } = useLocation() as Location<ThreatDialogLocationState | undefined>;
     const project = useAppSelector((state) => state.projects.current);
+    const { hostPath } = useChainDialogPaths();
 
-    const hostRoute: ThreatDialogHostRoute = pathname.includes("/risk/")
-        ? "risk"
-        : pathname.includes("/measures/")
-          ? "measures"
-          : "threats";
-
-    // Navigating within the app carries the threat in location state (fast path). After a browser
-    // reload that state is gone, so re-fetch the threat by the id kept in the URL — this keeps the
-    // dialog open across a reload instead of dropping the user back on the list.
+    // Navigating within the app carries the threat in location state (fast path), and a browser
+    // reload keeps that state. A URL opened fresh (new tab, pasted link, bookmark) has none, so
+    // re-fetch the threat by the id kept in the URL instead of dropping the user on the host page.
     const stateThreat = state?.threat;
     const [fetchedThreat, setFetchedThreat] = useState<ExtendedThreat | undefined>(undefined);
     const [fetchFailed, setFetchFailed] = useState(false);
@@ -89,19 +82,18 @@ const ThreatDialogPage = ({ onSaved }: ThreatDialogPageProps) => {
                 threat={threat}
                 project={project}
                 userRole={userRole}
-                hostRoute={hostRoute}
                 {...(onSaved !== undefined ? { onSaved } : {})}
                 {...(returnToTab !== undefined ? { initialTab: returnToTab } : {})}
             />
         );
     }
 
-    // Nothing to reconstruct from (no id, or the threat no longer exists) → back to the list.
+    // Nothing to reconstruct from (no id, or the threat no longer exists) → back to the host page.
     if (!threatIdParam || fetchFailed) {
-        return <Navigate to={`/projects/${projectId}/threats`} replace />;
+        return <Navigate to={hostPath} replace />;
     }
 
-    // A reload is being reconstructed; the threats list shows behind until the fetch resolves.
+    // A fresh URL is being reconstructed; the host page shows behind until the fetch resolves.
     return null;
 };
 

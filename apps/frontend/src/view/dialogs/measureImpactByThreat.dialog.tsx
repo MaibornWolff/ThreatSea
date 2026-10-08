@@ -26,7 +26,8 @@ import { useEffect, useState, type ChangeEvent } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
-import { useDialog } from "#application/hooks/use-dialog.hook.ts";
+import { useAppDispatch } from "#application/hooks/use-app-redux.hook.ts";
+import { MeasureImpactsActions } from "#application/actions/measureImpacts.actions.ts";
 import { Button } from "#view/components/button.component.tsx";
 import { Dialog } from "#view/components/dialog.component.tsx";
 import { DialogTextField } from "#view/components/dialog.textfield.component.tsx";
@@ -55,6 +56,7 @@ interface MeasureImpactByThreatDialogProps extends DialogProps {
     project: Project;
     measure: Measure;
     measureImpact: MeasureImpact | null;
+    onSaved?: () => void;
 }
 
 /**
@@ -69,11 +71,12 @@ const MeasureImpactByThreatDialog = ({
     project,
     measure,
     measureImpact,
+    onSaved,
     ...props
 }: MeasureImpactByThreatDialogProps) => {
     const projectId = parseInt(String(project.id), 10);
     const navigate = useNavigate();
-    const { confirmDialog, cancelDialog } = useDialog<MeasureImpactByThreatFormValues | null>("measureImpacts");
+    const dispatch = useAppDispatch();
     const { suggestedThreats, remainingThreats, impactedThreats } = useThreatSuggestions({
         selectedMeasure: measure,
         projectId,
@@ -124,7 +127,6 @@ const MeasureImpactByThreatDialog = ({
      * @event Button#onClick
      */
     const handleCancelDialog = () => {
-        cancelDialog();
         closeDialog();
     };
 
@@ -134,15 +136,33 @@ const MeasureImpactByThreatDialog = ({
      * @event Box#onSubmit
      * @param {object} data - Data of the measure.
      */
-    const handleConfirmDialog = (data: MeasureImpactByThreatFormValues) => {
-        confirmDialog({
+    const handleConfirmDialog = async (data: MeasureImpactByThreatFormValues) => {
+        const payload = {
             ...data,
             probability: data.setsOutOfScope || !data.impactsProbability ? null : data.probability,
             damage: data.setsOutOfScope || !data.impactsDamage ? null : data.damage,
             measureId: parseInt(String(measure.id), 10),
             projectId: parseInt(String(projectId), 10),
-        });
-        closeDialog();
+        };
+        try {
+            if (payload.id != null) {
+                await dispatch(
+                    MeasureImpactsActions.updateMeasureImpact(
+                        payload as Parameters<typeof MeasureImpactsActions.updateMeasureImpact>[0]
+                    )
+                ).unwrap();
+            } else {
+                await dispatch(
+                    MeasureImpactsActions.createMeasureImpact(
+                        payload as Parameters<typeof MeasureImpactsActions.createMeasureImpact>[0]
+                    )
+                ).unwrap();
+            }
+            onSaved?.();
+            closeDialog();
+        } catch {
+            // handled globally; keep the dialog open so the user can retry
+        }
     };
 
     /**

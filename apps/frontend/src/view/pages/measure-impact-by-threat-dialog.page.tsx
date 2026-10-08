@@ -1,4 +1,5 @@
-import { useParams, useLocation, Navigate, type Location } from "react-router";
+import { useLocation, Navigate, type Location } from "react-router";
+import { useChainDialogPaths } from "#application/hooks/use-chain-dialog-paths.hook.ts";
 import type { Project } from "#api/types/project.types.ts";
 import type { Measure } from "#api/types/measure.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
@@ -17,8 +18,12 @@ interface MeasureImpactByThreatDialogLocationState {
     measureImpact?: MeasureImpact | null;
 }
 
-export const MeasureImpactByThreatDialogPage = () => {
-    const { projectId = "" } = useParams<{ projectId: string }>();
+interface MeasureImpactByThreatDialogPageProps {
+    onSaved?: () => void;
+}
+
+export const MeasureImpactByThreatDialogPage = ({ onSaved }: MeasureImpactByThreatDialogPageProps = {}) => {
+    const { hostPath } = useChainDialogPaths();
     const { state } = useLocation() as Location<MeasureImpactByThreatDialogLocationState | undefined>;
 
     if (state) {
@@ -30,9 +35,10 @@ export const MeasureImpactByThreatDialogPage = () => {
                 open={true}
                 measure={measure}
                 measureImpact={measureImpact ?? null}
+                {...(onSaved !== undefined ? { onSaved } : {})}
             />
         );
     } else {
-        return <Navigate to={`/projects/${projectId}/measures`} replace />;
+        return <Navigate to={hostPath} replace />;
     }
 };

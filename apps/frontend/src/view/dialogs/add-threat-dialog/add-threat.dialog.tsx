@@ -15,6 +15,7 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useLocation } from "react-router";
 import { useAppDispatch } from "#application/hooks/use-app-redux.hook.ts";
+import { useChainDialogPaths } from "#application/hooks/use-chain-dialog-paths.hook.ts";
 import { ThreatsActions } from "#application/actions/threats.actions.ts";
 import { ThreatsAPI } from "#api/threats.api.ts";
 import { Button } from "#view/components/button.component.tsx";
@@ -36,29 +37,19 @@ import { AddThreatMeasuresTab } from "./add-threat-measures-tab.component.tsx";
 
 export type ThreatTab = "MAIN" | "ASSETS" | "MEASURES";
 
-export type ThreatDialogHostRoute = "threats" | "measures" | "risk";
-
 interface AddThreatDialogProps extends DialogProps {
     threat: ExtendedThreat;
     project: ExtendedProject;
     userRole: USER_ROLES | undefined;
     initialTab?: ThreatTab;
-    hostRoute?: ThreatDialogHostRoute;
     onSaved?: () => void;
 }
 
-const AddThreatDialog = ({
-    threat,
-    project,
-    userRole,
-    initialTab,
-    hostRoute = "threats",
-    onSaved,
-    ...props
-}: AddThreatDialogProps) => {
+const AddThreatDialog = ({ threat, project, userRole, initialTab, onSaved, ...props }: AddThreatDialogProps) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const location = useLocation();
+    const { measurePath, applyMeasurePath } = useChainDialogPaths();
     const { t } = useTranslation("threatDialogPage");
     const [tab, setTab] = useState<ThreatTab>(initialTab ?? "MAIN");
     const formRef = useRef<HTMLFormElement | null>(null);
@@ -192,33 +183,22 @@ const AddThreatDialog = ({
         event.preventDefault();
         event.stopPropagation();
         if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
-            navigate(`/projects/${projectId}/measures/edit`, {
+            navigate(measurePath, {
                 state: { project: projectData, measure },
             });
         }
     };
 
-    const onClickEditMeasureImpact = (
-        event: MouseEvent<HTMLElement>,
-        measureImpact: MeasureImpact,
-        measure: Measure
-    ) => {
+    const onClickEditMeasureImpact = (event: MouseEvent<HTMLElement>, measureImpact: MeasureImpact) => {
         event.preventDefault();
         event.stopPropagation();
-        if (hostRoute === "measures") {
-            navigate(`/projects/${projectId}/measures/${measure.id}/measureImpacts/edit`, {
-                state: { measure, measureImpact, project },
-            });
-        } else {
-            // threats and risk both have a measureImpacts/edit route at their own root
-            navigate(`/projects/${projectId}/${hostRoute}/measureImpacts/edit`, {
-                state: {
-                    threat: { ...threat, damage: calcDamage(threat) },
-                    measureImpact,
-                    project,
-                },
-            });
-        }
+        navigate(applyMeasurePath, {
+            state: {
+                threat: { ...threat, damage: calcDamage(threat) },
+                measureImpact,
+                project,
+            },
+        });
     };
 
     const onClickDeleteMeasureThreat = (
@@ -251,8 +231,7 @@ const AddThreatDialog = ({
     };
 
     const onClickApplyMeasure = () => {
-        const basePath = hostRoute === "risk" ? `/projects/${projectId}/risk` : `/projects/${projectId}/threats`;
-        navigate(`${basePath}/measureImpacts/edit`, {
+        navigate(applyMeasurePath, {
             state: {
                 threat: { ...threat, damage: calcDamage(threat) },
                 project,

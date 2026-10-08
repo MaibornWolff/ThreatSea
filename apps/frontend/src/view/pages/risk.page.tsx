@@ -16,13 +16,14 @@ import {
 import { memo, useLayoutEffect, useState, type ChangeEvent, type ReactNode, type SyntheticEvent } from "react";
 
 import { useTranslation } from "react-i18next";
-import { Route, Routes, useNavigate, useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import type { SxProps, Theme } from "@mui/material";
 import type { TableCellProps } from "@mui/material/TableCell";
 import type { ExtendedProject } from "#api/types/project.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
 import type { ThreatWithMetrics, SelectedMatrixCell, ThreatMeasure } from "#application/hooks/use-matrix.hook.ts";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
+import { useChainDialogPaths } from "#application/hooks/use-chain-dialog-paths.hook.ts";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
@@ -42,12 +43,9 @@ import { CreatePage } from "#view/components/create-page.component.tsx";
 import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
 import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
 import { withProject } from "#view/components/with-project.hoc.tsx";
-import { MeasureImpactByMeasureDialogPage } from "./measure-impact-by-measure-dialog.page";
 import { useEditor } from "#application/hooks/use-editor.hook.ts";
-import ThreatDialogPage from "./threat-dialog.page";
-import AddMeasureDialogPage from "./add-measure-dialog.page";
 import { AlertActions } from "#application/actions/alert.actions.ts";
-import MeasureDetailsDialogPage from "./measure-details-dialog.page";
+import { ChainDialogRoutes } from "./chain-dialog-routes.page";
 import type { SortDirection } from "#application/actions/list.actions.ts";
 
 interface RiskPageBodyProps {
@@ -94,6 +92,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
     const { openConfirm } = useConfirm<MeasureImpact>();
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
+    const { threatPath, measurePath, applyMeasurePath } = useChainDialogPaths();
 
     const [selectedThreat, setSelectedThreat] = useState<number>(0);
     const [measureSortBy, setMeasureSortBy] = useState<string>("name");
@@ -147,7 +146,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
 
     const onClickApplyMeasure = (threat: ThreatWithMetrics | undefined) => {
         if (threat != null) {
-            navigate(`/projects/${projectId}/risk/measureImpacts/edit`, {
+            navigate(applyMeasurePath, {
                 state: {
                     threat,
                     project,
@@ -160,7 +159,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
         threat: ThreatWithMetrics | undefined,
         measureImpact: MeasureImpact | undefined
     ) => {
-        navigate(`/projects/${projectId}/risk/measureImpacts/edit`, {
+        navigate(applyMeasurePath, {
             state: {
                 threat,
                 measureImpact,
@@ -184,7 +183,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
     const onClickEditAppliedMeasure = (event: React.MouseEvent<HTMLElement>, measure: ThreatMeasure) => {
         event.stopPropagation();
 
-        navigate(`/projects/${projectId}/risk/appliedMeasure/edit`, {
+        navigate(measurePath, {
             state: {
                 project,
                 measure: {
@@ -250,8 +249,8 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
 
     const handleEditThreat = (threatIndex: number, threat: ThreatWithMetrics | undefined) => {
         setSelectedThreat(threatIndex);
-        if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
-            navigate(`/projects/${projectId}/risk/threats/edit?threatId=${threat?.id ?? ""}`, {
+        if (threat && checkUserRole(userRole, USER_ROLES.EDITOR)) {
+            navigate(threatPath(threat.id), {
                 state: {
                     threat,
                 },
@@ -867,16 +866,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                 </Box>
             </Box>
             {checkUserRole(userRole, USER_ROLES.EDITOR) && (
-                <Routes>
-                    <Route
-                        path="measureImpacts/edit"
-                        element={<MeasureImpactByMeasureDialogPage onApplied={() => void loadThreats()} />}
-                    >
-                        <Route path="measures/add" element={<AddMeasureDialogPage />} />
-                    </Route>
-                    <Route path="threats/edit" element={<ThreatDialogPage onSaved={() => void loadThreats()} />} />
-                    <Route path="appliedMeasure/edit" element={<MeasureDetailsDialogPage />} />
-                </Routes>
+                <ChainDialogRoutes host="risk" onThreatsChanged={() => void loadThreats()} />
             )}
         </Page>
     );
