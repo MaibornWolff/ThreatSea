@@ -4,6 +4,7 @@
 
 1. [Testing Concept](#1-testing-concept)
 2. [Frontend Component Tests (Vitest)](#2-frontend-component-tests-vitest)
+   - 2.1 [Canvas (react-konva) in component tests](#21-canvas-react-konva-in-component-tests)
 3. [Backend Tests (Vitest)](#3-backend-tests-vitest)
 4. [Playwright E2E Tests](#4-playwright-e2e-tests)
    - 4.1 [Architecture](#41-architecture)
@@ -96,6 +97,72 @@ pnpm --filter threatsea_fe test:unit:coverage  # + coverage/index.html
 Only the third command writes a report, into `apps/frontend/coverage/`. The
 `apps/frontend/junit.xml` that CI picks up comes from `test:unit:ci` alone — none of the
 commands above produce it.
+
+### 2.1 Canvas (react-konva) in component tests
+
+Konva draws into a real `<canvas>`, which jsdom cannot provide. `vitest.setup.ts` therefore replaces
+`react-konva` and `react-konva-utils` **globally** with the stubs in `src/test-utils/konva-mock.ts`.
+Never add a per-file `vi.mock("react-konva")`: under `isolate: false` it collides with the global one.
+New canvas tests use the fakes and controls below instead of their own stubs.
+
+- **Shapes are `<div>`s.** Each Konva node renders as `data-testid="konva-<shape>"` and carries the
+  props worth asserting on as `data-*` attributes (`data-points`, `data-stroke`, `data-x`,
+  `data-text`, …).
+- **Handlers get Konva-shaped events.** Konva handler props are mapped onto DOM events
+  (`onClick` → `click`, `onDragMove` → `drag`, `onDblClick` → `dblclick`, `onMouseEnter`/`onMouseOver`
+  → `mouseenter`/`mouseover`, …), so `fireEvent` and `userEvent` reach them. The handler receives
+  `{ evt, target, currentTarget, cancelBubble }`: `evt` is the native DOM event, `target` the element
+  the event was fired on, extended with Konva node defaults (`getStage`, `getLayer`, `x`, `y`,
+  `position`, `setPosition`, `stopDrag`, `startDrag`). Events bubble like in Konva, and a handler that
+  sets `event.cancelBubble = true` stops the bubbling.
+- **Stub a drag target via `fireEvent`.** Properties passed as `target` are assigned to the element
+  and win over the defaults:
+
+  ```ts
+  fireEvent.drag(segmentLine, { target: { x: () => 20, y: () => 0, position: vi.fn() } });
+  ```
+
+  `connection-edit-handles.component.test.tsx` shows the pattern.
+
+- **`<Stage>` is a stateful fake.** Its `ref` yields a fake Konva stage: `x()`, `y()`, `position()`,
+  `scale()`, `scaleX()`/`scaleY()`, `width()`/`height()`, `getPointerPosition()`,
+  `getRelativePointerPosition()` (pointer minus position, divided by scale) and `batchDraw()`.
+  `content` is the `konva-stage` div itself, so cursor changes are observable as
+  `screen.getByTestId("konva-stage").style.cursor`. Stage handlers (`onMouseDown`, `onMouseMove`,
+  `onMouseUp`, `onMouseLeave`, `onContextMenu`, `onWheel`, `onClick`, `onDragOver`) get the fake stage
+  as `target` when the event hits the empty stage and the shape's element otherwise, as in Konva.
+  `evt.layerX/layerY` mirror `clientX/clientY` (jsdom has no `layerX`). Child nodes return the mounted
+  fake stage from `getStage()`.
+- **`<Layer>` with a `ref` is a fake layer** with `getClientRect()`, `find()` (always `[]`) and
+  `toDataURL()`. By default it is empty: a 0 × 0 bounding box and the blank image `"data:,"`.
+- **`konvaTestControls`** (exported from `konva-mock.ts`) drives what jsdom cannot measure.
+  `vitest.setup.ts` calls `konvaTestControls.reset()` after every test.
+
+  | Control                               | Effect                                                                                             |
+  | ------------------------------------- | -------------------------------------------------------------------------------------------------- |
+  | `setStageSize({ width, height })`     | `stage.width()/height()`; wins over the setter (the editor sizes the stage to its 0 × 0 container) |
+  | `setPointerPosition(point \| null)`   | `stage.getPointerPosition()`; otherwise the last mouse event's `clientX/clientY`                   |
+  | `getMountedStage()`                   | the fake stage of the mounted `<Stage>`, or `null`                                                 |
+  | `setLayerClientRect(rect)`            | `layer.getClientRect()` (content bounds for centering and image export)                            |
+  | `setLayerDataUrl(dataUrl)`            | `layer.toDataURL()` (the exported image)                                                           |
+  | `setLayerDataUrlError(error \| null)` | makes `layer.toDataURL()` throw `error`                                                            |
+
+  ```ts
+  fireEvent.contextMenu(screen.getByTestId("konva-stage"), { clientX: 120, clientY: 80, button: 2 });
+  ```
+
+- **Keyboard through `window.onkeyup`/`onkeydown`.** jsdom ignores handlers assigned to these
+  properties, so `vitest.setup.ts` bridges them to real `keyup`/`keydown` events; `userEvent.keyboard`
+  reaches them like in a browser.
+- **No right-click via `click`.** React drops `click` events with `button: 2`, so a handler test with
+  `fireEvent.click(element, { button: 2 })` passes without the handler ever running. Use `button: 1`
+  to test a non-primary click, and `fireEvent.contextMenu` for the context menu.
+
+**Per-file coverage threshold.** `editor.page.tsx` is only guarded by `editor.page.test.tsx`, because
+E2E does not run in CI (§6). `vitest.config.ts` therefore holds a per-file entry under
+`coverage.thresholds`, set to the measured values rounded down, which `test:unit:ci` enforces. When
+coverage grows, raise the entry in the same PR. Lowering it needs a reason in the PR description, e.g.
+a removed handler or code that cannot be reached through the UI.
 
 ---
 
