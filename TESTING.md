@@ -215,7 +215,7 @@ PW_ALL_BROWSERS=1 pnpm --filter threatsea_fe playwright   # + Firefox and WebKit
 
 Locally only Chromium runs. `PW_ALL_BROWSERS=1` (or `=true`) adds the Firefox and WebKit projects;
 `CI=1` has the same effect. Each browser logs in as its own fixed profile in `auth.setup.ts`
-(Chromium `testUser=2`, Firefox `3`, WebKit `4`), stores its session in
+(Chromium `testUser=1`, Firefox `2`, WebKit `3`), stores its session in
 `tmp/.auth/<browser>-user.json`, and namespaces the resources it creates via
 `buildTestId(browserName, ...)`, so the runs don't collide in a shared database.
 
@@ -225,14 +225,29 @@ The suite targets the Vite dev server on `http://localhost:3000`. If yours runs 
 `auth.setup.ts` waits for that redirect to land on the base URL, so a mismatch times out the
 login.
 
-**Chromium and Firefox pass; WebKit does not.** The backend defines four fixed profiles, indices
-`0`–`3` (`fixedAuthentication.service.ts`), so WebKit's `testUser=4` does not exist: the login
-redirects but sets no `accessToken` cookie. `auth.setup.ts` reports success anyway, because the
-`csrfToken` it waits for is written per express-session rather than per identity — the resulting
-`tmp/.auth/webkit-user.json` holds only `threatSea_session_id`. Every WebKit test then fails on
-its first API call. Measured on 2026-09-17 with `projects.page.e2e.spec.ts`: 8/8 passing on
-Chromium and on Firefox, 7/7 failing on WebKit. Fixing it takes a fifth backend profile or a
-different index for WebKit; until then use Chromium and Firefox.
+`auth.setup.ts` checks for the `accessToken` cookie right after the login redirect. A failed
+fixed-auth login still redirects to the frontend, and the `csrfToken` it waits for afterwards is
+scoped to the express session rather than the identity, so the cookie is the only proof the
+browser is logged in; without it the setup project fails instead of writing a logged-out storage
+state. A browser with no profiles mapped in `utils/auth.api.ts` fails the setup as well.
+
+The backend's fixed profiles (`fixedAuthentication.service.ts`) are indexed by `testUser`. Each
+browser owns its own set, so the three projects can run in parallel without one browser's tests
+touching another browser's users:
+
+| Index | Profile                                | Used by                              |
+| ----- | -------------------------------------- | ------------------------------------ |
+| `0`   | `testfn testsn` (`test@test.test`)     | Devs locally — **never** used by E2E |
+| `1`   | `E2E Testing` (`test2@test.test`)      | Chromium owner                       |
+| `2`   | `E2E Testing` (`test3@test.test`)      | Firefox owner                        |
+| `3`   | `E2E Testing` (`test4@test.test`)      | WebKit owner                         |
+| `4/5` | `Chromium Secondary A/B` (`test5/6@…`) | Chromium secondary identities (§4.5) |
+| `6/7` | `Firefox Secondary A/B` (`test7/8@…`)  | Firefox secondary identities (§4.5)  |
+| `8/9` | `WebKit Secondary A/B` (`test9/10@…`)  | WebKit secondary identities (§4.5)   |
+
+The mapping lives in one place, `fixedTestUsersFor(browserName)` in `utils/auth.api.ts`, which
+`auth.setup.ts` and the role-based tests both read. A new browser project needs three new backend
+profiles (owner, secondary A and B) and an entry there, not reused indices.
 
 On failure: HTML report in `apps/frontend/playwright-report/`, traces/screenshots/video in
 `apps/frontend/test-results/`.
@@ -241,11 +256,11 @@ On failure: HTML report in `apps/frontend/playwright-report/`, traces/screenshot
 
 Needed whenever a test verifies what a **different role** (Editor, Viewer) may do, in addition to
 the primary Owner identity `auth.setup.ts` logs in per browser. Pattern (`utils/auth.api.ts`):
-`provisionFixedTestUser(testUserIndex)` creates/logs in one of the backend's fixed E2E profiles
-(indices `0`–`1`, reserved — `2`/`3`/`4` are the browsers' own primary identities, though `4`
-has no profile behind it, see [4.4](#44-running-tests-locally)) via an isolated
-request context, just so it exists to be added as a member; add it with the role under test; then
-`loginAsFixedTestUser(page, testUserIndex)` swaps **`page`'s** identity mid-test.
+take the browser's own secondary identities from `fixedTestUsersFor(browserName)` (`secondaryA`,
+`secondaryB`, see the table in [4.4](#44-running-tests-locally)) — never a hard-coded index, and
+never index `0`. `provisionFixedTestUser(testUserIndex)` creates/logs in that profile via an
+isolated request context, just so it exists to be added as a member; add it with the role under
+test; then `loginAsFixedTestUser(page, testUserIndex)` swaps **`page`'s** identity mid-test.
 
 **Gotcha (already caused a false result in one of our own tests):** this only changes `page`'s
 cookies. The `request` fixture has its own independent cookie jar seeded from `storageState` and

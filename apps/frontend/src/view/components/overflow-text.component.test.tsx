@@ -1,5 +1,5 @@
-import { act, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { act, screen, waitFor } from "@testing-library/react";
+import userEvent, { PointerEventsCheckLevel } from "@testing-library/user-event";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { OverflowText } from "./overflow-text.component.tsx";
 
@@ -70,6 +70,19 @@ describe("OverflowText", () => {
         await userEvent.hover(getText());
 
         expect(await screen.findByRole("tooltip")).toHaveTextContent(LONG_NAME);
+    });
+
+    // The tooltip overlaps the row below; it must let the pointer through so that row can show its own.
+    it("closes the tooltip when the pointer moves on to where the tooltip overlaps", async () => {
+        setWidths({ box: 145, text: 180 });
+        renderOverflowText();
+        const user = userEvent.setup({ pointerEventsCheck: PointerEventsCheckLevel.Never });
+
+        await user.hover(getText());
+        const tooltip = await screen.findByRole("tooltip");
+        await user.hover(tooltip);
+
+        await waitFor(() => expect(screen.queryByRole("tooltip")).not.toBeInTheDocument());
     });
 
     // Showing the tooltip on keyboard focus is MUI's :focus-visible logic, which jsdom cannot evaluate.
