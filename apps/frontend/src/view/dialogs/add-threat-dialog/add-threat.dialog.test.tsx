@@ -70,7 +70,6 @@ const setup = (
             threat={threat}
             project={project}
             userRole={userRole}
-            open={true}
             {...(onSaved !== undefined ? { onSaved } : {})}
         />,
         { initialEntries: [THREAT_DIALOG_URLS[host]] }
