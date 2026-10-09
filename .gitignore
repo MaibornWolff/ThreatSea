@@ -48,3 +48,7 @@ yarn-error.log*
 
 # ai
 .claude/settings.local.json
+
+# VitePress
+gh-pages/.vitepress/cache
+gh-pages/.vitepress/dist

@@ -7,7 +7,7 @@ It provides a comprehensive framework for identifying and analyzing potential th
 
 ### Requirements
 
-- [node.js](https://nodejs.org/) installation (you can find the currently used version of node.js in the [.node-version](.node-version) file)
+- [node.js](https://nodejs.org/) installation (you can find the currently used version of node.js in the [.node-version](https://github.com/MaibornWolff/ThreatSea/blob/main/.node-version) file)
 - [pnpm package manager](https://pnpm.io/)
 - PostgreSQL database
 

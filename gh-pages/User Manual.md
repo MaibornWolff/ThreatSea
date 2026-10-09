@@ -83,9 +83,9 @@ Projects can be created by using the ‘+’ Button right to the search window. 
 
 ### Import project
 
-Exported projects (JSON files) can be imported again into ThreatSea with the <img src="../assets/avbfe351f753bcaa24ae2.png" alt="Projects Page Import Icon" style="height:1em; width:auto; vertical-align:middle;"> button. Project members are not ex- and imported.
+Exported projects (JSON files) can be imported again into ThreatSea with the <img src="./assets/avbfe351f753bcaa24ae2.png" alt="Projects Page Import Icon" style="height:1em; width:auto; vertical-align:middle;"> button. Project members are not ex- and imported.
 
-The "migrate project" button <img src="../assets/images.png" alt="Projects Page Migrate Icon" style="height:1em; width:auto; vertical-align:middle;"> is a temporary feature that serves for migrating projects to the new datamodel introduced by the new measure handling in Q4 2023. Its functionality is described here: New Measure handling - Migrate Projects. It will be removed again after a grace period.
+The "migrate project" button <img src="./assets/images.png" alt="Projects Page Migrate Icon" style="height:1em; width:auto; vertical-align:middle;"> is a temporary feature that serves for migrating projects to the new datamodel introduced by the new measure handling in Q4 2023. Its functionality is described here: New Measure handling - Migrate Projects. It will be removed again after a grace period.
 
 ### Edit project
 
@@ -125,7 +125,7 @@ The system editor is used to draw graphical representations of technical systems
 
 ![Editor Page View](assets/Editor.png "Editor Page View")
 
-By holding the primary mouse key and moving the cursor, users can navigate through the system sketch. The top-left "focus" button <img src="../assets/images_1_.png" alt="Editor Page Focus Button" style="height:1em; width:auto; vertical-align:middle;"> allows quick navigation by centering and scaling the editor view relatively to the overall system sketch. With the "download" button <img src="../assets/download-1459070_960_720.png" alt="Editor Page Download Icon" style="height:1em; width:auto; vertical-align:middle;"> the system sketch can be downloaded as png file. For users with the `Editor` role, the same toolbar additionally offers annotation tools for adding shapes, freehand drawings and text to the system sketch (see [Annotations](#annotations)).
+By holding the primary mouse key and moving the cursor, users can navigate through the system sketch. The top-left "focus" button <img src="./assets/images_1_.png" alt="Editor Page Focus Button" style="height:1em; width:auto; vertical-align:middle;"> allows quick navigation by centering and scaling the editor view relatively to the overall system sketch. With the "download" button <img src="./assets/download-1459070_960_720.png" alt="Editor Page Download Icon" style="height:1em; width:auto; vertical-align:middle;"> the system sketch can be downloaded as png file. For users with the `Editor` role, the same toolbar additionally offers annotation tools for adding shapes, freehand drawings and text to the system sketch (see [Annotations](#annotations)).
 
 In the system editor, a system is represented by a set of components. A component is an arbitrary unit of a system that is a combination of one or more of the six attack points. The scope of components differs individually for each project depending on the depth of the threat analysis. For large enterprise scale threat models, a component within the system sketch might (technically) be a system on its own like a server, a client or a database, while in other projects, single applications or even processes might be modeled as dedicated components. Due to its high abstraction of technical details, the methodology works for all scopes.
 
@@ -167,7 +167,7 @@ Users can move components within the system editor by drag and drop. The editor 
 
 ### Editing a component
 
-By clicking on a component, users can open the "edit component" pop-up pane. There, in the sidebar header at the top of the pane, the user can edit the name of the component, change the component's icon with the "Change icon" <img src="../assets/change-icon.svg" alt="Editor Page Change Icon" style="height:1em; width:auto; vertical-align:middle;"> button and delete the component with the <img src="../assets/images_2_.png" alt="Editor Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> button. The "Change icon" and delete buttons are only shown to users with the `Editor` role.
+By clicking on a component, users can open the "edit component" pop-up pane. There, in the sidebar header at the top of the pane, the user can edit the name of the component, change the component's icon with the "Change icon" <img src="./assets/change-icon.svg" alt="Editor Page Change Icon" style="height:1em; width:auto; vertical-align:middle;"> button and delete the component with the <img src="./assets/images_2_.png" alt="Editor Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> button. The "Change icon" and delete buttons are only shown to users with the `Editor` role.
 
 ![Editor Page Edit Component Menu](assets/image-2025-4-10_9-5-21.png "Editor Page Edit Component Menu")
 
@@ -248,7 +248,7 @@ Users can connect components to visualize a communication relationship between t
 
 #### Creating a communication interface
 
-Users can create a communication interface at a component by clicking on the <img src="../assets/connect-plug-icon-linear-logo-mark-in-black-and-white-vector.jpg" alt="Editor Page Connect Icon" style="height:1em; width:auto; vertical-align:middle;">button that is displayed in the bottom-right corner of a component and selecting "Create New" in the list of communication interfaces. They can give a name and select an icon for the new communication interface. A default icon is already preselected, so the interface can be created without opening the icon picker.
+Users can create a communication interface at a component by clicking on the <img src="./assets/connect-plug-icon-linear-logo-mark-in-black-and-white-vector.jpg" alt="Editor Page Connect Icon" style="height:1em; width:auto; vertical-align:middle;">button that is displayed in the bottom-right corner of a component and selecting "Create New" in the list of communication interfaces. They can give a name and select an icon for the new communication interface. A default icon is already preselected, so the interface can be created without opening the icon picker.
 
 ![Editor Page Create Communication Interface Button](assets/image-2025-4-10_17-3-28.png "Editor Page Create Communication Interface Button")
 
@@ -262,7 +262,7 @@ Communication interface can either be edited or deleted via the previously shown
 
 ![Editor Page Communication Interface Component Menu](assets/image-2025-4-10_17-10-2.png "Editor Page Communication Interface Component Menu")
 
-In the selected-component sidebar, each communication interface now appears as a clickable label. Clicking the name navigates the sidebar directly into the interface's detail view, where assets can be assigned. To rename an interface without leaving the list, users with the `Editor` role (or higher) can click the <img src="../assets/image-2023-11-10_23-40-55.png" alt="Edit Icon" style="height:1em; width:auto; vertical-align:middle;"> icon next to the interface; the name becomes an input field and the new name is saved on `Enter` or when the field loses focus. The <img src="../assets/images_2_.png" alt="Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> button next to it deletes the interface as before.
+In the selected-component sidebar, each communication interface now appears as a clickable label. Clicking the name navigates the sidebar directly into the interface's detail view, where assets can be assigned. To rename an interface without leaving the list, users with the `Editor` role (or higher) can click the <img src="./assets/image-2023-11-10_23-40-55.png" alt="Edit Icon" style="height:1em; width:auto; vertical-align:middle;"> icon next to the interface; the name becomes an input field and the new name is saved on `Enter` or when the field loses focus. The <img src="./assets/images_2_.png" alt="Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> button next to it deletes the interface as before.
 
 ![Editor Sidebar Interface Inline Edit](assets/interface-inline-edit.png "Editor Sidebar Interface Inline Edit")
 
@@ -272,7 +272,7 @@ When a communication interface has been selected, the sidebar header shows a bre
 
 #### Connecting communication interfaces to communication infrastructures
 
-Users can connect communication interfaces to communication infrastructures to visualize networks. This can be achieved by opening the list of interfaces via the <img src="../assets/connect-plug-icon-linear-logo-mark-in-black-and-white-vector.jpg" alt="Editor Page Link Icon" style="height:1em; width:auto; vertical-align:middle;"> button or the light blue component border and then selecting the <img src="../assets/Wifi-Tethering--Streamline-Outlined-Material-Symbols.png" alt="Editor Page Connection On Icon" style="height:1em; width:auto; vertical-align:middle;"> icon.
+Users can connect communication interfaces to communication infrastructures to visualize networks. This can be achieved by opening the list of interfaces via the <img src="./assets/connect-plug-icon-linear-logo-mark-in-black-and-white-vector.jpg" alt="Editor Page Link Icon" style="height:1em; width:auto; vertical-align:middle;"> button or the light blue component border and then selecting the <img src="./assets/Wifi-Tethering--Streamline-Outlined-Material-Symbols.png" alt="Editor Page Connection On Icon" style="height:1em; width:auto; vertical-align:middle;"> icon.
 
 ![Editor Page Communication Interface Connection Symbol On](assets/image-2025-4-10_17-17-26.png "Editor Page Communication Interface Connection Symbol On")
 
@@ -286,13 +286,13 @@ When completing the communication relationship, ThreatSea creates a visual conne
 
 ![Editor Page Component Communication Infrastructure Connection](assets/image-2025-4-10_17-20-54.png "Editor Page Component Communication Infrastructure Connection")
 
-With the <img src="../assets/Wifi-Tethering-Off--Streamline-Sharp-Material-Symbols.png" alt="Editor Page Connection Off Icon" style="height:1em; width:auto; vertical-align:middle;"> button, users can remove an existing connection from a single communication interface.
+With the <img src="./assets/Wifi-Tethering-Off--Streamline-Sharp-Material-Symbols.png" alt="Editor Page Connection Off Icon" style="height:1em; width:auto; vertical-align:middle;"> button, users can remove an existing connection from a single communication interface.
 
 ![Editor Page Communication Interface Connection Symbol Off](assets/image-2025-4-10_17-27-46.png "Editor Page Communication Interface Connection Symbol Off")
 
 #### Editing communication infrastructures
 
-When clicking on a communication infrastructure, users can edit the name of the infrastructure and assign assets to this attack point by using the "Set All"/"Unset All" buttons. With the top-right <img src="../assets/images_2_.png" alt="Editor Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> button the user can delete the communication infrastructure. This action does not affect the communication interfaces linked to that communication infrastructure, only the visual connection is deleted. In the "Connected Components" part, clicking a connected component's name navigates directly to that component's sidebar view — if the connection runs through a specific communication interface, the interface detail view is opened automatically. The <img src="../assets/images_2_.png" alt="Editor Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> button next to each entry removes the connection.
+When clicking on a communication infrastructure, users can edit the name of the infrastructure and assign assets to this attack point by using the "Set All"/"Unset All" buttons. With the top-right <img src="./assets/images_2_.png" alt="Editor Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> button the user can delete the communication infrastructure. This action does not affect the communication interfaces linked to that communication infrastructure, only the visual connection is deleted. In the "Connected Components" part, clicking a connected component's name navigates directly to that component's sidebar view — if the connection runs through a specific communication interface, the interface detail view is opened automatically. The <img src="./assets/images_2_.png" alt="Editor Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> button next to each entry removes the connection.
 
 ![Editor Page Communication Infrastructure Menu](assets/image-2025-4-10_17-21-48.png "Editor Page Communication Infrastructure Menu")
 
@@ -400,7 +400,7 @@ Assets can also be edited directly from the **System editor**: clicking an asset
 
 ### Deleting an asset
 
-Users can delete an asset via the <img src="../assets/images_2_.png" alt="Assets Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> button in the respective row of the asset. A safety dialog has to be confirmed.
+Users can delete an asset via the <img src="./assets/images_2_.png" alt="Assets Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> button in the respective row of the asset. A safety dialog has to be confirmed.
 
 ![Assets Page Delete Asset Confirmation](assets/image-2024-7-30_14-18-27.png "Assets Page Delete Asset Confirmation")
 
@@ -504,11 +504,11 @@ Tipp:
 
 In some cases it is necessary to duplicate a threat. This usually happens when there are different threat scenarios which greatly differ in their probability for the different protection goals. In most cases it is sufficient to focus on the worst-case scenario but sometimes it might be necessary to explicitly highlight this difference in the threat list and to duplicate the threat scenario. E.g., given above example about destroying equipment, there might also be other physical attacks from unauthorized parties which actually pose a risk to confidentiality but are more difficult to execute than simply swinging a hammer at the equipment and therefore have a lesser probability of occurrence.
 
-Users can duplicate a threat scenario by using the <img src="../assets/content-copy.png" alt="Assets Page Copy Icon" style="height:1em; width:auto; vertical-align:middle;"> button in the row of the respective threat. After confirming a safety dialog, the threat is duplicated below the same generic threat with all values including the description copied. The name of the copy gets the suffix "(Copy)" and its status is "New".
+Users can duplicate a threat scenario by using the <img src="./assets/content-copy.png" alt="Assets Page Copy Icon" style="height:1em; width:auto; vertical-align:middle;"> button in the row of the respective threat. After confirming a safety dialog, the threat is duplicated below the same generic threat with all values including the description copied. The name of the copy gets the suffix "(Copy)" and its status is "New".
 
 ### Deleting a threat
 
-Users can delete a threat scenario by using the <img src="../assets/images_2_.png" alt="Assets Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> button in the row of the respective threat. After confirming the safety dialog, **this action cannot be reverted.** The only threat of a generic threat cannot be deleted; ThreatSea shows a notice instead, so that every generic threat keeps at least one threat.
+Users can delete a threat scenario by using the <img src="./assets/images_2_.png" alt="Assets Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> button in the row of the respective threat. After confirming the safety dialog, **this action cannot be reverted.** The only threat of a generic threat cannot be deleted; ThreatSea shows a notice instead, so that every generic threat keeps at least one threat.
 
 ## Measures
 
@@ -578,7 +578,7 @@ With the "Sets the threat out of scope", the user can indicate that after the me
 
 #### Editing the effect of a measure on a threat
 
-Via the <img src="../assets/image-2023-11-10_23-40-55.png" alt="Measures Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> buttons in the threat list shown in the "THREATS" tab of the "Edit Measure" dialog, users can edit the impact that a measure has on a specific threat. The displayed dialog afterwards is the same as for a applying a measure to threats but the selected threat is locked.
+Via the <img src="./assets/image-2023-11-10_23-40-55.png" alt="Measures Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> buttons in the threat list shown in the "THREATS" tab of the "Edit Measure" dialog, users can edit the impact that a measure has on a specific threat. The displayed dialog afterwards is the same as for a applying a measure to threats but the selected threat is locked.
 
 ![Measures Page Edit Measure Edit Impact](assets/image-2024-7-31_9-58-5.png "Measures Page Edit Measure Edit Impact")
 
@@ -588,7 +588,7 @@ When clicking on the name of a threat in the threat list shown in the "THREATS" 
 
 #### Deleting the effect of a measure on a threat
 
-Users can delete the effect of a measure on a threat scenario with the <img src="../assets/images_2_.png" alt="Measures Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> buttons in the threat list shown in the "THREATS" tab of the "Edit Measure" dialog. A safety dialog is shown before actually deleting the entry.
+Users can delete the effect of a measure on a threat scenario with the <img src="./assets/images_2_.png" alt="Measures Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> buttons in the threat list shown in the "THREATS" tab of the "Edit Measure" dialog. A safety dialog is shown before actually deleting the entry.
 
 Known Issue:
 
@@ -600,7 +600,7 @@ Users can copy a measure by using the button in the row of the respective threat
 
 ### Deleting a measure
 
-Users can delete measures with the <img src="../assets/images_2_.png" alt="Measures Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> buttons in the measure list and have to confirm the safety dialog.
+Users can delete measures with the <img src="./assets/images_2_.png" alt="Measures Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> buttons in the measure list and have to confirm the safety dialog.
 
 ## Risk
 
@@ -663,7 +663,7 @@ With the "Sets the threat out of scope", the user can indicate that after the me
 
 ### Unapplying a measure from a risk
 
-When a risk is selected, users can unapply a measure from a risk with the <img src="../assets/images_2_.png" alt="Measures Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> in the row of the respective measure assignment. This does not delete the measure from the "Measures" view but only removes the assignment from the risk.
+When a risk is selected, users can unapply a measure from a risk with the <img src="./assets/images_2_.png" alt="Measures Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> in the row of the respective measure assignment. This does not delete the measure from the "Measures" view but only removes the assignment from the risk.
 
 ## Report
 
@@ -714,7 +714,7 @@ With the "Sort (Threats)" settings, the user can decide if the list of threats s
 
 ### Export as Excel
 
-With the <img src="../assets/download-1459070_960_720.png" alt="Report Page Download Icon" style="height:1em; width:auto; vertical-align:middle;"> button, the user can download an excel export of the project including tabular representations of the assets, threats, measures and measure impacts (i.e., the impact relations between risks and measures) included in the threat model. The layout of this export cannot be changed by other settings.
+With the <img src="./assets/download-1459070_960_720.png" alt="Report Page Download Icon" style="height:1em; width:auto; vertical-align:middle;"> button, the user can download an excel export of the project including tabular representations of the assets, threats, measures and measure impacts (i.e., the impact relations between risks and measures) included in the threat model. The layout of this export cannot be changed by other settings.
 
 ## (Project) Members
 
@@ -748,11 +748,11 @@ Project owners can edit member assignments by clicking on the row with the respe
 
 ### Deleting a member
 
-Project owners can remove project members with the <img src="../assets/images_2_.png" alt="Members Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> in the row of the respective member assignment.
+Project owners can remove project members with the <img src="./assets/images_2_.png" alt="Members Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> in the row of the respective member assignment.
 
 ## Catalogs view
 
-After switching to the catalog view, a user can see an overview of all catalogs to which they have access to. They can sort these catalogs according to name or creation date in ascending or descending order or search for specific catalogs. For catalogs to which they have owner access, the <img src="../assets/image-2023-11-10_23-40-55.png" alt="Members Page Edit Icon" style="height:1em; width:auto; vertical-align:middle;"> and <img src="../assets/images_2_.png" alt="Members Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> are shown. By clicking on a catalog entry, users can open the respective catalog.
+After switching to the catalog view, a user can see an overview of all catalogs to which they have access to. They can sort these catalogs according to name or creation date in ascending or descending order or search for specific catalogs. For catalogs to which they have owner access, the <img src="./assets/image-2023-11-10_23-40-55.png" alt="Members Page Edit Icon" style="height:1em; width:auto; vertical-align:middle;"> and <img src="./assets/images_2_.png" alt="Members Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> are shown. By clicking on a catalog entry, users can open the respective catalog.
 
 ![Catalogs Tab View](assets/image-2024-7-30_14-26-59.png "Catalogs Tab View")
 
@@ -766,13 +766,13 @@ They need to provide a name for the catalog and to choose a language (English or
 
 ### Edit catalog
 
-With the <img src="../assets/image-2023-11-10_23-40-55.png" alt="Catalogs Page Edit Catalog Icon" style="height:1em; width:auto; vertical-align:middle;"> button, catalog owners can edit the name of their catalogs.
+With the <img src="./assets/image-2023-11-10_23-40-55.png" alt="Catalogs Page Edit Catalog Icon" style="height:1em; width:auto; vertical-align:middle;"> button, catalog owners can edit the name of their catalogs.
 
 ![Catalogs Page Edit Catalog Dialog](assets/image-2024-7-30_14-28-35.png "Catalogs Page Edit Catalog Dialog")
 
 ### Delete catalog
 
-With the <img src="../assets/images_2_.png" alt="Catalogs Page Delete Catalog Icon" style="height:1em; width:auto; vertical-align:middle;"> button, catalog owners can delete their catalogs.
+With the <img src="./assets/images_2_.png" alt="Catalogs Page Delete Catalog Icon" style="height:1em; width:auto; vertical-align:middle;"> button, catalog owners can delete their catalogs.
 
 ![Catalogs Page Delete Catalog Confirmation](assets/image-2024-7-30_14-29-9.png "Catalogs Page Delete Catalog Confirmation")
 
@@ -788,7 +788,7 @@ Editing catalog threats and measures will impact all projects that use these cat
 
 Known Issue:
 
-- Currently, the import (<img src="../assets/avbfe351f753bcaa24ae2.png" alt="Catalogs Page Import Icon" style="height:1em; width:auto; vertical-align:middle;">) and export (<img src="../assets/download-1459070_960_720.png" alt="Catalogs Page Export Icon" style="height:1em; width:auto; vertical-align:middle;">) buttons have no functionality and will be disabled completely in a future update.
+- Currently, the import (<img src="./assets/avbfe351f753bcaa24ae2.png" alt="Catalogs Page Import Icon" style="height:1em; width:auto; vertical-align:middle;">) and export (<img src="./assets/download-1459070_960_720.png" alt="Catalogs Page Export Icon" style="height:1em; width:auto; vertical-align:middle;">) buttons have no functionality and will be disabled completely in a future update.
 
 ### Creating a catalog threat
 
@@ -828,7 +828,7 @@ With the toggle switches for **Confidentiality, Integrity** and **Availability**
 
 ### Deleting a catalog threat
 
-Catalog editors and owners can delete catalog threats by clicking on the <img src="../assets/images_2_.png" alt="Catalogs Page Delete Threat Icon" style="height:1em; width:auto; vertical-align:middle;"> button for the corresponding threat entry within the list and subsequently confirming the deletion in a safety dialog.
+Catalog editors and owners can delete catalog threats by clicking on the <img src="./assets/images_2_.png" alt="Catalogs Page Delete Threat Icon" style="height:1em; width:auto; vertical-align:middle;"> button for the corresponding threat entry within the list and subsequently confirming the deletion in a safety dialog.
 
 ![Catalogs Page Delete Threat Button](assets/image-2024-7-30_14-40-46.png "Catalogs Page Delete Threat Button")
 
@@ -872,7 +872,7 @@ Known Issue
 
 ### Deleting a catalog measure
 
-Catalog editors and owners can delete catalog measures by clicking on the <img src="../assets/images_2_.png" alt="Catalogs Page Delete Measure Icon" style="height:1em; width:auto; vertical-align:middle;"> button for the corresponding measure entry within the list and subsequently confirming the deletion in a safety dialog.
+Catalog editors and owners can delete catalog measures by clicking on the <img src="./assets/images_2_.png" alt="Catalogs Page Delete Measure Icon" style="height:1em; width:auto; vertical-align:middle;"> button for the corresponding measure entry within the list and subsequently confirming the deletion in a safety dialog.
 
 ![Catalogs Page Delete Measure Button](assets/image-2024-7-30_14-46-32.png "Catalogs Page Delete Measure Button")
 
@@ -910,7 +910,7 @@ Catalog owners can edit member assignments by clicking on the row with the respe
 
 ### Deleting a member
 
-Catalog owners can remove catalog members with the <img src="../assets/image-2023-11-10_23-40-55.png" alt="Catalog Members Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> in the row of the respective member assignment.
+Catalog owners can remove catalog members with the <img src="./assets/image-2023-11-10_23-40-55.png" alt="Catalog Members Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> in the row of the respective member assignment.
 
 ## Errors
 

@@ -22,7 +22,7 @@ apps/
   backend/            Express 5 + TypeScript API (Drizzle ORM, PostgreSQL)
 packages/
   typescript-config/  Shared tsconfig presets
-gh-pages/             Published documentation sources (rendered via mkdocs; see mkdocs.yml)
+gh-pages/             Published documentation sources (VitePress; see gh-pages/.vitepress/config.mts)
 ```
 
 ### Frontend structure (`apps/frontend/src/`)
@@ -92,6 +92,8 @@ pnpm --filter threatsea_fe type-check
 pnpm --filter threatsea_be test           # backend unit tests
 pnpm --filter threatsea_be db:generate    # generate a new Drizzle migration
 pnpm --filter threatsea_be db:migrate     # apply migrations
+pnpm --filter threatsea_docs docs:dev    # docs dev server (VitePress)
+pnpm --filter threatsea_docs build       # build docs into gh-pages/.vitepress/dist
 
 # E2E (requires DB + backend running — see README)
 pnpm --filter threatsea_fe playwright
