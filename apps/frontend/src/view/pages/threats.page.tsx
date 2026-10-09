@@ -146,10 +146,14 @@ const ThreatsPageBody = () => {
         actions: t("actions"),
     };
 
-    const { columnFilters, expandedFilters, handleFilterChange, toggleFilterExpanded, clearColumnFilters } =
-        useColumnFilters();
-
-    const hasActiveFilter = Object.values(columnFilters).some((value) => value.trim() !== "");
+    const {
+        columnFilters,
+        expandedFilters,
+        hasActiveFilter,
+        handleFilterChange,
+        toggleFilterExpanded,
+        clearColumnFilters,
+    } = useColumnFilters();
 
     const allThreatsExpanded =
         genericThreats.length > 0 &&

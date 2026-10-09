@@ -3,8 +3,10 @@
  *     page in the projects.
  */
 
+import FilterAltOff from "@mui/icons-material/FilterAltOff";
 import Visibility from "@mui/icons-material/Visibility";
 import { Box, Button, Checkbox, FormControlLabel, LinearProgress, Menu, MenuItem, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { DataGrid, GridRow, type GridColumnVisibilityModel, type GridRowProps } from "@mui/x-data-grid";
 import { memo, useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -55,6 +57,7 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
     const dispatch = useAppDispatch();
     const { t } = useTranslation("assetsPage");
     usePageTitle(t("assets"));
+    const theme = useTheme();
 
     const { deleteAsset, isPending, assets } = useAssetsList({ projectId });
 
@@ -94,7 +97,14 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
         actions: t("actions"),
     };
 
-    const { columnFilters, expandedFilters, handleFilterChange, toggleFilterExpanded } = useColumnFilters();
+    const {
+        columnFilters,
+        expandedFilters,
+        hasActiveFilter,
+        handleFilterChange,
+        toggleFilterExpanded,
+        clearColumnFilters,
+    } = useColumnFilters();
     const pageSizeOptions = usePageSizeOptions();
 
     // Filtered in JS: the community DataGrid applies at most one controlled
@@ -254,14 +264,26 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
                                 ))}
                             </Menu>
                         </Box>
-                        {assets.length > 0 && (
-                            <Box sx={{ display: "flex", alignItems: "center" }}>
-                                <Typography sx={{ mr: 0.5, fontWeight: "bold", color: "primary.text" }}>
-                                    {filteredAssets.length}
-                                </Typography>
-                                <Typography>{handleAssetsCount()}</Typography>
-                            </Box>
-                        )}
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                            {hasActiveFilter && (
+                                <Button
+                                    onClick={clearColumnFilters}
+                                    startIcon={<FilterAltOff sx={{ fontSize: 18 }} />}
+                                    data-testid="assets-page_clear-filters-button"
+                                    sx={{ mr: 2, textTransform: "none", color: theme.vars.palette.text.primary }}
+                                >
+                                    {t("clearFilters")}
+                                </Button>
+                            )}
+                            {assets.length > 0 && (
+                                <>
+                                    <Typography sx={{ mr: 0.5, fontWeight: "bold", color: "primary.text" }}>
+                                        {filteredAssets.length}
+                                    </Typography>
+                                    <Typography>{handleAssetsCount()}</Typography>
+                                </>
+                            )}
+                        </Box>
                     </Box>
 
                     <DataGrid
