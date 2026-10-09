@@ -35,7 +35,7 @@ const DIALOG_URL = "/projects/7/measures/3/measureImpacts/edit";
 
 const LocationProbe = () => <div data-testid="location">{useLocation().pathname}</div>;
 
-const setup = (onSaved?: () => void) => {
+const setup = (onSaved?: () => void, initialMeasureImpact: MeasureImpact | null = measureImpact) => {
     const user = userEvent.setup();
     const { store } = renderWithProviders(
         <>
@@ -46,7 +46,7 @@ const setup = (onSaved?: () => void) => {
                         <MeasureImpactByThreatDialog
                             project={project}
                             measure={measure}
-                            measureImpact={measureImpact}
+                            measureImpact={initialMeasureImpact}
                             {...(onSaved !== undefined ? { onSaved } : {})}
                         />
                     }
@@ -96,6 +96,26 @@ describe("MeasureImpactByThreatDialog", () => {
         );
         expect(onSaved).toHaveBeenCalledTimes(1);
         expect(screen.queryByRole("heading", { name: "Encrypt traffic" })).not.toBeInTheDocument();
+    });
+
+    it("creates a new impact for the picked threat, notifies the host page and goes back", async () => {
+        // No existing impacts, so threat 42 is pickable instead of listed as already impacted.
+        vi.mocked(MeasureImpactsApi.getMeasureImpacts).mockResolvedValue([]);
+        vi.spyOn(MeasureImpactsApi, "createMeasureImpact").mockResolvedValue(measureImpact);
+        const onSaved = vi.fn();
+        const { user } = setup(onSaved, null);
+
+        await user.click(screen.getByRole("combobox"));
+        await user.click(await screen.findByRole("option", { name: /Eavesdropping/ }));
+        await user.type(screen.getByLabelText("Description"), "New");
+        await user.click(screen.getByRole("button", { name: "Save" }));
+
+        await waitFor(() => expect(screen.getByTestId("location")).toHaveTextContent(/^\/projects\/7\/measures$/));
+        expect(MeasureImpactsApi.createMeasureImpact).toHaveBeenCalledWith(
+            expect.objectContaining({ measureId: 3, threatId: 42, projectId: 7, description: "New" })
+        );
+        expect(MeasureImpactsApi.updateMeasureImpact).not.toHaveBeenCalled();
+        expect(onSaved).toHaveBeenCalledTimes(1);
     });
 
     it("disables Save while the save is running, so a second click can't save again", async () => {
