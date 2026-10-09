@@ -64,6 +64,10 @@ interface ColumnConfig {
 
 const cellText = { fontSize: "0.875rem" } as const;
 
+// The numeric columns abbreviate their header (the full name is its tooltip). This fits the abbreviation,
+// its filter toggle and DataGrid's sort icon; narrower, a sorted column clips the label.
+const METRIC_COLUMN_WIDTH = 110;
+
 const threatStatusPresentation: Record<THREAT_STATUSES, { icon: React.ReactElement; color: string }> = {
     [THREAT_STATUSES.NEW]: { icon: <FiberManualRecord sx={{ fontSize: 16 }} />, color: "text.statusNew" },
     [THREAT_STATUSES.IN_PROGRESS]: { icon: <Edit sx={{ fontSize: 16 }} />, color: "secondary.main" },
@@ -311,14 +315,14 @@ export const createThreatsColumns = ({
     {
         field: "probability",
         headerName: t("probability"),
-        // Fits the German header "Eintrittswahrscheinlichkeit" next to its filter toggle.
-        width: 240,
+        width: METRIC_COLUMN_WIDTH,
         align: "center",
         headerAlign: "center",
         renderHeader: () => (
             <ColumnFilterHeader
                 field="probability"
-                label={t("probability")}
+                label={t("probabilityAbbreviation")}
+                fullLabel={t("probability")}
                 columnFilters={columnFilters}
                 onFilterChange={onFilterChange}
                 expandedFilters={expandedFilters}
@@ -333,13 +337,14 @@ export const createThreatsColumns = ({
     {
         field: "damage",
         headerName: t("damage"),
-        width: 140,
+        width: METRIC_COLUMN_WIDTH,
         align: "center",
         headerAlign: "center",
         renderHeader: () => (
             <ColumnFilterHeader
                 field="damage"
-                label={t("damage")}
+                label={t("damageAbbreviation")}
+                fullLabel={t("damage")}
                 columnFilters={columnFilters}
                 onFilterChange={onFilterChange}
                 expandedFilters={expandedFilters}
@@ -354,13 +359,14 @@ export const createThreatsColumns = ({
     {
         field: "risk",
         headerName: t("risk"),
-        width: 100,
+        width: METRIC_COLUMN_WIDTH,
         align: "center",
         headerAlign: "center",
         renderHeader: () => (
             <ColumnFilterHeader
                 field="risk"
-                label={t("risk")}
+                label={t("riskAbbreviation")}
+                fullLabel={t("risk")}
                 columnFilters={columnFilters}
                 onFilterChange={onFilterChange}
                 expandedFilters={expandedFilters}

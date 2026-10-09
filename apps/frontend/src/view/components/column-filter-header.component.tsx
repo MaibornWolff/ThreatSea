@@ -2,10 +2,13 @@ import ExpandMore from "@mui/icons-material/ExpandMore";
 import { Box, Collapse, IconButton as MuiIconButton, TextField, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { Tooltip } from "#view/components/tooltip.component.tsx";
 
 interface ColumnFilterHeaderProps {
     field: string;
     label: string;
+    // Set when the label is abbreviated: shown as a hover tooltip and used as the label's accessible name.
+    fullLabel?: string;
     columnFilters: Record<string, string>;
     onFilterChange: (field: string, value: string) => void;
     expandedFilters: Record<string, boolean>;
@@ -16,6 +19,7 @@ interface ColumnFilterHeaderProps {
 export const ColumnFilterHeader = ({
     field,
     label,
+    fullLabel,
     columnFilters,
     onFilterChange,
     expandedFilters,
@@ -23,6 +27,9 @@ export const ColumnFilterHeader = ({
     children,
 }: ColumnFilterHeaderProps) => {
     const { t } = useTranslation("common");
+    const labelText = (
+        <Typography sx={{ fontWeight: "bold", fontSize: "0.875rem", textAlign: "center" }}>{label}</Typography>
+    );
 
     return (
         <Box
@@ -35,7 +42,13 @@ export const ColumnFilterHeader = ({
             }}
         >
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 0.5 }}>
-                <Typography sx={{ fontWeight: "bold", fontSize: "0.875rem", textAlign: "center" }}>{label}</Typography>
+                {fullLabel ? (
+                    <Tooltip title={fullLabel} placement="top">
+                        {labelText}
+                    </Tooltip>
+                ) : (
+                    labelText
+                )}
                 {/*
                     Deliberately not a tab stop, like DataGrid's own header icons: the grid moves header focus to the
                     first tabindex="0" element inside it, so a focusable chevron would take the header's keyboard focus
@@ -46,7 +59,7 @@ export const ColumnFilterHeader = ({
                 <MuiIconButton
                     size="small"
                     tabIndex={-1}
-                    aria-label={t("toggleColumnFilter", { column: label })}
+                    aria-label={t("toggleColumnFilter", { column: fullLabel ?? label })}
                     aria-expanded={expandedFilters[field] ?? true}
                     onClick={(event) => {
                         event.stopPropagation();

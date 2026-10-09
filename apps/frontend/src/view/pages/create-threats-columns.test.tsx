@@ -1,6 +1,7 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import type { TFunction } from "i18next";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { translationUtil } from "#utils/translations.ts";
@@ -13,8 +14,10 @@ import { createThreatsColumns, formatComponentName, type ThreatsGridRow } from "
 // The app's real translations, fixed to English: the tests assert the texts users see, so a
 // missing or misspelled key fails instead of passing as its own name.
 const englishT = translationUtil.getFixedT("en", "threatsPage");
+const germanT = translationUtil.getFixedT("de", "threatsPage");
 
 interface BuildOptions {
+    t?: TFunction;
     columnFilters?: Record<string, string>;
     expandedFilters?: Record<string, boolean>;
     userRole?: USER_ROLES;
@@ -34,7 +37,7 @@ const buildColumns = (opts: BuildOptions = {}) => {
     };
 
     const columns = createThreatsColumns({
-        t: englishT,
+        t: opts.t ?? englishT,
         userRole: opts.userRole ?? USER_ROLES.EDITOR,
         columnFilters: opts.columnFilters ?? {},
         expandedFilters: opts.expandedFilters ?? {},
@@ -97,6 +100,13 @@ const renderCell = (column: GridColDef<ThreatsGridRow> | undefined, row: Threats
     return renderWithProviders(<>{column.renderCell(cellParams(row))}</>);
 };
 
+const renderHeader = (column: GridColDef<ThreatsGridRow> | undefined) => {
+    if (!column?.renderHeader) {
+        throw new Error("Column has no renderHeader");
+    }
+    return renderWithProviders(<>{column.renderHeader({} as never)}</>);
+};
+
 const columnByField = (opts: BuildOptions = {}) => {
     const { columns, handlers } = buildColumns(opts);
     return { byField: Object.fromEntries(columns.map((column) => [column.field, column])), handlers };
@@ -120,13 +130,6 @@ describe("createThreatsColumns — structure", () => {
         ]);
     });
 
-    it("keeps the probability column wide enough for its German header", () => {
-        const { columns } = buildColumns();
-        // "Eintrittswahrscheinlichkeit" measures about 181px in the header font; with the filter
-        // toggle and the header padding the column needs about 239px.
-        expect(columns.find((column) => column.field === "probability")!.width).toBeGreaterThanOrEqual(240);
-    });
-
     it("makes every column with values sortable, but not the actions column", () => {
         const { columns } = buildColumns();
         expect(columns.filter((column) => column.sortable !== false).map((column) => column.field)).toEqual([
@@ -141,6 +144,41 @@ describe("createThreatsColumns — structure", () => {
             "risk",
             "status",
         ]);
+    });
+});
+
+describe("createThreatsColumns — numeric column headers", () => {
+    it.each([
+        { field: "probability", language: "English", t: englishT, abbreviation: "P", fullName: "Probability" },
+        { field: "damage", language: "English", t: englishT, abbreviation: "D", fullName: "Damage" },
+        { field: "risk", language: "English", t: englishT, abbreviation: "R", fullName: "Risk" },
+        {
+            field: "probability",
+            language: "German",
+            t: germanT,
+            abbreviation: "EW",
+            fullName: "Eintrittswahrscheinlichkeit",
+        },
+        { field: "damage", language: "German", t: germanT, abbreviation: "S", fullName: "Schaden" },
+        { field: "risk", language: "German", t: germanT, abbreviation: "R", fullName: "Risiko" },
+    ])(
+        "abbreviates the $field header in $language and shows its full name on hover",
+        async ({ field, t, abbreviation, fullName }) => {
+            const { byField } = columnByField({ t });
+            renderHeader(byField[field]);
+
+            await userEvent.hover(screen.getByText(abbreviation));
+
+            expect(await screen.findByRole("tooltip")).toHaveTextContent(fullName);
+        }
+    );
+
+    it("keeps the full names for the column menu and the column selection", () => {
+        const { byField } = columnByField();
+
+        expect(byField["probability"]!.headerName).toBe("Probability");
+        expect(byField["damage"]!.headerName).toBe("Damage");
+        expect(byField["risk"]!.headerName).toBe("Risk");
     });
 });
 
