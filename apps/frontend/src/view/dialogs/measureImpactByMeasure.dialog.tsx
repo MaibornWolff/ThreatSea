@@ -601,6 +601,7 @@ const MeasureImpactByMeasureDialog = ({
                         variant="contained"
                         sx={{ marginRight: 0 }}
                         onClick={handleCancelDialog}
+                        disabled={isSubmitting}
                         data-testid="apply-measure-modal_cancel-button"
                     >
                         {t("cancelBtn")}
