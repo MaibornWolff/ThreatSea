@@ -23,4 +23,22 @@ describe("useColumnFilters", () => {
         act(() => result.current.clearColumnFilters());
         expect(result.current.columnFilters).toEqual({});
     });
+
+    it("reports an active filter only while a filter holds more than whitespace", () => {
+        const { result } = renderHook(() => useColumnFilters());
+        expect(result.current.hasActiveFilter).toBe(false);
+
+        act(() => result.current.handleFilterChange("name", "   "));
+        expect(result.current.hasActiveFilter).toBe(false);
+
+        act(() => result.current.handleFilterChange("email", "x"));
+        expect(result.current.hasActiveFilter).toBe(true);
+
+        act(() => result.current.handleFilterChange("email", ""));
+        expect(result.current.hasActiveFilter).toBe(false);
+
+        act(() => result.current.handleFilterChange("name", "abc"));
+        act(() => result.current.clearColumnFilters());
+        expect(result.current.hasActiveFilter).toBe(false);
+    });
 });

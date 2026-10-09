@@ -1,5 +1,7 @@
+import FilterAltOff from "@mui/icons-material/FilterAltOff";
 import Visibility from "@mui/icons-material/Visibility";
 import { Box, Button, Checkbox, FormControlLabel, LinearProgress, Menu, MenuItem, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { DataGrid, GridRow, type GridColumnVisibilityModel, type GridRowProps } from "@mui/x-data-grid";
 import { memo, useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -55,6 +57,7 @@ type MeasureDialogState = Omit<Partial<Measure>, "id" | "scheduledAt"> & {
 const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
     const { t } = useTranslation("measuresPage");
     usePageTitle(t("measures"));
+    const theme = useTheme();
     const { openConfirm } = useConfirm<Measure>();
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
@@ -93,7 +96,14 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
         actions: t("actions"),
     };
 
-    const { columnFilters, expandedFilters, handleFilterChange, toggleFilterExpanded } = useColumnFilters();
+    const {
+        columnFilters,
+        expandedFilters,
+        hasActiveFilter,
+        handleFilterChange,
+        toggleFilterExpanded,
+        clearColumnFilters,
+    } = useColumnFilters();
     const pageSizeOptions = usePageSizeOptions();
 
     // Filtered in JS: the community DataGrid applies at most one controlled
@@ -282,14 +292,26 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                                 ))}
                             </Menu>
                         </Box>
-                        {measures.length > 0 && (
-                            <Box sx={{ display: "flex", alignItems: "center" }}>
-                                <Typography sx={{ mr: 0.5, fontWeight: "bold", color: "primary.text" }}>
-                                    {filteredMeasures.length}
-                                </Typography>
-                                <Typography>{handleMeasureCount()}</Typography>
-                            </Box>
-                        )}
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                            {hasActiveFilter && (
+                                <Button
+                                    onClick={clearColumnFilters}
+                                    startIcon={<FilterAltOff sx={{ fontSize: 18 }} />}
+                                    data-testid="measures-page_clear-filters-button"
+                                    sx={{ mr: 2, textTransform: "none", color: theme.vars.palette.text.primary }}
+                                >
+                                    {t("clearFilters")}
+                                </Button>
+                            )}
+                            {measures.length > 0 && (
+                                <>
+                                    <Typography sx={{ mr: 0.5, fontWeight: "bold", color: "primary.text" }}>
+                                        {filteredMeasures.length}
+                                    </Typography>
+                                    <Typography>{handleMeasureCount()}</Typography>
+                                </>
+                            )}
+                        </Box>
                     </Box>
 
                     <DataGrid

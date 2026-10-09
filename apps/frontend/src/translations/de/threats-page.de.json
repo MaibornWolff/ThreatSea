@@ -19,7 +19,6 @@
   "collapse": "Einklappen",
   "expandAllThreats": "Alle Bedrohungen ausklappen",
   "collapseAllThreats": "Alle Bedrohungen einklappen",
-  "clearFilters": "Filter zurücksetzen",
   "noThreats": "Keine Bedrohungen zu dieser generischen Bedrohung.",
   "threatsCount_one": "{{count}} Bedrohung",
   "threatsCount_other": "{{count}} Bedrohungen",
