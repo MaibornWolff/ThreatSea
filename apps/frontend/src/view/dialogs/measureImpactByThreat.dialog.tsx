@@ -532,7 +532,12 @@ const MeasureImpactByThreatDialog = ({
                         paddingLeft: 0,
                     }}
                 >
-                    <Button variant="contained" sx={{ marginRight: 0 }} onClick={handleCancelDialog}>
+                    <Button
+                        variant="contained"
+                        sx={{ marginRight: 0 }}
+                        onClick={handleCancelDialog}
+                        disabled={isSubmitting}
+                    >
                         {t("cancelBtn")}
                     </Button>
                     <Button
