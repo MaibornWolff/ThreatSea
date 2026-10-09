@@ -25,8 +25,7 @@ import { useEffect, useState, type ChangeEvent } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
-import { useAppDispatch } from "#application/hooks/use-app-redux.hook.ts";
-import { MeasureImpactsActions } from "#application/actions/measureImpacts.actions.ts";
+import { useMeasureImpacts } from "#application/hooks/use-measureImpacts.hook.ts";
 import { Button } from "#view/components/button.component.tsx";
 import { ChainDialogContent } from "#view/components/chain-dialog-content.component.tsx";
 import { DialogTextField } from "#view/components/dialog.textfield.component.tsx";
@@ -72,7 +71,7 @@ const MeasureImpactByThreatDialog = ({
 }: MeasureImpactByThreatDialogProps) => {
     const projectId = parseInt(String(project.id), 10);
     const navigate = useNavigate();
-    const dispatch = useAppDispatch();
+    const { saveMeasureImpact } = useMeasureImpacts({ projectId });
     const { suggestedThreats, remainingThreats, impactedThreats } = useThreatSuggestions({
         selectedMeasure: measure,
         projectId,
@@ -133,31 +132,10 @@ const MeasureImpactByThreatDialog = ({
      * @param {object} data - Data of the measure.
      */
     const handleConfirmDialog = async (data: MeasureImpactByThreatFormValues) => {
-        const payload = {
-            ...data,
-            probability: data.setsOutOfScope || !data.impactsProbability ? null : data.probability,
-            damage: data.setsOutOfScope || !data.impactsDamage ? null : data.damage,
-            measureId: parseInt(String(measure.id), 10),
-            projectId: parseInt(String(projectId), 10),
-        };
-        try {
-            if (payload.id != null) {
-                await dispatch(
-                    MeasureImpactsActions.updateMeasureImpact(
-                        payload as Parameters<typeof MeasureImpactsActions.updateMeasureImpact>[0]
-                    )
-                ).unwrap();
-            } else {
-                await dispatch(
-                    MeasureImpactsActions.createMeasureImpact(
-                        payload as Parameters<typeof MeasureImpactsActions.createMeasureImpact>[0]
-                    )
-                ).unwrap();
-            }
+        const isSaved = await saveMeasureImpact({ ...data, measureId: parseInt(String(measure.id), 10) });
+        if (isSaved) {
             onSaved?.();
             closeDialog();
-        } catch {
-            // handled globally; keep the dialog open so the user can retry
         }
     };
 
