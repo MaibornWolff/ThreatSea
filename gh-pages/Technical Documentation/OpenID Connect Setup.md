@@ -1,4 +1,6 @@
-# OpenID Connect Setup
+---
+title: OpenID Connect Setup
+---
 
 This guide explains how to setup ThreaSea to use your preferred OpenID Connect Provider. An example is given below using KeyCloak as an OpenID Connect Provider.
 

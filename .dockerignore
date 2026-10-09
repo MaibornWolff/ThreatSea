@@ -16,8 +16,6 @@ Dockerfile
 docker-compose.yaml
 gh-pages
 LICENSE
-mkdocs.yml
-mkdocs_requirements.txt
 README.md
 release.config.mjs
 renovate.json

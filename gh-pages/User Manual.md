@@ -1,4 +1,6 @@
-# User Manual
+---
+title: User Manual
+---
 
 ## Introduction
 

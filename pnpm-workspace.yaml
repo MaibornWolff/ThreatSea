@@ -1,6 +1,7 @@
 packages:
   - "apps/*"
   - "packages/*"
+  - "gh-pages"
 
 catalog:
   "@types/node": 24.19.1
