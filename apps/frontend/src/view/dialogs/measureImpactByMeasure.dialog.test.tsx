@@ -1,9 +1,17 @@
-import { screen, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { CatalogMeasuresApi } from "#api/catalog-measures.api.ts";
 import { GenericThreatsAPI } from "#api/generic-threats.api.ts";
 import { MeasureImpactsApi } from "#api/measureImpacts.api.ts";
 import { MeasuresAPI } from "#api/measures.api.ts";
-import { createGenericThreatWithThreats, createMeasure, createProject, createThreat } from "#test-utils/builders.ts";
+import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
+import {
+    createGenericThreatWithThreats,
+    createMeasure,
+    createMeasureImpact,
+    createProject,
+    createThreat,
+} from "#test-utils/builders.ts";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import MeasureImpactByMeasureDialog from "./measureImpactByMeasure.dialog";
 
@@ -36,5 +44,32 @@ describe("MeasureImpactByMeasureDialog", () => {
         unmount();
 
         expect(store.getState().dialogs["measureImpacts"]).toBeNull();
+    });
+
+    it("disables Save while the save is running, so a second click can't save again", async () => {
+        const measureImpact = createMeasureImpact({ id: 9, measureId: 5, threatId: 42, projectId: 7 });
+        let resolveSave!: (value: MeasureImpact) => void;
+        vi.spyOn(MeasureImpactsApi, "updateMeasureImpact").mockReturnValueOnce(
+            new Promise((resolve) => {
+                resolveSave = resolve;
+            })
+        );
+        const user = userEvent.setup();
+        renderWithProviders(
+            <MeasureImpactByMeasureDialog
+                project={project}
+                threat={{ ...threat, damage: 4 }}
+                measureImpact={measureImpact}
+            />
+        );
+
+        const saveButton = screen.getByRole("button", { name: "Save" });
+        await user.click(saveButton);
+
+        await waitFor(() => expect(saveButton).toBeDisabled());
+        expect(MeasureImpactsApi.updateMeasureImpact).toHaveBeenCalledTimes(1);
+
+        resolveSave(measureImpact);
+        await waitFor(() => expect(saveButton).toBeEnabled());
     });
 });
