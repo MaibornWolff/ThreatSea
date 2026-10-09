@@ -190,7 +190,10 @@ test.describe("Threats Page Tests", () => {
         await pg.toggleSort("risk");
 
         await expect(pg.columnHeader("risk")).toHaveAttribute("aria-sort", "ascending");
-        await expect(page.getByRole("button", { name: "Collapse" })).toHaveCount(EXPECTED_GENERIC_THREAT_COUNT);
+        // exact: the toolbar's "Collapse all threats" button would match a substring search too.
+        await expect(page.getByRole("button", { name: "Collapse", exact: true })).toHaveCount(
+            EXPECTED_GENERIC_THREAT_COUNT
+        );
     });
 
     test("Should keep a generic threat listed when the name filter matches one of its threats", async ({ page }) => {
