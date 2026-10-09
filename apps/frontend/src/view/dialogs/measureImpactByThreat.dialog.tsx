@@ -36,7 +36,6 @@ import { DescriptionTextField } from "#view/components/description-textfield.com
 import type { Project } from "#api/types/project.types.ts";
 import type { Measure } from "#api/types/measure.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
-import type { DialogValue } from "#application/reducers/dialogs.reducer.ts";
 
 interface FormValues {
     id: number | undefined;
@@ -49,7 +48,7 @@ interface FormValues {
     damage: number | "" | null;
 }
 
-interface MeasureImpactByThreatFormValues extends FormValues, Omit<MeasureImpact, keyof FormValues>, DialogValue {}
+interface MeasureImpactByThreatFormValues extends FormValues, Omit<MeasureImpact, keyof FormValues> {}
 
 interface MeasureImpactByThreatDialogProps {
     project: Project;
