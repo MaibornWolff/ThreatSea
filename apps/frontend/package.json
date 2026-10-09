@@ -43,7 +43,7 @@
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-hook-form": "7.89.0",
-    "react-i18next": "17.0.15",
+    "react-i18next": "17.0.16",
     "react-konva": "19.3.0",
     "react-konva-utils": "2.1.0",
     "react-redux": "9.3.0",
