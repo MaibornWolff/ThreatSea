@@ -22,7 +22,7 @@ apps/
   backend/            Express 5 + TypeScript API (Drizzle ORM, PostgreSQL)
 packages/
   typescript-config/  Shared tsconfig presets
-gh-pages/             Published documentation sources (Astro Starlight; see gh-pages/astro.config.mjs)
+gh-pages/             Published documentation (Astro Starlight; pages in src/content/docs/)
 ```
 
 ### Frontend structure (`apps/frontend/src/`)
@@ -105,7 +105,7 @@ Before opening a PR, run at minimum: `pnpm lint`, `pnpm format:check`, `pnpm typ
 
 ## Architectural Decisions
 
-Cross-cutting decisions are recorded in [`Architectural Decision Record.md`](<./gh-pages/Technical Documentation/Architectural Decision Record.md>). Follow decided ADRs. If a task conflicts with one or makes a new architectural decision, raise it with the developer before adding a row — don't add or edit ADRs on your own.
+Cross-cutting decisions are recorded in [`architectural-decision-record.md`](./gh-pages/src/content/docs/technical-documentation/architectural-decision-record.md). Follow decided ADRs. If a task conflicts with one or makes a new architectural decision, raise it with the developer before adding a row — don't add or edit ADRs on your own.
 
 ---
 

@@ -12,7 +12,7 @@ Run `pnpm install` to download all required node packages.
 
 The ThreatSea backend requires environment variables to work.
 Create a new file called `.env` with values taken from the .env.example file.
-For authentication use AUTH_METHOD=fixed for local environment, refer to [OpenID Connect Setup](https://maibornwolff.github.io/ThreatSea/Technical%20Documentation/OpenID%20Connect%20Setup/) for more.
+For authentication use AUTH_METHOD=fixed for local environment, refer to [OpenID Connect Setup](/ThreatSea/technical-documentation/openid-connect-setup/) for more.
 
 ## Starting ThreatSea
 

@@ -59,21 +59,21 @@ After logging in, a user can see an overview of all projects to which they have 
 
 By clicking on the ThreatSea logo on the left side of the header bar, users can return to this project view from wherever in ThreatSea in one click.
 
-![Projects Page View](assets/image-2024-7-30_13-9-48.png "Projects Page View")
+![Projects Page View](../../assets/image-2024-7-30_13-9-48.png "Projects Page View")
 
 Projects can be sorted by their name or their creation date. Via the search field, a user can search for a specific project name or part thereof.
 
-![Projects Page Search Field](assets/image-2024-7-30_13-10-46.png "Projects Page Search Field")
+![Projects Page Search Field](../../assets/image-2024-7-30_13-10-46.png "Projects Page Search Field")
 
 Each project is represented by a project tile with the project name, the project creation date, a preview of the system model, shortcuts to the specific views of the system and an expandable description of the project.
 
 Project owners can use the dropdown menu in the top right corner of the project tile to edit, export, delete or move the project to a folder. Editors and viewers see the same menu containing only the "Move to folder" entry, since folder placement is stored per user.
 
-![Projects Page Project Options](assets/image-2024-7-30_13-11-38.png "Projects Page Project Options")
+![Projects Page Project Options](../../assets/image-2024-7-30_13-11-38.png "Projects Page Project Options")
 
 Projects can additionally be organised into folders. A new top-level folder is created with the "New folder" button (the folder-plus icon in the toolbar next to the search field), which asks for a folder name. On the projects list, each folder appears as a collapsible section showing its name and a count of the projects and subfolders it contains, and a separate "Ungrouped" section at the bottom holds every project that is not placed in a folder. Which folders are expanded or collapsed is remembered while navigating in and out of projects, but resets on a full page reload.
 
-![Projects Page Folders](assets/projects-folders.png "Projects Page Folders")
+![Projects Page Folders](../../assets/projects-folders.png "Projects Page Folders")
 
 Every folder header has a three-dot actions menu on its right offering "New subfolder", "Rename folder", "Move to folder" and "Delete folder". Folders can be nested up to seven levels deep; the "New subfolder" entry is disabled once that limit is reached. Deleting an empty folder only requires confirmation, whereas deleting a folder that still contains subfolders or projects removes its subfolders and moves its projects back to "Ungrouped". A single project is placed into a folder from the project tile's dropdown menu via "Move to folder", which opens a dialog for choosing the target folder (or "Top level" to remove it from any folder). Folder placement is stored per user, so each member organises their own view of the shared projects without affecting other members.
 
@@ -81,7 +81,7 @@ Every folder header has a three-dot actions menu on its right offering "New subf
 
 Projects can be created by using the ‘+’ Button right to the search window. This button is only visible for privileged users. To create a project, a project name and optionally a description have to be provided and the 4x6 catalog that shall be used in the project has to be selected. Note that at least view permissions on the catalog that shall be used are required. Additionally the project owner can give a information classification (public, internal, confidential, highly confidential), which will be displayed in the header of each project, on each page of the pdf report and also in the name of generated Excel reports. Those informations can only be changed by the project owner.
 
-![Projects Page Create Project Dialog](assets/image-2025-2-17_13-6-15.png "Projects Page Create Project Dialog")
+![Projects Page Create Project Dialog](../../assets/image-2025-2-17_13-6-15.png "Projects Page Create Project Dialog")
 
 ### Import project
 
@@ -93,7 +93,7 @@ The "migrate project" button <img src="../assets/images.png" alt="Projects Page 
 
 The project owner can change the name, description, the used catalog and the information classification via the dropdown menu in the top right of the project tile. Currently, the latter is not recommended to be used, we recommend choosing one single catalogue for the whole lifetime of a project. Future releases will improve this functionality.
 
-![Projects Page Edit Project Dialog](assets/image-2025-2-17_13-10-34.png "Projects Page Edit Project Dialog")
+![Projects Page Edit Project Dialog](../../assets/image-2025-2-17_13-10-34.png "Projects Page Edit Project Dialog")
 
 ### Export project
 
@@ -103,13 +103,13 @@ The project owner can export the project as downloadable JSON file via the dropd
 
 The project owner can delete the project and all its contents via the dropdown menu in the top right of the project tile. After confirming the safety dialog, this action is irreversible!
 
-![Projects Page Delete Project Cofirmation](assets/image-2024-7-30_13-13-30.png "Projects Page Delete Project Cofirmation")
+![Projects Page Delete Project Cofirmation](../../assets/image-2024-7-30_13-13-30.png "Projects Page Delete Project Cofirmation")
 
 ## Projects
 
 Projects have seven main views, all of them accessible via the header bar:
 
-![Project Header Bar](assets/image-2024-7-30_12-55-47.png "Project Header Bar")
+![Project Header Bar](../../assets/image-2024-7-30_12-55-47.png "Project Header Bar")
 
 - System – Graphical editor to model the system architecture in terms of the 4x6 model
 - Assets – List of assets and their protection needs
@@ -125,7 +125,7 @@ The views can also be accessed via the shortcuts in the single project tiles fro
 
 The system editor is used to draw graphical representations of technical systems by decomposing these systems into single components and the connections between them.
 
-![Editor Page View](assets/Editor.png "Editor Page View")
+![Editor Page View](../../assets/Editor.png "Editor Page View")
 
 By holding the primary mouse key and moving the cursor, users can navigate through the system sketch. The top-left "focus" button <img src="../assets/images_1_.png" alt="Editor Page Focus Button" style="height:1em; width:auto; vertical-align:middle;"> allows quick navigation by centering and scaling the editor view relatively to the overall system sketch. With the "download" button <img src="../assets/download-1459070_960_720.png" alt="Editor Page Download Icon" style="height:1em; width:auto; vertical-align:middle;"> the system sketch can be downloaded as png file. For users with the `Editor` role, the same toolbar additionally offers annotation tools for adding shapes, freehand drawings and text to the system sketch (see [Annotations](#annotations)).
 
@@ -135,7 +135,7 @@ In the system editor, a system is represented by a set of components. A componen
 
 A component can be created by clicking with the secondary mouse button into any unoccupied space of the system editor and choosing the type of component from the menu appearing at the location of the click. Users can either select from one of the four pre-defined component types or from custom component types.
 
-![Editor Page Create Component Menu](assets/image-2025-4-10_8-57-42.png "Editor Page Create Component Menu")
+![Editor Page Create Component Menu](../../assets/image-2025-4-10_8-57-42.png "Editor Page Create Component Menu")
 
 After selecting a component type, a pre-filled component of that type appears at the location of the initial mouse-click. The color coding of the component border indicates the attack points the component comprises:
 
@@ -144,7 +144,7 @@ After selecting a component type, a pre-filled component of that type appears at
 - <span style="color: rgb(255, 167, 95);">Orange:</span> User Interface
 - <span style="color: rgb(255, 104, 189);">Pink:</span> User Behaviour
 
-![Editor Page Attack Points on Component](assets/Attack_Points.png "Editor Page Attack Points on Component")
+![Editor Page Attack Points on Component](../../assets/Attack_Points.png "Editor Page Attack Points on Component")
 
 The remaining two attack points are displayed in the following color-coding in the system editor:
 
@@ -165,17 +165,17 @@ ThreatSea provides four default component types that represent very typical infr
 
 Users can move components within the system editor by drag and drop. The editor displays an alignment grid during this operation.
 
-![Editor Page Grid Alignment](assets/image-2024-7-30_12-58-42.png "Editor Page Grid Alignment")
+![Editor Page Grid Alignment](../../assets/image-2024-7-30_12-58-42.png "Editor Page Grid Alignment")
 
 ### Editing a component
 
 By clicking on a component, users can open the "edit component" pop-up pane. There, in the sidebar header at the top of the pane, the user can edit the name of the component, change the component's icon with the "Change icon" <img src="../assets/change-icon.svg" alt="Editor Page Change Icon" style="height:1em; width:auto; vertical-align:middle;"> button and delete the component with the <img src="../assets/images_2_.png" alt="Editor Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> button. The "Change icon" and delete buttons are only shown to users with the `Editor` role.
 
-![Editor Page Edit Component Menu](assets/image-2025-4-10_9-5-21.png "Editor Page Edit Component Menu")
+![Editor Page Edit Component Menu](../../assets/image-2025-4-10_9-5-21.png "Editor Page Edit Component Menu")
 
 The "Change icon" button opens the "Change component icon" dialog. There the user can either pick one of the standard icons (User, Client, Server, Database, Communication Infrastructure) or upload a custom image (PNG or JPEG, up to 100 kB).
 
-![Editor Page Change Component Icon](assets/change-component-icon.png "Editor Page Change Component Icon")
+![Editor Page Change Component Icon](../../assets/change-component-icon.png "Editor Page Change Component Icon")
 
 #### Assigning attack points
 
@@ -189,11 +189,11 @@ This does not hold true for <span style="color: rgb(146, 224, 251);">Communicati
 
 Since attack points are relevant for the creation of threats, their deletion could lead to loss of work (e.g refinement of threats) as the threats related to the attack point will disappear. Therefore the deactivation or deletion of attack points in the system editor requires user confirmation.
 
-![Editor Page Delete Component Confirmation](assets/image-2025-1-10_15-3-57.png "Editor Delete Compoment Confirmation")
+![Editor Page Delete Component Confirmation](../../assets/image-2025-1-10_15-3-57.png "Editor Delete Compoment Confirmation")
 
 When a point of attack has been selected in the sidebar, the sidebar header shows a breadcrumb of the form _ComponentName > Point-of-attack-type_. Clicking the component name returns to the component view without having to click on the canvas.
 
-![Editor Sidebar Breadcrumb](assets/sidebar-breadcrumb-poa.png "Editor Sidebar Breadcrumb")
+![Editor Sidebar Breadcrumb](../../assets/sidebar-breadcrumb-poa.png "Editor Sidebar Breadcrumb")
 
 #### Assigning assets
 
@@ -201,21 +201,21 @@ The third part of the dialog displays a color-coded overview of the asset assign
 
 With the "Set All" and "Unset All" buttons, users have a quick possibility to assign or unassign a single asset to or from **all** attack points which the selected component comprises.
 
-![Editor Page Edit Component Menu Details](assets/image-2025-4-10_9-25-36.png "Editor Page Edit Component Menu Details")
+![Editor Page Edit Component Menu Details](../../assets/image-2025-4-10_9-25-36.png "Editor Page Edit Component Menu Details")
 
 Asset names in the sidebar are clickable shortcuts: clicking a name opens the "Edit asset" dialog directly on top of the system editor, so users do not have to navigate to the Assets page to adjust protection needs while refining the system model. Hovering an asset name in a POA sidebar additionally shows a small preview with the asset's protection-need values in the shorthand `(C <confidentiality> / I <integrity> / A <availability>)`.
 
-![Editor Sidebar Asset Hover Preview](assets/asset-hover-popper.png "Editor Sidebar Asset Hover Preview")
+![Editor Sidebar Asset Hover Preview](../../assets/asset-hover-popper.png "Editor Sidebar Asset Hover Preview")
 
 ### Custom component types
 
 Besides the four generic component types "Users", "Client", "Server" and "Database", users can also create custom component types individually for each project. The list of custom component types that exist within the project is displayed after clicking on "Custom" when creating a new component.
 
-![Editor Page Custom Components](assets/image-2024-7-30_13-15-10.png "Editor Page Custom Components")
+![Editor Page Custom Components](../../assets/image-2024-7-30_13-15-10.png "Editor Page Custom Components")
 
 Custom component types have to be created once and afterwards can be used within the project in which they have been created. A new custom component type can be created by clicking on the + Button when creating a new component.
 
-![Editor Page Create Custom Component Button](assets/image-2024-7-30_13-3-7.png "Editor Page Create Custom Component Button")
+![Editor Page Create Custom Component Button](../../assets/image-2024-7-30_13-3-7.png "Editor Page Create Custom Component Button")
 
 Users have to provide the following information for the component type:
 
@@ -223,21 +223,21 @@ Users have to provide the following information for the component type:
 - Icon (optional): Icon that should be displayed within the system sketch for each component of the component type. Only PNG or JPEG files up to 100 kB can be used.
 - Attack Points: With the attack point toggles, users can specify, which attack points (out of the four non-communication related attack points) should be activated by default for each component of the component type
 
-![Editor Page Create Custom Component Menu](assets/image-2024-7-30_13-4-30.png "Editor Page Create Custom Component Menu")
+![Editor Page Create Custom Component Menu](../../assets/image-2024-7-30_13-4-30.png "Editor Page Create Custom Component Menu")
 
 After initial creation, the custom component type appears in the list of custom component types and can be used to create new components.
 
-![Editor Page Custom Component](assets/image-2024-7-30_13-5-12.png "Editor Page Custom Component")
+![Editor Page Custom Component](../../assets/image-2024-7-30_13-5-12.png "Editor Page Custom Component")
 
 ### Assigning assets to specific attack points of components
 
 Besides the "Set All"/"Unset All" buttons in the "Edit component" dialog, users can assign assets to a specific attack point of a component. This can be achieved by clicking on the respective color-coded part of the border of the component. In the example below, clicking on the yellow part of the border opens the dialog that allows the user to assign assets specifically to the attack point "Data Storage Infrastructure" of the component "Client" with the toggle switches.
 
-![Editor Page Component Connection](assets/image-2023-11-10_20-30-51.png "Editor Page Component Connection")
+![Editor Page Component Connection](../../assets/image-2023-11-10_20-30-51.png "Editor Page Component Connection")
 
 For communication interfaces, as there can be more than one of them, clicking on the light-blue border of the component opens a context menu, in which the user can select the specific interface they want to assign assets to:
 
-![Editor Page Component Communication Interface](assets/image-2025-4-10_9-30-30.png "Editor Page Component Communication Interface")
+![Editor Page Component Communication Interface](../../assets/image-2025-4-10_9-30-30.png "Editor Page Component Communication Interface")
 
 Clicking on one of the entries leads to the same dialog as shown before, where the user can assign assets to the communication interface.
 
@@ -252,57 +252,57 @@ Users can connect components to visualize a communication relationship between t
 
 Users can create a communication interface at a component by clicking on the <img src="../assets/connect-plug-icon-linear-logo-mark-in-black-and-white-vector.jpg" alt="Editor Page Connect Icon" style="height:1em; width:auto; vertical-align:middle;">button that is displayed in the bottom-right corner of a component and selecting "Create New" in the list of communication interfaces. They can give a name and select an icon for the new communication interface. A default icon is already preselected, so the interface can be created without opening the icon picker.
 
-![Editor Page Create Communication Interface Button](assets/image-2025-4-10_17-3-28.png "Editor Page Create Communication Interface Button")
+![Editor Page Create Communication Interface Button](../../assets/image-2025-4-10_17-3-28.png "Editor Page Create Communication Interface Button")
 
-![Editor Page Create Communication Interface Dialog](assets/image-2025-4-10_17-5-3.png "Editor Page Create Communication Interface Creation Dialog")
+![Editor Page Create Communication Interface Dialog](../../assets/image-2025-4-10_17-5-3.png "Editor Page Create Communication Interface Creation Dialog")
 
 #### Editing communication interfaces and assigning assets
 
 Communication interface can either be edited or deleted via the previously shown "edit component" dialog or users can select the light blue border of the component, then select the desired communication interface and then edit/delete the interface or assign assets to the interface.
 
-![Editor Page Communication Interface Menu](assets/image-2025-4-10_17-9-40.png "Editor Page Communication Interface Menu")
+![Editor Page Communication Interface Menu](../../assets/image-2025-4-10_17-9-40.png "Editor Page Communication Interface Menu")
 
-![Editor Page Communication Interface Component Menu](assets/image-2025-4-10_17-10-2.png "Editor Page Communication Interface Component Menu")
+![Editor Page Communication Interface Component Menu](../../assets/image-2025-4-10_17-10-2.png "Editor Page Communication Interface Component Menu")
 
 In the selected-component sidebar, each communication interface now appears as a clickable label. Clicking the name navigates the sidebar directly into the interface's detail view, where assets can be assigned. To rename an interface without leaving the list, users with the `Editor` role (or higher) can click the <img src="../assets/image-2023-11-10_23-40-55.png" alt="Edit Icon" style="height:1em; width:auto; vertical-align:middle;"> icon next to the interface; the name becomes an input field and the new name is saved on `Enter` or when the field loses focus. The <img src="../assets/images_2_.png" alt="Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> button next to it deletes the interface as before.
 
-![Editor Sidebar Interface Inline Edit](assets/interface-inline-edit.png "Editor Sidebar Interface Inline Edit")
+![Editor Sidebar Interface Inline Edit](../../assets/interface-inline-edit.png "Editor Sidebar Interface Inline Edit")
 
 When a communication interface has been selected, the sidebar header shows a breadcrumb of the form _ComponentName > Interface: \<name\>_. Clicking the component name returns to the component view.
 
-![Editor Sidebar Breadcrumb Interface](assets/sidebar-breadcrumb-interface.png "Editor Sidebar Breadcrumb Interface")
+![Editor Sidebar Breadcrumb Interface](../../assets/sidebar-breadcrumb-interface.png "Editor Sidebar Breadcrumb Interface")
 
 #### Connecting communication interfaces to communication infrastructures
 
 Users can connect communication interfaces to communication infrastructures to visualize networks. This can be achieved by opening the list of interfaces via the <img src="../assets/connect-plug-icon-linear-logo-mark-in-black-and-white-vector.jpg" alt="Editor Page Link Icon" style="height:1em; width:auto; vertical-align:middle;"> button or the light blue component border and then selecting the <img src="../assets/Wifi-Tethering--Streamline-Outlined-Material-Symbols.png" alt="Editor Page Connection On Icon" style="height:1em; width:auto; vertical-align:middle;"> icon.
 
-![Editor Page Communication Interface Connection Symbol On](assets/image-2025-4-10_17-17-26.png "Editor Page Communication Interface Connection Symbol On")
+![Editor Page Communication Interface Connection Symbol On](../../assets/image-2025-4-10_17-17-26.png "Editor Page Communication Interface Connection Symbol On")
 
 The mouse pointer then drags a blue line from the selected component. The user then can assign the target of the communication flow by clicking on one of the + buttons of the target component (of type <span style="color: rgb(87, 134, 255);">Communication Infrastructure</span>). The creation of a communication flow can be aborted by clicking into an empty space in the editor grid.
 
 Note: when the source component is of type "user", the drag preview and the resulting connection are rendered in pink instead of blue. See [User components](#user-components) for details.
 
-![Editor Page Component Communication Infrastructure Connection Dotted](assets/image-2025-4-10_17-20-16.png "Editor Page Component Communication Infrastructure Connection Dotted")
+![Editor Page Component Communication Infrastructure Connection Dotted](../../assets/image-2025-4-10_17-20-16.png "Editor Page Component Communication Infrastructure Connection Dotted")
 
 When completing the communication relationship, ThreatSea creates a visual connection between the component and the communication infrastructure.
 
-![Editor Page Component Communication Infrastructure Connection](assets/image-2025-4-10_17-20-54.png "Editor Page Component Communication Infrastructure Connection")
+![Editor Page Component Communication Infrastructure Connection](../../assets/image-2025-4-10_17-20-54.png "Editor Page Component Communication Infrastructure Connection")
 
 With the <img src="../assets/Wifi-Tethering-Off--Streamline-Sharp-Material-Symbols.png" alt="Editor Page Connection Off Icon" style="height:1em; width:auto; vertical-align:middle;"> button, users can remove an existing connection from a single communication interface.
 
-![Editor Page Communication Interface Connection Symbol Off](assets/image-2025-4-10_17-27-46.png "Editor Page Communication Interface Connection Symbol Off")
+![Editor Page Communication Interface Connection Symbol Off](../../assets/image-2025-4-10_17-27-46.png "Editor Page Communication Interface Connection Symbol Off")
 
 #### Editing communication infrastructures
 
 When clicking on a communication infrastructure, users can edit the name of the infrastructure and assign assets to this attack point by using the "Set All"/"Unset All" buttons. With the top-right <img src="../assets/images_2_.png" alt="Editor Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> button the user can delete the communication infrastructure. This action does not affect the communication interfaces linked to that communication infrastructure, only the visual connection is deleted. In the "Connected Components" part, clicking a connected component's name navigates directly to that component's sidebar view — if the connection runs through a specific communication interface, the interface detail view is opened automatically. The <img src="../assets/images_2_.png" alt="Editor Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> button next to each entry removes the connection.
 
-![Editor Page Communication Infrastructure Menu](assets/image-2025-4-10_17-21-48.png "Editor Page Communication Infrastructure Menu")
+![Editor Page Communication Infrastructure Menu](../../assets/image-2025-4-10_17-21-48.png "Editor Page Communication Infrastructure Menu")
 
 Tipp:
 
 - Users can also individually name connections by clicking on the connection itself. This allows giving more context information in the system model, e.g. protocol or directional information.
 
-![Editor Page Communication Infrastructure Name](assets/image-2025-4-10_17-25-0.png "Editor Page Communication Infrastructure Name")
+![Editor Page Communication Infrastructure Name](../../assets/image-2025-4-10_17-25-0.png "Editor Page Communication Infrastructure Name")
 
 ### User components
 
@@ -310,13 +310,13 @@ Components of type "user" cannot be assigned with other attack points than "User
 
 To make user interactions visually distinct from regular communication flows, ThreatSea renders any connection where one endpoint is a "user" component in <span style="color: rgb(255, 104, 189);">pink</span> instead of the default <span style="color: rgb(87, 134, 255);">blue</span> used for communication connections. The pink matches the user component's own border color (the "User behaviour" attack point). This is purely a visual cue and does not affect threat generation.
 
-![Editor Page User Component](assets/image-2024-7-30_13-58-48.png "Editor Page User Component")
+![Editor Page User Component](../../assets/image-2024-7-30_13-58-48.png "Editor Page User Component")
 
 ### Annotations
 
 Besides modelling components and their connections, users can add freeform annotations to the system sketch. Annotations are graphical markup — shapes, freehand drawings and text — that can be used to highlight areas, group components visually or leave notes for collaborators. Like user connections, annotations are purely visual and have no effect on the threat generation. The annotation tools are only available to users with the `Editor` role (or higher).
 
-![Editor Annotation Toolbar](assets/editor-annotations-toolbar.png "Editor Annotation Toolbar")
+![Editor Annotation Toolbar](../../assets/editor-annotations-toolbar.png "Editor Annotation Toolbar")
 
 #### The annotation toolbar
 
@@ -328,13 +328,13 @@ The annotation tools are located on the left edge of the editor, below the "focu
 
 Clicking a tool activates it (the button is highlighted); clicking the active tool again deactivates it. While a shape or the pencil tool is active, a color picker appears next to the toolbar for choosing the annotation color.
 
-![Annotation Shapes Popover](assets/shapes-popover-open.png "Annotation Shapes Popover")
+![Annotation Shapes Popover](../../assets/shapes-popover-open.png "Annotation Shapes Popover")
 
 #### Drawing shapes and lines
 
 To draw a shape, open the Shapes popover and select Rectangle, Circle, Line or Arrow. The mouse pointer turns into a crosshair. Click and drag on the canvas to draw the shape in the currently selected color. After a shape, line or arrow has been drawn, the tool deactivates automatically, so each click of a shape tool draws a single annotation.
 
-![Rectangle and Arrow Annotations](assets/rectangle-and-an-arrow-on-the-canvas.png "Rectangle and Arrow Annotations")
+![Rectangle and Arrow Annotations](../../assets/rectangle-and-an-arrow-on-the-canvas.png "Rectangle and Arrow Annotations")
 
 #### Freehand drawing
 
@@ -353,7 +353,7 @@ While a text annotation is selected or being edited, a small formatting toolbar 
 - a font-size selector (from 12 to 48),
 - a delete button.
 
-![Text Annotation Formatting Toolbar](assets/text-annotation-edit.png "Text Annotation Formatting Toolbar")
+![Text Annotation Formatting Toolbar](../../assets/text-annotation-edit.png "Text Annotation Formatting Toolbar")
 
 #### Choosing a color
 
@@ -366,13 +366,13 @@ When no annotation tool is active, clicking an annotation selects it. Selected a
 - Color: change the color of the selected annotation.
 - Delete (trash icon) button in the top-right corner: delete the selected annotation (requires `Editor` role).
 
-![Selected Annotation Sidebar Panel](assets/selected-annotation-sidebar-panel.png "Selected Annotation Sidebar Panel")
+![Selected Annotation Sidebar Panel](../../assets/selected-annotation-sidebar-panel.png "Selected Annotation Sidebar Panel")
 
 ## Assets
 
 The assets view visualizes the results of the protection need analysis for the system. It contains a list of all assets, their individual protection needs for the three protection goals **confidentiality**, **integrity** and **availability**, as well as their creation date.
 
-![Assets Page View](assets/image-2024-7-30_14-16-36.png "Assets Page View")
+![Assets Page View](../../assets/image-2024-7-30_14-16-36.png "Assets Page View")
 
 Users can sort the assets in ascending and descending order according to their name, the protection need for each protection goal and their creation date. They can also search for specific assets by using the search bar. The search covers the asset name and the description.
 
@@ -380,11 +380,11 @@ Users can sort the assets in ascending and descending order according to their n
 
 Users can create new assets with the "Add Asset" button above the list.
 
-![Assets Page Create Asset Button](assets/image-2024-7-30_14-14-35.png "Assets Page Create Asset Button")
+![Assets Page Create Asset Button](../../assets/image-2024-7-30_14-14-35.png "Assets Page Create Asset Button")
 
 In the following dialog, users can give a name, a description and protection need values in a range from 1 to 5 according to the 4x6 impact scale for the asset.
 
-![Assets Page Create Asset Dialog](assets/image-2024-7-30_14-16-5.png "Assets Page Create Asset Dialog")
+![Assets Page Create Asset Dialog](../../assets/image-2024-7-30_14-16-5.png "Assets Page Create Asset Dialog")
 
 Tipp:
 
@@ -394,9 +394,9 @@ Tipp:
 
 Clicking on an asset entry opens the same dialog as when creating an asset that allows the user to (re-)edit all values.
 
-![Assets Page Edit Asset](assets/image-2024-7-30_14-17-30.png "Assets Page Edit Asset")
+![Assets Page Edit Asset](../../assets/image-2024-7-30_14-17-30.png "Assets Page Edit Asset")
 
-![Assets Page Edit Asset Dialog](assets/image-2024-7-30_14-17-54.png "Assets Page Edit Asset Dialog")
+![Assets Page Edit Asset Dialog](../../assets/image-2024-7-30_14-17-54.png "Assets Page Edit Asset Dialog")
 
 Assets can also be edited directly from the **System editor**: clicking an asset name in the sidebar opens the same dialog over the editor canvas, and closing the dialog returns to the system view. The resulting URL (`/projects/<projectId>/system/assets/<assetId>/edit`) is shareable.
 
@@ -404,7 +404,7 @@ Assets can also be edited directly from the **System editor**: clicking an asset
 
 Users can delete an asset via the <img src="../assets/images_2_.png" alt="Assets Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> button in the respective row of the asset. A safety dialog has to be confirmed.
 
-![Assets Page Delete Asset Confirmation](assets/image-2024-7-30_14-18-27.png "Assets Page Delete Asset Confirmation")
+![Assets Page Delete Asset Confirmation](../../assets/image-2024-7-30_14-18-27.png "Assets Page Delete Asset Confirmation")
 
 ## Threats
 
@@ -417,7 +417,7 @@ Clicking a generic threat row (or its arrow) expands or collapses its threats. T
 
 <!-- Screenshot outdated: shows the flat threats list from before the generic threat rework. Replace with the generic threats list. -->
 
-![Threats Page View](assets/image-2024-7-31_9-46-20.png "Threats Page View")
+![Threats Page View](../../assets/image-2024-7-31_9-46-20.png "Threats Page View")
 
 For each threat, the list contains the following information:
 
@@ -449,7 +449,7 @@ Finalized and out-of-scope threats are displayed dimmed in the list.
 
 <!-- Screenshot outdated: shows threats marked as "edited" in grey, which the status replaced. Replace with the status column and dimmed finalized/out-of-scope rows. -->
 
-![Threats Page Edited Threat](assets/image-2024-7-31_9-47-52.png "Threats Page Edited Threat")
+![Threats Page Edited Threat](../../assets/image-2024-7-31_9-47-52.png "Threats Page Edited Threat")
 
 ThreatSea generates the generic threats by applying the threat catalogue that is assigned to the project to the attack points in the system sketch. As soon as an attack point has assets assigned, the first threat of each of its generic threats is created with the values of the catalogue. Each time the system sketch or the asset analysis is changed, the list is updated accordingly:
 
@@ -463,7 +463,7 @@ Tipp:
 
 <!-- Screenshot outdated: shows the asset popup in the flat threats list. Replace with the popup in the generic threats list. -->
 
-![Threats Page Threat Tooltip](assets/image-2024-7-31_9-51-11.png "Threats Page Threat Tooltip")
+![Threats Page Threat Tooltip](../../assets/image-2024-7-31_9-51-11.png "Threats Page Threat Tooltip")
 
 ### Adding a threat
 
@@ -475,7 +475,7 @@ Users can edit a threat scenario by clicking on the respective threat in the thr
 
 <!-- Screenshot outdated: shows the dialog before the generic threat rework (with the "Done editing" checkbox). Replace with the current dialog including the status selection. -->
 
-![Threats Page Edit Threat Dialog](assets/edit-threat-dialog.png "Threats Page Edit Threat Dialog")
+![Threats Page Edit Threat Dialog](../../assets/edit-threat-dialog.png "Threats Page Edit Threat Dialog")
 
 The top row of this dialog contains the base information of the threat:
 
@@ -500,7 +500,7 @@ Tipp:
 
 <!-- Screenshot outdated: shows the "ASSETS" tab of the dialog before the generic threat rework. Replace with the current dialog. -->
 
-![Threats Page Edit Threat Assets](assets/image-2024-7-31_9-53-53.png "Threats Page Edit Threat Assets")
+![Threats Page Edit Threat Assets](../../assets/image-2024-7-31_9-53-53.png "Threats Page Edit Threat Assets")
 
 ### Duplicating a threat
 
@@ -519,7 +519,7 @@ The measures view lists all security measures that are planned or already implem
 - Name: Name of the security measure
 - Scheduled at: (Planned) implementation date of the security measure
 
-![Measures Page View](assets/image-2024-7-30_13-18-56.png "Measures Page View")
+![Measures Page View](../../assets/image-2024-7-30_13-18-56.png "Measures Page View")
 
 Users can sort the list of measures according to each of these information in ascending or descending order or search for specific measures. The search takes names and description fields into account.
 
@@ -531,11 +531,11 @@ Tipp:
 
 Users can create new measures with the "Add Measure" button above the list.
 
-![Measures Page Create Button](assets/image-2024-7-30_13-19-27.png "Measures Page Create Button")
+![Measures Page Create Button](../../assets/image-2024-7-30_13-19-27.png "Measures Page Create Button")
 
 In the following dialog, users can give a name, a description and the (planned) implementation date for the measure. Dates can either by typed in the German format DD.MM.YYYY or chosen from the date picker shown after clicking on the calendar symbol to the right of the date field.
 
-![Measures Page Add Measure Dialog](assets/image-2024-7-30_13-26-12.png "Measures Page Add Measure Dialog")
+![Measures Page Add Measure Dialog](../../assets/image-2024-7-30_13-26-12.png "Measures Page Add Measure Dialog")
 
 ### Editing a measure
 
@@ -545,7 +545,7 @@ Users can edit a measure by clicking on the respective entry in the measure list
 
 In the "MEASURE" tab of the "Edit Threat" dialog, users can edit the name, the description and the (planned) implementation date of the selected measure. Dates can either by typed in the German format DD.MM.YYYY or chosen from the date picker shown after clicking on the calendar symbol to the right of the date field.
 
-![Measures Page Edit Measure Dialog](assets/image-2024-7-30_13-28-26.png "Measures Page Edit Measure Dialog")
+![Measures Page Edit Measure Dialog](../../assets/image-2024-7-30_13-28-26.png "Measures Page Edit Measure Dialog")
 
 #### Applying a measure to threats
 
@@ -558,15 +558,15 @@ The "THREATS" tab of the "Edit Measure" dialog displays the user a list of all t
 
 Users can sort the list of measures according to each of these information in ascending or descending order or search for specific threats that are already impacted by the measure. The search covers the names and the descriptions of the threats.
 
-![Measures Page Edit Measure List of Threats](assets/image-2023-11-10_23-12-3.png "Measures Page Edit Measure List of Threats")
+![Measures Page Edit Measure List of Threats](../../assets/image-2023-11-10_23-12-3.png "Measures Page Edit Measure List of Threats")
 
 With the + button, users can apply the measure to other threat scenarios.
 
-![Measures Page Edit Measure Apply Threat](assets/image-2024-7-31_9-58-5.png "Measures Page Edit Measure Apply Threat")
+![Measures Page Edit Measure Apply Threat](../../assets/image-2024-7-31_9-58-5.png "Measures Page Edit Measure Apply Threat")
 
 In the "Threat" dropdown, the user can select the threat scenario to which the measure shall be applied. If the measure has already been applied to a threat before, threats with the same attack point type / attacker type combination appear at the top of the dropdown list as "Suggested Threats".
 
-![Measures Page Edit Measure Suggested Threats](assets/image-2024-7-31_9-59-29.png "Measures Page Edit Measure Suggested Threats")
+![Measures Page Edit Measure Suggested Threats](../../assets/image-2024-7-31_9-59-29.png "Measures Page Edit Measure Suggested Threats")
 
 It doesn't make sense to apply a measure to a threat twice, so ThreatSea doesn't allow this. To make this transparent, the threats the measure has already been applied to are listed at the end of the drop-down as greyed out.
 
@@ -582,7 +582,7 @@ With the "Sets the threat out of scope", the user can indicate that after the me
 
 Via the <img src="../assets/image-2023-11-10_23-40-55.png" alt="Measures Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> buttons in the threat list shown in the "THREATS" tab of the "Edit Measure" dialog, users can edit the impact that a measure has on a specific threat. The displayed dialog afterwards is the same as for a applying a measure to threats but the selected threat is locked.
 
-![Measures Page Edit Measure Edit Impact](assets/image-2024-7-31_9-58-5.png "Measures Page Edit Measure Edit Impact")
+![Measures Page Edit Measure Edit Impact](../../assets/image-2024-7-31_9-58-5.png "Measures Page Edit Measure Edit Impact")
 
 #### Editing a threat
 
@@ -608,15 +608,15 @@ Users can delete measures with the <img src="../assets/images_2_.png" alt="Measu
 
 The risk view provides the user with the full risk profile of the system, including all threats from the threats view, all measures from the measures view and the change of the risk profile over time. For each different (planned) implementation date of a new measure, a new point in the timeline within the risk view is created. Users can switch between the different points in time and see the effects of the newly implemented measures visualized in the risk matrix on the left side.
 
-![Risk Page View](assets/image-2023-11-11_11-4-52.png "Risk Page View")
+![Risk Page View](../../assets/image-2023-11-11_11-4-52.png "Risk Page View")
 
 The risks are color-coded in the three risk categories <span style="color: rgb(51, 153, 102)">**Low**</span>, <span style="color: rgb(255, 204, 0)">**Medium**</span> and <span style="color: rgb(255, 0, 0)">**High**</span>. Users can adapt this color-coding with the "Line of Tolerance" bar below the risk matrix, where they can move the boundaries of the range of low and high risks.
 
-![Risk Page Risk Matrix](assets/image-2023-11-11_11-25-47.png "Risk Page Risk Matrix")
+![Risk Page Risk Matrix](../../assets/image-2023-11-11_11-25-47.png "Risk Page Risk Matrix")
 
 The risk matrix shows the absolute number of risks in a 5x5 matrix based on the 4x6 scales. While by default all threats are displayed in the "Threats" scroll panel in the middle of the screen, users can use the risk matrix to filter the threat list for all threats with risks of a specific probability/impact combination. For example, by clicking in the panel at position probability 3 and impact 3, the threat list is filtered for all threats with an occurrence probability of 3 and impact 3. Since the risk matrix is generated to reflect the selected point within the timeline, the filter does so too, meaning if a specific date is selected on the timeline and the user filters for a specific field of the risk matrix, the net probability and net impact values at this point within the timeline are used for the filter calculation. Clicking on an already selected field of the matrix resets the filter to show all risks. Threats that are out of scope are not shown in the risk matrix, and threats without assets and without risk are not listed.
 
-![Risk Page Risk Matrix Selected Threats](assets/image-2023-11-11_11-14-26.png "Risk Page Risk Matrix Selected Threats")
+![Risk Page Risk Matrix Selected Threats](../../assets/image-2023-11-11_11-14-26.png "Risk Page Risk Matrix Selected Threats")
 
 Within the "Threats" scroll panel, all threats matching the selected filter (or unfiltered) are displayed with the following information:
 
@@ -629,29 +629,29 @@ Users can sort the list of threats according to each of these information in asc
 
 The user can select an entry in the list of threats to display the measures that have an impact on this specific risk in the right scroll panel. Independently of the selected point within the timeline, all measures assigned to the risk will appear, the selected point in the timeline only influences the filtering and color-coding. Note that if the user has a risk selected in a filtered list and then changes the point within the timeline, the risk might drop out of the filter, if the time selection changes the net risk of the risk. In the "Measures" scroll panel, the user can sort all measures applied to risk according to their name and their (planned) implementation date in ascending or descending order.
 
-![Risk Page Selected Threat Assigned Measures](assets/image-2023-11-11_11-31-33.png "Risk Page Selected Threat Assigned Measures")
+![Risk Page Selected Threat Assigned Measures](../../assets/image-2023-11-11_11-31-33.png "Risk Page Selected Threat Assigned Measures")
 
 By clicking on the threat name the user can also quickly access the threat details with the "Edit Threat" dialog.
 
-![Risk Page Threat List Access Threat Details](assets/image-2023-11-11_11-51-19.png "Risk Page Threat List Access Threat Details")
+![Risk Page Threat List Access Threat Details](../../assets/image-2023-11-11_11-51-19.png "Risk Page Threat List Access Threat Details")
 
 ### Applying a measure to a risk
 
 When a risk is selected, users can apply a measure to the risk with the + button above the "Measures" scroll panel.
 
-![Risk Page Apply Measure on Threat](assets/image-2023-11-11_11-53-9.png "Risk Page Apply Measure on Threat")
+![Risk Page Apply Measure on Threat](../../assets/image-2023-11-11_11-53-9.png "Risk Page Apply Measure on Threat")
 
-![Risk Page Apply Measure Dialog](assets/image-2023-11-11_11-56-13.png "Risk Page Apply Measure Dialog")
+![Risk Page Apply Measure Dialog](../../assets/image-2023-11-11_11-56-13.png "Risk Page Apply Measure Dialog")
 
 In the "Measure" dropdown, the user can select a measure that shall be applied to the threat.
 
-![Risk Page Apply Measure Dialog Select Measure](assets/image-2023-11-11_12-1-22.png "Risk Page Apply Measure Dialog Select Measure")
+![Risk Page Apply Measure Dialog Select Measure](../../assets/image-2023-11-11_12-1-22.png "Risk Page Apply Measure Dialog Select Measure")
 
 The dropdown is structured in the following order:
 
 - **Create Measure:** With the create measure button, the user can choose to create a completely new custom measure. When the user clicks on this button, the "Add Measure" dialog opens, where the user needs to give a name, a description and a (planned) implementation date for the measure. Afterwards the user flow returns to the "Apply Measure" dialog, where the newly created measure is pre-selected.
 
-![Risk Page Apply Measure Dialog Create Measure](assets/image-2023-11-11_12-4-46.png "Risk Page Apply Measure Dialog Create Measure")
+![Risk Page Apply Measure Dialog Create Measure](../../assets/image-2023-11-11_12-4-46.png "Risk Page Apply Measure Dialog Create Measure")
 
 - **Suggested Measures:** Other measures that have already been applied to the same attack point type / attacker type combination or that were generated from catalogue measures that are applicable for the same attack point type / attacker type combination are suggested first.
 - **Catalog Measures:** For each generic threat scenario, the catalog used in the project also contains generic measures which are proposed to the user at this point for the selected threat scenario. As these measures are not yet instantiated, selecting one of them also leads to the "Add Measure" dialog as explained above in "Create Measure" with a pre-filled name.
@@ -671,7 +671,7 @@ When a risk is selected, users can unapply a measure from a risk with the <img s
 
 In the report view, the user can generate PDF and excel reports for the risk and threat assessment and change the settings for these reports. With these settings, a report can be generated by clicking on "Create PDF Document". After the report has been generated successfully, it can be downloaded or displayed in the browser.
 
-![Report Page View](assets/image-2024-7-30_13-30-3.png "Report Page View")
+![Report Page View](../../assets/image-2024-7-30_13-30-3.png "Report Page View")
 
 ### Page Settings
 
@@ -722,7 +722,7 @@ With the <img src="../assets/download-1459070_960_720.png" alt="Report Page Down
 
 In the members view, the user can change the access and role settings for the project. For each project member name, email address and the project role are displayed. The user can then sort all project members according to this data in ascending or descending order. The user can also search for a specific project member. With the tiles "Owner", "Editor" and "Viewer" in the top row, the user can filter for project members with the respective role.
 
-![Members Page View](assets/image-2024-7-30_13-41-52.png "Members Page View")
+![Members Page View](../../assets/image-2024-7-30_13-41-52.png "Members Page View")
 
 ### Project roles
 
@@ -736,17 +736,17 @@ For each project, three different roles can be assigned to users.
 
 Project owners can add members to their project with the "Add Member" button above the list.
 
-![Members Page Add Member Button](assets/image-2024-7-30_13-42-42.png "Members Page Add Member Button")
+![Members Page Add Member Button](../../assets/image-2024-7-30_13-42-42.png "Members Page Add Member Button")
 
 In the "Add Member" dialog they can either select a user from the list or search for a specific user. Note that **only users that already logged into ThreatSea before can be selected**. In the "Role" dropdown the role for the new project member can be selected.
 
-![Members Page Add Member Dialog](assets/image-2024-7-30_13-45-9.png "Members Page Add Member Dialog")
+![Members Page Add Member Dialog](../../assets/image-2024-7-30_13-45-9.png "Members Page Add Member Dialog")
 
 ### Editing a member
 
 Project owners can edit member assignments by clicking on the row with the respective member assignment. They can also edit their own project role to viewer or editor, if at least another owner for the project exists.
 
-![Members Page Edit Member Dialog](assets/image-2024-7-30_13-46-29.png "Members Page Edit Member Dialog")
+![Members Page Edit Member Dialog](../../assets/image-2024-7-30_13-46-29.png "Members Page Edit Member Dialog")
 
 ### Deleting a member
 
@@ -756,13 +756,13 @@ Project owners can remove project members with the <img src="../assets/images_2_
 
 After switching to the catalog view, a user can see an overview of all catalogs to which they have access to. They can sort these catalogs according to name or creation date in ascending or descending order or search for specific catalogs. For catalogs to which they have owner access, the <img src="../assets/image-2023-11-10_23-40-55.png" alt="Members Page Edit Icon" style="height:1em; width:auto; vertical-align:middle;"> and <img src="../assets/images_2_.png" alt="Members Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> are shown. By clicking on a catalog entry, users can open the respective catalog.
 
-![Catalogs Tab View](assets/image-2024-7-30_14-26-59.png "Catalogs Tab View")
+![Catalogs Tab View](../../assets/image-2024-7-30_14-26-59.png "Catalogs Tab View")
 
 ### Create catalog
 
 With the + button right to the search pane, users can create new catalogs.
 
-![Catalogs Page Add Catalog Dialog](assets/image-2024-7-30_14-27-38.png "Catalogs Page Add Catalog Dialog")
+![Catalogs Page Add Catalog Dialog](../../assets/image-2024-7-30_14-27-38.png "Catalogs Page Add Catalog Dialog")
 
 They need to provide a name for the catalog and to choose a language (English or German) for the catalog. By default, a new catalog is pre-filled with a generic 4x6 matrix (in the selected language) as used within the plain 4x6 methodology.
 
@@ -770,13 +770,13 @@ They need to provide a name for the catalog and to choose a language (English or
 
 With the <img src="../assets/image-2023-11-10_23-40-55.png" alt="Catalogs Page Edit Catalog Icon" style="height:1em; width:auto; vertical-align:middle;"> button, catalog owners can edit the name of their catalogs.
 
-![Catalogs Page Edit Catalog Dialog](assets/image-2024-7-30_14-28-35.png "Catalogs Page Edit Catalog Dialog")
+![Catalogs Page Edit Catalog Dialog](../../assets/image-2024-7-30_14-28-35.png "Catalogs Page Edit Catalog Dialog")
 
 ### Delete catalog
 
 With the <img src="../assets/images_2_.png" alt="Catalogs Page Delete Catalog Icon" style="height:1em; width:auto; vertical-align:middle;"> button, catalog owners can delete their catalogs.
 
-![Catalogs Page Delete Catalog Confirmation](assets/image-2024-7-30_14-29-9.png "Catalogs Page Delete Catalog Confirmation")
+![Catalogs Page Delete Catalog Confirmation](../../assets/image-2024-7-30_14-29-9.png "Catalogs Page Delete Catalog Confirmation")
 
 ## Catalogs
 
@@ -784,7 +784,7 @@ Each catalog is a representation of a 4x6 matrix in ThreatSea and is used by pro
 
 Catalog pages provide two views, reachable via the navigation in the top-right of the header bar: the "Catalog Editor" (the threats-and-measures view described here) and the "Members" view. The name of the current catalog is shown in the header bar.
 
-![Catalogs Page View](assets/image-2024-7-30_14-30-7.png "Catalogs Page View")
+![Catalogs Page View](../../assets/image-2024-7-30_14-30-7.png "Catalogs Page View")
 
 Editing catalog threats and measures will impact all projects that use these catalogs and should only be done by experts.
 
@@ -796,7 +796,7 @@ Known Issue:
 
 Catalog editors and owners can add new catalog threats to the catalog with the + button.
 
-![Catalogs Page Add Threats Button](assets/image-2024-7-30_14-33-18.png "Catalogs Page Add Threats Button")
+![Catalogs Page Add Threats Button](../../assets/image-2024-7-30_14-33-18.png "Catalogs Page Add Threats Button")
 
 In the following "Add Threat" dialog, the user can give the following information for the catalog threat, which will be used as default information for the threat lists generated in all projects that use the specific catalog.
 
@@ -808,13 +808,13 @@ In the following "Add Threat" dialog, the user can give the following informatio
 
 With the toggle switches for **Confidentiality, Integrity** and **Availability** the user is able to indicate that the catalog threat only applies to specific protection goals. ThreatSea considers the protection goals for the impact calculation for risks in specific projects.
 
-![Catalogs Page Add Threat Dialog](assets/image-2024-7-30_14-36-26.png "Catalogs Page Add Threat Dialog")
+![Catalogs Page Add Threat Dialog](../../assets/image-2024-7-30_14-36-26.png "Catalogs Page Add Threat Dialog")
 
 ### Editing a catalog threat
 
 Catalog editors and owners can edit catalog threats by clicking on the respective threat entry within the list.
 
-![Catalogs Page Selected Threat](assets/image-2024-7-30_14-39-33.png "Catalogs Page Selected Threat")
+![Catalogs Page Selected Threat](../../assets/image-2024-7-30_14-39-33.png "Catalogs Page Selected Threat")
 
 In the following "Edit Threat" dialog, the user can edit the following information for the catalog threat, which will be used as default information for the threat lists generated in all projects that use the specific catalog.
 
@@ -826,19 +826,19 @@ In the following "Edit Threat" dialog, the user can edit the following informati
 
 With the toggle switches for **Confidentiality, Integrity** and **Availability** the user is able to indicate that the catalog threat only applies to specific protection goals. ThreatSea considers the protection goals for the impact calculation for risks in specific projects.
 
-![Catalogs Page Edit Threat Dialog](assets/image-2024-7-30_14-40-12.png "Catalogs Page Edit Threat Dialog")
+![Catalogs Page Edit Threat Dialog](../../assets/image-2024-7-30_14-40-12.png "Catalogs Page Edit Threat Dialog")
 
 ### Deleting a catalog threat
 
 Catalog editors and owners can delete catalog threats by clicking on the <img src="../assets/images_2_.png" alt="Catalogs Page Delete Threat Icon" style="height:1em; width:auto; vertical-align:middle;"> button for the corresponding threat entry within the list and subsequently confirming the deletion in a safety dialog.
 
-![Catalogs Page Delete Threat Button](assets/image-2024-7-30_14-40-46.png "Catalogs Page Delete Threat Button")
+![Catalogs Page Delete Threat Button](../../assets/image-2024-7-30_14-40-46.png "Catalogs Page Delete Threat Button")
 
 ### Creating a catalog measure
 
 Catalog editors and owners can add new catalog measures to the catalog with the + button.
 
-![Catalogs Page Add Measure Button](assets/image-2024-7-30_14-41-24.png "Catalogs Page Add Measure Button")
+![Catalogs Page Add Measure Button](../../assets/image-2024-7-30_14-41-24.png "Catalogs Page Add Measure Button")
 
 In the following "Add Measure" dialog, the user can give the following information for the catalog measure, which will proposed in all projects that use the catalog as measure for all threats at the same attacker type / attack point type combination as specified in the catalog measure.
 
@@ -851,13 +851,13 @@ Known Issue
 
 - Currently, the "Probability" field in the "Add Measure" dialog and the Confidantiality, Integrity, Availability toggle switches have no effect and should not be used. In the future they might be removed completely
 
-![Catalogs Page Add Measure Dialog](assets/image-2024-7-30_14-44-37.png "Catalogs Page Add Measure Dialog")
+![Catalogs Page Add Measure Dialog](../../assets/image-2024-7-30_14-44-37.png "Catalogs Page Add Measure Dialog")
 
 ### Editing a catalog measure
 
 Catalog editors and owners can edit catalog measures by clicking on the respective measure entry within the list.
 
-![Catalogs Page Selected Measure](assets/image-2024-7-30_14-45-13.png "Catalogs Page Selected Measure")
+![Catalogs Page Selected Measure](../../assets/image-2024-7-30_14-45-13.png "Catalogs Page Selected Measure")
 
 In the following "Edit Measure" dialog, the user can give the following information for the catalog measure, which will proposed in all projects that use the catalog as measure for all threats at the same attacker type / attack point type combination as specified in the catalog measure.
 
@@ -870,21 +870,21 @@ Known Issue
 
 - Currently, the "Probability" field in the "Edit Measure" dialog and the Confidantiality, Integrity, Availability toggle switches have no effect and should not be used. In the future they might be removed completely.
 
-![Catalogs Page Edit Measure Dialog](assets/image-2024-7-30_14-45-49.png "Catalogs Page Edit Measure Dialog")
+![Catalogs Page Edit Measure Dialog](../../assets/image-2024-7-30_14-45-49.png "Catalogs Page Edit Measure Dialog")
 
 ### Deleting a catalog measure
 
 Catalog editors and owners can delete catalog measures by clicking on the <img src="../assets/images_2_.png" alt="Catalogs Page Delete Measure Icon" style="height:1em; width:auto; vertical-align:middle;"> button for the corresponding measure entry within the list and subsequently confirming the deletion in a safety dialog.
 
-![Catalogs Page Delete Measure Button](assets/image-2024-7-30_14-46-32.png "Catalogs Page Delete Measure Button")
+![Catalogs Page Delete Measure Button](../../assets/image-2024-7-30_14-46-32.png "Catalogs Page Delete Measure Button")
 
-![Catalogs Page Delete Measure Confirmation](assets/image-2024-7-30_14-46-56.png "Catalogs Page Delete Measure Confirmation")
+![Catalogs Page Delete Measure Confirmation](../../assets/image-2024-7-30_14-46-56.png "Catalogs Page Delete Measure Confirmation")
 
 ## (Catalog) Members
 
 In the members view, the user can change the access and role settings for the catalog. For each catalog member name, email address and the catalog role are displayed. The user can then sort all catalog members according to this data in ascending or descending order. The user can also search for a specific catalog member. With the tiles "Owner", "Editor" and "Viewer" in the top row, the user can filter for catalog members with the respective role.
 
-![Catalog Members Page View](assets/image-2024-7-30_14-52-3.png "Catalog Members Page View")
+![Catalog Members Page View](../../assets/image-2024-7-30_14-52-3.png "Catalog Members Page View")
 
 ### Catalog Roles
 
@@ -898,17 +898,17 @@ For each catalog, three different roles can be assigned to users.
 
 Catalog owners can add catalog members to their project with the + button.
 
-![Catalog Members Page Add Member Button](assets/image-2024-7-30_14-52-44.png "Catalog Members Page Add Member Button")
+![Catalog Members Page Add Member Button](../../assets/image-2024-7-30_14-52-44.png "Catalog Members Page Add Member Button")
 
 In the "Add Member" dialog they can either select a user from the list or search for a specific user. Note that only users that already logged into ThreatSea before can be selected. In the "Role" dropdown the role for the new catalog member can be selected.
 
-![Catalog Members Page Add Member Dialog](assets/image-2024-7-30_13-45-9.png "Catalog Members Page Add Member Dialog")
+![Catalog Members Page Add Member Dialog](../../assets/image-2024-7-30_13-45-9.png "Catalog Members Page Add Member Dialog")
 
 ### Editing a member
 
 Catalog owners can edit member assignments by clicking on the row with the respective member assignment. They can also edit their own catalog role to viewer or editor, if at least another owner for the catalog exists.
 
-![Catalog Members Page Edit Member Dialog](assets/image-2024-7-30_13-46-29.png "Catalog Members Page Edit Member Dialog")
+![Catalog Members Page Edit Member Dialog](../../assets/image-2024-7-30_13-46-29.png "Catalog Members Page Edit Member Dialog")
 
 ### Deleting a member
 

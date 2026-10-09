@@ -1,7 +1,7 @@
 // @ts-check
 import starlight from "@astrojs/starlight";
 import { defineConfig, passthroughImageService } from "astro/config";
-import copyAssets from "./src/copy-assets.mjs";
+import starlightLinksValidator from "starlight-links-validator";
 
 export default defineConfig({
     // Published as a GitHub Pages project site at https://maibornwolff.github.io/ThreatSea/
@@ -10,25 +10,31 @@ export default defineConfig({
     trailingSlash: "always",
     // Copy images as-is instead of optimizing them, avoids the native `sharp` dependency
     image: { service: passthroughImageService() },
+    // Keep the old mkdocs URLs working
+    redirects: {
+        "/User Manual/": "/ThreatSea/user-manual/",
+        "/Developer Setup/": "/ThreatSea/developer-setup/",
+        "/Technical Documentation/Architectural Decision Record/":
+            "/ThreatSea/technical-documentation/architectural-decision-record/",
+        "/Technical Documentation/OpenID Connect Setup/": "/ThreatSea/technical-documentation/openid-connect-setup/",
+    },
     integrations: [
-        copyAssets(),
         starlight({
             title: "ThreatSea",
             social: [{ icon: "github", label: "GitHub", href: "https://github.com/MaibornWolff/ThreatSea" }],
+            // Fail the build on broken internal links; the OIDC guide intentionally links to local dev services
+            plugins: [starlightLinksValidator({ errorOnLocalLinks: false })],
             sidebar: [
                 { label: "Home", link: "/" },
-                { label: "User Manual", link: "/User Manual/" },
+                { label: "User Manual", slug: "user-manual" },
                 {
                     label: "Technical Documentation",
                     items: [
-                        {
-                            label: "Architectural Decision Record",
-                            link: "/Technical Documentation/Architectural Decision Record/",
-                        },
-                        { label: "OpenID Connect Setup", link: "/Technical Documentation/OpenID Connect Setup/" },
+                        "technical-documentation/architectural-decision-record",
+                        "technical-documentation/openid-connect-setup",
                     ],
                 },
-                { label: "Developer Setup", link: "/Developer Setup/" },
+                { label: "Developer Setup", slug: "developer-setup" },
             ],
         }),
     ],
