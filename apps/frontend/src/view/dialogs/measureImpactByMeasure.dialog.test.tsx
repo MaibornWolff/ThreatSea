@@ -80,7 +80,7 @@ describe("MeasureImpactByMeasureDialog", () => {
         expect(onApplied).toHaveBeenCalledTimes(1);
     });
 
-    it("disables Save while the save is running, so a second click can't save again", async () => {
+    it("disables Save and Cancel while the save is running, so it can't save twice or go back twice", async () => {
         const measureImpact = createMeasureImpact({ id: 9, measureId: 5, threatId: 42, projectId: 7 });
         let resolveSave!: (value: MeasureImpact) => void;
         vi.spyOn(MeasureImpactsApi, "updateMeasureImpact").mockReturnValueOnce(
@@ -101,6 +101,7 @@ describe("MeasureImpactByMeasureDialog", () => {
         await user.click(saveButton);
 
         await waitFor(() => expect(saveButton).toBeDisabled());
+        expect(screen.getByRole("button", { name: "Cancel" })).toBeDisabled();
         expect(MeasureImpactsApi.updateMeasureImpact).toHaveBeenCalledTimes(1);
 
         resolveSave(measureImpact);
