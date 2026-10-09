@@ -73,6 +73,21 @@ describe("ColumnFilterHeader", () => {
         expect(onFilterChange).toHaveBeenNthCalledWith(2, "name", "b");
     });
 
+    it("shows the full name of an abbreviated label on hover", async () => {
+        renderHeader({ field: "probability", label: "P", fullLabel: "Probability" });
+
+        await userEvent.hover(screen.getByText("P"));
+
+        expect(await screen.findByRole("tooltip")).toHaveTextContent("Probability");
+    });
+
+    it("names an abbreviated label and its toggle by the full name for screen readers", () => {
+        renderHeader({ field: "probability", label: "P", fullLabel: "Probability" });
+
+        expect(screen.getByLabelText("Probability")).toHaveTextContent("P");
+        expect(screen.getByRole("button", { name: "Toggle Probability filter" })).toBeInTheDocument();
+    });
+
     it("renders a custom filter in place of the text input", () => {
         renderHeader({
             children: (
