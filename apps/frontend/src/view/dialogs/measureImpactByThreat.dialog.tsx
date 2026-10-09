@@ -97,7 +97,7 @@ const MeasureImpactByThreatDialog = ({
         setValue,
         handleSubmit,
         control,
-        formState: { errors },
+        formState: { errors, isSubmitting },
     } = useForm<MeasureImpactByThreatFormValues>({
         defaultValues: {
             ...measureImpact,
@@ -558,7 +558,13 @@ const MeasureImpactByThreatDialog = ({
                     <Button variant="contained" sx={{ marginRight: 0 }} onClick={handleCancelDialog}>
                         {t("cancelBtn")}
                     </Button>
-                    <Button type="submit" sx={{ marginRight: 0 }} variant="contained" color="success">
+                    <Button
+                        type="submit"
+                        disabled={isSubmitting}
+                        sx={{ marginRight: 0 }}
+                        variant="contained"
+                        color="success"
+                    >
                         {t("saveBtn")}
                     </Button>
                 </DialogActions>

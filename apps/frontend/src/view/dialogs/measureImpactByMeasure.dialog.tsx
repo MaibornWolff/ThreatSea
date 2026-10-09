@@ -94,7 +94,7 @@ const MeasureImpactByMeasureDialog = ({
         setValue,
         handleSubmit,
         control,
-        formState: { errors },
+        formState: { errors, isSubmitting },
     } = useForm<MeasureImpactFormValues>({
         defaultValues: {
             ...measureImpact,
@@ -629,6 +629,7 @@ const MeasureImpactByMeasureDialog = ({
                     </Button>
                     <Button
                         type="submit"
+                        disabled={isSubmitting}
                         sx={{ marginRight: 0 }}
                         variant="contained"
                         color="success"
