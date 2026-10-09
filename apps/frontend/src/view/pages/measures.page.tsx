@@ -63,6 +63,8 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
     const { projectId: projectIdParam = "0" } = useParams<{ projectId: string }>();
     const projectId = Number.parseInt(projectIdParam, 10);
     const { deleteMeasure, isPending, measures } = useMeasuresList({ projectId });
+    // Chain dialogs re-fetch measures when they open; only the first load shows the loading state.
+    const isFirstLoad = isPending && measures.length === 0;
     const { measurePath } = useChainDialogPaths();
 
     const userRole = useAppSelector((state) => state.projects.current?.role);
@@ -209,7 +211,7 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
         <Box sx={{ overflow: "hidden", height: "100%", boxSizing: "border-box" }}>
             <LinearProgress
                 sx={{
-                    visibility: isPending ? "visible" : "hidden",
+                    visibility: isFirstLoad ? "visible" : "hidden",
                     boxSizing: "border-box",
                 }}
             />
@@ -317,7 +319,7 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                     <DataGrid
                         rows={filteredMeasures}
                         columns={columns}
-                        loading={isPending}
+                        loading={isFirstLoad}
                         disableRowSelectionOnClick
                         disableColumnFilter
                         disableColumnMenu
