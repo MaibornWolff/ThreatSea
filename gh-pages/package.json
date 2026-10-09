@@ -10,6 +10,7 @@
   },
   "devDependencies": {
     "@astrojs/starlight": "0.42.5",
-    "astro": "7.3.5"
+    "astro": "7.3.5",
+    "starlight-links-validator": "0.26.0"
   }
 }

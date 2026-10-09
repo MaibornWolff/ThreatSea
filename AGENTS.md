@@ -23,7 +23,7 @@ apps/
 packages/
   typescript-config/  Shared tsconfig presets
 docs/adr/             Architecture Decision Records (managed with `adrs`; config in adrs.toml)
-gh-pages/             Published documentation sources (Astro Starlight; see gh-pages/astro.config.mjs)
+gh-pages/             Published documentation (Astro Starlight; pages in src/content/docs/)
 ```
 
 ### Frontend structure (`apps/frontend/src/`)
