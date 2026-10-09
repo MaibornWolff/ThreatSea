@@ -21,6 +21,7 @@ export default defineConfig({
     integrations: [
         starlight({
             title: "ThreatSea",
+            customCss: ["./src/styles/custom.css"],
             social: [{ icon: "github", label: "GitHub", href: "https://github.com/MaibornWolff/ThreatSea" }],
             // Fail the build on broken internal links; the OIDC guide intentionally links to local dev services
             plugins: [starlightLinksValidator({ errorOnLocalLinks: false })],
