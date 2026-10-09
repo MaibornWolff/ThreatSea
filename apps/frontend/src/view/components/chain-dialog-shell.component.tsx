@@ -22,11 +22,8 @@ export const ChainDialogShell = () => {
             }}
             maxWidth={false}
             fullWidth={false}
-            sx={{
-                // Top-anchored, so a swap to a shorter dialog doesn't jump vertically.
-                [`& .${dialogClasses.container}`]: { alignItems: "flex-start" },
-                [`& .${dialogClasses.paper}`]: { marginTop: 8, maxHeight: "calc(100% - 96px)", padding: 0 },
-            }}
+            // ChainDialogContent carries the padding, inside its scroll area.
+            sx={{ [`& .${dialogClasses.paper}`]: { padding: 0 } }}
         >
             <Outlet />
         </Dialog>
