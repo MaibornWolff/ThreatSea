@@ -1,6 +1,7 @@
 import type { TFunction } from "i18next";
 import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat.types.ts";
 import type { ExtendedThreatWithMetrics } from "#application/hooks/use-generic-threats-list.hook.ts";
+import { ALL_ROWS_PAGE_SIZE } from "#application/hooks/use-page-size-options.hook.ts";
 import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import {
     formatComponentName,
@@ -261,8 +262,10 @@ export const buildThreatsRows = ({
         }
     }
 
+    const sortedGroups = sortGroups(groups, sort, t);
     const pageStart = page.page * page.pageSize;
-    const pageGroups = sortGroups(groups, sort, t).slice(pageStart, pageStart + page.pageSize);
+    const pageGroups =
+        page.pageSize === ALL_ROWS_PAGE_SIZE ? sortedGroups : sortedGroups.slice(pageStart, pageStart + page.pageSize);
 
     const rows: ThreatsGridRow[] = [];
     for (const { genericThreat, visibleThreats, totalThreatCount } of pageGroups) {
