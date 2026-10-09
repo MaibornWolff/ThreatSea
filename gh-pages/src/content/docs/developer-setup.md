@@ -1,4 +1,6 @@
-# Developer Setup Guide
+---
+title: Developer Setup Guide
+---
 
 This guide explains how to get a running instance of ThreatSea for development.
 
@@ -10,7 +12,7 @@ Run `pnpm install` to download all required node packages.
 
 The ThreatSea backend requires environment variables to work.
 Create a new file called `.env` with values taken from the .env.example file.
-For authentication use AUTH_METHOD=fixed for local environment, refer to [OpenID Connect Setup](./Technical%20Documentation/OpenID%20Connect%20Setup.md) for more.
+For authentication use AUTH_METHOD=fixed for local environment, refer to [OpenID Connect Setup](/ThreatSea/technical-documentation/openid-connect-setup/) for more.
 
 ## Starting ThreatSea
 

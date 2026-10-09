@@ -22,7 +22,7 @@ apps/
   backend/            Express 5 + TypeScript API (Drizzle ORM, PostgreSQL)
 packages/
   typescript-config/  Shared tsconfig presets
-gh-pages/             Published documentation sources (rendered via mkdocs; see mkdocs.yml)
+gh-pages/             Published documentation (Astro Starlight; pages in src/content/docs/)
 ```
 
 ### Frontend structure (`apps/frontend/src/`)
@@ -92,6 +92,8 @@ pnpm --filter threatsea_fe type-check
 pnpm --filter threatsea_be test           # backend unit tests
 pnpm --filter threatsea_be db:generate    # generate a new Drizzle migration
 pnpm --filter threatsea_be db:migrate     # apply migrations
+pnpm --filter threatsea_docs docs:dev    # docs dev server (Starlight)
+pnpm --filter threatsea_docs build       # build docs into gh-pages/dist
 
 # E2E (requires DB + backend running — see README)
 pnpm --filter threatsea_fe playwright
@@ -103,7 +105,7 @@ Before opening a PR, run at minimum: `pnpm lint`, `pnpm format:check`, `pnpm typ
 
 ## Architectural Decisions
 
-Cross-cutting decisions are recorded in [`Architectural Decision Record.md`](<./gh-pages/Technical Documentation/Architectural Decision Record.md>). Follow decided ADRs. If a task conflicts with one or makes a new architectural decision, raise it with the developer before adding a row — don't add or edit ADRs on your own.
+Cross-cutting decisions are recorded in [`architectural-decision-record.md`](./gh-pages/src/content/docs/technical-documentation/architectural-decision-record.md). Follow decided ADRs. If a task conflicts with one or makes a new architectural decision, raise it with the developer before adding a row — don't add or edit ADRs on your own.
 
 ---
 

@@ -1,4 +1,6 @@
-# ThreatSea
+---
+title: ThreatSea
+---
 
 ThreatSea is a threat modeling tool developed by [MaibornWolff GmbH](https://www.maibornwolff.de/en), which implements the 4x6 methodology.
 It provides a comprehensive framework for identifying and analyzing potential threats in software systems, helping organizations to implement effective security measures.
@@ -7,7 +9,7 @@ It provides a comprehensive framework for identifying and analyzing potential th
 
 ### Requirements
 
-- [node.js](https://nodejs.org/) installation (you can find the currently used version of node.js in the [.node-version](.node-version) file)
+- [node.js](https://nodejs.org/) installation (you can find the currently used version of node.js in the [.node-version](https://github.com/MaibornWolff/ThreatSea/blob/main/.node-version) file)
 - [pnpm package manager](https://pnpm.io/)
 - PostgreSQL database
 

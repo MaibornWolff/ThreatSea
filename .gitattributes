@@ -6,7 +6,6 @@
 *.json text
 *.ts
 *.js
-*.py
 *.yaml
 *.sql
 *.txt

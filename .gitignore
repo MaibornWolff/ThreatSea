@@ -48,3 +48,6 @@ yarn-error.log*
 
 # ai
 .claude/settings.local.json
+
+# Astro
+gh-pages/.astro

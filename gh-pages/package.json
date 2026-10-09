@@ -1,0 +1,16 @@
+{
+  "name": "threatsea_docs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "astro build",
+    "docs:dev": "astro dev",
+    "preview": "astro preview"
+  },
+  "devDependencies": {
+    "@astrojs/starlight": "0.42.5",
+    "astro": "7.3.5",
+    "starlight-links-validator": "0.26.0"
+  }
+}

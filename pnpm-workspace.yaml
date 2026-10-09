@@ -1,6 +1,7 @@
 packages:
   - "apps/*"
   - "packages/*"
+  - "gh-pages"
 
 catalog:
   "@types/node": 24.19.1
@@ -22,3 +23,7 @@ trustPolicyExclude:
   - "semver@6.3.1"
 patchedDependencies:
   png-js: patches/png-js.patch
+overrides:
+  # GHSA-rj75-hqrm-r3gf: Starlight pulls in postcss-nested@6 (via expressive-code), which pins the vulnerable
+  # postcss-selector-parser@6. Drop once expressive-code moves to postcss-nested@7+.
+  "postcss-nested@6>postcss-selector-parser": 7.1.6
