@@ -18,6 +18,7 @@ import { useAssetsList } from "#application/hooks/use-assets-list.hook.ts";
 import { useColumnFilters } from "#application/hooks/use-column-filters.hook.ts";
 import { getToggleableColumns, useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
 import { applyColumnWidths, useColumnWidths } from "#application/hooks/use-column-widths.hook.ts";
+import { usePageSizeOptions } from "#application/hooks/use-page-size-options.hook.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { NoRowsOverlay } from "#view/components/no-rows-overlay.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
@@ -94,6 +95,7 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
     };
 
     const { columnFilters, expandedFilters, handleFilterChange, toggleFilterExpanded } = useColumnFilters();
+    const pageSizeOptions = usePageSizeOptions();
 
     // Filtered in JS: the community DataGrid applies at most one controlled
     // filter-model item, which silently breaks combined column filters.
@@ -308,7 +310,7 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
                             pagination: { paginationModel: { pageSize: 25, page: 0 } },
                             sorting: { sortModel: [{ field: "name", sort: "asc" }] },
                         }}
-                        pageSizeOptions={[10, 25, 50, 100]}
+                        pageSizeOptions={pageSizeOptions}
                         slots={{ noRowsOverlay: NoRowsOverlayWithMessage, row: AssetsGridRowSlot }}
                     />
                 </Box>

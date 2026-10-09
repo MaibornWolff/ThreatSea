@@ -1,6 +1,7 @@
 import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat.types.ts";
 import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import type { ExtendedThreatWithMetrics } from "#application/hooks/use-generic-threats-list.hook.ts";
+import { ALL_ROWS_PAGE_SIZE } from "#application/hooks/use-page-size-options.hook.ts";
 import { createThreat } from "#test-utils/builders.ts";
 import { translationUtil } from "#utils/translations.ts";
 import {
@@ -216,6 +217,25 @@ describe("buildThreatsRows — pagination", () => {
         expect(
             summarize(build({ sort: { field: "name", direction: "desc" }, page: { page: 0, pageSize: 1 } }))
         ).toEqual(["generic-2 (1/1)"]);
+    });
+
+    it("puts every generic threat on one page for the 'All' page size", () => {
+        const result = build({ expanded: { 1: true, 2: true }, page: { page: 0, pageSize: ALL_ROWS_PAGE_SIZE } });
+        expect(summarize(result)).toEqual([
+            "generic-1 (2/2)",
+            "threat-11",
+            "threat-12",
+            "generic-2 (1/1)",
+            "threat-21",
+        ]);
+        expect(result.genericThreatCount).toBe(2);
+    });
+
+    it("ignores a leftover page index for the 'All' page size", () => {
+        expect(summarize(build({ page: { page: 1, pageSize: ALL_ROWS_PAGE_SIZE } }))).toEqual([
+            "generic-1 (2/2)",
+            "generic-2 (1/1)",
+        ]);
     });
 
     it("counts the generic threats matching the filters across all pages", () => {

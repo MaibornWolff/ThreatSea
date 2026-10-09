@@ -4,6 +4,7 @@ import type { GridColDef, GridSortModel } from "@mui/x-data-grid";
 import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat.types.ts";
 import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import type { ExtendedThreatWithMetrics } from "#application/hooks/use-generic-threats-list.hook.ts";
+import { ALL_ROWS_PAGE_SIZE } from "#application/hooks/use-page-size-options.hook.ts";
 import { createThreat } from "#test-utils/builders.ts";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { translationUtil } from "#utils/translations.ts";
@@ -50,11 +51,16 @@ const rows: ThreatsGridRow[] = [
 
 const setup = (
     gridRows: ThreatsGridRow[] = rows,
-    { pageSize = 25, genericThreatCount = 1 }: { pageSize?: number; genericThreatCount?: number } = {}
+    {
+        page = 0,
+        pageSize = 25,
+        genericThreatCount = 1,
+    }: { page?: number; pageSize?: number; genericThreatCount?: number } = {}
 ) => {
     const onToggleGenericThreat = vi.fn();
     const onEditThreat = vi.fn();
     const onSortModelChange = vi.fn();
+    const onPaginationModelChange = vi.fn();
     renderWithProviders(
         <div style={{ height: 600, width: 800 }}>
             <ThreatsGrid
@@ -64,8 +70,8 @@ const setup = (
                 columnVisibilityModel={{}}
                 sortModel={[{ field: "name", sort: "asc" }]}
                 onSortModelChange={onSortModelChange}
-                paginationModel={{ page: 0, pageSize }}
-                onPaginationModelChange={vi.fn()}
+                paginationModel={{ page, pageSize }}
+                onPaginationModelChange={onPaginationModelChange}
                 genericThreatCount={genericThreatCount}
                 onColumnWidthChange={vi.fn()}
                 onToggleGenericThreat={onToggleGenericThreat}
@@ -73,7 +79,13 @@ const setup = (
             />
         </div>
     );
-    return { onToggleGenericThreat, onEditThreat, onSortModelChange, user: userEvent.setup() };
+    return {
+        onToggleGenericThreat,
+        onEditThreat,
+        onSortModelChange,
+        onPaginationModelChange,
+        user: userEvent.setup(),
+    };
 };
 
 const rowOf = (text: string) => screen.getByText(text).closest<HTMLElement>("[role='row']")!;
@@ -152,6 +164,19 @@ describe("ThreatsGrid", () => {
         // the footer counts generic threats, not rows
         expect(screen.getByText("Generic threats per page:")).toBeInTheDocument();
         expect(screen.getByText("1–10 of 12")).toBeInTheDocument();
+    });
+
+    it("offers an 'All' page size, which shows all generic threats from the first page", async () => {
+        const { onPaginationModelChange, user } = setup(rows, { page: 1, pageSize: 10, genericThreatCount: 12 });
+
+        // jsdom skips the grid's min-width media query that shows the page-size select on wider screens
+        await user.click(screen.getByRole("combobox", { name: "Generic threats per page:", hidden: true }));
+        await user.click(screen.getByRole("option", { name: "All" }));
+
+        expect(onPaginationModelChange).toHaveBeenLastCalledWith(
+            { page: 0, pageSize: ALL_ROWS_PAGE_SIZE },
+            expect.anything()
+        );
     });
 
     it("hands sorting to the page when a column header is clicked", async () => {
