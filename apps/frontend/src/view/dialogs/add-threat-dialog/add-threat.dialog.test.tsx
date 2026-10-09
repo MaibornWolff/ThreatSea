@@ -20,6 +20,7 @@ import { mockUseConfirm, mockUseThreatMeasuresList } from "#test-utils/mock-hook
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 import { ThreatsAPI } from "#api/threats.api.ts";
 import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
+import type { Threat } from "#api/types/threat.types.ts";
 import type { ChainDialogHost } from "#application/hooks/use-chain-dialog-paths.hook.ts";
 
 mockUseConfirm();
@@ -322,6 +323,27 @@ describe("AddThreatDialog — Save", () => {
             expect.objectContaining({ id: 42, projectId: 7, status: THREAT_STATUSES.IN_PROGRESS })
         );
         expect(onSaved).toHaveBeenCalledTimes(1);
+    });
+
+    it("disables Save and Cancel while the save is running, so it can't save twice or go back twice", async () => {
+        let resolveSave!: (value: Threat) => void;
+        vi.mocked(ThreatsAPI.updateThreat).mockReturnValueOnce(
+            new Promise((resolve) => {
+                resolveSave = resolve;
+            })
+        );
+        const { user } = setup(USER_ROLES.EDITOR, "threats");
+
+        await makeDirty(user);
+        const saveButton = screen.getByTestId("EditThreatSave");
+        await user.click(saveButton);
+
+        await waitFor(() => expect(saveButton).toBeDisabled());
+        expect(screen.getByRole("button", { name: "Cancel" })).toBeDisabled();
+        expect(ThreatsAPI.updateThreat).toHaveBeenCalledTimes(1);
+
+        resolveSave(createThreat({ id: 42 }));
+        await waitFor(() => expect(navigate).toHaveBeenCalledTimes(1));
     });
 
     it("advances a new threat to in progress on save", async () => {
