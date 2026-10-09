@@ -1,0 +1,5 @@
+/* Starlight renders every content image as a block. Keep the small icons that are sized to the text
+   height (<img style="height:1em; …">) inline with the surrounding text. */
+.sl-markdown-content img[style*="height:1em"] {
+  display: inline;
+}
