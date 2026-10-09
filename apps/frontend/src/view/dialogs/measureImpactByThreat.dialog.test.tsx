@@ -4,6 +4,7 @@ import { Route, Routes, useLocation } from "react-router";
 import { GenericThreatsAPI } from "#api/generic-threats.api.ts";
 import { MeasureImpactsApi } from "#api/measureImpacts.api.ts";
 import { MeasuresAPI } from "#api/measures.api.ts";
+import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
 import {
     createGenericThreatWithThreats,
     createMeasure,
@@ -95,6 +96,26 @@ describe("MeasureImpactByThreatDialog", () => {
         );
         expect(onSaved).toHaveBeenCalledTimes(1);
         expect(screen.queryByRole("heading", { name: "Encrypt traffic" })).not.toBeInTheDocument();
+    });
+
+    it("disables Save while the save is running, so a second click can't save again", async () => {
+        let resolveSave!: (value: MeasureImpact) => void;
+        vi.mocked(MeasureImpactsApi.updateMeasureImpact).mockReturnValueOnce(
+            new Promise((resolve) => {
+                resolveSave = resolve;
+            })
+        );
+        const { user } = setup();
+
+        await editDescription(user);
+        const saveButton = screen.getByRole("button", { name: "Save" });
+        await user.click(saveButton);
+
+        await waitFor(() => expect(saveButton).toBeDisabled());
+        expect(MeasureImpactsApi.updateMeasureImpact).toHaveBeenCalledTimes(1);
+
+        resolveSave(measureImpact);
+        await waitFor(() => expect(screen.getByTestId("location")).toHaveTextContent(/^\/projects\/7\/measures$/));
     });
 
     it("keeps the dialog open and does not notify the host page when the save fails", async () => {
