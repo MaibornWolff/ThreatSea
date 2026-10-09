@@ -13,6 +13,7 @@ import { useTheme } from "@mui/material/styles";
 import { useCallback, type MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
+import { usePageSizeOptions } from "#application/hooks/use-page-size-options.hook.ts";
 import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import { NoRowsOverlay } from "#view/components/no-rows-overlay.component.tsx";
 import { GENERIC_THREAT_ROW_PREFIX, THREAT_ROW_PREFIX, type ThreatsGridRow } from "./create-threats-columns";
@@ -68,6 +69,7 @@ export const ThreatsGrid = ({
     onEditThreat,
 }: ThreatsGridProps) => {
     const { t } = useTranslation("threatsPage");
+    const pageSizeOptions = usePageSizeOptions();
     const NoRowsOverlayWithMessage = useCallback(() => <NoRowsOverlay message={t("noThreatsFound")} />, [t]);
     // A localeText prop replaces the theme's DataGrid texts instead of adding to them, so start from the
     // theme's (the app language) and only override the page-size label, which counts generic threats.
@@ -152,7 +154,7 @@ export const ThreatsGrid = ({
                 "& .threats-grid--dimmed .MuiDataGrid-cell[data-field='status']": { opacity: 1 },
                 "& .threats-grid--dimmed .MuiDataGrid-cell[data-field='actions']": { opacity: 1 },
             }}
-            pageSizeOptions={[10, 25, 50, 100]}
+            pageSizeOptions={pageSizeOptions}
             slots={{ noRowsOverlay: NoRowsOverlayWithMessage, row: ThreatsGridRowSlot }}
         />
     );

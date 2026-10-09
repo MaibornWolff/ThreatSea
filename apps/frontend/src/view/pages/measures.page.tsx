@@ -13,6 +13,7 @@ import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
 import { useColumnFilters } from "#application/hooks/use-column-filters.hook.ts";
 import { getToggleableColumns, useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
 import { applyColumnWidths, useColumnWidths } from "#application/hooks/use-column-widths.hook.ts";
+import { usePageSizeOptions } from "#application/hooks/use-page-size-options.hook.ts";
 import { useMeasuresList } from "#application/hooks/use-measures-list.hook.ts";
 import { NoRowsOverlay } from "#view/components/no-rows-overlay.component.tsx";
 import { Page } from "#view/components/page.component.tsx";
@@ -93,6 +94,7 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
     };
 
     const { columnFilters, expandedFilters, handleFilterChange, toggleFilterExpanded } = useColumnFilters();
+    const pageSizeOptions = usePageSizeOptions();
 
     // Filtered in JS: the community DataGrid applies at most one controlled
     // filter-model item, which silently breaks combined column filters.
@@ -336,7 +338,7 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                             pagination: { paginationModel: { pageSize: 25, page: 0 } },
                             sorting: { sortModel: [{ field: "name", sort: "asc" }] },
                         }}
-                        pageSizeOptions={[10, 25, 50, 100]}
+                        pageSizeOptions={pageSizeOptions}
                         slots={{ noRowsOverlay: NoRowsOverlayWithMessage, row: MeasuresGridRowSlot }}
                     />
                 </Box>
