@@ -248,8 +248,8 @@ jobs:
           COSIGN_YES: "true"
         run: |
           helm package charts/threatsea --version "$VERSION" --app-version "$VERSION"
-          helm push "threatsea-${VERSION}.tgz" oci://ghcr.io/maibornwolff/charts 2>&1 | tee push.log
-          DIGEST="$(grep -o 'sha256:[0-9a-f]\{64\}' push.log | head -1)"
+          helm push "threatsea-${VERSION}.tgz" oci://ghcr.io/maibornwolff/charts 2>&1 | tee "$RUNNER_TEMP/push.log"
+          DIGEST="$(grep -o 'sha256:[0-9a-f]\{64\}' "$RUNNER_TEMP/push.log" | head -1)"
           [ -n "$DIGEST" ] || { echo "no digest in helm push output" >&2; exit 1; }
           cosign sign --yes "ghcr.io/maibornwolff/charts/threatsea@${DIGEST}"
 
