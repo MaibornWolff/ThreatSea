@@ -183,7 +183,7 @@ Things to know before relying on it, even for an evaluation:
 | podAnnotations | object | `{}` | Annotations added to the pods |
 | podLabels | object | `{}` | Labels added to the pods |
 | podSecurityContext | object | `{"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}` | Pod-level security context |
-| postgresql.auth.existingSecret | string | `""` | Existing Secret holding the password, instead of auth.password. |
+| postgresql.auth.existingSecret | string | `""` | Existing Secret holding the bundled database's password, instead of auth.password. Rendering fails when this is set and enabled=false. |
 | postgresql.auth.existingSecretPasswordKey | string | `"password"` | Key inside `postgresql.auth.existingSecret` that holds the password |
 | postgresql.auth.password | string | `""` | Password for database.user. Required when enabled=true and existingSecret is empty. |
 | postgresql.enabled | bool | `false` | Deploy a single-replica PostgreSQL StatefulSet. EVALUATION ONLY: no backups, no replication, no TLS, and no supported upgrade path between major versions. |

@@ -151,7 +151,7 @@ postgresql:
   auth:
     # -- Password for database.user. Required when enabled=true and existingSecret is empty.
     password: ""
-    # -- Existing Secret holding the password, instead of auth.password.
+    # -- Existing Secret holding the bundled database's password, instead of auth.password. Rendering fails when this is set and enabled=false.
     existingSecret: ""
     # -- Key inside `postgresql.auth.existingSecret` that holds the password
     existingSecretPasswordKey: password

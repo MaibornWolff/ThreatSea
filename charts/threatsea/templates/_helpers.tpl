@@ -142,25 +142,24 @@ DATABASE_TLS literal read by the backend. The bundled database serves plaintext.
 {{- end }}
 
 {{/*
-Database password secret reference.
+Name and key of the Secret holding the database password, for use under secretKeyRef.
+postgresql.auth.* only describes the bundled database, so it is rejected when that is off
+rather than silently ignored.
 */}}
-{{- define "threatsea.databasePasswordSecretName" -}}
+{{- define "threatsea.databasePasswordSecretKeyRef" -}}
+{{- if .Values.postgresql.enabled }}
 {{- if .Values.postgresql.auth.existingSecret }}
-{{- .Values.postgresql.auth.existingSecret }}
-{{- else if .Values.postgresql.enabled }}
-{{- include "threatsea.postgresql.fullname" . }}
+name: {{ .Values.postgresql.auth.existingSecret }}
+key: {{ .Values.postgresql.auth.existingSecretPasswordKey }}
 {{- else }}
-{{- include "threatsea.secretName" . }}
+name: {{ include "threatsea.postgresql.fullname" . }}
+key: password
 {{- end }}
-{{- end }}
-
-{{- define "threatsea.databasePasswordSecretKey" -}}
-{{- if .Values.postgresql.auth.existingSecret }}
-{{- .Values.postgresql.auth.existingSecretPasswordKey }}
-{{- else if .Values.postgresql.enabled }}
-{{- print "password" }}
+{{- else if .Values.postgresql.auth.existingSecret }}
+{{- fail "postgresql.auth.existingSecret is only used when postgresql.enabled=true; set secret.existingSecret or secret.values.databasePassword for an external database password" }}
 {{- else }}
-{{- .Values.secret.keys.databasePassword }}
+name: {{ include "threatsea.secretName" . }}
+key: {{ .Values.secret.keys.databasePassword }}
 {{- end }}
 {{- end }}
 

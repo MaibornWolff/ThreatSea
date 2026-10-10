@@ -45,8 +45,7 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "threatsea.databasePasswordSecretName" . }}
-                  key: {{ include "threatsea.databasePasswordSecretKey" . }}
+                  {{- include "threatsea.databasePasswordSecretKeyRef" . | nindent 18 }}
             - name: PGDATA
               value: /var/lib/postgresql/18/docker
           readinessProbe:

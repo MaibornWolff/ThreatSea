@@ -55,3 +55,13 @@ tests:
       - contains:
           path: spec.containers[0].env
           content: {name: PGPORT, value: "5432"}
+
+  - it: reads the bundled password from an existing secret when given one
+    set:
+      postgresql.enabled: true
+      postgresql.auth.existingSecret: my-pg-secret
+      postgresql.auth.existingSecretPasswordKey: pw
+    asserts:
+      - equal:
+          path: spec.containers[0].env[?(@.name=="PGPASSWORD")].valueFrom.secretKeyRef
+          value: {name: my-pg-secret, key: pw}

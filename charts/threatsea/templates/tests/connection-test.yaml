@@ -38,5 +38,4 @@ spec:
         - name: PGPASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ include "threatsea.databasePasswordSecretName" . }}
-              key: {{ include "threatsea.databasePasswordSecretKey" . }}
+              {{- include "threatsea.databasePasswordSecretKeyRef" . | nindent 14 }}

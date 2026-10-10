@@ -73,18 +73,49 @@ tests:
           errorPattern: postgresql.auth.password must be set
 
   - it: reads the password from an existing secret when given one
-    template: postgresql-statefulset.yaml
+    templates: [deployment.yaml, postgresql-statefulset.yaml]
     set:
       postgresql.enabled: true
       postgresql.auth.existingSecret: my-pg-secret
       postgresql.auth.existingSecretPasswordKey: pw
     asserts:
       - equal:
-          path: spec.template.spec.containers[0].env[?(@.name=="POSTGRES_PASSWORD")].valueFrom.secretKeyRef.name
-          value: my-pg-secret
+          path: spec.template.spec.containers[0].env[?(@.name=="POSTGRES_PASSWORD")].valueFrom.secretKeyRef
+          value: {name: my-pg-secret, key: pw}
+        template: postgresql-statefulset.yaml
       - equal:
-          path: spec.template.spec.containers[0].env[?(@.name=="POSTGRES_PASSWORD")].valueFrom.secretKeyRef.key
-          value: pw
+          path: spec.template.spec.containers[0].env[?(@.name=="DATABASE_PASSWORD")].valueFrom.secretKeyRef
+          value: {name: my-pg-secret, key: pw}
+        template: deployment.yaml
+
+  - it: rejects postgresql.auth.existingSecret without the bundled database
+    template: deployment.yaml
+    set:
+      database.host: db.example.com
+      postgresql.auth.existingSecret: my-pg-secret
+    asserts:
+      - failedTemplate:
+          errorPattern: postgresql.auth.existingSecret is only used when postgresql.enabled=true
+
+  - it: reads the external database password from the chart secret
+    template: deployment.yaml
+    release: {name: rel}
+    set:
+      database.host: db.example.com
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name=="DATABASE_PASSWORD")].valueFrom.secretKeyRef
+          value: {name: rel-threatsea, key: database-password}
+
+  - it: reads the external database password from secret.existingSecret
+    template: deployment.yaml
+    set:
+      database.host: db.example.com
+      secret.existingSecret: my-secret
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name=="DATABASE_PASSWORD")].valueFrom.secretKeyRef
+          value: {name: my-secret, key: database-password}
 
   # Finding 7: database.name/user are the single source of truth. The bundled
   # database creates exactly what the app is told to connect to, so no mismatch exists.
