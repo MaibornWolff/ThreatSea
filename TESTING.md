@@ -87,6 +87,18 @@ shared singleton flips the language for every file that runs after it; to test a
 render with `renderWithProviders(ui, { i18n: translationUtil.cloneInstance() })` and switch the
 clone instead. `AGENTS.md` has the full rules.
 
+**PDF report components (`src/view/report/`) go through `renderPdfTree`**
+(`src/test-utils/render-pdf-tree.tsx`), not Testing Library. react-pdf primitives (`View`, `Text`,
+`Page`, …) are strings such as `"VIEW"` that react-dom cannot render, so the helper mounts the
+element with react-pdf's own reconciler (`createRenderer`) and returns its node tree — no
+`vi.mock`, no fonts, no PDF layout. Assert on that tree with `getTexts` (visible text per `Text`
+node), `findAllByType` (e.g. `"LINK"` targets or anchor `id`s) and `runRenderProps`, which calls the
+`render` props with a page number the way pagination does — that covers the table-of-contents
+`indexCallback` and the footer page number. Pass `language="de"` to test German output; the
+components translate through `useTranslation(…, { lng })`, so nothing changes the shared i18next
+instance. `buildReportFixture()` (`src/view/report/testData/report-fixture.ts`) returns a fresh copy
+of the sample report per call, so a test can modify it freely. The report tests show the pattern.
+
 ```bash
 pnpm --filter threatsea_fe test:unit:watch   # while iterating
 pnpm --filter threatsea_fe test:unit         # single run
@@ -266,9 +278,9 @@ helper if you need to seed/clean data → write `tests/<route>.page.e2e.spec.ts`
 `beforeEach`/`afterEach` isolation and `buildTestId(...)`-namespaced resources → run with
 `playwright:ui` until green → open a PR.
 
-**New component test:** place it next to the component, use Testing Library + `userEvent`, test
-observable behavior (not internals) with at least one edge case → run
-`test:unit:watch` → open a PR.
+**New component test:** place it next to the component, use Testing Library + `userEvent` (for a
+PDF report component: `renderPdfTree`, see §2), test observable behavior (not internals) with at
+least one edge case → run `test:unit:watch` → open a PR.
 
 **New backend test:** add `apps/backend/tests/<resource>.test.ts`, drive the endpoint through
 `supertest` and assert on the response and the resulting database state, including the error
