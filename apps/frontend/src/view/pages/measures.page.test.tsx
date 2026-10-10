@@ -13,10 +13,8 @@ vi.mock("../components/header-utility-controls.component", () => ({
     HeaderUtilityControls: () => null,
 }));
 
-// Loading the real dialogs here would cache them for their own test files, bypassing their mocks.
-vi.mock("./measure-details-dialog.page", () => ({ default: () => null }));
-vi.mock("./measure-impact-by-threat-dialog.page", () => ({ MeasureImpactByThreatDialogPage: () => null }));
-vi.mock("./threat-dialog.page", () => ({ default: () => null }));
+// Loading the real dialog routes here would cache them for their own test files, bypassing their mocks.
+vi.mock("./chain-dialog-routes.page", () => ({ ChainDialogRoutes: () => null }));
 
 import { MeasuresPage } from "./measures.page";
 

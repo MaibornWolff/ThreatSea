@@ -208,6 +208,7 @@ export const mockUseMeasureImpacts = (config?: Partial<UseMeasureImpactsResult>)
         isPending: false,
         loadMeasureImpacts: vi.fn(),
         deleteMeasureImpact: vi.fn(),
+        saveMeasureImpact: vi.fn(),
         ...config,
     }));
 };

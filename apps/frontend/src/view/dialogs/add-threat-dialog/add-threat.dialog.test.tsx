@@ -1,6 +1,6 @@
 import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import AddThreatDialog, { type ThreatDialogHostRoute } from "./add-threat.dialog";
+import AddThreatDialog from "./add-threat.dialog";
 
 // The save button only enables once the form is dirty; typing into the name
 // field is the least intrusive way to mark it changed in these tests.
@@ -20,6 +20,8 @@ import { mockUseConfirm, mockUseThreatMeasuresList } from "#test-utils/mock-hook
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 import { ThreatsAPI } from "#api/threats.api.ts";
 import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
+import type { Threat } from "#api/types/threat.types.ts";
+import type { ChainDialogHost } from "#application/hooks/use-chain-dialog-paths.hook.ts";
 
 mockUseConfirm();
 mockUseThreatMeasuresList();
@@ -41,9 +43,16 @@ vi.mock("react-router", async (importOriginal) => {
     return { ...actual, useNavigate: () => navigate };
 });
 
+// Where the threat dialog opens on each host page.
+const THREAT_DIALOG_URLS: Record<ChainDialogHost, string> = {
+    threats: "/projects/7/threats/edit?threatId=42",
+    measures: "/projects/7/measures/threats/edit?threatId=42",
+    risk: "/projects/7/risk/threats/edit?threatId=42",
+};
+
 const setup = (
     userRole: USER_ROLES = USER_ROLES.EDITOR,
-    hostRoute: ThreatDialogHostRoute = "threats",
+    host: ChainDialogHost = "threats",
     onSaved?: () => void,
     threatOverrides: Parameters<typeof createThreat>[0] = {}
 ) => {
@@ -62,10 +71,9 @@ const setup = (
             threat={threat}
             project={project}
             userRole={userRole}
-            open={true}
-            hostRoute={hostRoute}
             {...(onSaved !== undefined ? { onSaved } : {})}
-        />
+        />,
+        { initialEntries: [THREAT_DIALOG_URLS[host]] }
     );
     return { project, threat, user };
 };
@@ -91,49 +99,39 @@ describe("AddThreatDialog — Apply Measure button", () => {
         expect(screen.queryByRole("button", { name: /apply measure/i })).not.toBeInTheDocument();
     });
 
-    it("navigates to the threats apply-measure route when hostRoute is threats", async () => {
-        const { project, threat, user } = setup(USER_ROLES.EDITOR, "threats");
+    it.each(["threats", "measures", "risk"] as const)(
+        "opens Apply measure on the %s page it was opened from",
+        async (host) => {
+            const { project, threat, user } = setup(USER_ROLES.EDITOR, host);
 
-        await user.click(screen.getByRole("tab", { name: /measures/i }));
-        await user.click(screen.getByRole("button", { name: /apply measure/i }));
+            await user.click(screen.getByRole("tab", { name: /measures/i }));
+            await user.click(screen.getByRole("button", { name: /apply measure/i }));
 
-        expect(navigate).toHaveBeenCalledTimes(2);
-        expect(navigate).toHaveBeenLastCalledWith(`/projects/${project.id}/threats/measureImpacts/edit`, {
-            state: {
-                threat: { ...threat, damage: 4 },
-                project,
-            },
-        });
+            expect(navigate).toHaveBeenCalledTimes(2);
+            expect(navigate).toHaveBeenLastCalledWith(`/projects/7/${host}/measureImpacts/edit`, {
+                state: {
+                    threat: { ...threat, damage: 4 },
+                    project,
+                },
+            });
+        }
+    );
+});
+
+describe("AddThreatDialog — Tabs", () => {
+    beforeEach(() => {
+        mockUseThreatMeasuresList();
     });
 
-    it("navigates to the risk apply-measure route when hostRoute is risk", async () => {
-        const { project, threat, user } = setup(USER_ROLES.EDITOR, "risk");
+    it("keeps the threatId in the URL when switching tabs", async () => {
+        const { user } = setup(USER_ROLES.EDITOR);
 
-        await user.click(screen.getByRole("tab", { name: /measures/i }));
-        await user.click(screen.getByRole("button", { name: /apply measure/i }));
+        await user.click(screen.getByRole("tab", { name: /assets/i }));
 
-        expect(navigate).toHaveBeenCalledTimes(2);
-        expect(navigate).toHaveBeenLastCalledWith(`/projects/${project.id}/risk/measureImpacts/edit`, {
-            state: {
-                threat: { ...threat, damage: 4 },
-                project,
-            },
-        });
-    });
-
-    it("navigates to the threats apply-measure route when hostRoute is measures (no measures sub-route for this action)", async () => {
-        const { project, threat, user } = setup(USER_ROLES.EDITOR, "measures");
-
-        await user.click(screen.getByRole("tab", { name: /measures/i }));
-        await user.click(screen.getByRole("button", { name: /apply measure/i }));
-
-        expect(navigate).toHaveBeenCalledTimes(2);
-        expect(navigate).toHaveBeenLastCalledWith(`/projects/${project.id}/threats/measureImpacts/edit`, {
-            state: {
-                threat: { ...threat, damage: 4 },
-                project,
-            },
-        });
+        expect(navigate).toHaveBeenLastCalledWith(
+            { pathname: "/projects/7/threats/edit", search: "?threatId=42" },
+            { replace: true, state: { returnToTab: "ASSETS" } }
+        );
     });
 });
 
@@ -176,51 +174,44 @@ describe("AddThreatDialog — Edit Measure Impact routing", () => {
         mockUseThreatMeasuresList({ threatMeasures: [threatMeasure] });
     });
 
-    it("navigates to threats measureImpacts route when hostRoute is threats", async () => {
-        const { project, threat, user } = setup(USER_ROLES.EDITOR, "threats");
+    it.each(["threats", "measures", "risk"] as const)(
+        "edits the impact in Apply measure on the %s page it was opened from",
+        async (host) => {
+            const { project, threat, user } = setup(USER_ROLES.EDITOR, host);
 
-        await user.click(screen.getByRole("tab", { name: /measures/i }));
-        await user.click(screen.getByText("2025-01-01"));
+            await user.click(screen.getByRole("tab", { name: /measures/i }));
+            await user.click(screen.getByText("2025-01-01"));
 
-        expect(navigate).toHaveBeenLastCalledWith(`/projects/${project.id}/threats/measureImpacts/edit`, {
-            state: {
-                threat: { ...threat, damage: 4 },
-                measureImpact: threatMeasure.measureImpact,
-                project,
-            },
-        });
-    });
-
-    it("navigates to measures measureImpacts route when hostRoute is measures", async () => {
-        const { project, user } = setup(USER_ROLES.EDITOR, "measures");
-
-        await user.click(screen.getByRole("tab", { name: /measures/i }));
-        await user.click(screen.getByText("2025-01-01"));
-
-        expect(navigate).toHaveBeenLastCalledWith(
-            `/projects/${project.id}/measures/${threatMeasure.measure.id}/measureImpacts/edit`,
-            {
+            expect(navigate).toHaveBeenLastCalledWith(`/projects/7/${host}/measureImpacts/edit`, {
                 state: {
-                    measure: threatMeasure.measure,
+                    threat: { ...threat, damage: 4 },
                     measureImpact: threatMeasure.measureImpact,
                     project,
                 },
-            }
-        );
+            });
+        }
+    );
+});
+
+describe("AddThreatDialog — Edit Measure routing", () => {
+    const threatMeasure = createThreatMeasure();
+
+    beforeEach(() => {
+        mockUseThreatMeasuresList({ threatMeasures: [threatMeasure] });
     });
 
-    it("navigates to risk measureImpacts route when hostRoute is risk", async () => {
-        const { project, threat, user } = setup(USER_ROLES.EDITOR, "risk");
+    it.each([
+        { host: "threats", expectedPath: "/projects/7/threats/measures/edit" },
+        { host: "measures", expectedPath: "/projects/7/measures/edit" },
+        { host: "risk", expectedPath: "/projects/7/risk/measures/edit" },
+    ] as const)("opens the measure dialog on the $host page it was opened from", async ({ host, expectedPath }) => {
+        const { project, user } = setup(USER_ROLES.EDITOR, host);
 
         await user.click(screen.getByRole("tab", { name: /measures/i }));
-        await user.click(screen.getByText("2025-01-01"));
+        await user.click(screen.getByText("Test Measure"));
 
-        expect(navigate).toHaveBeenLastCalledWith(`/projects/${project.id}/risk/measureImpacts/edit`, {
-            state: {
-                threat: { ...threat, damage: 4 },
-                measureImpact: threatMeasure.measureImpact,
-                project,
-            },
+        expect(navigate).toHaveBeenLastCalledWith(expectedPath, {
+            state: { project, measure: threatMeasure.measure },
         });
     });
 });
@@ -332,6 +323,27 @@ describe("AddThreatDialog — Save", () => {
             expect.objectContaining({ id: 42, projectId: 7, status: THREAT_STATUSES.IN_PROGRESS })
         );
         expect(onSaved).toHaveBeenCalledTimes(1);
+    });
+
+    it("disables Save and Cancel while the save is running, so it can't save twice or go back twice", async () => {
+        let resolveSave!: (value: Threat) => void;
+        vi.mocked(ThreatsAPI.updateThreat).mockReturnValueOnce(
+            new Promise((resolve) => {
+                resolveSave = resolve;
+            })
+        );
+        const { user } = setup(USER_ROLES.EDITOR, "threats");
+
+        await makeDirty(user);
+        const saveButton = screen.getByTestId("EditThreatSave");
+        await user.click(saveButton);
+
+        await waitFor(() => expect(saveButton).toBeDisabled());
+        expect(screen.getByRole("button", { name: "Cancel" })).toBeDisabled();
+        expect(ThreatsAPI.updateThreat).toHaveBeenCalledTimes(1);
+
+        resolveSave(createThreat({ id: 42 }));
+        await waitFor(() => expect(navigate).toHaveBeenCalledTimes(1));
     });
 
     it("advances a new threat to in progress on save", async () => {

@@ -5,10 +5,11 @@ import { useTheme } from "@mui/material/styles";
 import { DataGrid, GridRow, type GridColumnVisibilityModel, type GridRowProps } from "@mui/x-data-grid";
 import { memo, useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Route, Routes, useNavigate, useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import type { ExtendedProject } from "#api/types/project.types.ts";
 import type { Measure } from "#api/types/measure.types.ts";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
+import { useChainDialogPaths } from "#application/hooks/use-chain-dialog-paths.hook.ts";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { useConfirm } from "#application/hooks/use-confirm.hook.ts";
@@ -24,9 +25,7 @@ import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
 import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
 import { withProject } from "#view/components/with-project.hoc.tsx";
 import { applyColumnFilters } from "#utils/column-filters.ts";
-import MeasureDetailsDialogPage from "./measure-details-dialog.page";
-import { MeasureImpactByThreatDialogPage } from "./measure-impact-by-threat-dialog.page";
-import ThreatDialogPage from "./threat-dialog.page";
+import { ChainDialogRoutes } from "./chain-dialog-routes.page";
 import { createMeasuresColumns } from "./create-measures-columns";
 import { TableAddButton } from "#view/components/table-add-button.component.tsx";
 
@@ -64,6 +63,9 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
     const { projectId: projectIdParam = "0" } = useParams<{ projectId: string }>();
     const projectId = Number.parseInt(projectIdParam, 10);
     const { deleteMeasure, isPending, measures } = useMeasuresList({ projectId });
+    // Chain dialogs re-fetch measures when they open; only the first load shows the loading state.
+    const isFirstLoad = isPending && measures.length === 0;
+    const { measurePath } = useChainDialogPaths();
 
     const userRole = useAppSelector((state) => state.projects.current?.role);
 
@@ -121,14 +123,14 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
             active: false,
             projectId: project.id,
         };
-        navigate(`/projects/${projectIdParam}/measures/edit`, {
+        navigate(measurePath, {
             state: { measure: measureState, project },
         });
     };
 
     const onClickEditMeasure = (measure: Measure) => {
         const measureState: MeasureDialogState = { ...measure };
-        navigate(`/projects/${projectIdParam}/measures/edit`, {
+        navigate(measurePath, {
             state: { project, measure: measureState },
         });
     };
@@ -143,11 +145,11 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                 name: t("duplicateName", { name: measure.name }),
                 scheduledAt: undefined,
             };
-            navigate(`/projects/${projectIdParam}/measures/edit`, {
+            navigate(measurePath, {
                 state: { measure: measureState, project },
             });
         },
-        [navigate, projectIdParam, project, t]
+        [navigate, measurePath, project, t]
     );
 
     const handleDeleteOrResetMeasure = useCallback(
@@ -209,7 +211,7 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
         <Box sx={{ overflow: "hidden", height: "100%", boxSizing: "border-box" }}>
             <LinearProgress
                 sx={{
-                    visibility: isPending ? "visible" : "hidden",
+                    visibility: isFirstLoad ? "visible" : "hidden",
                     boxSizing: "border-box",
                 }}
             />
@@ -317,7 +319,7 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                     <DataGrid
                         rows={filteredMeasures}
                         columns={columns}
-                        loading={isPending}
+                        loading={isFirstLoad}
                         disableRowSelectionOnClick
                         disableColumnFilter
                         disableColumnMenu
@@ -364,11 +366,7 @@ const MeasuresPageBody = ({ project }: MeasuresPageBodyProps) => {
                         slots={{ noRowsOverlay: NoRowsOverlayWithMessage, row: MeasuresGridRowSlot }}
                     />
                 </Box>
-                <Routes>
-                    <Route path="edit" element={<MeasureDetailsDialogPage />} />
-                    <Route path=":measureId/measureImpacts/edit" element={<MeasureImpactByThreatDialogPage />} />
-                    <Route path="threats/edit" element={<ThreatDialogPage />} />
-                </Routes>
+                <ChainDialogRoutes host="measures" />
             </Page>
         </Box>
     );

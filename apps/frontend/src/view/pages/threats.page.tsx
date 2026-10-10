@@ -18,7 +18,7 @@ import { useTheme } from "@mui/material/styles";
 import type { GridColumnVisibilityModel, GridPaginationModel, GridSortModel } from "@mui/x-data-grid";
 import { memo, useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Route, Routes, useParams } from "react-router";
+import { useParams } from "react-router";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { useColumnFilters } from "#application/hooks/use-column-filters.hook.ts";
 import { getToggleableColumns, useColumnVisibility } from "#application/hooks/use-column-visibility.hook.ts";
@@ -31,9 +31,7 @@ import { Page } from "#view/components/page.component.tsx";
 import { CreatePage } from "#view/components/create-page.component.tsx";
 import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
 import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
-import ThreatDialogPage from "./threat-dialog.page";
-import { MeasureImpactByMeasureDialogPage } from "./measure-impact-by-measure-dialog.page";
-import AddMeasureDialogPage from "./add-measure-dialog.page";
+import { ChainDialogRoutes } from "./chain-dialog-routes.page";
 import { withProject } from "#view/components/with-project.hoc.tsx";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
@@ -379,15 +377,7 @@ const ThreatsPageBody = () => {
                     />
                 </Box>
 
-                <Routes>
-                    <Route path="edit" element={<ThreatDialogPage onSaved={() => void loadGenericThreats()} />} />
-                    <Route
-                        path="measureImpacts/edit"
-                        element={<MeasureImpactByMeasureDialogPage onApplied={() => void loadGenericThreats()} />}
-                    >
-                        <Route path="measures/add" element={<AddMeasureDialogPage />} />
-                    </Route>
-                </Routes>
+                <ChainDialogRoutes host="threats" onThreatsChanged={() => void loadGenericThreats()} />
             </Page>
         </Box>
     );

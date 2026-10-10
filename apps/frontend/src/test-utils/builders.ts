@@ -4,6 +4,7 @@ import type { ComponentType } from "#api/types/component-types.types.ts";
 import type { Folder } from "#api/types/folder.types.ts";
 import type { ExtendedProject, ProjectReport, ThreatReport } from "#api/types/project.types.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
+import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat.types.ts";
 import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import type { Measure } from "#api/types/measure.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
@@ -67,6 +68,26 @@ export const createThreat = (overrides: Partial<ExtendedThreat> = {}): ExtendedT
     componentType: null,
     interfaceName: null,
     assets: [],
+    ...overrides,
+});
+
+export const createGenericThreatWithThreats = (
+    overrides: Partial<GenericThreatWithExtendedThreats> = {}
+): GenericThreatWithExtendedThreats => ({
+    id: 1,
+    projectId: 1,
+    catalogThreatId: 1,
+    pointOfAttackId: "poa-1",
+    name: "Test Generic Threat",
+    description: "",
+    pointOfAttack: POINTS_OF_ATTACK.USER_INTERFACE,
+    attacker: ATTACKERS.UNAUTHORISED_PARTIES,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z",
+    componentName: "Test Component",
+    componentType: null,
+    interfaceName: null,
+    threats: [],
     ...overrides,
 });
 
