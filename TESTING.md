@@ -146,7 +146,7 @@ starts by asking a page object for it.
 Key patterns:
 
 - **Per-test isolation.** Every test namespaces its resources with `buildTestId(browserName,
-testId)` so parallel runs and reruns don't collide.
+  testId)` so parallel runs and reruns don't collide.
 - **API-driven setup/teardown.** `beforeEach` seeds via API, `afterEach` deletes what the test
   created — tests stay independent.
 - **Auth once per browser.** `auth.setup.ts` logs in once per browser and stores the session in
