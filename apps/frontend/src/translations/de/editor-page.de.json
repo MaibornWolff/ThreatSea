@@ -65,7 +65,9 @@
     }
   },
   "contextMenu": {
-    "customComponents": "Benutzerdefiniert",
+    "customComponents": "Benutzerdefiniert"
+  },
+  "componentNames": {
     "Database": "Datenbank",
     "Communication Infrastructure": "Kommunikations-Infrastruktur",
     "Users": "Benutzer",

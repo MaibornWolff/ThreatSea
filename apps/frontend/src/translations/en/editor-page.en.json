@@ -65,7 +65,9 @@
     }
   },
   "contextMenu": {
-    "customComponents": "Custom",
+    "customComponents": "Custom"
+  },
+  "componentNames": {
     "Database": "Database",
     "Users": "Users",
     "Communication Infrastructure": "Communication Infrastructure",

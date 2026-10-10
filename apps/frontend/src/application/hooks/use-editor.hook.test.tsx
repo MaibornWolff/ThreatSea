@@ -284,6 +284,93 @@ describe("useEditor", () => {
             expect(pointsOfAttack).toHaveLength(2);
             expect(pointsOfAttack.every((pointOfAttack) => pointOfAttack?.componentId === componentId)).toBe(true);
         });
+
+        // i18n is a shared singleton and vitest runs with isolate: false, so restore English afterwards.
+        describe("default name", () => {
+            afterEach(async () => {
+                await translationUtil.changeLanguage("en");
+            });
+
+            it("stores the German menu label when the language is German", async () => {
+                await translationUtil.changeLanguage("de");
+                const { result, store } = renderUseEditor();
+
+                act(() => {
+                    result.current.addComponent({
+                        componentType: {
+                            id: STANDARD_COMPONENT_TYPES.USERS,
+                            name: "Users",
+                            symbol: null,
+                            standardIcon: null,
+                            pointsOfAttack: [],
+                            isStandard: true,
+                        },
+                        x: 0,
+                        y: 0,
+                        gridX: 0,
+                        gridY: 0,
+                    });
+                    result.current.addComponent({
+                        componentType: {
+                            id: STANDARD_COMPONENT_TYPES.DATABASE,
+                            name: "Database",
+                            symbol: null,
+                            standardIcon: null,
+                            pointsOfAttack: [],
+                            isStandard: true,
+                        },
+                        x: 40,
+                        y: 0,
+                        gridX: 8,
+                        gridY: 0,
+                    });
+                    result.current.addComponent({
+                        componentType: {
+                            id: STANDARD_COMPONENT_TYPES.COMMUNICATION_INFRASTRUCTURE,
+                            name: "Communication Infrastructure",
+                            symbol: null,
+                            standardIcon: null,
+                            pointsOfAttack: [],
+                            isStandard: true,
+                        },
+                        x: 80,
+                        y: 0,
+                        gridX: 16,
+                        gridY: 0,
+                    });
+                });
+
+                const components = store.getState().system.components;
+                const names = components.ids.map((componentId) => components.entities[componentId]?.name);
+
+                expect(names).toEqual(["Benutzer", "Datenbank", "Kommunikations-Infrastruktur"]);
+            });
+
+            it("keeps a custom component name when the language is German", async () => {
+                await translationUtil.changeLanguage("de");
+                const { result, store } = renderUseEditor();
+
+                act(() => {
+                    result.current.addComponent({
+                        componentType: {
+                            id: 42,
+                            name: "Mein Service",
+                            symbol: null,
+                            standardIcon: null,
+                            pointsOfAttack: [],
+                            isStandard: false,
+                        },
+                        x: 0,
+                        y: 0,
+                        gridX: 0,
+                        gridY: 0,
+                    });
+                });
+
+                const createdComponents = Object.values(store.getState().system.components.entities);
+                expect(createdComponents.map((component) => component?.name)).toEqual(["Mein Service"]);
+            });
+        });
     });
 
     // setSelectedComponentName ignores a
