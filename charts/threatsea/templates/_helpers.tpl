@@ -125,19 +125,19 @@ postgresql.auth.* only describes the bundled database, so it is rejected when th
 rather than silently ignored.
 */}}
 {{- define "threatsea.databasePasswordSecretKeyRef" -}}
-{{- if .Values.postgresql.enabled }}
-{{- if .Values.postgresql.auth.existingSecret }}
-name: {{ .Values.postgresql.auth.existingSecret }}
-key: {{ .Values.postgresql.auth.existingSecretPasswordKey }}
-{{- else }}
-name: {{ include "threatsea.postgresql.fullname" . }}
+{{- if .Values.postgresql.enabled -}}
+{{- if .Values.postgresql.auth.existingSecret -}}
+name: {{ .Values.postgresql.auth.existingSecret | quote }}
+key: {{ .Values.postgresql.auth.existingSecretPasswordKey | quote }}
+{{- else -}}
+name: {{ include "threatsea.postgresql.fullname" . | quote }}
 key: password
 {{- end }}
-{{- else if .Values.postgresql.auth.existingSecret }}
+{{- else if .Values.postgresql.auth.existingSecret -}}
 {{- fail "postgresql.auth.existingSecret is only used when postgresql.enabled=true; set secret.existingSecret or secret.values.databasePassword for an external database password" }}
-{{- else }}
-name: {{ include "threatsea.secretName" . }}
-key: {{ .Values.secret.keys.databasePassword }}
+{{- else -}}
+name: {{ include "threatsea.secretName" . | quote }}
+key: {{ .Values.secret.keys.databasePassword | quote }}
 {{- end }}
 {{- end }}
 
@@ -179,8 +179,8 @@ key: {{ .Values.secret.keys.databasePassword }}
 - name: OIDC_CLIENT_SECRET
   valueFrom:
     secretKeyRef:
-      name: {{ include "threatsea.secretName" . }}
-      key: {{ .Values.secret.keys.oidcClientSecret }}
+      name: {{ include "threatsea.secretName" . | quote }}
+      key: {{ .Values.secret.keys.oidcClientSecret | quote }}
 {{- end }}
 - name: COOKIES_SECURE_OPTION
   value: {{ ternary "enabled" "disabled" .Values.config.cookies.secure | quote }}
@@ -189,13 +189,13 @@ key: {{ .Values.secret.keys.databasePassword }}
 - name: JWT_SECRET
   valueFrom:
     secretKeyRef:
-      name: {{ include "threatsea.secretName" . }}
-      key: {{ .Values.secret.keys.jwtSecret }}
+      name: {{ include "threatsea.secretName" . | quote }}
+      key: {{ .Values.secret.keys.jwtSecret | quote }}
 - name: EXPRESS_SESSION_SECRET
   valueFrom:
     secretKeyRef:
-      name: {{ include "threatsea.secretName" . }}
-      key: {{ .Values.secret.keys.sessionSecret }}
+      name: {{ include "threatsea.secretName" . | quote }}
+      key: {{ .Values.secret.keys.sessionSecret | quote }}
 - name: DATABASE_HOST
   value: {{ include "threatsea.databaseHost" . | quote }}
 - name: DATABASE_PORT
