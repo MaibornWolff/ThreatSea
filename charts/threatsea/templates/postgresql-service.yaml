@@ -9,7 +9,7 @@ spec:
   clusterIP: None
   ports:
     - name: postgresql
-      port: 5432
+      port: {{ include "threatsea.postgresql.port" . }}
       targetPort: postgresql
   selector:
     {{- include "threatsea.postgresql.selectorLabels" . | nindent 4 }}

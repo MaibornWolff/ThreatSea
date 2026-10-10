@@ -105,11 +105,25 @@ Database host – the bundled Service when postgresql.enabled=true, else databas
 {{- end }}
 
 {{/*
+Bundled PostgreSQL image reference.
+*/}}
+{{- define "threatsea.postgresql.image" -}}
+{{- printf "%s:%s" .Values.postgresql.image.repository .Values.postgresql.image.tag }}
+{{- end }}
+
+{{/*
+Bundled PostgreSQL listen port, shared by the container, the Service and the database port.
+*/}}
+{{- define "threatsea.postgresql.port" -}}
+5432
+{{- end }}
+
+{{/*
 Database port – the bundled Service always listens on 5432, else database.port.
 */}}
 {{- define "threatsea.databasePort" -}}
 {{- if .Values.postgresql.enabled }}
-{{- print 5432 }}
+{{- include "threatsea.postgresql.port" . }}
 {{- else }}
 {{- .Values.database.port }}
 {{- end }}

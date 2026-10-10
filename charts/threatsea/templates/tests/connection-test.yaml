@@ -19,7 +19,7 @@ spec:
       type: RuntimeDefault
   containers:
     - name: pg-isready
-      image: "{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag }}"
+      image: {{ include "threatsea.postgresql.image" . | quote }}
       imagePullPolicy: {{ .Values.postgresql.image.pullPolicy }}
       command:
         - pg_isready

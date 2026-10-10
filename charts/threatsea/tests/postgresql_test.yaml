@@ -134,7 +134,8 @@ tests:
           path: spec.template.spec.containers[0].env
           content: {name: POSTGRES_USER, value: appuser}
 
-  # Verified image facts: PG 18 moved PGDATA and the volume mount point.
+  # The image's own PGDATA (/var/lib/postgresql/18/docker) already sits under this
+  # mount; repeating it here would tie the chart to one postgres major version.
   - it: mounts the volume where the postgres 18 image expects it
     template: postgresql-statefulset.yaml
     set:
@@ -144,9 +145,19 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].volumeMounts[?(@.name=="data")].mountPath
           value: /var/lib/postgresql
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content: {name: PGDATA, value: /var/lib/postgresql/18/docker}
+      - notExists:
+          path: spec.template.spec.containers[0].env[?(@.name=="PGDATA")]
+
+  - it: follows postgresql.image.tag
+    template: postgresql-statefulset.yaml
+    set:
+      postgresql.enabled: true
+      postgresql.auth.password: secret
+      postgresql.image.tag: 18.7-alpine
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: postgres:18.7-alpine
 
   - it: runs the database as uid 70 on a read-only root filesystem
     template: postgresql-statefulset.yaml
