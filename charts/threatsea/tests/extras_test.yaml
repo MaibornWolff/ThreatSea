@@ -104,3 +104,12 @@ tests:
     asserts:
       - failedTemplate:
           errorPattern: chart-managed variable DATABASE_PASSWORD
+
+  - it: renders the managed env when extraEnv is null
+    template: deployment.yaml
+    set:
+      extraEnv: null
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: AUTH_METHOD, value: oidc}

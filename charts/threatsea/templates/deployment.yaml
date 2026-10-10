@@ -1,5 +1,5 @@
 {{- $env := include "threatsea.env" . | fromYamlArray }}
-{{- include "threatsea.checkExtraEnv" (dict "env" $env "extraEnv" .Values.extraEnv) }}
+{{- include "threatsea.checkExtraEnv" (dict "env" $env "extraEnv" (.Values.extraEnv | default list)) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -48,7 +48,7 @@ spec:
               containerPort: {{ .Values.service.containerPort }}
               protocol: TCP
           env:
-            {{- toYaml (concat $env .Values.extraEnv) | nindent 12 }}
+            {{- toYaml (concat $env (.Values.extraEnv | default list)) | nindent 12 }}
           {{- with .Values.extraEnvFrom }}
           envFrom:
             {{- toYaml . | nindent 12 }}
