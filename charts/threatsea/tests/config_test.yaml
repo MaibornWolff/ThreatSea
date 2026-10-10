@@ -54,16 +54,18 @@ tests:
       config.useProxy: true
       config.oidc.allowHttp: false
     asserts:
-      - contains: {path: "spec.template.spec.containers[0].env", content: {name: COOKIES_SECURE_OPTION, value: "enabled"}}
-      - contains: {path: "spec.template.spec.containers[0].env", content: {name: USE_PROXY, value: "true"}}
-      - contains: {path: "spec.template.spec.containers[0].env", content: {name: OIDC_ALLOW_HTTP, value: "false"}}
+      - contains:
+          { path: "spec.template.spec.containers[0].env", content: { name: COOKIES_SECURE_OPTION, value: "enabled" } }
+      - contains: { path: "spec.template.spec.containers[0].env", content: { name: USE_PROXY, value: "true" } }
+      - contains: { path: "spec.template.spec.containers[0].env", content: { name: OIDC_ALLOW_HTTP, value: "false" } }
 
   - it: maps cookies.secure false to disabled
     template: deployment.yaml
     set:
       config.cookies.secure: false
     asserts:
-      - contains: {path: "spec.template.spec.containers[0].env", content: {name: COOKIES_SECURE_OPTION, value: "disabled"}}
+      - contains:
+          { path: "spec.template.spec.containers[0].env", content: { name: COOKIES_SECURE_OPTION, value: "disabled" } }
 
   # Review Focus 2: 0 is a documented log level and is falsy in Go templates.
   - it: renders log level 0 rather than dropping it
@@ -71,7 +73,7 @@ tests:
     set:
       config.logLevel: 0
     asserts:
-      - contains: {path: "spec.template.spec.containers[0].env", content: {name: LOG_LEVEL, value: "0"}}
+      - contains: { path: "spec.template.spec.containers[0].env", content: { name: LOG_LEVEL, value: "0" } }
 
   - it: rejects a log level outside 0-3
     set:

@@ -22,8 +22,8 @@ tests:
       ingress.enabled: true
       ingress.className: nginx
     asserts:
-      - equal: {path: spec.ingressClassName, value: nginx}
-      - equal: {path: "spec.rules[0].http.paths[0].path", value: "/"}
+      - equal: { path: spec.ingressClassName, value: nginx }
+      - equal: { path: "spec.rules[0].http.paths[0].path", value: "/" }
 
   - it: refuses both routing options at once
     template: ingress.yaml
@@ -42,7 +42,7 @@ tests:
       gateway.gatewayName: gw
       gateway.hostnames: [a.example.com, b.example.com]
     asserts:
-      - equal: {path: spec.hostnames, value: [a.example.com, b.example.com]}
+      - equal: { path: spec.hostnames, value: [a.example.com, b.example.com] }
 
   - it: passes sectionName and annotations to the HTTPRoute
     template: httproute.yaml
@@ -50,28 +50,28 @@ tests:
       gateway.enabled: true
       gateway.gatewayName: gw
       gateway.sectionName: https
-      gateway.annotations: {team: security}
+      gateway.annotations: { team: security }
     asserts:
-      - equal: {path: "spec.parentRefs[0].sectionName", value: https}
-      - equal: {path: metadata.annotations.team, value: security}
+      - equal: { path: "spec.parentRefs[0].sectionName", value: https }
+      - equal: { path: metadata.annotations.team, value: security }
 
   - it: annotates the service when asked
     template: service.yaml
     set:
-      service.annotations: {"cloud.example.com/lb": "internal"}
+      service.annotations: { "cloud.example.com/lb": "internal" }
     asserts:
-      - equal: {path: 'metadata.annotations["cloud.example.com/lb"]', value: internal}
+      - equal: { path: 'metadata.annotations["cloud.example.com/lb"]', value: internal }
 
   - it: takes a deployment strategy
     template: deployment.yaml
     set:
-      strategy: {type: Recreate}
+      strategy: { type: Recreate }
     asserts:
-      - equal: {path: spec.strategy.type, value: Recreate}
+      - equal: { path: spec.strategy.type, value: Recreate }
 
   - it: sets no initialDelaySeconds on the liveness and readiness probes
     template: deployment.yaml
     asserts:
-      - notExists: {path: "spec.template.spec.containers[0].livenessProbe.initialDelaySeconds"}
-      - notExists: {path: "spec.template.spec.containers[0].readinessProbe.initialDelaySeconds"}
-      - exists: {path: "spec.template.spec.containers[0].startupProbe"}
+      - notExists: { path: "spec.template.spec.containers[0].livenessProbe.initialDelaySeconds" }
+      - notExists: { path: "spec.template.spec.containers[0].readinessProbe.initialDelaySeconds" }
+      - exists: { path: "spec.template.spec.containers[0].startupProbe" }

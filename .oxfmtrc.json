@@ -20,6 +20,7 @@
     "build",
     "dist",
     "**/testData/**",
-    "charts"
+    "charts/*/templates",
+    "charts/*/README.md"
   ]
 }

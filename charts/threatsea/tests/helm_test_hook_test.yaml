@@ -12,9 +12,9 @@ set:
   secret.values.databasePassword: dbpw
 tests:
   - it: renders a test-hook pod that checks the database connection
-    release: {name: rel}
+    release: { name: rel }
     asserts:
-      - isKind: {of: Pod}
+      - isKind: { of: Pod }
       - equal:
           path: metadata.annotations["helm.sh/hook"]
           value: test
@@ -26,7 +26,7 @@ tests:
           value: Never
       - contains:
           path: spec.containers[0].env
-          content: {name: PGHOST, value: rel-threatsea-postgresql}
+          content: { name: PGHOST, value: rel-threatsea-postgresql }
     set:
       postgresql.enabled: true
       postgresql.auth.password: pw
@@ -34,7 +34,7 @@ tests:
     asserts:
       - contains:
           path: spec.containers[0].env
-          content: {name: PGHOST, value: db.example.com}
+          content: { name: PGHOST, value: db.example.com }
       - equal:
           path: spec.containers[0].command
           value: [psql, -X, -v, ON_ERROR_STOP=1, -c, "SELECT 1"]
@@ -43,7 +43,7 @@ tests:
           value: psql
       - contains:
           path: spec.containers[0].env
-          content: {name: PGCONNECT_TIMEOUT, value: "10"}
+          content: { name: PGCONNECT_TIMEOUT, value: "10" }
       - equal:
           path: spec.securityContext.runAsUser
           value: 70
@@ -60,7 +60,7 @@ tests:
     asserts:
       - contains:
           path: spec.containers[0].env
-          content: {name: PGPORT, value: "5432"}
+          content: { name: PGPORT, value: "5432" }
 
   - it: reads the bundled password from an existing secret when given one
     set:
@@ -70,7 +70,7 @@ tests:
     asserts:
       - equal:
           path: spec.containers[0].env[?(@.name=="PGPASSWORD")].valueFrom.secretKeyRef
-          value: {name: my-pg-secret, key: pw}
+          value: { name: my-pg-secret, key: pw }
 
   - it: uses the bundled database image
     set:
@@ -90,7 +90,7 @@ tests:
     asserts:
       - contains:
           path: spec.containers[0].env
-          content: {name: PGSSLMODE, value: require}
+          content: { name: PGSSLMODE, value: require }
 
   - it: disables TLS for an external database without database.tls
     set:
@@ -100,7 +100,7 @@ tests:
     asserts:
       - contains:
           path: spec.containers[0].env
-          content: {name: PGSSLMODE, value: disable}
+          content: { name: PGSSLMODE, value: disable }
 
   - it: disables TLS for the bundled database even with database.tls
     set:
@@ -110,4 +110,4 @@ tests:
     asserts:
       - contains:
           path: spec.containers[0].env
-          content: {name: PGSSLMODE, value: disable}
+          content: { name: PGSSLMODE, value: disable }

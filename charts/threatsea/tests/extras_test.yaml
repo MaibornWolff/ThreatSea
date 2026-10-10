@@ -18,7 +18,7 @@ tests:
     set:
       extraVolumes:
         - name: custom-ca
-          configMap: {name: my-ca}
+          configMap: { name: my-ca }
       extraVolumeMounts:
         - name: custom-ca
           mountPath: /etc/ssl/certs/custom
@@ -26,27 +26,27 @@ tests:
     asserts:
       - contains:
           path: spec.template.spec.volumes
-          content: {name: custom-ca, configMap: {name: my-ca}}
+          content: { name: custom-ca, configMap: { name: my-ca } }
       - contains:
           path: spec.template.spec.containers[0].volumeMounts
-          content: {name: custom-ca, mountPath: "/etc/ssl/certs/custom", readOnly: true}
+          content: { name: custom-ca, mountPath: "/etc/ssl/certs/custom", readOnly: true }
 
   - it: adds extra env sources
     template: deployment.yaml
     set:
       extraEnvFrom:
-        - configMapRef: {name: my-config}
+        - configMapRef: { name: my-config }
     asserts:
       - contains:
           path: spec.template.spec.containers[0].envFrom
-          content: {configMapRef: {name: my-config}}
+          content: { configMapRef: { name: my-config } }
 
   - it: omits the keys entirely when nothing is set
     template: deployment.yaml
     asserts:
-      - notExists: {path: "spec.template.spec.containers[0].envFrom"}
-      - notExists: {path: "spec.template.spec.containers[0].volumeMounts"}
-      - notExists: {path: "spec.template.spec.volumes"}
+      - notExists: { path: "spec.template.spec.containers[0].envFrom" }
+      - notExists: { path: "spec.template.spec.containers[0].volumeMounts" }
+      - notExists: { path: "spec.template.spec.volumes" }
 
   # Review Focus 1: a duplicate env name is silently resolved by Kubernetes
   # keeping the last entry, so the chart must reject the collision.
@@ -69,7 +69,7 @@ tests:
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
-          content: {name: OIDC_SCOPE, value: openid profile email groups}
+          content: { name: OIDC_SCOPE, value: openid profile email groups }
 
   # Review Focus 4: the chart sets OIDC_* only under oidc, so there is no collision under fixed auth.
   - it: accepts an OIDC variable in extraEnv under fixed auth
@@ -82,7 +82,7 @@ tests:
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
-          content: {name: OIDC_CLIENT_SECRET, value: x}
+          content: { name: OIDC_CLIENT_SECRET, value: x }
 
   - it: rejects an OIDC variable in extraEnv under oidc auth
     template: deployment.yaml
@@ -112,4 +112,4 @@ tests:
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
-          content: {name: AUTH_METHOD, value: oidc}
+          content: { name: AUTH_METHOD, value: oidc }

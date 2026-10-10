@@ -19,11 +19,7 @@
         },
         "pullPolicy": {
           "type": "string",
-          "enum": [
-            "Always",
-            "IfNotPresent",
-            "Never"
-          ]
+          "enum": ["Always", "IfNotPresent", "Never"]
         },
         "tag": {
           "type": "string"
@@ -86,10 +82,7 @@
         },
         "authMethod": {
           "type": "string",
-          "enum": [
-            "oidc",
-            "fixed"
-          ]
+          "enum": ["oidc", "fixed"]
         },
         "oidc": {
           "type": "object",
@@ -207,11 +200,7 @@
             },
             "pullPolicy": {
               "type": "string",
-              "enum": [
-                "Always",
-                "IfNotPresent",
-                "Never"
-              ]
+              "enum": ["Always", "IfNotPresent", "Never"]
             }
           }
         },

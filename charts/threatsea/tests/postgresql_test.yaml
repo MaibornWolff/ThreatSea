@@ -38,7 +38,7 @@ tests:
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
-          content: {name: DATABASE_TLS, value: "enabled"}
+          content: { name: DATABASE_TLS, value: "enabled" }
 
   # Finding 1: the bundled database serves plaintext, so TLS must be off or the
   # backend never connects, migrations never finish and the pod never becomes ready.
@@ -51,18 +51,18 @@ tests:
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
-          content: {name: DATABASE_TLS, value: "disabled"}
+          content: { name: DATABASE_TLS, value: "disabled" }
 
   - it: points DATABASE_HOST at the bundled service
     template: deployment.yaml
-    release: {name: rel}
+    release: { name: rel }
     set:
       postgresql.enabled: true
       postgresql.auth.password: secret
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
-          content: {name: DATABASE_HOST, value: rel-threatsea-postgresql}
+          content: { name: DATABASE_HOST, value: rel-threatsea-postgresql }
 
   - it: requires a password for the bundled database
     template: postgresql-secret.yaml
@@ -81,11 +81,11 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].env[?(@.name=="POSTGRES_PASSWORD")].valueFrom.secretKeyRef
-          value: {name: my-pg-secret, key: pw}
+          value: { name: my-pg-secret, key: pw }
         template: postgresql-statefulset.yaml
       - equal:
           path: spec.template.spec.containers[0].env[?(@.name=="DATABASE_PASSWORD")].valueFrom.secretKeyRef
-          value: {name: my-pg-secret, key: pw}
+          value: { name: my-pg-secret, key: pw }
         template: deployment.yaml
 
   - it: rejects postgresql.auth.existingSecret without the bundled database
@@ -99,13 +99,13 @@ tests:
 
   - it: reads the external database password from the chart secret
     template: deployment.yaml
-    release: {name: rel}
+    release: { name: rel }
     set:
       database.host: db.example.com
     asserts:
       - equal:
           path: spec.template.spec.containers[0].env[?(@.name=="DATABASE_PASSWORD")].valueFrom.secretKeyRef
-          value: {name: rel-threatsea, key: database-password}
+          value: { name: rel-threatsea, key: database-password }
 
   - it: reads the external database password from secret.existingSecret
     template: deployment.yaml
@@ -115,7 +115,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].env[?(@.name=="DATABASE_PASSWORD")].valueFrom.secretKeyRef
-          value: {name: my-secret, key: database-password}
+          value: { name: my-secret, key: database-password }
 
   # Finding 7: database.name/user are the single source of truth. The bundled
   # database creates exactly what the app is told to connect to, so no mismatch exists.
@@ -129,10 +129,10 @@ tests:
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
-          content: {name: POSTGRES_DB, value: appdb}
+          content: { name: POSTGRES_DB, value: appdb }
       - contains:
           path: spec.template.spec.containers[0].env
-          content: {name: POSTGRES_USER, value: appuser}
+          content: { name: POSTGRES_USER, value: appuser }
 
   # The image's own PGDATA (/var/lib/postgresql/18/docker) already sits under this
   # mount; repeating it here would tie the chart to one postgres major version.
@@ -206,7 +206,7 @@ tests:
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
-          content: {name: DATABASE_PORT, value: "5432"}
+          content: { name: DATABASE_PORT, value: "5432" }
 
   - it: uses database.port for an external database
     template: deployment.yaml
@@ -216,7 +216,7 @@ tests:
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
-          content: {name: DATABASE_PORT, value: "6543"}
+          content: { name: DATABASE_PORT, value: "6543" }
 
   # pg_isready without -h checks the Unix socket, which the image's temporary
   # initdb server also serves, so the probes must go over TCP.
