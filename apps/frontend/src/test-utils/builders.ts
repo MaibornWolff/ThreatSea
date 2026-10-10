@@ -1,6 +1,8 @@
 import type { Asset } from "#api/types/asset.types.ts";
 import type { CatalogWithRole } from "#api/types/catalogs.types.ts";
 import type { ComponentType } from "#api/types/component-types.types.ts";
+import type { CatalogThreat } from "#api/types/catalog-threat.types.ts";
+import type { CatalogMeasure } from "#api/types/catalog-measure.types.ts";
 import type { Folder } from "#api/types/folder.types.ts";
 import type { ExtendedProject, ProjectReport, ThreatReport } from "#api/types/project.types.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
@@ -183,6 +185,38 @@ export const createCatalog = (overrides: Partial<CatalogWithRole> = {}): Catalog
     createdAt: new Date("2025-01-01"),
     updatedAt: new Date("2025-01-01"),
     role: USER_ROLES.EDITOR,
+    ...overrides,
+});
+
+export const createCatalogThreat = (overrides: Partial<CatalogThreat> = {}): CatalogThreat => ({
+    id: 1,
+    name: "Test Catalog Threat",
+    description: "",
+    attacker: ATTACKERS.UNAUTHORISED_PARTIES,
+    pointOfAttack: POINTS_OF_ATTACK.USER_INTERFACE,
+    confidentiality: true,
+    integrity: false,
+    availability: false,
+    probability: 3,
+    catalogId: 1,
+    createdAt: new Date("2025-01-01"),
+    updatedAt: new Date("2025-01-01"),
+    ...overrides,
+});
+
+export const createCatalogMeasure = (overrides: Partial<CatalogMeasure> = {}): CatalogMeasure => ({
+    id: 1,
+    name: "Test Catalog Measure",
+    description: "",
+    attacker: ATTACKERS.UNAUTHORISED_PARTIES,
+    pointOfAttack: POINTS_OF_ATTACK.USER_INTERFACE,
+    confidentiality: true,
+    integrity: false,
+    availability: false,
+    probability: 3,
+    catalogId: 1,
+    createdAt: new Date("2025-01-01"),
+    updatedAt: new Date("2025-01-01"),
     ...overrides,
 });
 
