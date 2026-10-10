@@ -38,6 +38,14 @@ export default defineConfig({
                 functions: 47,
                 lines: 54,
                 statements: 54,
+                // The editor page is guarded by editor.page.test.tsx alone (E2E does not run in CI).
+                // Raise these when coverage grows; see TESTING.md §2.1.
+                "src/view/pages/editor.page.tsx": {
+                    branches: 91,
+                    functions: 97,
+                    lines: 97,
+                    statements: 97,
+                },
             },
             reportsDirectory: path.resolve(import.meta.dirname, "coverage"),
         },

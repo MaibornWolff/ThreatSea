@@ -11,18 +11,13 @@ import {
 } from "#test-utils/builders.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 
-vi.mock("./editor-sidebar-selected-component.component", () => ({
-    EditorSidebarSelectedComponent: () => <div data-testid="selected-component" />,
-}));
-vi.mock("./editor-sidebar-selected-connection.component", () => ({
-    EditorSidebarSelectedConnection: () => <div data-testid="selected-connection" />,
-}));
-vi.mock("./editor-sidebar-selected-communication-interface.component", () => ({
-    EditorSidebarSelectedCommunicationInterface: () => <div data-testid="selected-communication-interface" />,
-}));
-vi.mock("./editor-sidebar-selected-point-of-attack.component", () => ({
-    EditorSidebarSelectedPointOfAttack: () => <div data-testid="selected-point-of-attack" />,
-}));
+// The real panels render here: mocking them would leave the cached EditorSidebar module bound to
+// the mocks for every later test file (isolate: false). Each panel is identified by an element
+// only it renders.
+const componentPanel = () => screen.queryByText("Points of Attack");
+const connectionPanel = () => screen.queryByDisplayValue("Test Connection");
+const communicationInterfacePanel = () => screen.queryByText("Interface:");
+const pointOfAttackPanel = () => screen.queryByTestId("poa-breadcrumb-component");
 
 const setup = (propsOverride: Partial<EditorSidebarProps> = {}) => {
     const props = {
@@ -75,10 +70,10 @@ describe("EditorSidebar", () => {
         it("renders nothing when no selection is active", () => {
             setup();
 
-            expect(screen.queryByTestId("selected-component")).not.toBeInTheDocument();
-            expect(screen.queryByTestId("selected-connection")).not.toBeInTheDocument();
-            expect(screen.queryByTestId("selected-communication-interface")).not.toBeInTheDocument();
-            expect(screen.queryByTestId("selected-point-of-attack")).not.toBeInTheDocument();
+            expect(componentPanel()).not.toBeInTheDocument();
+            expect(connectionPanel()).not.toBeInTheDocument();
+            expect(communicationInterfacePanel()).not.toBeInTheDocument();
+            expect(pointOfAttackPanel()).not.toBeInTheDocument();
         });
 
         it("renders EditorSidebarSelectedComponent when a component is selected without a POA", () => {
@@ -88,8 +83,8 @@ describe("EditorSidebar", () => {
                 selectedPointOfAttack: null,
             });
 
-            expect(screen.getByTestId("selected-component")).toBeInTheDocument();
-            expect(screen.queryByTestId("selected-point-of-attack")).not.toBeInTheDocument();
+            expect(componentPanel()).toBeInTheDocument();
+            expect(pointOfAttackPanel()).not.toBeInTheDocument();
         });
 
         it("renders EditorSidebarSelectedConnection when a connection is selected", () => {
@@ -98,7 +93,7 @@ describe("EditorSidebar", () => {
                 selectedConnection: createConnection(),
             });
 
-            expect(screen.getByTestId("selected-connection")).toBeInTheDocument();
+            expect(connectionPanel()).toBeInTheDocument();
         });
 
         it("renders EditorSidebarSelectedCommunicationInterface when a connection point is selected", () => {
@@ -106,7 +101,7 @@ describe("EditorSidebar", () => {
                 selectedConnectionPoint: createConnectionPoint(),
             });
 
-            expect(screen.getByTestId("selected-communication-interface")).toBeInTheDocument();
+            expect(communicationInterfacePanel()).toBeInTheDocument();
         });
 
         it("renders EditorSidebarSelectedPointOfAttack when a component and POA are both selected", () => {
@@ -116,8 +111,8 @@ describe("EditorSidebar", () => {
                 selectedPointOfAttack: createPointOfAttack(),
             });
 
-            expect(screen.getByTestId("selected-point-of-attack")).toBeInTheDocument();
-            expect(screen.queryByTestId("selected-component")).not.toBeInTheDocument();
+            expect(pointOfAttackPanel()).toBeInTheDocument();
+            expect(componentPanel()).not.toBeInTheDocument();
         });
 
         it("does not render POA panel when selectedConnectionPoint is set", () => {
@@ -128,8 +123,8 @@ describe("EditorSidebar", () => {
                 selectedConnectionPoint: createConnectionPoint(),
             });
 
-            expect(screen.queryByTestId("selected-point-of-attack")).not.toBeInTheDocument();
-            expect(screen.getByTestId("selected-communication-interface")).toBeInTheDocument();
+            expect(pointOfAttackPanel()).not.toBeInTheDocument();
+            expect(communicationInterfacePanel()).toBeInTheDocument();
         });
 
         it("does not render POA panel when selectedConnection is set", () => {
@@ -141,8 +136,8 @@ describe("EditorSidebar", () => {
                 selectedConnection: createConnection(),
             });
 
-            expect(screen.queryByTestId("selected-point-of-attack")).not.toBeInTheDocument();
-            expect(screen.getByTestId("selected-connection")).toBeInTheDocument();
+            expect(pointOfAttackPanel()).not.toBeInTheDocument();
+            expect(connectionPanel()).toBeInTheDocument();
         });
     });
 });
