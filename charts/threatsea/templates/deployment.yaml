@@ -1,3 +1,5 @@
+{{- $env := include "threatsea.env" . | fromYamlArray }}
+{{- include "threatsea.checkExtraEnv" (dict "env" $env "extraEnv" .Values.extraEnv) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -46,78 +48,7 @@ spec:
               containerPort: {{ .Values.service.containerPort }}
               protocol: TCP
           env:
-            {{- include "threatsea.checkExtraEnv" . }}
-            # ── Server ────────────────────────────────────────────────────
-            - name: PORT
-              value: {{ .Values.service.containerPort | quote }}
-
-            # ── Logging ──────────────────────────────────────────────────
-            - name: LOG_LEVEL
-              value: {{ .Values.config.logLevel | toString | quote }}
-
-            # ── Origins ───────────────────────────────────────────────────
-            - name: ORIGIN_APP
-              value: {{ required "config.originApp is required" .Values.config.originApp | quote }}
-            - name: ORIGIN_BACKEND
-              value: {{ required "config.originBackend is required" .Values.config.originBackend | quote }}
-
-            # ── Auth ──────────────────────────────────────────────────────
-            - name: AUTH_METHOD
-              value: {{ .Values.config.authMethod | quote }}
-            {{- if eq .Values.config.authMethod "oidc" }}
-            - name: OIDC_ISSUER_URL
-              value: {{ required "config.oidc.issuerUrl is required when authMethod=oidc" .Values.config.oidc.issuerUrl | quote }}
-            - name: OIDC_CLIENT_ID
-              value: {{ required "config.oidc.clientId is required when authMethod=oidc" .Values.config.oidc.clientId | quote }}
-            - name: OIDC_ALLOW_HTTP
-              value: {{ .Values.config.oidc.allowHttp | toString | quote }}
-            - name: OIDC_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "threatsea.secretName" . }}
-                  key: {{ .Values.secret.keys.oidcClientSecret }}
-            {{- end }}
-
-            # ── Cookies ───────────────────────────────────────────────────
-            - name: COOKIES_SECURE_OPTION
-              value: {{ ternary "enabled" "disabled" .Values.config.cookies.secure | quote }}
-
-            # ── App Proxy ─────────────────────────────────────────────────
-            - name: USE_PROXY
-              value: {{ .Values.config.useProxy | toString | quote }}
-
-            # ── Secrets ───────────────────────────────────────────────────
-            - name: JWT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "threatsea.secretName" . }}
-                  key: {{ .Values.secret.keys.jwtSecret }}
-            - name: EXPRESS_SESSION_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "threatsea.secretName" . }}
-                  key: {{ .Values.secret.keys.sessionSecret }}
-
-            # ── Database ──────────────────────────────────────────────────
-            - name: DATABASE_HOST
-              value: {{ include "threatsea.databaseHost" . | quote }}
-            - name: DATABASE_PORT
-              value: {{ include "threatsea.databasePort" . | quote }}
-            - name: DATABASE_NAME
-              value: {{ .Values.database.name | quote }}
-            - name: DATABASE_USER
-              value: {{ .Values.database.user | quote }}
-            - name: DATABASE_TLS
-              value: {{ include "threatsea.databaseTls" . | quote }}
-            - name: DATABASE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  {{- include "threatsea.databasePasswordSecretKeyRef" . | nindent 18 }}
-
-            # ── Extra env ─────────────────────────────────────────────────
-            {{- with .Values.extraEnv }}
-            {{- toYaml . | nindent 12 }}
-            {{- end }}
+            {{- toYaml (concat $env .Values.extraEnv) | nindent 12 }}
           {{- with .Values.extraEnvFrom }}
           envFrom:
             {{- toYaml . | nindent 12 }}

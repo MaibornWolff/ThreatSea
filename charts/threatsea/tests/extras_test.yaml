@@ -70,3 +70,37 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content: {name: OIDC_SCOPE, value: openid profile email groups}
+
+  # Review Focus 4: the chart sets OIDC_* only under oidc, so there is no collision under fixed auth.
+  - it: accepts an OIDC variable in extraEnv under fixed auth
+    template: deployment.yaml
+    set:
+      config.authMethod: fixed
+      extraEnv:
+        - name: OIDC_CLIENT_SECRET
+          value: x
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: OIDC_CLIENT_SECRET, value: x}
+
+  - it: rejects an OIDC variable in extraEnv under oidc auth
+    template: deployment.yaml
+    set:
+      config.authMethod: oidc
+      extraEnv:
+        - name: OIDC_CLIENT_SECRET
+          value: x
+    asserts:
+      - failedTemplate:
+          errorPattern: chart-managed variable OIDC_CLIENT_SECRET
+
+  - it: rejects a secret-backed managed variable in extraEnv
+    template: deployment.yaml
+    set:
+      extraEnv:
+        - name: DATABASE_PASSWORD
+          value: x
+    asserts:
+      - failedTemplate:
+          errorPattern: chart-managed variable DATABASE_PASSWORD

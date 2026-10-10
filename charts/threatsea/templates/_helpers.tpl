@@ -1,13 +1,7 @@
-{{/*
-Expand the name of the chart.
-*/}}
 {{- define "threatsea.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
-{{/*
-Create a default fully qualified app name.
-*/}}
 {{- define "threatsea.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
@@ -21,16 +15,10 @@ Create a default fully qualified app name.
 {{- end }}
 {{- end }}
 
-{{/*
-Create chart label value.
-*/}}
 {{- define "threatsea.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
-{{/*
-Common labels.
-*/}}
 {{- define "threatsea.labels" -}}
 helm.sh/chart: {{ include "threatsea.chart" . }}
 {{ include "threatsea.selectorLabels" . }}
@@ -40,17 +28,11 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
-{{/*
-Selector labels.
-*/}}
 {{- define "threatsea.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "threatsea.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
-{{/*
-ServiceAccount name.
-*/}}
 {{- define "threatsea.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
 {{- default (include "threatsea.fullname" .) .Values.serviceAccount.name }}
@@ -59,9 +41,6 @@ ServiceAccount name.
 {{- end }}
 {{- end }}
 
-{{/*
-Secret name – the user-supplied Secret when secret.existingSecret is set, otherwise the chart-managed one.
-*/}}
 {{- define "threatsea.secretName" -}}
 {{- if .Values.secret.existingSecret }}
 {{- .Values.secret.existingSecret }}
@@ -82,17 +61,11 @@ stay within 63 characters; longer StatefulSet names yield no pods
 {{- printf "%s-postgresql" (include "threatsea.fullname" . | trunc 41 | trimSuffix "-") }}
 {{- end }}
 
-{{/*
-Bundled PostgreSQL selector labels.
-*/}}
 {{- define "threatsea.postgresql.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "threatsea.name" . | trunc 52 | trimSuffix "-" }}-postgresql
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
-{{/*
-Database host – the bundled Service when postgresql.enabled=true, else database.host.
-*/}}
 {{- define "threatsea.databaseHost" -}}
 {{- if .Values.postgresql.enabled }}
 {{- if .Values.database.host }}
@@ -104,23 +77,14 @@ Database host – the bundled Service when postgresql.enabled=true, else databas
 {{- end }}
 {{- end }}
 
-{{/*
-Bundled PostgreSQL image reference.
-*/}}
 {{- define "threatsea.postgresql.image" -}}
 {{- printf "%s:%s" .Values.postgresql.image.repository .Values.postgresql.image.tag }}
 {{- end }}
 
-{{/*
-Bundled PostgreSQL listen port, shared by the container, the Service and the database port.
-*/}}
 {{- define "threatsea.postgresql.port" -}}
 5432
 {{- end }}
 
-{{/*
-Database port – the bundled Service always listens on 5432, else database.port.
-*/}}
 {{- define "threatsea.databasePort" -}}
 {{- if .Values.postgresql.enabled }}
 {{- include "threatsea.postgresql.port" . }}
@@ -177,30 +141,77 @@ key: {{ .Values.secret.keys.databasePassword }}
 {{- end }}
 {{- end }}
 
-{{/*
-Image tag – falls back to appVersion.
-*/}}
 {{- define "threatsea.imageTag" -}}
 {{- .Values.image.tag | default .Chart.AppVersion }}
 {{- end }}
 
-{{/*
-Reject extraEnv entries that redefine a variable the chart already sets; Kubernetes
-would silently keep the last duplicate. The list mirrors the env block in
-deployment.yaml and must be updated whenever a variable is added or removed there.
-*/}}
+{{- /* Kubernetes silently keeps the last duplicate env name, so reject collisions. */ -}}
 {{- define "threatsea.checkExtraEnv" -}}
-{{- $managed := list "PORT" "LOG_LEVEL" "ORIGIN_APP" "ORIGIN_BACKEND" "AUTH_METHOD" "OIDC_ISSUER_URL" "OIDC_CLIENT_ID" "OIDC_ALLOW_HTTP" "OIDC_CLIENT_SECRET" "COOKIES_SECURE_OPTION" "USE_PROXY" "JWT_SECRET" "EXPRESS_SESSION_SECRET" "DATABASE_HOST" "DATABASE_PORT" "DATABASE_NAME" "DATABASE_USER" "DATABASE_TLS" "DATABASE_PASSWORD" -}}
-{{- range .Values.extraEnv }}
+{{- $managed := list }}
+{{- range .env }}
+{{- $managed = append $managed .name }}
+{{- end }}
+{{- range .extraEnv }}
 {{- if has .name $managed }}
 {{- fail (printf "extraEnv must not redefine the chart-managed variable %s" .name) }}
 {{- end }}
 {{- end }}
 {{- end }}
 
-{{/*
-Fail when both routing options are enabled.
-*/}}
+{{- define "threatsea.env" -}}
+- name: PORT
+  value: {{ .Values.service.containerPort | quote }}
+- name: LOG_LEVEL
+  value: {{ .Values.config.logLevel | toString | quote }}
+- name: ORIGIN_APP
+  value: {{ required "config.originApp is required" .Values.config.originApp | quote }}
+- name: ORIGIN_BACKEND
+  value: {{ required "config.originBackend is required" .Values.config.originBackend | quote }}
+- name: AUTH_METHOD
+  value: {{ .Values.config.authMethod | quote }}
+{{- if eq .Values.config.authMethod "oidc" }}
+- name: OIDC_ISSUER_URL
+  value: {{ required "config.oidc.issuerUrl is required when authMethod=oidc" .Values.config.oidc.issuerUrl | quote }}
+- name: OIDC_CLIENT_ID
+  value: {{ required "config.oidc.clientId is required when authMethod=oidc" .Values.config.oidc.clientId | quote }}
+- name: OIDC_ALLOW_HTTP
+  value: {{ .Values.config.oidc.allowHttp | toString | quote }}
+- name: OIDC_CLIENT_SECRET
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "threatsea.secretName" . }}
+      key: {{ .Values.secret.keys.oidcClientSecret }}
+{{- end }}
+- name: COOKIES_SECURE_OPTION
+  value: {{ ternary "enabled" "disabled" .Values.config.cookies.secure | quote }}
+- name: USE_PROXY
+  value: {{ .Values.config.useProxy | toString | quote }}
+- name: JWT_SECRET
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "threatsea.secretName" . }}
+      key: {{ .Values.secret.keys.jwtSecret }}
+- name: EXPRESS_SESSION_SECRET
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "threatsea.secretName" . }}
+      key: {{ .Values.secret.keys.sessionSecret }}
+- name: DATABASE_HOST
+  value: {{ include "threatsea.databaseHost" . | quote }}
+- name: DATABASE_PORT
+  value: {{ include "threatsea.databasePort" . | quote }}
+- name: DATABASE_NAME
+  value: {{ .Values.database.name | quote }}
+- name: DATABASE_USER
+  value: {{ .Values.database.user | quote }}
+- name: DATABASE_TLS
+  value: {{ include "threatsea.databaseTls" . | quote }}
+- name: DATABASE_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      {{- include "threatsea.databasePasswordSecretKeyRef" . | nindent 6 }}
+{{- end }}
+
 {{- define "threatsea.validateRouting" -}}
 {{- if and .Values.ingress.enabled .Values.gateway.enabled -}}
 {{- fail "ingress.enabled and gateway.enabled are mutually exclusive; enable only one" -}}
