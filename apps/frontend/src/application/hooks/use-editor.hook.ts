@@ -182,7 +182,7 @@ export const useEditor = ({
     }: { componentType: EditorComponentType } & Pick<Component, "x" | "y" | "gridX" | "gridY">): void => {
         const componentId = nanoid();
         const defaultName = componentType.isStandard
-            ? t(`contextMenu.${componentType.name}`, { defaultValue: componentType.name })
+            ? t(`componentNames.${componentType.name}`, { defaultValue: componentType.name })
             : componentType.name;
         dispatch(
             SystemActions.createComponent({

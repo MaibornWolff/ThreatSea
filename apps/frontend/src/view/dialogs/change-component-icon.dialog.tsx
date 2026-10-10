@@ -17,15 +17,15 @@ interface ChangeComponentIconDialogProps extends Omit<DialogProps, "component" |
     onConfirm: (symbol: string) => void;
 }
 
-// All standard icons offered (any placed component can use any). Labels reuse context-menu keys.
+// All standard icons offered (any placed component can use any).
 const STANDARD_ICON_OPTIONS: { type: STANDARD_COMPONENT_TYPES; labelKey: string }[] = [
-    { type: STANDARD_COMPONENT_TYPES.USERS, labelKey: "contextMenu.Users" },
-    { type: STANDARD_COMPONENT_TYPES.CLIENT, labelKey: "contextMenu.Client" },
-    { type: STANDARD_COMPONENT_TYPES.SERVER, labelKey: "contextMenu.Server" },
-    { type: STANDARD_COMPONENT_TYPES.DATABASE, labelKey: "contextMenu.Database" },
+    { type: STANDARD_COMPONENT_TYPES.USERS, labelKey: "componentNames.Users" },
+    { type: STANDARD_COMPONENT_TYPES.CLIENT, labelKey: "componentNames.Client" },
+    { type: STANDARD_COMPONENT_TYPES.SERVER, labelKey: "componentNames.Server" },
+    { type: STANDARD_COMPONENT_TYPES.DATABASE, labelKey: "componentNames.Database" },
     {
         type: STANDARD_COMPONENT_TYPES.COMMUNICATION_INFRASTRUCTURE,
-        labelKey: "contextMenu.Communication Infrastructure",
+        labelKey: "componentNames.Communication Infrastructure",
     },
 ];
 
