@@ -4,11 +4,11 @@ packages:
 
 catalog:
   "@types/node": 24.19.1
-  "@vitest/coverage-v8": 4.1.11
+  "@vitest/coverage-v8": 5.0.3
   dotenv: 18.0.6
   oxlint: 1.87.0
   oxlint-tsgolint: 7.0.2003
-  vitest: 4.1.11
+  vitest: 5.0.3
 
 allowBuilds:
   esbuild: false
