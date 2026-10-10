@@ -48,7 +48,7 @@ jobs:
       - name: Build backend
         run: pnpm build --filter="..../apps/backend"
       - name: Upload backend build artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: backend-dist
           path: apps/backend/dist/
@@ -69,7 +69,7 @@ jobs:
       - name: Build Frontend
         run: pnpm build --filter="..../apps/frontend" && pnpm type-check --filter="..../apps/frontend"
       - name: Upload frontend build artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: frontend-build
           path: apps/frontend/build/
@@ -118,7 +118,7 @@ jobs:
       - name: Test backend
         run: pnpm -r --filter="..../apps/backend" test:ci
       - name: Upload test results
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: backend-test-results
@@ -144,7 +144,7 @@ jobs:
       - name: Run component tests
         run: pnpm --filter="..../apps/frontend" test:unit:ci
       - name: Upload test results
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: frontend-test-results
