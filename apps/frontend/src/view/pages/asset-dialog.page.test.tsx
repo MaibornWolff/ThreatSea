@@ -46,6 +46,7 @@ describe("AssetDialogPage", () => {
                     isPending: false,
                     current: undefined,
                     deletingProjectId: undefined,
+                    lineOfToleranceDraft: undefined,
                 },
             },
         });
@@ -68,6 +69,7 @@ describe("AssetDialogPage", () => {
                     isPending: false,
                     current: undefined,
                     deletingProjectId: undefined,
+                    lineOfToleranceDraft: undefined,
                 },
             },
         });
@@ -91,6 +93,7 @@ describe("AssetDialogPage", () => {
                     isPending: false,
                     current: project,
                     deletingProjectId: undefined,
+                    lineOfToleranceDraft: undefined,
                 },
             },
         });
@@ -114,6 +117,7 @@ describe("AssetDialogPage", () => {
                     isPending: false,
                     current: undefined,
                     deletingProjectId: undefined,
+                    lineOfToleranceDraft: undefined,
                 },
             },
         });
@@ -135,6 +139,7 @@ describe("AssetDialogPage", () => {
                     isPending: false,
                     current: undefined,
                     deletingProjectId: undefined,
+                    lineOfToleranceDraft: undefined,
                 },
             },
         });
@@ -158,6 +163,7 @@ describe("AssetDialogPage", () => {
                     isPending: false,
                     current: undefined,
                     deletingProjectId: undefined,
+                    lineOfToleranceDraft: undefined,
                 },
             },
         });

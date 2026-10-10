@@ -19,6 +19,8 @@ export class RiskPage extends BasePage {
 
     // Line of tolerance & measure timeline
     readonly lineOfToleranceThumbs: Locator;
+    readonly lineOfToleranceSaveButton: Locator;
+    readonly lineOfToleranceResetButton: Locator;
     readonly timelineThumb: Locator;
 
     // "Apply Measure" dialog
@@ -59,6 +61,8 @@ export class RiskPage extends BasePage {
         // implicit (from the input type), not a literal `role` attribute — getByRole resolves
         // that correctly, a `[role="slider"]` CSS attribute selector never would.
         this.lineOfToleranceThumbs = page.getByTestId("risk-page_line-of-tolerance-slider").getByRole("slider");
+        this.lineOfToleranceSaveButton = page.getByTestId("risk-page_line-of-tolerance-save-button");
+        this.lineOfToleranceResetButton = page.getByTestId("risk-page_line-of-tolerance-reset-button");
         this.timelineThumb = page.getByTestId("risk-page_measure-timeline-slider").getByRole("slider");
 
         // MUI puts the interactive combobox (and its aria-disabled state) on an inner element,
