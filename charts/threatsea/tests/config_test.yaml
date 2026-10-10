@@ -67,7 +67,7 @@ tests:
       - contains:
           { path: "spec.template.spec.containers[0].env", content: { name: COOKIES_SECURE_OPTION, value: "disabled" } }
 
-  # Review Focus 2: 0 is a documented log level and is falsy in Go templates.
+  # 0 is a documented log level and is falsy in Go templates.
   - it: renders log level 0 rather than dropping it
     template: deployment.yaml
     set:
@@ -96,7 +96,6 @@ tests:
       - failedTemplate:
           errorPattern: "additional properties .configg. not allowed"
 
-  # Review Focus 5
   - it: rejects database.host together with the bundled database
     template: deployment.yaml
     set:

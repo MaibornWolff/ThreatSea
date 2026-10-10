@@ -48,7 +48,7 @@ tests:
       - notExists: { path: "spec.template.spec.containers[0].volumeMounts" }
       - notExists: { path: "spec.template.spec.volumes" }
 
-  # Review Focus 1: a duplicate env name is silently resolved by Kubernetes
+  # A duplicate env name is silently resolved by Kubernetes
   # keeping the last entry, so the chart must reject the collision.
   - it: rejects an extraEnv entry that shadows a chart-managed variable
     template: deployment.yaml
@@ -71,7 +71,7 @@ tests:
           path: spec.template.spec.containers[0].env
           content: { name: OIDC_SCOPE, value: openid profile email groups }
 
-  # Review Focus 4: the chart sets OIDC_* only under oidc, so there is no collision under fixed auth.
+  # The chart sets OIDC_* only under oidc, so there is no collision under fixed auth.
   - it: accepts an OIDC variable in extraEnv under fixed auth
     template: deployment.yaml
     set:

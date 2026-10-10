@@ -175,7 +175,7 @@ tests:
           path: spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem
           value: true
 
-  # Review Focus 4: a 63-character fullnameOverride must not make the database's
+  # A 63-character fullnameOverride must not make the database's
   # Service name collide with the app's Service name. The app name below is 63
   # a's; the database name must be 41 a's + "-postgresql" (52 characters). 52, not
   # 63, because the StatefulSet controller adds pod labels such as
