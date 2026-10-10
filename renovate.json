@@ -40,7 +40,7 @@
   ],
   "packageRules": [
     {
-      "description": "No major postgres image updates in the Helm chart. The bundled database hardcodes PGDATA=/var/lib/postgresql/18/docker, so a major bump breaks existing PVCs. Minor and patch bumps are allowed but need the chart README regenerated (helm-docs) because the image tag appears in it.",
+      "description": "No major postgres image updates in the Helm chart. The postgres image keeps its data under /var/lib/postgresql/<major>/docker, so a major bump starts a new, empty cluster. Minor and patch bumps are allowed but need the chart README regenerated (helm-docs) because the image tag appears in it.",
       "matchFileNames": ["charts/**"],
       "matchPackageNames": ["postgres"],
       "matchUpdateTypes": ["major"],
