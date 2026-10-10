@@ -37,7 +37,13 @@ tests:
           content: {name: PGHOST, value: db.example.com}
       - equal:
           path: spec.containers[0].command
-          value: [pg_isready, -q]
+          value: [psql, -X, -v, ON_ERROR_STOP=1, -c, "SELECT 1"]
+      - equal:
+          path: spec.containers[0].name
+          value: psql
+      - contains:
+          path: spec.containers[0].env
+          content: {name: PGCONNECT_TIMEOUT, value: "10"}
       - equal:
           path: spec.securityContext.runAsUser
           value: 70
@@ -75,3 +81,33 @@ tests:
       - equal:
           path: spec.containers[0].image
           value: postgres:18.7-alpine
+
+  - it: requires TLS for an external database with database.tls
+    set:
+      postgresql.enabled: false
+      database.host: db.example.com
+      database.tls: true
+    asserts:
+      - contains:
+          path: spec.containers[0].env
+          content: {name: PGSSLMODE, value: require}
+
+  - it: disables TLS for an external database without database.tls
+    set:
+      postgresql.enabled: false
+      database.host: db.example.com
+      database.tls: false
+    asserts:
+      - contains:
+          path: spec.containers[0].env
+          content: {name: PGSSLMODE, value: disable}
+
+  - it: disables TLS for the bundled database even with database.tls
+    set:
+      postgresql.enabled: true
+      postgresql.auth.password: pw
+      database.tls: true
+    asserts:
+      - contains:
+          path: spec.containers[0].env
+          content: {name: PGSSLMODE, value: disable}
