@@ -19,11 +19,6 @@ ThreatSea is not exposed externally. To access it locally, run:
 Then open: http://localhost:8080
 {{- end }}
 
-{{- if ne .Values.config.authMethod "oidc" }}
-
-⚠  Auth method is set to "{{ .Values.config.authMethod }}", not "oidc". This enables fixed-profile authentication with hardcoded test users. Use it for development only.
-{{- end }}
-
 {{- if not .Values.config.cookies.secure }}
 
 ⚠  Secure cookies are DISABLED. Only acceptable in non-HTTPS development environments.

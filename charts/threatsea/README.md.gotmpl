@@ -127,7 +127,7 @@ Things to know before relying on it, even for an evaluation:
 
 ## Authentication
 
-`config.authMethod` defaults to `oidc`. Any other value means fixed-profile authentication with hardcoded test users. That mode is for development only and must never be exposed to real users.
+The chart supports only OIDC, and `config.authMethod` accepts only `oidc`. The backend also has fixed-profile authentication with hardcoded test users, but that is for local development only, so the chart deliberately does not allow it.
 
 ## Testing the release
 

@@ -82,7 +82,7 @@
         },
         "authMethod": {
           "type": "string",
-          "enum": ["oidc", "fixed"]
+          "enum": ["oidc"]
         },
         "oidc": {
           "type": "object",

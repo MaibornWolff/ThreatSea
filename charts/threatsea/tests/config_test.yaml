@@ -13,21 +13,28 @@ set:
   secret.values.databasePassword: dbpw
   database.host: db.example.com
 tests:
-  # Finding 3: the backend treats anything but exactly "oidc" as fixed-profile
-  # auth with hardcoded test users, so a typo must not render.
-  - it: rejects an authMethod that is not exactly oidc or fixed
+  # The backend treats anything but exactly "oidc" as fixed-profile auth with
+  # hardcoded test users, so neither "fixed" nor a typo may render.
+  - it: rejects fixed as authMethod
+    set:
+      config.authMethod: fixed
+    asserts:
+      - failedTemplate:
+          errorPattern: "authMethod.*value must be 'oidc'"
+
+  - it: rejects an authMethod that is not exactly oidc
     set:
       config.authMethod: OIDC
     asserts:
       - failedTemplate:
-          errorPattern: "authMethod.*value must be one of"
+          errorPattern: "authMethod.*value must be 'oidc'"
 
   - it: rejects a trailing space in authMethod
     set:
       config.authMethod: "oidc "
     asserts:
       - failedTemplate:
-          errorPattern: "authMethod.*value must be one of"
+          errorPattern: "authMethod.*value must be 'oidc'"
 
   # Finding 8
   - it: requires originApp

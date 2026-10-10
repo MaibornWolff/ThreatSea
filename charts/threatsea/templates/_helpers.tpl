@@ -169,11 +169,10 @@ key: {{ .Values.secret.keys.databasePassword | quote }}
   value: {{ required "config.originBackend is required" .Values.config.originBackend | quote }}
 - name: AUTH_METHOD
   value: {{ .Values.config.authMethod | quote }}
-{{- if eq .Values.config.authMethod "oidc" }}
 - name: OIDC_ISSUER_URL
-  value: {{ required "config.oidc.issuerUrl is required when authMethod=oidc" .Values.config.oidc.issuerUrl | quote }}
+  value: {{ required "config.oidc.issuerUrl is required" .Values.config.oidc.issuerUrl | quote }}
 - name: OIDC_CLIENT_ID
-  value: {{ required "config.oidc.clientId is required when authMethod=oidc" .Values.config.oidc.clientId | quote }}
+  value: {{ required "config.oidc.clientId is required" .Values.config.oidc.clientId | quote }}
 - name: OIDC_ALLOW_HTTP
   value: {{ .Values.config.oidc.allowHttp | toString | quote }}
 - name: OIDC_CLIENT_SECRET
@@ -181,7 +180,6 @@ key: {{ .Values.secret.keys.databasePassword | quote }}
     secretKeyRef:
       name: {{ include "threatsea.secretName" . | quote }}
       key: {{ .Values.secret.keys.oidcClientSecret | quote }}
-{{- end }}
 - name: COOKIES_SECURE_OPTION
   value: {{ ternary "enabled" "disabled" .Values.config.cookies.secure | quote }}
 - name: USE_PROXY

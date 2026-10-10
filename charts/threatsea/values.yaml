@@ -71,11 +71,12 @@ config:
   # Must be the externally reachable backend URL, otherwise OIDC login fails.
   originBackend: ""
 
-  # -- Authentication method, `oidc` or `fixed`. `fixed` enables fixed-profile
-  # authentication with hardcoded test users and is for development only.
+  # -- Authentication method. The only supported value is `oidc`. Fixed-profile
+  # authentication uses hardcoded test users and is for local development only,
+  # so the chart does not offer it.
   authMethod: "oidc"
   oidc:
-    # -- OIDC issuer URL (required when authMethod=oidc)
+    # -- OIDC issuer URL (required)
     issuerUrl: ""
     # -- OIDC client ID
     clientId: ""
@@ -114,7 +115,7 @@ secret:
     jwtSecret: ""
     # -- Secret used to sign Express session cookies
     sessionSecret: ""
-    # -- OIDC client secret (only required when config.authMethod=oidc)
+    # -- OIDC client secret (required)
     oidcClientSecret: ""
     # -- Database password (used only when postgresql.enabled=false and secret.existingSecret is empty)
     databasePassword: ""

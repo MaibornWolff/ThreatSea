@@ -132,7 +132,7 @@ Things to know before relying on it, even for an evaluation:
 
 ## Authentication
 
-`config.authMethod` defaults to `oidc`. Any other value means fixed-profile authentication with hardcoded test users. That mode is for development only and must never be exposed to real users.
+The chart supports only OIDC, and `config.authMethod` accepts only `oidc`. The backend also has fixed-profile authentication with hardcoded test users, but that is for local development only, so the chart deliberately does not allow it.
 
 ## Testing the release
 
@@ -143,12 +143,12 @@ Things to know before relying on it, even for an evaluation:
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Affinity rules |
-| config.authMethod | string | `"oidc"` | Authentication method, `oidc` or `fixed`. `fixed` enables fixed-profile authentication with hardcoded test users and is for development only. |
+| config.authMethod | string | `"oidc"` | Authentication method. The only supported value is `oidc`. Fixed-profile authentication uses hardcoded test users and is for local development only, so the chart does not offer it. |
 | config.cookies.secure | bool | `true` | Send cookies with the Secure flag (boolean). Set to false only in development (non-HTTPS). |
 | config.logLevel | int | `3` | Log level as an integer: 0 (debug), 1 (info), 2 (warning), 3 (error) |
 | config.oidc.allowHttp | bool | `false` | Allow plain HTTP for OIDC (boolean, never enable in production) |
 | config.oidc.clientId | string | `""` | OIDC client ID |
-| config.oidc.issuerUrl | string | `""` | OIDC issuer URL (required when authMethod=oidc) |
+| config.oidc.issuerUrl | string | `""` | OIDC issuer URL (required) |
 | config.originApp | string | `""` | Origin of the frontend (used for CORS and as the post-login redirect target) |
 | config.originBackend | string | `""` | Origin of the backend (used to build the OIDC redirect/callback URL). Must be the externally reachable backend URL, otherwise OIDC login fails. |
 | config.useProxy | bool | `true` | Set to true (boolean) when behind a reverse proxy / ingress (enables trust proxy) |
@@ -203,7 +203,7 @@ Things to know before relying on it, even for an evaluation:
 | secret.values | object | `{"databasePassword":"","jwtSecret":"","oidcClientSecret":"","sessionSecret":""}` | Values for the chart-created Secret (used only when existingSecret is empty) |
 | secret.values.databasePassword | string | `""` | Database password (used only when postgresql.enabled=false and secret.existingSecret is empty) |
 | secret.values.jwtSecret | string | `""` | Secret used to sign JWTs |
-| secret.values.oidcClientSecret | string | `""` | OIDC client secret (only required when config.authMethod=oidc) |
+| secret.values.oidcClientSecret | string | `""` | OIDC client secret (required) |
 | secret.values.sessionSecret | string | `""` | Secret used to sign Express session cookies |
 | service.annotations | object | `{}` | Annotations for the Service |
 | service.containerPort | int | `8000` | Port the ThreatSea container listens on |
