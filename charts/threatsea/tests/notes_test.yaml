@@ -1,0 +1,29 @@
+suite: install notes
+templates:
+  - NOTES.txt
+set:
+  config.originApp: https://app.example.com
+  config.originBackend: https://api.example.com
+  config.oidc.issuerUrl: https://idp.example.com
+  config.oidc.clientId: threatsea
+  secret.values.jwtSecret: jwt
+  secret.values.sessionSecret: session
+  secret.values.oidcClientSecret: oidc
+  secret.values.databasePassword: dbpw
+tests:
+  - it: names the external database host
+    set:
+      database.host: db.example.com
+    asserts:
+      - matchRegexRaw:
+          pattern: "Using external PostgreSQL at: db\\.example\\.com"
+
+  - it: names the secret key holding the database host
+    set:
+      secret.existingSecret: my-secret
+      secret.configKeys.databaseHost: db-host-key
+    asserts:
+      - matchRegexRaw:
+          pattern: "Using external PostgreSQL at the host in key db-host-key of Secret my-secret"
+      - notMatchRegexRaw:
+          pattern: "PostgreSQL at: *\\n"
