@@ -110,7 +110,7 @@ secret:
 
   # -- Keys in secret.existingSecret to read non-secret settings from, for setups
   # that keep them alongside the secrets (e.g. one Key Vault-backed Secret). A
-  # non-empty key replaces the plain value and takes precedence over it. Requires
+  # non-empty key replaces the plain value; rendering fails when both are set. Requires
   # secret.existingSecret; the database keys also require postgresql.enabled=false.
   configKeys:
     # -- Key holding the OIDC issuer URL, replacing config.oidc.issuerUrl
@@ -143,10 +143,10 @@ database:
   host: ""
   # -- Port of the PostgreSQL server
   port: 5432
-  # -- Database name. Also the database the bundled PostgreSQL creates.
-  name: threatsea
-  # -- Database user. Also the user the bundled PostgreSQL creates.
-  user: threatsea
+  # -- Database name. Defaults to `threatsea` when empty. Also the database the bundled PostgreSQL creates.
+  name: ""
+  # -- Database user. Defaults to `threatsea` when empty. Also the user the bundled PostgreSQL creates.
+  user: ""
   # -- Connect over TLS (boolean). Forced off when postgresql.enabled=true, which serves plaintext.
   tls: true
 

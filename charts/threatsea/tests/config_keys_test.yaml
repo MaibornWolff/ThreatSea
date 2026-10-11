@@ -32,14 +32,30 @@ tests:
           path: spec.template.spec.containers[0].env
           content: { name: DATABASE_USER, valueFrom: { secretKeyRef: { name: my-secret, key: db-user-key } } }
 
-  - it: lets the key take precedence over the plain value
+  # A key and its plain value are both set: one would be silently ignored.
+  - it: rejects a database key together with its plain value
     template: deployment.yaml
     set:
-      database.name: ignored
+      database.name: threatsea
     asserts:
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content: { name: DATABASE_NAME, valueFrom: { secretKeyRef: { name: my-secret, key: db-name-key } } }
+      - failedTemplate:
+          errorPattern: database.name must be empty when secret.configKeys.databaseName is set
+
+  - it: rejects an OIDC key together with its plain value
+    template: deployment.yaml
+    set:
+      config.oidc.issuerUrl: https://idp.example.com
+    asserts:
+      - failedTemplate:
+          errorPattern: config.oidc.issuerUrl must be empty when secret.configKeys.oidcIssuerUrl is set
+
+  - it: rejects the database host key together with database.host
+    template: deployment.yaml
+    set:
+      database.host: db.example.com
+    asserts:
+      - failedTemplate:
+          errorPattern: database.host must be empty when secret.configKeys.databaseHost is set
 
   - it: keeps plain values for the keys left empty
     template: deployment.yaml

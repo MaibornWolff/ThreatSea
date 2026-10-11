@@ -232,3 +232,16 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].startupProbe.exec.command
           value: [pg_isready, -h, 127.0.0.1, -U, threatsea, -d, threatsea]
+
+  - it: creates the threatsea database and user by default
+    template: postgresql-statefulset.yaml
+    set:
+      postgresql.enabled: true
+      postgresql.auth.password: pw
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: POSTGRES_DB, value: threatsea }
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: POSTGRES_USER, value: threatsea }

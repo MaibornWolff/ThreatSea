@@ -39,9 +39,9 @@ spec:
               containerPort: {{ include "threatsea.postgresql.port" . }}
           env:
             - name: POSTGRES_DB
-              value: {{ .Values.database.name | quote }}
+              value: {{ include "threatsea.databaseName" . | quote }}
             - name: POSTGRES_USER
-              value: {{ .Values.database.user | quote }}
+              value: {{ include "threatsea.databaseUser" . | quote }}
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:

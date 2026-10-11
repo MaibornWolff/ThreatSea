@@ -98,14 +98,22 @@ Bundled PostgreSQL readiness check. Connects over TCP (-h 127.0.0.1): without -h
 pg_isready probes the Unix socket, which the image's temporary initdb server also
 serves, so the probe could pass during first-time initialisation.
 */}}
+{{- define "threatsea.databaseName" -}}
+{{- .Values.database.name | default "threatsea" }}
+{{- end }}
+
+{{- define "threatsea.databaseUser" -}}
+{{- .Values.database.user | default "threatsea" }}
+{{- end }}
+
 {{- define "threatsea.postgresql.isReady" -}}
 - pg_isready
 - -h
 - 127.0.0.1
 - -U
-- {{ .Values.database.user | quote }}
+- {{ include "threatsea.databaseUser" . | quote }}
 - -d
-- {{ .Values.database.name | quote }}
+- {{ include "threatsea.databaseName" . | quote }}
 {{- end }}
 
 {{/*
@@ -177,16 +185,30 @@ optional required message, checked only when the plain value is used.
 {{- end }}
 
 {{/*
-secret.configKeys can only point into an existing Secret, and the bundled database is
-created from the plain database.name and database.user, so both misuses are rejected.
+secret.configKeys can only point into an existing Secret, the bundled database is
+created from the plain database.name and database.user, and a key set together with
+its plain value would silently ignore one of them, so all three misuses are rejected.
 */}}
 {{- define "threatsea.validateConfigKeys" -}}
 {{- $keys := .Values.secret.configKeys -}}
-{{- if and (not .Values.secret.existingSecret) (or $keys.oidcIssuerUrl $keys.oidcClientId $keys.databaseHost $keys.databaseName $keys.databaseUser) -}}
+{{- $databaseKeysSet := or $keys.databaseHost $keys.databaseName $keys.databaseUser -}}
+{{- if and (not .Values.secret.existingSecret) (or $keys.oidcIssuerUrl $keys.oidcClientId $databaseKeysSet) -}}
 {{- fail "secret.configKeys requires secret.existingSecret; the chart-created Secret holds only secret.values" -}}
 {{- end -}}
-{{- if and .Values.postgresql.enabled (or $keys.databaseHost $keys.databaseName $keys.databaseUser) -}}
+{{- if and .Values.postgresql.enabled $databaseKeysSet -}}
 {{- fail "secret.configKeys.database* must be empty when postgresql.enabled=true; the bundled database is created from database.name and database.user" -}}
+{{- end -}}
+{{- $plainValues := dict
+  "oidcIssuerUrl" (list "config.oidc.issuerUrl" .Values.config.oidc.issuerUrl)
+  "oidcClientId" (list "config.oidc.clientId" .Values.config.oidc.clientId)
+  "databaseHost" (list "database.host" .Values.database.host)
+  "databaseName" (list "database.name" .Values.database.name)
+  "databaseUser" (list "database.user" .Values.database.user)
+-}}
+{{- range $keyName, $plainValue := $plainValues -}}
+{{- if and (get $keys $keyName) (index $plainValue 1) -}}
+{{- fail (printf "%s must be empty when secret.configKeys.%s is set; the key replaces it" (index $plainValue 0) $keyName) -}}
+{{- end -}}
 {{- end -}}
 {{- end }}
 
@@ -205,8 +227,8 @@ app and the connection test. Expects a dict with ctx, host, port, name and user.
 {{- include "threatsea.configEnv" (dict "ctx" $ctx "name" .host "key" $keys.databaseHost "value" $host) }}
 - name: {{ .port }}
   value: {{ include "threatsea.databasePort" $ctx | quote }}
-{{ include "threatsea.configEnv" (dict "ctx" $ctx "name" .name "key" $keys.databaseName "value" $ctx.Values.database.name) }}
-{{ include "threatsea.configEnv" (dict "ctx" $ctx "name" .user "key" $keys.databaseUser "value" $ctx.Values.database.user) }}
+{{ include "threatsea.configEnv" (dict "ctx" $ctx "name" .name "key" $keys.databaseName "value" (include "threatsea.databaseName" $ctx)) }}
+{{ include "threatsea.configEnv" (dict "ctx" $ctx "name" .user "key" $keys.databaseUser "value" (include "threatsea.databaseUser" $ctx)) }}
 {{- end }}
 
 {{- define "threatsea.env" -}}

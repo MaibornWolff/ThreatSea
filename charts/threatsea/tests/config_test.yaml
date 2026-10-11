@@ -94,3 +94,13 @@ tests:
     asserts:
       - failedTemplate:
           errorPattern: database.host must not be set when postgresql.enabled=true
+
+  - it: falls back to threatsea for the database name and user
+    template: deployment.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: DATABASE_NAME, value: threatsea }
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: DATABASE_USER, value: threatsea }

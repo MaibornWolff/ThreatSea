@@ -64,7 +64,7 @@ There are two ways to supply the secrets:
 
 The chart cannot look inside an existing Secret. If one of the keys is missing, the pod starts and then crash-loops with `Environment variable ... has to be defined`.
 
-If your existing Secret also holds non-secret settings, for example because it is synced from a key vault, the chart can read them from there too. Set the matching `secret.configKeys.*` entry to the key name and leave the plain value empty: `oidcIssuerUrl`, `oidcClientId`, `databaseHost`, `databaseName` and `databaseUser` replace `config.oidc.issuerUrl`, `config.oidc.clientId`, `database.host`, `database.name` and `database.user`. The database keys cannot be combined with `postgresql.enabled=true`.
+If your existing Secret also holds non-secret settings, for example because it is synced from a key vault, the chart can read them from there too. Set the matching `secret.configKeys.*` entry to the key name and leave the plain value empty; rendering fails when both are set: `oidcIssuerUrl`, `oidcClientId`, `databaseHost`, `databaseName` and `databaseUser` replace `config.oidc.issuerUrl`, `config.oidc.clientId`, `database.host`, `database.name` and `database.user`. The database keys cannot be combined with `postgresql.enabled=true`.
 
 With `postgresql.enabled=true` the `database-password` key is not read. The bundled database's password comes from `postgresql.auth.*`.
 
@@ -151,10 +151,10 @@ Things to know before relying on it, even for an evaluation:
 | config.useProxy | bool | `true` | Set to true (boolean) when behind a reverse proxy / ingress (enables trust proxy) |
 | containerSecurityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true}` | Container-level security context. The root filesystem is read-only; use `extraVolumes` for any path the container must write to. |
 | database.host | string | `""` | Hostname of an external PostgreSQL server. Required unless postgresql.enabled=true. |
-| database.name | string | `"threatsea"` | Database name. Also the database the bundled PostgreSQL creates. |
+| database.name | string | `""` | Database name. Defaults to `threatsea` when empty. Also the database the bundled PostgreSQL creates. |
 | database.port | int | `5432` | Port of the PostgreSQL server |
 | database.tls | bool | `true` | Connect over TLS (boolean). Forced off when postgresql.enabled=true, which serves plaintext. |
-| database.user | string | `"threatsea"` | Database user. Also the user the bundled PostgreSQL creates. |
+| database.user | string | `""` | Database user. Defaults to `threatsea` when empty. Also the user the bundled PostgreSQL creates. |
 | deploymentAnnotations | object | `{}` | Annotations added to the Deployment, e.g. for Stakater Reloader |
 | extraEnv | list | `[]` | Extra environment variables to inject into the container |
 | extraEnvFrom | list | `[]` | Extra environment sources (configMapRef / secretRef) added to the container's `envFrom` |
@@ -196,7 +196,7 @@ Things to know before relying on it, even for an evaluation:
 | readinessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/api/health","port":"http"},"periodSeconds":10,"timeoutSeconds":5}` | Readiness probe of the ThreatSea container |
 | replicaCount | int | `1` | Number of replicas. Sessions are stored in PostgreSQL and survive across replicas, but whether other in-process state prevents horizontal scaling has not been verified, so `1` is the tested configuration. |
 | resources | object | `{"limits":{"memory":"512Mi"},"requests":{"cpu":"100m","memory":"256Mi"}}` | Resource requests and limits of the ThreatSea container |
-| secret.configKeys | object | `{"databaseHost":"","databaseName":"","databaseUser":"","oidcClientId":"","oidcIssuerUrl":""}` | Keys in secret.existingSecret to read non-secret settings from, for setups that keep them alongside the secrets (e.g. one Key Vault-backed Secret). A non-empty key replaces the plain value and takes precedence over it. Requires secret.existingSecret; the database keys also require postgresql.enabled=false. |
+| secret.configKeys | object | `{"databaseHost":"","databaseName":"","databaseUser":"","oidcClientId":"","oidcIssuerUrl":""}` | Keys in secret.existingSecret to read non-secret settings from, for setups that keep them alongside the secrets (e.g. one Key Vault-backed Secret). A non-empty key replaces the plain value; rendering fails when both are set. Requires secret.existingSecret; the database keys also require postgresql.enabled=false. |
 | secret.configKeys.databaseHost | string | `""` | Key holding the database host, replacing database.host |
 | secret.configKeys.databaseName | string | `""` | Key holding the database name, replacing database.name |
 | secret.configKeys.databaseUser | string | `""` | Key holding the database user, replacing database.user |
