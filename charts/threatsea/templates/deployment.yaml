@@ -7,6 +7,10 @@ metadata:
   name: {{ include "threatsea.fullname" . }}
   labels:
     {{- include "threatsea.labels" . | nindent 4 }}
+  {{- with .Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
   {{- with .Values.strategy }}

@@ -157,6 +157,58 @@ key: {{ .Values.secret.keys.databasePassword | quote }}
 {{- end }}
 {{- end }}
 
+{{/*
+Env entry read from secret.existingSecret when a secret.configKeys key is set,
+otherwise from the plain value. Expects a dict with ctx, name, key, value and an
+optional required message, checked only when the plain value is used.
+*/}}
+{{- define "threatsea.configEnv" -}}
+- name: {{ .name }}
+{{- if .key }}
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "threatsea.secretName" .ctx | quote }}
+      key: {{ .key | quote }}
+{{- else if .required }}
+  value: {{ required .required .value | quote }}
+{{- else }}
+  value: {{ .value | quote }}
+{{- end }}
+{{- end }}
+
+{{/*
+secret.configKeys can only point into an existing Secret, and the bundled database is
+created from the plain database.name and database.user, so both misuses are rejected.
+*/}}
+{{- define "threatsea.validateConfigKeys" -}}
+{{- $keys := .Values.secret.configKeys -}}
+{{- if and (not .Values.secret.existingSecret) (or $keys.oidcIssuerUrl $keys.oidcClientId $keys.databaseHost $keys.databaseName $keys.databaseUser) -}}
+{{- fail "secret.configKeys requires secret.existingSecret; the chart-created Secret holds only secret.values" -}}
+{{- end -}}
+{{- if and .Values.postgresql.enabled (or $keys.databaseHost $keys.databaseName $keys.databaseUser) -}}
+{{- fail "secret.configKeys.database* must be empty when postgresql.enabled=true; the bundled database is created from database.name and database.user" -}}
+{{- end -}}
+{{- end }}
+
+{{/*
+Database host, port, name and user env entries under the given names, shared by the
+app and the connection test. Expects a dict with ctx, host, port, name and user.
+*/}}
+{{- define "threatsea.databaseEnv" -}}
+{{- $ctx := .ctx }}
+{{- include "threatsea.validateConfigKeys" $ctx }}
+{{- $keys := $ctx.Values.secret.configKeys }}
+{{- $host := "" }}
+{{- if not $keys.databaseHost }}
+{{- $host = include "threatsea.databaseHost" $ctx }}
+{{- end }}
+{{- include "threatsea.configEnv" (dict "ctx" $ctx "name" .host "key" $keys.databaseHost "value" $host) }}
+- name: {{ .port }}
+  value: {{ include "threatsea.databasePort" $ctx | quote }}
+{{ include "threatsea.configEnv" (dict "ctx" $ctx "name" .name "key" $keys.databaseName "value" $ctx.Values.database.name) }}
+{{ include "threatsea.configEnv" (dict "ctx" $ctx "name" .user "key" $keys.databaseUser "value" $ctx.Values.database.user) }}
+{{- end }}
+
 {{- define "threatsea.env" -}}
 - name: PORT
   value: {{ .Values.service.containerPort | quote }}
@@ -168,10 +220,8 @@ key: {{ .Values.secret.keys.databasePassword | quote }}
   value: {{ required "config.originBackend is required" .Values.config.originBackend | quote }}
 - name: AUTH_METHOD
   value: "oidc"
-- name: OIDC_ISSUER_URL
-  value: {{ required "config.oidc.issuerUrl is required" .Values.config.oidc.issuerUrl | quote }}
-- name: OIDC_CLIENT_ID
-  value: {{ required "config.oidc.clientId is required" .Values.config.oidc.clientId | quote }}
+{{ include "threatsea.configEnv" (dict "ctx" . "name" "OIDC_ISSUER_URL" "key" .Values.secret.configKeys.oidcIssuerUrl "value" .Values.config.oidc.issuerUrl "required" "config.oidc.issuerUrl is required") }}
+{{ include "threatsea.configEnv" (dict "ctx" . "name" "OIDC_CLIENT_ID" "key" .Values.secret.configKeys.oidcClientId "value" .Values.config.oidc.clientId "required" "config.oidc.clientId is required") }}
 - name: OIDC_ALLOW_HTTP
   value: {{ .Values.config.oidc.allowHttp | toString | quote }}
 - name: OIDC_CLIENT_SECRET
@@ -193,14 +243,7 @@ key: {{ .Values.secret.keys.databasePassword | quote }}
     secretKeyRef:
       name: {{ include "threatsea.secretName" . | quote }}
       key: {{ .Values.secret.keys.sessionSecret | quote }}
-- name: DATABASE_HOST
-  value: {{ include "threatsea.databaseHost" . | quote }}
-- name: DATABASE_PORT
-  value: {{ include "threatsea.databasePort" . | quote }}
-- name: DATABASE_NAME
-  value: {{ .Values.database.name | quote }}
-- name: DATABASE_USER
-  value: {{ .Values.database.user | quote }}
+{{ include "threatsea.databaseEnv" (dict "ctx" . "host" "DATABASE_HOST" "port" "DATABASE_PORT" "name" "DATABASE_NAME" "user" "DATABASE_USER") }}
 - name: DATABASE_TLS
   value: {{ include "threatsea.databaseTls" . | quote }}
 - name: DATABASE_PASSWORD

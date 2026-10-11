@@ -31,14 +31,7 @@ spec:
       securityContext:
         {{- toYaml .Values.containerSecurityContext | nindent 8 }}
       env:
-        - name: PGHOST
-          value: {{ include "threatsea.databaseHost" . | quote }}
-        - name: PGPORT
-          value: {{ include "threatsea.databasePort" . | quote }}
-        - name: PGUSER
-          value: {{ .Values.database.user | quote }}
-        - name: PGDATABASE
-          value: {{ .Values.database.name | quote }}
+        {{- include "threatsea.databaseEnv" (dict "ctx" . "host" "PGHOST" "port" "PGPORT" "name" "PGDATABASE" "user" "PGUSER") | nindent 8 }}
         - name: PGSSLMODE
           value: {{ ternary "require" "disable" (eq (include "threatsea.databaseTls" .) "enabled") | quote }}
         - name: PGCONNECT_TIMEOUT

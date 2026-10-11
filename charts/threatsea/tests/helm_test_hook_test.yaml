@@ -111,3 +111,21 @@ tests:
       - contains:
           path: spec.containers[0].env
           content: { name: PGSSLMODE, value: disable }
+
+  - it: reads the database settings from the existing secret like the app
+    set:
+      database.host: ""
+      secret.existingSecret: my-secret
+      secret.configKeys.databaseHost: db-host-key
+      secret.configKeys.databaseName: db-name-key
+      secret.configKeys.databaseUser: db-user-key
+    asserts:
+      - contains:
+          path: spec.containers[0].env
+          content: { name: PGHOST, valueFrom: { secretKeyRef: { name: my-secret, key: db-host-key } } }
+      - contains:
+          path: spec.containers[0].env
+          content: { name: PGDATABASE, valueFrom: { secretKeyRef: { name: my-secret, key: db-name-key } } }
+      - contains:
+          path: spec.containers[0].env
+          content: { name: PGUSER, valueFrom: { secretKeyRef: { name: my-secret, key: db-user-key } } }

@@ -59,6 +59,8 @@ There are two ways to supply the secrets:
 
 The chart cannot look inside an existing Secret. If one of the keys is missing, the pod starts and then crash-loops with `Environment variable ... has to be defined`.
 
+If your existing Secret also holds non-secret settings, for example because it is synced from a key vault, the chart can read them from there too. Set the matching `secret.configKeys.*` entry to the key name and leave the plain value empty: `oidcIssuerUrl`, `oidcClientId`, `databaseHost`, `databaseName` and `databaseUser` replace `config.oidc.issuerUrl`, `config.oidc.clientId`, `database.host`, `database.name` and `database.user`. The database keys cannot be combined with `postgresql.enabled=true`.
+
 With `postgresql.enabled=true` the `database-password` key is not read. The bundled database's password comes from `postgresql.auth.*`.
 
 ```bash

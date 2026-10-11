@@ -53,6 +53,9 @@
         }
       }
     },
+    "deploymentAnnotations": {
+      "type": "object"
+    },
     "podAnnotations": {
       "type": "object"
     },
@@ -130,6 +133,27 @@
               "type": "string"
             },
             "databasePassword": {
+              "type": "string"
+            }
+          }
+        },
+        "configKeys": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "oidcIssuerUrl": {
+              "type": "string"
+            },
+            "oidcClientId": {
+              "type": "string"
+            },
+            "databaseHost": {
+              "type": "string"
+            },
+            "databaseName": {
+              "type": "string"
+            },
+            "databaseUser": {
               "type": "string"
             }
           }

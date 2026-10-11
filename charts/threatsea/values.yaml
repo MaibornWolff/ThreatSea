@@ -36,6 +36,9 @@ serviceAccount:
   # -- Mount the ServiceAccount API token into the pods (ThreatSea does not need it)
   automountServiceAccountToken: false
 
+# -- Annotations added to the Deployment, e.g. for Stakater Reloader
+deploymentAnnotations: {}
+
 # -- Annotations added to the pods
 podAnnotations: {}
 
@@ -104,6 +107,22 @@ secret:
     sessionSecret: session-secret
     oidcClientSecret: oidc-client-secret
     databasePassword: database-password
+
+  # -- Keys in secret.existingSecret to read non-secret settings from, for setups
+  # that keep them alongside the secrets (e.g. one Key Vault-backed Secret). A
+  # non-empty key replaces the plain value and takes precedence over it. Requires
+  # secret.existingSecret; the database keys also require postgresql.enabled=false.
+  configKeys:
+    # -- Key holding the OIDC issuer URL, replacing config.oidc.issuerUrl
+    oidcIssuerUrl: ""
+    # -- Key holding the OIDC client ID, replacing config.oidc.clientId
+    oidcClientId: ""
+    # -- Key holding the database host, replacing database.host
+    databaseHost: ""
+    # -- Key holding the database name, replacing database.name
+    databaseName: ""
+    # -- Key holding the database user, replacing database.user
+    databaseUser: ""
 
   # -- Values for the chart-created Secret (used only when existingSecret is empty)
   values:
