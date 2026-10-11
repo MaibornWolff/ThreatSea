@@ -13,30 +13,13 @@ set:
   secret.values.databasePassword: dbpw
   database.host: db.example.com
 tests:
-  # The backend treats anything but exactly "oidc" as fixed-profile auth with
-  # hardcoded test users, so neither "fixed" nor a typo may render.
-  - it: rejects fixed as authMethod
-    set:
-      config.authMethod: fixed
+  - it: always sets AUTH_METHOD to oidc
+    template: deployment.yaml
     asserts:
-      - failedTemplate:
-          errorPattern: "authMethod.*value must be 'oidc'"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: AUTH_METHOD, value: oidc }
 
-  - it: rejects an authMethod that is not exactly oidc
-    set:
-      config.authMethod: OIDC
-    asserts:
-      - failedTemplate:
-          errorPattern: "authMethod.*value must be 'oidc'"
-
-  - it: rejects a trailing space in authMethod
-    set:
-      config.authMethod: "oidc "
-    asserts:
-      - failedTemplate:
-          errorPattern: "authMethod.*value must be 'oidc'"
-
-  # Finding 8
   - it: requires originApp
     template: deployment.yaml
     set:
@@ -53,7 +36,6 @@ tests:
       - failedTemplate:
           errorPattern: config.originBackend is required
 
-  # Finding 11
   - it: maps native booleans to the strings the backend reads
     template: deployment.yaml
     set:

@@ -120,7 +120,6 @@ DATABASE_TLS literal read by the backend. The bundled database serves plaintext.
 {{- end }}
 
 {{/*
-Name and key of the Secret holding the database password, for use under secretKeyRef.
 postgresql.auth.* only describes the bundled database, so it is rejected when that is off
 rather than silently ignored.
 */}}
@@ -168,7 +167,7 @@ key: {{ .Values.secret.keys.databasePassword | quote }}
 - name: ORIGIN_BACKEND
   value: {{ required "config.originBackend is required" .Values.config.originBackend | quote }}
 - name: AUTH_METHOD
-  value: {{ .Values.config.authMethod | quote }}
+  value: "oidc"
 - name: OIDC_ISSUER_URL
   value: {{ required "config.oidc.issuerUrl is required" .Values.config.oidc.issuerUrl | quote }}
 - name: OIDC_CLIENT_ID

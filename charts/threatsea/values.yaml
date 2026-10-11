@@ -71,10 +71,6 @@ config:
   # Must be the externally reachable backend URL, otherwise OIDC login fails.
   originBackend: ""
 
-  # -- Authentication method. The only supported value is `oidc`. Fixed-profile
-  # authentication uses hardcoded test users and is for local development only,
-  # so the chart does not offer it.
-  authMethod: "oidc"
   oidc:
     # -- OIDC issuer URL (required)
     issuerUrl: ""

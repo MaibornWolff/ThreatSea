@@ -40,7 +40,7 @@ tests:
           path: spec.template.spec.containers[0].env
           content: { name: DATABASE_TLS, value: "enabled" }
 
-  # Finding 1: the bundled database serves plaintext, so TLS must be off or the
+  # The bundled database serves plaintext, so TLS must be off or the
   # backend never connects, migrations never finish and the pod never becomes ready.
   - it: forces DATABASE_TLS=disabled for the bundled database
     template: deployment.yaml
@@ -117,7 +117,7 @@ tests:
           path: spec.template.spec.containers[0].env[?(@.name=="DATABASE_PASSWORD")].valueFrom.secretKeyRef
           value: { name: my-secret, key: database-password }
 
-  # Finding 7: database.name/user are the single source of truth. The bundled
+  # database.name/user are the single source of truth. The bundled
   # database creates exactly what the app is told to connect to, so no mismatch exists.
   - it: creates the database and user the app connects with
     template: postgresql-statefulset.yaml

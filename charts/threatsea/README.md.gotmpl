@@ -125,10 +125,6 @@ Things to know before relying on it, even for an evaluation:
 - **Changing the PostgreSQL major version starts an empty database.** Overriding `postgresql.image.tag` to another major version makes PostgreSQL use a new data directory, so the app sees a fresh, empty database. The old data stays on the volume under the previous major version's directory.
 - **Storage settings are immutable.** `postgresql.persistence.enabled`, `size` and `storageClass` end up in the StatefulSet's `volumeClaimTemplates`, which Kubernetes does not allow to change on upgrade.
 
-## Authentication
-
-The chart supports only OIDC, and `config.authMethod` accepts only `oidc`. The backend also has fixed-profile authentication with hardcoded test users, but that is for local development only, so the chart deliberately does not allow it.
-
 ## Testing the release
 
 `helm test <release>` runs a pod that logs in to the configured database with `psql`, using the chart's credentials, and runs `SELECT 1`, so a wrong password fails the test. With `database.tls: true` it requires TLS (`sslmode=require`) but does not verify the server certificate, so a certificate problem can pass `helm test` and still break the app. The pod pulls `postgresql.image` even when an external database is used.

@@ -80,10 +80,6 @@
         "originBackend": {
           "type": "string"
         },
-        "authMethod": {
-          "type": "string",
-          "enum": ["oidc"]
-        },
         "oidc": {
           "type": "object",
           "additionalProperties": false,
