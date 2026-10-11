@@ -46,9 +46,6 @@ export function getDatabaseTlsConfig(databaseTls: string | undefined): PoolConfi
     return true;
 }
 
-/**
- * Port of the backend server.
- */
 export const PORT = getOptionalPositiveNumber("PORT", 8000);
 
 export const JWT_SECRET = new TextEncoder().encode(getEnvironmentVariable("JWT_SECRET"));
