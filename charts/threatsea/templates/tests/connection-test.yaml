@@ -31,7 +31,7 @@ spec:
       securityContext:
         {{- toYaml .Values.containerSecurityContext | nindent 8 }}
       env:
-        {{- include "threatsea.databaseEnv" (dict "ctx" . "host" "PGHOST" "port" "PGPORT" "name" "PGDATABASE" "user" "PGUSER") | nindent 8 }}
+        {{- include "threatsea.databaseEnv" (dict "ctx" . "names" "libpq") | nindent 8 }}
         - name: PGSSLMODE
           value: {{ ternary "require" "disable" (eq (include "threatsea.databaseTls" .) "enabled") | quote }}
         - name: PGCONNECT_TIMEOUT

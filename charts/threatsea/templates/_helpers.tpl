@@ -213,22 +213,29 @@ its plain value would silently ignore one of them, so all three misuses are reje
 {{- end }}
 
 {{/*
-Database host, port, name and user env entries under the given names, shared by the
-app and the connection test. Expects a dict with ctx, host, port, name and user.
+Database host, port, name and user env entries, shared by the app and the connection
+test. Expects a dict with ctx and names: "app" for DATABASE_*, "libpq" for PG*.
 */}}
 {{- define "threatsea.databaseEnv" -}}
 {{- $ctx := .ctx }}
-{{- include "threatsea.validateConfigKeys" $ctx }}
+{{- $nameSets := dict
+  "app" (dict "host" "DATABASE_HOST" "port" "DATABASE_PORT" "name" "DATABASE_NAME" "user" "DATABASE_USER")
+  "libpq" (dict "host" "PGHOST" "port" "PGPORT" "name" "PGDATABASE" "user" "PGUSER")
+}}
+{{- $names := get $nameSets .names }}
+{{- if not $names }}
+{{- fail (printf "threatsea.databaseEnv: unknown names %q" .names) }}
+{{- end }}
 {{- $keys := $ctx.Values.secret.configKeys }}
 {{- $host := "" }}
 {{- if not $keys.databaseHost }}
 {{- $host = include "threatsea.databaseHost" $ctx }}
 {{- end }}
-{{- include "threatsea.configEnv" (dict "ctx" $ctx "name" .host "key" $keys.databaseHost "value" $host) }}
-- name: {{ .port }}
+{{- include "threatsea.configEnv" (dict "ctx" $ctx "name" $names.host "key" $keys.databaseHost "value" $host) }}
+- name: {{ $names.port }}
   value: {{ include "threatsea.databasePort" $ctx | quote }}
-{{ include "threatsea.configEnv" (dict "ctx" $ctx "name" .name "key" $keys.databaseName "value" (include "threatsea.databaseName" $ctx)) }}
-{{ include "threatsea.configEnv" (dict "ctx" $ctx "name" .user "key" $keys.databaseUser "value" (include "threatsea.databaseUser" $ctx)) }}
+{{ include "threatsea.configEnv" (dict "ctx" $ctx "name" $names.name "key" $keys.databaseName "value" (include "threatsea.databaseName" $ctx)) }}
+{{ include "threatsea.configEnv" (dict "ctx" $ctx "name" $names.user "key" $keys.databaseUser "value" (include "threatsea.databaseUser" $ctx)) }}
 {{- end }}
 
 {{- define "threatsea.env" -}}
@@ -265,7 +272,7 @@ app and the connection test. Expects a dict with ctx, host, port, name and user.
     secretKeyRef:
       name: {{ include "threatsea.secretName" . | quote }}
       key: {{ .Values.secret.keys.sessionSecret | quote }}
-{{ include "threatsea.databaseEnv" (dict "ctx" . "host" "DATABASE_HOST" "port" "DATABASE_PORT" "name" "DATABASE_NAME" "user" "DATABASE_USER") }}
+{{ include "threatsea.databaseEnv" (dict "ctx" . "names" "app") }}
 - name: DATABASE_TLS
   value: {{ include "threatsea.databaseTls" . | quote }}
 - name: DATABASE_PASSWORD

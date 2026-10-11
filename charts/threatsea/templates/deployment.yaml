@@ -1,6 +1,7 @@
 {{- $env := include "threatsea.env" . | fromYamlArray }}
 {{- $extraEnv := .Values.extraEnv | default list }}
 {{- include "threatsea.checkExtraEnv" (dict "env" $env "extraEnv" $extraEnv) }}
+{{- include "threatsea.validateConfigKeys" . }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
