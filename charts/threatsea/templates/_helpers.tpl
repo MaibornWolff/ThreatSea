@@ -93,11 +93,6 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 {{- end }}
 
-{{/*
-Bundled PostgreSQL readiness check. Connects over TCP (-h 127.0.0.1): without -h
-pg_isready probes the Unix socket, which the image's temporary initdb server also
-serves, so the probe could pass during first-time initialisation.
-*/}}
 {{- define "threatsea.databaseName" -}}
 {{- .Values.database.name | default "threatsea" }}
 {{- end }}
@@ -106,6 +101,11 @@ serves, so the probe could pass during first-time initialisation.
 {{- .Values.database.user | default "threatsea" }}
 {{- end }}
 
+{{/*
+Bundled PostgreSQL readiness check. Connects over TCP (-h 127.0.0.1): without -h
+pg_isready probes the Unix socket, which the image's temporary initdb server also
+serves, so the probe could pass during first-time initialisation.
+*/}}
 {{- define "threatsea.postgresql.isReady" -}}
 - pg_isready
 - -h
