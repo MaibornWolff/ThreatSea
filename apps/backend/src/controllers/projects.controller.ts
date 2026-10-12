@@ -111,9 +111,20 @@ export async function updateProject(
     next: NextFunction
 ): Promise<void> {
     const projectId = request.params.projectId;
+    const userId = request.user!.id!;
     const data = request.body;
 
     try {
+        // Only a new catalog needs access; the current one may have lost it since.
+        const currentProject = await ProjectsService.getProject(projectId, userId);
+        if (data.catalogId !== undefined && data.catalogId !== currentProject?.catalogId) {
+            const catalog = await getCatalog(data.catalogId, userId);
+            if (catalog === null) {
+                next(new NotFoundError("Catalog not found"));
+                return;
+            }
+        }
+
         const project: ProjectResponse = await ProjectsService.updateProject(projectId, data);
 
         response.json(project);
