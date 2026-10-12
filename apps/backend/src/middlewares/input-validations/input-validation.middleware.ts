@@ -44,6 +44,35 @@ export function ValidateBodyHandler<T extends object, P extends CatalogIdParam |
     };
 }
 
+/**
+ * Like {@link ValidateBodyHandler}, but for an array body: validates and whitelists each item.
+ */
+export function ValidateBodyArrayHandler<
+    T extends object,
+    P extends CatalogIdParam | ProjectIdParam | FolderIdParam | void,
+>(type: new () => T) {
+    return async (request: Request<P>, _response: Response, next: NextFunction) => {
+        if (!Array.isArray(request.body)) {
+            next(new BadRequestError("Request body must be an array"));
+            return;
+        }
+
+        const transformedItems = plainToInstance(type, request.body as unknown[], { enableImplicitConversion: true });
+
+        for (const transformedItem of transformedItems) {
+            const errors = await validate(transformedItem, { whitelist: true });
+
+            if (errors.length > 0) {
+                next(new InputValidationError(errors));
+                return;
+            }
+        }
+
+        request.body = transformedItems;
+        next();
+    };
+}
+
 export function ValidateParamHandler<P extends CatalogIdParam | ProjectIdParam | FolderIdParam>(type: new () => P) {
     return async (request: Request<P>, _response: Response, next: NextFunction) => {
         const transformedParams = plainToInstance(type, request.params, { enableImplicitConversion: true });

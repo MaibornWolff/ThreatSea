@@ -186,6 +186,63 @@ describe("get or create catalog threats", () => {
     });
 });
 
+describe("import catalog threats", () => {
+    const importCatalogThreats = (body: unknown) =>
+        request(app)
+            .post("/api/catalogs/" + catalogId + "/threats/import")
+            .send(body as object)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+
+    const listCatalogThreats = () =>
+        request(app)
+            .get("/api/catalogs/" + catalogId + "/threats")
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+
+    it("should import catalog threats in the shape the CSV import sends", async () => {
+        const response = await importCatalogThreats([
+            { ...VALID_CATALOG_THREAT_1, catalogId },
+            { ...VALID_CATALOG_THREAT_2, catalogId },
+        ]);
+        expect(response.statusCode).toEqual(200);
+        expect(response.body.map((catalogThreat: { name: string }) => catalogThreat.name)).toEqual([
+            VALID_CATALOG_THREAT_1.name,
+            VALID_CATALOG_THREAT_2.name,
+        ]);
+    });
+
+    it("should ignore client-supplied ids", async () => {
+        const existingResponse = await importCatalogThreats([VALID_CATALOG_THREAT_1]);
+        const existingId = existingResponse.body[0].id;
+
+        const response = await importCatalogThreats([{ ...VALID_CATALOG_THREAT_2, id: existingId }]);
+        expect(response.statusCode).toEqual(200);
+        expect(response.body[0].id).not.toBe(existingId);
+        expect(response.body[0].name).toBe(VALID_CATALOG_THREAT_2.name);
+    });
+
+    it("should import nothing when one row is invalid", async () => {
+        const response = await importCatalogThreats([
+            VALID_CATALOG_THREAT_1,
+            { ...VALID_CATALOG_THREAT_2, probability: 9 },
+        ]);
+        expect(response.statusCode).toEqual(400);
+        expect(response.body.validationErrors).toBeDefined();
+
+        const listResponse = await listCatalogThreats();
+        expect(listResponse.body).toEqual([]);
+    });
+
+    it("should not import a body that is not an array", async () => {
+        const response = await importCatalogThreats(VALID_CATALOG_THREAT_1);
+        expect(response.statusCode).toEqual(400);
+
+        const listResponse = await listCatalogThreats();
+        expect(listResponse.body).toEqual([]);
+    });
+});
+
 describe("delete or update catalog threats", () => {
     let catalogThreatId: number;
     beforeEach(async () => {
