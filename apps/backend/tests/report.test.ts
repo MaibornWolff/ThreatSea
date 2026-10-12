@@ -158,14 +158,14 @@ describe("report", () => {
     });
 });
 
-const POA_TYPE = POINTS_OF_ATTACK.COMMUNICATION_INTERFACES;
+const POINT_OF_ATTACK_TYPE = POINTS_OF_ATTACK.COMMUNICATION_INTERFACES;
 
 // Catalogue threat affecting confidentiality and availability, so the asset's integrity
 // rating is deliberately ignored by the damage calculation.
 const CATALOG_THREAT = {
     name: "Catalog Threat 1",
     description: "Description 1",
-    pointOfAttack: POA_TYPE,
+    pointOfAttack: POINT_OF_ATTACK_TYPE,
     attacker: ATTACKERS.ADMINISTRATORS,
     probability: 2,
     confidentiality: true,
@@ -177,7 +177,7 @@ function systemDataWithPointOfAttack(assetIds: number[]): SystemData {
     const pointOfAttack: PointOfAttack = {
         id: nanoid(),
         name: null,
-        type: POA_TYPE,
+        type: POINT_OF_ATTACK_TYPE,
         componentId: null,
         connectionId: null,
         projectId,

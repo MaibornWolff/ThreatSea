@@ -14,8 +14,8 @@ export interface ValidateBodyOptions<T> {
 }
 
 /**
- * Drops body fields that `type` does not declare. Use `whitelist: false` only for free-form
- * bodies whose handler picks its own fields.
+ * Drops body fields without a class-validator decorator on `type`, even declared ones. Use
+ * `whitelist: false` only for free-form bodies whose handler picks its own fields.
  */
 export function ValidateBodyHandler<T extends object, P extends CatalogIdParam | ProjectIdParam | FolderIdParam | void>(
     type: new () => T,

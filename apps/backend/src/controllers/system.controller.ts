@@ -47,7 +47,7 @@ export async function updateSystem(
     const projectId = request.params.projectId;
 
     const { data, image } = request.body;
-    // Without an image in the body, the stored image stays.
+    // exactOptionalPropertyTypes rejects an explicit `image: undefined`.
     const systemUpdate: UpdateSystemRequest = image === undefined ? { data } : { data, image };
     try {
         const updatedSystem = await updateSystemService.updateSystem(projectId, systemUpdate);
