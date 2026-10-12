@@ -57,6 +57,12 @@ export function ValidateBodyArrayHandler<
             return;
         }
 
+        // class-validator throws on null instead of reporting an error.
+        if (request.body.includes(null)) {
+            next(new BadRequestError("Request body items must not be null"));
+            return;
+        }
+
         const transformedItems = plainToInstance(type, request.body as unknown[], { enableImplicitConversion: true });
 
         for (const transformedItem of transformedItems) {

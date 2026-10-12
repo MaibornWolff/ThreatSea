@@ -244,6 +244,24 @@ describe("get or create catalog measures", () => {
 
         expect((await listCatalogMeasures()).body).toEqual(catalogMeasuresBefore);
     });
+
+    it("should not import catalog measures when one row is null", async () => {
+        const listCatalogMeasures = () =>
+            request(app)
+                .get("/api/catalogs/" + catalogId + "/measures")
+                .set("X-CSRF-TOKEN", csrfToken)
+                .set("Cookie", cookies);
+        const catalogMeasuresBefore = (await listCatalogMeasures()).body;
+
+        const res = await request(app)
+            .post("/api/catalogs/" + catalogId + "/measures/import")
+            .send([VALID_CATALOG_MEASURE_1, null])
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.status).toBe(400);
+
+        expect((await listCatalogMeasures()).body).toEqual(catalogMeasuresBefore);
+    });
 });
 
 describe("delete or update catalog measures", () => {
