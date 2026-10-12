@@ -39,6 +39,7 @@ const renderPage = () =>
                     isLoadingAll: false,
                     current: project,
                     deletingProjectId: undefined,
+                    lineOfToleranceDraft: undefined,
                 },
             },
         }
