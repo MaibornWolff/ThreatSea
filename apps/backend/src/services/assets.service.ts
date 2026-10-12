@@ -30,14 +30,15 @@ export async function getAsset(assetId: number): Promise<Asset | null> {
 }
 
 /**
- * Gets multiple assets by their ids.
+ * Gets multiple assets of a project by their ids. Ids of other projects are ignored.
  *
- * @param {number[]} assetIds
+ * @param {number} projectId - The id of the project the assets must belong to.
+ * @param {number[]} assetIds - The ids of the assets.
  * @returns {Promise<Asset[]>} A promise that resolves to an array of assets.
  */
-export async function getMultipleAssets(assetIds: number[]): Promise<Asset[]> {
+export async function getMultipleAssets(projectId: number, assetIds: number[]): Promise<Asset[]> {
     return await db.query.assets.findMany({
-        where: inArray(assets.id, assetIds),
+        where: and(eq(assets.projectId, projectId), inArray(assets.id, assetIds)),
     });
 }
 

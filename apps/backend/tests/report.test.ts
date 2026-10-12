@@ -158,22 +158,42 @@ describe("report", () => {
     });
 });
 
-describe("report risk of out-of-scope threats", () => {
-    const POA_TYPE = POINTS_OF_ATTACK.COMMUNICATION_INTERFACES;
+const POA_TYPE = POINTS_OF_ATTACK.COMMUNICATION_INTERFACES;
 
-    // Catalogue threat affecting confidentiality and availability, so the asset's integrity
-    // rating is deliberately ignored by the damage calculation.
-    const CATALOG_THREAT = {
-        name: "Catalog Threat 1",
-        description: "Description 1",
-        pointOfAttack: POA_TYPE,
-        attacker: ATTACKERS.ADMINISTRATORS,
-        probability: 2,
-        confidentiality: true,
-        integrity: false,
-        availability: true,
+// Catalogue threat affecting confidentiality and availability, so the asset's integrity
+// rating is deliberately ignored by the damage calculation.
+const CATALOG_THREAT = {
+    name: "Catalog Threat 1",
+    description: "Description 1",
+    pointOfAttack: POA_TYPE,
+    attacker: ATTACKERS.ADMINISTRATORS,
+    probability: 2,
+    confidentiality: true,
+    integrity: false,
+    availability: true,
+};
+
+function systemDataWithPointOfAttack(assetIds: number[]): SystemData {
+    const pointOfAttack: PointOfAttack = {
+        id: nanoid(),
+        name: null,
+        type: POA_TYPE,
+        componentId: null,
+        connectionId: null,
+        projectId,
+        connectionPointId: null,
+        assets: assetIds,
     };
+    return {
+        connections: [],
+        components: [],
+        pointsOfAttack: [pointOfAttack],
+        connectionPoints: [],
+        lastAutoSaveDate: new Date().toISOString(),
+    };
+}
 
+describe("report risk of out-of-scope threats", () => {
     // Exposing a point of attack that carries an asset makes updateSystem generate the generic
     // threat and its first threat, which is the threat the report renders.
     const seedThreatWithAsset = async () => {
@@ -201,25 +221,7 @@ describe("report risk of out-of-scope threats", () => {
                 .returning()
         ).at(0)!;
 
-        const pointOfAttack: PointOfAttack = {
-            id: nanoid(),
-            name: null,
-            type: POA_TYPE,
-            componentId: null,
-            connectionId: null,
-            projectId,
-            connectionPointId: null,
-            assets: [asset.id],
-        };
-        const data: SystemData = {
-            connections: [],
-            components: [],
-            pointsOfAttack: [pointOfAttack],
-            connectionPoints: [],
-            lastAutoSaveDate: new Date().toISOString(),
-        };
-
-        await updateSystem(projectId, { data });
+        await updateSystem(projectId, { data: systemDataWithPointOfAttack([asset.id]) });
     };
 
     const getReportThreat = async () => {
@@ -290,5 +292,57 @@ describe("report risk of out-of-scope threats", () => {
         expect(outOfScopeThreat.netDamage).toEqual(0);
         expect(outOfScopeThreat.netRisk).toEqual(0);
         expect(outOfScopeThreat.risk).toEqual(8);
+    });
+});
+
+describe("report assets of other projects", () => {
+    const assetWithRating = (name: string, rating: number, assetProjectId: number) => ({
+        name,
+        description: "",
+        confidentiality: rating,
+        integrity: rating,
+        availability: rating,
+        confidentialityJustification: "",
+        integrityJustification: "",
+        availabilityJustification: "",
+        projectId: assetProjectId,
+    });
+
+    it("should not use assets of another project in threats", async () => {
+        const catalogThreatResponse = await request(app)
+            .post("/api/catalogs/" + catalogId + "/threats")
+            .send(CATALOG_THREAT)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(catalogThreatResponse.statusCode).toEqual(200);
+
+        const otherProjectResponse = await request(app)
+            .post("/api/projects")
+            .send({ ...VALID_PROJECT, catalogId })
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(otherProjectResponse.statusCode).toEqual(200);
+
+        const [ownAsset, otherProjectAsset] = await db
+            .insert(assets)
+            .values([
+                assetWithRating("Own asset", 1, projectId),
+                assetWithRating("Other project's asset", 5, otherProjectResponse.body.id),
+            ])
+            .returning();
+
+        await updateSystem(projectId, {
+            data: systemDataWithPointOfAttack([ownAsset!.id, otherProjectAsset!.id]),
+        });
+
+        const response = await request(app)
+            .get("/api/projects/" + projectId + "/report")
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+
+        expect(response.statusCode).toEqual(200);
+        expect(response.body.threats).toHaveLength(1);
+        expect(response.body.threats[0].damage).toEqual(1);
+        expect(response.body.threats[0].assets.map((asset: { id: number }) => asset.id)).toEqual([ownAsset!.id]);
     });
 });
