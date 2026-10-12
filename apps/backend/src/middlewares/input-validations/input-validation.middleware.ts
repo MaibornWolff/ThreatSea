@@ -8,14 +8,23 @@ import { ProjectIdParam } from "#types/project.types.js";
 
 export type CrossFieldCheck<T> = (instance: T) => string | null;
 
+export interface ValidateBodyOptions<T> {
+    crossFieldChecks?: readonly CrossFieldCheck<T>[];
+    whitelist?: boolean;
+}
+
+/**
+ * Drops body fields that `type` does not declare. Use `whitelist: false` only for free-form
+ * bodies whose handler picks its own fields.
+ */
 export function ValidateBodyHandler<T extends object, P extends CatalogIdParam | ProjectIdParam | FolderIdParam | void>(
     type: new () => T,
-    crossFieldChecks: readonly CrossFieldCheck<T>[] = []
+    { crossFieldChecks = [], whitelist = true }: ValidateBodyOptions<T> = {}
 ) {
     return async (request: Request<P>, _response: Response, next: NextFunction) => {
         const transformedBody = plainToInstance(type, request.body, { enableImplicitConversion: true });
 
-        const errors = await validate(transformedBody, { whitelist: false });
+        const errors = await validate(transformedBody, { whitelist });
 
         if (errors.length > 0) {
             next(new InputValidationError(errors));

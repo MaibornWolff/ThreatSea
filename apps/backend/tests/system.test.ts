@@ -636,6 +636,47 @@ it("should update a system", async () => {
     expect(res.body.data.connectionPoints).toEqual(VALID_UPDATE_SYSTEM.data.connectionPoints);
 });
 
+it("should keep the system on its project when the body names another project", async () => {
+    const otherProjectResponse = await request(app)
+        .post("/api/projects")
+        .send({ ...VALID_PROJECT, catalogId })
+        .set("X-CSRF-TOKEN", csrfToken)
+        .set("Cookie", cookies);
+    expect(otherProjectResponse.statusCode).toEqual(200);
+
+    const response = await request(app)
+        .put(`/api/projects/${projectId}/system`)
+        .send({ ...VALID_SYSTEM, projectId: otherProjectResponse.body.id })
+        .set("X-CSRF-TOKEN", csrfToken)
+        .set("Cookie", cookies);
+    expect(response.statusCode).toEqual(200);
+    expect(response.body.projectId).toBe(projectId);
+
+    const systemResponse = await request(app)
+        .get(`/api/projects/${projectId}/system`)
+        .set("X-CSRF-TOKEN", csrfToken)
+        .set("Cookie", cookies);
+    expect(systemResponse.statusCode).toEqual(200);
+    expect(systemResponse.body.data.components).toEqual(VALID_SYSTEM.data.components);
+});
+
+it("should keep the stored image when the body has no image", async () => {
+    await request(app)
+        .put(`/api/projects/${projectId}/system`)
+        .send(VALID_SYSTEM)
+        .set("X-CSRF-TOKEN", csrfToken)
+        .set("Cookie", cookies);
+
+    const response = await request(app)
+        .put(`/api/projects/${projectId}/system`)
+        .send({ data: VALID_UPDATE_SYSTEM.data })
+        .set("X-CSRF-TOKEN", csrfToken)
+        .set("Cookie", cookies);
+    expect(response.statusCode).toEqual(200);
+    expect(response.body.image).toBe(VALID_SYSTEM.image);
+    expect(response.body.data.components).toEqual(VALID_UPDATE_SYSTEM.data.components);
+});
+
 const systemWithComponentSymbol = (symbol: string) => ({
     data: {
         components: [{ id: "c1", name: "Component", symbol }],
