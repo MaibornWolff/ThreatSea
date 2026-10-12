@@ -178,6 +178,25 @@ describe("project tests", () => {
             expect(res.body.validationErrors).toBeDefined();
         });
 
+        it("should keep the catalog of a project when the body names another catalog", async () => {
+            const projectResponse = await request(app)
+                .get("/api/projects/" + projectId)
+                .set("X-CSRF-TOKEN", csrfToken)
+                .set("Cookie", cookies);
+            expect(projectResponse.statusCode).toEqual(200);
+            const originalCatalogId = projectResponse.body.catalogId;
+            // beforeEach created a fresh catalog, so catalogId names a different one.
+            expect(catalogId).not.toBe(originalCatalogId);
+
+            const response = await request(app)
+                .put("/api/projects/" + projectId)
+                .send({ ...VALID_PROJECT_UPDATE, catalogId })
+                .set("X-CSRF-TOKEN", csrfToken)
+                .set("Cookie", cookies);
+            expect(response.statusCode).toEqual(200);
+            expect(response.body.catalogId).toBe(originalCatalogId);
+        });
+
         it("should delete a project", async () => {
             const res = await request(app)
                 .delete("/api/projects/" + projectId)

@@ -46,9 +46,11 @@ export async function updateSystem(
 ): Promise<void> {
     const projectId = request.params.projectId;
 
-    const data = request.body;
+    const { data, image } = request.body;
+    // Without an image in the body, the stored image stays.
+    const systemUpdate: UpdateSystemRequest = image === undefined ? { data } : { data, image };
     try {
-        const updatedSystem = await updateSystemService.updateSystem(projectId, data);
+        const updatedSystem = await updateSystemService.updateSystem(projectId, systemUpdate);
 
         response.json(updatedSystem);
     } catch (error) {

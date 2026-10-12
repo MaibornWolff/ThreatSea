@@ -37,7 +37,7 @@ componentTypesRouter.get<ProjectIdParam, ComponentTypeResponse[], void>(
 componentTypesRouter.post<ProjectIdParam, ComponentTypeResponse, CreateComponentTypeRequest>(
     "/",
     ValidateParamHandler(ProjectIdParam),
-    ValidateBodyHandler(CreateComponentTypeRequest, [iconExactlyOne]),
+    ValidateBodyHandler(CreateComponentTypeRequest, { crossFieldChecks: [iconExactlyOne] }),
     CheckProjectRoleHandler(USER_ROLES.EDITOR),
     createComponentType
 );
@@ -45,7 +45,7 @@ componentTypesRouter.post<ProjectIdParam, ComponentTypeResponse, CreateComponent
 componentTypesRouter.put<ComponentTypeIdParam, ComponentTypeResponse, UpdateComponentTypeRequest>(
     `/:${idParam}`,
     ValidateParamHandler(ComponentTypeIdParam),
-    ValidateBodyHandler(UpdateComponentTypeRequest, [iconExactlyOne]),
+    ValidateBodyHandler(UpdateComponentTypeRequest, { crossFieldChecks: [iconExactlyOne] }),
     CheckProjectRoleHandler(USER_ROLES.EDITOR),
     updateComponentType
 );
