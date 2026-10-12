@@ -1,7 +1,18 @@
 import { CONFIDENTIALITY_LEVELS } from "./confidentiality-levels.types.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
 import { Type } from "class-transformer";
-import { IsDefined, IsEnum, IsIn, IsInt, IsNotEmpty, IsString, Length, MaxLength, Validate } from "class-validator";
+import {
+    IsDefined,
+    IsEnum,
+    IsIn,
+    IsInt,
+    IsNotEmpty,
+    IsString,
+    Length,
+    MaxLength,
+    Validate,
+    ValidateIf,
+} from "class-validator";
 import {
     FIELD_MUST_BE_INT_MESSAGE,
     FIELD_MUST_BE_ONE_OF_MESSAGE,
@@ -72,6 +83,10 @@ export class UpdateProjectRequest {
         message: FIELD_MUST_BE_ONE_OF_MESSAGE("confidentialityLevel", Object.values(CONFIDENTIALITY_LEVELS)),
     })
     confidentialityLevel!: CONFIDENTIALITY_LEVELS;
+
+    @ValidateIf((request: UpdateProjectRequest) => request.catalogId !== undefined)
+    @IsInt({ message: FIELD_MUST_BE_INT_MESSAGE("catalogId") })
+    catalogId?: number;
 
     @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("lineOfToleranceGreen") })
     @IsInt({ message: FIELD_MUST_BE_INT_MESSAGE("lineOfToleranceGreen") })

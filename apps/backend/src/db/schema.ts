@@ -266,7 +266,7 @@ export const measures = pgTable(
 
 export type Project = typeof projects.$inferSelect;
 export type CreateProject = Omit<typeof projects.$inferInsert, DefaultFields>;
-export type UpdateProject = Omit<CreateProject, "catalogId">;
+export type UpdateProject = Omit<CreateProject, "catalogId"> & Partial<Pick<CreateProject, "catalogId">>;
 
 export const projects = pgTable(
     "projects",
