@@ -83,7 +83,7 @@ export async function createProject(
     const data = request.body;
 
     const catalog = await getCatalog(data.catalogId, userId);
-    if (catalog === undefined) {
+    if (catalog === null) {
         next(new NotFoundError("Catalog not found"));
         return;
     }

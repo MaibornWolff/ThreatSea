@@ -137,6 +137,35 @@ describe("project tests", () => {
             expect(res.statusCode).toBe(400);
             expect(res.body.validationErrors).toBeDefined();
         });
+
+        it("should not create a new project on a catalog the user cannot access", async () => {
+            const otherUsersCatalog = (
+                await db.insert(catalogs).values({ name: "Other user's catalog", language: LANGUAGES.EN }).returning()
+            ).at(0)!;
+
+            const res = await request(app)
+                .post("/api/projects")
+                .send({ ...VALID_PROJECT, catalogId: otherUsersCatalog.id })
+                .set("X-CSRF-TOKEN", csrfToken)
+                .set("Cookie", cookies);
+            expect(res.statusCode).toEqual(404);
+
+            const projectsResponse = await request(app)
+                .get("/api/projects")
+                .set("X-CSRF-TOKEN", csrfToken)
+                .set("Cookie", cookies);
+            const projectCatalogIds = projectsResponse.body.map((project: { catalogId: number }) => project.catalogId);
+            expect(projectCatalogIds).not.toContain(otherUsersCatalog.id);
+        });
+
+        it("should not create a new project on a catalog that does not exist", async () => {
+            const res = await request(app)
+                .post("/api/projects")
+                .send({ ...VALID_PROJECT, catalogId: 999999 })
+                .set("X-CSRF-TOKEN", csrfToken)
+                .set("Cookie", cookies);
+            expect(res.statusCode).toEqual(404);
+        });
     });
 
     describe("delete or update projects", () => {
