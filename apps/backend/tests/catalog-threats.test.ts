@@ -241,6 +241,14 @@ describe("import catalog threats", () => {
         const listResponse = await listCatalogThreats();
         expect(listResponse.body).toEqual([]);
     });
+
+    it("should import nothing when one row is null", async () => {
+        const response = await importCatalogThreats([VALID_CATALOG_THREAT_1, null]);
+        expect(response.statusCode).toEqual(400);
+
+        const listResponse = await listCatalogThreats();
+        expect(listResponse.body).toEqual([]);
+    });
 });
 
 describe("delete or update catalog threats", () => {
