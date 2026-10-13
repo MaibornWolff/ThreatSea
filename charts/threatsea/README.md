@@ -88,10 +88,10 @@ database:
   port: 5432
   name: threatsea
   user: threatsea
-  tls: true
+  tls: verify
 ```
 
-`database.tls` is `true` by default. If the server certificate is signed by a private CA, mount the CA bundle with `extraVolumes` and `extraVolumeMounts` and point Node.js at it with `NODE_EXTRA_CA_CERTS`. The root filesystem is read-only, so the bundle has to come from a volume:
+`database.tls` sets the TLS mode and accepts the same values as the backend's `DATABASE_TLS`: `verify` (the default) connects over TLS and verifies the server certificate, `no-verify` connects over TLS but accepts any certificate, for example from a connection pooler with a self-signed one, and `disabled` connects in plaintext. If the server certificate is signed by a private CA, mount the CA bundle with `extraVolumes` and `extraVolumeMounts` and point Node.js at it with `NODE_EXTRA_CA_CERTS`. The root filesystem is read-only, so the bundle has to come from a volume:
 
 ```yaml
 extraVolumes:
@@ -121,7 +121,7 @@ postgresql:
     password: change-me
 ```
 
-With the bundled database enabled, `database.host` is not used and `database.tls` is forced off. The app always connects to port 5432 of the bundled Service, so `database.port` is ignored.
+With the bundled database enabled, `database.host` is not used and `database.tls` is forced to `disabled`. The app always connects to port 5432 of the bundled Service, so `database.port` is ignored.
 
 Things to know before relying on it, even for an evaluation:
 
@@ -132,7 +132,7 @@ Things to know before relying on it, even for an evaluation:
 
 ## Testing the release
 
-`helm test <release>` runs a pod that logs in to the configured database with `psql`, using the chart's credentials, and runs `SELECT 1`, so a wrong password fails the test. With `database.tls: true` it requires TLS (`sslmode=require`) but does not verify the server certificate, so a certificate problem can pass `helm test` and still break the app. The pod pulls `postgresql.image` even when an external database is used.
+`helm test <release>` runs a pod that logs in to the configured database with `psql`, using the chart's credentials, and runs `SELECT 1`, so a wrong password fails the test. Unless `database.tls` is `disabled`, it requires TLS (`sslmode=require`) but does not verify the server certificate, so a certificate problem can pass `helm test` and still break the app. The pod pulls `postgresql.image` even when an external database is used.
 
 ## Values
 
@@ -151,7 +151,7 @@ Things to know before relying on it, even for an evaluation:
 | database.host | string | `""` | Hostname of an external PostgreSQL server. Required unless postgresql.enabled=true. |
 | database.name | string | `""` | Database name. Defaults to `threatsea` when empty. Also the database the bundled PostgreSQL creates. |
 | database.port | int | `5432` | Port of the PostgreSQL server |
-| database.tls | bool | `true` | Connect over TLS (boolean). Forced off when postgresql.enabled=true, which serves plaintext. |
+| database.tls | string | `"verify"` | TLS mode, passed to the backend as DATABASE_TLS: `verify` (TLS with certificate verification), `no-verify` (TLS without certificate verification, e.g. for a pooler with a self-signed certificate) or `disabled`. Forced to `disabled` when postgresql.enabled=true, which serves plaintext. |
 | database.user | string | `""` | Database user. Defaults to `threatsea` when empty. Also the user the bundled PostgreSQL creates. |
 | deploymentAnnotations | object | `{}` | Annotations added to the Deployment, e.g. for Stakater Reloader |
 | extraEnv | list | `[]` | Extra environment variables to inject into the container |

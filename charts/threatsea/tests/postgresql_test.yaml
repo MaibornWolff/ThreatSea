@@ -31,14 +31,40 @@ tests:
       - failedTemplate:
           errorPattern: database.host must be set when postgresql.enabled=false
 
-  - it: sends DATABASE_TLS=enabled to an external database
+  - it: sends DATABASE_TLS=verify to an external database by default
     template: deployment.yaml
     set:
       database.host: db.example.com
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
-          content: { name: DATABASE_TLS, value: "enabled" }
+          content: { name: DATABASE_TLS, value: "verify" }
+
+  - it: passes database.tls through to DATABASE_TLS for an external database
+    template: deployment.yaml
+    set:
+      database.host: db.example.com
+      database.tls: no-verify
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: DATABASE_TLS, value: "no-verify" }
+
+  - it: rejects a database.tls value the backend does not know
+    template: deployment.yaml
+    set:
+      database.host: db.example.com
+      database.tls: enabled
+    asserts:
+      - failedTemplate: {}
+
+  - it: rejects a boolean database.tls
+    template: deployment.yaml
+    set:
+      database.host: db.example.com
+      database.tls: true
+    asserts:
+      - failedTemplate: {}
 
   # The bundled database serves plaintext, so TLS must be off or the
   # backend never connects, migrations never finish and the pod never becomes ready.
@@ -47,7 +73,7 @@ tests:
     set:
       postgresql.enabled: true
       postgresql.auth.password: secret
-      database.tls: true
+      database.tls: verify
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env

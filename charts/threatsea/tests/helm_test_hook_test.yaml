@@ -82,21 +82,31 @@ tests:
           path: spec.containers[0].image
           value: postgres:18.7-alpine
 
-  - it: requires TLS for an external database with database.tls
+  - it: requires TLS for an external database with database.tls=verify
     set:
       postgresql.enabled: false
       database.host: db.example.com
-      database.tls: true
+      database.tls: verify
     asserts:
       - contains:
           path: spec.containers[0].env
           content: { name: PGSSLMODE, value: require }
 
-  - it: disables TLS for an external database without database.tls
+  - it: requires TLS for an external database with database.tls=no-verify
     set:
       postgresql.enabled: false
       database.host: db.example.com
-      database.tls: false
+      database.tls: no-verify
+    asserts:
+      - contains:
+          path: spec.containers[0].env
+          content: { name: PGSSLMODE, value: require }
+
+  - it: disables TLS for an external database with database.tls=disabled
+    set:
+      postgresql.enabled: false
+      database.host: db.example.com
+      database.tls: disabled
     asserts:
       - contains:
           path: spec.containers[0].env
@@ -106,7 +116,7 @@ tests:
     set:
       postgresql.enabled: true
       postgresql.auth.password: pw
-      database.tls: true
+      database.tls: verify
     asserts:
       - contains:
           path: spec.containers[0].env

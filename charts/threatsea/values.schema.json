@@ -197,7 +197,8 @@
           "type": "string"
         },
         "tls": {
-          "type": "boolean"
+          "type": "string",
+          "enum": ["verify", "no-verify", "disabled"]
         }
       }
     },

@@ -123,7 +123,7 @@ DATABASE_TLS literal read by the backend. The bundled database serves plaintext.
 {{- if .Values.postgresql.enabled }}
 {{- print "disabled" }}
 {{- else }}
-{{- ternary "enabled" "disabled" .Values.database.tls }}
+{{- .Values.database.tls }}
 {{- end }}
 {{- end }}
 

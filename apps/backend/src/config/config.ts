@@ -43,7 +43,8 @@ export function validateOidcScope(scope: string): string {
 }
 
 // "no-verify" encrypts the connection but accepts any server certificate, for poolers such as
-// PgBouncer that present a self-signed one. Any other value keeps full certificate verification.
+// PgBouncer that present a self-signed one. "verify", like any other value, keeps full
+// certificate verification.
 export function getDatabaseTlsConfig(databaseTls: string | undefined): PoolConfig["ssl"] {
     if (databaseTls === "disabled") {
         return false;

@@ -135,8 +135,11 @@ database:
   name: ""
   # -- Database user. Defaults to `threatsea` when empty. Also the user the bundled PostgreSQL creates.
   user: ""
-  # -- Connect over TLS (boolean). Forced off when postgresql.enabled=true, which serves plaintext.
-  tls: true
+  # -- TLS mode, passed to the backend as DATABASE_TLS: `verify` (TLS with certificate
+  # verification), `no-verify` (TLS without certificate verification, e.g. for a pooler
+  # with a self-signed certificate) or `disabled`. Forced to `disabled` when
+  # postgresql.enabled=true, which serves plaintext.
+  tls: verify
 
 postgresql:
   # -- Deploy a single-replica PostgreSQL StatefulSet. EVALUATION ONLY: no backups,
