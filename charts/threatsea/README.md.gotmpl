@@ -1,8 +1,6 @@
 {{ template "chart.header" . }}
 {{ template "chart.deprecationWarning" . }}
 
-{{ template "chart.badgesSection" . }}
-
 {{ template "chart.description" . }}
 
 {{ template "chart.homepageLine" . }}
@@ -57,7 +55,7 @@ There are two ways to supply the secrets:
 > [!WARNING]
 > Secrets passed through values are stored in plaintext in the Helm release Secret. They are visible to anyone who can read Secrets in the namespace or run `helm get values`. Use `secret.existingSecret` to avoid this, for example with a Secret managed by External Secrets Operator or Sealed Secrets.
 
-The chart cannot look inside an existing Secret. If one of the keys is missing, the pod starts and then crash-loops with `Environment variable ... has to be defined`.
+The chart cannot look inside an existing Secret. If one of the keys is missing, Kubernetes does not start the container and the pod stays in `CreateContainerConfigError`. `kubectl describe pod` names the missing key in the pod events.
 
 If your existing Secret also holds non-secret settings, for example because it is synced from a key vault, the chart can read them from there too. Set the matching `secret.configKeys.*` entry to the key name and leave the plain value empty; rendering fails when both are set: `oidcIssuerUrl`, `oidcClientId`, `databaseHost`, `databaseName` and `databaseUser` replace `config.oidc.issuerUrl`, `config.oidc.clientId`, `database.host`, `database.name` and `database.user`. The database keys cannot be combined with `postgresql.enabled=true`.
 

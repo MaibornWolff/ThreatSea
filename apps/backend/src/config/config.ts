@@ -25,6 +25,14 @@ function getOptionalPositiveNumber(key: string, defaultValue: number): number {
     return parsedValue;
 }
 
+function getOptionalPort(key: string, defaultValue: number): number {
+    const port = getOptionalPositiveNumber(key, defaultValue);
+    if (!Number.isInteger(port) || port > 65535) {
+        throw new Error(`Environment variable ${key} must be an integer between 1 and 65535`);
+    }
+    return port;
+}
+
 // OIDC requires the "openid" scope; without it the IdP returns no ID token and every login fails
 // with a misleading "No 'sub' claim" error, so reject the misconfiguration at startup instead.
 export function validateOidcScope(scope: string): string {
@@ -46,7 +54,7 @@ export function getDatabaseTlsConfig(databaseTls: string | undefined): PoolConfi
     return true;
 }
 
-export const PORT = getOptionalPositiveNumber("PORT", 8000);
+export const PORT = getOptionalPort("PORT", 8000);
 
 export const JWT_SECRET = new TextEncoder().encode(getEnvironmentVariable("JWT_SECRET"));
 export const JWT_ISSUER = "threatsea";
@@ -81,7 +89,7 @@ export const originConfig = {
 export const databaseConfig: PoolConfig = {
     user: getEnvironmentVariable("DATABASE_USER"),
     host: getEnvironmentVariable("DATABASE_HOST"),
-    port: getOptionalPositiveNumber("DATABASE_PORT", 5432),
+    port: getOptionalPort("DATABASE_PORT", 5432),
     database: getEnvironmentVariable("DATABASE_NAME"),
     password: getEnvironmentVariable("DATABASE_PASSWORD"),
     ssl: getDatabaseTlsConfig(process.env["DATABASE_TLS"]),

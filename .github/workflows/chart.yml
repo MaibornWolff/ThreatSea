@@ -66,6 +66,7 @@ jobs:
         run: helm unittest charts/threatsea
 
       - name: Render and validate manifests
+        shell: bash
         run: |
           for valuesFile in charts/threatsea/ci/*-values.yaml; do
             echo "::group::$valuesFile"
