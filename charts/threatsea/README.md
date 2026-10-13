@@ -201,7 +201,7 @@ Things to know before relying on it, even for an evaluation:
 | secret.configKeys.oidcClientId | string | `""` | Key holding the OIDC client ID, replacing config.oidc.clientId |
 | secret.configKeys.oidcIssuerUrl | string | `""` | Key holding the OIDC issuer URL, replacing config.oidc.issuerUrl |
 | secret.existingSecret | string | `""` | Name of an existing Secret to use. When empty, the chart creates a Secret from secret.values. When set, the chart creates none and the Secret must contain the keys defined in secret.keys. |
-| secret.keys | object | `{"databasePassword":"database-password","jwtSecret":"jwt-secret","oidcClientSecret":"oidc-client-secret","sessionSecret":"session-secret"}` | Key names of the four secret entries. The chart uses these names both in the Secret it creates and when reading an existing Secret, so an existing Secret must contain exactly these keys. |
+| secret.keys | object | `{"databasePassword":"database-password","jwtSecret":"jwt-secret","oidcClientSecret":"oidc-client-secret","sessionSecret":"session-secret"}` | Key names of the four secret entries. The chart uses these names both in the Secret it creates and when reading an existing Secret, so an existing Secret must contain these keys (databasePassword only when postgresql.enabled=false). It may hold other keys too, such as those named in secret.configKeys. |
 | secret.values | object | `{"databasePassword":"","jwtSecret":"","oidcClientSecret":"","sessionSecret":""}` | Values for the chart-created Secret (used only when existingSecret is empty) |
 | secret.values.databasePassword | string | `""` | Database password (used only when postgresql.enabled=false and secret.existingSecret is empty) |
 | secret.values.jwtSecret | string | `""` | Secret used to sign JWTs |
