@@ -13,6 +13,7 @@ set:
   secret.values.oidcClientSecret: oidc
   secret.values.databasePassword: dbpw
   database.host: db.example.com
+  database.user: appuser
 tests:
   - it: names resources after the release and chart
     template: service.yaml

@@ -50,6 +50,7 @@ tests:
     set:
       postgresql.enabled: false
       database.host: db.example.com
+      database.user: appuser
 
   - it: tests the bundled service port regardless of database.port
     set:
@@ -86,6 +87,7 @@ tests:
     set:
       postgresql.enabled: false
       database.host: db.example.com
+      database.user: appuser
       database.tls: verify
     asserts:
       - contains:
@@ -96,6 +98,7 @@ tests:
     set:
       postgresql.enabled: false
       database.host: db.example.com
+      database.user: appuser
       database.tls: no-verify
     asserts:
       - contains:
@@ -106,6 +109,7 @@ tests:
     set:
       postgresql.enabled: false
       database.host: db.example.com
+      database.user: appuser
       database.tls: disabled
     asserts:
       - contains:

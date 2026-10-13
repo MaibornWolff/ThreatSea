@@ -12,3 +12,4 @@ secret:
     databasePassword: dbpw
 database:
   host: db.example.com
+  user: threatsea

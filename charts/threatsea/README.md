@@ -47,6 +47,7 @@ Pre-releases are published from the `next` branch. Pass `--devel` (or an explici
 | `secret.values.oidcClientSecret` | OIDC client secret |
 | `secret.values.databasePassword` | Password for `database.user` on the external database |
 | `database.host` | Hostname of the external PostgreSQL server (not needed with the bundled database) |
+| `database.user` | User for the external PostgreSQL server (not needed with the bundled database, which defaults it to `threatsea`) |
 
 Rendering fails with a message naming the missing value. When `secret.existingSecret` is set, the `secret.values.*` entries are not needed.
 
@@ -152,7 +153,7 @@ Things to know before relying on it, even for an evaluation:
 | database.name | string | `""` | Database name. Defaults to `threatsea` when empty. Also the database the bundled PostgreSQL creates. |
 | database.port | int | `5432` | Port of the PostgreSQL server |
 | database.tls | string | `"verify"` | TLS mode, passed to the backend as DATABASE_TLS: `verify` (TLS with certificate verification), `no-verify` (TLS without certificate verification, e.g. for a pooler with a self-signed certificate) or `disabled`. Forced to `disabled` when postgresql.enabled=true, which serves plaintext. |
-| database.user | string | `""` | Database user. Defaults to `threatsea` when empty. Also the user the bundled PostgreSQL creates. |
+| database.user | string | `""` | Database user. Required unless postgresql.enabled=true; the bundled PostgreSQL creates this user and defaults it to `threatsea` when empty. |
 | deploymentAnnotations | object | `{}` | Annotations added to the Deployment, e.g. for Stakater Reloader |
 | extraEnv | list | `[]` | Extra environment variables to inject into the container |
 | extraEnvFrom | list | `[]` | Extra environment sources (configMapRef / secretRef) added to the container's `envFrom` |

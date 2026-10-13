@@ -12,6 +12,7 @@ set:
   secret.values.oidcClientSecret: oidc
   secret.values.databasePassword: dbpw
   database.host: db.example.com
+  database.user: appuser
 tests:
   - it: always sets AUTH_METHOD to oidc
     template: deployment.yaml
@@ -95,12 +96,9 @@ tests:
       - failedTemplate:
           errorPattern: database.host must not be set when postgresql.enabled=true
 
-  - it: falls back to threatsea for the database name and user
+  - it: falls back to threatsea for the database name
     template: deployment.yaml
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
           content: { name: DATABASE_NAME, value: threatsea }
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content: { name: DATABASE_USER, value: threatsea }

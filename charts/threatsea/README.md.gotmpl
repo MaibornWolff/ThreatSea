@@ -42,6 +42,7 @@ Pre-releases are published from the `next` branch. Pass `--devel` (or an explici
 | `secret.values.oidcClientSecret` | OIDC client secret |
 | `secret.values.databasePassword` | Password for `database.user` on the external database |
 | `database.host` | Hostname of the external PostgreSQL server (not needed with the bundled database) |
+| `database.user` | User for the external PostgreSQL server (not needed with the bundled database, which defaults it to `threatsea`) |
 
 Rendering fails with a message naming the missing value. When `secret.existingSecret` is set, the `secret.values.*` entries are not needed.
 

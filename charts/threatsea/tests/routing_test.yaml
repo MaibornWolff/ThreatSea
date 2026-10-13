@@ -15,6 +15,7 @@ set:
   secret.values.oidcClientSecret: oidc
   secret.values.databasePassword: dbpw
   database.host: db.example.com
+  database.user: appuser
 tests:
   - it: quotes the ingress class name and path
     template: ingress.yaml

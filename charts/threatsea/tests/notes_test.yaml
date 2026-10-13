@@ -14,6 +14,7 @@ tests:
   - it: names the external database host
     set:
       database.host: db.example.com
+      database.user: appuser
     asserts:
       - matchRegexRaw:
           pattern: "Using external PostgreSQL at: db\\.example\\.com"

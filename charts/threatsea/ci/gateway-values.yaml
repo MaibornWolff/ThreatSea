@@ -12,6 +12,7 @@ secret:
     databasePassword: dbpw
 database:
   host: db.example.com
+  user: threatsea
 gateway:
   enabled: true
   gatewayName: gw

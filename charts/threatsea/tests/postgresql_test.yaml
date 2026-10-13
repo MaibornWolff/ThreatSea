@@ -19,6 +19,7 @@ tests:
     templates: [postgresql-statefulset.yaml, postgresql-service.yaml, postgresql-secret.yaml]
     set:
       database.host: db.example.com
+      database.user: appuser
     asserts:
       - hasDocuments:
           count: 0
@@ -31,10 +32,30 @@ tests:
       - failedTemplate:
           errorPattern: database.host must be set when postgresql.enabled=false
 
+  - it: requires database.user when the bundled database is off
+    template: deployment.yaml
+    set:
+      database.host: db.example.com
+      database.user: ""
+    asserts:
+      - failedTemplate:
+          errorPattern: database.user must be set when postgresql.enabled=false
+
+  - it: creates the bundled database user threatsea when database.user is empty
+    template: postgresql-statefulset.yaml
+    set:
+      postgresql.enabled: true
+      postgresql.auth.password: secret
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: POSTGRES_USER, value: threatsea }
+
   - it: sends DATABASE_TLS=verify to an external database by default
     template: deployment.yaml
     set:
       database.host: db.example.com
+      database.user: appuser
     asserts:
       - contains:
           path: spec.template.spec.containers[0].env
@@ -44,6 +65,7 @@ tests:
     template: deployment.yaml
     set:
       database.host: db.example.com
+      database.user: appuser
       database.tls: no-verify
     asserts:
       - contains:
@@ -54,6 +76,7 @@ tests:
     template: deployment.yaml
     set:
       database.host: db.example.com
+      database.user: appuser
       database.tls: enabled
     asserts:
       - failedTemplate: {}
@@ -62,6 +85,7 @@ tests:
     template: deployment.yaml
     set:
       database.host: db.example.com
+      database.user: appuser
       database.tls: true
     asserts:
       - failedTemplate: {}
@@ -118,6 +142,7 @@ tests:
     template: deployment.yaml
     set:
       database.host: db.example.com
+      database.user: appuser
       postgresql.auth.existingSecret: my-pg-secret
     asserts:
       - failedTemplate:
@@ -128,6 +153,7 @@ tests:
     release: { name: rel }
     set:
       database.host: db.example.com
+      database.user: appuser
     asserts:
       - equal:
           path: spec.template.spec.containers[0].env[?(@.name=="DATABASE_PASSWORD")].valueFrom.secretKeyRef
@@ -137,6 +163,7 @@ tests:
     template: deployment.yaml
     set:
       database.host: db.example.com
+      database.user: appuser
       secret.existingSecret: my-secret
     asserts:
       - equal:
@@ -238,6 +265,7 @@ tests:
     template: deployment.yaml
     set:
       database.host: db.example.com
+      database.user: appuser
       database.port: 6543
     asserts:
       - contains:

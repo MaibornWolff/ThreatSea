@@ -98,7 +98,11 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{- define "threatsea.databaseUser" -}}
+{{- if .Values.postgresql.enabled }}
 {{- .Values.database.user | default "threatsea" }}
+{{- else }}
+{{- required "database.user must be set when postgresql.enabled=false" .Values.database.user }}
+{{- end }}
 {{- end }}
 
 {{/*
@@ -235,7 +239,11 @@ test. Expects a dict with ctx and names: "app" for DATABASE_*, "libpq" for PG*.
 - name: {{ $names.port }}
   value: {{ include "threatsea.databasePort" $ctx | quote }}
 {{ include "threatsea.configEnv" (dict "ctx" $ctx "name" $names.name "key" $keys.databaseName "value" (include "threatsea.databaseName" $ctx)) }}
-{{ include "threatsea.configEnv" (dict "ctx" $ctx "name" $names.user "key" $keys.databaseUser "value" (include "threatsea.databaseUser" $ctx)) }}
+{{- $user := "" }}
+{{- if not $keys.databaseUser }}
+{{- $user = include "threatsea.databaseUser" $ctx }}
+{{- end }}
+{{ include "threatsea.configEnv" (dict "ctx" $ctx "name" $names.user "key" $keys.databaseUser "value" $user) }}
 {{- end }}
 
 {{- define "threatsea.env" -}}

@@ -12,6 +12,7 @@ set:
   secret.values.oidcClientSecret: oidc
   secret.values.databasePassword: dbpw
   database.host: db.example.com
+  database.user: appuser
 tests:
   - it: mounts an extra volume
     template: deployment.yaml

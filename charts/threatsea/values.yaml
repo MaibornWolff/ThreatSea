@@ -133,7 +133,8 @@ database:
   port: 5432
   # -- Database name. Defaults to `threatsea` when empty. Also the database the bundled PostgreSQL creates.
   name: ""
-  # -- Database user. Defaults to `threatsea` when empty. Also the user the bundled PostgreSQL creates.
+  # -- Database user. Required unless postgresql.enabled=true; the bundled PostgreSQL
+  # creates this user and defaults it to `threatsea` when empty.
   user: ""
   # -- TLS mode, passed to the backend as DATABASE_TLS: `verify` (TLS with certificate
   # verification), `no-verify` (TLS without certificate verification, e.g. for a pooler
