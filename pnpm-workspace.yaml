@@ -7,7 +7,7 @@ catalog:
   "@vitest/coverage-v8": 4.1.11
   dotenv: 18.0.7
   oxlint: 1.87.0
-  oxlint-tsgolint: 7.0.2003
+  oxlint-tsgolint: 7.0.2004
   vitest: 4.1.11
 
 allowBuilds:
