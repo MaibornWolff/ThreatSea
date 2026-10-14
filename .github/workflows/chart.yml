@@ -25,6 +25,10 @@ jobs:
       # The SHA-256 values must be updated together with the version
       # (take them from the release's checksum file); a bump that leaves
       # them stale fails the download check below.
+      # renovate: datasource=github-releases depName=helm-unittest/helm-unittest
+      HELM_UNITTEST_VERSION: v1.1.2
+      # From the release's unittest-<version>.tgz.prov
+      HELM_UNITTEST_SHA256: f3f6e4bcfbb73bf573434444af4ea506caaeb6f71dbb9891b499758574dd3161
       # renovate: datasource=github-releases depName=yannh/kubeconform
       KUBECONFORM_VERSION: v0.8.0
       KUBECONFORM_SHA256: 9bc2bffbf71f261128533edaf912153948b7ff238f9a531ae6d34466ec287883
@@ -45,7 +49,10 @@ jobs:
 
       - name: Install helm-unittest and kubeconform
         run: |
-          helm plugin install https://github.com/helm-unittest/helm-unittest --version 1.1.2 --verify=false
+          curl -sSfL -o "$RUNNER_TEMP/unittest.tgz" "https://github.com/helm-unittest/helm-unittest/releases/download/${HELM_UNITTEST_VERSION}/unittest-${HELM_UNITTEST_VERSION#v}.tgz"
+          echo "${HELM_UNITTEST_SHA256}  $RUNNER_TEMP/unittest.tgz" | sha256sum -c -
+          # The checksum above pins the plugin; --verify=false only skips Helm's .prov lookup.
+          helm plugin install "$RUNNER_TEMP/unittest.tgz" --verify=false
           curl -sSfL -o "$RUNNER_TEMP/kubeconform.tar.gz" "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz"
           echo "${KUBECONFORM_SHA256}  $RUNNER_TEMP/kubeconform.tar.gz" | sha256sum -c -
           tar -xzf "$RUNNER_TEMP/kubeconform.tar.gz" -C /usr/local/bin kubeconform
