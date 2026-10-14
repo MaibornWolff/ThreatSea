@@ -38,8 +38,7 @@ Pre-releases are published from the `next` branch. Pass `--devel` (or an explici
 
 | Value | Description |
 | ----- | ----------- |
-| `config.originApp` | Origin of the frontend, for example `https://threatsea.example.com` |
-| `config.originBackend` | Externally reachable origin of the backend, used to build the OIDC callback URL |
+| `config.origin` | Externally reachable origin of ThreatSea, for example `https://threatsea.example.com`. The OIDC callback URL is `<origin>/api/auth/redirect` |
 | `config.oidc.issuerUrl` | OIDC issuer URL |
 | `config.oidc.clientId` | OIDC client ID |
 | `secret.values.jwtSecret` | JWT signing secret |
@@ -138,6 +137,29 @@ Things to know before relying on it, even for an evaluation:
 
 `helm test <release>` runs a pod that logs in to the configured database with `psql`, using the chart's credentials, and runs `SELECT 1`, so a wrong password fails the test. It uses the same TLS mode as the app: `verify` checks the server certificate against the image's system CAs (`sslmode=verify-full`), `no-verify` requires TLS without checking the certificate (`sslmode=require`) and `disabled` connects in plaintext. If the app trusts a private CA through `extraEnv`/`extraVolumes`, the test pod does not, so `helm test` fails in `verify` mode. The pod pulls `postgresql.image` even when an external database is used.
 
+## Additional backend settings
+
+The backend reads a few settings the chart has no value for. Set them through `extraEnv`:
+
+| Variable | Default | Description |
+| -------- | ------- | ----------- |
+| `OIDC_SCOPE` | `openid profile email` | Space-separated scopes requested from the identity provider. Must include `openid`, otherwise the app does not start. ThreatSea needs the `email` claim to identify users, so drop `email` only if your provider includes it without that scope. |
+| `OIDC_ALLOW_UNVERIFIED_EMAIL_LINKING` | `false` | By default, a login is refused unless the identity provider reports the email as verified (`email_verified`), because the email is used to create the account or link it to an existing one. Set to `true` only for a provider that does not send `email_verified` and whose email addresses users cannot choose themselves; otherwise a user can take over another account by claiming its email. |
+| `USER_PURGE_ENABLED` | `false` | Set to `true` to permanently delete users who have not logged in for `USER_PURGE_THRESHOLD_DAYS`. Users who are the only owner of a project or catalog are kept. Any other value leaves the purge disabled. Each pod runs the purge on startup and then every `USER_PURGE_INTERVAL_HOURS`. |
+| `USER_PURGE_THRESHOLD_DAYS` | `365` | Days since the last login after which the purge deletes a user. Must be greater than `USER_HIDE_THRESHOLD_DAYS`. |
+| `USER_PURGE_INTERVAL_HOURS` | `24` | Hours between purge runs, at most 596. |
+| `USER_HIDE_THRESHOLD_DAYS` | `90` | Days since the last login after which a user is no longer offered when adding members to a project or catalog. Existing memberships stay visible. Applies even when the purge is disabled. |
+
+```yaml
+extraEnv:
+  - name: USER_PURGE_ENABLED
+    value: "true"
+  - name: USER_PURGE_THRESHOLD_DAYS
+    value: "180"
+```
+
+Invalid values (a non-positive number, or a hide threshold that is not smaller than the purge threshold) stop the app at startup, and the pod goes into `CrashLoopBackOff`.
+
 ## Values
 
 | Key | Type | Default | Description |
@@ -148,8 +170,7 @@ Things to know before relying on it, even for an evaluation:
 | config.oidc.allowHttp | bool | `false` | Allow plain HTTP for OIDC (boolean, never enable in production) |
 | config.oidc.clientId | string | `""` | OIDC client ID |
 | config.oidc.issuerUrl | string | `""` | OIDC issuer URL (required) |
-| config.originApp | string | `""` | Origin of the frontend (used for CORS and as the post-login redirect target) |
-| config.originBackend | string | `""` | Origin of the backend (used to build the OIDC redirect/callback URL). Must be the externally reachable backend URL, otherwise OIDC login fails. |
+| config.origin | string | `""` | Externally reachable origin of ThreatSea, for example `https://threatsea.example.com`. The container serves the frontend and the API from this one origin; it is used for CORS, the OIDC callback URL (`<origin>/api/auth/redirect`) and the post-login redirect. |
 | config.useProxy | bool | `true` | Set to true (boolean) when behind a reverse proxy / ingress (enables trust proxy) |
 | containerSecurityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true}` | Container-level security context. The root filesystem is read-only; use `extraVolumes` for any path the container must write to. |
 | database.host | string | `""` | Hostname of an external PostgreSQL server. Required unless postgresql.enabled=true. |
@@ -158,7 +179,7 @@ Things to know before relying on it, even for an evaluation:
 | database.tls | string | `"verify"` | TLS mode, passed to the backend as DATABASE_TLS: `verify` (TLS with certificate verification), `no-verify` (TLS without certificate verification, e.g. for a pooler with a self-signed certificate) or `disabled`. Forced to `disabled` when postgresql.enabled=true, which serves plaintext. |
 | database.user | string | `""` | Database user. Required unless postgresql.enabled=true; the bundled PostgreSQL creates this user and defaults it to `threatsea` when empty. |
 | deploymentAnnotations | object | `{}` | Annotations added to the Deployment, e.g. for Stakater Reloader |
-| extraEnv | list | `[]` | Extra environment variables to inject into the container |
+| extraEnv | list | `[]` | Extra environment variables to inject into the container. Use it for backend settings the chart has no value for; the README lists them under "Additional backend settings". |
 | extraEnvFrom | list | `[]` | Extra environment sources (configMapRef / secretRef) added to the container's `envFrom` |
 | extraVolumeMounts | list | `[]` | Extra volume mounts added to the container; each must match a volume in `extraVolumes` |
 | extraVolumes | list | `[]` | Extra volumes added to the pod, e.g. to mount a private CA bundle (the root filesystem is read-only) |
@@ -212,7 +233,6 @@ Things to know before relying on it, even for an evaluation:
 | secret.values.oidcClientSecret | string | `""` | OIDC client secret (required) |
 | secret.values.sessionSecret | string | `""` | Secret used to sign Express session cookies |
 | service.annotations | object | `{}` | Annotations for the Service |
-| service.containerPort | int | `8000` | Port the ThreatSea container listens on |
 | service.port | int | `80` | Service port |
 | service.type | string | `"ClusterIP"` | Service type |
 | serviceAccount.annotations | object | `{}` | Annotations for the ServiceAccount |

@@ -51,7 +51,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.service.containerPort }}
+              containerPort: {{ include "threatsea.containerPort" . }}
               protocol: TCP
           env:
             {{- toYaml (concat $env $extraEnv) | nindent 12 }}

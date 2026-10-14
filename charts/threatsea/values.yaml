@@ -61,11 +61,10 @@ config:
   # -- Log level as an integer: 0 (debug), 1 (info), 2 (warning), 3 (error)
   logLevel: 3
 
-  # -- Origin of the frontend (used for CORS and as the post-login redirect target)
-  originApp: ""
-  # -- Origin of the backend (used to build the OIDC redirect/callback URL).
-  # Must be the externally reachable backend URL, otherwise OIDC login fails.
-  originBackend: ""
+  # -- Externally reachable origin of ThreatSea, for example `https://threatsea.example.com`.
+  # The container serves the frontend and the API from this one origin; it is used for
+  # CORS, the OIDC callback URL (`<origin>/api/auth/redirect`) and the post-login redirect.
+  origin: ""
 
   oidc:
     # -- OIDC issuer URL (required)
@@ -180,8 +179,6 @@ service:
   type: ClusterIP
   # -- Service port
   port: 80
-  # -- Port the ThreatSea container listens on
-  containerPort: 8000
   # -- Annotations for the Service
   annotations: {}
 
@@ -266,7 +263,8 @@ tolerations: []
 # -- Affinity rules
 affinity: {}
 
-# -- Extra environment variables to inject into the container
+# -- Extra environment variables to inject into the container. Use it for backend
+# settings the chart has no value for; the README lists them under "Additional backend settings".
 extraEnv: []
 
 # -- Extra environment sources (configMapRef / secretRef) added to the container's `envFrom`

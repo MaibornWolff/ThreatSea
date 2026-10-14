@@ -1,6 +1,5 @@
 config:
-  originApp: https://app.example.com
-  originBackend: https://api.example.com
+  origin: https://threatsea.example.com
   oidc:
     issuerUrl: https://idp.example.com
     clientId: threatsea

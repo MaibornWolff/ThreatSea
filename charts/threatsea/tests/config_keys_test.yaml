@@ -3,8 +3,7 @@ templates:
   - deployment.yaml
   - secret.yaml
 set:
-  config.originApp: https://app.example.com
-  config.originBackend: https://api.example.com
+  config.origin: https://threatsea.example.com
   secret.existingSecret: my-secret
   secret.configKeys.oidcIssuerUrl: issuer-key
   secret.configKeys.oidcClientId: client-id-key

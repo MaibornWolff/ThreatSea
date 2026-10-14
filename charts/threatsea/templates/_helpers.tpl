@@ -136,6 +136,14 @@ passwordSecretKeyRef:
 {{- end }}
 {{- end }}
 
+{{/*
+Port the app listens on. Fixed: it is only visible inside the pod, and the image runs
+as non-root, so a port above 1024 is required anyway. service.port is the user-facing one.
+*/}}
+{{- define "threatsea.containerPort" -}}
+8000
+{{- end }}
+
 {{- define "threatsea.imageTag" -}}
 {{- .Values.image.tag | default .Chart.AppVersion }}
 {{- end }}
@@ -220,14 +228,15 @@ for DATABASE_*, "libpq" for PG*.
 
 {{- define "threatsea.env" -}}
 {{- $database := include "threatsea.database" . | fromYaml }}
+{{- $origin := required "config.origin is required" .Values.config.origin }}
 - name: PORT
-  value: {{ .Values.service.containerPort | quote }}
+  value: {{ include "threatsea.containerPort" . | quote }}
 - name: LOG_LEVEL
   value: {{ .Values.config.logLevel | toString | quote }}
 - name: ORIGIN_APP
-  value: {{ required "config.originApp is required" .Values.config.originApp | quote }}
+  value: {{ $origin | quote }}
 - name: ORIGIN_BACKEND
-  value: {{ required "config.originBackend is required" .Values.config.originBackend | quote }}
+  value: {{ $origin | quote }}
 - name: AUTH_METHOD
   value: "oidc"
 {{ include "threatsea.configEnv" (dict "ctx" . "name" "OIDC_ISSUER_URL" "key" .Values.secret.configKeys.oidcIssuerUrl "value" .Values.config.oidc.issuerUrl "required" "config.oidc.issuerUrl is required") }}

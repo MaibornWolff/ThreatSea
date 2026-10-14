@@ -3,8 +3,7 @@ templates:
   - deployment.yaml
   - secret.yaml
 set:
-  config.originApp: https://app.example.com
-  config.originBackend: https://api.example.com
+  config.origin: https://threatsea.example.com
   config.oidc.issuerUrl: https://idp.example.com
   config.oidc.clientId: threatsea
   secret.values.jwtSecret: jwt
@@ -21,21 +20,51 @@ tests:
           path: spec.template.spec.containers[0].env
           content: { name: AUTH_METHOD, value: oidc }
 
-  - it: requires originApp
+  - it: requires origin
     template: deployment.yaml
     set:
-      config.originApp: ""
+      config.origin: ""
     asserts:
       - failedTemplate:
-          errorPattern: config.originApp is required
+          errorPattern: config.origin is required
 
-  - it: requires originBackend
+  # The image serves the frontend and the API from one origin, and the session cookie is
+  # host-scoped, so the two backend origins must always match.
+  - it: sets both backend origins from config.origin
     template: deployment.yaml
+    asserts:
+      - contains:
+          {
+            path: "spec.template.spec.containers[0].env",
+            content: { name: ORIGIN_APP, value: https://threatsea.example.com },
+          }
+      - contains:
+          {
+            path: "spec.template.spec.containers[0].env",
+            content: { name: ORIGIN_BACKEND, value: https://threatsea.example.com },
+          }
+
+  - it: rejects the removed originApp and originBackend values
     set:
-      config.originBackend: ""
+      config.originApp: https://threatsea.example.com
     asserts:
       - failedTemplate:
-          errorPattern: config.originBackend is required
+          errorPattern: "additional properties .originApp. not allowed"
+
+  - it: listens on the fixed container port
+    template: deployment.yaml
+    asserts:
+      - contains: { path: "spec.template.spec.containers[0].env", content: { name: PORT, value: "8000" } }
+      - equal:
+          path: spec.template.spec.containers[0].ports[0]
+          value: { name: http, containerPort: 8000, protocol: TCP }
+
+  - it: rejects the removed service.containerPort value
+    set:
+      service.containerPort: 9000
+    asserts:
+      - failedTemplate:
+          errorPattern: "additional properties .containerPort. not allowed"
 
   - it: maps native booleans to the strings the backend reads
     template: deployment.yaml

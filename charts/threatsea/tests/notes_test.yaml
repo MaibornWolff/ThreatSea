@@ -2,8 +2,7 @@ suite: install notes
 templates:
   - NOTES.txt
 set:
-  config.originApp: https://app.example.com
-  config.originBackend: https://api.example.com
+  config.origin: https://threatsea.example.com
   config.oidc.issuerUrl: https://idp.example.com
   config.oidc.clientId: threatsea
   secret.values.jwtSecret: jwt
