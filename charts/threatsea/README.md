@@ -68,13 +68,16 @@ If your existing Secret also holds non-secret settings, for example because it i
 With `postgresql.enabled=true` the `database-password` key is not read. The bundled database's password comes from `postgresql.auth.*`.
 
 ```bash
-kubectl create secret generic threatsea-secrets \
+kubectl create namespace threatsea
+
+kubectl create secret generic threatsea-secrets --namespace threatsea \
   --from-literal=jwt-secret="$(openssl rand -hex 32)" \
   --from-literal=session-secret="$(openssl rand -hex 32)" \
   --from-literal=oidc-client-secret='<client secret>' \
   --from-literal=database-password='<database password>'
 
 helm install threatsea oci://ghcr.io/maibornwolff/charts/threatsea --version <version> \
+  --namespace threatsea \
   --set secret.existingSecret=threatsea-secrets \
   --values my-values.yaml
 ```
@@ -126,7 +129,7 @@ With the bundled database enabled, `database.host` is not used and `database.tls
 
 Things to know before relying on it, even for an evaluation:
 
-- **Credentials are fixed on first start.** PostgreSQL initialises the data directory once. Changing `postgresql.auth.password`, `database.name` or `database.user` afterwards has no effect on the existing PVC. A changed password only breaks the app's login.
+- **Credentials are fixed on first start.** PostgreSQL initialises the data directory once. Changing `postgresql.auth.password`, `database.name` or `database.user` afterwards has no effect on the existing PVC. The app then uses the new values while the database keeps the old ones, so the app can no longer connect.
 - **The PVC survives `helm uninstall`.** Reinstalling with a different password then fails authentication. Delete the PVC (`kubectl delete pvc -l app.kubernetes.io/instance=<release>`) to start fresh, which also deletes the data.
 - **Changing the PostgreSQL major version starts an empty database.** Overriding `postgresql.image.tag` to another major version makes PostgreSQL use a new data directory, so the app sees a fresh, empty database. The old data stays on the volume under the previous major version's directory.
 - **Storage settings are immutable.** `postgresql.persistence.enabled`, `size` and `storageClass` end up in the StatefulSet's `volumeClaimTemplates`, which Kubernetes does not allow to change on upgrade.
