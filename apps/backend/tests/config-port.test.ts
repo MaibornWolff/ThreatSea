@@ -35,12 +35,12 @@ describe("port configuration", () => {
     it.each(["0", "65536", "1.5", "abc"])("rejects PORT=%s", async (value) => {
         vi.stubEnv("PORT", value);
 
-        await expect(importConfig()).rejects.toThrow("PORT");
+        await expect(importConfig()).rejects.toThrow("Environment variable PORT ");
     });
 
     it.each(["0", "65536", "1.5", "abc"])("rejects DATABASE_PORT=%s", async (value) => {
         vi.stubEnv("DATABASE_PORT", value);
 
-        await expect(importConfig()).rejects.toThrow("DATABASE_PORT");
+        await expect(importConfig()).rejects.toThrow("Environment variable DATABASE_PORT ");
     });
 });

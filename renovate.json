@@ -20,16 +20,6 @@
       "datasourceTemplate": "npm"
     },
     {
-      "description": "Update GitHub-release pins inline in workflow run commands (helm plugin install <url> --version X). No built-in manager reads versions out of run: commands, so without this the pins drift silently.",
-      "customType": "regex",
-      "managerFilePatterns": ["/^\\.github/workflows/.+\\.ya?ml$/"],
-      "matchStrings": [
-        "helm plugin install https://github\\.com/(?<depName>[^/\\s]+/[^/\\s]+) --version (?<currentValue>[\\w.+-]+)"
-      ],
-      "datasourceTemplate": "github-releases",
-      "extractVersionTemplate": "^v?(?<version>.+)$"
-    },
-    {
       "description": "Update tool versions declared as `# renovate: datasource=... depName=...` followed by a `key: vX.Y.Z` line in workflows (setup-helm version, helm-unittest, kubeconform and helm-docs downloads). The version is declared once, so URLs built from it can never end up half-updated. The SHA-256 next to a downloaded tool is not updated automatically: take it from the release's checksum file, otherwise CI fails the checksum check.",
       "customType": "regex",
       "managerFilePatterns": ["/^\\.github/workflows/.+\\.ya?ml$/"],

@@ -86,8 +86,8 @@ jobs:
 
       - name: Verify packaged chart contents
         run: |
-          helm package charts/threatsea --version 0.0.0 --app-version 0.0.0 --destination "${{ runner.temp }}"
-          contents=$(tar -tzf "${{ runner.temp }}/threatsea-0.0.0.tgz")
+          helm package charts/threatsea --version 0.0.0 --app-version 0.0.0 --destination "$RUNNER_TEMP"
+          contents=$(tar -tzf "$RUNNER_TEMP/threatsea-0.0.0.tgz")
           echo "$contents" | grep -qx 'threatsea/templates/tests/connection-test.yaml' \
             || { echo "::error::helm test hook missing from the packaged chart (check .helmignore)"; exit 1; }
           if echo "$contents" | grep -q '^threatsea/tests/'; then
