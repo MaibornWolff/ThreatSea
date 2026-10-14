@@ -83,7 +83,7 @@ tests:
           path: spec.containers[0].image
           value: postgres:18.7-alpine
 
-  - it: requires TLS for an external database with database.tls=verify
+  - it: verifies the certificate against the system CAs like the app with database.tls=verify
     set:
       postgresql.enabled: false
       database.host: db.example.com
@@ -92,7 +92,10 @@ tests:
     asserts:
       - contains:
           path: spec.containers[0].env
-          content: { name: PGSSLMODE, value: require }
+          content: { name: PGSSLMODE, value: verify-full }
+      - contains:
+          path: spec.containers[0].env
+          content: { name: PGSSLROOTCERT, value: system }
 
   - it: requires TLS for an external database with database.tls=no-verify
     set:
@@ -104,6 +107,9 @@ tests:
       - contains:
           path: spec.containers[0].env
           content: { name: PGSSLMODE, value: require }
+      - notContains:
+          path: spec.containers[0].env
+          content: { name: PGSSLROOTCERT, value: system }
 
   - it: disables TLS for an external database with database.tls=disabled
     set:

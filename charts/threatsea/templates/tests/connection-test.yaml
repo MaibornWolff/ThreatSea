@@ -32,8 +32,14 @@ spec:
         {{- toYaml .Values.containerSecurityContext | nindent 8 }}
       env:
         {{- include "threatsea.databaseEnv" (dict "ctx" . "names" "libpq") | nindent 8 }}
+        {{- /* libpq equivalents of the backend's DATABASE_TLS modes; "system" trusts the image's CA bundle like Node does */}}
+        {{- $databaseTls := include "threatsea.databaseTls" . }}
         - name: PGSSLMODE
-          value: {{ ternary "disable" "require" (eq (include "threatsea.databaseTls" .) "disabled") | quote }}
+          value: {{ get (dict "verify" "verify-full" "no-verify" "require" "disabled" "disable") $databaseTls | quote }}
+        {{- if eq $databaseTls "verify" }}
+        - name: PGSSLROOTCERT
+          value: system
+        {{- end }}
         - name: PGCONNECT_TIMEOUT
           value: "10"
         - name: PGPASSWORD

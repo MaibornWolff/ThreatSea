@@ -136,7 +136,7 @@ Things to know before relying on it, even for an evaluation:
 
 ## Testing the release
 
-`helm test <release>` runs a pod that logs in to the configured database with `psql`, using the chart's credentials, and runs `SELECT 1`, so a wrong password fails the test. Unless `database.tls` is `disabled`, it requires TLS (`sslmode=require`) but does not verify the server certificate, so a certificate problem can pass `helm test` and still break the app. The pod pulls `postgresql.image` even when an external database is used.
+`helm test <release>` runs a pod that logs in to the configured database with `psql`, using the chart's credentials, and runs `SELECT 1`, so a wrong password fails the test. It uses the same TLS mode as the app: `verify` checks the server certificate against the image's system CAs (`sslmode=verify-full`), `no-verify` requires TLS without checking the certificate (`sslmode=require`) and `disabled` connects in plaintext. If the app trusts a private CA through `extraEnv`/`extraVolumes`, the test pod does not, so `helm test` fails in `verify` mode. The pod pulls `postgresql.image` even when an external database is used.
 
 ## Values
 
