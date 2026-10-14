@@ -66,17 +66,6 @@ app.kubernetes.io/name: {{ include "threatsea.name" . | trunc 52 | trimSuffix "-
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
-{{- define "threatsea.databaseHost" -}}
-{{- if .Values.postgresql.enabled }}
-{{- if .Values.database.host }}
-{{- fail "database.host must not be set when postgresql.enabled=true" }}
-{{- end }}
-{{- include "threatsea.postgresql.fullname" . }}
-{{- else }}
-{{- required "database.host must be set when postgresql.enabled=false" .Values.database.host }}
-{{- end }}
-{{- end }}
-
 {{- define "threatsea.postgresql.image" -}}
 {{- printf "%s:%s" .Values.postgresql.image.repository .Values.postgresql.image.tag }}
 {{- end }}
@@ -85,70 +74,65 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 5432
 {{- end }}
 
-{{- define "threatsea.databasePort" -}}
-{{- if .Values.postgresql.enabled }}
-{{- include "threatsea.postgresql.port" . }}
-{{- else }}
-{{- .Values.database.port }}
-{{- end }}
-{{- end }}
-
-{{- define "threatsea.databaseName" -}}
-{{- .Values.database.name | default "threatsea" }}
-{{- end }}
-
-{{- define "threatsea.databaseUser" -}}
-{{- if .Values.postgresql.enabled }}
-{{- .Values.database.user | default "threatsea" }}
-{{- else }}
-{{- required "database.user must be set when postgresql.enabled=false" .Values.database.user }}
-{{- end }}
-{{- end }}
-
 {{/*
 Bundled PostgreSQL readiness check. Connects over TCP (-h 127.0.0.1): without -h
 pg_isready probes the Unix socket, which the image's temporary initdb server also
 serves, so the probe could pass during first-time initialisation.
 */}}
 {{- define "threatsea.postgresql.isReady" -}}
+{{- $database := include "threatsea.database" . | fromYaml -}}
 - pg_isready
 - -h
 - 127.0.0.1
 - -U
-- {{ include "threatsea.databaseUser" . | quote }}
+- {{ $database.user | quote }}
 - -d
-- {{ include "threatsea.databaseName" . | quote }}
+- {{ $database.name | quote }}
 {{- end }}
 
 {{/*
-DATABASE_TLS literal read by the backend. The bundled database serves plaintext.
+Database connection settings of the active mode, as YAML for fromYaml: host, port,
+name, user, tls (the backend's DATABASE_TLS literal) and passwordSecretKeyRef. The
+bundled database fixes host, port and tls (it serves plaintext); an external one takes
+them from database.*. host and user are empty when secret.configKeys supplies them.
+Each mode rejects the other's settings rather than silently ignoring them: the bundled
+database is created from the plain database.name and database.user, and
+postgresql.auth.* only describes the bundled database.
 */}}
-{{- define "threatsea.databaseTls" -}}
+{{- define "threatsea.database" -}}
+{{- $keys := .Values.secret.configKeys -}}
+{{- $auth := .Values.postgresql.auth -}}
+name: {{ .Values.database.name | default "threatsea" | quote }}
 {{- if .Values.postgresql.enabled }}
-{{- print "disabled" }}
+{{- if .Values.database.host }}
+{{- fail "database.host must not be set when postgresql.enabled=true" }}
+{{- end }}
+{{- if or $keys.databaseHost $keys.databaseName $keys.databaseUser }}
+{{- fail "secret.configKeys.database* must be empty when postgresql.enabled=true; the bundled database is created from database.name and database.user" }}
+{{- end }}
+host: {{ include "threatsea.postgresql.fullname" . | quote }}
+port: {{ include "threatsea.postgresql.port" . }}
+user: {{ .Values.database.user | default "threatsea" | quote }}
+tls: disabled
+passwordSecretKeyRef:
+{{- if $auth.existingSecret }}
+  name: {{ $auth.existingSecret | quote }}
+  key: {{ $auth.existingSecretPasswordKey | quote }}
 {{- else }}
-{{- .Values.database.tls }}
+  name: {{ include "threatsea.postgresql.fullname" . | quote }}
+  key: password
 {{- end }}
-{{- end }}
-
-{{/*
-postgresql.auth.* only describes the bundled database, so it is rejected when that is off
-rather than silently ignored.
-*/}}
-{{- define "threatsea.databasePasswordSecretKeyRef" -}}
-{{- if .Values.postgresql.enabled -}}
-{{- if .Values.postgresql.auth.existingSecret -}}
-name: {{ .Values.postgresql.auth.existingSecret | quote }}
-key: {{ .Values.postgresql.auth.existingSecretPasswordKey | quote }}
-{{- else -}}
-name: {{ include "threatsea.postgresql.fullname" . | quote }}
-key: password
-{{- end }}
-{{- else if .Values.postgresql.auth.existingSecret -}}
+{{- else }}
+{{- if $auth.existingSecret }}
 {{- fail "postgresql.auth.existingSecret is only used when postgresql.enabled=true; set secret.existingSecret or secret.values.databasePassword for an external database password" }}
-{{- else -}}
-name: {{ include "threatsea.secretName" . | quote }}
-key: {{ .Values.secret.keys.databasePassword | quote }}
+{{- end }}
+host: {{ if $keys.databaseHost }}""{{ else }}{{ required "database.host must be set when postgresql.enabled=false" .Values.database.host | quote }}{{ end }}
+port: {{ .Values.database.port }}
+user: {{ if $keys.databaseUser }}""{{ else }}{{ required "database.user must be set when postgresql.enabled=false" .Values.database.user | quote }}{{ end }}
+tls: {{ .Values.database.tls | quote }}
+passwordSecretKeyRef:
+  name: {{ include "threatsea.secretName" . | quote }}
+  key: {{ .Values.secret.keys.databasePassword | quote }}
 {{- end }}
 {{- end }}
 
@@ -189,18 +173,14 @@ optional required message, checked only when the plain value is used.
 {{- end }}
 
 {{/*
-secret.configKeys can only point into an existing Secret, the bundled database is
-created from the plain database.name and database.user, and a key set together with
-its plain value would silently ignore one of them, so all three misuses are rejected.
+secret.configKeys can only point into an existing Secret, and a key set together with
+its plain value would silently ignore one of them, so both misuses are rejected.
+threatsea.database rejects database keys for the bundled database.
 */}}
 {{- define "threatsea.validateConfigKeys" -}}
 {{- $keys := .Values.secret.configKeys -}}
-{{- $databaseKeysSet := or $keys.databaseHost $keys.databaseName $keys.databaseUser -}}
-{{- if and (not .Values.secret.existingSecret) (or $keys.oidcIssuerUrl $keys.oidcClientId $databaseKeysSet) -}}
+{{- if and (not .Values.secret.existingSecret) (or $keys.oidcIssuerUrl $keys.oidcClientId $keys.databaseHost $keys.databaseName $keys.databaseUser) -}}
 {{- fail "secret.configKeys requires secret.existingSecret; the chart-created Secret holds only secret.values" -}}
-{{- end -}}
-{{- if and .Values.postgresql.enabled $databaseKeysSet -}}
-{{- fail "secret.configKeys.database* must be empty when postgresql.enabled=true; the bundled database is created from database.name and database.user" -}}
 {{- end -}}
 {{- $plainValues := dict
   "oidcIssuerUrl" (list "config.oidc.issuerUrl" .Values.config.oidc.issuerUrl)
@@ -218,10 +198,10 @@ its plain value would silently ignore one of them, so all three misuses are reje
 
 {{/*
 Database host, port, name and user env entries, shared by the app and the connection
-test. Expects a dict with ctx and names: "app" for DATABASE_*, "libpq" for PG*.
+test. Expects a dict with ctx, database (threatsea.database decoded) and names: "app"
+for DATABASE_*, "libpq" for PG*.
 */}}
 {{- define "threatsea.databaseEnv" -}}
-{{- $ctx := .ctx }}
 {{- $nameSets := dict
   "app" (dict "host" "DATABASE_HOST" "port" "DATABASE_PORT" "name" "DATABASE_NAME" "user" "DATABASE_USER")
   "libpq" (dict "host" "PGHOST" "port" "PGPORT" "name" "PGDATABASE" "user" "PGUSER")
@@ -230,23 +210,16 @@ test. Expects a dict with ctx and names: "app" for DATABASE_*, "libpq" for PG*.
 {{- if not $names }}
 {{- fail (printf "threatsea.databaseEnv: unknown names %q" .names) }}
 {{- end }}
-{{- $keys := $ctx.Values.secret.configKeys }}
-{{- $host := "" }}
-{{- if not $keys.databaseHost }}
-{{- $host = include "threatsea.databaseHost" $ctx }}
-{{- end }}
-{{- include "threatsea.configEnv" (dict "ctx" $ctx "name" $names.host "key" $keys.databaseHost "value" $host) }}
+{{- $keys := .ctx.Values.secret.configKeys }}
+{{- include "threatsea.configEnv" (dict "ctx" .ctx "name" $names.host "key" $keys.databaseHost "value" .database.host) }}
 - name: {{ $names.port }}
-  value: {{ include "threatsea.databasePort" $ctx | quote }}
-{{ include "threatsea.configEnv" (dict "ctx" $ctx "name" $names.name "key" $keys.databaseName "value" (include "threatsea.databaseName" $ctx)) }}
-{{- $user := "" }}
-{{- if not $keys.databaseUser }}
-{{- $user = include "threatsea.databaseUser" $ctx }}
-{{- end }}
-{{ include "threatsea.configEnv" (dict "ctx" $ctx "name" $names.user "key" $keys.databaseUser "value" $user) }}
+  value: {{ .database.port | quote }}
+{{ include "threatsea.configEnv" (dict "ctx" .ctx "name" $names.name "key" $keys.databaseName "value" .database.name) }}
+{{ include "threatsea.configEnv" (dict "ctx" .ctx "name" $names.user "key" $keys.databaseUser "value" .database.user) }}
 {{- end }}
 
 {{- define "threatsea.env" -}}
+{{- $database := include "threatsea.database" . | fromYaml }}
 - name: PORT
   value: {{ .Values.service.containerPort | quote }}
 - name: LOG_LEVEL
@@ -280,13 +253,13 @@ test. Expects a dict with ctx and names: "app" for DATABASE_*, "libpq" for PG*.
     secretKeyRef:
       name: {{ include "threatsea.secretName" . | quote }}
       key: {{ .Values.secret.keys.sessionSecret | quote }}
-{{ include "threatsea.databaseEnv" (dict "ctx" . "names" "app") }}
+{{ include "threatsea.databaseEnv" (dict "ctx" . "database" $database "names" "app") }}
 - name: DATABASE_TLS
-  value: {{ include "threatsea.databaseTls" . | quote }}
+  value: {{ $database.tls | quote }}
 - name: DATABASE_PASSWORD
   valueFrom:
     secretKeyRef:
-      {{- include "threatsea.databasePasswordSecretKeyRef" . | nindent 6 }}
+      {{- toYaml $database.passwordSecretKeyRef | nindent 6 }}
 {{- end }}
 
 {{- define "threatsea.validateRouting" -}}

@@ -1,3 +1,4 @@
+{{- $database := include "threatsea.database" . | fromYaml }}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -31,12 +32,11 @@ spec:
       securityContext:
         {{- toYaml .Values.containerSecurityContext | nindent 8 }}
       env:
-        {{- include "threatsea.databaseEnv" (dict "ctx" . "names" "libpq") | nindent 8 }}
+        {{- include "threatsea.databaseEnv" (dict "ctx" . "database" $database "names" "libpq") | nindent 8 }}
         {{- /* libpq equivalents of the backend's DATABASE_TLS modes; "system" trusts the image's CA bundle like Node does */}}
-        {{- $databaseTls := include "threatsea.databaseTls" . }}
         - name: PGSSLMODE
-          value: {{ get (dict "verify" "verify-full" "no-verify" "require" "disabled" "disable") $databaseTls | quote }}
-        {{- if eq $databaseTls "verify" }}
+          value: {{ get (dict "verify" "verify-full" "no-verify" "require" "disabled" "disable") $database.tls | quote }}
+        {{- if eq $database.tls "verify" }}
         - name: PGSSLROOTCERT
           value: system
         {{- end }}
@@ -45,4 +45,4 @@ spec:
         - name: PGPASSWORD
           valueFrom:
             secretKeyRef:
-              {{- include "threatsea.databasePasswordSecretKeyRef" . | nindent 14 }}
+              {{- toYaml $database.passwordSecretKeyRef | nindent 14 }}
