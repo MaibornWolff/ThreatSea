@@ -13,6 +13,7 @@ import type { TFunction } from "i18next";
 import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat.types.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
+import { PROTECTION_GOALS, type ProtectionGoal } from "#api/types/protection-goals.types.ts";
 import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import type { ExtendedThreatWithMetrics } from "#application/hooks/use-generic-threats-list.hook.ts";
@@ -67,9 +68,6 @@ const cellText = { fontSize: "0.875rem" } as const;
 // The numeric columns abbreviate their header (the full name is its tooltip). This fits the abbreviation,
 // its filter toggle and DataGrid's sort icon; narrower, a sorted column clips the label.
 const METRIC_COLUMN_WIDTH = 110;
-
-export const PROTECTION_GOALS = ["confidentiality", "integrity", "availability"] as const;
-type ProtectionGoal = (typeof PROTECTION_GOALS)[number];
 
 // The protection goals filter holds the selected goals comma-separated, since column filters are strings.
 export const parseProtectionGoalsFilter = (filterValue: string | undefined): ProtectionGoal[] =>
