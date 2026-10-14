@@ -115,6 +115,46 @@ describe("buildThreatsRows", () => {
         ).toEqual(["generic-1 (1/2)", "threat-11"]);
     });
 
+    it.each([
+        { goal: "confidentiality", expected: ["generic-1 (1/2)", "threat-11", "generic-2 (1/1)", "threat-21"] },
+        { goal: "integrity", expected: ["generic-1 (1/2)", "threat-12"] },
+        { goal: "availability", expected: [] },
+        { goal: "integrity,availability", expected: ["generic-1 (1/2)", "threat-12"] },
+        {
+            goal: "confidentiality,integrity",
+            expected: ["generic-1 (2/2)", "threat-11", "threat-12", "generic-2 (1/1)", "threat-21"],
+        },
+    ])("lists only the threats with any of the protection goals '$goal'", ({ goal, expected }) => {
+        const threatsWithGoals = {
+            1: [
+                threat(11, 1, { confidentiality: true, integrity: false, availability: false }),
+                threat(12, 1, { confidentiality: false, integrity: true, availability: false }),
+            ],
+            2: [threat(21, 2, { confidentiality: true, integrity: false, availability: false })],
+        };
+
+        expect(
+            summarize(
+                build({
+                    threats: threatsWithGoals,
+                    columnFilters: { protectionGoals: goal },
+                    expanded: { 1: true, 2: true },
+                })
+            )
+        ).toEqual(expected);
+    });
+
+    it("hides a generic threat without threats under a protection goal filter", () => {
+        expect(
+            summarize(
+                build({
+                    threats: { ...threatsByGenericThreatId, 2: [] },
+                    columnFilters: { protectionGoals: "confidentiality" },
+                })
+            )
+        ).toEqual(["generic-1 (2/2)"]);
+    });
+
     it("lists all threats of a generic threat matching the name filter, even renamed ones", () => {
         expect(summarize(build({ columnFilters: { name: "tampering" }, expanded: { 2: true } }))).toEqual([
             "generic-2 (1/1)",
