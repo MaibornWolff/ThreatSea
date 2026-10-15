@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import type { TFunction } from "i18next";
@@ -67,6 +67,9 @@ const threat = {
     attacker: "UNAUTHORISED_PARTIES",
     probability: 4,
     status: THREAT_STATUSES.IN_PROGRESS,
+    confidentiality: true,
+    integrity: false,
+    availability: true,
     assets: [
         { id: 1, name: "Credentials", confidentiality: 5, integrity: 5, availability: 5 },
         { id: 2, name: "User ID", confidentiality: 2, integrity: 3, availability: 4 },
@@ -119,6 +122,7 @@ describe("createThreatsColumns — structure", () => {
             "name",
             "description",
             "assets",
+            "protectionGoals",
             "componentName",
             "pointOfAttack",
             "attacker",
@@ -183,7 +187,7 @@ describe("createThreatsColumns — numeric column headers", () => {
 });
 
 describe("createThreatsColumns — generic threat rows carry no risk", () => {
-    it.each(["probability", "damage", "risk", "assets", "status"])(
+    it.each(["probability", "damage", "risk", "assets", "protectionGoals", "status"])(
         "renders nothing (no misleading dash) for %s on a generic threat row",
         (field) => {
             const { byField } = columnByField();
@@ -291,6 +295,129 @@ describe("createThreatsColumns — expand toggle", () => {
         const { byField } = columnByField();
         renderCell(byField["name"], { ...genericRow, isExpanded: true });
         expect(screen.getByRole("button", { name: "Collapse" })).toBeInTheDocument();
+    });
+});
+
+describe("createThreatsColumns — protection goals column", () => {
+    const threatRowWithGoals = (goals: { confidentiality: boolean; integrity: boolean; availability: boolean }) =>
+        ({ rowType: "threat", rowId: "threat-42", threat: { ...threat, ...goals } }) as ThreatsGridRow;
+
+    it.each([
+        { language: "English", t: englishT, abbreviations: ["C", "I", "A"] },
+        { language: "German", t: germanT, abbreviations: ["Vt", "In", "Vf"] },
+    ])("shows all three protection goal abbreviations in $language", ({ t, abbreviations }) => {
+        const { byField } = columnByField({ t });
+        renderCell(byField["protectionGoals"], threatRow);
+
+        for (const abbreviation of abbreviations) {
+            expect(screen.getByText(abbreviation)).toBeInTheDocument();
+        }
+    });
+
+    it("highlights the selected protection goals and greys out the others", () => {
+        const { byField } = columnByField();
+        renderCell(byField["protectionGoals"], threatRow);
+
+        expect(screen.getByText("C")).toHaveStyle({ fontWeight: "700" });
+        expect(screen.getByText("I")).not.toHaveStyle({ fontWeight: "700" });
+        expect(screen.getByText("A")).toHaveStyle({ fontWeight: "700" });
+    });
+
+    it.each([
+        {
+            goals: { confidentiality: true, integrity: false, availability: true },
+            name: "Confidentiality, Availability",
+        },
+        {
+            goals: { confidentiality: true, integrity: true, availability: true },
+            name: "Confidentiality, Integrity, Availability",
+        },
+        { goals: { confidentiality: false, integrity: true, availability: false }, name: "Integrity" },
+        { goals: { confidentiality: false, integrity: false, availability: false }, name: "No protection goals" },
+    ])("names the selected protection goals for assistive technology: $name", ({ goals, name }) => {
+        const { byField } = columnByField();
+        renderCell(byField["protectionGoals"], threatRowWithGoals(goals));
+
+        expect(screen.getByRole("img", { name })).toBeInTheDocument();
+    });
+
+    it("abbreviates the header in English and shows its full name on hover", async () => {
+        const { byField } = columnByField();
+        renderHeader(byField["protectionGoals"]);
+
+        await userEvent.hover(screen.getByText("CIA"));
+
+        expect(await screen.findByRole("tooltip")).toHaveTextContent("Protection Goals");
+    });
+
+    it("writes out the short German header without a tooltip", async () => {
+        const { byField } = columnByField({ t: germanT });
+        renderHeader(byField["protectionGoals"]);
+
+        await userEvent.hover(screen.getByText("Schutzziele"));
+
+        expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+    });
+
+    it("keeps the full name for the column menu and cannot be sorted", () => {
+        const { byField } = columnByField();
+        const column = byField["protectionGoals"]!;
+
+        expect(column.headerName).toBe("Protection Goals");
+        expect(column.sortable).toBe(false);
+    });
+
+    it.each([
+        { current: "", clicked: "Integrity", expected: "integrity" },
+        { current: "availability", clicked: "Confidentiality", expected: "confidentiality,availability" },
+        { current: "confidentiality,integrity", clicked: "Confidentiality", expected: "integrity" },
+        { current: "integrity", clicked: "Integrity", expected: "" },
+    ])(
+        "ticking $clicked with the filter at '$current' filters for '$expected'",
+        async ({ current, clicked, expected }) => {
+            const { byField, handlers } = columnByField({
+                columnFilters: { protectionGoals: current },
+                expandedFilters: { protectionGoals: true },
+            });
+            renderHeader(byField["protectionGoals"]);
+
+            await userEvent.click(screen.getByRole("combobox"));
+            await userEvent.click(await screen.findByRole("option", { name: clicked }));
+
+            expect(handlers.onFilterChange).toHaveBeenCalledWith("protectionGoals", expected);
+        }
+    );
+
+    it("ticks the selected protection goals in the menu", async () => {
+        const { byField } = columnByField({
+            columnFilters: { protectionGoals: "confidentiality,availability" },
+            expandedFilters: { protectionGoals: true },
+        });
+        renderHeader(byField["protectionGoals"]);
+
+        await userEvent.click(screen.getByRole("combobox"));
+
+        const checkboxOf = async (name: string) =>
+            within(await screen.findByRole("option", { name })).getByRole("checkbox");
+        expect(await checkboxOf("Confidentiality")).toBeChecked();
+        expect(await checkboxOf("Integrity")).not.toBeChecked();
+        expect(await checkboxOf("Availability")).toBeChecked();
+    });
+
+    it.each([
+        { language: "English", t: englishT, filter: "", shown: "All" },
+        { language: "English", t: englishT, filter: "confidentiality,availability", shown: "C, A" },
+        { language: "German", t: germanT, filter: "", shown: "Alle" },
+        { language: "German", t: germanT, filter: "integrity,availability", shown: "In, Vf" },
+    ])("shows the filter '$filter' as '$shown' in $language", ({ t, filter, shown }) => {
+        const { byField } = columnByField({
+            t,
+            columnFilters: { protectionGoals: filter },
+            expandedFilters: { protectionGoals: true },
+        });
+        renderHeader(byField["protectionGoals"]);
+
+        expect(screen.getByRole("combobox")).toHaveTextContent(shown);
     });
 });
 

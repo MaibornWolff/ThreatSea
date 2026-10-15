@@ -7,12 +7,13 @@ import Delete from "@mui/icons-material/Delete";
 import Edit from "@mui/icons-material/Edit";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
-import { Box, MenuItem, Select, Typography } from "@mui/material";
+import { Box, Checkbox, ListItemText, MenuItem, Select, Typography } from "@mui/material";
 import { type GridColDef, type GridRenderCellParams } from "@mui/x-data-grid";
 import type { TFunction } from "i18next";
 import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat.types.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
+import { PROTECTION_GOALS, type ProtectionGoal } from "#api/types/protection-goals.types.ts";
 import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import type { ExtendedThreatWithMetrics } from "#application/hooks/use-generic-threats-list.hook.ts";
@@ -67,6 +68,10 @@ const cellText = { fontSize: "0.875rem" } as const;
 // The numeric columns abbreviate their header (the full name is its tooltip). This fits the abbreviation,
 // its filter toggle and DataGrid's sort icon; narrower, a sorted column clips the label.
 const METRIC_COLUMN_WIDTH = 110;
+
+// The protection goals filter holds the selected goals comma-separated, since column filters are strings.
+export const parseProtectionGoalsFilter = (filterValue: string | undefined): ProtectionGoal[] =>
+    PROTECTION_GOALS.filter((goal) => filterValue?.split(",").includes(goal));
 
 const threatStatusPresentation: Record<THREAT_STATUSES, { icon: React.ReactElement; color: string }> = {
     [THREAT_STATUSES.NEW]: { icon: <FiberManualRecord sx={{ fontSize: 16 }} />, color: "text.statusNew" },
@@ -211,6 +216,86 @@ export const createThreatsColumns = ({
                 >
                     {row.threat.assets.length}
                 </span>
+            );
+        },
+    },
+    {
+        field: "protectionGoals",
+        headerName: t("protectionGoals"),
+        width: 150,
+        sortable: false,
+        align: "center",
+        headerAlign: "center",
+        renderHeader: () => (
+            <ColumnFilterHeader
+                field="protectionGoals"
+                label={t("protectionGoalsAbbreviation")}
+                // German needs no abbreviation; a tooltip repeating the label would add nothing.
+                {...(t("protectionGoalsAbbreviation") !== t("protectionGoals") && { fullLabel: t("protectionGoals") })}
+                columnFilters={columnFilters}
+                onFilterChange={onFilterChange}
+                expandedFilters={expandedFilters}
+                onToggleExpanded={onToggleFilterExpanded}
+            >
+                <Select<ProtectionGoal[]>
+                    multiple
+                    size="small"
+                    value={parseProtectionGoalsFilter(columnFilters["protectionGoals"])}
+                    onChange={(event) => {
+                        const selectedGoals = event.target.value as ProtectionGoal[];
+                        onFilterChange(
+                            "protectionGoals",
+                            PROTECTION_GOALS.filter((goal) => selectedGoals.includes(goal)).join(",")
+                        );
+                    }}
+                    onClick={(event) => event.stopPropagation()}
+                    displayEmpty
+                    // The column is narrow: the selection shows as abbreviations, the menu names the goals in full.
+                    renderValue={(selectedGoals) =>
+                        selectedGoals.length === 0
+                            ? t("filterAll")
+                            : selectedGoals.map((goal) => t(`${goal}Abbreviation`)).join(", ")
+                    }
+                    sx={{ width: "100%" }}
+                >
+                    {PROTECTION_GOALS.map((goal) => (
+                        <MenuItem key={goal} value={goal}>
+                            <Checkbox
+                                size="small"
+                                checked={parseProtectionGoalsFilter(columnFilters["protectionGoals"]).includes(goal)}
+                            />
+                            <ListItemText primary={t(goal)} />
+                        </MenuItem>
+                    ))}
+                </Select>
+            </ColumnFilterHeader>
+        ),
+        renderCell: (params: GridRenderCellParams<ThreatsGridRow>) => {
+            const row = params.row;
+            if (row.rowType !== "threat") {
+                return null;
+            }
+            const activeGoalNames = PROTECTION_GOALS.filter((goal) => row.threat[goal]).map((goal) => t(goal));
+            return (
+                <Box
+                    role="img"
+                    aria-label={activeGoalNames.length > 0 ? activeGoalNames.join(", ") : t("noProtectionGoals")}
+                    sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1, height: "100%" }}
+                >
+                    {PROTECTION_GOALS.map((goal) => (
+                        <Typography
+                            key={goal}
+                            aria-hidden
+                            sx={{
+                                ...cellText,
+                                fontWeight: row.threat[goal] ? "bold" : "normal",
+                                color: row.threat[goal] ? "text.primary" : "text.disabled",
+                            }}
+                        >
+                            {t(`${goal}Abbreviation`)}
+                        </Typography>
+                    ))}
+                </Box>
             );
         },
     },
