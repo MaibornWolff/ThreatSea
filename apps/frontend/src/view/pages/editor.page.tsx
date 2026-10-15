@@ -14,6 +14,7 @@ import { EditorActions } from "#application/actions/editor.actions.ts";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { useAssets } from "#application/hooks/use-assets.hook.ts";
 import { useAutoSavePreview } from "#application/hooks/use-auto-save-preview.hook.ts";
+import { useDebounce } from "#hooks/useDebounce.ts";
 import { useAnnotationDrawing, ANNOTATION_STROKE_WIDTH } from "#application/hooks/use-annotation-drawing.hook.ts";
 import { useEditor, type EditorConnectionAnchor } from "#application/hooks/use-editor.hook.ts";
 import { useKeyboardComponentMove, type HelpLines } from "#application/hooks/use-keyboard-component-move.hook.ts";
@@ -133,10 +134,10 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         deselectComponent,
         setLayerPosition,
         setShowHelpLines,
-        setSelectedComponentName,
-        setSelectedComponentDescription,
+        setComponentName,
+        setComponentDescription,
         setSelectedComponentSymbol,
-        setSelectedConnectionPointDescription,
+        setConnectionPointDescription,
         addPointOfAttack,
         removePointOfAttack,
         removeConnection,
@@ -160,7 +161,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         removeComponentConnectionLine,
         addInUseComponent,
         removeInUseComponent,
-        setSelectedConnectionName,
+        setConnectionName,
         setAutoSaveStatus,
         components,
         connections,
@@ -203,8 +204,50 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     const lastCenteredProjectId = useAppSelector((state) => state.editor.lastCenteredProjectId);
     const loadedProjectId = useAppSelector((state) => state.system.loadedProjectId);
 
+    const handleOnNameChange = (componentId: string, name: string): void => {
+        if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
+            setComponentName(componentId, name);
+        }
+    };
+
+    const handleOnDescriptionChange = (componentId: string, description: string): void => {
+        if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
+            setComponentDescription(componentId, description);
+        }
+    };
+
+    // Debounced here rather than in the sidebar so the force-save on unmount can flush pending edits first.
+    const debouncedNameChange = useDebounce(handleOnNameChange);
+    const debouncedDescriptionChange = useDebounce(handleOnDescriptionChange);
+    const debouncedCommunicationInterfaceNameChange = useDebounce(handleChangeCommunicationInterfaceName);
+    const pendingCommunicationInterfaceIdRef = useRef<string | null>(null);
+
+    const handleDebouncedCommunicationInterfaceNameChange = (
+        componentId: string,
+        interfaceId: string,
+        name: string
+    ): void => {
+        // The debounce holds a single pending call, so another interface's edit would otherwise replace it.
+        if (pendingCommunicationInterfaceIdRef.current !== interfaceId) {
+            debouncedCommunicationInterfaceNameChange.flush();
+            pendingCommunicationInterfaceIdRef.current = interfaceId;
+        }
+        debouncedCommunicationInterfaceNameChange(componentId, interfaceId, name);
+    };
+
+    const flushPendingSidebarEdits = useCallback((): void => {
+        debouncedNameChange.flush();
+        debouncedDescriptionChange.flush();
+        debouncedCommunicationInterfaceNameChange.flush();
+    }, [debouncedNameChange, debouncedDescriptionChange, debouncedCommunicationInterfaceNameChange]);
+
+    // The sidebar re-seeds its edit buffers from the store when it shows another component,
+    // so pending edits must land there before that.
+    useEffect(() => flushPendingSidebarEdits, [flushPendingSidebarEdits, selectedComponentId, isAnyComponentInUse]);
+
     const { downloadSystemView } = useAutoSavePreview({
         componentLayerRef,
+        flushPendingEdits: flushPendingSidebarEdits,
         updateAutoSaveOnClick,
         saveCurrentSystem,
         autoSaveBlocked,
@@ -861,29 +904,15 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         }
     };
 
-    const handleOnNameChange = (evt: ChangeEvent<HTMLInputElement>): void => {
+    const handleOnConnectionPointDescriptionChange = (connectionPointId: string, description: string): void => {
         if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
-            setSelectedComponentName(evt.target.value);
+            setConnectionPointDescription(connectionPointId, description);
         }
     };
 
-    const handleOnDescriptionChange = (evt: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+    const handleConnectionNameChange = (connectionId: string, name: string): void => {
         if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
-            setSelectedComponentDescription(evt.target.value);
-        }
-    };
-
-    const handleOnConnectionPointDescriptionChange = (
-        evt: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-    ): void => {
-        if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
-            setSelectedConnectionPointDescription(evt.target.value);
-        }
-    };
-
-    const handleConnectionNameChange = (evt: ChangeEvent<HTMLInputElement>): void => {
-        if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
-            setSelectedConnectionName(evt.target.value);
+            setConnectionName(connectionId, name);
         }
     };
 
@@ -1528,7 +1557,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                     selectedComponentId={isAnyComponentInUse ? null : selectedComponentId}
                     selectedPointOfAttack={selectedPointOfAttack}
                     handleDeleteComponent={handleDeleteComponent}
-                    handleOnNameChange={handleOnNameChange}
+                    handleOnNameChange={debouncedNameChange}
                     handleChangePointOfAttack={handleChangePointOfAttack}
                     handleAddAssetToAllPointsOfAttack={handleAddAssetToAllPointsOfAttack}
                     handleRemoveAssetFromAllPointsOfAttack={handleRemoveAssetFromAllPointsOfAttack}
@@ -1548,12 +1577,13 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                     handleOnAssetChanged={handleOnAssetChanged}
                     selectedConnectionPoint={selectedConnectionPoint}
                     userRole={userRole}
-                    handleOnDescriptionChange={handleOnDescriptionChange}
+                    handleOnDescriptionChange={debouncedDescriptionChange}
                     handleOpenChangeIconDialog={handleOpenChangeIconDialog}
                     connectedComponents={connectedComponentsForSelected}
                     handleDeleteConnectionBetweenComponents={handleDeleteConnectionBetweenComponents}
                     handleOnConnectionPointDescriptionChange={handleOnConnectionPointDescriptionChange}
                     handleChangeCommunicationInterfaceName={handleChangeCommunicationInterfaceName}
+                    handleDebouncedCommunicationInterfaceNameChange={handleDebouncedCommunicationInterfaceNameChange}
                     handleDeleteCommunicationInterface={handleDeleteCommunicationInterfaceDialog}
                     handlePointOfAttackLabelClick={handlePointOfAttackLabelClick}
                     handleAssetNameClick={handleAssetNameClick}

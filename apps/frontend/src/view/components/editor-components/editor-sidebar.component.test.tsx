@@ -53,6 +53,7 @@ const setup = (propsOverride: Partial<EditorSidebarProps> = {}) => {
         handleDeleteConnectionBetweenComponents: vi.fn(),
         handleOnConnectionPointDescriptionChange: vi.fn(),
         handleChangeCommunicationInterfaceName: vi.fn(),
+        handleDebouncedCommunicationInterfaceNameChange: vi.fn(),
         handleDeleteCommunicationInterface: vi.fn(),
         handlePointOfAttackLabelClick: vi.fn(),
         handleAssetNameClick: vi.fn(),

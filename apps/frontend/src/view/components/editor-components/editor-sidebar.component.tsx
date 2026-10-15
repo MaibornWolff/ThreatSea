@@ -24,7 +24,7 @@ export interface EditorSidebarProps {
     selectedComponentId: string | null | undefined;
     selectedPointOfAttack: SystemPointOfAttack | null | undefined;
     handleDeleteComponent: () => void;
-    handleOnNameChange: (event: ChangeEvent<HTMLInputElement>) => void;
+    handleOnNameChange: (componentId: string, name: string) => void;
     handleChangePointOfAttack: (
         event: ChangeEvent<HTMLInputElement>,
         type: POINTS_OF_ATTACK,
@@ -39,17 +39,18 @@ export interface EditorSidebarProps {
     selectedConnectionId: string | null | undefined;
     selectedConnection: SystemConnection | undefined;
     handleDeleteConnection: () => void;
-    handleOnConnectionNameChange: (event: ChangeEvent<HTMLInputElement>) => void;
+    handleOnConnectionNameChange: (connectionId: string, name: string) => void;
     handleResetConnectionRouting: () => void;
     handleOnAssetChanged: (event: ChangeEvent<HTMLInputElement>, asset: Asset) => void;
     selectedConnectionPoint: SystemConnectionPoint | null | undefined;
     userRole: USER_ROLES | undefined;
-    handleOnDescriptionChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+    handleOnDescriptionChange: (componentId: string, description: string) => void;
     handleOpenChangeIconDialog: () => void;
     connectedComponents: ConnectionEndpointWithComponent[];
     handleDeleteConnectionBetweenComponents: (sourceComponentId: string, targetComponentId: string) => void;
-    handleOnConnectionPointDescriptionChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+    handleOnConnectionPointDescriptionChange: (connectionPointId: string, description: string) => void;
     handleChangeCommunicationInterfaceName: (componentId: string, interfaceId: string, value: string) => void;
+    handleDebouncedCommunicationInterfaceNameChange: (componentId: string, interfaceId: string, value: string) => void;
     handleDeleteCommunicationInterface: (
         componentId: string,
         interfaceId: string,
@@ -97,6 +98,7 @@ export const EditorSidebar = ({
     handleDeleteConnectionBetweenComponents,
     handleOnConnectionPointDescriptionChange,
     handleChangeCommunicationInterfaceName,
+    handleDebouncedCommunicationInterfaceNameChange,
     handleDeleteCommunicationInterface,
     handlePointOfAttackLabelClick,
     handleAssetNameClick,
@@ -165,7 +167,7 @@ export const EditorSidebar = ({
                             handleOpenChangeIconDialog={handleOpenChangeIconDialog}
                             connectedComponents={connectedComponents}
                             handleDeleteConnectionBetweenComponents={handleDeleteConnectionBetweenComponents}
-                            handleChangeCommunicationInterfaceName={handleChangeCommunicationInterfaceName}
+                            handleChangeCommunicationInterfaceName={handleDebouncedCommunicationInterfaceNameChange}
                             handleDeleteCommunicationInterface={handleDeleteCommunicationInterface}
                             handlePointOfAttackLabelClick={handlePointOfAttackLabelClick}
                             handleAssetNameClick={handleAssetNameClick}

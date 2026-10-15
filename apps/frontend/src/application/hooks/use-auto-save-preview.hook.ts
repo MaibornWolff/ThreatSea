@@ -8,6 +8,7 @@ import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 
 export interface UseAutoSavePreviewArgs {
     componentLayerRef: RefObject<KonvaLayer | null>;
+    flushPendingEdits: () => void;
     updateAutoSaveOnClick: ((handler: (() => void) | undefined) => void) | undefined;
     saveCurrentSystem: (params: { image: string | null | undefined }) => void;
     autoSaveBlocked: () => void;
@@ -29,6 +30,7 @@ interface UseAutoSavePreviewReturn {
 // `makeScreenshot` toggles, holds the dataURL in a ref, force-saves on unmount.
 export const useAutoSavePreview = ({
     componentLayerRef,
+    flushPendingEdits,
     updateAutoSaveOnClick,
     saveCurrentSystem,
     autoSaveBlocked,
@@ -140,6 +142,10 @@ export const useAutoSavePreview = ({
     }
 
     const save = (forceSave = false): void => {
+        // saveSystem reads the store synchronously, so flushed edits are part of this save.
+        if (forceSave) {
+            flushPendingEdits();
+        }
         if (shouldSave(forceSave)) {
             if (forceSave || componentLayerRef?.current || screenshotRef.current) {
                 saveCurrentSystem({ image: screenshotRef.current });

@@ -163,6 +163,28 @@ describe("EditorSidebarSelectedComponent — new click handlers", () => {
         });
     });
 
+    describe("text edits", () => {
+        it("passes the component id and the typed name", async () => {
+            const { props, user } = setup({
+                selectedComponent: createSystemComponent({ id: "comp-1", name: "Client" }),
+            });
+
+            await user.type(screen.getByDisplayValue("Client"), "X");
+
+            expect(props.handleOnNameChange).toHaveBeenLastCalledWith("comp-1", "ClientX");
+        });
+
+        it("passes the component id and the typed description", async () => {
+            const { props, user } = setup({
+                selectedComponent: createSystemComponent({ id: "comp-1", description: "Web client" }),
+            });
+
+            await user.type(screen.getByDisplayValue("Web client"), "X");
+
+            expect(props.handleOnDescriptionChange).toHaveBeenLastCalledWith("comp-1", "Web clientX");
+        });
+    });
+
     describe("local input state across re-renders", () => {
         it("preserves typed name when parent re-renders with a new selectedComponent reference but same id", async () => {
             const user = userEvent.setup();

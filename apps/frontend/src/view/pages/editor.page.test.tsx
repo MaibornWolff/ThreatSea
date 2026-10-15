@@ -86,10 +86,6 @@ vi.mock("../components/page.component", () => ({
     Page: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
-vi.mock("#hooks/useDebounce.ts", () => ({
-    useDebounce: (fn: () => void) => fn,
-}));
-
 // --- Helpers ---
 
 /**
@@ -480,6 +476,125 @@ describe("EditorPage", () => {
             });
 
             expect(updateConnectionsOfComponent).toHaveBeenCalledWith("comp-abc");
+        });
+    });
+
+    // Sidebar text edits are debounced on the page and bound to the component they were typed for (issue #1360).
+    describe("debounced sidebar edits", () => {
+        const editorPageRoutes = (
+            <Routes>
+                <Route path="/projects/:projectId/system/*" element={<EditorPage />} />
+            </Routes>
+        );
+
+        beforeEach(() => {
+            vi.useFakeTimers();
+        });
+
+        afterEach(() => {
+            vi.useRealTimers();
+        });
+
+        it("writes the name after the debounce delay", () => {
+            const setComponentName = vi.fn();
+            mockUseEditor({ selectedComponentId: "comp-1", setComponentName });
+            renderEditorPage();
+
+            act(() => {
+                getSidebarProps().handleOnNameChange("comp-1", "Browser");
+            });
+            expect(setComponentName).not.toHaveBeenCalled();
+
+            act(() => {
+                vi.advanceTimersByTime(300);
+            });
+            expect(setComponentName).toHaveBeenCalledExactlyOnceWith("comp-1", "Browser");
+        });
+
+        it("writes a pending name and description to the typed-in component when another one is selected", () => {
+            const setComponentName = vi.fn();
+            const setComponentDescription = vi.fn();
+            mockUseEditor({ selectedComponentId: "comp-1", setComponentName, setComponentDescription });
+            const { rerender } = renderEditorPage();
+
+            act(() => {
+                getSidebarProps().handleOnNameChange("comp-1", "Browser");
+                getSidebarProps().handleOnDescriptionChange("comp-1", "Runs in the browser");
+            });
+
+            mockUseEditor({ selectedComponentId: "comp-2", setComponentName, setComponentDescription });
+            rerender(editorPageRoutes);
+
+            expect(setComponentName).toHaveBeenCalledExactlyOnceWith("comp-1", "Browser");
+            expect(setComponentDescription).toHaveBeenCalledExactlyOnceWith("comp-1", "Runs in the browser");
+
+            act(() => {
+                vi.advanceTimersByTime(300);
+            });
+            expect(setComponentName).toHaveBeenCalledOnce();
+        });
+
+        it("writes a pending name when a component drag starts", () => {
+            const setComponentName = vi.fn();
+            mockUseEditor({ selectedComponentId: "comp-1", setComponentName });
+            const { rerender } = renderEditorPage();
+
+            act(() => {
+                getSidebarProps().handleOnNameChange("comp-1", "Browser");
+            });
+
+            mockUseEditor({ selectedComponentId: "comp-1", isAnyComponentInUse: true, setComponentName });
+            rerender(editorPageRoutes);
+
+            expect(setComponentName).toHaveBeenCalledExactlyOnceWith("comp-1", "Browser");
+        });
+
+        it("writes a pending interface name before an edit of another interface replaces it", () => {
+            const handleChangeCommunicationInterfaceName = vi.fn();
+            mockUseEditor({ selectedComponentId: "comp-1", handleChangeCommunicationInterfaceName });
+            renderEditorPage();
+
+            act(() => {
+                getSidebarProps().handleDebouncedCommunicationInterfaceNameChange("comp-1", "interface-1", "HTTPS");
+                getSidebarProps().handleDebouncedCommunicationInterfaceNameChange("comp-1", "interface-2", "gRPC");
+                vi.advanceTimersByTime(300);
+            });
+
+            expect(handleChangeCommunicationInterfaceName.mock.calls).toEqual([
+                ["comp-1", "interface-1", "HTTPS"],
+                ["comp-1", "interface-2", "gRPC"],
+            ]);
+        });
+
+        it("writes a pending name before the force-save on unmount", () => {
+            const setComponentName = vi.fn();
+            const saveCurrentSystem = vi.fn();
+            mockUseEditor({ selectedComponentId: "comp-1", setComponentName, saveCurrentSystem });
+            const { unmount } = renderEditorPage({ loadedProjectId: 1 });
+
+            act(() => {
+                getSidebarProps().handleOnNameChange("comp-1", "Browser");
+            });
+            unmount();
+
+            expect(setComponentName).toHaveBeenCalledExactlyOnceWith("comp-1", "Browser");
+            expect(saveCurrentSystem).toHaveBeenCalledOnce();
+            expect(setComponentName.mock.invocationCallOrder[0]).toBeLessThan(
+                saveCurrentSystem.mock.invocationCallOrder[0]!
+            );
+        });
+
+        it("does not write a pending name for a viewer", () => {
+            const setComponentName = vi.fn();
+            mockUseEditor({ selectedComponentId: "comp-1", setComponentName });
+            const { unmount } = renderEditorPage({ role: USER_ROLES.VIEWER, loadedProjectId: 1 });
+
+            act(() => {
+                getSidebarProps().handleOnNameChange("comp-1", "Browser");
+            });
+            unmount();
+
+            expect(setComponentName).not.toHaveBeenCalled();
         });
     });
 
