@@ -2,6 +2,7 @@ import { screen } from "@testing-library/react";
 import { createRef } from "react";
 import { EditorSidebar, type EditorSidebarProps } from "./editor-sidebar.component";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
+import { PendingEditsContext } from "./contexts/PendingEditsContext";
 import {
     createAsset,
     createSystemComponent,
@@ -53,7 +54,6 @@ const setup = (propsOverride: Partial<EditorSidebarProps> = {}) => {
         handleDeleteConnectionBetweenComponents: vi.fn(),
         handleOnConnectionPointDescriptionChange: vi.fn(),
         handleChangeCommunicationInterfaceName: vi.fn(),
-        handleDebouncedCommunicationInterfaceNameChange: vi.fn(),
         handleDeleteCommunicationInterface: vi.fn(),
         handlePointOfAttackLabelClick: vi.fn(),
         handleAssetNameClick: vi.fn(),
@@ -67,7 +67,11 @@ const setup = (propsOverride: Partial<EditorSidebarProps> = {}) => {
         handleDeleteAnnotation: vi.fn(),
         ...propsOverride,
     };
-    renderWithProviders(<EditorSidebar {...props} />);
+    renderWithProviders(
+        <PendingEditsContext value={{ register: () => vi.fn() }}>
+            <EditorSidebar {...props} />
+        </PendingEditsContext>
+    );
     return { props };
 };
 

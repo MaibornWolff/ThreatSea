@@ -13,6 +13,7 @@ import { useState, useEffect, useEffectEvent, memo } from "react";
 import { Box, FormGroup, ListItemAvatar, Typography, IconButton, Avatar } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { DynamicMuiIcon } from "#view/components/dynamic-mui-icon.component.tsx";
+import { useDebouncedEdit, type EditCommit } from "./contexts/PendingEditsContext";
 import type { ChangeEvent } from "react";
 import type { Asset } from "#api/types/asset.types.ts";
 import type {
@@ -24,7 +25,7 @@ import type {
 export interface EditorSidebarSelectedComponentProps {
     selectedComponent: AugmentedSystemComponent | undefined;
     handleDeleteComponent: () => void;
-    handleOnNameChange: (componentId: string, name: string) => void;
+    handleOnNameChange: EditCommit<[componentId: string, name: string]>;
     handleChangePointOfAttack: (
         event: ChangeEvent<HTMLInputElement>,
         type: POINTS_OF_ATTACK,
@@ -37,11 +38,11 @@ export interface EditorSidebarSelectedComponentProps {
     items: Asset[];
     pointsOfAttackOfSelectedComponent: SystemPointOfAttack[];
     userRole: USER_ROLES | undefined;
-    handleOnDescriptionChange: (componentId: string, description: string) => void;
+    handleOnDescriptionChange: EditCommit<[componentId: string, description: string]>;
     handleOpenChangeIconDialog: () => void;
     connectedComponents: ConnectionEndpointWithComponent[];
     handleDeleteConnectionBetweenComponents: (sourceComponentId: string, targetComponentId: string) => void;
-    handleChangeCommunicationInterfaceName: (componentId: string, interfaceId: string, value: string) => void;
+    handleChangeCommunicationInterfaceName: EditCommit<[componentId: string, interfaceId: string, name: string]>;
     handleDeleteCommunicationInterface: (
         componentId: string,
         interfaceId: string,
@@ -98,6 +99,10 @@ const EditorSidebarSelectedComponentInner = ({
     const [interfaceNames, setInterfaceNames] = useState<Record<string, string>>({});
     const [editingInterfaceId, setEditingInterfaceId] = useState<string | null>(null);
 
+    const debouncedNameChange = useDebouncedEdit(handleOnNameChange);
+    const debouncedDescriptionChange = useDebouncedEdit(handleOnDescriptionChange);
+    const debouncedInterfaceNameChange = useDebouncedEdit(handleChangeCommunicationInterfaceName);
+
     const setSelectedComponentValuesEvent = useEffectEvent((selectedComponent: AugmentedSystemComponent) => {
         setLocalName(selectedComponent.name ?? "");
         setLocalDescription(selectedComponent.description ?? "");
@@ -112,18 +117,28 @@ const EditorSidebarSelectedComponentInner = ({
         if (selectedComponent) {
             setSelectedComponentValuesEvent(selectedComponent);
         }
+        // Pending edits must reach the store before the buffers are re-seeded from it, or switching back
+        // to this component within the debounce delay would show the old values.
+        return () => {
+            debouncedNameChange.flush();
+            debouncedDescriptionChange.flush();
+            debouncedInterfaceNameChange.flush();
+        };
         // Depend on id only — this seeds the local edit buffers (name, description, per-interface name) when a
         // different component is selected. Interface add/delete keeps the same id and is reflected live from the
         // selectedComponent prop below, so it must not re-seed here (that would clobber an in-progress edit).
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedComponent?.id]);
 
+    // The debounce holds a single pending call, so an edit of the next interface would otherwise replace it.
+    useEffect(() => debouncedInterfaceNameChange.flush, [editingInterfaceId, debouncedInterfaceNameChange]);
+
     const handleLocalInterfaceNameChange = (componentId: string, interfaceId: string, value: string) => {
         setInterfaceNames((prev) => ({
             ...prev,
             [interfaceId]: value,
         }));
-        handleChangeCommunicationInterfaceName(componentId, interfaceId, value);
+        debouncedInterfaceNameChange(componentId, interfaceId, value);
     };
 
     if (!selectedComponent) {
@@ -132,12 +147,12 @@ const EditorSidebarSelectedComponentInner = ({
 
     const handleLocalNameChange = (event: ChangeEvent<HTMLInputElement>) => {
         setLocalName(event.target.value);
-        handleOnNameChange(selectedComponent.id, event.target.value);
+        debouncedNameChange(selectedComponent.id, event.target.value);
     };
 
     const handleLocalDescriptionChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setLocalDescription(event.target.value);
-        handleOnDescriptionChange(selectedComponent.id, event.target.value);
+        debouncedDescriptionChange(selectedComponent.id, event.target.value);
     };
 
     // Read the interface list live from the store-backed prop so add/delete is reflected immediately.

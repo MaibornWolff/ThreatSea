@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { screen, act } from "@testing-library/react";
 import { Route, Routes } from "react-router";
 import { EditorPage } from "./editor.page";
@@ -10,6 +11,7 @@ import { SystemComponent } from "#view/components/editor-components/system-compo
 import { ConnectionEditHandles } from "#view/components/editor-components/connection-edit-handles.component.tsx";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 import systemReducer from "#application/reducers/system.reducer.ts";
+import { editCommit, useDebouncedEdit } from "#view/components/editor-components/contexts/PendingEditsContext.tsx";
 
 // --- Hook spies ---
 //
@@ -479,122 +481,26 @@ describe("EditorPage", () => {
         });
     });
 
-    // Sidebar text edits are debounced on the page and bound to the component they were typed for (issue #1360).
-    describe("debounced sidebar edits", () => {
-        const editorPageRoutes = (
-            <Routes>
-                <Route path="/projects/:projectId/system/*" element={<EditorPage />} />
-            </Routes>
-        );
-
-        beforeEach(() => {
-            vi.useFakeTimers();
-        });
-
-        afterEach(() => {
-            vi.useRealTimers();
-        });
-
-        it("writes the name after the debounce delay", () => {
-            const setComponentName = vi.fn();
-            mockUseEditor({ selectedComponentId: "comp-1", setComponentName });
-            renderEditorPage();
-
-            act(() => {
-                getSidebarProps().handleOnNameChange("comp-1", "Browser");
+    describe("pending sidebar edits", () => {
+        it("writes an edit the sidebar still has pending before the force-save on unmount", () => {
+            const calls: string[] = [];
+            const commitName = vi.fn((name: string) => calls.push(`commit ${name}`));
+            const saveCurrentSystem = vi.fn(() => calls.push("save"));
+            const originalSidebar = vi.mocked(EditorSidebar).getMockImplementation()!;
+            vi.mocked(EditorSidebar).mockImplementation((props) => {
+                const debouncedNameChange = useDebouncedEdit(editCommit(commitName));
+                useEffect(() => {
+                    debouncedNameChange("Browser");
+                }, [debouncedNameChange]);
+                return originalSidebar(props);
             });
-            expect(setComponentName).not.toHaveBeenCalled();
+            mockUseEditor({ saveCurrentSystem });
 
-            act(() => {
-                vi.advanceTimersByTime(300);
-            });
-            expect(setComponentName).toHaveBeenCalledExactlyOnceWith("comp-1", "Browser");
-        });
-
-        it("writes a pending name and description to the typed-in component when another one is selected", () => {
-            const setComponentName = vi.fn();
-            const setComponentDescription = vi.fn();
-            mockUseEditor({ selectedComponentId: "comp-1", setComponentName, setComponentDescription });
-            const { rerender } = renderEditorPage();
-
-            act(() => {
-                getSidebarProps().handleOnNameChange("comp-1", "Browser");
-                getSidebarProps().handleOnDescriptionChange("comp-1", "Runs in the browser");
-            });
-
-            mockUseEditor({ selectedComponentId: "comp-2", setComponentName, setComponentDescription });
-            rerender(editorPageRoutes);
-
-            expect(setComponentName).toHaveBeenCalledExactlyOnceWith("comp-1", "Browser");
-            expect(setComponentDescription).toHaveBeenCalledExactlyOnceWith("comp-1", "Runs in the browser");
-
-            act(() => {
-                vi.advanceTimersByTime(300);
-            });
-            expect(setComponentName).toHaveBeenCalledOnce();
-        });
-
-        it("writes a pending name when a component drag starts", () => {
-            const setComponentName = vi.fn();
-            mockUseEditor({ selectedComponentId: "comp-1", setComponentName });
-            const { rerender } = renderEditorPage();
-
-            act(() => {
-                getSidebarProps().handleOnNameChange("comp-1", "Browser");
-            });
-
-            mockUseEditor({ selectedComponentId: "comp-1", isAnyComponentInUse: true, setComponentName });
-            rerender(editorPageRoutes);
-
-            expect(setComponentName).toHaveBeenCalledExactlyOnceWith("comp-1", "Browser");
-        });
-
-        it("writes a pending interface name before an edit of another interface replaces it", () => {
-            const handleChangeCommunicationInterfaceName = vi.fn();
-            mockUseEditor({ selectedComponentId: "comp-1", handleChangeCommunicationInterfaceName });
-            renderEditorPage();
-
-            act(() => {
-                getSidebarProps().handleDebouncedCommunicationInterfaceNameChange("comp-1", "interface-1", "HTTPS");
-                getSidebarProps().handleDebouncedCommunicationInterfaceNameChange("comp-1", "interface-2", "gRPC");
-                vi.advanceTimersByTime(300);
-            });
-
-            expect(handleChangeCommunicationInterfaceName.mock.calls).toEqual([
-                ["comp-1", "interface-1", "HTTPS"],
-                ["comp-1", "interface-2", "gRPC"],
-            ]);
-        });
-
-        it("writes a pending name before the force-save on unmount", () => {
-            const setComponentName = vi.fn();
-            const saveCurrentSystem = vi.fn();
-            mockUseEditor({ selectedComponentId: "comp-1", setComponentName, saveCurrentSystem });
             const { unmount } = renderEditorPage({ loadedProjectId: 1 });
-
-            act(() => {
-                getSidebarProps().handleOnNameChange("comp-1", "Browser");
-            });
             unmount();
+            vi.mocked(EditorSidebar).mockImplementation(originalSidebar);
 
-            expect(setComponentName).toHaveBeenCalledExactlyOnceWith("comp-1", "Browser");
-            expect(saveCurrentSystem).toHaveBeenCalledOnce();
-            expect(setComponentName.mock.invocationCallOrder[0]).toBeLessThan(
-                saveCurrentSystem.mock.invocationCallOrder[0]!
-            );
-        });
-
-        it("does not write a pending name for a viewer", () => {
-            const setComponentName = vi.fn();
-            mockUseEditor({ selectedComponentId: "comp-1", setComponentName });
-            const { unmount } = renderEditorPage({ role: USER_ROLES.VIEWER, loadedProjectId: 1 });
-
-            act(() => {
-                getSidebarProps().handleOnNameChange("comp-1", "Browser");
-            });
-            unmount();
-
-            expect(setComponentName).not.toHaveBeenCalled();
+            expect(calls).toEqual(["commit Browser", "save"]);
         });
     });
 

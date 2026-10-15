@@ -4,6 +4,7 @@ import { EditorSidebarSelectedComponent } from "./editor-sidebar-selected-compon
 import { EditorSidebarSelectedCommunicationInterface } from "./editor-sidebar-selected-communication-interface.component";
 import { EditorSidebarSelectedConnection } from "./editor-sidebar-selected-connection.component";
 import { EditorSidebarSelectedPointOfAttack } from "./editor-sidebar-selected-point-of-attack.component";
+import { editCommit } from "./contexts/PendingEditsContext";
 import { type RefObject, type ChangeEvent } from "react";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
@@ -50,7 +51,6 @@ export interface EditorSidebarProps {
     handleDeleteConnectionBetweenComponents: (sourceComponentId: string, targetComponentId: string) => void;
     handleOnConnectionPointDescriptionChange: (connectionPointId: string, description: string) => void;
     handleChangeCommunicationInterfaceName: (componentId: string, interfaceId: string, value: string) => void;
-    handleDebouncedCommunicationInterfaceNameChange: (componentId: string, interfaceId: string, value: string) => void;
     handleDeleteCommunicationInterface: (
         componentId: string,
         interfaceId: string,
@@ -98,7 +98,6 @@ export const EditorSidebar = ({
     handleDeleteConnectionBetweenComponents,
     handleOnConnectionPointDescriptionChange,
     handleChangeCommunicationInterfaceName,
-    handleDebouncedCommunicationInterfaceNameChange,
     handleDeleteCommunicationInterface,
     handlePointOfAttackLabelClick,
     handleAssetNameClick,
@@ -157,17 +156,17 @@ export const EditorSidebar = ({
                             handleAddAssetToAllPointsOfAttack={handleAddAssetToAllPointsOfAttack}
                             handleRemoveAssetFromAllPointsOfAttack={handleRemoveAssetFromAllPointsOfAttack}
                             selectedComponent={selectedComponent}
-                            handleOnNameChange={handleOnNameChange}
+                            handleOnNameChange={editCommit(handleOnNameChange)}
                             assetSearchValue={assetSearchValue}
                             handleAssetSearchChanged={handleAssetSearchChanged}
                             items={items}
                             pointsOfAttackOfSelectedComponent={pointsOfAttackOfSelectedComponent}
                             userRole={userRole}
-                            handleOnDescriptionChange={handleOnDescriptionChange}
+                            handleOnDescriptionChange={editCommit(handleOnDescriptionChange)}
                             handleOpenChangeIconDialog={handleOpenChangeIconDialog}
                             connectedComponents={connectedComponents}
                             handleDeleteConnectionBetweenComponents={handleDeleteConnectionBetweenComponents}
-                            handleChangeCommunicationInterfaceName={handleDebouncedCommunicationInterfaceNameChange}
+                            handleChangeCommunicationInterfaceName={editCommit(handleChangeCommunicationInterfaceName)}
                             handleDeleteCommunicationInterface={handleDeleteCommunicationInterface}
                             handlePointOfAttackLabelClick={handlePointOfAttackLabelClick}
                             handleAssetNameClick={handleAssetNameClick}
