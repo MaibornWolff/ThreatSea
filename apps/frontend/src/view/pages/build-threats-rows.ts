@@ -6,17 +6,26 @@ import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import {
     formatComponentName,
     GENERIC_THREAT_ROW_PREFIX,
+    parseProtectionGoalsFilter,
     THREAT_ROW_PREFIX,
     type ThreatsGridRow,
 } from "./create-threats-columns";
 
 // Fields whose values only exist on threats; a filter on them can never
 // match a generic threat directly.
-const threatOnlyFilterFields = ["description", "assets", "probability", "damage", "risk", "status"] as const;
+const threatOnlyFilterFields = [
+    "description",
+    "assets",
+    "protectionGoals",
+    "probability",
+    "damage",
+    "risk",
+    "status",
+] as const;
 
 interface ActiveFilter {
     field: string;
-    // the raw value, for exact matches (status)
+    // the raw value, for exact matches (protection goals, status)
     value: string;
     // trimmed and lower-cased, for substring matches
     search: string;
@@ -34,6 +43,8 @@ const threatMatchesFilter = (
             return threat.description.toLowerCase().includes(search);
         case "assets":
             return String(threat.assets.length).includes(search);
+        case "protectionGoals":
+            return parseProtectionGoalsFilter(value).some((goal) => threat[goal]);
         case "componentName":
             return formatComponentName(threat, t).toLowerCase().includes(search);
         case "pointOfAttack":

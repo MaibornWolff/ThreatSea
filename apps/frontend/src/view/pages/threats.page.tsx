@@ -52,6 +52,7 @@ const DEFAULT_COLUMN_VISIBILITY: GridColumnVisibilityModel = {
     // Descriptions are long free text; the column is opt-in via Customize view.
     description: false,
     assets: true,
+    protectionGoals: false,
     componentName: true,
     pointOfAttack: true,
     attacker: true,
@@ -136,6 +137,7 @@ const ThreatsPageBody = () => {
         name: t("name"),
         description: t("description"),
         assets: t("assets"),
+        protectionGoals: t("protectionGoals"),
         componentName: t("componentName"),
         pointOfAttack: t("pointOfAttack"),
         attacker: t("attacker"),
