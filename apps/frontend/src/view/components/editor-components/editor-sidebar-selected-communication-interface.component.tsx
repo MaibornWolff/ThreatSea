@@ -21,7 +21,7 @@ export interface EditorSidebarSelectedCommunicationInterfaceProps {
     handleAssetSearchChanged: (event: ChangeEvent<HTMLInputElement>) => void;
     items: Asset[];
     handleOnAssetChanged: (event: ChangeEvent<HTMLInputElement>, asset: Asset) => void;
-    handleOnConnectionPointDescriptionChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+    handleOnConnectionPointDescriptionChange: (connectionPointId: string, description: string) => void;
     handleChangeCommunicationInterfaceName: (componentId: string, interfaceId: string, value: string) => void;
     handleDeleteCommunicationInterface: (
         componentId: string,
@@ -196,7 +196,9 @@ export const EditorSidebarSelectedCommunicationInterface = ({
             </Box>
             <TextField
                 value={selectedConnectionPoint?.description ? selectedConnectionPoint.description : ""}
-                onChange={handleOnConnectionPointDescriptionChange}
+                onChange={(event) =>
+                    handleOnConnectionPointDescriptionChange(selectedConnectionPoint.id, event.target.value)
+                }
                 onKeyUp={(event) => {
                     if (event.key === "Delete") {
                         event.stopPropagation();

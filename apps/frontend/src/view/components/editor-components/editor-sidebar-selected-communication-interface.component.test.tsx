@@ -33,6 +33,16 @@ const setup = (propsOverride: Partial<EditorSidebarSelectedCommunicationInterfac
 };
 
 describe("EditorSidebarSelectedCommunicationInterface", () => {
+    it("passes the connection point id and the typed description", async () => {
+        const { props, user } = setup({
+            selectedConnectionPoint: createConnectionPoint({ id: "cp-1", description: "Login form" }),
+        });
+
+        await user.type(screen.getByDisplayValue("Login form"), "X");
+
+        expect(props.handleOnConnectionPointDescriptionChange).toHaveBeenCalledExactlyOnceWith("cp-1", "Login formX");
+    });
+
     describe("breadcrumb", () => {
         it("renders the component name, separator, and Interface label", () => {
             setup();

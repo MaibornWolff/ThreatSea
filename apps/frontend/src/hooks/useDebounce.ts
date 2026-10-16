@@ -1,25 +1,40 @@
-import { useCallback, useRef } from "react";
+import { useMemo, useRef } from "react";
 
-type DebouncedFunction<Args extends unknown[]> = (...args: Args) => void;
+export interface DebouncedFunction<Args extends unknown[]> {
+    (...args: Args): void;
+    flush: () => void;
+}
 
 export const useDebounce = <Args extends unknown[]>(
-    callback: DebouncedFunction<Args>,
+    callback: (...args: Args) => void,
     delay = 300
 ): DebouncedFunction<Args> => {
+    const callbackRef = useRef(callback);
+    callbackRef.current = callback;
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const pendingArgsRef = useRef<Args | null>(null);
 
-    const debouncedCallback = useCallback(
-        (...args: Args) => {
+    return useMemo(() => {
+        const flush = (): void => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+                timeoutRef.current = null;
+            }
+            const pendingArgs = pendingArgsRef.current;
+            if (pendingArgs) {
+                pendingArgsRef.current = null;
+                callbackRef.current(...pendingArgs);
+            }
+        };
+
+        const debouncedCallback = (...args: Args): void => {
             if (timeoutRef.current) {
                 clearTimeout(timeoutRef.current);
             }
+            pendingArgsRef.current = args;
+            timeoutRef.current = setTimeout(flush, delay);
+        };
 
-            timeoutRef.current = setTimeout(() => {
-                callback(...args);
-            }, delay);
-        },
-        [callback, delay]
-    );
-
-    return debouncedCallback;
+        return Object.assign(debouncedCallback, { flush });
+    }, [delay]);
 };

@@ -15,6 +15,7 @@ const buildLayerMock = () => ({
 
 const buildArgs = (overrides: Partial<UseAutoSavePreviewArgs> = {}) => ({
     componentLayerRef: { current: buildLayerMock() as unknown as KonvaLayer },
+    flushPendingEdits: vi.fn(),
     updateAutoSaveOnClick: vi.fn(),
     saveCurrentSystem: vi.fn(),
     autoSaveBlocked: vi.fn(),
@@ -70,6 +71,36 @@ describe("useAutoSavePreview", () => {
         // No screenshot has been captured yet, so image is undefined — the
         // middleware then preserves the backend image.
         expect(saveCurrentSystem).toHaveBeenCalledWith({ image: undefined });
+    });
+
+    it("flushes pending edits before force-saving on unmount", () => {
+        const storeContents: string[] = [];
+        const savedContents: string[][] = [];
+        const flushPendingEdits = vi.fn(() => storeContents.push("pending edit"));
+        const saveCurrentSystem = vi.fn(() => savedContents.push([...storeContents]));
+
+        const { unmount } = renderUseAutoSavePreview(buildArgs({ flushPendingEdits, saveCurrentSystem }));
+
+        unmount();
+
+        expect(savedContents).toEqual([["pending edit"]]);
+    });
+
+    it("flushes pending edits before saving from the click handler", () => {
+        const storeContents: string[] = [];
+        const savedContents: string[][] = [];
+        const flushPendingEdits = vi.fn(() => storeContents.push("pending edit"));
+        const saveCurrentSystem = vi.fn(() => savedContents.push([...storeContents]));
+        const updateAutoSaveOnClick = vi.fn();
+
+        renderUseAutoSavePreview(buildArgs({ flushPendingEdits, saveCurrentSystem, updateAutoSaveOnClick }));
+        const saveOnClick = updateAutoSaveOnClick.mock.calls[0]![0] as () => void;
+
+        act(() => {
+            saveOnClick();
+        });
+
+        expect(savedContents).toEqual([["pending edit"]]);
     });
 
     it("does not force-save on unmount when the user is a viewer", () => {
