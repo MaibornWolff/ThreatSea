@@ -5,7 +5,7 @@
 
 import { useParams, useLocation, Navigate, type Location } from "react-router";
 import type { CatalogMeasure } from "#api/types/catalog-measure.types.ts";
-import CatalogMeasureDialog from "#view/dialogs/catalog-measure.dialog.tsx";
+import CatalogItemDialog from "#view/dialogs/catalog-item.dialog.tsx";
 
 interface CatalogMeasureDialogLocationState {
     catalogMeasure: Partial<CatalogMeasure> | undefined;
@@ -24,7 +24,9 @@ const CatalogMeasureDialogPage = () => {
     if (state) {
         const { catalogMeasure, isNew = false } = state;
 
-        return <CatalogMeasureDialog open={true} isNew={isNew} catalogMeasure={catalogMeasure} catalogId={catalogId} />;
+        return (
+            <CatalogItemDialog open={true} type="measure" isNew={isNew} item={catalogMeasure} catalogId={catalogId} />
+        );
     } else {
         return <Navigate to={`/catalogs/${catalogIdParam}`} replace />;
     }
