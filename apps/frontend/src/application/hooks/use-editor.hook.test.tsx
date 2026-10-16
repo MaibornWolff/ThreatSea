@@ -286,22 +286,73 @@ describe("useEditor", () => {
         });
     });
 
-    // setSelectedComponentName ignores a
-    // blank name instead of writing it.
-    describe("setSelectedComponentName", () => {
+    // setComponentName writes to the passed component, not the
+    // current selection, and ignores a blank name.
+    describe("setComponentName", () => {
+        it("renames the passed component even when another one is selected", () => {
+            const { result, store } = renderUseEditor((store) => {
+                store.dispatch(SystemActions.createComponent(createComponentPayload({ id: "comp-1", name: "Client" })));
+                store.dispatch(SystemActions.createComponent(createComponentPayload({ id: "comp-2", name: "Users" })));
+                store.dispatch(EditorActions.selectComponent("comp-2"));
+            });
+
+            act(() => {
+                result.current.setComponentName("comp-1", "Browser");
+            });
+
+            const { entities } = store.getState().system.components;
+            expect(entities["comp-1"]?.name).toBe("Browser");
+            expect(entities["comp-2"]?.name).toBe("Users");
+        });
+
         it("ignores a blank name", () => {
             const { result, store } = renderUseEditor((store) => {
                 store.dispatch(
                     SystemActions.createComponent(createComponentPayload({ id: "comp-1", name: "Original" }))
                 );
-                store.dispatch(EditorActions.selectComponent("comp-1"));
             });
 
             act(() => {
-                result.current.setSelectedComponentName("   ");
+                result.current.setComponentName("comp-1", "   ");
             });
 
             expect(store.getState().system.components.entities["comp-1"]?.name).toBe("Original");
+        });
+    });
+
+    describe("setComponentDescription", () => {
+        it("updates the passed component even when another one is selected", () => {
+            const { result, store } = renderUseEditor((store) => {
+                store.dispatch(SystemActions.createComponent(createComponentPayload({ id: "comp-1" })));
+                store.dispatch(SystemActions.createComponent(createComponentPayload({ id: "comp-2" })));
+                store.dispatch(EditorActions.selectComponent("comp-2"));
+            });
+
+            act(() => {
+                result.current.setComponentDescription("comp-1", "Runs in the browser");
+            });
+
+            const { entities } = store.getState().system.components;
+            expect(entities["comp-1"]?.description).toBe("Runs in the browser");
+            expect(entities["comp-2"]?.description).not.toBe("Runs in the browser");
+        });
+    });
+
+    describe("setConnectionName", () => {
+        it("renames the passed connection even when another one is selected", () => {
+            const { result, store } = renderUseEditor((store) => {
+                store.dispatch(SystemActions.createConnection(createConnection({ id: "conn-1", name: "HTTP" })));
+                store.dispatch(SystemActions.createConnection(createConnection({ id: "conn-2", name: "SQL" })));
+                store.dispatch(EditorActions.selectConnection("conn-2"));
+            });
+
+            act(() => {
+                result.current.setConnectionName("conn-1", "HTTPS");
+            });
+
+            const { entities } = store.getState().system.connections;
+            expect(entities["conn-1"]?.name).toBe("HTTPS");
+            expect(entities["conn-2"]?.name).toBe("SQL");
         });
     });
 

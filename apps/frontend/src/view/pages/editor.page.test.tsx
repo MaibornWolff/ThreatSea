@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { screen, act } from "@testing-library/react";
 import { Route, Routes } from "react-router";
 import { EditorPage } from "./editor.page";
@@ -10,6 +11,7 @@ import { SystemComponent } from "#view/components/editor-components/system-compo
 import { ConnectionEditHandles } from "#view/components/editor-components/connection-edit-handles.component.tsx";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 import systemReducer from "#application/reducers/system.reducer.ts";
+import { editCommit, useDebouncedEdit } from "#view/components/editor-components/contexts/PendingEditsContext.tsx";
 
 // --- Hook spies ---
 //
@@ -84,10 +86,6 @@ vi.mock("../components/editor-components/contexts/LineDrawingProvider", () => ({
 
 vi.mock("../components/page.component", () => ({
     Page: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
-
-vi.mock("#hooks/useDebounce.ts", () => ({
-    useDebounce: (fn: () => void) => fn,
 }));
 
 // --- Helpers ---
@@ -480,6 +478,29 @@ describe("EditorPage", () => {
             });
 
             expect(updateConnectionsOfComponent).toHaveBeenCalledWith("comp-abc");
+        });
+    });
+
+    describe("pending sidebar edits", () => {
+        it("writes an edit the sidebar still has pending before the force-save on unmount", () => {
+            const calls: string[] = [];
+            const commitName = vi.fn((name: string) => calls.push(`commit ${name}`));
+            const saveCurrentSystem = vi.fn(() => calls.push("save"));
+            const originalSidebar = vi.mocked(EditorSidebar).getMockImplementation()!;
+            vi.mocked(EditorSidebar).mockImplementation((props) => {
+                const debouncedNameChange = useDebouncedEdit(editCommit(commitName));
+                useEffect(() => {
+                    debouncedNameChange("Browser");
+                }, [debouncedNameChange]);
+                return originalSidebar(props);
+            });
+            mockUseEditor({ saveCurrentSystem });
+
+            const { unmount } = renderEditorPage({ loadedProjectId: 1 });
+            unmount();
+            vi.mocked(EditorSidebar).mockImplementation(originalSidebar);
+
+            expect(calls).toEqual(["commit Browser", "save"]);
         });
     });
 

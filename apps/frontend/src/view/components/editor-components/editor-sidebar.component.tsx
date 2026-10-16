@@ -4,6 +4,7 @@ import { EditorSidebarSelectedComponent } from "./editor-sidebar-selected-compon
 import { EditorSidebarSelectedCommunicationInterface } from "./editor-sidebar-selected-communication-interface.component";
 import { EditorSidebarSelectedConnection } from "./editor-sidebar-selected-connection.component";
 import { EditorSidebarSelectedPointOfAttack } from "./editor-sidebar-selected-point-of-attack.component";
+import { editCommit } from "./contexts/PendingEditsContext";
 import { type RefObject, type ChangeEvent } from "react";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
@@ -24,7 +25,7 @@ export interface EditorSidebarProps {
     selectedComponentId: string | null | undefined;
     selectedPointOfAttack: SystemPointOfAttack | null | undefined;
     handleDeleteComponent: () => void;
-    handleOnNameChange: (event: ChangeEvent<HTMLInputElement>) => void;
+    handleOnNameChange: (componentId: string, name: string) => void;
     handleChangePointOfAttack: (
         event: ChangeEvent<HTMLInputElement>,
         type: POINTS_OF_ATTACK,
@@ -39,16 +40,16 @@ export interface EditorSidebarProps {
     selectedConnectionId: string | null | undefined;
     selectedConnection: SystemConnection | undefined;
     handleDeleteConnection: () => void;
-    handleOnConnectionNameChange: (event: ChangeEvent<HTMLInputElement>) => void;
+    handleOnConnectionNameChange: (connectionId: string, name: string) => void;
     handleResetConnectionRouting: () => void;
     handleOnAssetChanged: (event: ChangeEvent<HTMLInputElement>, asset: Asset) => void;
     selectedConnectionPoint: SystemConnectionPoint | null | undefined;
     userRole: USER_ROLES | undefined;
-    handleOnDescriptionChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+    handleOnDescriptionChange: (componentId: string, description: string) => void;
     handleOpenChangeIconDialog: () => void;
     connectedComponents: ConnectionEndpointWithComponent[];
     handleDeleteConnectionBetweenComponents: (sourceComponentId: string, targetComponentId: string) => void;
-    handleOnConnectionPointDescriptionChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+    handleOnConnectionPointDescriptionChange: (connectionPointId: string, description: string) => void;
     handleChangeCommunicationInterfaceName: (componentId: string, interfaceId: string, value: string) => void;
     handleDeleteCommunicationInterface: (
         componentId: string,
@@ -155,17 +156,17 @@ export const EditorSidebar = ({
                             handleAddAssetToAllPointsOfAttack={handleAddAssetToAllPointsOfAttack}
                             handleRemoveAssetFromAllPointsOfAttack={handleRemoveAssetFromAllPointsOfAttack}
                             selectedComponent={selectedComponent}
-                            handleOnNameChange={handleOnNameChange}
+                            handleOnNameChange={editCommit(handleOnNameChange)}
                             assetSearchValue={assetSearchValue}
                             handleAssetSearchChanged={handleAssetSearchChanged}
                             items={items}
                             pointsOfAttackOfSelectedComponent={pointsOfAttackOfSelectedComponent}
                             userRole={userRole}
-                            handleOnDescriptionChange={handleOnDescriptionChange}
+                            handleOnDescriptionChange={editCommit(handleOnDescriptionChange)}
                             handleOpenChangeIconDialog={handleOpenChangeIconDialog}
                             connectedComponents={connectedComponents}
                             handleDeleteConnectionBetweenComponents={handleDeleteConnectionBetweenComponents}
-                            handleChangeCommunicationInterfaceName={handleChangeCommunicationInterfaceName}
+                            handleChangeCommunicationInterfaceName={editCommit(handleChangeCommunicationInterfaceName)}
                             handleDeleteCommunicationInterface={handleDeleteCommunicationInterface}
                             handlePointOfAttackLabelClick={handlePointOfAttackLabelClick}
                             handleAssetNameClick={handleAssetNameClick}

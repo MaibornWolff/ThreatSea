@@ -6,6 +6,24 @@ import { createConnection } from "#test-utils/builders.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 
 describe("EditorSidebarSelectedConnection", () => {
+    it("passes the connection id and the typed name", async () => {
+        const user = userEvent.setup();
+        const handleOnConnectionNameChange = vi.fn();
+        renderWithProviders(
+            <EditorSidebarSelectedConnection
+                selectedConnection={createConnection({ id: "conn-1", name: "HTTP" })}
+                handleDeleteConnection={vi.fn()}
+                handleOnConnectionNameChange={handleOnConnectionNameChange}
+                handleResetConnectionRouting={vi.fn()}
+                userRole={USER_ROLES.EDITOR}
+            />
+        );
+
+        await user.type(screen.getByDisplayValue("HTTP"), "S");
+
+        expect(handleOnConnectionNameChange).toHaveBeenCalledExactlyOnceWith("conn-1", "HTTPS");
+    });
+
     describe("Reset routing button", () => {
         it("renders the reset routing button when the connection is pinned and the user is an editor", () => {
             renderWithProviders(
