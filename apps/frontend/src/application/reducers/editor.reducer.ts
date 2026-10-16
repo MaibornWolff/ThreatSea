@@ -315,6 +315,12 @@ const editorReducer = createReducer(defaultState, (builder) => {
         state.annotationTool = null;
         state.selectedAnnotation = null;
     });
+
+    builder.addCase(SystemActions.removeAnnotation, (state, action) => {
+        if (state.selectedAnnotation === action.payload.id) {
+            state.selectedAnnotation = null;
+        }
+    });
 });
 
 export default editorReducer;

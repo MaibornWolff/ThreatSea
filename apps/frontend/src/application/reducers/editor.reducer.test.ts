@@ -68,6 +68,18 @@ describe("editorReducer", () => {
             const next = editorReducer(seeded, EditorActions.selectAnnotation("ann-2"));
             expect(next.selectedAnnotation).toBe("ann-2");
         });
+
+        it("removeAnnotation clears the selection when the selected annotation is removed", () => {
+            const seeded = editorReducer(getInitialState(), EditorActions.selectAnnotation("ann-1"));
+            const next = editorReducer(seeded, SystemActions.removeAnnotation({ id: "ann-1" }));
+            expect(next.selectedAnnotation).toBeNull();
+        });
+
+        it("removeAnnotation keeps the selection when another annotation is removed", () => {
+            const seeded = editorReducer(getInitialState(), EditorActions.selectAnnotation("ann-1"));
+            const next = editorReducer(seeded, SystemActions.removeAnnotation({ id: "ann-2" }));
+            expect(next.selectedAnnotation).toBe("ann-1");
+        });
     });
 
     describe("annotationTool", () => {
