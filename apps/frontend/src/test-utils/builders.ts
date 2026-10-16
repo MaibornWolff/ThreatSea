@@ -1,9 +1,12 @@
 import type { Asset } from "#api/types/asset.types.ts";
 import type { CatalogWithRole } from "#api/types/catalogs.types.ts";
 import type { ComponentType } from "#api/types/component-types.types.ts";
+import type { CatalogThreat } from "#api/types/catalog-threat.types.ts";
+import type { CatalogMeasure } from "#api/types/catalog-measure.types.ts";
 import type { Folder } from "#api/types/folder.types.ts";
 import type { ExtendedProject, ProjectReport, ThreatReport } from "#api/types/project.types.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
+import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import type { Measure } from "#api/types/measure.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
 import type { ThreatMeasure } from "#application/hooks/use-threat-measures-list.hook.ts";
@@ -47,8 +50,9 @@ export const createAsset = (overrides: Partial<Asset> = {}): Asset => ({
 
 export const createThreat = (overrides: Partial<ExtendedThreat> = {}): ExtendedThreat => ({
     id: 1,
+    projectId: 1,
+    genericThreatId: 1,
     pointOfAttackId: "poa-1",
-    catalogThreatId: 1,
     name: "Test Threat",
     description: "",
     pointOfAttack: POINTS_OF_ATTACK.USER_INTERFACE,
@@ -57,10 +61,10 @@ export const createThreat = (overrides: Partial<ExtendedThreat> = {}): ExtendedT
     confidentiality: true,
     integrity: false,
     availability: false,
-    doneEditing: false,
-    projectId: 1,
-    createdAt: new Date("2025-01-01"),
-    updatedAt: new Date("2025-01-01"),
+    status: THREAT_STATUSES.NEW,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z",
+    genericThreatDescription: "Test Generic Description",
     componentName: "Test Component",
     componentType: null,
     interfaceName: null,
@@ -184,6 +188,38 @@ export const createCatalog = (overrides: Partial<CatalogWithRole> = {}): Catalog
     ...overrides,
 });
 
+export const createCatalogThreat = (overrides: Partial<CatalogThreat> = {}): CatalogThreat => ({
+    id: 1,
+    name: "Test Catalog Threat",
+    description: "",
+    attacker: ATTACKERS.UNAUTHORISED_PARTIES,
+    pointOfAttack: POINTS_OF_ATTACK.USER_INTERFACE,
+    confidentiality: true,
+    integrity: false,
+    availability: false,
+    probability: 3,
+    catalogId: 1,
+    createdAt: new Date("2025-01-01"),
+    updatedAt: new Date("2025-01-01"),
+    ...overrides,
+});
+
+export const createCatalogMeasure = (overrides: Partial<CatalogMeasure> = {}): CatalogMeasure => ({
+    id: 1,
+    name: "Test Catalog Measure",
+    description: "",
+    attacker: ATTACKERS.UNAUTHORISED_PARTIES,
+    pointOfAttack: POINTS_OF_ATTACK.USER_INTERFACE,
+    confidentiality: true,
+    integrity: false,
+    availability: false,
+    probability: 3,
+    catalogId: 1,
+    createdAt: new Date("2025-01-01"),
+    updatedAt: new Date("2025-01-01"),
+    ...overrides,
+});
+
 export const createConnectionAnchor = (
     overrides: Partial<ConnectionAnchor> & { communicationInterfaceId?: string | null } = {}
 ) => ({
@@ -292,8 +328,9 @@ export const createReportThreatMeasure = (overrides: Partial<ReportThreatMeasure
 
 export const createReportThreat = (overrides: Partial<ThreatReport> = {}): ThreatReport => ({
     id: 1,
+    projectId: 1,
+    genericThreatId: 1,
     pointOfAttackId: "poa-1",
-    catalogThreatId: 1,
     name: "Test Threat",
     description: "",
     pointOfAttack: POINTS_OF_ATTACK.USER_INTERFACE,
@@ -302,10 +339,9 @@ export const createReportThreat = (overrides: Partial<ThreatReport> = {}): Threa
     confidentiality: false,
     integrity: false,
     availability: false,
-    doneEditing: true,
-    projectId: 1,
-    createdAt: new Date("2025-01-01"),
-    updatedAt: new Date("2025-01-01"),
+    status: THREAT_STATUSES.NEW,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z",
     componentName: null,
     componentType: null,
     componentReportId: null,
@@ -337,6 +373,7 @@ export const createProjectReport = (overrides: Partial<ProjectReport> = {}): Pro
     threats: [],
     measures: [],
     measureImpacts: [],
+    threatGroups: [],
     ...overrides,
 });
 

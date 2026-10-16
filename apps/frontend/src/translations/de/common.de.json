@@ -16,31 +16,33 @@
   "scheduledTooltip": "Geplante Maßnahme",
   "reset": "Maßnahme zurücksetzen",
   "resetMeasureText": "Wollen Sie wirklich die Maßnahme '{{ measureName }}' zurücksetzen?",
-
   "addAsset": "Asset hinzufügen",
   "assets": "Assets",
   "editAsset": "Asset bearbeiten",
-
   "addThreatBtn": "Bedrohung hinzufügen",
   "editThreat": "Bedrohung bearbeiten",
   "editThreatWithName": "Bedrohung bearbeiten: {{ name }}",
   "threat": "Bedrohung",
   "threats": "Bedrohungen",
-
   "A": "Verfügbarkeit",
   "availability": "Verfügbarkeit",
+  "availabilityAbbreviation": "Vf",
   "C": "Vertraulichkeit",
   "confidentiality": "Vertraulichkeit",
+  "confidentialityAbbreviation": "Vt",
   "I": "Integrität",
   "integrity": "Integrität",
-
+  "integrityAbbreviation": "In",
   "unknown": "Unbekannt",
-
+  "allRows": "Alle",
   "attacker": "Angreifer",
   "catalogs": "Kataloge",
+  "clearFilters": "Filter zurücksetzen",
   "componentName": "Komponente",
   "creationDate": "Datum",
+  "customizeView": "Ansicht anpassen",
   "damage": "Schaden",
+  "damageAbbreviation": "S",
   "damageAxis": "Schaden",
   "description": "Beschreibung",
   "done": "Erledigt",
@@ -50,14 +52,19 @@
   "language": "Sprache",
   "lineOfTolerance.title": "Toleranzgrenze",
   "name": "Name",
+  "noProtectionGoals": "Keine Schutzziele",
   "notScheduledYet": "Noch nicht terminiert",
   "open": "Offen",
   "participants": "Teilnehmer",
   "pointOfAttack": "Angriffspunkt",
   "probability": "Eintrittswahrscheinlichkeit",
+  "probabilityAbbreviation": "EW",
   "probabilityAxis": "Eintrittswahrscheinlichkeit",
+  "protectionGoals": "Schutzziele",
+  "protectionGoalsAbbreviation": "Schutzziele",
   "report": "Report",
   "risk": "Risiko",
+  "riskAbbreviation": "R",
   "gross": "brutto",
   "net": "netto",
   "role": "Rolle",
@@ -67,7 +74,6 @@
   "projects": "Projekte",
   "catalogEditor": "Katalog-Editor",
   "title": "Titel",
-
   "addBtn": "Hinzufügen",
   "cancel": "Abbrechen",
   "cancelBtn": "Abbrechen",
@@ -81,14 +87,12 @@
   "okBtn": "OK",
   "resetText": "Zurücksetzen",
   "saveBtn": "Speichern",
-
   "attackerList": {
     "ADMINISTRATORS": "Administratoren",
     "APPLICATION_USERS": "Anwendungsbenutzer",
     "SYSTEM_USERS": "Systembenutzer",
     "UNAUTHORISED_PARTIES": "Dritte"
   },
-
   "confidentialityLevels": {
     "PUBLIC": "öffentlich",
     "INTERNAL": "intern",
@@ -96,7 +100,6 @@
     "HIGHLY_CONFIDENTIAL": "streng vertraulich",
     "undefined": "Lädt..."
   },
-
   "errorMessages": {
     "availabilityMin": "Verfügbarkeitswert muss 1 oder größer sein",
     "availabilityMax": "Verfügbarkeitswert muss 5 oder kleiner sein",
@@ -108,7 +111,6 @@
     "integrityMax": "Integritätswert muss 5 oder kleiner sein",
     "probabilityMin": "Eintrittswahrscheinlichkeit muss 1 oder größer sein",
     "probabilityMax": "Eintrittswahrscheinlichkeit muss 5 oder kleiner sein",
-
     "attakerRequired": "Angreifer erforderlich",
     "availabilityValue": "Verfügbarkeitswert erforderlich",
     "catalogRequired": "Katalog erforderlich",
@@ -127,7 +129,6 @@
     "roleRequired": "Rolle erforderlich",
     "threatRequired": "Bedrohung erforderlich",
     "nameNotUnique": "Name ist schon vergeben",
-
     "noConnectionFound": "Keine Verbindung für diese Komponente gefunden.",
     "noCommunicationInterfaceFound": "Die ausgewählte Kommunikationsschnittstelle konnte nicht gefunden werden.",
     "userConnectionInvalid": "Benutzer können sich nur mit Clients, Servern oder Datenbanken verbinden",
@@ -138,18 +139,21 @@
     "excelExportFailed": "Excel-Export fehlgeschlagen.",
     "reportFetchFailed": "Report kann nicht geladen werden."
   },
-
   "pointsOfAttackList": {
     "COMMUNICATION_INFRASTRUCTURE": "Kommunikationsinfrastruktur",
     "DATA_STORAGE_INFRASTRUCTURE": "Datenablagestruktur",
     "PROCESSING_INFRASTRUCTURE": "Ausführungsinfrastruktur",
-
     "COMMUNICATION_INTERFACE": "Kommunikationsschnittstelle",
     "COMMUNICATION_INTERFACES": "Kommunikationsschnittstelle",
     "USER_INTERFACE": "Benutzerschnittstelle",
     "USER_BEHAVIOUR": "Benutzerverhalten"
   },
-
+  "statusList": {
+    "new": "Neu",
+    "in progress": "In Bearbeitung",
+    "finalized": "Finalisiert",
+    "out of scope": "Out of Scope"
+  },
   "probabilities": {
     "1": {
       "name": "extrem unwahrscheinlich",
@@ -172,7 +176,6 @@
       "description": "Die Bedrohung kann bereits unbeabsichtigt (z.B. bei der regulären Tätigkeit eines gutwilligen Benutzers) eintreten."
     }
   },
-
   "damages": {
     "1": {
       "name": "sehr geringfügig",
@@ -194,5 +197,11 @@
       "name": "existenzbedrohend",
       "description": "Für die Existenz des Unternehmens"
     }
-  }
+  },
+  "filterPlaceholder": "Filtern...",
+  "toggleColumnFilter": "Filter für {{column}} umschalten",
+  "ok": "OK",
+  "search": "Suchen",
+  "sortAscending": "Aufsteigend sortieren",
+  "sortDescending": "Absteigend sortieren"
 }

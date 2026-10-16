@@ -29,8 +29,11 @@ export class AssetsPage extends BasePage {
         this.addAssetButton = page.locator('[data-testid="assets-page_add-asset-button"]');
         this.assetListEntries = page.locator('[data-testid="assets-page_assets-list-entry"]');
         this.assetListEntryNames = page.locator('[data-testid="assets-page_assets-list-entry_name"]');
-        this.sortByNameButton = page.locator('[data-testid="assets-page_sort-assets-by-name-button"]');
-        this.sortByDateButton = page.locator('[data-testid="assets-page_sort-assets-by-date-button"]');
+        // Sorting happens via the DataGrid column headers; the header element carries
+        // aria-sort and toggles the sort on click (the filter toggle inside it stops
+        // propagation, so it does not interfere).
+        this.sortByNameButton = page.locator('.MuiDataGrid-columnHeader[data-field="name"]');
+        this.sortByDateButton = page.locator('.MuiDataGrid-columnHeader[data-field="createdAt"]');
 
         this.nameInput = page.locator('[data-testid="asset-creation-modal_name-input"] input');
         this.descriptionInput = page.locator(
@@ -58,7 +61,15 @@ export class AssetsPage extends BasePage {
     }
 
     sortByCiaButton(attribute: string): Locator {
-        return this.page.locator(`[data-testid="assets-page_sort-assets-by-${attribute}-button"]`);
+        return this.page.locator(`.MuiDataGrid-columnHeader[data-field="${attribute}"]`);
+    }
+
+    /**
+     * Toggles a column's sort by clicking its header label. Clicking the header element
+     * itself is unreliable: its center can hit the filter toggle (which stops propagation).
+     */
+    async toggleSort(field: string): Promise<void> {
+        await this.page.locator(`.MuiDataGrid-columnHeader[data-field="${field}"] p`).first().click();
     }
 
     assetListEntryCia(attribute: string): Locator {

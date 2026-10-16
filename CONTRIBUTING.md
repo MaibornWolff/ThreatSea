@@ -190,6 +190,7 @@ Guidelines:
 - Run tests for a specific app:
   - Frontend: pnpm -w run playwright --filter threatsea_fe (running backend has to be available)
   - Backend: pnpm -w run test --filter threatsea_be
+- Test conventions, Page Object structure, local setup and the flake/known-gap process are documented in [`TESTING.md`](TESTING.md).
 
 ---
 

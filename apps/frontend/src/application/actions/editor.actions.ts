@@ -9,7 +9,7 @@ import type {
     CreateComponentTypeRequest,
     UpdateComponentTypeRequest,
 } from "#api/types/component-types.types.ts";
-import type { EditorConnection, EditorEntityId } from "#application/reducers/editor.reducer.ts";
+import type { AutoSaveMessage, EditorConnection, EditorEntityId } from "#application/reducers/editor.reducer.ts";
 import type { EditorComponentType } from "#application/adapters/editor-component-type.adapter.ts";
 import type { EditorComponentConnectionLine } from "#application/adapters/editor-component-connection-lines.adapter.ts";
 import type { AnnotationType, Coordinate } from "#api/types/system.types.ts";
@@ -251,12 +251,12 @@ export class EditorActions {
     static setAutoSaveStatus = createAction<string>("[editor] set auto save status");
 
     /**
-     * Action for setting the auto save text.
-     * @function setAutoSaveText
+     * Action for setting the auto save message.
+     * @function setAutoSaveMessage
      * @param {string} type - Action type.
-     * @returns Action function for setting the auto save text.
+     * @returns Action function for setting the auto save message.
      */
-    static setAutoSaveText = createAction<string>("[editor] set auto save text");
+    static setAutoSaveMessage = createAction<AutoSaveMessage | null>("[editor] set auto save message");
 
     /**
      * Action for setting the last auto save date.

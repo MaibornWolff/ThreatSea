@@ -14,11 +14,12 @@ import {
     type MemberPath,
 } from "../utils/member.api.ts";
 import {
-    SECONDARY_TEST_USER_A,
-    SECONDARY_TEST_USER_B,
+    type FixedTestUser,
+    fixedTestUsersFor,
     loginAsFixedTestUser,
     provisionFixedTestUser,
 } from "../utils/auth.api.ts";
+import { expectReadableAddButtonFirst } from "../utils/toolbar.utils.ts";
 
 const compareAsc = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
 
@@ -41,12 +42,16 @@ function registerMemberManagementTests(memberPath: MemberPath, options: MemberMa
         let ownerToken: string;
         let entityId: number;
         let catalogIdToCleanUp: number | undefined;
+        // This browser's own secondary identities, so parallel browser projects never share one.
+        let secondaryA: FixedTestUser;
+        let secondaryB: FixedTestUser;
 
         test.beforeEach(async ({ page, request, browserName }, { testId }) => {
             const membersPage = new MembersPage(page);
             await membersPage.navigate("/projects");
             ownerToken = await membersPage.getCsrfToken();
             const tid = buildTestId(browserName, testId);
+            ({ secondaryA, secondaryB } = fixedTestUsersFor(browserName));
 
             const catalog = await createCatalog(request, ownerToken, {
                 name: `Members Test Catalog ${tid}`,
@@ -94,7 +99,7 @@ function registerMemberManagementTests(memberPath: MemberPath, options: MemberMa
         }
 
         if (includeListMechanicsTests) {
-            test("Should show the current owner and support searching by name and email", async ({ page, request }) => {
+            test("Should show the current owner and support filtering by name and email", async ({ page, request }) => {
                 const pg = new MembersPage(page);
                 const [owner] = await getAddedMembers(request, ownerToken, memberPath, entityId);
 
@@ -102,27 +107,28 @@ function registerMemberManagementTests(memberPath: MemberPath, options: MemberMa
                 await expect(pg.memberNameCells).toHaveText([toDisplayName(owner!)]);
                 await expect(pg.memberRoleCells).toHaveText([ROLE_LABELS[USER_ROLES.OWNER]]);
 
-                await addSecondaryMember(request, SECONDARY_TEST_USER_A, USER_ROLES.EDITOR);
+                await addSecondaryMember(request, secondaryA, USER_ROLES.EDITOR);
                 await pg.goto(memberPath, entityId);
                 await expect(pg.memberRows).toHaveCount(2);
 
-                await pg.searchField.fill("testfn");
+                // The reworked members list filters per column rather than via one global search field.
+                await pg.setColumnFilter("name", secondaryA.name);
                 await expect(pg.memberRows).toHaveCount(1);
-                await expect(pg.memberNameCells).toHaveText([SECONDARY_TEST_USER_A.name]);
+                await expect(pg.memberNameCells).toHaveText([secondaryA.name]);
 
-                await pg.searchField.fill("");
+                await pg.setColumnFilter("name", "");
                 await expect(pg.memberRows).toHaveCount(2);
 
-                await pg.searchField.fill(SECONDARY_TEST_USER_A.email);
+                await pg.setColumnFilter("email", secondaryA.email);
                 await expect(pg.memberRows).toHaveCount(1);
-                await expect(pg.memberEmailCells).toHaveText([SECONDARY_TEST_USER_A.email]);
+                await expect(pg.memberEmailCells).toHaveText([secondaryA.email]);
             });
 
             test("Should sort the member list by name, email and role", async ({ page, request }) => {
                 const pg = new MembersPage(page);
 
-                await addSecondaryMember(request, SECONDARY_TEST_USER_A, USER_ROLES.EDITOR);
-                await addSecondaryMember(request, SECONDARY_TEST_USER_B, USER_ROLES.VIEWER);
+                await addSecondaryMember(request, secondaryA, USER_ROLES.EDITOR);
+                await addSecondaryMember(request, secondaryB, USER_ROLES.VIEWER);
 
                 const members = await getAddedMembers(request, ownerToken, memberPath, entityId);
                 const byNameAsc = [...members].sort((a, b) =>
@@ -150,18 +156,20 @@ function registerMemberManagementTests(memberPath: MemberPath, options: MemberMa
                 await pg.emailHeader.click();
                 await expect(pg.memberEmailCells).toHaveText(byEmailAsc.toReversed().map((m) => m.email));
 
-                await pg.roleHeader.click();
-                await expect(pg.memberRoleCells).toHaveText(byRoleAsc.toReversed().map((m) => ROLE_LABELS[m.role]));
-
+                // Role is unsorted at this point, so the first click sorts ascending (DataGrid's
+                // native direction for a freshly-clicked column, same as the email column above).
                 await pg.roleHeader.click();
                 await expect(pg.memberRoleCells).toHaveText(byRoleAsc.map((m) => ROLE_LABELS[m.role]));
+
+                await pg.roleHeader.click();
+                await expect(pg.memberRoleCells).toHaveText(byRoleAsc.toReversed().map((m) => ROLE_LABELS[m.role]));
             });
 
             test("Should filter the member list by role and reset when toggled off", async ({ page, request }) => {
                 const pg = new MembersPage(page);
 
-                await addSecondaryMember(request, SECONDARY_TEST_USER_A, USER_ROLES.EDITOR);
-                await addSecondaryMember(request, SECONDARY_TEST_USER_B, USER_ROLES.VIEWER);
+                await addSecondaryMember(request, secondaryA, USER_ROLES.EDITOR);
+                await addSecondaryMember(request, secondaryB, USER_ROLES.VIEWER);
                 await pg.goto(memberPath, entityId);
                 await expect(pg.memberRows).toHaveCount(3);
 
@@ -201,48 +209,53 @@ function registerMemberManagementTests(memberPath: MemberPath, options: MemberMa
             });
         }
 
+        test("Should show the add button first, labelled and readable on hover", async ({ page }) => {
+            const pg = new MembersPage(page);
+            await expectReadableAddButtonFirst(page, pg.addMemberButton, "Add Member");
+        });
+
         test("Should let the owner add a new member with a chosen role", async ({ page }) => {
             const pg = new MembersPage(page);
-            await provisionFixedTestUser(SECONDARY_TEST_USER_A.testUserIndex);
+            await provisionFixedTestUser(secondaryA.testUserIndex);
 
             await pg.addMemberButton.click();
-            await pg.addableMemberSearchField.fill("testfn");
-            await expect(pg.addableMemberListItem(SECONDARY_TEST_USER_A.name)).toBeVisible();
+            await pg.addableMemberSearchField.fill(secondaryA.name);
+            await expect(pg.addableMemberListItem(secondaryA.name)).toBeVisible();
 
-            await pg.addableMemberListItem(SECONDARY_TEST_USER_A.name).click();
-            await expect(pg.addableMemberSelectedIndicator(SECONDARY_TEST_USER_A.name)).toBeVisible();
+            await pg.addableMemberListItem(secondaryA.name).click();
+            await expect(pg.addableMemberSelectedIndicator(secondaryA.name)).toBeVisible();
 
             await pg.selectRole(USER_ROLES.VIEWER);
             await pg.memberDialogSaveButton.click();
 
             const alert = page.getByRole("alert");
-            await expect(alert).toContainText(SECONDARY_TEST_USER_A.name);
+            await expect(alert).toContainText(secondaryA.name);
             await expect(alert).toContainText("added successfully");
 
             await expect(pg.memberRows).toHaveCount(2);
-            await expect(pg.row(SECONDARY_TEST_USER_A.email)).toContainText(ROLE_LABELS[USER_ROLES.VIEWER]);
+            await expect(pg.row(secondaryA.email)).toContainText(ROLE_LABELS[USER_ROLES.VIEWER]);
         });
 
         test("Should let the owner change another member's role", async ({ page, request }) => {
             const pg = new MembersPage(page);
-            await addSecondaryMember(request, SECONDARY_TEST_USER_A, USER_ROLES.EDITOR);
+            await addSecondaryMember(request, secondaryA, USER_ROLES.EDITOR);
             await pg.goto(memberPath, entityId);
 
-            await pg.row(SECONDARY_TEST_USER_A.email).click();
+            await pg.row(secondaryA.email).click();
             await pg.selectRole(USER_ROLES.VIEWER);
             await pg.memberDialogSaveButton.click();
 
             await expect(page.getByRole("alert")).toContainText("successfully updated");
-            await expect(pg.row(SECONDARY_TEST_USER_A.email)).toContainText(ROLE_LABELS[USER_ROLES.VIEWER]);
+            await expect(pg.row(secondaryA.email)).toContainText(ROLE_LABELS[USER_ROLES.VIEWER]);
         });
 
         test("Should let the owner remove a member", async ({ page, request }) => {
             const pg = new MembersPage(page);
-            await addSecondaryMember(request, SECONDARY_TEST_USER_A, USER_ROLES.EDITOR);
+            await addSecondaryMember(request, secondaryA, USER_ROLES.EDITOR);
             await pg.goto(memberPath, entityId);
             await expect(pg.memberRows).toHaveCount(2);
 
-            await pg.deleteButtonForRow(SECONDARY_TEST_USER_A.email).click();
+            await pg.deleteButtonForRow(secondaryA.email).click();
             await expect(pg.confirmButton).toBeVisible();
             await pg.confirmButton.click();
 
@@ -252,7 +265,7 @@ function registerMemberManagementTests(memberPath: MemberPath, options: MemberMa
 
         test("Should block removing the sole remaining owner", async ({ page, request }) => {
             const pg = new MembersPage(page);
-            await addSecondaryMember(request, SECONDARY_TEST_USER_A, USER_ROLES.VIEWER);
+            await addSecondaryMember(request, secondaryA, USER_ROLES.VIEWER);
             await pg.goto(memberPath, entityId);
 
             const members = await getAddedMembers(request, ownerToken, memberPath, entityId);
@@ -260,7 +273,7 @@ function registerMemberManagementTests(memberPath: MemberPath, options: MemberMa
 
             await pg.deleteButtonForRow(owner.email).click();
             await expect(pg.confirmButton).toBeVisible();
-            await expect(pg.confirmButton).toHaveText("Ok");
+            await expect(pg.confirmButton).toHaveText("OK");
             await expect(pg.cancelButton).toHaveCount(0);
             await expect(page.getByText(/only owner left/)).toBeVisible();
 
@@ -270,7 +283,7 @@ function registerMemberManagementTests(memberPath: MemberPath, options: MemberMa
 
         test("Should block changing the role of the sole remaining owner", async ({ page, request }) => {
             const pg = new MembersPage(page);
-            await addSecondaryMember(request, SECONDARY_TEST_USER_A, USER_ROLES.VIEWER);
+            await addSecondaryMember(request, secondaryA, USER_ROLES.VIEWER);
             await pg.goto(memberPath, entityId);
 
             const members = await getAddedMembers(request, ownerToken, memberPath, entityId);
@@ -287,17 +300,17 @@ function registerMemberManagementTests(memberPath: MemberPath, options: MemberMa
 
         test("Should hide add, edit and delete controls from an Editor", async ({ page, request }) => {
             const pg = new MembersPage(page);
-            await addSecondaryMember(request, SECONDARY_TEST_USER_A, USER_ROLES.EDITOR);
+            await addSecondaryMember(request, secondaryA, USER_ROLES.EDITOR);
 
-            await loginAsFixedTestUser(page, SECONDARY_TEST_USER_A.testUserIndex);
+            await loginAsFixedTestUser(page, secondaryA.testUserIndex);
             await pg.goto(memberPath, entityId);
 
             await expect(pg.memberRows).toHaveCount(2);
             await expect(pg.addMemberButton).toHaveCount(0);
-            await expect(page.locator('[data-testid="MembersBody"] button')).toHaveCount(0);
+            await expect(pg.rowActionButtons).toHaveCount(0);
 
             const urlBeforeClick = page.url();
-            await pg.row(SECONDARY_TEST_USER_A.email).click();
+            await pg.row(secondaryA.email).click();
             await expect(page).toHaveURL(urlBeforeClick);
         });
 
@@ -311,11 +324,11 @@ function registerMemberManagementTests(memberPath: MemberPath, options: MemberMa
             request,
         }) => {
             const pg = new MembersPage(page);
-            await addSecondaryMember(request, SECONDARY_TEST_USER_A, USER_ROLES.EDITOR);
+            await addSecondaryMember(request, secondaryA, USER_ROLES.EDITOR);
             const members = await getAddedMembers(request, ownerToken, memberPath, entityId);
-            const editorMember = members.find((member) => member.email === SECONDARY_TEST_USER_A.email)!;
+            const editorMember = members.find((member) => member.email === secondaryA.email)!;
 
-            await loginAsFixedTestUser(page, SECONDARY_TEST_USER_A.testUserIndex);
+            await loginAsFixedTestUser(page, secondaryA.testUserIndex);
             const editorToken = await pg.getCsrfToken();
 
             const response = await attemptUpdateMemberRole(
@@ -332,9 +345,9 @@ function registerMemberManagementTests(memberPath: MemberPath, options: MemberMa
 
         test("Should block a Viewer from accessing the members page", async ({ page, request }) => {
             const pg = new MembersPage(page);
-            await addSecondaryMember(request, SECONDARY_TEST_USER_B, USER_ROLES.VIEWER);
+            await addSecondaryMember(request, secondaryB, USER_ROLES.VIEWER);
 
-            await loginAsFixedTestUser(page, SECONDARY_TEST_USER_B.testUserIndex);
+            await loginAsFixedTestUser(page, secondaryB.testUserIndex);
             await pg.gotoDirectly(memberPath, entityId);
 
             // The guard currently always redirects to /projects, even for the catalog members
@@ -353,12 +366,12 @@ function registerMemberManagementTests(memberPath: MemberPath, options: MemberMa
 
         test("Should redirect a member after they remove themselves", async ({ page, request }) => {
             const pg = new MembersPage(page);
-            await addSecondaryMember(request, SECONDARY_TEST_USER_A, USER_ROLES.OWNER);
+            await addSecondaryMember(request, secondaryA, USER_ROLES.OWNER);
 
-            await loginAsFixedTestUser(page, SECONDARY_TEST_USER_A.testUserIndex);
+            await loginAsFixedTestUser(page, secondaryA.testUserIndex);
             await pg.goto(memberPath, entityId);
 
-            await pg.deleteButtonForRow(SECONDARY_TEST_USER_A.email).click();
+            await pg.deleteButtonForRow(secondaryA.email).click();
             await pg.confirmButton.click();
 
             const expectedRedirect = memberPath === "projects" ? /\/projects$/ : /\/catalogs$/;

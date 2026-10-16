@@ -127,9 +127,9 @@ export const editorSelectors = {
         (editor): ExtendedEditorState["makeScreenShot"] => editor.makeScreenShot
     ),
 
-    selectAutoSaveHelperText: createSelector(
+    selectAutoSaveMessage: createSelector(
         [selectEditorState],
-        (editor): ExtendedEditorState["autoSaveHelperText"] => editor.autoSaveHelperText
+        (editor): ExtendedEditorState["autoSaveMessage"] => editor.autoSaveMessage
     ),
 
     selectLastAutoSaveDate: createSelector(

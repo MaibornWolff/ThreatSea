@@ -1,10 +1,8 @@
 import type { Asset } from "#api/types/asset.types.ts";
+import type { ProtectionGoal } from "#api/types/protection-goals.types.ts";
 
-interface DamageInput {
-    assets: Pick<Asset, "confidentiality" | "integrity" | "availability">[];
-    confidentiality: boolean;
-    integrity: boolean;
-    availability: boolean;
+interface DamageInput extends Record<ProtectionGoal, boolean> {
+    assets: Pick<Asset, ProtectionGoal>[];
 }
 
 export function hasOwnProperty<O extends object, K extends PropertyKey>(obj: O, key: K): obj is O & Record<K, unknown> {

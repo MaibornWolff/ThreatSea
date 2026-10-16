@@ -11,6 +11,7 @@ import {
     calcRiskBarGraph,
     filterMeasuresByScheduledRange,
     filterThreatsByScheduledRange,
+    getOutOfScopeReason,
     type Milestone,
     type RiskMatrix,
 } from "#utils/report-risk.ts";
@@ -137,7 +138,11 @@ export const useReport = ({ projectId }: { projectId: number }) => {
         if (!transformedThreats || !matrixDesign) {
             return null;
         }
-        return addThreatsToRiskMatrix(matrixDesign, transformedThreats, (threat) => {
+        // A threat a user put out of scope is not part of the assessment at all, so it is left out
+        // of the "before" matrix too. Threats a measure puts out of scope stay, so that the change
+        // between the two matrices stays visible.
+        const assessedThreats = transformedThreats.filter((threat) => getOutOfScopeReason(threat) !== "status");
+        return addThreatsToRiskMatrix(matrixDesign, assessedThreats, (threat) => {
             return { probability: threat.probability, damage: threat.damage };
         });
     }, [transformedThreats, matrixDesign]);

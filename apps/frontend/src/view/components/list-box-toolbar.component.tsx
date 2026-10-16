@@ -118,11 +118,13 @@ export const ListBoxToolbar = <TSortBy extends string = string>({
                     buttons={[
                         {
                             icon: ArrowUpward,
+                            "aria-label": t("sortAscending"),
                             value: "asc",
                             "data-testid": `catalog-page_ascending-${type}s-sort-button`,
                         },
                         {
                             icon: ArrowDownward,
+                            "aria-label": t("sortDescending"),
                             value: "desc",
                             "data-testid": `catalog-page_descending-${type}s-sort-button`,
                         },

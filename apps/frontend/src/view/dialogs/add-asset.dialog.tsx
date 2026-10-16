@@ -28,14 +28,13 @@ import { DialogTextField } from "#view/components/dialog.textfield.component.tsx
 import { NameTextField } from "#view/components/name-textfield.component.tsx";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import type { Asset } from "#api/types/asset.types.ts";
+import type { ProtectionGoal } from "#api/types/protection-goals.types.ts";
 import { useState } from "react";
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { MIN_CIA_VALUE, MAX_CIA_VALUE } from "./validation-constants";
 import { DescriptionTextField } from "#view/components/description-textfield.component.tsx";
 import { BigTextField } from "#view/components/big-textfield.component.tsx";
 import type { DialogValue } from "#application/reducers/dialogs.reducer.ts";
-
-type JustificationField = "confidentiality" | "integrity" | "availability";
 
 interface FormValues {
     id: number | undefined;
@@ -92,9 +91,9 @@ const AddAssetDialog = ({ projectId, asset, userRole, onDialogClose, ...props }:
             projectId: asset?.projectId ?? projectId,
         },
     });
-    const [justificationDropDown, setJustificationDropDown] = useState<JustificationField | null>(null);
+    const [justificationDropDown, setJustificationDropDown] = useState<ProtectionGoal | null>(null);
 
-    const handleJustificationDropDownChange = (field: JustificationField) => {
+    const handleJustificationDropDownChange = (field: ProtectionGoal) => {
         setJustificationDropDown((prevDropDown) => (prevDropDown === field ? null : field));
     };
 

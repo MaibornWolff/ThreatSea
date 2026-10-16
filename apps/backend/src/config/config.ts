@@ -34,6 +34,18 @@ export function validateOidcScope(scope: string): string {
     return scope;
 }
 
+// "no-verify" encrypts the connection but accepts any server certificate, for poolers such as
+// PgBouncer that present a self-signed one. Any other value keeps full certificate verification.
+export function getDatabaseTlsConfig(databaseTls: string | undefined): PoolConfig["ssl"] {
+    if (databaseTls === "disabled") {
+        return false;
+    }
+    if (databaseTls === "no-verify") {
+        return { rejectUnauthorized: false };
+    }
+    return true;
+}
+
 export const JWT_SECRET = new TextEncoder().encode(getEnvironmentVariable("JWT_SECRET"));
 export const JWT_ISSUER = "threatsea";
 export const JWT_AUDIENCE = "threatsea-api";
@@ -69,7 +81,7 @@ export const databaseConfig: PoolConfig = {
     host: getEnvironmentVariable("DATABASE_HOST"),
     database: getEnvironmentVariable("DATABASE_NAME"),
     password: getEnvironmentVariable("DATABASE_PASSWORD"),
-    ssl: process.env["DATABASE_TLS"] !== "disabled" ? true : false,
+    ssl: getDatabaseTlsConfig(process.env["DATABASE_TLS"]),
 };
 
 // Config for cors and express.

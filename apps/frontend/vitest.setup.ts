@@ -21,6 +21,18 @@ const ensureAnimationFrameGlobals = (): void => {
 };
 ensureAnimationFrameGlobals();
 
+const ensureResizeObserver = (): void => {
+    const scope = globalThis as typeof globalThis & { ResizeObserver?: unknown };
+    if (typeof scope.ResizeObserver !== "function") {
+        scope.ResizeObserver = class {
+            observe = vi.fn();
+            unobserve = vi.fn();
+            disconnect = vi.fn();
+        };
+    }
+};
+ensureResizeObserver();
+
 afterEach(() => {
     cleanup();
     ensureAnimationFrameGlobals();

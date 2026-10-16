@@ -1,6 +1,13 @@
-import { screen } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import AddThreatDialog, { type ThreatDialogHostRoute } from "./add-threat.dialog";
+
+// The save button only enables once the form is dirty; typing into the name
+// field is the least intrusive way to mark it changed in these tests.
+const makeDirty = async (user: ReturnType<typeof userEvent.setup>) => {
+    const nameInput = within(screen.getByTestId("EditThreatName")).getByRole("textbox");
+    await user.type(nameInput, " edit");
+};
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import {
     createAsset,
@@ -9,12 +16,24 @@ import {
     createThreat,
     createThreatMeasure,
 } from "#test-utils/builders.ts";
-import { mockUseConfirm, mockUseDialog, mockUseThreatMeasuresList } from "#test-utils/mock-hooks.ts";
+import { mockUseConfirm, mockUseThreatMeasuresList } from "#test-utils/mock-hooks.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
+import { ThreatsAPI } from "#api/threats.api.ts";
+import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 
-mockUseDialog();
 mockUseConfirm();
 mockUseThreatMeasuresList();
+
+// Spy on the real module instead of vi.mock: with `isolate: false` an earlier
+// test file may have already loaded threats.actions.ts (via the store's error
+// middleware), whose thunk closes over the real ThreatsAPI — a module mock
+// registered here would not reach that cached closure, but a spy on the shared
+// module object does.
+// restoreMocks removes spies after every test, so install them in beforeEach.
+beforeEach(() => {
+    vi.spyOn(ThreatsAPI, "updateThreat").mockResolvedValue(createThreat({ id: 42 }));
+    vi.spyOn(ThreatsAPI, "getThreat");
+});
 
 const navigate = vi.fn();
 vi.mock("react-router", async (importOriginal) => {
@@ -22,15 +41,31 @@ vi.mock("react-router", async (importOriginal) => {
     return { ...actual, useNavigate: () => navigate };
 });
 
-const setup = (userRole: USER_ROLES = USER_ROLES.EDITOR, hostRoute: ThreatDialogHostRoute = "threats") => {
+const setup = (
+    userRole: USER_ROLES = USER_ROLES.EDITOR,
+    hostRoute: ThreatDialogHostRoute = "threats",
+    onSaved?: () => void,
+    threatOverrides: Parameters<typeof createThreat>[0] = {}
+) => {
     const project = createProject({ id: 7 });
     const threat = createThreat({
         id: 42,
         assets: [createAsset({ confidentiality: 4, integrity: 2, availability: 1 })],
+        ...threatOverrides,
     });
+    // By default the backend still holds the snapshot the dialog was opened with; tests
+    // simulate a newer stored threat by queueing mockResolvedValueOnce before setup.
+    vi.mocked(ThreatsAPI.getThreat).mockResolvedValue(threat);
     const user = userEvent.setup();
     renderWithProviders(
-        <AddThreatDialog threat={threat} project={project} userRole={userRole} open={true} hostRoute={hostRoute} />
+        <AddThreatDialog
+            threat={threat}
+            project={project}
+            userRole={userRole}
+            open={true}
+            hostRoute={hostRoute}
+            {...(onSaved !== undefined ? { onSaved } : {})}
+        />
     );
     return { project, threat, user };
 };
@@ -99,6 +134,37 @@ describe("AddThreatDialog — Apply Measure button", () => {
                 project,
             },
         });
+    });
+});
+
+describe("AddThreatDialog — Delete Measure Impact", () => {
+    it("deletes the impact after confirmation without reloading the host list", async () => {
+        const threatMeasure = createThreatMeasure({
+            measureImpact: createMeasureImpact({ id: 5, threatId: 42, measureId: 1 }),
+        });
+        // Like the dispatched thunk, the result can be unwrapped into a resolved promise.
+        const deleteMeasureImpact = vi.fn().mockReturnValue({ unwrap: () => Promise.resolve() });
+        const openConfirm = vi.fn();
+        mockUseThreatMeasuresList({ threatMeasures: [threatMeasure], deleteMeasureImpact });
+        mockUseConfirm({ openConfirm });
+        const onSaved = vi.fn();
+        const { user } = setup(USER_ROLES.EDITOR, "threats", onSaved);
+
+        await user.click(screen.getByRole("tab", { name: /measures/i }));
+        await user.click(screen.getByRole("button", { name: "Delete Impact" }));
+        expect(deleteMeasureImpact).not.toHaveBeenCalled();
+
+        const { onAccept, state } = openConfirm.mock.lastCall![0];
+        await act(async () => {
+            await onAccept(state);
+        });
+
+        expect(deleteMeasureImpact).toHaveBeenCalledWith(
+            expect.objectContaining({ id: 5, threatId: 42, measureId: 1, projectId: 7 })
+        );
+        // Deleting an impact never changes the threat's status, and the risk page's net values
+        // follow the measure impacts in the store, so the host list is not reloaded.
+        expect(onSaved).not.toHaveBeenCalled();
     });
 });
 
@@ -195,5 +261,167 @@ describe("AddThreatDialog — Risk preview", () => {
         expect(grossRisk).toHaveTextContent("12");
         expect(netRisk).toHaveTextContent("4");
         expect(netRisk).not.toHaveTextContent("12");
+    });
+});
+
+describe("AddThreatDialog — Save", () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        mockUseThreatMeasuresList();
+    });
+
+    it("warns before a browser reload only while the form has unsaved changes", async () => {
+        const { user } = setup(USER_ROLES.EDITOR, "threats");
+
+        const cleanUnload = new Event("beforeunload", { cancelable: true });
+        window.dispatchEvent(cleanUnload);
+        expect(cleanUnload.defaultPrevented).toBe(false);
+
+        await makeDirty(user);
+
+        const dirtyUnload = new Event("beforeunload", { cancelable: true });
+        window.dispatchEvent(dirtyUnload);
+        expect(dirtyUnload.defaultPrevented).toBe(true);
+    });
+
+    it("disables save while the form is untouched and enables it once a field changes", async () => {
+        const { user } = setup(USER_ROLES.EDITOR, "threats");
+
+        expect(screen.getByTestId("EditThreatSave")).toBeDisabled();
+
+        await makeDirty(user);
+
+        expect(screen.getByTestId("EditThreatSave")).toBeEnabled();
+    });
+
+    it("enables save when only the status changes", async () => {
+        const { user } = setup(USER_ROLES.EDITOR, "threats", undefined, { status: THREAT_STATUSES.NEW });
+
+        expect(screen.getByTestId("EditThreatSave")).toBeDisabled();
+
+        await user.click(screen.getByRole("combobox"));
+        await user.click(screen.getByRole("option", { name: "Finalized" }));
+
+        expect(screen.getByTestId("EditThreatSave")).toBeEnabled();
+    });
+
+    it("shows a new threat's real status but does not allow selecting 'New'", async () => {
+        const { user } = setup(USER_ROLES.EDITOR, "threats", undefined, { status: THREAT_STATUSES.NEW });
+
+        // The select honestly reflects the threat's current status.
+        expect(screen.getByRole("combobox")).toHaveTextContent("New");
+
+        await user.click(screen.getByRole("combobox"));
+        // "New" is shown in the closed select but is not offered as a dropdown option.
+        expect(screen.queryByRole("option", { name: "New" })).not.toBeInTheDocument();
+        expect(screen.getByRole("option", { name: "In progress" })).toBeInTheDocument();
+        expect(screen.getByRole("option", { name: "Finalized" })).toBeInTheDocument();
+        expect(screen.getByRole("option", { name: "Out of scope" })).toBeInTheDocument();
+    });
+
+    it("persists the threat, notifies the host, and closes on success", async () => {
+        vi.mocked(ThreatsAPI.updateThreat).mockResolvedValue(createThreat({ id: 42 }));
+        const onSaved = vi.fn();
+        const { user } = setup(USER_ROLES.EDITOR, "threats", onSaved);
+
+        await makeDirty(user);
+        await user.click(screen.getByTestId("EditThreatSave"));
+
+        await waitFor(() => expect(navigate).toHaveBeenCalledWith(-1));
+        expect(ThreatsAPI.updateThreat).toHaveBeenCalledWith(
+            expect.objectContaining({ id: 42, projectId: 7, status: THREAT_STATUSES.IN_PROGRESS })
+        );
+        expect(onSaved).toHaveBeenCalledTimes(1);
+    });
+
+    it("advances a new threat to in progress on save", async () => {
+        vi.mocked(ThreatsAPI.updateThreat).mockResolvedValue(createThreat({ id: 42 }));
+        const { user } = setup(USER_ROLES.EDITOR, "threats", undefined, { status: THREAT_STATUSES.NEW });
+
+        await makeDirty(user);
+        await user.click(screen.getByTestId("EditThreatSave"));
+
+        await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled());
+        expect(ThreatsAPI.updateThreat).toHaveBeenCalledWith(
+            expect.objectContaining({ id: 42, status: THREAT_STATUSES.IN_PROGRESS })
+        );
+    });
+
+    it("keeps a finalized threat finalized on save", async () => {
+        vi.mocked(ThreatsAPI.updateThreat).mockResolvedValue(createThreat({ id: 42 }));
+        const { user } = setup(USER_ROLES.EDITOR, "threats", undefined, { status: THREAT_STATUSES.FINALIZED });
+
+        await makeDirty(user);
+        await user.click(screen.getByTestId("EditThreatSave"));
+
+        await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled());
+        expect(ThreatsAPI.updateThreat).toHaveBeenCalledWith(
+            expect.objectContaining({ id: 42, status: THREAT_STATUSES.FINALIZED })
+        );
+    });
+
+    it("keeps an out-of-scope threat out of scope on save", async () => {
+        vi.mocked(ThreatsAPI.updateThreat).mockResolvedValue(createThreat({ id: 42 }));
+        const { user } = setup(USER_ROLES.EDITOR, "threats", undefined, { status: THREAT_STATUSES.OUTOFSCOPE });
+
+        await makeDirty(user);
+        await user.click(screen.getByTestId("EditThreatSave"));
+
+        await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled());
+        expect(ThreatsAPI.updateThreat).toHaveBeenCalledWith(
+            expect.objectContaining({ id: 42, status: THREAT_STATUSES.OUTOFSCOPE })
+        );
+    });
+
+    it("shows the stored status and keeps it on save when the threat was finalized after the dialog's snapshot", async () => {
+        // e.g. an out-of-scope measure was applied from the Measures tab, which re-mounts the
+        // dialog from the navigation-state snapshot taken while the threat was still in progress
+        vi.mocked(ThreatsAPI.getThreat).mockResolvedValueOnce(
+            createThreat({ id: 42, status: THREAT_STATUSES.FINALIZED })
+        );
+        const { user } = setup(USER_ROLES.EDITOR, "threats", undefined, { status: THREAT_STATUSES.IN_PROGRESS });
+
+        await waitFor(() => expect(screen.getByRole("combobox")).toHaveTextContent("Finalized"));
+        expect(ThreatsAPI.getThreat).toHaveBeenCalledWith({ projectId: 7, id: 42 });
+
+        await makeDirty(user);
+        await user.click(screen.getByTestId("EditThreatSave"));
+
+        await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled());
+        expect(ThreatsAPI.updateThreat).toHaveBeenCalledWith(
+            expect.objectContaining({ id: 42, status: THREAT_STATUSES.FINALIZED })
+        );
+    });
+
+    it("keeps a status the user picked before the stored threat arrived", async () => {
+        let resolveStoredThreat!: (threat: ReturnType<typeof createThreat>) => void;
+        vi.mocked(ThreatsAPI.getThreat).mockReturnValueOnce(
+            new Promise((resolve) => {
+                resolveStoredThreat = resolve;
+            })
+        );
+        const { user } = setup(USER_ROLES.EDITOR, "threats", undefined, { status: THREAT_STATUSES.IN_PROGRESS });
+
+        await user.click(screen.getByRole("combobox"));
+        await user.click(screen.getByRole("option", { name: "Out of scope" }));
+        // act flushes the stored-threat handler before the assertion
+        await act(async () => {
+            resolveStoredThreat(createThreat({ id: 42, status: THREAT_STATUSES.FINALIZED }));
+        });
+
+        expect(screen.getByRole("combobox")).toHaveTextContent("Out of scope");
+    });
+
+    it("keeps the dialog open and does not notify the host when the update fails", async () => {
+        vi.mocked(ThreatsAPI.updateThreat).mockRejectedValue(new Error("update failed"));
+        const onSaved = vi.fn();
+        const { user } = setup(USER_ROLES.EDITOR, "threats", onSaved);
+
+        await makeDirty(user);
+        await user.click(screen.getByTestId("EditThreatSave"));
+
+        await waitFor(() => expect(ThreatsAPI.updateThreat).toHaveBeenCalled());
+        expect(onSaved).not.toHaveBeenCalled();
+        expect(navigate).not.toHaveBeenCalled();
     });
 });

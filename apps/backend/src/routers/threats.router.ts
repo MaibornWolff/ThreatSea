@@ -1,18 +1,19 @@
 /**
- * Module that defines the routes of the
- * threats for each project.
+ * Routes for generic threats and threats.
  */
 import express from "express";
-import { createThreat, deleteThreats, getThreat, getThreats, updateThreats } from "#controllers/threats.controller.js";
-import { CheckProjectRoleHandler } from "#guards/authorisation.guard.js";
-import { ProjectIdParam } from "#types/project.types.js";
 import {
-    CreateThreatRequest,
-    ExtendedThreatResponse,
-    ThreatIdParam,
-    ThreatResponse,
-    UpdateThreatRequest,
-} from "#types/threat.types.js";
+    createThreat,
+    deleteThreat,
+    getGenericThreatsWithExtendedThreats,
+    getThreat,
+    getThreatsByGenericThreatId,
+    updateThreat,
+} from "#controllers/threats.controller.js";
+import { CheckProjectRoleHandler } from "#guards/authorisation.guard.js";
+import { ThreatIdParam, ThreatResponse, CreateThreatRequest, UpdateThreatRequest } from "#types/threat.types.js";
+import { GenericThreatIdParam, GenericThreatWithExtendedThreatsResponse } from "#types/generic-threat.types.js";
+import { ProjectIdParam } from "#types/project.types.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
 import {
     ValidateBodyHandler,
@@ -22,11 +23,19 @@ import {
 export const threatsRouter = express.Router({ mergeParams: true });
 const idParam = "threatId";
 
-threatsRouter.get<ProjectIdParam, ExtendedThreatResponse[], void>(
-    "/",
+// Must stay ahead of the `/:threatId` routes below, otherwise express matches "generic" as a threat id.
+threatsRouter.get<ProjectIdParam, GenericThreatWithExtendedThreatsResponse[], void>(
+    "/generic",
     ValidateParamHandler(ProjectIdParam),
     CheckProjectRoleHandler(USER_ROLES.VIEWER),
-    getThreats
+    getGenericThreatsWithExtendedThreats
+);
+
+threatsRouter.get<GenericThreatIdParam, ThreatResponse[], void>(
+    "/:genericThreatId/list",
+    ValidateParamHandler(GenericThreatIdParam),
+    CheckProjectRoleHandler(USER_ROLES.VIEWER),
+    getThreatsByGenericThreatId
 );
 
 threatsRouter.get<ThreatIdParam, ThreatResponse, void>(
@@ -36,9 +45,9 @@ threatsRouter.get<ThreatIdParam, ThreatResponse, void>(
     getThreat
 );
 
-threatsRouter.post<ProjectIdParam, ThreatResponse, CreateThreatRequest>(
-    "/",
-    ValidateParamHandler(ProjectIdParam),
+threatsRouter.post<GenericThreatIdParam, ThreatResponse, CreateThreatRequest>(
+    "/:genericThreatId",
+    ValidateParamHandler(GenericThreatIdParam),
     ValidateBodyHandler(CreateThreatRequest),
     CheckProjectRoleHandler(USER_ROLES.EDITOR),
     createThreat
@@ -49,12 +58,12 @@ threatsRouter.put<ThreatIdParam, ThreatResponse, UpdateThreatRequest>(
     ValidateParamHandler(ThreatIdParam),
     ValidateBodyHandler(UpdateThreatRequest),
     CheckProjectRoleHandler(USER_ROLES.EDITOR),
-    updateThreats
+    updateThreat
 );
 
 threatsRouter.delete<ThreatIdParam, void, void>(
     `/:${idParam}`,
     ValidateParamHandler(ThreatIdParam),
     CheckProjectRoleHandler(USER_ROLES.EDITOR),
-    deleteThreats
+    deleteThreat
 );

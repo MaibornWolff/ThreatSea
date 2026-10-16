@@ -936,8 +936,13 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         }
     };
 
+    // Absolute paths: the memoized sidebar can hold a handler whose relative navigate resolves against a stale URL.
     const handleAssetNameClick = (asset: Asset): void => {
-        navigate(`assets/${asset.id}/edit`);
+        navigate(`/projects/${projectId}/system/assets/${asset.id}/edit`);
+    };
+
+    const handleAddAssetClick = (): void => {
+        navigate(`/projects/${projectId}/system/assets/edit`);
     };
 
     const handleComponentBreadcrumbClick = (): void => {
@@ -1402,9 +1407,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                         </Layer>
 
                         <Layer x={layerPosition.x} y={layerPosition.y} ref={componentLayerRef}>
-                            {connections.map((connection, i) => {
+                            {connections.map((connection) => {
                                 if (connection.visible === false) {
-                                    return <Group key={i}></Group>;
+                                    return <Group key={connection.id}></Group>;
                                 }
 
                                 // A connection whose endpoint component is gone has no valid line.
@@ -1416,7 +1421,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                 }
 
                                 return (
-                                    <Group key={i}>
+                                    <Group key={connection.id}>
                                         <SystemComponentConnection
                                             {...connection}
                                             onClick={handleSelectConnection}
@@ -1460,9 +1465,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                                 color={annotationColor}
                                 strokeWidth={ANNOTATION_STROKE_WIDTH}
                             />
-                            {components.map((component, i) => (
+                            {components.map((component) => (
                                 <SystemComponent
-                                    key={i}
+                                    key={component.id}
                                     {...component}
                                     onSelectAnchor={handleSelectAnchor}
                                     selectedAnchor={
@@ -1552,6 +1557,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                     handleDeleteCommunicationInterface={handleDeleteCommunicationInterfaceDialog}
                     handlePointOfAttackLabelClick={handlePointOfAttackLabelClick}
                     handleAssetNameClick={handleAssetNameClick}
+                    handleAddAssetClick={handleAddAssetClick}
                     handleSelectConnectedComponent={handleSelectConnectedComponent}
                     handleComponentBreadcrumbClick={handleComponentBreadcrumbClick}
                     handleInterfaceBreadcrumbClick={handleInterfaceBreadcrumbClick}
@@ -1564,6 +1570,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
 
                 <Routes>
                     <Route path="components/edit" element={<ComponentDialogPage />} />
+                    <Route path="assets/edit" element={<AssetDialogPage />} />
                     <Route path="assets/:assetId/edit" element={<AssetDialogPage />} />
                 </Routes>
 

@@ -6,5 +6,6 @@
   "noAssetsFound": "No Assets yet",
   "assetsLoading": "Loading assets...",
   "assetDeleteMessage": "Do you really want to delete the asset '{{name}}'?",
-  "heading": "Assets"
+  "heading": "Assets",
+  "actions": "Actions"
 }

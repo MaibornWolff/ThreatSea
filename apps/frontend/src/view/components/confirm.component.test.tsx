@@ -67,7 +67,7 @@ describe("Confirm", () => {
 
         const highlighted = screen.getByText("Project X");
         expect(highlighted.tagName).toBe("SPAN");
-        expect(highlighted).toHaveStyle("font-weight: bold");
+        expect(highlighted).toHaveStyle("font-weight: 700");
         expect(highlighted.parentElement).toHaveTextContent("Delete Project X permanently?");
     });
 

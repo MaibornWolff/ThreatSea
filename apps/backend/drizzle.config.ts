@@ -12,6 +12,11 @@ export default defineConfig({
         password: process.env["DATABASE_PASSWORD"],
         database: process.env["DATABASE_NAME"],
         url: process.env["DATABASE_URL"]!,
-        ssl: process.env["DATABASE_TLS"] !== "disabled" ? true : false,
+        ssl:
+            process.env["DATABASE_TLS"] === "disabled"
+                ? false
+                : process.env["DATABASE_TLS"] === "no-verify"
+                  ? { rejectUnauthorized: false }
+                  : true,
     },
 });
