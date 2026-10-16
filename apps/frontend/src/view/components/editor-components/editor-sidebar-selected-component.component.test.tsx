@@ -9,6 +9,7 @@ import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { editCommit, PendingEditsContext, type PendingEditsRegistry } from "./contexts/PendingEditsContext";
 import {
     createAsset,
+    createCommunicationInterface,
     createConnectedComponent,
     createSystemComponent,
     createPointOfAttack,
@@ -17,11 +18,7 @@ import type { Asset } from "#api/types/asset.types.ts";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
-import {
-    AnchorOrientation,
-    type ConnectionEndpointWithComponent,
-    type SystemCommunicationInterface,
-} from "#api/types/system.types.ts";
+import { AnchorOrientation, type ConnectionEndpointWithComponent } from "#api/types/system.types.ts";
 
 const noopPendingEditsRegistry: PendingEditsRegistry = { register: () => vi.fn() };
 
@@ -233,15 +230,10 @@ describe("EditorSidebarSelectedComponent — new click handlers", () => {
         });
 
         it("writes a pending interface name before another interface is edited", () => {
-            const communicationInterfaces = ["API Gateway", "Message Queue"].map((name, index) => ({
-                id: `ci-${index + 1}`,
-                name,
-                icon: null,
-                type: "REST",
-                projectId: 1,
-                componentId: "comp-1",
-                componentName: "Test Component",
-            }));
+            const communicationInterfaces = [
+                createCommunicationInterface({ id: "ci-1", name: "API Gateway" }),
+                createCommunicationInterface({ id: "ci-2", name: "Message Queue" }),
+            ];
             const { commits } = setup({
                 selectedComponent: createSystemComponent({ id: "comp-1", communicationInterfaces }),
             });
@@ -437,17 +429,7 @@ describe("EditorSidebarSelectedComponent — new click handlers", () => {
     });
 
     describe("communication interface items", () => {
-        const communicationInterfaces: SystemCommunicationInterface[] = [
-            {
-                id: "ci-1",
-                name: "API Gateway",
-                icon: null,
-                type: "REST",
-                projectId: 1,
-                componentId: "comp-1",
-                componentName: "Test Component",
-            },
-        ];
+        const communicationInterfaces = [createCommunicationInterface({ id: "ci-1", name: "API Gateway" })];
 
         const componentWithInterfaces = createSystemComponent({ communicationInterfaces });
 
