@@ -103,7 +103,7 @@ Before opening a PR, run at minimum: `pnpm lint`, `pnpm format:check`, `pnpm typ
 
 ## Architectural Decisions
 
-Cross-cutting decisions are recorded in [`Architectural Decision Record.md`](<./gh-pages/Technical Documentation/Architectural Decision Record.md>). Follow decided ADRs. If a task conflicts with one or makes a new architectural decision, raise it with the developer before adding a row — don't add or edit ADRs on your own.
+Cross-cutting decisions are recorded as one file per ADR in [`docs/adr/`](./docs/adr/), managed with [`adrs`](https://github.com/joshrotenberg/adrs) (config in `adrs.toml`). Follow accepted ADRs. If a task conflicts with one or makes a new architectural decision, raise it with the developer before creating an ADR — don't add or edit ADRs on your own.
 
 ---
 
