@@ -287,7 +287,7 @@ const ComponentDialog = ({ component, ...props }: ComponentDialogProps) => {
                         <Box sx={{ display: "flex", gap: 1 }}>
                             {SELECTABLE_STANDARD_ICONS.map((icon) => {
                                 const isSelected = selectedStandardIcon === icon;
-                                const iconLabel = t(`contextMenu.${STANDARD_ICON_LABEL_KEYS[icon]}`);
+                                const iconLabel = t(`componentNames.${STANDARD_ICON_LABEL_KEYS[icon]}`);
                                 return (
                                     <ButtonBase
                                         key={icon}
