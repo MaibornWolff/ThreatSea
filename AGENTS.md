@@ -40,7 +40,7 @@ application/     Redux Toolkit state
 view/            Presentation layer
   pages/           Route-level components
   components/      Reusable UI; `editor-components/` is the Konva canvas editor
-  dialogs/         Modals
+  dialogs/         Modals (opened as nested routes; dialogs that open each other go through ChainDialogRoutes)
   wrappers/        Layout wrappers
   report/          PDF report generation (@react-pdf/renderer)
 hooks/           Shared custom hooks
