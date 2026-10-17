@@ -29,7 +29,8 @@ systemRouter.put<ProjectIdParam, SystemResponse, UpdateSystemRequest>(
     "/",
     ValidateParamHandler(ProjectIdParam),
     CheckProjectRoleHandler(USER_ROLES.EDITOR),
-    ValidateBodyHandler(UpdateSystemRequestDto),
+    // The diagram JSON is free-form; updateSystem picks data and image itself.
+    ValidateBodyHandler(UpdateSystemRequestDto, { whitelist: false }),
     updateSystem
 );
 

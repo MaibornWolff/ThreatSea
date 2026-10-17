@@ -10,6 +10,7 @@ import {
     assets,
     catalogs,
     threats,
+    CreateAsset,
     CreateThreat,
     CreateGenericThreat,
     genericThreats,
@@ -109,11 +110,56 @@ const INVALID_THREAT_PROB_TOO_LOW: InstanceType<typeof UpdateThreatRequest> = {
     status: THREAT_STATUSES.NEW,
 };
 
+const VALID_PROJECT = {
+    name: "Project 1",
+    description: "Description 1",
+    confidentialityLevel: CONFIDENTIALITY_LEVELS.INTERNAL,
+};
+
+const VALID_ASSET: Omit<CreateAsset, "projectId"> = {
+    name: "Asset 1",
+    description: "d",
+    confidentiality: 3,
+    integrity: 3,
+    availability: 3,
+    confidentialityJustification: "j",
+    integrityJustification: "j",
+    availabilityJustification: "j",
+};
+
 let projectId: number;
+let catalogId: number;
 let catalogThreatId: number;
 let genericThreatId: number;
+let assetId: number;
 let cookies: string[];
 let csrfToken: string;
+
+async function setPointOfAttackAssets(assetIds: number[]): Promise<void> {
+    await db
+        .update(systems)
+        .set({
+            data: {
+                connections: [],
+                components: [],
+                connectionPoints: [],
+                pointsOfAttack: [
+                    {
+                        id: VALID_THREAT_1.pointOfAttackId,
+                        name: null,
+                        type: POINTS_OF_ATTACK.COMMUNICATION_INTERFACES,
+                        componentId: null,
+                        connectionId: null,
+                        connectionPointId: null,
+                        projectId,
+                        assets: assetIds,
+                    },
+                ],
+                lastAutoSaveDate: new Date().toISOString(),
+            },
+        })
+        .where(eq(systems.projectId, projectId));
+}
 
 beforeAll(async () => {
     // Get CSRF token
@@ -137,7 +183,7 @@ beforeEach(async () => {
             })
             .returning()
     ).at(0)!;
-    const catalogId = catalog.id;
+    catalogId = catalog.id;
 
     const authRes = await request(app).get("/api/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
     const userId = authRes.body.data.userId;
@@ -154,12 +200,6 @@ beforeEach(async () => {
         .set("X-CSRF-TOKEN", csrfToken)
         .set("Cookie", cookies);
     catalogThreatId = threatRes.body.id;
-
-    const VALID_PROJECT = {
-        name: "Project 1",
-        description: "Description 1",
-        confidentialityLevel: CONFIDENTIALITY_LEVELS.INTERNAL,
-    };
 
     const projectRes = await request(app)
         .post("/api/projects")
@@ -191,43 +231,12 @@ beforeEach(async () => {
     const asset = (
         await db
             .insert(assets)
-            .values({
-                name: "Asset 1",
-                description: "d",
-                confidentiality: 3,
-                integrity: 3,
-                availability: 3,
-                confidentialityJustification: "j",
-                integrityJustification: "j",
-                availabilityJustification: "j",
-                projectId,
-            })
+            .values({ ...VALID_ASSET, projectId })
             .returning()
     ).at(0)!;
+    assetId = asset.id;
 
-    await db
-        .update(systems)
-        .set({
-            data: {
-                connections: [],
-                components: [],
-                connectionPoints: [],
-                pointsOfAttack: [
-                    {
-                        id: VALID_THREAT_1.pointOfAttackId,
-                        name: null,
-                        type: POINTS_OF_ATTACK.COMMUNICATION_INTERFACES,
-                        componentId: null,
-                        connectionId: null,
-                        connectionPointId: null,
-                        projectId,
-                        assets: [asset.id],
-                    },
-                ],
-                lastAutoSaveDate: new Date().toISOString(),
-            },
-        })
-        .where(eq(systems.projectId, projectId));
+    await setPointOfAttackAssets([assetId]);
 });
 
 describe("get or create threats", () => {
@@ -247,6 +256,35 @@ describe("get or create threats", () => {
         for (const threat of genericThreat.threats) {
             expect(threat.genericThreatDescription).toBe(genericThreat.description);
         }
+    });
+
+    it("should not return assets of another project", async () => {
+        const otherProjectResponse = await request(app)
+            .post("/api/projects")
+            .send({ ...VALID_PROJECT, catalogId })
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(otherProjectResponse.statusCode).toEqual(200);
+
+        const otherProjectAsset = (
+            await db
+                .insert(assets)
+                .values({ ...VALID_ASSET, projectId: otherProjectResponse.body.id })
+                .returning()
+        ).at(0)!;
+        await setPointOfAttackAssets([assetId, otherProjectAsset.id]);
+
+        const response = await request(app)
+            .get(`/api/projects/${projectId}/system/threats/generic`)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(response.statusCode).toEqual(200);
+
+        const listedThreats = response.body.flatMap(
+            (genericThreat: { threats: { assets: { id: number }[] }[] }) => genericThreat.threats
+        );
+        expect(listedThreats).toHaveLength(1);
+        expect(listedThreats[0].assets.map((asset: { id: number }) => asset.id)).toEqual([assetId]);
     });
 
     it("should return an empty list for a generic threat without threats", async () => {

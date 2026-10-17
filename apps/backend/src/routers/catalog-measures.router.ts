@@ -22,6 +22,7 @@ import {
 import { CheckCatalogExistenceHandler } from "#middlewares/check-existence.middleware.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
 import {
+    ValidateBodyArrayHandler,
     ValidateBodyHandler,
     ValidateParamHandler,
 } from "#middlewares/input-validations/input-validation.middleware.js";
@@ -64,6 +65,7 @@ catalogMeasuresRouter.delete<CatalogMeasureIdParam, void, void>(
 catalogMeasuresRouter.post<CatalogIdParam, CatalogMeasureResponse[], CreateCatalogMeasureRequest[]>(
     "/import",
     ValidateParamHandler(CatalogIdParam),
+    ValidateBodyArrayHandler(CreateCatalogMeasureRequest),
     CheckCatalogRoleHandler(USER_ROLES.EDITOR),
     importCatalogMeasures
 );
