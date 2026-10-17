@@ -16,7 +16,7 @@ This story is done when
 - [ ] Incompatible e2e-tests are adapted
 - [ ] If necessary: New e2e-tests are implemented
 - [ ] Functional tests and integration tests / e2e-tests have passed successfully
-- [ ] The Architectural Decision Record was taken into account
+- [ ] The Architectural Decision Records in `docs/adr/` were taken into account
 - [ ] If necessary: customer installation guide has been updated
 - [ ] If necessary: new config parameters have been described
 - [ ] If necessary: Required documentation has been written or updated

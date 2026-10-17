@@ -1,0 +1,14 @@
+adr_dir = "docs/adr"
+mode = "ng"
+no_edit = false
+
+[templates]
+
+[generate]
+
+[export]
+
+[doctor]
+ignore = []
+warnings_as_errors = false
+ignore_path = []
