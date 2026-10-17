@@ -9,7 +9,8 @@ const asyncThunks = [
     ProjectsActions.deleteProject,
 ] as const;
 
-const isFullfiledAction = isFulfilled(...asyncThunks);
+// Rejections are reported by the error middleware, since the request carries no project name.
+const isFullfiledAction = isFulfilled(...asyncThunks, ProjectsActions.updateProjectLineOfTolerance);
 
 const isRejectedAction = isRejected(...asyncThunks);
 

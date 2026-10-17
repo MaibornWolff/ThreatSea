@@ -4,8 +4,9 @@
  */
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
+import { and, eq } from "drizzle-orm";
 import { db } from "#db/index.js";
-import { catalogs, usersCatalogs } from "#db/schema.js";
+import { catalogs, usersCatalogs, usersProjects } from "#db/schema.js";
 import { CONFIDENTIALITY_LEVELS } from "#types/confidentiality-levels.types.js";
 import { app } from "#server.js";
 import { LANGUAGES } from "#types/languages.type.js";
@@ -24,6 +25,11 @@ const VALID_PROJECT_UPDATE: InstanceType<typeof UpdateProjectRequest> = {
     confidentialityLevel: CONFIDENTIALITY_LEVELS.CONFIDENTIAL,
     lineOfToleranceGreen: 1,
     lineOfToleranceRed: 20,
+};
+
+const VALID_LINE_OF_TOLERANCE_UPDATE = {
+    lineOfToleranceGreen: 3,
+    lineOfToleranceRed: 16,
 };
 
 const INVALID_PROJECT_NAME_MISSING: Omit<InstanceType<typeof CreateProjectRequest>, "catalogId" | "name"> = {
@@ -63,6 +69,7 @@ beforeAll(async () => {
 describe("project tests", () => {
     let catalogId: number;
     let projectId: number;
+    let userId: number;
     beforeEach(async () => {
         const catalog = (
             await db
@@ -79,7 +86,7 @@ describe("project tests", () => {
             .get("/api/auth/status")
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
-        const userId = authRes.body.data.userId;
+        userId = authRes.body.data.userId;
 
         await db.insert(usersCatalogs).values({
             userId,
@@ -184,6 +191,90 @@ describe("project tests", () => {
                 .set("X-CSRF-TOKEN", csrfToken)
                 .set("Cookie", cookies);
             expect(res.statusCode).toEqual(204);
+        });
+    });
+
+    describe("update lines of tolerance", () => {
+        let lineOfToleranceProjectId: number;
+
+        const setOwnRole = async (role: USER_ROLES) => {
+            await db
+                .update(usersProjects)
+                .set({ role })
+                .where(and(eq(usersProjects.userId, userId), eq(usersProjects.projectId, lineOfToleranceProjectId)));
+        };
+
+        const putLineOfTolerance = (body: object) =>
+            request(app)
+                .put("/api/projects/" + lineOfToleranceProjectId + "/lineOfTolerance")
+                .send(body)
+                .set("X-CSRF-TOKEN", csrfToken)
+                .set("Cookie", cookies);
+
+        beforeEach(async () => {
+            const res = await request(app)
+                .post("/api/projects")
+                .send({ ...VALID_PROJECT, catalogId })
+                .set("X-CSRF-TOKEN", csrfToken)
+                .set("Cookie", cookies);
+            lineOfToleranceProjectId = res.body.id;
+        });
+
+        it("should let an owner update the lines of tolerance", async () => {
+            const res = await putLineOfTolerance(VALID_LINE_OF_TOLERANCE_UPDATE);
+
+            expect(res.statusCode).toBe(200);
+            expect(res.body.lineOfToleranceGreen).toBe(VALID_LINE_OF_TOLERANCE_UPDATE.lineOfToleranceGreen);
+            expect(res.body.lineOfToleranceRed).toBe(VALID_LINE_OF_TOLERANCE_UPDATE.lineOfToleranceRed);
+        });
+
+        it("should let an editor update the lines of tolerance and persist them", async () => {
+            await setOwnRole(USER_ROLES.EDITOR);
+
+            const res = await putLineOfTolerance(VALID_LINE_OF_TOLERANCE_UPDATE);
+            expect(res.statusCode).toBe(200);
+
+            const getRes = await request(app)
+                .get("/api/projects/" + lineOfToleranceProjectId)
+                .set("X-CSRF-TOKEN", csrfToken)
+                .set("Cookie", cookies);
+            expect(getRes.body.lineOfToleranceGreen).toBe(VALID_LINE_OF_TOLERANCE_UPDATE.lineOfToleranceGreen);
+            expect(getRes.body.lineOfToleranceRed).toBe(VALID_LINE_OF_TOLERANCE_UPDATE.lineOfToleranceRed);
+            expect(getRes.body.name).toBe(VALID_PROJECT.name);
+        });
+
+        it("should not let an editor update the project details", async () => {
+            await setOwnRole(USER_ROLES.EDITOR);
+
+            const res = await request(app)
+                .put("/api/projects/" + lineOfToleranceProjectId)
+                .send(VALID_PROJECT_UPDATE)
+                .set("X-CSRF-TOKEN", csrfToken)
+                .set("Cookie", cookies);
+
+            expect(res.statusCode).toBe(403);
+        });
+
+        it("should not let a viewer update the lines of tolerance", async () => {
+            await setOwnRole(USER_ROLES.VIEWER);
+
+            const res = await putLineOfTolerance(VALID_LINE_OF_TOLERANCE_UPDATE);
+
+            expect(res.statusCode).toBe(403);
+        });
+
+        it("should not update the lines of tolerance (green above red)", async () => {
+            const res = await putLineOfTolerance({ lineOfToleranceGreen: 15, lineOfToleranceRed: 6 });
+
+            expect(res.statusCode).toBe(400);
+            expect(res.body.validationErrors).toBeDefined();
+        });
+
+        it("should not update the lines of tolerance (value missing)", async () => {
+            const res = await putLineOfTolerance({ lineOfToleranceGreen: 3 });
+
+            expect(res.statusCode).toBe(400);
+            expect(res.body.validationErrors).toBeDefined();
         });
     });
 });
