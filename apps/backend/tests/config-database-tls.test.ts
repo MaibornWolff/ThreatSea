@@ -5,6 +5,10 @@ describe("getDatabaseTlsConfig", () => {
         expect(getDatabaseTlsConfig(undefined)).toBe(true);
     });
 
+    it("verifies the server certificate when DATABASE_TLS is verify", () => {
+        expect(getDatabaseTlsConfig("verify")).toBe(true);
+    });
+
     it("verifies the server certificate for an unknown value", () => {
         expect(getDatabaseTlsConfig("no_verify")).toBe(true);
     });

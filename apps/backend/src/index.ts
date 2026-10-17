@@ -3,11 +3,7 @@ import { app } from "#server.js";
 import { Logger } from "#logging/index.js";
 import { runMigrations } from "#db/index.js";
 import { startInactiveUserPurgeScheduler, stopInactiveUserPurgeScheduler } from "#jobs/purge-inactive-users.job.js";
-
-/**
- * Port of the backend server.
- */
-const PORT = 8000;
+import { PORT } from "#config/config.js";
 
 // Run migrations before binding the port so no requests are served against
 // an un-migrated schema, and migration failures abort startup cleanly.

@@ -19,6 +19,8 @@
     ".vite",
     "build",
     "dist",
-    "**/testData/**"
+    "**/testData/**",
+    "charts/*/templates",
+    "charts/*/README.md"
   ]
 }

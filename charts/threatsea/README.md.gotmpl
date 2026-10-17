@@ -1,0 +1,158 @@
+{{ template "chart.header" . }}
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "chart.homepageLine" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+## Installing
+
+The chart is published as an OCI artifact and signed with cosign. Its version is the same as the ThreatSea release it deploys.
+
+```bash
+helm install threatsea oci://ghcr.io/maibornwolff/charts/threatsea --version <version> \
+  --namespace threatsea --create-namespace \
+  --values my-values.yaml
+```
+
+Verify the signature before installing:
+
+```bash
+cosign verify ghcr.io/maibornwolff/charts/threatsea:<version> \
+  --certificate-identity-regexp '^https://github\.com/MaibornWolff/ThreatSea/\.github/workflows/release\.yml@refs/heads/(main|next)$' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+```
+
+Pre-releases are published from the `next` branch. Pass `--devel` (or an explicit pre-release `--version`) to install one.
+
+## Required values
+
+| Value | Description |
+| ----- | ----------- |
+| `config.origin` | Externally reachable origin of ThreatSea, for example `https://threatsea.example.com`. The OIDC callback URL is `<origin>/api/auth/redirect` |
+| `config.oidc.issuerUrl` | OIDC issuer URL |
+| `config.oidc.clientId` | OIDC client ID |
+| `secret.values.jwtSecret` | JWT signing secret |
+| `secret.values.sessionSecret` | Express session secret |
+| `secret.values.oidcClientSecret` | OIDC client secret |
+| `secret.values.databasePassword` | Password for `database.user` on the external database |
+| `database.host` | Hostname of the external PostgreSQL server (not needed with the bundled database) |
+| `database.user` | User for the external PostgreSQL server (not needed with the bundled database, which defaults it to `threatsea`) |
+
+Rendering fails with a message naming the missing value. When `secret.existingSecret` is set, the `secret.values.*` entries are not needed.
+
+## Secrets
+
+There are two ways to supply the secrets:
+
+1. **Through values.** Set `secret.values.*` and the chart creates the Secret.
+2. **Through an existing Secret.** Set `secret.existingSecret` to the name of a Secret you manage. The chart then creates no Secret and reads the entries named by `secret.keys` (by default `jwt-secret`, `session-secret`, `oidc-client-secret` and `database-password`).
+
+> [!WARNING]
+> Secrets passed through values are stored in plaintext in the Helm release Secret. They are visible to anyone who can read Secrets in the namespace or run `helm get values`. Use `secret.existingSecret` to avoid this, for example with a Secret managed by External Secrets Operator or Sealed Secrets.
+
+The chart cannot look inside an existing Secret. If one of the keys is missing, Kubernetes does not start the container and the pod stays in `CreateContainerConfigError`. `kubectl describe pod` names the missing key in the pod events.
+
+If your existing Secret also holds non-secret settings, for example because it is synced from a key vault, the chart can read them from there too. Set the matching `secret.configKeys.*` entry to the key name and leave the plain value empty; rendering fails when both are set: `oidcIssuerUrl`, `oidcClientId`, `databaseHost`, `databaseName` and `databaseUser` replace `config.oidc.issuerUrl`, `config.oidc.clientId`, `database.host`, `database.name` and `database.user`. The database keys cannot be combined with `postgresql.enabled=true`.
+
+With `postgresql.enabled=true` the `database-password` key is not read. The bundled database's password comes from `postgresql.auth.*`.
+
+```bash
+kubectl create namespace threatsea
+
+kubectl create secret generic threatsea-secrets --namespace threatsea \
+  --from-literal=jwt-secret="$(openssl rand -hex 32)" \
+  --from-literal=session-secret="$(openssl rand -hex 32)" \
+  --from-literal=oidc-client-secret='<client secret>' \
+  --from-literal=database-password='<database password>'
+
+helm install threatsea oci://ghcr.io/maibornwolff/charts/threatsea --version <version> \
+  --namespace threatsea \
+  --set secret.existingSecret=threatsea-secrets \
+  --values my-values.yaml
+```
+
+## External database
+
+An external PostgreSQL server is the documented production setup. Point the chart at it with the `database.*` values:
+
+```yaml
+database:
+  host: postgres.example.com
+  port: 5432
+  name: threatsea
+  user: threatsea
+  tls: verify
+```
+
+`database.tls` sets the TLS mode and accepts the same values as the backend's `DATABASE_TLS`: `verify` (the default) connects over TLS and verifies the server certificate, `no-verify` connects over TLS but accepts any certificate, for example from a connection pooler with a self-signed one, and `disabled` connects in plaintext. If the server certificate is signed by a private CA, mount the CA bundle with `extraVolumes` and `extraVolumeMounts` and point Node.js at it with `NODE_EXTRA_CA_CERTS`. The root filesystem is read-only, so the bundle has to come from a volume:
+
+```yaml
+extraVolumes:
+  - name: db-ca
+    secret:
+      secretName: my-db-ca
+extraVolumeMounts:
+  - name: db-ca
+    mountPath: /etc/ssl/db-ca
+    readOnly: true
+extraEnv:
+  - name: NODE_EXTRA_CA_CERTS
+    value: /etc/ssl/db-ca/ca.crt
+```
+
+`extraEnv` cannot redefine variables the chart manages itself, such as `DATABASE_TLS` or `PORT`; rendering fails if you try.
+
+## Bundled database
+
+> [!WARNING]
+> `postgresql.enabled: true` deploys a PostgreSQL StatefulSet for **evaluation only**. It runs a single replica, has no backups, serves plaintext connections (no TLS), and has no supported upgrade path between PostgreSQL major versions. For production use an external database, for example a managed service or [CloudNativePG](https://cloudnative-pg.io/).
+
+```yaml
+postgresql:
+  enabled: true
+  auth:
+    password: change-me
+```
+
+With the bundled database enabled, `database.host` is not used and `database.tls` is forced to `disabled`. The app always connects to port 5432 of the bundled Service, so `database.port` is ignored.
+
+Things to know before relying on it, even for an evaluation:
+
+- **Credentials are fixed on first start.** PostgreSQL initialises the data directory once. Changing the password (`postgresql.auth.password`, or the password key in `postgresql.auth.existingSecret` when that is set), `database.name` or `database.user` afterwards has no effect on the existing PVC. The app then uses the new values while the database keeps the old ones, so the app can no longer connect.
+- **The PVC survives `helm uninstall`.** Reinstalling with a different password then fails authentication. Delete the PVC (`kubectl delete pvc -l app.kubernetes.io/instance=<release>`) to start fresh, which also deletes the data.
+- **Changing the PostgreSQL major version starts an empty database.** Overriding `postgresql.image.tag` to another major version makes PostgreSQL use a new data directory, so the app sees a fresh, empty database. The old data stays on the volume under the previous major version's directory.
+- **Storage settings are immutable.** `postgresql.persistence.enabled`, `size` and `storageClass` end up in the StatefulSet's `volumeClaimTemplates`, which Kubernetes does not allow to change on upgrade.
+
+## Testing the release
+
+`helm test <release>` runs a pod that logs in to the configured database with `psql`, using the chart's credentials, and runs `SELECT 1`, so a wrong password fails the test. It uses the same TLS mode as the app: `verify` checks the server certificate against the image's system CAs (`sslmode=verify-full`), `no-verify` requires TLS without checking the certificate (`sslmode=require`) and `disabled` connects in plaintext. If the app trusts a private CA through `extraEnv`/`extraVolumes`, the test pod does not, so `helm test` fails in `verify` mode. The pod pulls `postgresql.image` even when an external database is used.
+
+## Additional backend settings
+
+The backend reads a few settings the chart has no value for. Set them through `extraEnv`:
+
+| Variable | Default | Description |
+| -------- | ------- | ----------- |
+| `OIDC_SCOPE` | `openid profile email` | Space-separated scopes requested from the identity provider. Must include `openid`, otherwise the app does not start. ThreatSea needs the `email` claim to identify users, so drop `email` only if your provider includes it without that scope. |
+| `OIDC_ALLOW_UNVERIFIED_EMAIL_LINKING` | `false` | By default, a login is refused unless the identity provider reports the email as verified (`email_verified`), because the email is used to create the account or link it to an existing one. Set to `true` only for a provider that does not send `email_verified` and whose email addresses users cannot choose themselves; otherwise a user can take over another account by claiming its email. |
+| `USER_PURGE_ENABLED` | `false` | Set to `true` to permanently delete users who have not logged in for `USER_PURGE_THRESHOLD_DAYS`. Users who are the only owner of a project or catalog are kept. Any other value leaves the purge disabled. Each pod runs the purge on startup and then every `USER_PURGE_INTERVAL_HOURS`. |
+| `USER_PURGE_THRESHOLD_DAYS` | `365` | Days since the last login after which the purge deletes a user. Must be greater than `USER_HIDE_THRESHOLD_DAYS`. |
+| `USER_PURGE_INTERVAL_HOURS` | `24` | Hours between purge runs, at most 596. |
+| `USER_HIDE_THRESHOLD_DAYS` | `90` | Days since the last login after which a user is no longer offered when adding members to a project or catalog. Existing memberships stay visible. Applies even when the purge is disabled. |
+
+```yaml
+extraEnv:
+  - name: USER_PURGE_ENABLED
+    value: "true"
+  - name: USER_PURGE_THRESHOLD_DAYS
+    value: "180"
+```
+
+Invalid values (a non-positive number, or a hide threshold that is not smaller than the purge threshold) stop the app at startup, and the pod goes into `CrashLoopBackOff`.
+
+{{ template "chart.valuesSection" . }}

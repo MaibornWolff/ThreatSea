@@ -1,0 +1,6 @@
+.git
+.gitignore
+ci/
+/tests/
+README.md.gotmpl
+.DS_Store

@@ -1,0 +1,133 @@
+suite: typed config values
+templates:
+  - deployment.yaml
+  - secret.yaml
+set:
+  config.origin: https://threatsea.example.com
+  config.oidc.issuerUrl: https://idp.example.com
+  config.oidc.clientId: threatsea
+  secret.values.jwtSecret: jwt
+  secret.values.sessionSecret: session
+  secret.values.oidcClientSecret: oidc
+  secret.values.databasePassword: dbpw
+  database.host: db.example.com
+  database.user: appuser
+tests:
+  - it: always sets AUTH_METHOD to oidc
+    template: deployment.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: AUTH_METHOD, value: oidc }
+
+  - it: requires origin
+    template: deployment.yaml
+    set:
+      config.origin: ""
+    asserts:
+      - failedTemplate:
+          errorPattern: config.origin is required
+
+  # The image serves the frontend and the API from one origin, and the session cookie is
+  # host-scoped, so the two backend origins must always match.
+  - it: sets both backend origins from config.origin
+    template: deployment.yaml
+    asserts:
+      - contains:
+          {
+            path: "spec.template.spec.containers[0].env",
+            content: { name: ORIGIN_APP, value: https://threatsea.example.com },
+          }
+      - contains:
+          {
+            path: "spec.template.spec.containers[0].env",
+            content: { name: ORIGIN_BACKEND, value: https://threatsea.example.com },
+          }
+
+  - it: rejects the removed originApp and originBackend values
+    set:
+      config.originApp: https://threatsea.example.com
+    asserts:
+      - failedTemplate:
+          errorPattern: "additional properties .originApp. not allowed"
+
+  - it: listens on the fixed container port
+    template: deployment.yaml
+    asserts:
+      - contains: { path: "spec.template.spec.containers[0].env", content: { name: PORT, value: "8000" } }
+      - equal:
+          path: spec.template.spec.containers[0].ports[0]
+          value: { name: http, containerPort: 8000, protocol: TCP }
+
+  - it: rejects the removed service.containerPort value
+    set:
+      service.containerPort: 9000
+    asserts:
+      - failedTemplate:
+          errorPattern: "additional properties .containerPort. not allowed"
+
+  - it: maps native booleans to the strings the backend reads
+    template: deployment.yaml
+    set:
+      config.cookies.secure: true
+      config.useProxy: true
+      config.oidc.allowHttp: false
+    asserts:
+      - contains:
+          { path: "spec.template.spec.containers[0].env", content: { name: COOKIES_SECURE_OPTION, value: "enabled" } }
+      - contains: { path: "spec.template.spec.containers[0].env", content: { name: USE_PROXY, value: "true" } }
+      - contains: { path: "spec.template.spec.containers[0].env", content: { name: OIDC_ALLOW_HTTP, value: "false" } }
+
+  - it: maps cookies.secure false to disabled
+    template: deployment.yaml
+    set:
+      config.cookies.secure: false
+    asserts:
+      - contains:
+          { path: "spec.template.spec.containers[0].env", content: { name: COOKIES_SECURE_OPTION, value: "disabled" } }
+
+  # 0 is a documented log level and is falsy in Go templates.
+  - it: renders log level 0 rather than dropping it
+    template: deployment.yaml
+    set:
+      config.logLevel: 0
+    asserts:
+      - contains: { path: "spec.template.spec.containers[0].env", content: { name: LOG_LEVEL, value: "0" } }
+
+  - it: rejects a log level outside 0-3
+    set:
+      config.logLevel: 7
+    asserts:
+      - failedTemplate:
+          errorPattern: "logLevel"
+
+  - it: rejects a string log level
+    set:
+      config.logLevel: "3"
+    asserts:
+      - failedTemplate:
+          errorPattern: "got string, want integer"
+
+  - it: rejects an unknown top-level value
+    set:
+      configg: {}
+    asserts:
+      - failedTemplate:
+          errorPattern: "additional properties .configg. not allowed"
+
+  - it: rejects database.host together with the bundled database
+    template: deployment.yaml
+    set:
+      postgresql.enabled: true
+      postgresql.auth.password: pw
+      database.host: db.example.com
+    asserts:
+      - failedTemplate:
+          errorPattern: database.host must not be set when postgresql.enabled=true
+
+  - it: falls back to threatsea for the database name
+    template: deployment.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: DATABASE_NAME, value: threatsea }
