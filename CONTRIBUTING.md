@@ -209,6 +209,8 @@ Guidelines:
 - Ensure examples are accurate and minimal but representative.
 - Update API references, if applicable.
 - Document any breaking changes and migration notes.
+- Architecture decisions are recorded as ADRs in [`docs/adr/`](docs/adr/).
+- Translations: every user-facing string needs an entry in both `apps/frontend/src/translations/en/` and `de/`. Each string lives in exactly one place: page-, dialog- or feature-specific keys in their own file, shared keys in `common.<lang>.json`. `common` is the fallback namespace, so never copy a common key into a page file.
 
 ---
 

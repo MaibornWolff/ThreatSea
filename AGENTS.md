@@ -22,6 +22,7 @@ apps/
   backend/            Express 5 + TypeScript API (Drizzle ORM, PostgreSQL)
 packages/
   typescript-config/  Shared tsconfig presets
+docs/adr/             Architecture Decision Records (managed with `adrs`; config in adrs.toml)
 gh-pages/             Published documentation sources (rendered via mkdocs; see mkdocs.yml)
 ```
 
@@ -103,7 +104,7 @@ Before opening a PR, run at minimum: `pnpm lint`, `pnpm format:check`, `pnpm typ
 
 ## Architectural Decisions
 
-Cross-cutting decisions are recorded in [`Architectural Decision Record.md`](<./gh-pages/Technical Documentation/Architectural Decision Record.md>). Follow decided ADRs. If a task conflicts with one or makes a new architectural decision, raise it with the developer before adding a row — don't add or edit ADRs on your own.
+Cross-cutting decisions are recorded as one file per ADR in [`docs/adr/`](./docs/adr/), managed with [`adrs`](https://github.com/joshrotenberg/adrs) (config in `adrs.toml`). Follow accepted ADRs. If a task conflicts with one or makes a new architectural decision, raise it with the developer before creating an ADR — don't add or edit ADRs on your own.
 
 ---
 
@@ -113,7 +114,7 @@ Cross-cutting decisions are recorded in [`Architectural Decision Record.md`](<./
 - **TypeScript everywhere.** No new `.js` source files in `apps/`.
 - **Frontend styling.** MUI v9 with the `sx` prop; no CSS-in-JS files unless extending a theme. Consume colors via `theme.vars.palette.*` (raw `theme.palette.*` only in Konva render paths), never by importing tokens directly into components — see [`apps/frontend/src/view/wrappers/THEME.md`](./apps/frontend/src/view/wrappers/THEME.md) for the token model and how to add a new color.
 - **State.** Redux Toolkit, but **not** the `createSlice` pattern. Reducers live in `application/reducers/*.reducer.ts` and use `createReducer`. Actions live separately in `application/actions/*.actions.ts` as static class members composed of `createAction` + `createAsyncThunk`. Selectors are memoized via `reselect` in `application/selectors/`. RTK Query is **not** used. When extending state, follow this split — do not introduce slices.
-- **i18n.** All user-facing strings use `useTranslation` / `t("…")` keys. Every new key must exist in both `translations/en/` and `translations/de/`.
+- **i18n.** All user-facing strings use `useTranslation` / `t("…")` keys. Every new key must exist in both `translations/en/` and `translations/de/`. Each string lives in exactly one place: page-, dialog- or feature-specific keys in their own file (e.g. `threat-dialog-page`, `main-menu`, `report`), keys shared across pages in `common.<lang>.json`. `common` is the fallback namespace (`fallbackNS`), so a key there resolves from every page and must never be copied into a page file. Reusing a common key name with different text in a page file is a deliberate override and fine.
 - **File naming (target convention).** Frontend components follow `<name>.component.tsx`, tests `<name>.component.test.tsx`, hooks `use-<name>.hook.ts`, reducers `<name>.reducer.ts`, selectors `<name>.selectors.ts`, actions `<name>.actions.ts`, API clients `<name>.api.ts`.
 - **Imports.** Both workspaces alias `#*` to `./src/*` via `package.json#imports` — prefer this over deep relative paths.
 - **Comments.** Default to none. Identifiers should be self-explanatory. Add a one-line comment only when the _why_ is non-obvious (a workaround, an invariant, a subtle constraint). Do not narrate _what_ the code does.
