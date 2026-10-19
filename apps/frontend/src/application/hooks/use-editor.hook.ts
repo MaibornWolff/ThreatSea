@@ -246,25 +246,21 @@ export const useEditor = ({
         );
     };
 
-    const setSelectedComponentName = (name: string): void => {
-        if (name && name.trim().length > 0 && selectedComponentId) {
+    const setComponentName = (componentId: string, name: string): void => {
+        if (name && name.trim().length > 0) {
             dispatch(
                 SystemActions.setComponentName({
-                    id: selectedComponentId,
+                    id: componentId,
                     changes: { name },
                 })
             );
         }
     };
 
-    const setSelectedComponentDescription = (description: string): void => {
-        if (!selectedComponentId) {
-            return;
-        }
-
+    const setComponentDescription = (componentId: string, description: string): void => {
         dispatch(
             SystemActions.setComponent({
-                id: selectedComponentId,
+                id: componentId,
                 changes: { description },
             })
         );
@@ -532,14 +528,10 @@ export const useEditor = ({
         }
     };
 
-    const setSelectedConnectionName = (name: string): void => {
-        if (!selectedConnectionId) {
-            return;
-        }
-
+    const setConnectionName = (connectionId: string, name: string): void => {
         dispatch(
             SystemActions.setConnection({
-                id: selectedConnectionId,
+                id: connectionId,
                 changes: {
                     name,
                 },
@@ -547,14 +539,10 @@ export const useEditor = ({
         );
     };
 
-    const setSelectedConnectionPointDescription = (description: string): void => {
-        if (!selectedConnectionPointId) {
-            return;
-        }
-
+    const setConnectionPointDescription = (connectionPointId: string, description: string): void => {
         dispatch(
             SystemActions.setConnectionPoint({
-                id: selectedConnectionPointId,
+                id: connectionPointId,
                 changes: {
                     description,
                 },
@@ -1105,10 +1093,10 @@ export const useEditor = ({
         setLayerPosition,
         setShowHelpLines,
         setComponentsGridPosition,
-        setSelectedComponentName,
-        setSelectedComponentDescription,
+        setComponentName,
+        setComponentDescription,
         setSelectedComponentSymbol,
-        setSelectedConnectionPointDescription,
+        setConnectionPointDescription,
         addPointOfAttack,
         removePointOfAttack,
         removeConnection,
@@ -1134,7 +1122,7 @@ export const useEditor = ({
         clearComponentConnectionLines,
         addInUseComponent,
         removeInUseComponent,
-        setSelectedConnectionName,
+        setConnectionName,
         setSelectedConnectionPointName,
         setAutoSaveStatus,
         initialized,

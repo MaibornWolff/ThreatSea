@@ -20,9 +20,9 @@
     "conventional-changelog-conventionalcommits": "9.3.1",
     "husky": "9.1.7",
     "lint-staged": "17.6.0",
-    "oxfmt": "0.72.0",
+    "oxfmt": "0.73.0",
     "semantic-release": "25.0.9",
-    "turbo": "2.11.7",
+    "turbo": "2.11.8",
     "typescript": "7.0.2"
   },
   "lint-staged": {
@@ -31,5 +31,5 @@
   "engines": {
     "node": ">=24"
   },
-  "packageManager": "pnpm@12.11.2"
+  "packageManager": "pnpm@12.14.0"
 }

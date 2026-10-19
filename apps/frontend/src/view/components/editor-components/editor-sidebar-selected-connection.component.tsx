@@ -3,7 +3,6 @@ import Autorenew from "@mui/icons-material/Autorenew";
 import { IconButton, Tooltip } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { Box } from "@mui/system";
-import type { ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { TextField } from "#view/components/textfield.component.tsx";
@@ -12,7 +11,7 @@ import type { SystemConnection } from "#api/types/system.types.ts";
 interface EditorSidebarSelectedConnectionProps {
     selectedConnection: SystemConnection | undefined;
     handleDeleteConnection: () => void;
-    handleOnConnectionNameChange: (event: ChangeEvent<HTMLInputElement>) => void;
+    handleOnConnectionNameChange: (connectionId: string, name: string) => void;
     handleResetConnectionRouting: () => void;
     userRole: USER_ROLES | undefined;
 }
@@ -44,7 +43,11 @@ export const EditorSidebarSelectedConnection = ({
             >
                 <TextField
                     value={selectedConnection?.name ? selectedConnection.name : ""}
-                    onChange={handleOnConnectionNameChange}
+                    onChange={(event) => {
+                        if (selectedConnection) {
+                            handleOnConnectionNameChange(selectedConnection.id, event.target.value);
+                        }
+                    }}
                     //dont delete the whole Component if Delete is pressed
                     onKeyUp={(event) => {
                         if (event.key === "Delete") {

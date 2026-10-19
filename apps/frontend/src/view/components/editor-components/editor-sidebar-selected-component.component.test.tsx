@@ -1,12 +1,15 @@
-import { screen, within } from "@testing-library/react";
+import type { ReactElement } from "react";
+import { act, fireEvent, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
     EditorSidebarSelectedComponent,
     type EditorSidebarSelectedComponentProps,
 } from "./editor-sidebar-selected-component.component";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
+import { editCommit, PendingEditsContext, type PendingEditsRegistry } from "./contexts/PendingEditsContext";
 import {
     createAsset,
+    createCommunicationInterface,
     createConnectedComponent,
     createSystemComponent,
     createPointOfAttack,
@@ -15,17 +18,27 @@ import type { Asset } from "#api/types/asset.types.ts";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 import { STANDARD_COMPONENT_TYPES } from "#api/types/standard-component.types.ts";
-import {
-    AnchorOrientation,
-    type ConnectionEndpointWithComponent,
-    type SystemCommunicationInterface,
-} from "#api/types/system.types.ts";
+import { AnchorOrientation, type ConnectionEndpointWithComponent } from "#api/types/system.types.ts";
 
-const setup = (propsOverride: Partial<EditorSidebarSelectedComponentProps> = {}) => {
+const noopPendingEditsRegistry: PendingEditsRegistry = { register: () => vi.fn() };
+
+const withPendingEdits = (ui: ReactElement, registry: PendingEditsRegistry = noopPendingEditsRegistry) => (
+    <PendingEditsContext value={registry}>{ui}</PendingEditsContext>
+);
+
+const setup = (
+    propsOverride: Partial<EditorSidebarSelectedComponentProps> = {},
+    registry: PendingEditsRegistry = noopPendingEditsRegistry
+) => {
+    const commits = {
+        name: vi.fn(),
+        description: vi.fn(),
+        interfaceName: vi.fn(),
+    };
     const props = {
         selectedComponent: createSystemComponent(),
         handleDeleteComponent: vi.fn(),
-        handleOnNameChange: vi.fn(),
+        handleOnNameChange: editCommit(commits.name),
         handleChangePointOfAttack: vi.fn(),
         handleAddAssetToAllPointsOfAttack: vi.fn(),
         handleRemoveAssetFromAllPointsOfAttack: vi.fn(),
@@ -34,11 +47,11 @@ const setup = (propsOverride: Partial<EditorSidebarSelectedComponentProps> = {})
         items: [createAsset({ id: 1, name: "DB Server" }), createAsset({ id: 2, name: "Web App" })],
         pointsOfAttackOfSelectedComponent: [],
         userRole: USER_ROLES.EDITOR,
-        handleOnDescriptionChange: vi.fn(),
+        handleOnDescriptionChange: editCommit(commits.description),
         handleOpenChangeIconDialog: vi.fn(),
         connectedComponents: [] as ConnectionEndpointWithComponent[],
         handleDeleteConnectionBetweenComponents: vi.fn(),
-        handleChangeCommunicationInterfaceName: vi.fn(),
+        handleChangeCommunicationInterfaceName: editCommit(commits.interfaceName),
         handleDeleteCommunicationInterface: vi.fn(),
         handlePointOfAttackLabelClick: vi.fn(),
         handleAssetNameClick: vi.fn(),
@@ -47,8 +60,12 @@ const setup = (propsOverride: Partial<EditorSidebarSelectedComponentProps> = {})
         ...propsOverride,
     };
     const user = userEvent.setup();
-    renderWithProviders(<EditorSidebarSelectedComponent {...props} />);
-    return { props, user };
+    const { rerender, unmount } = renderWithProviders(
+        withPendingEdits(<EditorSidebarSelectedComponent {...props} />, registry)
+    );
+    const rerenderWith = (overrides: Partial<EditorSidebarSelectedComponentProps>) =>
+        rerender(withPendingEdits(<EditorSidebarSelectedComponent {...props} {...overrides} />, registry));
+    return { props, user, commits, rerenderWith, unmount };
 };
 
 describe("EditorSidebarSelectedComponent — new click handlers", () => {
@@ -163,6 +180,106 @@ describe("EditorSidebarSelectedComponent — new click handlers", () => {
         });
     });
 
+    // Edits are debounced, bound to the component they were typed for and flushed
+    // before they could be lost or overwritten (issue #1360).
+    describe("debounced text edits", () => {
+        // fireEvent instead of user-event: user-event stalls under fake timers.
+        beforeEach(() => {
+            vi.useFakeTimers();
+        });
+
+        afterEach(() => {
+            vi.useRealTimers();
+        });
+
+        const typeInto = (currentValue: string, newValue: string) =>
+            fireEvent.change(screen.getByDisplayValue(currentValue), { target: { value: newValue } });
+
+        it("writes the typed name and description after the debounce delay", () => {
+            const { commits } = setup({
+                selectedComponent: createSystemComponent({ id: "comp-1", name: "Client", description: "Web" }),
+            });
+
+            typeInto("Client", "ClientX");
+            typeInto("Web", "WebY");
+            expect(commits.name).not.toHaveBeenCalled();
+
+            act(() => {
+                vi.advanceTimersByTime(300);
+            });
+
+            expect(commits.name).toHaveBeenCalledExactlyOnceWith("comp-1", "ClientX");
+            expect(commits.description).toHaveBeenCalledExactlyOnceWith("comp-1", "WebY");
+        });
+
+        it("writes a pending edit to the typed-in component when another component is selected", () => {
+            const { commits, rerenderWith } = setup({
+                selectedComponent: createSystemComponent({ id: "comp-1", name: "Client" }),
+            });
+
+            typeInto("Client", "ClientX");
+            rerenderWith({ selectedComponent: createSystemComponent({ id: "comp-2", name: "Users" }) });
+
+            expect(commits.name).toHaveBeenCalledExactlyOnceWith("comp-1", "ClientX");
+            expect(screen.getByDisplayValue("Users")).toBeInTheDocument();
+
+            act(() => {
+                vi.advanceTimersByTime(300);
+            });
+            expect(commits.name).toHaveBeenCalledOnce();
+        });
+
+        it("writes a pending interface name before another interface is edited", () => {
+            const communicationInterfaces = [
+                createCommunicationInterface({ id: "ci-1", name: "API Gateway" }),
+                createCommunicationInterface({ id: "ci-2", name: "Message Queue" }),
+            ];
+            const { commits } = setup({
+                selectedComponent: createSystemComponent({ id: "comp-1", communicationInterfaces }),
+            });
+
+            fireEvent.click(screen.getAllByTestId("EditIcon")[0]!);
+            typeInto("API Gateway", "API GatewayX");
+            fireEvent.click(screen.getAllByTestId("EditIcon")[1]!);
+
+            expect(commits.interfaceName).toHaveBeenCalledExactlyOnceWith("comp-1", "ci-1", "API GatewayX");
+        });
+
+        it("writes a pending edit when the editor flushes before a save", () => {
+            const registeredFlushes = new Set<() => void>();
+            const registry: PendingEditsRegistry = {
+                register: (flush) => {
+                    registeredFlushes.add(flush);
+                    return () => {
+                        registeredFlushes.delete(flush);
+                    };
+                },
+            };
+            const { commits } = setup(
+                { selectedComponent: createSystemComponent({ id: "comp-1", name: "Client" }) },
+                registry
+            );
+
+            typeInto("Client", "ClientX");
+            act(() => {
+                registeredFlushes.forEach((flush) => flush());
+            });
+
+            expect(commits.name).toHaveBeenCalledExactlyOnceWith("comp-1", "ClientX");
+        });
+
+        it("writes a pending edit when the sidebar unmounts", () => {
+            const { commits, unmount } = setup({
+                selectedComponent: createSystemComponent({ id: "comp-1", name: "Client" }),
+            });
+
+            typeInto("Client", "ClientX");
+            unmount();
+
+            expect(commits.name).toHaveBeenCalledExactlyOnceWith("comp-1", "ClientX");
+        });
+    });
+
     describe("local input state across re-renders", () => {
         it("preserves typed name when parent re-renders with a new selectedComponent reference but same id", async () => {
             const user = userEvent.setup();
@@ -170,7 +287,7 @@ describe("EditorSidebarSelectedComponent — new click handlers", () => {
 
             const baseProps = {
                 handleDeleteComponent: vi.fn(),
-                handleOnNameChange: vi.fn(),
+                handleOnNameChange: editCommit(vi.fn()),
                 handleChangePointOfAttack: vi.fn(),
                 handleAddAssetToAllPointsOfAttack: vi.fn(),
                 handleRemoveAssetFromAllPointsOfAttack: vi.fn(),
@@ -179,11 +296,11 @@ describe("EditorSidebarSelectedComponent — new click handlers", () => {
                 items: [] as Asset[],
                 pointsOfAttackOfSelectedComponent: [],
                 userRole: USER_ROLES.EDITOR,
-                handleOnDescriptionChange: vi.fn(),
+                handleOnDescriptionChange: editCommit(vi.fn()),
                 handleOpenChangeIconDialog: vi.fn(),
                 connectedComponents: [] as ConnectionEndpointWithComponent[],
                 handleDeleteConnectionBetweenComponents: vi.fn(),
-                handleChangeCommunicationInterfaceName: vi.fn(),
+                handleChangeCommunicationInterfaceName: editCommit(vi.fn()),
                 handleDeleteCommunicationInterface: vi.fn(),
                 handlePointOfAttackLabelClick: vi.fn(),
                 handleAssetNameClick: vi.fn(),
@@ -192,7 +309,7 @@ describe("EditorSidebarSelectedComponent — new click handlers", () => {
             };
 
             const { rerender } = renderWithProviders(
-                <EditorSidebarSelectedComponent {...baseProps} selectedComponent={initialComponent} />
+                withPendingEdits(<EditorSidebarSelectedComponent {...baseProps} selectedComponent={initialComponent} />)
             );
 
             const nameInput = screen.getByDisplayValue("Original");
@@ -204,11 +321,13 @@ describe("EditorSidebarSelectedComponent — new click handlers", () => {
             // can't distinguish "memo skipped" from "effect skipped".
             const sameIdNewRef = { ...initialComponent, x: 999 };
             rerender(
-                <EditorSidebarSelectedComponent
-                    {...baseProps}
-                    selectedComponent={sameIdNewRef}
-                    connectedComponents={[]}
-                />
+                withPendingEdits(
+                    <EditorSidebarSelectedComponent
+                        {...baseProps}
+                        selectedComponent={sameIdNewRef}
+                        connectedComponents={[]}
+                    />
+                )
             );
 
             expect(screen.getByDisplayValue("OriginalX")).toBeInTheDocument();
@@ -218,7 +337,7 @@ describe("EditorSidebarSelectedComponent — new click handlers", () => {
     describe("reset on component switch", () => {
         const baseHandlers = {
             handleDeleteComponent: vi.fn(),
-            handleOnNameChange: vi.fn(),
+            handleOnNameChange: editCommit(vi.fn()),
             handleChangePointOfAttack: vi.fn(),
             handleAddAssetToAllPointsOfAttack: vi.fn(),
             handleRemoveAssetFromAllPointsOfAttack: vi.fn(),
@@ -226,10 +345,10 @@ describe("EditorSidebarSelectedComponent — new click handlers", () => {
             handleAssetSearchChanged: vi.fn(),
             pointsOfAttackOfSelectedComponent: [],
             userRole: USER_ROLES.EDITOR,
-            handleOnDescriptionChange: vi.fn(),
+            handleOnDescriptionChange: editCommit(vi.fn()),
             handleOpenChangeIconDialog: vi.fn(),
             handleDeleteConnectionBetweenComponents: vi.fn(),
-            handleChangeCommunicationInterfaceName: vi.fn(),
+            handleChangeCommunicationInterfaceName: editCommit(vi.fn()),
             handleDeleteCommunicationInterface: vi.fn(),
             handlePointOfAttackLabelClick: vi.fn(),
             handleAssetNameClick: vi.fn(),
@@ -251,20 +370,24 @@ describe("EditorSidebarSelectedComponent — new click handlers", () => {
                 within(screen.getByTestId("connected-component-search-field")).getByRole("textbox");
 
             const { rerender } = renderWithProviders(
-                <EditorSidebarSelectedComponent
-                    {...props}
-                    selectedComponent={createSystemComponent({ id: "comp-1" })}
-                />
+                withPendingEdits(
+                    <EditorSidebarSelectedComponent
+                        {...props}
+                        selectedComponent={createSystemComponent({ id: "comp-1" })}
+                    />
+                )
             );
 
             await user.type(searchInput(), "alpha");
             expect(searchInput()).toHaveValue("alpha");
 
             rerender(
-                <EditorSidebarSelectedComponent
-                    {...props}
-                    selectedComponent={createSystemComponent({ id: "comp-2" })}
-                />
+                withPendingEdits(
+                    <EditorSidebarSelectedComponent
+                        {...props}
+                        selectedComponent={createSystemComponent({ id: "comp-2" })}
+                    />
+                )
             );
 
             expect(searchInput()).toHaveValue("");
@@ -281,20 +404,24 @@ describe("EditorSidebarSelectedComponent — new click handlers", () => {
                 screen.getAllByTestId("selected-component-asset-search-results").map((element) => element.textContent);
 
             const { rerender } = renderWithProviders(
-                <EditorSidebarSelectedComponent
-                    {...props}
-                    selectedComponent={createSystemComponent({ id: "comp-1" })}
-                />
+                withPendingEdits(
+                    <EditorSidebarSelectedComponent
+                        {...props}
+                        selectedComponent={createSystemComponent({ id: "comp-1" })}
+                    />
+                )
             );
 
             await user.click(screen.getByTestId("selected-component-asset-descending-sort-button"));
             expect(assetNames()).toEqual(["Beta", "Alpha"]);
 
             rerender(
-                <EditorSidebarSelectedComponent
-                    {...props}
-                    selectedComponent={createSystemComponent({ id: "comp-2" })}
-                />
+                withPendingEdits(
+                    <EditorSidebarSelectedComponent
+                        {...props}
+                        selectedComponent={createSystemComponent({ id: "comp-2" })}
+                    />
+                )
             );
 
             expect(assetNames()).toEqual(["Alpha", "Beta"]);
@@ -302,17 +429,7 @@ describe("EditorSidebarSelectedComponent — new click handlers", () => {
     });
 
     describe("communication interface items", () => {
-        const communicationInterfaces: SystemCommunicationInterface[] = [
-            {
-                id: "ci-1",
-                name: "API Gateway",
-                icon: null,
-                type: "REST",
-                projectId: 1,
-                componentId: "comp-1",
-                componentName: "Test Component",
-            },
-        ];
+        const communicationInterfaces = [createCommunicationInterface({ id: "ci-1", name: "API Gateway" })];
 
         const componentWithInterfaces = createSystemComponent({ communicationInterfaces });
 

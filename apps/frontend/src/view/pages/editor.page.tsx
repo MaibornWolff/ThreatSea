@@ -29,6 +29,10 @@ import {
 } from "#view/components/editor-components/annotations-canvas-layer.component.tsx";
 import { EditorSidebar } from "#view/components/editor-components/editor-sidebar.component.tsx";
 import {
+    PendingEditsContext,
+    usePendingEditsRegistry,
+} from "#view/components/editor-components/contexts/PendingEditsContext.tsx";
+import {
     EditorStage,
     MAX_STAGE_SCALE,
     MIN_STAGE_SCALE,
@@ -133,10 +137,10 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         deselectComponent,
         setLayerPosition,
         setShowHelpLines,
-        setSelectedComponentName,
-        setSelectedComponentDescription,
+        setComponentName,
+        setComponentDescription,
         setSelectedComponentSymbol,
-        setSelectedConnectionPointDescription,
+        setConnectionPointDescription,
         addPointOfAttack,
         removePointOfAttack,
         removeConnection,
@@ -160,7 +164,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         removeComponentConnectionLine,
         addInUseComponent,
         removeInUseComponent,
-        setSelectedConnectionName,
+        setConnectionName,
         setAutoSaveStatus,
         components,
         connections,
@@ -203,8 +207,11 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     const lastCenteredProjectId = useAppSelector((state) => state.editor.lastCenteredProjectId);
     const loadedProjectId = useAppSelector((state) => state.system.loadedProjectId);
 
+    const pendingEdits = usePendingEditsRegistry();
+
     const { downloadSystemView } = useAutoSavePreview({
         componentLayerRef,
+        flushPendingEdits: pendingEdits.flushAll,
         updateAutoSaveOnClick,
         saveCurrentSystem,
         autoSaveBlocked,
@@ -861,29 +868,27 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         }
     };
 
-    const handleOnNameChange = (evt: ChangeEvent<HTMLInputElement>): void => {
+    const handleOnNameChange = (componentId: string, name: string): void => {
         if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
-            setSelectedComponentName(evt.target.value);
+            setComponentName(componentId, name);
         }
     };
 
-    const handleOnDescriptionChange = (evt: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+    const handleOnDescriptionChange = (componentId: string, description: string): void => {
         if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
-            setSelectedComponentDescription(evt.target.value);
+            setComponentDescription(componentId, description);
         }
     };
 
-    const handleOnConnectionPointDescriptionChange = (
-        evt: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-    ): void => {
+    const handleOnConnectionPointDescriptionChange = (connectionPointId: string, description: string): void => {
         if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
-            setSelectedConnectionPointDescription(evt.target.value);
+            setConnectionPointDescription(connectionPointId, description);
         }
     };
 
-    const handleConnectionNameChange = (evt: ChangeEvent<HTMLInputElement>): void => {
+    const handleConnectionNameChange = (connectionId: string, name: string): void => {
         if (checkUserRole(userRole, USER_ROLES.EDITOR)) {
-            setSelectedConnectionName(evt.target.value);
+            setConnectionName(connectionId, name);
         }
     };
 
@@ -1521,52 +1526,54 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                     />
                 </Box>
 
-                <EditorSidebar
-                    sidebarRef={sidebarRef}
-                    // Drop selected component from sidebar during drag — avoids the MUI 9 FormControl/InputBase setAdornedStart re-render loop on the high-frequency drag path.
-                    selectedComponent={isAnyComponentInUse ? undefined : selectedComponent}
-                    selectedComponentId={isAnyComponentInUse ? null : selectedComponentId}
-                    selectedPointOfAttack={selectedPointOfAttack}
-                    handleDeleteComponent={handleDeleteComponent}
-                    handleOnNameChange={handleOnNameChange}
-                    handleChangePointOfAttack={handleChangePointOfAttack}
-                    handleAddAssetToAllPointsOfAttack={handleAddAssetToAllPointsOfAttack}
-                    handleRemoveAssetFromAllPointsOfAttack={handleRemoveAssetFromAllPointsOfAttack}
-                    assetSearchValue={assetSearchValue}
-                    handleAssetSearchChanged={handleAssetSearchChanged}
-                    items={items}
-                    pointsOfAttackOfSelectedComponent={pointsOfAttackOfSelectedComponent}
-                    selectedConnectionId={selectedConnectionId}
-                    selectedConnection={selectedConnection}
-                    handleDeleteConnection={handleDeleteConnection}
-                    handleOnConnectionNameChange={handleConnectionNameChange}
-                    handleResetConnectionRouting={() => {
-                        if (selectedConnection) {
-                            resetConnectionRouting(selectedConnection.id);
-                        }
-                    }}
-                    handleOnAssetChanged={handleOnAssetChanged}
-                    selectedConnectionPoint={selectedConnectionPoint}
-                    userRole={userRole}
-                    handleOnDescriptionChange={handleOnDescriptionChange}
-                    handleOpenChangeIconDialog={handleOpenChangeIconDialog}
-                    connectedComponents={connectedComponentsForSelected}
-                    handleDeleteConnectionBetweenComponents={handleDeleteConnectionBetweenComponents}
-                    handleOnConnectionPointDescriptionChange={handleOnConnectionPointDescriptionChange}
-                    handleChangeCommunicationInterfaceName={handleChangeCommunicationInterfaceName}
-                    handleDeleteCommunicationInterface={handleDeleteCommunicationInterfaceDialog}
-                    handlePointOfAttackLabelClick={handlePointOfAttackLabelClick}
-                    handleAssetNameClick={handleAssetNameClick}
-                    handleAddAssetClick={handleAddAssetClick}
-                    handleSelectConnectedComponent={handleSelectConnectedComponent}
-                    handleComponentBreadcrumbClick={handleComponentBreadcrumbClick}
-                    handleInterfaceBreadcrumbClick={handleInterfaceBreadcrumbClick}
-                    selectedAnnotation={selectedAnnotation}
-                    handleAnnotationColorChange={handleAnnotationColorChange}
-                    handleAnnotationColorPreview={handleAnnotationColorPreview}
-                    handleAnnotationChange={handleAnnotationChange}
-                    handleDeleteAnnotation={handleDeleteAnnotation}
-                />
+                <PendingEditsContext value={pendingEdits.registry}>
+                    <EditorSidebar
+                        sidebarRef={sidebarRef}
+                        // Drop selected component from sidebar during drag — avoids the MUI 9 FormControl/InputBase setAdornedStart re-render loop on the high-frequency drag path.
+                        selectedComponent={isAnyComponentInUse ? undefined : selectedComponent}
+                        selectedComponentId={isAnyComponentInUse ? null : selectedComponentId}
+                        selectedPointOfAttack={selectedPointOfAttack}
+                        handleDeleteComponent={handleDeleteComponent}
+                        handleOnNameChange={handleOnNameChange}
+                        handleChangePointOfAttack={handleChangePointOfAttack}
+                        handleAddAssetToAllPointsOfAttack={handleAddAssetToAllPointsOfAttack}
+                        handleRemoveAssetFromAllPointsOfAttack={handleRemoveAssetFromAllPointsOfAttack}
+                        assetSearchValue={assetSearchValue}
+                        handleAssetSearchChanged={handleAssetSearchChanged}
+                        items={items}
+                        pointsOfAttackOfSelectedComponent={pointsOfAttackOfSelectedComponent}
+                        selectedConnectionId={selectedConnectionId}
+                        selectedConnection={selectedConnection}
+                        handleDeleteConnection={handleDeleteConnection}
+                        handleOnConnectionNameChange={handleConnectionNameChange}
+                        handleResetConnectionRouting={() => {
+                            if (selectedConnection) {
+                                resetConnectionRouting(selectedConnection.id);
+                            }
+                        }}
+                        handleOnAssetChanged={handleOnAssetChanged}
+                        selectedConnectionPoint={selectedConnectionPoint}
+                        userRole={userRole}
+                        handleOnDescriptionChange={handleOnDescriptionChange}
+                        handleOpenChangeIconDialog={handleOpenChangeIconDialog}
+                        connectedComponents={connectedComponentsForSelected}
+                        handleDeleteConnectionBetweenComponents={handleDeleteConnectionBetweenComponents}
+                        handleOnConnectionPointDescriptionChange={handleOnConnectionPointDescriptionChange}
+                        handleChangeCommunicationInterfaceName={handleChangeCommunicationInterfaceName}
+                        handleDeleteCommunicationInterface={handleDeleteCommunicationInterfaceDialog}
+                        handlePointOfAttackLabelClick={handlePointOfAttackLabelClick}
+                        handleAssetNameClick={handleAssetNameClick}
+                        handleAddAssetClick={handleAddAssetClick}
+                        handleSelectConnectedComponent={handleSelectConnectedComponent}
+                        handleComponentBreadcrumbClick={handleComponentBreadcrumbClick}
+                        handleInterfaceBreadcrumbClick={handleInterfaceBreadcrumbClick}
+                        selectedAnnotation={selectedAnnotation}
+                        handleAnnotationColorChange={handleAnnotationColorChange}
+                        handleAnnotationColorPreview={handleAnnotationColorPreview}
+                        handleAnnotationChange={handleAnnotationChange}
+                        handleDeleteAnnotation={handleDeleteAnnotation}
+                    />
+                </PendingEditsContext>
 
                 <Routes>
                     <Route path="components/edit" element={<ComponentDialogPage />} />
