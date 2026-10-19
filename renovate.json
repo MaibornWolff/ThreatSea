@@ -27,6 +27,11 @@
       "minimumReleaseAge": null
     },
     {
+      "description": "Update the Oxc React Compiler together with @vitejs/plugin-react. The plugin declares a narrow peer range for oxc-transform-react, so bumping either alone can leave the pair incompatible. Every compiler bump changes the generated code, so review these PRs more closely than a normal bump.",
+      "matchPackageNames": ["oxc-transform-react", "@vitejs/plugin-react"],
+      "groupName": "react compiler"
+    },
+    {
       "description": "Pin conventional-changelog-conventionalcommits to v9. @semantic-release/release-notes-generator only devDepends on it, so we must provide it as a direct dependency, and it must match the release notes generator's template engine (conventional-changelog-writer@8 / Handlebars). v10 ships templates for writer@9, which renders empty release notes. Revisit once release-notes-generator upgrades to writer@9.",
       "matchPackageNames": ["conventional-changelog-conventionalcommits"],
       "allowedVersions": "<10"
