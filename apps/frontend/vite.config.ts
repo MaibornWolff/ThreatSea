@@ -5,7 +5,6 @@ import svgrPlugin from "vite-plugin-svgr";
 export default defineConfig(({ command }) => ({
     base: "/",
     plugins: [react({ compiler: { logDiagnostics: command === "serve" } }), svgrPlugin()],
-    cacheDir: ".vite",
     publicDir: "public",
     server: {
         open: true,
