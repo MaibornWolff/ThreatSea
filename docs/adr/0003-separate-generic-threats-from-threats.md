@@ -26,7 +26,7 @@ Threats are modelled in three levels:
 
 - A **catalog threat** (`catalog_threats`) is a catalog entry.
 - A **generic threat** (`generic_threats`) is a catalog threat applied to one point of attack in a project. It is generated from the system model and is immutable; there is at most one per project, catalog threat and point of attack.
-- A **threat** (`threats`) is a refinable instance of a generic threat. It inherits its identity from the generic threat and its default assessment from the catalog threat, and carries its own probability, protection goals and status. One generic threat can have several independent threats. A threat's status may be derived from measures that set it out of scope.
+- A **threat** (`threats`) is a refinable instance of a generic threat. It inherits its identity from the generic threat and its default assessment from the catalog threat, and carries its own name, description, probability, protection goals and status. The name defaults to the generic threat's name and the description starts empty. One generic threat can have several independent threats. A threat's status may be derived from measures that set it out of scope.
 
 ## Consequences
 

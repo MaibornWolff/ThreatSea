@@ -22,7 +22,7 @@ Color needs a single source of truth that separates raw values from design inten
 
 ## Decision
 
-Colors are defined as two token layers in `apps/frontend/src/view/wrappers/color-tokens.ts`: raw primitives, and semantic aliases that map onto them and feed the MUI palette. Components consume color only through the theme (`theme.vars.palette.*`, with CSS variables enabled). Hardcoded color literals and direct token imports are not allowed, which a `no-restricted-imports` lint rule enforces. Runtimes that cannot read CSS variables (the Konva canvas and the PDF report) are documented exceptions.
+Colors are defined as two token layers in `apps/frontend/src/view/wrappers/color-tokens.ts`: raw primitives, and semantic aliases that map onto them and feed the MUI palette. Components consume color only through the theme (`theme.vars.palette.*`, with CSS variables enabled). Direct token imports are blocked by a `no-restricted-imports` lint rule; hardcoded color literals are avoided by convention. `theme.wrapper.tsx`, which wires the tokens into the palette, and runtimes that cannot read CSS variables (the Konva canvas and the PDF report) are documented exceptions.
 
 Details and how to add a color: `apps/frontend/src/view/wrappers/THEME.md`.
 
