@@ -10,7 +10,7 @@ References issue: #
 
 - [ ] A test for the issue exists and confirms the absence of the issue
 - [ ] If necessary - A (negative) e2e-test has been implemented to protect from regressions of this issue
-- [ ] The Architectural Decision Record was taken into account
+- [ ] The Architectural Decision Records in `docs/adr/` were taken into account
 - [ ] Functional tests and integration tests / e2e-tests have passed successfully
 - [ ] If necessary - new config parameters have been described
 - [ ] If necessary - Required documentation has been written or updated
