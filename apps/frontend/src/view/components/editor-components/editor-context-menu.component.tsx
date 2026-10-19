@@ -159,7 +159,7 @@ export const EditorContextMenu = ({ onSelect, stageRef, ref }: EditorContextMenu
                         <ComponentListItem
                             key={index}
                             symbol={symbol}
-                            label={t(`contextMenu.${name}`)}
+                            label={t(`componentNames.${name}`)}
                             onClick={() => onSelect(standardComponent)}
                             data-testid={`ComponentListItem${index}`}
                         />
