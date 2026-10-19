@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 
 export default defineConfig({
-    plugins: [react()],
+    plugins: [react({ compiler: true })],
     resolve: {
         // Ensure react-router and react-router-dom share a single module instance
         // so that useNavigate() works inside a MemoryRouter in tests.
