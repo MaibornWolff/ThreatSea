@@ -2,9 +2,9 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import svgrPlugin from "vite-plugin-svgr";
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
     base: "/",
-    plugins: [react({ compiler: true }), svgrPlugin()],
+    plugins: [react({ compiler: { logDiagnostics: command === "serve" } }), svgrPlugin()],
     cacheDir: ".vite",
     publicDir: "public",
     server: {
@@ -54,4 +54,4 @@ export default defineConfig({
     worker: {
         format: "es",
     },
-});
+}));
