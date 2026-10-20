@@ -11,10 +11,14 @@ import { ConflictError } from "#errors/conflict.error.js";
  * Gets all assets of the specified project.
  *
  * @param {number} projectId - The id of the current project.
+ * @param {TransactionType} transaction - drizzle transaction
  * @returns {Promise<Asset[]>} A promise that resolves to an array of assets.
  */
-export async function getAssets(projectId: number): Promise<Asset[]> {
-    return await db.query.assets.findMany({ where: eq(assets.projectId, projectId) });
+export async function getAssets(
+    projectId: number,
+    transaction: TransactionType | undefined = undefined
+): Promise<Asset[]> {
+    return await (transaction ?? db).query.assets.findMany({ where: eq(assets.projectId, projectId) });
 }
 
 /**
@@ -30,14 +34,19 @@ export async function getAsset(assetId: number): Promise<Asset | null> {
 }
 
 /**
- * Gets multiple assets by their ids.
+ * Gets multiple assets of a project by their ids. Ids of other projects are ignored.
  *
- * @param {number[]} assetIds
+ * @param {number} projectId - The id of the project the assets must belong to.
+ * @param {number[]} assetIds - The ids of the assets.
  * @returns {Promise<Asset[]>} A promise that resolves to an array of assets.
  */
-export async function getMultipleAssets(assetIds: number[]): Promise<Asset[]> {
+export async function getAssetsByIds(projectId: number, assetIds: number[]): Promise<Asset[]> {
+    if (assetIds.length === 0) {
+        return [];
+    }
+
     return await db.query.assets.findMany({
-        where: inArray(assets.id, assetIds),
+        where: and(eq(assets.projectId, projectId), inArray(assets.id, assetIds)),
     });
 }
 

@@ -4,6 +4,7 @@
  */
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
+import { and, eq } from "drizzle-orm";
 import { db } from "#db/index.js";
 import { catalogs, usersCatalogs } from "#db/schema.js";
 import { CONFIDENTIALITY_LEVELS } from "#types/confidentiality-levels.types.js";
@@ -63,6 +64,7 @@ beforeAll(async () => {
 describe("project tests", () => {
     let catalogId: number;
     let projectId: number;
+    let userId: number;
     beforeEach(async () => {
         const catalog = (
             await db
@@ -79,7 +81,7 @@ describe("project tests", () => {
             .get("/api/auth/status")
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
-        const userId = authRes.body.data.userId;
+        userId = authRes.body.data.userId;
 
         await db.insert(usersCatalogs).values({
             userId,
@@ -135,6 +137,35 @@ describe("project tests", () => {
             expect(res.statusCode).toBe(400);
             expect(res.body.validationErrors).toBeDefined();
         });
+
+        it("should not create a new project on a catalog the user cannot access", async () => {
+            const otherUsersCatalog = (
+                await db.insert(catalogs).values({ name: "Other user's catalog", language: LANGUAGES.EN }).returning()
+            ).at(0)!;
+
+            const res = await request(app)
+                .post("/api/projects")
+                .send({ ...VALID_PROJECT, catalogId: otherUsersCatalog.id })
+                .set("X-CSRF-TOKEN", csrfToken)
+                .set("Cookie", cookies);
+            expect(res.statusCode).toEqual(404);
+
+            const projectsResponse = await request(app)
+                .get("/api/projects")
+                .set("X-CSRF-TOKEN", csrfToken)
+                .set("Cookie", cookies);
+            const projectCatalogIds = projectsResponse.body.map((project: { catalogId: number }) => project.catalogId);
+            expect(projectCatalogIds).not.toContain(otherUsersCatalog.id);
+        });
+
+        it("should not create a new project on a catalog that does not exist", async () => {
+            const res = await request(app)
+                .post("/api/projects")
+                .send({ ...VALID_PROJECT, catalogId: 999999 })
+                .set("X-CSRF-TOKEN", csrfToken)
+                .set("Cookie", cookies);
+            expect(res.statusCode).toEqual(404);
+        });
     });
 
     describe("delete or update projects", () => {
@@ -176,6 +207,68 @@ describe("project tests", () => {
                 .set("Cookie", cookies);
             expect(res.statusCode).toBe(400);
             expect(res.body.validationErrors).toBeDefined();
+        });
+
+        it("should change the catalog of a project to a catalog the user can access", async () => {
+            const projectResponse = await request(app)
+                .get("/api/projects/" + projectId)
+                .set("X-CSRF-TOKEN", csrfToken)
+                .set("Cookie", cookies);
+            expect(projectResponse.statusCode).toEqual(200);
+            // beforeEach created a fresh catalog, so catalogId names a different one.
+            expect(catalogId).not.toBe(projectResponse.body.catalogId);
+
+            const response = await request(app)
+                .put("/api/projects/" + projectId)
+                .send({ ...VALID_PROJECT_UPDATE, catalogId })
+                .set("X-CSRF-TOKEN", csrfToken)
+                .set("Cookie", cookies);
+            expect(response.statusCode).toEqual(200);
+            expect(response.body.catalogId).toBe(catalogId);
+        });
+
+        it("should not change the catalog of a project to a catalog the user cannot access", async () => {
+            const projectResponse = await request(app)
+                .get("/api/projects/" + projectId)
+                .set("X-CSRF-TOKEN", csrfToken)
+                .set("Cookie", cookies);
+            const originalCatalogId = projectResponse.body.catalogId;
+            const otherUsersCatalog = (
+                await db.insert(catalogs).values({ name: "Other user's catalog", language: LANGUAGES.EN }).returning()
+            ).at(0)!;
+
+            const response = await request(app)
+                .put("/api/projects/" + projectId)
+                .send({ ...VALID_PROJECT_UPDATE, catalogId: otherUsersCatalog.id })
+                .set("X-CSRF-TOKEN", csrfToken)
+                .set("Cookie", cookies);
+            expect(response.statusCode).toEqual(404);
+
+            const unchangedProjectResponse = await request(app)
+                .get("/api/projects/" + projectId)
+                .set("X-CSRF-TOKEN", csrfToken)
+                .set("Cookie", cookies);
+            expect(unchangedProjectResponse.body.catalogId).toBe(originalCatalogId);
+        });
+
+        it("should update a project whose current catalog the user can no longer access", async () => {
+            const projectResponse = await request(app)
+                .get("/api/projects/" + projectId)
+                .set("X-CSRF-TOKEN", csrfToken)
+                .set("Cookie", cookies);
+            const currentCatalogId = projectResponse.body.catalogId;
+            await db
+                .delete(usersCatalogs)
+                .where(and(eq(usersCatalogs.catalogId, currentCatalogId), eq(usersCatalogs.userId, userId)));
+
+            const response = await request(app)
+                .put("/api/projects/" + projectId)
+                .send({ ...VALID_PROJECT_UPDATE, name: "Project 3", catalogId: currentCatalogId })
+                .set("X-CSRF-TOKEN", csrfToken)
+                .set("Cookie", cookies);
+            expect(response.statusCode).toEqual(200);
+            expect(response.body.name).toBe("Project 3");
+            expect(response.body.catalogId).toBe(currentCatalogId);
         });
 
         it("should delete a project", async () => {

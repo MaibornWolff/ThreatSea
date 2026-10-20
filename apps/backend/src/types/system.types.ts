@@ -15,8 +15,8 @@ export interface UpdateSystemRequest {
 }
 
 /**
- * Validates only each placed component's `symbol`; plainToInstance preserves every other system
- * property untouched. Without it the save path stores arbitrary symbols unchecked.
+ * Validates only each placed component's `symbol`; the system route skips whitelisting, so every
+ * other system property stays untouched. Without it the save path stores arbitrary symbols unchecked.
  */
 export class ComponentDto {
     // png/jpeg data URL or legacy asset path only; null/empty skipped. See the pattern.

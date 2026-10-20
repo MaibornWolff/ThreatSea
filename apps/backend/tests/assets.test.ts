@@ -163,6 +163,25 @@ describe("get or create assets", () => {
         expect(res.statusCode).toEqual(200);
     });
 
+    it("should ignore a client-supplied id when creating an asset", async () => {
+        const existingAssetResponse = await request(app)
+            .post("/api/projects/" + projectId + "/assets")
+            .send(VALID_ASSET_1)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(existingAssetResponse.statusCode).toEqual(200);
+        const existingAssetId = existingAssetResponse.body.id;
+
+        const response = await request(app)
+            .post("/api/projects/" + projectId + "/assets")
+            .send({ ...VALID_ASSET_2, id: existingAssetId })
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(response.statusCode).toEqual(200);
+        expect(response.body.id).not.toBe(existingAssetId);
+        expect(response.body.name).toBe(VALID_ASSET_2.name);
+    });
+
     it("should not create a new asset (name missing)", async () => {
         const invalidAsset = {
             availability: VALID_ASSET_1.availability,
