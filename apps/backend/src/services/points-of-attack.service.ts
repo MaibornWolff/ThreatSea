@@ -21,22 +21,6 @@ interface PointOfAttack {
 }
 
 /**
- * Gets the assets involved in the point of attack.
- *
- * @param {number} projectId - The current project id.
- * @param {number[]} assetIds - object that defines a point
- *     of attack.
- * @returns An array of objects with the asset data.
- */
-async function getAssets(projectId: number, assetIds: number[]): Promise<Asset[]> {
-    if (assetIds.length === 0) {
-        return [];
-    }
-
-    return await getAssetsByIds(projectId, assetIds);
-}
-
-/**
  * Fetches every point of attack of the system and resolves
  * the components and assets involved with them.
  *
@@ -75,7 +59,7 @@ export async function getPointsOfAttack(projectId: number): Promise<PointOfAttac
         const connectionPointId = connectionPoint?.id ?? null;
         const connectionPointName = connectionPoint?.name ?? null;
 
-        const assets = await getAssets(projectId, pointOfAttack.assets);
+        const assets = await getAssetsByIds(projectId, pointOfAttack.assets);
 
         items.push({
             ...pointOfAttack,

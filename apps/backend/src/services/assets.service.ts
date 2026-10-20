@@ -41,6 +41,10 @@ export async function getAsset(assetId: number): Promise<Asset | null> {
  * @returns {Promise<Asset[]>} A promise that resolves to an array of assets.
  */
 export async function getAssetsByIds(projectId: number, assetIds: number[]): Promise<Asset[]> {
+    if (assetIds.length === 0) {
+        return [];
+    }
+
     return await db.query.assets.findMany({
         where: and(eq(assets.projectId, projectId), inArray(assets.id, assetIds)),
     });
