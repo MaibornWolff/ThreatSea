@@ -122,7 +122,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                 showUniversalHeaderNavigation: true,
                 showProjectInfo: true,
                 getCatalogInfo: false,
-            }),
+            })
         );
     }, [dispatch]);
 
@@ -163,7 +163,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
 
     const onCLickEditMeasureImpact = (
         threat: ThreatWithMetrics | undefined,
-        measureImpact: MeasureImpact | undefined,
+        measureImpact: MeasureImpact | undefined
     ) => {
         navigate(applyMeasurePath, {
             state: {
@@ -206,7 +206,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
         event: React.MouseEvent<HTMLElement>,
         measureName: string,
         threatName: string,
-        measureImpact: MeasureImpact,
+        measureImpact: MeasureImpact
     ) => {
         event.preventDefault();
         event.stopPropagation();
@@ -724,7 +724,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                                     onClick={() =>
                                                                         onCLickEditMeasureImpact(
                                                                             threats[selectedThreat],
-                                                                            measureImpact,
+                                                                            measureImpact
                                                                         )
                                                                     }
                                                                     hover
@@ -823,7 +823,7 @@ const RiskPageBody = ({ project }: RiskPageBodyProps) => {
                                                                                                 name,
                                                                                                 threats[selectedThreat]
                                                                                                     .name,
-                                                                                                measureImpact,
+                                                                                                measureImpact
                                                                                             );
                                                                                         }
                                                                                     }}
