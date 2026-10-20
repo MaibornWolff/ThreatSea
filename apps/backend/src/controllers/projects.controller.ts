@@ -139,26 +139,20 @@ export async function updateProject(
  *
  * @param {Request} request - The http request.
  * @param {Response} response - The http response.
- * @param {NextFunction} next - The next middleware function.
  */
 export async function updateProjectLineOfTolerance(
     request: Request<ProjectIdParam, ProjectResponse, UpdateProjectLineOfToleranceRequest>,
-    response: Response<ProjectResponse>,
-    next: NextFunction
+    response: Response<ProjectResponse>
 ): Promise<void> {
     const projectId = request.params.projectId;
     const { lineOfToleranceGreen, lineOfToleranceRed } = request.body;
 
-    try {
-        const project: ProjectResponse = await ProjectsService.updateProjectLineOfTolerance(projectId, {
-            lineOfToleranceGreen,
-            lineOfToleranceRed,
-        });
+    const project: ProjectResponse = await ProjectsService.updateProjectLineOfTolerance(projectId, {
+        lineOfToleranceGreen,
+        lineOfToleranceRed,
+    });
 
-        response.json(project);
-    } catch (error) {
-        next(error);
-    }
+    response.json(project);
 }
 
 /**
