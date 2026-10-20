@@ -11,10 +11,14 @@ import { ConflictError } from "#errors/conflict.error.js";
  * Gets all assets of the specified project.
  *
  * @param {number} projectId - The id of the current project.
+ * @param {TransactionType} transaction - drizzle transaction
  * @returns {Promise<Asset[]>} A promise that resolves to an array of assets.
  */
-export async function getAssets(projectId: number): Promise<Asset[]> {
-    return await db.query.assets.findMany({ where: eq(assets.projectId, projectId) });
+export async function getAssets(
+    projectId: number,
+    transaction: TransactionType | undefined = undefined
+): Promise<Asset[]> {
+    return await (transaction ?? db).query.assets.findMany({ where: eq(assets.projectId, projectId) });
 }
 
 /**

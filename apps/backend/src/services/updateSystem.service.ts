@@ -34,9 +34,11 @@ export async function updateSystem(projectId: number, updateSystemData: UpdateSy
         throw new NotFoundError("System not found");
     }
 
-    const systemUpdate = { ...updateSystemData, data: await keepProjectAssetIds(projectId, updateSystemData.data) };
-
     return await db.transaction(async (tx) => {
+        const systemUpdate = {
+            ...updateSystemData,
+            data: await keepProjectAssetIds(projectId, updateSystemData.data, tx),
+        };
         const updatedSystem = await systemService.updateSystem(projectId, systemUpdate, tx);
 
         await deleteThreatsByPointsOfAttack(getDeletedPointsOfAttack(oldSystem, updatedSystem), projectId, tx);
@@ -64,12 +66,16 @@ export async function updateSystem(projectId: number, updateSystemData: UpdateSy
 
 // Drops asset ids of other projects and of deleted assets. A deleted asset stays in the diagram,
 // so rejecting unknown ids would break normal saves.
-async function keepProjectAssetIds(projectId: number, data: SystemData | null): Promise<SystemData | null> {
+async function keepProjectAssetIds(
+    projectId: number,
+    data: SystemData | null,
+    transaction: TransactionType
+): Promise<SystemData | null> {
     if (!data?.pointsOfAttack) {
         return data;
     }
 
-    const projectAssetIds = new Set((await getAssets(projectId)).map((asset) => asset.id));
+    const projectAssetIds = new Set((await getAssets(projectId, transaction)).map((asset) => asset.id));
 
     return {
         ...data,
