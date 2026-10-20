@@ -4,7 +4,8 @@
 import { db, TransactionType } from "#db/index.js";
 import { CatalogThreat, CreateGenericThreat, CreateThreat, GenericThreat, System } from "#db/schema.js";
 import { NotFoundError } from "#errors/not-found.error.js";
-import { PointOfAttack, UpdateSystemRequest } from "#types/system.types.js";
+import { PointOfAttack, SystemData, UpdateSystemRequest } from "#types/system.types.js";
+import { getAssets } from "#services/assets.service.js";
 import { getCatalogThreatsByIds, getCatalogThreatsByProjectId } from "#services/catalog-threats.service.js";
 import {
     buildThreatForGenericThreat,
@@ -34,7 +35,11 @@ export async function updateSystem(projectId: number, updateSystemData: UpdateSy
     }
 
     return await db.transaction(async (tx) => {
-        const updatedSystem = await systemService.updateSystem(projectId, updateSystemData, tx);
+        const systemUpdate = {
+            ...updateSystemData,
+            data: await keepProjectAssetIds(projectId, updateSystemData.data, tx),
+        };
+        const updatedSystem = await systemService.updateSystem(projectId, systemUpdate, tx);
 
         await deleteThreatsByPointsOfAttack(getDeletedPointsOfAttack(oldSystem, updatedSystem), projectId, tx);
 
@@ -57,6 +62,30 @@ export async function updateSystem(projectId: number, updateSystemData: UpdateSy
 
         return updatedSystem;
     });
+}
+
+// Drops asset ids of other projects and of deleted assets. A deleted asset stays in the diagram,
+// so rejecting unknown ids would break normal saves.
+async function keepProjectAssetIds(
+    projectId: number,
+    data: SystemData | null,
+    transaction: TransactionType
+): Promise<SystemData | null> {
+    if (!data?.pointsOfAttack) {
+        return data;
+    }
+
+    const projectAssetIds = new Set((await getAssets(projectId, transaction)).map((asset) => asset.id));
+
+    return {
+        ...data,
+        pointsOfAttack: data.pointsOfAttack.map((pointOfAttack) => ({
+            ...pointOfAttack,
+            assets: Array.isArray(pointOfAttack.assets)
+                ? pointOfAttack.assets.filter((assetId) => projectAssetIds.has(assetId))
+                : [],
+        })),
+    };
 }
 
 function getDeletedPointsOfAttack(oldSystem: System | undefined, newSystem: System): PointOfAttack[] {

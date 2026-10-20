@@ -140,6 +140,7 @@ const VALID_CATALOG_MEASURE_1: InstanceType<typeof CreateCatalogMeasureRequest> 
 };
 
 let projectId: number;
+let catalogId: number;
 let catalogThreatId: number;
 let catalogMeasureId: number;
 let genericThreatId: number;
@@ -170,7 +171,7 @@ beforeEach(async () => {
             })
             .returning()
     ).at(0)!;
-    const catalogId = catalog.id;
+    catalogId = catalog.id;
 
     const authRes = await request(app).get("/api/auth/status").set("X-CSRF-TOKEN", csrfToken).set("Cookie", cookies);
     const userId = authRes.body.data.userId;
@@ -359,6 +360,31 @@ describe("get, delete or update a single measure", () => {
         expect(res.body.name).toBe(VALID_MEASURE_2.name);
         expect(res.body.description).toBe(VALID_MEASURE_2.description);
         expect(res.body.scheduledAt).toBe(VALID_MEASURE_2.scheduledAt);
+    });
+
+    it("should keep a measure in its project when the body names another project", async () => {
+        const otherProjectResponse = await request(app)
+            .post("/api/projects")
+            .send({ ...VALID_PROJECT, catalogId })
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(otherProjectResponse.statusCode).toEqual(200);
+        const otherProjectId = otherProjectResponse.body.id;
+
+        const response = await request(app)
+            .put("/api/projects/" + projectId + "/system/measures/" + measureId)
+            .send({ ...VALID_MEASURE_2, projectId: otherProjectId })
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(response.statusCode).toEqual(200);
+        expect(response.body.projectId).toBe(projectId);
+
+        const otherProjectMeasuresResponse = await request(app)
+            .get("/api/projects/" + otherProjectId + "/system/measures")
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(otherProjectMeasuresResponse.statusCode).toEqual(200);
+        expect(otherProjectMeasuresResponse.body).toEqual([]);
     });
 
     it("should delete a measure", async () => {

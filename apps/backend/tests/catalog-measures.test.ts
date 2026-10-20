@@ -209,6 +209,59 @@ describe("get or create catalog measures", () => {
             .set("Cookie", cookies);
         expect(res.status).toBe(200);
     });
+
+    it("should ignore client-supplied ids when importing catalog measures", async () => {
+        const importCatalogMeasures = (body: object[]) =>
+            request(app)
+                .post("/api/catalogs/" + catalogId + "/measures/import")
+                .send(body)
+                .set("X-CSRF-TOKEN", csrfToken)
+                .set("Cookie", cookies);
+        const existingResponse = await importCatalogMeasures([VALID_CATALOG_MEASURE_1]);
+        const existingId = existingResponse.body[0].id;
+
+        const response = await importCatalogMeasures([{ ...VALID_CATALOG_MEASURE_2, id: existingId }]);
+        expect(response.status).toBe(200);
+        expect(response.body[0].id).not.toBe(existingId);
+        expect(response.body[0].name).toBe(VALID_CATALOG_MEASURE_2.name);
+    });
+
+    it("should not import catalog measures when one row is invalid", async () => {
+        const listCatalogMeasures = () =>
+            request(app)
+                .get("/api/catalogs/" + catalogId + "/measures")
+                .set("X-CSRF-TOKEN", csrfToken)
+                .set("Cookie", cookies);
+        const catalogMeasuresBefore = (await listCatalogMeasures()).body;
+
+        const res = await request(app)
+            .post("/api/catalogs/" + catalogId + "/measures/import")
+            .send([VALID_CATALOG_MEASURE_1, CATALOG_MEASURE_PROBABILITY_MISSING])
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.status).toBe(400);
+        expect(res.body.validationErrors).toBeDefined();
+
+        expect((await listCatalogMeasures()).body).toEqual(catalogMeasuresBefore);
+    });
+
+    it("should not import catalog measures when one row is null", async () => {
+        const listCatalogMeasures = () =>
+            request(app)
+                .get("/api/catalogs/" + catalogId + "/measures")
+                .set("X-CSRF-TOKEN", csrfToken)
+                .set("Cookie", cookies);
+        const catalogMeasuresBefore = (await listCatalogMeasures()).body;
+
+        const res = await request(app)
+            .post("/api/catalogs/" + catalogId + "/measures/import")
+            .send([VALID_CATALOG_MEASURE_1, null])
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.status).toBe(400);
+
+        expect((await listCatalogMeasures()).body).toEqual(catalogMeasuresBefore);
+    });
 });
 
 describe("delete or update catalog measures", () => {
