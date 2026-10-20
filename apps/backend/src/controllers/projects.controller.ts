@@ -12,6 +12,7 @@ import {
     ExtendedProjectResponse,
     ProjectIdParam,
     ProjectResponse,
+    UpdateProjectLineOfToleranceRequest,
     UpdateProjectRequest,
 } from "#types/project.types.js";
 
@@ -131,6 +132,27 @@ export async function updateProject(
     } catch (error) {
         next(error);
     }
+}
+
+/**
+ * Updates the lines of tolerance of the specified project.
+ *
+ * @param {Request} request - The http request.
+ * @param {Response} response - The http response.
+ */
+export async function updateProjectLineOfTolerance(
+    request: Request<ProjectIdParam, ProjectResponse, UpdateProjectLineOfToleranceRequest>,
+    response: Response<ProjectResponse>
+): Promise<void> {
+    const projectId = request.params.projectId;
+    const { lineOfToleranceGreen, lineOfToleranceRed } = request.body;
+
+    const project: ProjectResponse = await ProjectsService.updateProjectLineOfTolerance(projectId, {
+        lineOfToleranceGreen,
+        lineOfToleranceRed,
+    });
+
+    response.json(project);
 }
 
 /**
