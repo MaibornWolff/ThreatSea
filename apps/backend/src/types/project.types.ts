@@ -63,7 +63,25 @@ export class CreateProjectRequest {
     confidentialityLevel!: CONFIDENTIALITY_LEVELS;
 }
 
-export class UpdateProjectRequest {
+export class UpdateProjectLineOfToleranceRequest {
+    @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("lineOfToleranceGreen") })
+    @IsInt({ message: FIELD_MUST_BE_INT_MESSAGE("lineOfToleranceGreen") })
+    @IsIn(LINE_OF_TOLERANCE_GREEN_VALUES, {
+        message: FIELD_MUST_BE_ONE_OF_MESSAGE("lineOfToleranceGreen", LINE_OF_TOLERANCE_GREEN_VALUES),
+    })
+    @Validate(ProjectLinesOfToleranceValidator)
+    lineOfToleranceGreen!: number;
+
+    @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("lineOfToleranceRed") })
+    @IsInt({ message: FIELD_MUST_BE_INT_MESSAGE("lineOfToleranceRed") })
+    @IsIn(LINE_OF_TOLERANCE_RED_VALUES, {
+        message: FIELD_MUST_BE_ONE_OF_MESSAGE("lineOfToleranceRed", LINE_OF_TOLERANCE_RED_VALUES),
+    })
+    @Validate(ProjectLinesOfToleranceValidator)
+    lineOfToleranceRed!: number;
+}
+
+export class UpdateProjectRequest extends UpdateProjectLineOfToleranceRequest {
     @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("name") })
     @IsString({ message: FIELD_MUST_BE_STRING_MESSAGE("name") })
     @Trim()
@@ -87,22 +105,6 @@ export class UpdateProjectRequest {
     @ValidateIf((request: UpdateProjectRequest) => request.catalogId !== undefined)
     @IsInt({ message: FIELD_MUST_BE_INT_MESSAGE("catalogId") })
     catalogId?: number;
-
-    @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("lineOfToleranceGreen") })
-    @IsInt({ message: FIELD_MUST_BE_INT_MESSAGE("lineOfToleranceGreen") })
-    @IsIn(LINE_OF_TOLERANCE_GREEN_VALUES, {
-        message: FIELD_MUST_BE_ONE_OF_MESSAGE("lineOfToleranceGreen", LINE_OF_TOLERANCE_GREEN_VALUES),
-    })
-    @Validate(ProjectLinesOfToleranceValidator)
-    lineOfToleranceGreen!: number;
-
-    @IsDefined({ message: FIELD_MUST_EXIST_MESSAGE("lineOfToleranceRed") })
-    @IsInt({ message: FIELD_MUST_BE_INT_MESSAGE("lineOfToleranceRed") })
-    @IsIn(LINE_OF_TOLERANCE_RED_VALUES, {
-        message: FIELD_MUST_BE_ONE_OF_MESSAGE("lineOfToleranceRed", LINE_OF_TOLERANCE_RED_VALUES),
-    })
-    @Validate(ProjectLinesOfToleranceValidator)
-    lineOfToleranceRed!: number;
 }
 
 export interface ProjectResponse {

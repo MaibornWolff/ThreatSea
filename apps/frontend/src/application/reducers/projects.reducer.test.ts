@@ -148,6 +148,29 @@ describe("projectsReducer — deletingProjectId lifecycle", () => {
         });
     });
 
+    describe("setProject", () => {
+        it("keeps the member's role when a non-owner saves the project", () => {
+            const state = withEntities(createProject({ id: 7, role: USER_ROLES.EDITOR, lineOfToleranceGreen: 6 }));
+
+            const next = projectsReducer(
+                state,
+                ProjectsActions.setProject(createProject({ id: 7, role: USER_ROLES.OWNER, lineOfToleranceGreen: 3 }))
+            );
+
+            expect(next.entities[7]?.role).toBe(USER_ROLES.EDITOR);
+            expect(next.entities[7]?.lineOfToleranceGreen).toBe(3);
+        });
+
+        it("marks a newly created project as owned", () => {
+            const next = projectsReducer(
+                getInitialState(),
+                ProjectsActions.setProject(createProject({ id: 7, role: USER_ROLES.VIEWER }))
+            );
+
+            expect(next.entities[7]?.role).toBe(USER_ROLES.OWNER);
+        });
+    });
+
     describe("setProjectFolder", () => {
         it("updates only the folder placement, leaving the role intact", () => {
             const state = withEntities(createProject({ id: 7, role: USER_ROLES.VIEWER, folderId: null }));
@@ -176,5 +199,68 @@ describe("projectsReducer — deletingProjectId lifecycle", () => {
             expect(next.entities[7]?.folderId).toBeNull();
             expect(next.current?.folderId).toBeNull();
         });
+    });
+});
+
+describe("projectsReducer — line of tolerance draft", () => {
+    const draft = { projectId: 7, lineOfToleranceGreen: 3, lineOfToleranceRed: 10 };
+
+    it("has no draft initially", () => {
+        expect(getInitialState().lineOfToleranceDraft).toBeUndefined();
+    });
+
+    it("stores the unsaved values without touching the saved project", () => {
+        const state = withEntities(createProject({ id: 7, lineOfToleranceGreen: 6, lineOfToleranceRed: 15 }));
+
+        const next = projectsReducer(state, ProjectsActions.setLineOfToleranceDraft(draft));
+
+        expect(next.lineOfToleranceDraft).toEqual(draft);
+        expect(next.entities[7]?.lineOfToleranceGreen).toBe(6);
+        expect(next.entities[7]?.lineOfToleranceRed).toBe(15);
+    });
+
+    it("discards the draft on reset", () => {
+        const state = projectsReducer(getInitialState(), ProjectsActions.setLineOfToleranceDraft(draft));
+
+        const next = projectsReducer(state, ProjectsActions.clearLineOfToleranceDraft());
+
+        expect(next.lineOfToleranceDraft).toBeUndefined();
+    });
+
+    it("drops the draft once the same values are saved", () => {
+        let state = withEntities(createProject({ id: 7, lineOfToleranceGreen: 6, lineOfToleranceRed: 15 }));
+        state = projectsReducer(state, ProjectsActions.setLineOfToleranceDraft(draft));
+
+        const next = projectsReducer(
+            state,
+            ProjectsActions.setProject(createProject({ id: 7, lineOfToleranceGreen: 3, lineOfToleranceRed: 10 }))
+        );
+
+        expect(next.lineOfToleranceDraft).toBeUndefined();
+        expect(next.entities[7]?.lineOfToleranceGreen).toBe(3);
+    });
+
+    it("keeps a draft edited further while the save was in flight", () => {
+        let state = withEntities(createProject({ id: 7, lineOfToleranceGreen: 6, lineOfToleranceRed: 15 }));
+        state = projectsReducer(state, ProjectsActions.setLineOfToleranceDraft({ ...draft, lineOfToleranceGreen: 2 }));
+
+        const next = projectsReducer(
+            state,
+            ProjectsActions.setProject(createProject({ id: 7, lineOfToleranceGreen: 3, lineOfToleranceRed: 10 }))
+        );
+
+        expect(next.lineOfToleranceDraft).toEqual({ ...draft, lineOfToleranceGreen: 2 });
+    });
+
+    it("keeps the draft when a different project is saved with the same values", () => {
+        let state = withEntities(createProject({ id: 7 }), createProject({ id: 8 }));
+        state = projectsReducer(state, ProjectsActions.setLineOfToleranceDraft(draft));
+
+        const next = projectsReducer(
+            state,
+            ProjectsActions.setProject(createProject({ id: 8, lineOfToleranceGreen: 3, lineOfToleranceRed: 10 }))
+        );
+
+        expect(next.lineOfToleranceDraft).toEqual(draft);
     });
 });
