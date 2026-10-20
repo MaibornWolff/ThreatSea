@@ -130,7 +130,7 @@ const AddThreatDialog = ({ threat, project, userRole, initialTab, onSaved }: Add
                     status,
                     id: threatId,
                     projectId,
-                }),
+                })
             ).unwrap();
             onSaved?.();
             closeDialog();
@@ -193,7 +193,7 @@ const AddThreatDialog = ({ threat, project, userRole, initialTab, onSaved }: Add
     const onClickDeleteMeasureThreat = (
         event: MouseEvent<HTMLElement>,
         measureThreat: ThreatMeasure,
-        measure: Measure,
+        measure: Measure
     ) => {
         event.preventDefault();
         event.stopPropagation();
@@ -238,7 +238,7 @@ const AddThreatDialog = ({ threat, project, userRole, initialTab, onSaved }: Add
         setTab(newTab);
         navigate(
             { pathname: location.pathname, search: location.search },
-            { replace: true, state: { ...location.state, returnToTab: newTab } },
+            { replace: true, state: { ...location.state, returnToTab: newTab } }
         );
     };
 
