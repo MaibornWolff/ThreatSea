@@ -4,7 +4,7 @@
 import { Asset } from "#db/schema.js";
 import { ComponentType } from "#types/system.types.js";
 import { findSystem } from "#services/system.service.js";
-import { getMultipleAssets } from "#services/assets.service.js";
+import { getAssetsByIds } from "#services/assets.service.js";
 
 interface PointOfAttack {
     id: string;
@@ -33,7 +33,7 @@ async function getAssets(projectId: number, assetIds: number[]): Promise<Asset[]
         return [];
     }
 
-    return await getMultipleAssets(projectId, assetIds);
+    return await getAssetsByIds(projectId, assetIds);
 }
 
 /**
