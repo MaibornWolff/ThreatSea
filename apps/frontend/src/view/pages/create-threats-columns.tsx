@@ -7,11 +7,12 @@ import Delete from "@mui/icons-material/Delete";
 import Edit from "@mui/icons-material/Edit";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
-import { Box, Checkbox, ListItemText, MenuItem, Select, Typography } from "@mui/material";
+import { Box, MenuItem, Select, Typography } from "@mui/material";
 import { type GridColDef, type GridRenderCellParams } from "@mui/x-data-grid";
 import type { TFunction } from "i18next";
 import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat.types.ts";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
+import { ATTACKERS } from "#api/types/attackers.types.ts";
 import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { PROTECTION_GOALS, type ProtectionGoal } from "#api/types/protection-goals.types.ts";
 import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
@@ -20,6 +21,7 @@ import type { ExtendedThreatWithMetrics } from "#application/hooks/use-generic-t
 import { ColumnFilterHeader } from "#view/components/column-filter-header.component.tsx";
 import { IconButton } from "#view/components/icon-button.component.tsx";
 import { OverflowText } from "#view/components/overflow-text.component.tsx";
+import { SelectionFilter } from "#view/components/selection-filter.component.tsx";
 
 export type ThreatsGridRow =
     | {
@@ -69,9 +71,8 @@ const cellText = { fontSize: "0.875rem" } as const;
 // its filter toggle and DataGrid's sort icon; narrower, a sorted column clips the label.
 const METRIC_COLUMN_WIDTH = 110;
 
-// The protection goals filter holds the selected goals comma-separated, since column filters are strings.
-export const parseProtectionGoalsFilter = (filterValue: string | undefined): ProtectionGoal[] =>
-    PROTECTION_GOALS.filter((goal) => filterValue?.split(",").includes(goal));
+export const POINT_OF_ATTACK_OPTIONS = Object.values(POINTS_OF_ATTACK);
+export const ATTACKER_OPTIONS = Object.values(ATTACKERS);
 
 const threatStatusPresentation: Record<THREAT_STATUSES, { icon: React.ReactElement; color: string }> = {
     [THREAT_STATUSES.NEW]: { icon: <FiberManualRecord sx={{ fontSize: 16 }} />, color: "text.statusNew" },
@@ -237,37 +238,16 @@ export const createThreatsColumns = ({
                 expandedFilters={expandedFilters}
                 onToggleExpanded={onToggleFilterExpanded}
             >
-                <Select<ProtectionGoal[]>
-                    multiple
-                    size="small"
-                    value={parseProtectionGoalsFilter(columnFilters["protectionGoals"])}
-                    onChange={(event) => {
-                        const selectedGoals = event.target.value as ProtectionGoal[];
-                        onFilterChange(
-                            "protectionGoals",
-                            PROTECTION_GOALS.filter((goal) => selectedGoals.includes(goal)).join(",")
-                        );
-                    }}
-                    onClick={(event) => event.stopPropagation()}
-                    displayEmpty
+                <SelectionFilter<ProtectionGoal>
+                    field="protectionGoals"
+                    options={PROTECTION_GOALS}
+                    columnFilters={columnFilters}
+                    onFilterChange={onFilterChange}
+                    optionLabel={(goal) => t(goal)}
                     // The column is narrow: the selection shows as abbreviations, the menu names the goals in full.
-                    renderValue={(selectedGoals) =>
-                        selectedGoals.length === 0
-                            ? t("filterAll")
-                            : selectedGoals.map((goal) => t(`${goal}Abbreviation`)).join(", ")
-                    }
-                    sx={{ width: "100%" }}
-                >
-                    {PROTECTION_GOALS.map((goal) => (
-                        <MenuItem key={goal} value={goal}>
-                            <Checkbox
-                                size="small"
-                                checked={parseProtectionGoalsFilter(columnFilters["protectionGoals"]).includes(goal)}
-                            />
-                            <ListItemText primary={t(goal)} />
-                        </MenuItem>
-                    ))}
-                </Select>
+                    selectedLabel={(goal) => t(`${goal}Abbreviation`)}
+                    allLabel={t("filterAll")}
+                />
             </ColumnFilterHeader>
         ),
         renderCell: (params: GridRenderCellParams<ThreatsGridRow>) => {
@@ -354,7 +334,16 @@ export const createThreatsColumns = ({
                 onFilterChange={onFilterChange}
                 expandedFilters={expandedFilters}
                 onToggleExpanded={onToggleFilterExpanded}
-            />
+            >
+                <SelectionFilter
+                    field="pointOfAttack"
+                    options={POINT_OF_ATTACK_OPTIONS}
+                    columnFilters={columnFilters}
+                    onFilterChange={onFilterChange}
+                    optionLabel={(pointOfAttack) => t(`pointsOfAttackList.${pointOfAttack}`)}
+                    allLabel={t("filterAll")}
+                />
+            </ColumnFilterHeader>
         ),
         renderCell: (params: GridRenderCellParams<ThreatsGridRow>) => {
             const row = params.row;
@@ -384,7 +373,16 @@ export const createThreatsColumns = ({
                 onFilterChange={onFilterChange}
                 expandedFilters={expandedFilters}
                 onToggleExpanded={onToggleFilterExpanded}
-            />
+            >
+                <SelectionFilter
+                    field="attacker"
+                    options={ATTACKER_OPTIONS}
+                    columnFilters={columnFilters}
+                    onFilterChange={onFilterChange}
+                    optionLabel={(attacker) => t(`attackerList.${attacker}`)}
+                    allLabel={t("filterAll")}
+                />
+            </ColumnFilterHeader>
         ),
         renderCell: (params: GridRenderCellParams<ThreatsGridRow>) => {
             const row = params.row;

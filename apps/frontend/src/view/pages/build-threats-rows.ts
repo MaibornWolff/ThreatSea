@@ -2,11 +2,14 @@ import type { TFunction } from "i18next";
 import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat.types.ts";
 import type { ExtendedThreatWithMetrics } from "#application/hooks/use-generic-threats-list.hook.ts";
 import { ALL_ROWS_PAGE_SIZE } from "#application/hooks/use-page-size-options.hook.ts";
+import { PROTECTION_GOALS } from "#api/types/protection-goals.types.ts";
 import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
+import { parseSelectionFilter } from "#utils/column-filters.ts";
 import {
+    ATTACKER_OPTIONS,
     formatComponentName,
     GENERIC_THREAT_ROW_PREFIX,
-    parseProtectionGoalsFilter,
+    POINT_OF_ATTACK_OPTIONS,
     THREAT_ROW_PREFIX,
     type ThreatsGridRow,
 } from "./create-threats-columns";
@@ -25,7 +28,7 @@ const threatOnlyFilterFields = [
 
 interface ActiveFilter {
     field: string;
-    // the raw value, for exact matches (protection goals, status)
+    // the raw value, for exact matches (protection goals, point of attack, attacker, status)
     value: string;
     // trimmed and lower-cased, for substring matches
     search: string;
@@ -42,15 +45,15 @@ const threatMatchesFilter = (
         case "description":
             return threat.description.toLowerCase().includes(search);
         case "assets":
-            return String(threat.assets.length).includes(search);
+            return threat.assets.some((asset) => asset.name.toLowerCase().includes(search));
         case "protectionGoals":
-            return parseProtectionGoalsFilter(value).some((goal) => threat[goal]);
+            return parseSelectionFilter(PROTECTION_GOALS, value).some((goal) => threat[goal]);
         case "componentName":
             return formatComponentName(threat, t).toLowerCase().includes(search);
         case "pointOfAttack":
-            return t(`pointsOfAttackList.${threat.pointOfAttack}`).toLowerCase().includes(search);
+            return parseSelectionFilter(POINT_OF_ATTACK_OPTIONS, value).includes(threat.pointOfAttack);
         case "attacker":
-            return t(`attackerList.${threat.attacker}`).toLowerCase().includes(search);
+            return parseSelectionFilter(ATTACKER_OPTIONS, value).includes(threat.attacker);
         case "probability":
             return String(threat.probability).includes(search);
         case "damage":
@@ -67,7 +70,7 @@ const threatMatchesFilter = (
 // undefined for fields a generic threat has no value for (the threat-only fields).
 const genericThreatMatchesFilter = (
     genericThreat: GenericThreatWithExtendedThreats,
-    { field, search }: ActiveFilter,
+    { field, value, search }: ActiveFilter,
     t: TFunction
 ): boolean | undefined => {
     switch (field) {
@@ -76,9 +79,9 @@ const genericThreatMatchesFilter = (
         case "componentName":
             return formatComponentName(genericThreat, t).toLowerCase().includes(search);
         case "pointOfAttack":
-            return t(`pointsOfAttackList.${genericThreat.pointOfAttack}`).toLowerCase().includes(search);
+            return parseSelectionFilter(POINT_OF_ATTACK_OPTIONS, value).includes(genericThreat.pointOfAttack);
         case "attacker":
-            return t(`attackerList.${genericThreat.attacker}`).toLowerCase().includes(search);
+            return parseSelectionFilter(ATTACKER_OPTIONS, value).includes(genericThreat.attacker);
         default:
             return undefined;
     }

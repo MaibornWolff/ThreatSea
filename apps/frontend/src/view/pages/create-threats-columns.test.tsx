@@ -421,6 +421,90 @@ describe("createThreatsColumns — protection goals column", () => {
     });
 });
 
+describe("createThreatsColumns — point of attack and attacker filters", () => {
+    it.each([
+        {
+            field: "pointOfAttack",
+            options: [
+                "User Interface",
+                "Processing Infrastructure",
+                "Data Storage Infrastructure",
+                "Communication Infrastructure",
+                "Communication Interfaces",
+                "User Behaviour",
+            ],
+        },
+        {
+            field: "attacker",
+            options: ["Unauthorised Parties", "System Users", "Application Users", "Administrators"],
+        },
+    ])("offers every $field to tick", async ({ field, options }) => {
+        const { byField } = columnByField({ expandedFilters: { [field]: true } });
+        renderHeader(byField[field]);
+
+        await userEvent.click(screen.getByRole("combobox"));
+
+        const optionNames = (await screen.findAllByRole("option")).map((option) => option.textContent);
+        expect(optionNames).toEqual(options);
+    });
+
+    it.each([
+        { field: "pointOfAttack", current: "", clicked: "User Behaviour", expected: "USER_BEHAVIOUR" },
+        {
+            field: "pointOfAttack",
+            current: "COMMUNICATION_INTERFACES",
+            clicked: "User Interface",
+            expected: "USER_INTERFACE,COMMUNICATION_INTERFACES",
+        },
+        { field: "attacker", current: "", clicked: "Administrators", expected: "ADMINISTRATORS" },
+        { field: "attacker", current: "SYSTEM_USERS", clicked: "System Users", expected: "" },
+    ])(
+        "ticking $clicked with the $field filter at '$current' filters for '$expected'",
+        async ({ field, current, clicked, expected }) => {
+            const { byField, handlers } = columnByField({
+                columnFilters: { [field]: current },
+                expandedFilters: { [field]: true },
+            });
+            renderHeader(byField[field]);
+
+            await userEvent.click(screen.getByRole("combobox"));
+            await userEvent.click(await screen.findByRole("option", { name: clicked }));
+
+            expect(handlers.onFilterChange).toHaveBeenCalledWith(field, expected);
+        }
+    );
+
+    it("filters for the same value in German", async () => {
+        const { byField, handlers } = columnByField({ t: germanT, expandedFilters: { attacker: true } });
+        renderHeader(byField["attacker"]);
+
+        await userEvent.click(screen.getByRole("combobox"));
+        await userEvent.click(await screen.findByRole("option", { name: germanT("attackerList.ADMINISTRATORS") }));
+
+        expect(handlers.onFilterChange).toHaveBeenCalledWith("attacker", "ADMINISTRATORS");
+    });
+
+    it.each([
+        { language: "English", t: englishT, filter: "", shown: "All" },
+        { language: "German", t: germanT, filter: "", shown: "Alle" },
+        {
+            language: "English",
+            t: englishT,
+            filter: "USER_INTERFACE,USER_BEHAVIOUR",
+            shown: "User Interface, User Behaviour",
+        },
+    ])("shows the point of attack filter '$filter' as '$shown' in $language", ({ t, filter, shown }) => {
+        const { byField } = columnByField({
+            t,
+            columnFilters: { pointOfAttack: filter },
+            expandedFilters: { pointOfAttack: true },
+        });
+        renderHeader(byField["pointOfAttack"]);
+
+        expect(screen.getByRole("combobox")).toHaveTextContent(shown);
+    });
+});
+
 describe("formatComponentName", () => {
     it("appends the interface name for communication interfaces", () => {
         expect(
