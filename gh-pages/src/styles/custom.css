@@ -12,3 +12,10 @@
   filter: invert(1);
   mix-blend-mode: screen;
 }
+
+/* Use more of wide screens, mainly so the screenshots in the user manual stay readable */
+@media (min-width: 100rem) {
+  :root {
+    --sl-content-width: 60rem;
+  }
+}
