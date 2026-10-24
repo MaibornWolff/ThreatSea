@@ -1,0 +1,91 @@
+suite: non-secret config read from the existing secret
+templates:
+  - deployment.yaml
+  - secret.yaml
+set:
+  config.origin: https://threatsea.example.com
+  secret.existingSecret: my-secret
+  secret.configKeys.oidcIssuerUrl: issuer-key
+  secret.configKeys.oidcClientId: client-id-key
+  secret.configKeys.databaseHost: db-host-key
+  secret.configKeys.databaseName: db-name-key
+  secret.configKeys.databaseUser: db-user-key
+tests:
+  # The plain values are required only while no key replaces them.
+  - it: reads each configured value from the existing secret
+    template: deployment.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: OIDC_ISSUER_URL, valueFrom: { secretKeyRef: { name: my-secret, key: issuer-key } } }
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: OIDC_CLIENT_ID, valueFrom: { secretKeyRef: { name: my-secret, key: client-id-key } } }
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: DATABASE_HOST, valueFrom: { secretKeyRef: { name: my-secret, key: db-host-key } } }
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: DATABASE_NAME, valueFrom: { secretKeyRef: { name: my-secret, key: db-name-key } } }
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: DATABASE_USER, valueFrom: { secretKeyRef: { name: my-secret, key: db-user-key } } }
+
+  # A key and its plain value are both set: one would be silently ignored.
+  - it: rejects a database key together with its plain value
+    template: deployment.yaml
+    set:
+      database.name: threatsea
+    asserts:
+      - failedTemplate:
+          errorPattern: database.name must be empty when secret.configKeys.databaseName is set
+
+  - it: rejects an OIDC key together with its plain value
+    template: deployment.yaml
+    set:
+      config.oidc.issuerUrl: https://idp.example.com
+    asserts:
+      - failedTemplate:
+          errorPattern: config.oidc.issuerUrl must be empty when secret.configKeys.oidcIssuerUrl is set
+
+  - it: rejects the database host key together with database.host
+    template: deployment.yaml
+    set:
+      database.host: db.example.com
+    asserts:
+      - failedTemplate:
+          errorPattern: database.host must be empty when secret.configKeys.databaseHost is set
+
+  - it: keeps plain values for the keys left empty
+    template: deployment.yaml
+    set:
+      secret.configKeys.databaseName: ""
+      database.name: plain-db
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: { name: DATABASE_NAME, value: plain-db }
+
+  # The chart-created Secret holds only the four secret values.
+  - it: requires an existing secret
+    template: deployment.yaml
+    set:
+      secret.existingSecret: ""
+      secret.values.jwtSecret: jwt
+      secret.values.sessionSecret: session
+      secret.values.oidcClientSecret: oidc
+      secret.values.databasePassword: dbpw
+    asserts:
+      - failedTemplate:
+          errorPattern: secret.configKeys requires secret.existingSecret
+
+  # The bundled database is created from the plain database.name and database.user.
+  - it: rejects database keys with the bundled database
+    template: deployment.yaml
+    set:
+      postgresql.enabled: true
+      postgresql.auth.password: pgpw
+      secret.configKeys.databaseHost: ""
+    asserts:
+      - failedTemplate:
+          errorPattern: secret.configKeys.database\* must be empty when postgresql.enabled=true

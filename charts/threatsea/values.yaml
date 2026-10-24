@@ -1,0 +1,277 @@
+# -- Number of replicas. Sessions are stored in PostgreSQL and survive across
+# replicas, but whether other in-process state prevents horizontal scaling has
+# not been verified, so `1` is the tested configuration.
+replicaCount: 1
+
+# -- Deployment update strategy. Kubernetes default (RollingUpdate) when empty.
+strategy: {}
+
+image:
+  # -- ThreatSea container image repository
+  repository: ghcr.io/maibornwolff/threatsea
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+  # -- Image tag. Defaults to the chart's appVersion when empty.
+  tag: ""
+
+# -- Secrets for pulling the image from a private registry
+imagePullSecrets: []
+
+# -- Override the chart name used in resource names
+nameOverride: ""
+# -- Override the full resource name prefix
+fullnameOverride: ""
+
+serviceAccount:
+  # -- Create a ServiceAccount for the pods
+  create: false
+  # -- Annotations for the ServiceAccount
+  annotations: {}
+  # -- ServiceAccount name. Generated from the fullname when empty and create=true.
+  name: ""
+  # -- Mount the ServiceAccount API token into the pods (ThreatSea does not need it)
+  automountServiceAccountToken: false
+
+# -- Annotations added to the Deployment, e.g. for Stakater Reloader
+deploymentAnnotations: {}
+
+# -- Annotations added to the pods
+podAnnotations: {}
+
+# -- Labels added to the pods
+podLabels: {}
+
+# -- Pod-level security context
+podSecurityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+# -- Container-level security context. The root filesystem is read-only; use
+# `extraVolumes` for any path the container must write to.
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  capabilities:
+    drop:
+      - ALL
+
+config:
+  # -- Log level as an integer: 0 (debug), 1 (info), 2 (warning), 3 (error)
+  logLevel: 3
+
+  # -- Externally reachable origin of ThreatSea, for example `https://threatsea.example.com`.
+  # The container serves the frontend and the API from this one origin; it is used for
+  # CORS, the OIDC callback URL (`<origin>/api/auth/redirect`) and the post-login redirect.
+  origin: ""
+
+  oidc:
+    # -- OIDC issuer URL (required)
+    issuerUrl: ""
+    # -- OIDC client ID
+    clientId: ""
+    # -- Allow plain HTTP for OIDC (boolean, never enable in production)
+    allowHttp: false
+
+  cookies:
+    # -- Send cookies with the Secure flag (boolean). Set to false only in
+    # development (non-HTTPS).
+    secure: true
+
+  # -- Set to true (boolean) when behind a reverse proxy / ingress (enables trust proxy)
+  useProxy: true
+
+secret:
+  # -- Name of an existing Secret to use. When empty, the chart creates a Secret
+  # from secret.values. When set, the chart creates none and the Secret must
+  # contain the keys defined in secret.keys.
+  existingSecret: ""
+
+  # -- Key names of the four secret entries. The chart uses these names both in the
+  # Secret it creates and when reading an existing Secret, so an existing Secret
+  # must contain these keys (databasePassword only when postgresql.enabled=false).
+  # It may hold other keys too, such as those named in secret.configKeys.
+  keys:
+    jwtSecret: jwt-secret
+    sessionSecret: session-secret
+    oidcClientSecret: oidc-client-secret
+    databasePassword: database-password
+
+  # -- Keys in secret.existingSecret to read non-secret settings from, for setups
+  # that keep them alongside the secrets (e.g. one Key Vault-backed Secret). A
+  # non-empty key replaces the plain value; rendering fails when both are set. Requires
+  # secret.existingSecret; the database keys also require postgresql.enabled=false.
+  configKeys:
+    # -- Key holding the OIDC issuer URL, replacing config.oidc.issuerUrl
+    oidcIssuerUrl: ""
+    # -- Key holding the OIDC client ID, replacing config.oidc.clientId
+    oidcClientId: ""
+    # -- Key holding the database host, replacing database.host
+    databaseHost: ""
+    # -- Key holding the database name, replacing database.name
+    databaseName: ""
+    # -- Key holding the database user, replacing database.user
+    databaseUser: ""
+
+  # -- Values for the chart-created Secret (used only when existingSecret is empty)
+  values:
+    # -- Secret used to sign JWTs
+    jwtSecret: ""
+    # -- Secret used to sign Express session cookies
+    sessionSecret: ""
+    # -- OIDC client secret (required)
+    oidcClientSecret: ""
+    # -- Database password (used only when postgresql.enabled=false and secret.existingSecret is empty)
+    databasePassword: ""
+
+database:
+  # -- Hostname of an external PostgreSQL server. Required unless postgresql.enabled=true.
+  host: ""
+  # -- Port of the PostgreSQL server
+  port: 5432
+  # -- Database name. Defaults to `threatsea` when empty. Also the database the bundled PostgreSQL creates.
+  name: ""
+  # -- Database user. Required unless postgresql.enabled=true; the bundled PostgreSQL
+  # creates this user and defaults it to `threatsea` when empty.
+  user: ""
+  # -- TLS mode, passed to the backend as DATABASE_TLS: `verify` (TLS with certificate
+  # verification), `no-verify` (TLS without certificate verification, e.g. for a pooler
+  # with a self-signed certificate) or `disabled`. Forced to `disabled` when
+  # postgresql.enabled=true, which serves plaintext.
+  tls: verify
+
+postgresql:
+  # -- Deploy a single-replica PostgreSQL StatefulSet. EVALUATION ONLY: no backups,
+  # no replication, no TLS, and no supported upgrade path between major versions.
+  enabled: false
+  image:
+    # -- Bundled PostgreSQL image repository (also used by the `helm test` hook)
+    repository: postgres
+    # -- Bundled PostgreSQL image tag
+    tag: "18.6-alpine"
+    # -- Bundled PostgreSQL image pull policy
+    pullPolicy: IfNotPresent
+  auth:
+    # -- Password for database.user. Required when enabled=true and existingSecret is empty.
+    password: ""
+    # -- Existing Secret holding the bundled database's password, instead of auth.password. Rendering fails when this is set and enabled=false.
+    existingSecret: ""
+    # -- Key inside `postgresql.auth.existingSecret` that holds the password
+    existingSecretPasswordKey: password
+  persistence:
+    # -- Persist data on a PersistentVolumeClaim. When false, data is lost on pod restart.
+    enabled: true
+    # -- Size of the PersistentVolumeClaim
+    size: 8Gi
+    # -- StorageClass of the PersistentVolumeClaim. Cluster default when empty.
+    storageClass: ""
+  # -- Resource requests and limits of the bundled PostgreSQL container
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 1Gi
+
+service:
+  # -- Service type
+  type: ClusterIP
+  # -- Service port
+  port: 80
+  # -- Annotations for the Service
+  annotations: {}
+
+ingress:
+  # -- Create an Ingress
+  enabled: false
+  # -- IngressClass name
+  className: ""
+  # -- Annotations for the Ingress
+  annotations: {}
+  # -- Ingress hosts and paths
+  hosts:
+    - host: threatsea.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  # -- Ingress TLS configuration
+  tls: []
+  # - secretName: threatsea-tls
+  #   hosts:
+  #     - threatsea.example.com
+
+# Requires the Gateway API CRDs to be installed in the cluster.
+# TLS is not configured here: with the Gateway API it terminates on the
+# Gateway's listener, which is owned by the cluster operator, not by this chart.
+gateway:
+  # -- Create an HTTPRoute attached to an existing Gateway
+  enabled: false
+  # -- Name of the Gateway to attach the HTTPRoute to
+  gatewayName: ""
+  # -- Namespace of the Gateway. Release namespace when empty.
+  gatewayNamespace: ""
+  # -- Hostnames matched by the HTTPRoute
+  hostnames:
+    - threatsea.example.com
+  # -- Name of the Gateway listener (sectionName) to attach to. All listeners when empty.
+  sectionName: ""
+  # -- Annotations for the HTTPRoute
+  annotations: {}
+
+# -- Resource requests and limits of the ThreatSea container
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 512Mi
+
+# -- Liveness probe of the ThreatSea container
+livenessProbe:
+  httpGet:
+    path: /api/health
+    port: http
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# -- Readiness probe of the ThreatSea container
+readinessProbe:
+  httpGet:
+    path: /api/health
+    port: http
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# -- Startup probe of the ThreatSea container
+startupProbe:
+  httpGet:
+    path: /api/health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  failureThreshold: 30
+
+# -- Node selector
+nodeSelector: {}
+
+# -- Tolerations
+tolerations: []
+
+# -- Affinity rules
+affinity: {}
+
+# -- Extra environment variables to inject into the container. Use it for backend
+# settings the chart has no value for; the README lists them under "Additional backend settings".
+extraEnv: []
+
+# -- Extra environment sources (configMapRef / secretRef) added to the container's `envFrom`
+extraEnvFrom: []
+
+# -- Extra volumes added to the pod, e.g. to mount a private CA bundle (the root filesystem is read-only)
+extraVolumes: []
+
+# -- Extra volume mounts added to the container; each must match a volume in `extraVolumes`
+extraVolumeMounts: []

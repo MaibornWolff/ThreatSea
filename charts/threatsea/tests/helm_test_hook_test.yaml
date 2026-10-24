@@ -1,0 +1,150 @@
+suite: helm test hook
+templates:
+  - tests/connection-test.yaml
+set:
+  config.origin: https://threatsea.example.com
+  config.oidc.issuerUrl: https://idp.example.com
+  config.oidc.clientId: threatsea
+  secret.values.jwtSecret: jwt
+  secret.values.sessionSecret: session
+  secret.values.oidcClientSecret: oidc
+  secret.values.databasePassword: dbpw
+tests:
+  - it: renders a test-hook pod that checks the database connection
+    release: { name: rel }
+    asserts:
+      - isKind: { of: Pod }
+      - equal:
+          path: metadata.annotations["helm.sh/hook"]
+          value: test
+      - equal:
+          path: metadata.annotations["helm.sh/hook-delete-policy"]
+          value: before-hook-creation,hook-succeeded
+      - equal:
+          path: spec.restartPolicy
+          value: Never
+      - contains:
+          path: spec.containers[0].env
+          content: { name: PGHOST, value: rel-threatsea-postgresql }
+    set:
+      postgresql.enabled: true
+      postgresql.auth.password: pw
+  - it: targets the external database when the bundled one is disabled
+    asserts:
+      - contains:
+          path: spec.containers[0].env
+          content: { name: PGHOST, value: db.example.com }
+      - equal:
+          path: spec.containers[0].command
+          value: [psql, -X, -v, ON_ERROR_STOP=1, -c, "SELECT 1"]
+      - equal:
+          path: spec.containers[0].name
+          value: psql
+      - contains:
+          path: spec.containers[0].env
+          content: { name: PGCONNECT_TIMEOUT, value: "10" }
+      - equal:
+          path: spec.securityContext.runAsUser
+          value: 70
+    set:
+      postgresql.enabled: false
+      database.host: db.example.com
+      database.user: appuser
+
+  - it: tests the bundled service port regardless of database.port
+    set:
+      postgresql.enabled: true
+      postgresql.auth.password: pw
+      database.host: ""
+      database.port: 6543
+    asserts:
+      - contains:
+          path: spec.containers[0].env
+          content: { name: PGPORT, value: "5432" }
+
+  - it: reads the bundled password from an existing secret when given one
+    set:
+      postgresql.enabled: true
+      postgresql.auth.existingSecret: my-pg-secret
+      postgresql.auth.existingSecretPasswordKey: pw
+    asserts:
+      - equal:
+          path: spec.containers[0].env[?(@.name=="PGPASSWORD")].valueFrom.secretKeyRef
+          value: { name: my-pg-secret, key: pw }
+
+  - it: uses the bundled database image
+    set:
+      postgresql.enabled: true
+      postgresql.auth.password: pw
+      postgresql.image.tag: 18.7-alpine
+    asserts:
+      - equal:
+          path: spec.containers[0].image
+          value: postgres:18.7-alpine
+
+  - it: verifies the certificate against the system CAs like the app with database.tls=verify
+    set:
+      postgresql.enabled: false
+      database.host: db.example.com
+      database.user: appuser
+      database.tls: verify
+    asserts:
+      - contains:
+          path: spec.containers[0].env
+          content: { name: PGSSLMODE, value: verify-full }
+      - contains:
+          path: spec.containers[0].env
+          content: { name: PGSSLROOTCERT, value: system }
+
+  - it: requires TLS for an external database with database.tls=no-verify
+    set:
+      postgresql.enabled: false
+      database.host: db.example.com
+      database.user: appuser
+      database.tls: no-verify
+    asserts:
+      - contains:
+          path: spec.containers[0].env
+          content: { name: PGSSLMODE, value: require }
+      - notContains:
+          path: spec.containers[0].env
+          content: { name: PGSSLROOTCERT, value: system }
+
+  - it: disables TLS for an external database with database.tls=disabled
+    set:
+      postgresql.enabled: false
+      database.host: db.example.com
+      database.user: appuser
+      database.tls: disabled
+    asserts:
+      - contains:
+          path: spec.containers[0].env
+          content: { name: PGSSLMODE, value: disable }
+
+  - it: disables TLS for the bundled database even with database.tls
+    set:
+      postgresql.enabled: true
+      postgresql.auth.password: pw
+      database.tls: verify
+    asserts:
+      - contains:
+          path: spec.containers[0].env
+          content: { name: PGSSLMODE, value: disable }
+
+  - it: reads the database settings from the existing secret like the app
+    set:
+      database.host: ""
+      secret.existingSecret: my-secret
+      secret.configKeys.databaseHost: db-host-key
+      secret.configKeys.databaseName: db-name-key
+      secret.configKeys.databaseUser: db-user-key
+    asserts:
+      - contains:
+          path: spec.containers[0].env
+          content: { name: PGHOST, valueFrom: { secretKeyRef: { name: my-secret, key: db-host-key } } }
+      - contains:
+          path: spec.containers[0].env
+          content: { name: PGDATABASE, valueFrom: { secretKeyRef: { name: my-secret, key: db-name-key } } }
+      - contains:
+          path: spec.containers[0].env
+          content: { name: PGUSER, valueFrom: { secretKeyRef: { name: my-secret, key: db-user-key } } }

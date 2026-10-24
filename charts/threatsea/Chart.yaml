@@ -1,0 +1,25 @@
+apiVersion: v2
+name: threatsea
+description: A Helm chart for ThreatSea - an open-source threat modeling tool
+type: application
+# Placeholder: release.yml stamps the release version here. Do not hand-edit.
+version: 0.0.0
+# Placeholder: release.yml stamps the release version here. Do not hand-edit.
+appVersion: "0.0.0"
+
+keywords:
+  - threatsea
+  - threat-modeling
+  - security
+  - risk-management
+
+kubeVersion: ">=1.25.0-0"
+icon: https://raw.githubusercontent.com/MaibornWolff/ThreatSea/main/apps/frontend/public/logo256.png
+
+home: https://github.com/MaibornWolff/ThreatSea
+sources:
+  - https://github.com/MaibornWolff/ThreatSea
+
+maintainers:
+  - name: MaibornWolff GmbH
+    url: https://www.maibornwolff.de/en

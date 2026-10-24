@@ -18,6 +18,16 @@ $ pnpm i
 $ pnpm run dev
 ```
 
+### Kubernetes (Helm)
+
+ThreatSea can be deployed on Kubernetes with the Helm chart published to GitHub Container Registry:
+
+```bash
+helm install threatsea oci://ghcr.io/maibornwolff/charts/threatsea --version <version> --values my-values.yaml
+```
+
+See the [chart README](charts/threatsea/README.md) for the required values, secret handling and database setup.
+
 ## E2E Testing (Playwright)
 
 ThreatSea uses [Playwright](https://playwright.dev/) for end-to-end testing. The test suite is located under `apps/frontend/playwright/` and follows the **Page Object Model (POM)** pattern.
