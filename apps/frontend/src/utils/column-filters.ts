@@ -31,3 +31,9 @@ export const applyColumnFilters = <T>(
         })
     );
 };
+
+// Selection filters hold the selected values comma-separated, since column filters are strings.
+export const parseSelectionFilter = <Value extends string>(
+    options: readonly Value[],
+    filterValue: string | undefined
+): Value[] => options.filter((option) => filterValue?.split(",").includes(option));
