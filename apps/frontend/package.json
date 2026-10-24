@@ -70,7 +70,7 @@
     "oxc-transform-react": "0.152.0",
     "oxlint": "catalog:",
     "oxlint-tsgolint": "catalog:",
-    "vite": "8.3.4",
+    "vite": "8.3.5",
     "vite-plugin-svgr": "5.2.0",
     "vitest": "catalog:"
   },
