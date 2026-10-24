@@ -23,7 +23,7 @@ apps/
 packages/
   typescript-config/  Shared tsconfig presets
 docs/adr/             Architecture Decision Records (managed with `adrs`; config in adrs.toml)
-gh-pages/             Published documentation sources (rendered via mkdocs; see mkdocs.yml)
+gh-pages/             Published documentation (Astro Starlight; pages in src/content/docs/)
 ```
 
 ### Frontend structure (`apps/frontend/src/`)
@@ -93,6 +93,8 @@ pnpm --filter threatsea_fe type-check
 pnpm --filter threatsea_be test           # backend unit tests
 pnpm --filter threatsea_be db:generate    # generate a new Drizzle migration
 pnpm --filter threatsea_be db:migrate     # apply migrations
+pnpm --filter threatsea_docs docs:dev    # docs dev server (Starlight)
+pnpm --filter threatsea_docs build       # build docs into gh-pages/dist
 
 # E2E (requires DB + backend running — see README)
 pnpm --filter threatsea_fe playwright

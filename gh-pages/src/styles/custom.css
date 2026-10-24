@@ -1,0 +1,21 @@
+/* Starlight renders every content image as a block. Keep the small icons that are sized to the text
+   height (<img style="height:1em; …">) inline with the surrounding text. Starlight also puts a top margin
+   on elements following another element, which pushes an icon out of the line when it follows another icon. */
+.sl-markdown-content img[style*="height:1em"] {
+  display: inline;
+  margin-top: 0;
+}
+
+/* The icons are black on a white or transparent background. In dark mode, invert them to white and let
+   the inverted (now black) background blend into the page. */
+:root:not([data-theme="light"]) .sl-markdown-content img[style*="height:1em"] {
+  filter: invert(1);
+  mix-blend-mode: screen;
+}
+
+/* Use more of wide screens, mainly so the screenshots in the user manual stay readable */
+@media (min-width: 100rem) {
+  :root {
+    --sl-content-width: 60rem;
+  }
+}
