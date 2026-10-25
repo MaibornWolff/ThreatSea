@@ -333,8 +333,8 @@ importers:
         specifier: 7.3.1
         version: 7.3.1(supports-color@7.2.0)
       tsc-alias:
-        specifier: 1.9.8
-        version: 1.9.8
+        specifier: 1.9.9
+        version: 1.9.9
       tsx:
         specifier: 4.23.15
         version: 4.23.15
@@ -4854,8 +4854,8 @@ packages:
     resolution: {integrity: sha512-aXJDbk6SnumuaZSANd21XAo15ucCDE38H4fkqiGsc3MhCK+wOlZvLP9cB/TvpHT0mOyWgC4Z8EwRlzqYSUzdsA==}
     engines: {node: '>= 0.4'}
 
-  tsc-alias@1.9.8:
-    resolution: {integrity: sha512-od5fOkQV3Awws6HuoW+hbampmmMz+U9denraxuAwwT2Q4ZFSAJ4LWPYnyVQfCKOquGlRyk7xQTdjCZ3THTsImw==}
+  tsc-alias@1.9.9:
+    resolution: {integrity: sha512-TxUi+OyqQXRwSMUQaB0pqM89VbOEvL/6RkgQa2LrxNvbhCmkQvrp8NX7VyMW9KYVLGlwICxrLwNv3Ik4vtIQxw==}
     engines: {node: '>=16.20.2'}
     hasBin: true
 
@@ -9091,7 +9091,7 @@ snapshots:
 
   traverse@0.6.8: {}
 
-  tsc-alias@1.9.8:
+  tsc-alias@1.9.9:
     dependencies:
       chokidar: 3.6.0
       commander: 9.5.0
