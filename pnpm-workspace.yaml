@@ -5,7 +5,7 @@ packages:
 catalog:
   "@types/node": 24.19.2
   "@vitest/coverage-v8": 4.1.12
-  dotenv: 18.0.8
+  dotenv: 18.0.9
   oxlint: 1.89.0
   oxlint-tsgolint: 7.0.2004
   vitest: 4.1.12
