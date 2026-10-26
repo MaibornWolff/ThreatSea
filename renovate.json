@@ -18,9 +18,24 @@
       "managerFilePatterns": ["/^\\.github/workflows/.+\\.ya?ml$/"],
       "matchStrings": ["npm (?:install|i) -g (?<depName>@?[^@\\s]+(?:/[^@\\s]+)?)@(?<currentValue>[\\w.+-]+)"],
       "datasourceTemplate": "npm"
+    },
+    {
+      "description": "Update tool versions declared as `# renovate: datasource=... depName=...` followed by a `key: vX.Y.Z` line in workflows (setup-helm version, helm-unittest, kubeconform and helm-docs downloads). The version is declared once, so URLs built from it can never end up half-updated. The SHA-256 next to a downloaded tool is not updated automatically: take it from the release's checksum file, otherwise CI fails the checksum check.",
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/.+\\.ya?ml$/"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>\\S+)\\s+\\w+: \"?(?<currentValue>v?[\\w.+-]+)\"?\\s"
+      ]
     }
   ],
   "packageRules": [
+    {
+      "description": "No major postgres image updates in the Helm chart. The postgres image keeps its data under /var/lib/postgresql/<major>/docker, so a major bump starts a new, empty cluster. Minor and patch bumps are allowed but need the chart README regenerated (helm-docs) because the image tag appears in it.",
+      "matchFileNames": ["charts/**"],
+      "matchPackageNames": ["postgres"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
     {
       "description": "minimumReleaseAge cannot be enforced for these update types (the package manager performs the resolution); without this they would be filtered as permanently pending and never raised as PRs",
       "matchUpdateTypes": ["lockFileMaintenance", "pin", "replacement"],

@@ -1,0 +1,14 @@
+config:
+  origin: https://threatsea.example.com
+  oidc:
+    issuerUrl: https://idp.example.com
+    clientId: threatsea
+secret:
+  values:
+    jwtSecret: jwt
+    sessionSecret: session
+    oidcClientSecret: oidc
+    databasePassword: dbpw
+database:
+  host: db.example.com
+  user: threatsea

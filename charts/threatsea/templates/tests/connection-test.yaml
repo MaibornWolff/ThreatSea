@@ -1,0 +1,48 @@
+{{- $database := include "threatsea.database" . | fromYaml }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "threatsea.fullname" . }}-connection-test
+  labels:
+    {{- include "threatsea.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-weight: "1"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  restartPolicy: Never
+  automountServiceAccountToken: false
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 70
+    runAsGroup: 70
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+    - name: psql
+      image: {{ include "threatsea.postgresql.image" . | quote }}
+      imagePullPolicy: {{ .Values.postgresql.image.pullPolicy }}
+      command:
+        - psql
+        - -X
+        - -v
+        - ON_ERROR_STOP=1
+        - -c
+        - SELECT 1
+      securityContext:
+        {{- toYaml .Values.containerSecurityContext | nindent 8 }}
+      env:
+        {{- include "threatsea.databaseEnv" (dict "ctx" . "database" $database "names" "libpq") | nindent 8 }}
+        {{- /* libpq equivalents of the backend's DATABASE_TLS modes; "system" trusts the image's CA bundle like Node does */}}
+        - name: PGSSLMODE
+          value: {{ get (dict "verify" "verify-full" "no-verify" "require" "disabled" "disable") $database.tls | quote }}
+        {{- if eq $database.tls "verify" }}
+        - name: PGSSLROOTCERT
+          value: system
+        {{- end }}
+        - name: PGCONNECT_TIMEOUT
+          value: "10"
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              {{- toYaml $database.passwordSecretKeyRef | nindent 14 }}
