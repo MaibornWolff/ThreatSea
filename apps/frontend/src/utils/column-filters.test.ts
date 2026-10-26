@@ -1,4 +1,4 @@
-import { applyColumnFilters } from "./column-filters";
+import { applyColumnFilters, parseSelectionFilter } from "./column-filters";
 
 interface Row {
     id: number;
@@ -77,5 +77,20 @@ describe("applyColumnFilters", () => {
             { edited: (_row: unknown, filterValue: string) => (seen.push(filterValue), true) }
         );
         expect(seen).toEqual(["edited"]);
+    });
+});
+
+describe("parseSelectionFilter", () => {
+    const options = ["confidentiality", "integrity", "availability"] as const;
+
+    it.each([
+        { filterValue: undefined, expected: [] },
+        { filterValue: "", expected: [] },
+        { filterValue: "integrity", expected: ["integrity"] },
+        { filterValue: "availability,confidentiality", expected: ["confidentiality", "availability"] },
+        { filterValue: "integrity,unknown", expected: ["integrity"] },
+        { filterValue: "integ", expected: [] },
+    ])("reads '$filterValue' as $expected, in option order", ({ filterValue, expected }) => {
+        expect(parseSelectionFilter(options, filterValue)).toEqual(expected);
     });
 });
