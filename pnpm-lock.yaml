@@ -396,8 +396,8 @@ importers:
         specifier: 7.91.0
         version: 7.91.0(@types/react@19.3.0)(react@19.3.1)
       react-i18next:
-        specifier: 17.1.5
-        version: 17.1.5(i18next@26.5.7(typescript@7.0.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@7.0.2)
+        specifier: 17.1.8
+        version: 17.1.8(i18next@26.5.7(typescript@7.0.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@7.0.2)
       react-konva:
         specifier: 19.3.2
         version: 19.3.2(@types/react@19.3.0)(konva@10.9.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -4374,8 +4374,8 @@ packages:
       '@types/react':
         optional: true
 
-  react-i18next@17.1.5:
-    resolution: {integrity: sha512-dRSwnd2pACasvcZXR+uP+60vW61CJKw9ZUM12B4ZucrY9SEIIsLBWgpo8UneOUXQcUtvjQmHMeOJ03Vursl1Ag==}
+  react-i18next@17.1.8:
+    resolution: {integrity: sha512-vGH+Tbhqbv5LdN9KvC9GEmQ6ATxJAjyxPEK0zSCSRlkeDqCPNxVtEOvDNRAz+51HTxc6QPwhnHaFD7ICu6pD1A==}
     peerDependencies:
       i18next: '>= 26.2.0'
       react: '>= 16.8.0'
@@ -8555,7 +8555,7 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.3.0
 
-  react-i18next@17.1.5(i18next@26.5.7(typescript@7.0.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@7.0.2):
+  react-i18next@17.1.8(i18next@26.5.7(typescript@7.0.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@7.0.2):
     dependencies:
       '@babel/runtime': 7.29.10
       html-parse-stringify: 4.0.1
