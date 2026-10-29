@@ -125,7 +125,7 @@ The system editor is used to draw graphical representations of technical systems
 
 ![Editor Page View](assets/Editor.png "Editor Page View")
 
-By holding the primary mouse key and moving the cursor, users can navigate through the system sketch. The top-left "focus" button <img src="../assets/images_1_.png" alt="Editor Page Focus Button" style="height:1em; width:auto; vertical-align:middle;"> allows quick navigation by centering and scaling the editor view relatively to the overall system sketch. With the "download" button <img src="../assets/download-1459070_960_720.png" alt="Editor Page Download Icon" style="height:1em; width:auto; vertical-align:middle;"> the system sketch can be downloaded as png file. For users with the `Editor` role, the same toolbar additionally offers annotation tools for adding shapes, freehand drawings and text to the system sketch (see [Annotations](#annotations)).
+By holding the primary mouse key and moving the cursor, users can navigate through the system sketch. The top-left "focus" button <img src="../assets/images_1_.png" alt="Editor Page Focus Button" style="height:1em; width:auto; vertical-align:middle;"> allows quick navigation by centering and scaling the editor view relatively to the overall system sketch. With the "download" button <img src="../assets/download-1459070_960_720.png" alt="Editor Page Download Icon" style="height:1em; width:auto; vertical-align:middle;"> the system sketch can be downloaded as png file. For users with the `Editor` role, the same toolbar additionally offers a "Components" menu for placing components (see [Creating a component](#creating-a-component)) and annotation tools for adding shapes, freehand drawings and text to the system sketch (see [Annotations](#annotations)).
 
 In the system editor, a system is represented by a set of components. A component is an arbitrary unit of a system that is a combination of one or more of the six attack points. The scope of components differs individually for each project depending on the depth of the threat analysis. For large enterprise scale threat models, a component within the system sketch might (technically) be a system on its own like a server, a client or a database, while in other projects, single applications or even processes might be modeled as dedicated components. Due to its high abstraction of technical details, the methodology works for all scopes.
 
@@ -135,7 +135,9 @@ A component can be created by clicking with the secondary mouse button into any 
 
 ![Editor Page Create Component Menu](assets/image-2025-4-10_8-57-42.png "Editor Page Create Component Menu")
 
-After selecting a component type, a pre-filled component of that type appears at the location of the initial mouse-click. The color coding of the component border indicates the attack points the component comprises:
+Alternatively, the "Components" button in the toolbar on the left edge of the editor opens the same list of component types, including the custom component types and the options to create, edit and delete them. After choosing a component type there, the mouse pointer turns into a crosshair and the component is placed where the next click with the primary mouse button lands. Pressing `Escape`, clicking the "Components" button again or opening the right-click menu cancels the placement.
+
+After selecting a component type, a pre-filled component of that type appears at the location of the initial mouse-click (or of the click after choosing it from the toolbar). The color coding of the component border indicates the attack points the component comprises:
 
 - <span style="color: rgb(241, 210, 0);">Yellow:</span> Data Storage Infrastructure
 - <span style="color: rgb(141, 90, 211);">Purple:</span> Processing Infrastructure
@@ -318,7 +320,7 @@ Besides modelling components and their connections, users can add freeform annot
 
 #### The annotation toolbar
 
-The annotation tools are located on the left edge of the editor, below the "focus" and "download" buttons. The following tools are available:
+The annotation tools are located on the left edge of the editor, below the "focus", "download" and "Components" buttons. The following tools are available:
 
 - Shapes: opens a small popover with four shape tools — Rectangle, Circle, Line and Arrow.
 - Pencil: a freehand drawing tool.

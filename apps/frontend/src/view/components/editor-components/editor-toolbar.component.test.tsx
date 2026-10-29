@@ -1,9 +1,11 @@
-import { screen } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { EditorToolbar, type EditorToolbarProps } from "./editor-toolbar.component";
 import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { DEFAULT_ANNOTATION_COLOR } from "#view/colors/annotation.colors.ts";
 import type { AnnotationType } from "#api/types/system.types.ts";
+import { EditorActions } from "#application/actions/editor.actions.ts";
+import type { EditorComponentType } from "#application/adapters/editor-component-type.adapter.ts";
 
 const setup = (overrides: Partial<EditorToolbarProps> = {}) => {
     const props = {
@@ -12,12 +14,14 @@ const setup = (overrides: Partial<EditorToolbarProps> = {}) => {
         showAnnotationTools: true,
         annotationTool: null as AnnotationType | null,
         onSetAnnotationTool: vi.fn(),
+        componentTypeToPlace: null as EditorComponentType | null,
+        onSetComponentTypeToPlace: vi.fn(),
         annotationColor: DEFAULT_ANNOTATION_COLOR,
         onSetAnnotationColor: vi.fn(),
         ...overrides,
     };
-    renderWithProviders(<EditorToolbar {...props} />);
-    return props;
+    const { store } = renderWithProviders(<EditorToolbar {...props} />);
+    return { ...props, store };
 };
 
 describe("EditorToolbar", () => {
@@ -184,6 +188,87 @@ describe("EditorToolbar", () => {
             await user.click(screen.getByRole("button", { name: "Rectangle" }));
 
             expect(screen.queryByRole("button", { name: "Rectangle" })).not.toBeInTheDocument();
+        });
+    });
+
+    describe("components popover", () => {
+        const customComponent: EditorComponentType = {
+            id: 42,
+            name: "Payment Gateway",
+            pointsOfAttack: [],
+            symbol: null,
+            standardIcon: null,
+            isStandard: false,
+            projectId: null,
+        };
+
+        it("hides the components button when showAnnotationTools is false", () => {
+            setup({ showAnnotationTools: false });
+
+            expect(screen.queryByRole("button", { name: "Components" })).not.toBeInTheDocument();
+        });
+
+        it("lists the standard components when the components button is clicked", async () => {
+            const user = userEvent.setup();
+            setup();
+
+            await user.click(screen.getByRole("button", { name: "Components" }));
+
+            const popover = screen.getByRole("presentation");
+            for (const name of ["Users", "Client", "Server", "Database"]) {
+                expect(within(popover).getByText(name)).toBeInTheDocument();
+            }
+        });
+
+        it("hands the chosen component type to onSetComponentTypeToPlace and closes the popover", async () => {
+            const user = userEvent.setup();
+            const onSetComponentTypeToPlace = vi.fn();
+            setup({ onSetComponentTypeToPlace });
+
+            await user.click(screen.getByRole("button", { name: "Components" }));
+            await user.click(screen.getByText("Server"));
+
+            expect(onSetComponentTypeToPlace).toHaveBeenLastCalledWith(expect.objectContaining({ name: "Server" }));
+            expect(screen.queryByRole("presentation")).not.toBeInTheDocument();
+        });
+
+        it("offers custom components once the custom section is expanded", async () => {
+            const user = userEvent.setup();
+            const onSetComponentTypeToPlace = vi.fn();
+            const { store } = setup({ onSetComponentTypeToPlace });
+            act(() => {
+                store.dispatch(EditorActions.addComponentType(customComponent));
+            });
+
+            await user.click(screen.getByRole("button", { name: "Components" }));
+            await user.click(screen.getByText("Custom"));
+            await user.click(await screen.findByText("Payment Gateway"));
+
+            expect(onSetComponentTypeToPlace).toHaveBeenLastCalledWith(
+                expect.objectContaining({ id: 42, name: "Payment Gateway" })
+            );
+        });
+
+        it("cancels a pending placement when the components button is clicked", async () => {
+            const user = userEvent.setup();
+            const onSetComponentTypeToPlace = vi.fn();
+            setup({ componentTypeToPlace: customComponent, onSetComponentTypeToPlace });
+
+            await user.click(screen.getByRole("button", { name: "Components" }));
+
+            expect(onSetComponentTypeToPlace).toHaveBeenCalledWith(null);
+        });
+
+        it("marks the components button as pressed only while a component is waiting to be placed", () => {
+            setup({ componentTypeToPlace: customComponent });
+
+            expect(screen.getByRole("button", { name: "Components" })).toHaveAttribute("aria-pressed", "true");
+        });
+
+        it("does not mark the components button as pressed without a pending placement", () => {
+            setup({ componentTypeToPlace: null });
+
+            expect(screen.getByRole("button", { name: "Components" })).toHaveAttribute("aria-pressed", "false");
         });
     });
 

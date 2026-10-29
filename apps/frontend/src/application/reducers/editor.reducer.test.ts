@@ -93,6 +93,52 @@ describe("editorReducer", () => {
         });
     });
 
+    describe("componentTypeToPlace", () => {
+        const customComponentType: EditorComponentType = {
+            id: 42,
+            name: "Payment Gateway",
+            pointsOfAttack: [],
+            symbol: null,
+            standardIcon: null,
+            isStandard: false,
+            projectId: null,
+        };
+
+        it("starts with no component waiting to be placed", () => {
+            expect(getInitialState().componentTypeToPlace).toBeNull();
+        });
+
+        it("setComponentTypeToPlace stores the picked component type", () => {
+            const next = editorReducer(getInitialState(), EditorActions.setComponentTypeToPlace(customComponentType));
+            expect(next.componentTypeToPlace).toEqual(customComponentType);
+        });
+
+        it("picking a component type ends an active annotation tool", () => {
+            const seeded = editorReducer(getInitialState(), EditorActions.setAnnotationTool("rect"));
+            const next = editorReducer(seeded, EditorActions.setComponentTypeToPlace(customComponentType));
+            expect(next.annotationTool).toBeNull();
+        });
+
+        it("picking an annotation tool ends a pending component placement", () => {
+            const seeded = editorReducer(getInitialState(), EditorActions.setComponentTypeToPlace(customComponentType));
+            const next = editorReducer(seeded, EditorActions.setAnnotationTool("circle"));
+            expect(next.componentTypeToPlace).toBeNull();
+            expect(next.annotationTool).toBe("circle");
+        });
+
+        it("clearing the annotation tool keeps a pending component placement", () => {
+            const seeded = editorReducer(getInitialState(), EditorActions.setComponentTypeToPlace(customComponentType));
+            const next = editorReducer(seeded, EditorActions.setAnnotationTool(null));
+            expect(next.componentTypeToPlace).toEqual(customComponentType);
+        });
+
+        it("setLoadedProjectId drops a pending placement from the previous project", () => {
+            const seeded = editorReducer(getInitialState(), EditorActions.setComponentTypeToPlace(customComponentType));
+            const next = editorReducer(seeded, SystemActions.setLoadedProjectId(7));
+            expect(next.componentTypeToPlace).toBeNull();
+        });
+    });
+
     describe("setLoadedProjectId", () => {
         it("clears the active annotation tool", () => {
             const seeded = editorReducer(getInitialState(), EditorActions.setAnnotationTool("rect"));

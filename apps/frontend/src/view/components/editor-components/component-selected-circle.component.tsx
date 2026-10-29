@@ -40,11 +40,11 @@ export const ComponentSelectedCircle = ({
     const [hover, setHover] = useState(false);
     const [lineIndex, setLineIndex] = useState<number>(2);
     const isCapturing = useAppSelector((state) => state.editor.isCapturing);
-    const annotationTool = useAppSelector(editorSelectors.selectAnnotationTool);
+    const isCanvasToolActive = useAppSelector(editorSelectors.selectIsCanvasToolActive);
     const visualHover = hover && !isCapturing;
 
     const onMouseEnter = (index: number) => {
-        if (annotationTool !== null) {
+        if (isCanvasToolActive) {
             return;
         }
         setLineIndex(index);
@@ -57,7 +57,7 @@ export const ComponentSelectedCircle = ({
     const onMouseLeave = () => {
         setLineIndex(-1);
         setHover(false);
-        if (annotationTool !== null) {
+        if (isCanvasToolActive) {
             return;
         }
         if (stageRef && stageRef.current) {

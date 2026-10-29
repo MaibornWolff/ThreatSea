@@ -8,6 +8,17 @@ import { createStore } from "#application/store.ts";
 import { EditorActions } from "#application/actions/editor.actions.ts";
 import type { Annotation } from "#api/types/system.types.ts";
 import { createAnnotation } from "#test-utils/builders.ts";
+import type { EditorComponentType } from "#application/adapters/editor-component-type.adapter.ts";
+
+const pendingComponentType: EditorComponentType = {
+    id: 42,
+    name: "Payment Gateway",
+    pointsOfAttack: [],
+    symbol: null,
+    standardIcon: null,
+    isStandard: false,
+    projectId: null,
+};
 
 const buildStageContent = () => {
     const content = { style: { cursor: "default" } };
@@ -100,6 +111,21 @@ describe("useAnnotationInteraction", () => {
             expect(event.cancelBubble).toBe(false);
             expect(event.evt.preventDefault).not.toHaveBeenCalled();
         });
+
+        it("lets the click through to the stage while a component is waiting to be placed", () => {
+            const { hook, store, onSelect } = renderInteractionHook({});
+            act(() => {
+                store.dispatch(EditorActions.setComponentTypeToPlace(pendingComponentType));
+            });
+            const event = buildEvent({ button: 0 });
+
+            act(() => {
+                hook.result.current.handleClick(event);
+            });
+
+            expect(onSelect).not.toHaveBeenCalled();
+            expect(event.cancelBubble).toBe(false);
+        });
     });
 
     describe("handleMouseEnter / handleMouseLeave", () => {
@@ -161,6 +187,22 @@ describe("useAnnotationInteraction", () => {
 
             act(() => {
                 store.dispatch(EditorActions.setAnnotationTool("line"));
+            });
+
+            act(() => {
+                hook.result.current.handleMouseLeave(buildEvent({ stageContent }));
+            });
+
+            expect(stageContent.style.cursor).toBe("crosshair");
+        });
+
+        it("keeps the placement crosshair on leave while a component is waiting to be placed", () => {
+            const { hook, store } = renderInteractionHook({});
+            const stageContent = buildStageContent();
+            stageContent.style.cursor = "crosshair";
+
+            act(() => {
+                store.dispatch(EditorActions.setComponentTypeToPlace(pendingComponentType));
             });
 
             act(() => {

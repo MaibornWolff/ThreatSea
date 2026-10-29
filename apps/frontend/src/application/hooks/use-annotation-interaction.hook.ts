@@ -29,7 +29,7 @@ export const useAnnotationInteraction = ({
     onSelect,
 }: UseAnnotationInteractionArgs) => {
     const isCapturing = useAppSelector((state) => state.editor.isCapturing);
-    const annotationTool = useAppSelector(editorSelectors.selectAnnotationTool);
+    const isCanvasToolActive = useAppSelector(editorSelectors.selectIsCanvasToolActive);
 
     useEffect(() => {
         if (!selected || !editable) {
@@ -54,7 +54,7 @@ export const useAnnotationInteraction = ({
         if (event.evt.button !== 0) {
             return;
         }
-        if (annotationTool !== null) {
+        if (isCanvasToolActive) {
             return;
         }
         event.cancelBubble = true;
@@ -63,7 +63,7 @@ export const useAnnotationInteraction = ({
     };
 
     const handleMouseEnter = (event: KonvaEventObject<MouseEvent>): void => {
-        if (annotationTool !== null) {
+        if (isCanvasToolActive) {
             return;
         }
         if (editable) {
@@ -72,7 +72,7 @@ export const useAnnotationInteraction = ({
     };
 
     const handleMouseLeave = (event: KonvaEventObject<MouseEvent>): void => {
-        if (annotationTool !== null) {
+        if (isCanvasToolActive) {
             return;
         }
         setStageCursor(event, "default");
@@ -80,7 +80,7 @@ export const useAnnotationInteraction = ({
 
     return {
         isCapturing,
-        isDrawing: annotationTool !== null,
+        isDrawing: isCanvasToolActive,
         setStageCursor,
         handleClick,
         handleMouseEnter,

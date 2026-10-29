@@ -8,6 +8,7 @@
   "canvas": {
     "centerEditor": "Editor zentrieren",
     "exportSystemImage": "Systembild exportieren",
+    "components": "Komponenten",
     "annotation": {
       "shapes": "Formen",
       "rectangle": "Rechteck",

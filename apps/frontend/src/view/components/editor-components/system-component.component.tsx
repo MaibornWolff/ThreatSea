@@ -151,7 +151,7 @@ export const SystemComponent = ({
     const nameLength = Math.max(width - 20, name.length * 6 + 35);
 
     const handleMouseEnter = () => {
-        if (annotationTool !== null) {
+        if (isCanvasToolActive) {
             return;
         }
         setHover(true);
@@ -162,7 +162,7 @@ export const SystemComponent = ({
     };
 
     const handleMouseEnterImage = () => {
-        if (annotationTool !== null) {
+        if (isCanvasToolActive) {
             return;
         }
         if (stageRef && stageRef.current) {
@@ -171,7 +171,7 @@ export const SystemComponent = ({
     };
 
     const handleMouseOutImage = () => {
-        if (annotationTool !== null) {
+        if (isCanvasToolActive) {
             return;
         }
         if (stageRef && stageRef.current) {
@@ -180,7 +180,7 @@ export const SystemComponent = ({
     };
 
     const handleSmallIconMouseEnter = () => {
-        if (annotationTool !== null) {
+        if (isCanvasToolActive) {
             return;
         }
         setIsSmallIconHovered(true);
@@ -191,7 +191,7 @@ export const SystemComponent = ({
 
     const handleSmallIconMouseLeave = () => {
         setIsSmallIconHovered(false);
-        if (annotationTool !== null) {
+        if (isCanvasToolActive) {
             return;
         }
         if (stageRef && stageRef.current) {
@@ -201,7 +201,7 @@ export const SystemComponent = ({
 
     const [hover, setHover] = useState(false);
     const isCapturing = useAppSelector((state) => state.editor.isCapturing);
-    const annotationTool = useAppSelector(editorSelectors.selectAnnotationTool);
+    const isCanvasToolActive = useAppSelector(editorSelectors.selectIsCanvasToolActive);
 
     // Hide selection / hover styling while a screenshot is being captured.
     const visualSelected = selected && !isCapturing;
@@ -214,7 +214,7 @@ export const SystemComponent = ({
               onMouseOver: handleMouseEnter,
               onMouseOut: handleMouseOut,
               hover: visualHover,
-              draggable: annotationTool === null,
+              draggable: !isCanvasToolActive,
           }
         : {
               onMouseOver: null,
@@ -397,13 +397,13 @@ const ConnectorGroup = ({
         return isPrimaryComponent ? Boolean(hover) && shouldDisplayConnectors : shouldDisplayConnectors;
     }, [hover, shouldDisplayConnectors, isPrimaryComponent, isDrawing, sourceType, componentType]);
 
-    const annotationToolForAnchor = useAppSelector(editorSelectors.selectAnnotationTool);
+    const isCanvasToolActiveForAnchor = useAppSelector(editorSelectors.selectIsCanvasToolActive);
 
     const handleSelectAnchor: (event: KonvaEventObject<MouseEvent>, anchor: AnchorOrientation) => void = (
         event,
         anchor
     ) => {
-        if (annotationToolForAnchor !== null) {
+        if (isCanvasToolActiveForAnchor) {
             return;
         }
         if (isPrimaryComponent) {
@@ -502,10 +502,10 @@ const Connector = ({
 
     const [hover, setHover] = useState(false);
     const selected = selectedAnchor === anchor;
-    const annotationTool = useAppSelector(editorSelectors.selectAnnotationTool);
+    const isCanvasToolActive = useAppSelector(editorSelectors.selectIsCanvasToolActive);
 
     const onMouseEnter = () => {
-        if (annotationTool !== null) {
+        if (isCanvasToolActive) {
             return;
         }
         setHover(true);
@@ -516,7 +516,7 @@ const Connector = ({
 
     const onMouseLeave = () => {
         setHover(false);
-        if (annotationTool !== null) {
+        if (isCanvasToolActive) {
             return;
         }
         if (stageRef.current) {
