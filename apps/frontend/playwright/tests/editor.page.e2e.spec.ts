@@ -326,6 +326,43 @@ test.describe("Editor Page Tests", () => {
         });
     });
 
+    test.describe("Toolbar Component Placement Tests", () => {
+        // Free grid cell in the threats fixture (its components sit at (465|305), (810|305) and (810|545)).
+        const FREE_CANVAS_POSITION = { x: 480, y: 560 };
+
+        test("Places a component picked in the toolbar at the next left click", async ({ page }) => {
+            const pg = new EditorPage(page);
+            await pg.waitForEditorReady();
+            const imagesBefore = await pg.countKonvaShapes("Image");
+
+            await pg.pickComponentFromToolbar("Database");
+            await expect(pg.componentsPopover).toBeHidden();
+            await expect(pg.componentsButton).toHaveAttribute("aria-pressed", "true");
+            await expect.poll(() => pg.getCanvasCursor()).toBe("crosshair");
+
+            await pg.clickCanvas(FREE_CANVAS_POSITION.x, FREE_CANVAS_POSITION.y);
+
+            await expect.poll(() => pg.countKonvaShapes("Image")).toBeGreaterThan(imagesBefore);
+            await expect(pg.componentsButton).toHaveAttribute("aria-pressed", "false");
+            await expect(pg.contextMenu).toBeHidden();
+        });
+
+        test("Escape cancels a pending placement", async ({ page }) => {
+            const pg = new EditorPage(page);
+            await pg.waitForEditorReady();
+            const imagesBefore = await pg.countKonvaShapes("Image");
+
+            await pg.pickComponentFromToolbar("Server");
+            await expect.poll(() => pg.getCanvasCursor()).toBe("crosshair");
+            await page.keyboard.press("Escape");
+
+            await expect.poll(() => pg.getCanvasCursor()).not.toBe("crosshair");
+            await expect(pg.componentsButton).toHaveAttribute("aria-pressed", "false");
+            await pg.clickCanvas(FREE_CANVAS_POSITION.x, FREE_CANVAS_POSITION.y);
+            expect(await pg.countKonvaShapes("Image")).toBe(imagesBefore);
+        });
+    });
+
     test.describe("Custom Component Tests", () => {
         const STANDARD_ICONS = ["Users", "Client", "Server", "Database"];
 

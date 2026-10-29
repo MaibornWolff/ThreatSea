@@ -12,13 +12,13 @@ export function LineDrawingProvider({ children }: LineDrawingProviderProps) {
         isDrawing: false,
         sourceType: null, // 'menu' or 'connector'
     });
-    const annotationTool = useAppSelector(editorSelectors.selectAnnotationTool);
+    const isCanvasToolActive = useAppSelector(editorSelectors.selectIsCanvasToolActive);
 
     useEffect(() => {
-        if (annotationTool !== null) {
+        if (isCanvasToolActive) {
             setDrawingState({ isDrawing: false, sourceType: null });
         }
-    }, [annotationTool]);
+    }, [isCanvasToolActive]);
 
     return (
         <LineDrawingContext.Provider value={{ drawingState, setDrawingState }}>{children}</LineDrawingContext.Provider>

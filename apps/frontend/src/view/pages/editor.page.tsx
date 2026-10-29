@@ -15,6 +15,7 @@ import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { useAssets } from "#application/hooks/use-assets.hook.ts";
 import { useAutoSavePreview } from "#application/hooks/use-auto-save-preview.hook.ts";
 import { useAnnotationDrawing, ANNOTATION_STROKE_WIDTH } from "#application/hooks/use-annotation-drawing.hook.ts";
+import { useComponentPlacement } from "#application/hooks/use-component-placement.hook.ts";
 import { useEditor, type EditorConnectionAnchor } from "#application/hooks/use-editor.hook.ts";
 import { useKeyboardComponentMove, type HelpLines } from "#application/hooks/use-keyboard-component-move.hook.ts";
 import { useEditorAnnotations } from "#application/hooks/use-editor-annotations.hook.ts";
@@ -56,6 +57,7 @@ import { GRID } from "#utils/connection-waypoints.ts";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import { SystemActions } from "#application/actions/system.actions.ts";
 import { systemSelectors } from "#application/selectors/system.selectors.ts";
+import { editorSelectors } from "#application/selectors/editor.selectors.ts";
 import type { KonvaEventObject } from "konva/lib/Node";
 import type { Stage as KonvaStage } from "konva/lib/Stage";
 import type { Layer as KonvaLayer } from "konva/lib/Layer";
@@ -239,6 +241,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     } = useEditorAnnotations({ projectId });
 
     const isEditor = checkUserRole(userRole, USER_ROLES.EDITOR);
+    const isCanvasToolActive = useAppSelector(editorSelectors.selectIsCanvasToolActive);
 
     const storedAnnotationColor = useAppSelector((state) =>
         systemSelectors.selectDefaultAnnotationColor(state, projectId)
@@ -462,7 +465,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     };
 
     const handleSelectComponent = ({ evt }: KonvaEventObject<MouseEvent>, componentId: string): void => {
-        if (annotationTool !== null) {
+        if (isCanvasToolActive) {
             return;
         }
         if (!evt.defaultPrevented && evt.button === 0) {
@@ -484,7 +487,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     };
 
     const handleSelectConnection = ({ evt }: KonvaEventObject<MouseEvent>, id: string): void => {
-        if (annotationTool !== null) {
+        if (isCanvasToolActive) {
             return;
         }
         if (!evt.defaultPrevented && evt.button === 0) {
@@ -566,7 +569,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     };
 
     const handleSelectAnchor = (e: MouseEvent | KonvaEventObject<MouseEvent>, data: ConnectorSelection): void => {
-        if (annotationTool !== null) {
+        if (isCanvasToolActive) {
             return;
         }
         const event = "evt" in e ? e.evt : e;
@@ -633,6 +636,11 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
 
         // Annotation drawing intercepts the stage before pan/deselect.
         if (!editingAnnotationId && tryStartDrawing(annotationTool, event)) {
+            return;
+        }
+
+        // A pending component placement resolves on click, so don't pan or deselect in between.
+        if (componentTypeToPlace !== null && evt.button === 0) {
             return;
         }
 
@@ -766,7 +774,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         }
     };
 
-    const handleContextMenuAction = (componentType: EditorComponentType, { x, y }: Coordinate): void => {
+    const handlePlaceComponent = (componentType: EditorComponentType, { x, y }: Coordinate): void => {
         const gridPositionX = Math.floor((x - layerPosition.x) / GRID_CONFIG.gridSizeX);
         const gridPositionY = Math.floor((y - layerPosition.y) / GRID_CONFIG.gridSizeY);
 
@@ -779,7 +787,22 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         });
     };
 
+    const { componentTypeToPlace, setComponentTypeToPlace, tryPlaceComponent } = useComponentPlacement({
+        stageRef,
+        isEditor,
+        onPlaceComponent: handlePlaceComponent,
+    });
+    const effectiveComponentTypeToPlace = loadedProjectId === projectId ? componentTypeToPlace : null;
+
+    const handleSetComponentTypeToPlace = (componentType: EditorComponentType | null): void => {
+        if (componentType !== null) {
+            closeAndDeselectAll();
+        }
+        setComponentTypeToPlace(componentType);
+    };
+
     const handleContextMenuOpen = (): void => {
+        setComponentTypeToPlace(null);
         deselectComponent();
         closeSideBar();
         deselectConnection();
@@ -893,7 +916,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     };
 
     const handleOnConnectionPointClicked = ({ evt }: KonvaEventObject<MouseEvent>, connectionPointId: string): void => {
-        if (annotationTool !== null) {
+        if (isCanvasToolActive) {
             return;
         }
         evt.preventDefault();
@@ -912,7 +935,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
         pointOfAttackId: string,
         componentId?: string
     ): void => {
-        if (annotationTool !== null) {
+        if (isCanvasToolActive) {
             return;
         }
         evt.preventDefault();
@@ -1038,6 +1061,9 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                 setAnnotationTool(null);
                 cancelDrawing();
             }
+            if (componentTypeToPlace !== null) {
+                setComponentTypeToPlace(null);
+            }
             closeAndDeselectAll();
         }
 
@@ -1114,7 +1140,7 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
     };
 
     const toggleCommunicationInterfacesMenu = (component: AugmentedSystemComponent): void => {
-        if (annotationTool !== null) {
+        if (isCanvasToolActive) {
             return;
         }
         setCommunicationMenuComponent(component);
@@ -1269,7 +1295,8 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                         handleMouseMove={handleMouseMove}
                         handleMouseUp={handleMouseUp}
                         onContextMenuOpen={handleContextMenuOpen}
-                        onContextMenuAction={handleContextMenuAction}
+                        onContextMenuAction={handlePlaceComponent}
+                        onClick={tryPlaceComponent}
                         onMouseLeave={handleMouseOut}
                         onKeyUp={handleKeyUp}
                         onKeyDown={handleKeyDown}
@@ -1521,6 +1548,8 @@ const EditorPageBody = ({ updateAutoSaveOnClick }: EditorPageBodyProps) => {
                         showAnnotationTools={isEditor}
                         annotationTool={effectiveAnnotationTool}
                         onSetAnnotationTool={handleSetAnnotationTool}
+                        componentTypeToPlace={effectiveComponentTypeToPlace}
+                        onSetComponentTypeToPlace={handleSetComponentTypeToPlace}
                         annotationColor={annotationColor}
                         onSetAnnotationColor={setAnnotationColor}
                     />

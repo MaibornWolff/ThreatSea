@@ -102,8 +102,7 @@ function ConnectionEditHandlesInner({
     const segmentCount = pointCount - 1;
 
     const isCapturing = useAppSelector((state) => state.editor.isCapturing);
-    const annotationTool = useAppSelector(editorSelectors.selectAnnotationTool);
-    const isDrawing = annotationTool !== null;
+    const isDrawing = useAppSelector(editorSelectors.selectIsCanvasToolActive);
     const visualSelected = selected && !isCapturing && !isDrawing;
 
     // Refs to the preview Line nodes for each segment (for imperative batchDraw updates)

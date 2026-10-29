@@ -3,6 +3,7 @@ import editorReducer from "#application/reducers/editor.reducer.ts";
 import { EditorActions } from "#application/actions/editor.actions.ts";
 import type { RootState } from "#application/store.types.ts";
 import type { AnnotationType } from "#api/types/system.types.ts";
+import type { EditorComponentType } from "#application/adapters/editor-component-type.adapter.ts";
 
 const withEditor = (mutate?: (editor: ReturnType<typeof editorReducer>) => ReturnType<typeof editorReducer>) => {
     const base = editorReducer(undefined, { type: "@@INIT" });
@@ -52,6 +53,46 @@ describe("editorSelectors", () => {
             });
 
             expect(editorSelectors.selectAnnotationTool(state)).toBeNull();
+        });
+    });
+
+    describe("selectIsCanvasToolActive", () => {
+        const customComponentType: EditorComponentType = {
+            id: 42,
+            name: "Payment Gateway",
+            pointsOfAttack: [],
+            symbol: null,
+            standardIcon: null,
+            isStandard: false,
+            projectId: null,
+        };
+
+        it("is false in the initial state", () => {
+            expect(editorSelectors.selectIsCanvasToolActive(withEditor())).toBe(false);
+        });
+
+        it("is true while an annotation tool is active", () => {
+            const state = withEditor((editor) => editorReducer(editor, EditorActions.setAnnotationTool("freehand")));
+
+            expect(editorSelectors.selectIsCanvasToolActive(state)).toBe(true);
+        });
+
+        it("is true while a component is waiting to be placed", () => {
+            const state = withEditor((editor) =>
+                editorReducer(editor, EditorActions.setComponentTypeToPlace(customComponentType))
+            );
+
+            expect(editorSelectors.selectIsCanvasToolActive(state)).toBe(true);
+            expect(editorSelectors.selectComponentTypeToPlace(state)).toEqual(customComponentType);
+        });
+
+        it("is false again once the placement is cleared", () => {
+            const state = withEditor((editor) => {
+                const seeded = editorReducer(editor, EditorActions.setComponentTypeToPlace(customComponentType));
+                return editorReducer(seeded, EditorActions.setComponentTypeToPlace(null));
+            });
+
+            expect(editorSelectors.selectIsCanvasToolActive(state)).toBe(false);
         });
     });
 });

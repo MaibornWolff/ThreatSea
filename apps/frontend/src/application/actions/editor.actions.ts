@@ -283,4 +283,6 @@ export class EditorActions {
     static deselectAnnotation = createAction<void>("[editor] deselect annotation");
 
     static setAnnotationTool = createAction<AnnotationType | null>("[editor] set annotation tool");
+
+    static setComponentTypeToPlace = createAction<EditorComponentType | null>("[editor] set component type to place");
 }
