@@ -3,6 +3,8 @@ import { parseSelectionFilter } from "#utils/column-filters.ts";
 
 interface SelectionFilterProps<Value extends string> {
     field: string;
+    // The column's name, so screen readers tell the filters apart while they all show "All".
+    label: string;
     options: readonly Value[];
     columnFilters: Record<string, string>;
     onFilterChange: (field: string, value: string) => void;
@@ -15,6 +17,7 @@ interface SelectionFilterProps<Value extends string> {
 // A row matches if it has any of the ticked options; nothing ticked means all.
 export const SelectionFilter = <Value extends string>({
     field,
+    label,
     options,
     columnFilters,
     onFilterChange,
@@ -34,6 +37,7 @@ export const SelectionFilter = <Value extends string>({
             }}
             onClick={(event) => event.stopPropagation()}
             displayEmpty
+            SelectDisplayProps={{ "aria-label": label }}
             renderValue={(selectedValues) =>
                 selectedValues.length === 0 ? allLabel : selectedValues.map(selectedLabel).join(", ")
             }

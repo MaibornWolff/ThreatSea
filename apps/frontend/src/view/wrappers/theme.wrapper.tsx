@@ -29,6 +29,14 @@ const themeOptions: Parameters<typeof createTheme>[0] = {
                 },
             },
         },
+        MuiMenu: {
+            styleOverrides: {
+                // The default paper colour is translucent, which lets the content behind a menu show through it.
+                paper: {
+                    backgroundColor: "var(--mui-palette-background-paperIntransparent)",
+                },
+            },
+        },
         MuiOutlinedInput: {
             styleOverrides: {
                 root: {

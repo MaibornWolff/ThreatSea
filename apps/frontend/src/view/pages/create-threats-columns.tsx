@@ -240,6 +240,7 @@ export const createThreatsColumns = ({
             >
                 <SelectionFilter<ProtectionGoal>
                     field="protectionGoals"
+                    label={t("protectionGoals")}
                     options={PROTECTION_GOALS}
                     columnFilters={columnFilters}
                     onFilterChange={onFilterChange}
@@ -337,6 +338,7 @@ export const createThreatsColumns = ({
             >
                 <SelectionFilter
                     field="pointOfAttack"
+                    label={t("pointOfAttack")}
                     options={POINT_OF_ATTACK_OPTIONS}
                     columnFilters={columnFilters}
                     onFilterChange={onFilterChange}
@@ -376,6 +378,7 @@ export const createThreatsColumns = ({
             >
                 <SelectionFilter
                     field="attacker"
+                    label={t("attacker")}
                     options={ATTACKER_OPTIONS}
                     columnFilters={columnFilters}
                     onFilterChange={onFilterChange}

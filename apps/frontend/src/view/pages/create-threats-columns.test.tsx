@@ -474,6 +474,17 @@ describe("createThreatsColumns — point of attack and attacker filters", () => 
         }
     );
 
+    it.each([
+        { field: "protectionGoals", name: "Protection Goals" },
+        { field: "pointOfAttack", name: "Point of Attack" },
+        { field: "attacker", name: "Attacker" },
+    ])("names the $field filter after its column while it shows 'All'", ({ field, name }) => {
+        const { byField } = columnByField({ expandedFilters: { [field]: true } });
+        renderHeader(byField[field]);
+
+        expect(screen.getByRole("combobox", { name })).toHaveTextContent("All");
+    });
+
     it("filters for the same value in German", async () => {
         const { byField, handlers } = columnByField({ t: germanT, expandedFilters: { attacker: true } });
         renderHeader(byField["attacker"]);
