@@ -33,7 +33,7 @@ const themeOptions: Parameters<typeof createTheme>[0] = {
             styleOverrides: {
                 // The default paper colour is translucent, which lets the content behind a menu show through it.
                 paper: {
-                    backgroundColor: "var(--mui-palette-background-paperIntransparent)",
+                    backgroundColor: "var(--mui-palette-background-mainIntransparent)",
                 },
             },
         },
