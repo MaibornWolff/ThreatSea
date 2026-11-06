@@ -1,8 +1,10 @@
 import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat.types.ts";
+import { ATTACKERS } from "#api/types/attackers.types.ts";
+import { POINTS_OF_ATTACK } from "#api/types/points-of-attack.types.ts";
 import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import type { ExtendedThreatWithMetrics } from "#application/hooks/use-generic-threats-list.hook.ts";
 import { ALL_ROWS_PAGE_SIZE } from "#application/hooks/use-page-size-options.hook.ts";
-import { createThreat } from "#test-utils/builders.ts";
+import { createAsset, createThreat } from "#test-utils/builders.ts";
 import { translationUtil } from "#utils/translations.ts";
 import {
     buildThreatsRows,
@@ -175,6 +177,124 @@ describe("buildThreatsRows", () => {
         expect(summarize(build({ columnFilters: { name: "tampering", status: THREAT_STATUSES.FINALIZED } }))).toEqual(
             []
         );
+    });
+
+    describe("point of attack and attacker filters", () => {
+        const storageGenericThreat = {
+            ...genericThreat(2, "Tampering with data"),
+            pointOfAttack: POINTS_OF_ATTACK.DATA_STORAGE_INFRASTRUCTURE,
+            attacker: ATTACKERS.ADMINISTRATORS,
+        };
+        const generics = [genericThreat(1, "Spoofing of identity"), storageGenericThreat];
+        const threats = {
+            ...threatsByGenericThreatId,
+            2: [
+                threat(21, 2, {
+                    name: "Checksum bypass",
+                    pointOfAttack: POINTS_OF_ATTACK.DATA_STORAGE_INFRASTRUCTURE,
+                    attacker: ATTACKERS.ADMINISTRATORS,
+                }),
+            ],
+        };
+
+        it.each([
+            { field: "pointOfAttack", filter: POINTS_OF_ATTACK.USER_INTERFACE, expected: ["generic-1 (2/2)"] },
+            {
+                field: "pointOfAttack",
+                filter: POINTS_OF_ATTACK.DATA_STORAGE_INFRASTRUCTURE,
+                expected: ["generic-2 (1/1)"],
+            },
+            {
+                field: "pointOfAttack",
+                filter: `${POINTS_OF_ATTACK.USER_INTERFACE},${POINTS_OF_ATTACK.DATA_STORAGE_INFRASTRUCTURE}`,
+                expected: ["generic-1 (2/2)", "generic-2 (1/1)"],
+            },
+            { field: "pointOfAttack", filter: POINTS_OF_ATTACK.USER_BEHAVIOUR, expected: [] },
+            { field: "attacker", filter: ATTACKERS.UNAUTHORISED_PARTIES, expected: ["generic-1 (2/2)"] },
+            {
+                field: "attacker",
+                filter: `${ATTACKERS.SYSTEM_USERS},${ATTACKERS.ADMINISTRATORS}`,
+                expected: ["generic-2 (1/1)"],
+            },
+            { field: "attacker", filter: ATTACKERS.APPLICATION_USERS, expected: [] },
+        ])("lists the generic threats whose $field is one of '$filter'", ({ field, filter, expected }) => {
+            expect(summarize(build({ generics, threats, columnFilters: { [field]: filter } }))).toEqual(expected);
+        });
+
+        it("matches the stored value, not part of its label", () => {
+            const communicationGenericThreat = {
+                ...genericThreat(3, "Eavesdropping"),
+                pointOfAttack: POINTS_OF_ATTACK.COMMUNICATION_INTERFACES,
+            };
+
+            expect(
+                summarize(
+                    build({
+                        generics: [...generics, communicationGenericThreat],
+                        threats,
+                        columnFilters: { pointOfAttack: POINTS_OF_ATTACK.COMMUNICATION_INFRASTRUCTURE },
+                    })
+                )
+            ).toEqual([]);
+        });
+
+        it("keeps a matching generic threat without threats", () => {
+            expect(
+                summarize(
+                    build({
+                        generics,
+                        threats: { ...threats, 2: [] },
+                        columnFilters: { attacker: ATTACKERS.ADMINISTRATORS },
+                    })
+                )
+            ).toEqual(["generic-2 (0/0)"]);
+        });
+
+        it("lists all threats of a matching generic threat, still applying threat-only filters", () => {
+            expect(
+                summarize(
+                    build({
+                        generics,
+                        threats,
+                        columnFilters: {
+                            pointOfAttack: POINTS_OF_ATTACK.USER_INTERFACE,
+                            status: THREAT_STATUSES.FINALIZED,
+                        },
+                        expanded: { 1: true },
+                    })
+                )
+            ).toEqual(["generic-1 (1/2)", "threat-11"]);
+        });
+    });
+
+    describe("assets filter", () => {
+        const credentials = createAsset({ id: 1, name: "User Credentials" });
+        const backups = createAsset({ id: 2, name: "Database Backups" });
+        const threatsWithAssets = {
+            1: [threat(11, 1, { assets: [credentials, backups] }), threat(12, 1, { assets: [backups] })],
+            2: [threat(21, 2, { assets: [] })],
+        };
+        const buildWithAssets = (assetsFilter: string) =>
+            summarize(
+                build({
+                    threats: threatsWithAssets,
+                    columnFilters: { assets: assetsFilter },
+                    expanded: { 1: true, 2: true },
+                })
+            );
+
+        it("lists the threats with an asset whose name contains the text, ignoring case", () => {
+            expect(buildWithAssets("credential")).toEqual(["generic-1 (1/2)", "threat-11"]);
+            expect(buildWithAssets("BACKUPS")).toEqual(["generic-1 (2/2)", "threat-11", "threat-12"]);
+        });
+
+        it("no longer matches the number of assets", () => {
+            expect(buildWithAssets("2")).toEqual([]);
+        });
+
+        it("never matches a generic threat itself, even when its name contains the text", () => {
+            expect(buildWithAssets("tampering")).toEqual([]);
+        });
     });
 });
 
