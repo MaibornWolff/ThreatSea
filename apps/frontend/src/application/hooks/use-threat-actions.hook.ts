@@ -6,6 +6,7 @@ import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat
 import type { ExtendedThreat, Threat } from "#api/types/threat.types.ts";
 import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import { useAppDispatch } from "./use-app-redux.hook";
+import { useChainDialogPaths } from "./use-chain-dialog-paths.hook";
 import { useConfirm } from "./use-confirm.hook";
 import type { ExtendedThreatWithMetrics } from "./use-generic-threats-list.hook";
 
@@ -30,15 +31,16 @@ export const useThreatActions = ({
     const navigate = useNavigate();
     const { t } = useTranslation("threatsPage");
     const { openConfirm } = useConfirm<Threat>();
+    const { threatPath } = useChainDialogPaths();
 
     const onClickEditThreat = useCallback(
         (event: MouseEvent<HTMLElement>, threat: ExtendedThreat | undefined) => {
             event.preventDefault();
             if (threat) {
-                navigate(`/projects/${projectId}/threats/edit?threatId=${threat.id}`, { state: { threat } });
+                navigate(threatPath(threat.id), { state: { threat } });
             }
         },
-        [navigate, projectId]
+        [navigate, threatPath]
     );
 
     const handleAddThreat = useCallback(

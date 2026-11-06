@@ -18,7 +18,6 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import type { DialogProps } from "@mui/material/Dialog";
 import { useTheme } from "@mui/material/styles";
 import Add from "@mui/icons-material/Add";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
@@ -28,10 +27,9 @@ import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useLocation } from "react-router";
 import { useDialog } from "#application/hooks/use-dialog.hook.ts";
-import { useAppDispatch } from "#application/hooks/use-app-redux.hook.ts";
-import { MeasureImpactsActions } from "#application/actions/measureImpacts.actions.ts";
+import { useMeasureImpacts } from "#application/hooks/use-measureImpacts.hook.ts";
 import { Button } from "#view/components/button.component.tsx";
-import { Dialog } from "#view/components/dialog.component.tsx";
+import { ChainDialogContent } from "#view/components/chain-dialog-content.component.tsx";
 import { DialogTextField } from "#view/components/dialog.textfield.component.tsx";
 import { useMeasureSuggestions } from "#application/hooks/use-measureSuggestions.ts";
 import { DescriptionTextField } from "#view/components/description-textfield.component.tsx";
@@ -56,7 +54,7 @@ interface FormValues {
 
 interface MeasureImpactFormValues extends FormValues, Omit<MeasureImpact, keyof FormValues>, DialogValue {}
 
-interface MeasureImpactByMeasureDialogProps extends DialogProps {
+interface MeasureImpactByMeasureDialogProps {
     project: Project;
     threat: ApplyMeasureThreat;
     measureImpact: MeasureImpact | null;
@@ -68,7 +66,6 @@ interface MeasureImpactByMeasureDialogProps extends DialogProps {
  *
  * @param {object} project - The current project data.
  * @param {boolean} measureData - The data of the measure.
- * @param {object} props - Dialog properties.
  * @returns React component for the measure dialog.
  */
 const MeasureImpactByMeasureDialog = ({
@@ -76,11 +73,10 @@ const MeasureImpactByMeasureDialog = ({
     threat,
     measureImpact,
     onApplied,
-    ...props
 }: MeasureImpactByMeasureDialogProps) => {
     const navigate = useNavigate();
     const location = useLocation();
-    const dispatch = useAppDispatch();
+    const { saveMeasureImpact } = useMeasureImpacts({ projectId: project.id });
     const { values: preselectedValues, cancelDialog } = useDialog<MeasureImpactFormValues | null>("measureImpacts");
     const { suggestedMeasures, appliedMeasures, filteredCatalogMeasures, remainingMeasures } = useMeasureSuggestions({
         selectedThreat: threat,
@@ -97,7 +93,7 @@ const MeasureImpactByMeasureDialog = ({
         setValue,
         handleSubmit,
         control,
-        formState: { errors },
+        formState: { errors, isSubmitting },
     } = useForm<MeasureImpactFormValues>({
         defaultValues: {
             ...measureImpact,
@@ -118,6 +114,9 @@ const MeasureImpactByMeasureDialog = ({
             setValue("measureId", preselectedValues.measureId);
         }
     }, [setValue, preselectedValues]);
+
+    // Clear the preselect on unmount, not in closeDialog: a backdrop click in the shell closes without it.
+    useEffect(() => cancelDialog, [cancelDialog]);
 
     const [outOfScopeCheckbox, setOutOfScopeCheckbox] = useState(getValues("setsOutOfScope"));
     const [probabilityCheckbox, setProbabilityCheckbox] = useState(getValues("impactsProbability"));
@@ -141,41 +140,18 @@ const MeasureImpactByMeasureDialog = ({
      * @param {object} data - Data of the measure.
      */
     const handleConfirmDialog = async (data: MeasureImpactFormValues) => {
-        const payload = {
-            ...data,
-            probability: data.setsOutOfScope || !data.impactsProbability ? null : data.probability,
-            damage: data.setsOutOfScope || !data.impactsDamage ? null : data.damage,
-            threatId: threat.id,
-            projectId: project.id,
-        };
-        try {
-            if (payload.id != null) {
-                await dispatch(
-                    MeasureImpactsActions.updateMeasureImpact(
-                        payload as Parameters<typeof MeasureImpactsActions.updateMeasureImpact>[0]
-                    )
-                ).unwrap();
-            } else {
-                await dispatch(
-                    MeasureImpactsActions.createMeasureImpact(
-                        payload as Parameters<typeof MeasureImpactsActions.createMeasureImpact>[0]
-                    )
-                ).unwrap();
-            }
+        const isSaved = await saveMeasureImpact({ ...data, threatId: threat.id });
+        if (isSaved) {
             onApplied?.();
             closeDialog();
-        } catch {
-            // handled globally; keep the dialog open so the user can retry
         }
     };
 
     /**
-     * Closes the dialog. Clears the measureImpacts dialog namespace first — the
-     * save-measure flow preselects a measureId there, and a leftover value would
-     * pre-fill the next dialog open from any path.
+     * Closes the dialog. The unmount effect above clears the measureId the save-measure flow
+     * preselected, so it doesn't pre-fill the next open.
      */
     const closeDialog = () => {
-        cancelDialog();
         navigate(-1);
     };
 
@@ -216,17 +192,7 @@ const MeasureImpactByMeasureDialog = ({
     };
 
     return (
-        <Dialog
-            onClose={(_event, reason) => {
-                if (reason === "backdropClick") {
-                    handleCancelDialog?.();
-                }
-            }}
-            maxWidth="sm"
-            fullWidth
-            {...props}
-            open={true}
-        >
+        <ChainDialogContent size="sm">
             <DialogTitle
                 sx={{
                     padding: 0,
@@ -635,12 +601,14 @@ const MeasureImpactByMeasureDialog = ({
                         variant="contained"
                         sx={{ marginRight: 0 }}
                         onClick={handleCancelDialog}
+                        disabled={isSubmitting}
                         data-testid="apply-measure-modal_cancel-button"
                     >
                         {t("cancelBtn")}
                     </Button>
                     <Button
                         type="submit"
+                        disabled={isSubmitting}
                         sx={{ marginRight: 0 }}
                         variant="contained"
                         color="success"
@@ -650,7 +618,7 @@ const MeasureImpactByMeasureDialog = ({
                     </Button>
                 </DialogActions>
             </Box>
-        </Dialog>
+        </ChainDialogContent>
     );
 };
 

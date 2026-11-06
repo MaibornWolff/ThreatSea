@@ -17,7 +17,6 @@ import {
     Select,
     Tooltip,
 } from "@mui/material";
-import type { DialogProps } from "@mui/material/Dialog";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import { useTheme } from "@mui/material/styles";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
@@ -26,9 +25,9 @@ import { useEffect, useState, type ChangeEvent } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
-import { useDialog } from "#application/hooks/use-dialog.hook.ts";
+import { useMeasureImpacts } from "#application/hooks/use-measureImpacts.hook.ts";
 import { Button } from "#view/components/button.component.tsx";
-import { Dialog } from "#view/components/dialog.component.tsx";
+import { ChainDialogContent } from "#view/components/chain-dialog-content.component.tsx";
 import { DialogTextField } from "#view/components/dialog.textfield.component.tsx";
 import { useThreatSuggestions } from "#application/hooks/use-ThreatSuggestions.ts";
 import { useMeasureImpactPlaceholder } from "#application/hooks/use-measureImpacts-placeHolder.hook.ts";
@@ -36,7 +35,6 @@ import { DescriptionTextField } from "#view/components/description-textfield.com
 import type { Project } from "#api/types/project.types.ts";
 import type { Measure } from "#api/types/measure.types.ts";
 import type { MeasureImpact } from "#api/types/measure-impact.types.ts";
-import type { DialogValue } from "#application/reducers/dialogs.reducer.ts";
 
 interface FormValues {
     id: number | undefined;
@@ -49,12 +47,13 @@ interface FormValues {
     damage: number | "" | null;
 }
 
-interface MeasureImpactByThreatFormValues extends FormValues, Omit<MeasureImpact, keyof FormValues>, DialogValue {}
+interface MeasureImpactByThreatFormValues extends FormValues, Omit<MeasureImpact, keyof FormValues> {}
 
-interface MeasureImpactByThreatDialogProps extends DialogProps {
+interface MeasureImpactByThreatDialogProps {
     project: Project;
     measure: Measure;
     measureImpact: MeasureImpact | null;
+    onSaved?: () => void;
 }
 
 /**
@@ -62,18 +61,17 @@ interface MeasureImpactByThreatDialogProps extends DialogProps {
  *
  * @param {object} project - The current project data.
  * @param {boolean} measureData - The data of the measure.
- * @param {object} props - Dialog properties.
  * @returns JSX.Element component for the measure dialog.
  */
 const MeasureImpactByThreatDialog = ({
     project,
     measure,
     measureImpact,
-    ...props
+    onSaved,
 }: MeasureImpactByThreatDialogProps) => {
     const projectId = parseInt(String(project.id), 10);
     const navigate = useNavigate();
-    const { confirmDialog, cancelDialog } = useDialog<MeasureImpactByThreatFormValues | null>("measureImpacts");
+    const { saveMeasureImpact } = useMeasureImpacts({ projectId });
     const { suggestedThreats, remainingThreats, impactedThreats } = useThreatSuggestions({
         selectedMeasure: measure,
         projectId,
@@ -97,7 +95,7 @@ const MeasureImpactByThreatDialog = ({
         setValue,
         handleSubmit,
         control,
-        formState: { errors },
+        formState: { errors, isSubmitting },
     } = useForm<MeasureImpactByThreatFormValues>({
         defaultValues: {
             ...measureImpact,
@@ -124,7 +122,6 @@ const MeasureImpactByThreatDialog = ({
      * @event Button#onClick
      */
     const handleCancelDialog = () => {
-        cancelDialog();
         closeDialog();
     };
 
@@ -134,15 +131,12 @@ const MeasureImpactByThreatDialog = ({
      * @event Box#onSubmit
      * @param {object} data - Data of the measure.
      */
-    const handleConfirmDialog = (data: MeasureImpactByThreatFormValues) => {
-        confirmDialog({
-            ...data,
-            probability: data.setsOutOfScope || !data.impactsProbability ? null : data.probability,
-            damage: data.setsOutOfScope || !data.impactsDamage ? null : data.damage,
-            measureId: parseInt(String(measure.id), 10),
-            projectId: parseInt(String(projectId), 10),
-        });
-        closeDialog();
+    const handleConfirmDialog = async (data: MeasureImpactByThreatFormValues) => {
+        const isSaved = await saveMeasureImpact({ ...data, measureId: parseInt(String(measure.id), 10) });
+        if (isSaved) {
+            onSaved?.();
+            closeDialog();
+        }
     };
 
     /**
@@ -153,17 +147,7 @@ const MeasureImpactByThreatDialog = ({
     };
 
     return (
-        <Dialog
-            onClose={(_event, reason) => {
-                if (reason === "backdropClick") {
-                    handleCancelDialog?.();
-                }
-            }}
-            maxWidth="sm"
-            fullWidth
-            {...props}
-            open={true}
-        >
+        <ChainDialogContent size="sm">
             <DialogTitle
                 sx={{
                     padding: 0,
@@ -548,15 +532,26 @@ const MeasureImpactByThreatDialog = ({
                         paddingLeft: 0,
                     }}
                 >
-                    <Button variant="contained" sx={{ marginRight: 0 }} onClick={handleCancelDialog}>
+                    <Button
+                        variant="contained"
+                        sx={{ marginRight: 0 }}
+                        onClick={handleCancelDialog}
+                        disabled={isSubmitting}
+                    >
                         {t("cancelBtn")}
                     </Button>
-                    <Button type="submit" sx={{ marginRight: 0 }} variant="contained" color="success">
+                    <Button
+                        type="submit"
+                        disabled={isSubmitting}
+                        sx={{ marginRight: 0 }}
+                        variant="contained"
+                        color="success"
+                    >
                         {t("saveBtn")}
                     </Button>
                 </DialogActions>
             </Box>
-        </Dialog>
+        </ChainDialogContent>
     );
 };
 
