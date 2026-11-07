@@ -151,4 +151,15 @@ export const editorSelectors = {
         [selectEditorState],
         (editor): ExtendedEditorState["annotationTool"] => editor.annotationTool
     ),
+
+    selectComponentTypeToPlace: createSelector(
+        [selectEditorState],
+        (editor): ExtendedEditorState["componentTypeToPlace"] => editor.componentTypeToPlace
+    ),
+
+    /** True while an annotation tool or a component placement takes over canvas clicks. */
+    selectIsCanvasToolActive: createSelector(
+        [selectEditorState],
+        (editor): boolean => editor.annotationTool !== null || editor.componentTypeToPlace !== null
+    ),
 };
