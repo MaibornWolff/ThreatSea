@@ -545,7 +545,7 @@ export const createThreatsColumns = ({
                             paddingRight: 1,
                         }}
                     >
-                        <Typography sx={cellText}>
+                        <Typography sx={{ ...cellText, whiteSpace: "nowrap" }}>
                             {row.threatCount < row.totalThreatCount
                                 ? t("threatsCountFiltered", { visible: row.threatCount, count: row.totalThreatCount })
                                 : t("threatsCount", { count: row.totalThreatCount })}

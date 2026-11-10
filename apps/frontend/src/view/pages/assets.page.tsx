@@ -29,6 +29,7 @@ import { usePageTitle } from "#application/hooks/use-page-title.hook.ts";
 import { HeaderUtilityControls } from "#view/components/header-utility-controls.component.tsx";
 import { withProject } from "#view/components/with-project.hoc.tsx";
 import { applyColumnFilters } from "#utils/column-filters.ts";
+import { getWrappingRowHeight, wrappingGridRowStyles } from "#utils/wrapping-grid-rows.ts";
 import AssetDialogPage from "./asset-dialog.page";
 import { createAssetsColumns, formatCreationDate } from "./create-assets-columns";
 import { TableAddButton } from "#view/components/table-add-button.component.tsx";
@@ -314,6 +315,7 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
                             }
                         }}
                         columnHeaderHeight={90}
+                        getRowHeight={getWrappingRowHeight}
                         columnVisibilityModel={columnVisibility}
                         onColumnWidthChange={handleColumnWidthChange}
                         // Two-state sort like the tables before the DataGrid: a header click toggles asc <-> desc
@@ -327,6 +329,7 @@ const AssetsPageBody = ({ project }: AssetsPageBodyProps) => {
                             "& .MuiDataGrid-columnHeader:focus": { outline: "none" },
                             "& .MuiDataGrid-columnHeader": { padding: "8px 16px" },
                             "& .MuiDataGrid-cell": { cursor: "pointer" },
+                            ...wrappingGridRowStyles,
                         }}
                         initialState={{
                             pagination: { paginationModel: { pageSize: 25, page: 0 } },

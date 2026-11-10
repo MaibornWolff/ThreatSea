@@ -3,6 +3,8 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import { useLayoutEffect, useRef, useState } from "react";
 import { Tooltip } from "#view/components/tooltip.component.tsx";
 
+const MAX_LINES = 2;
+
 interface OverflowTextProps {
     text: string;
     testId?: string;
@@ -13,9 +15,9 @@ interface OverflowTextProps {
 }
 
 /**
- * A single-line, ellipsis-truncated text element with a tooltip shown only when the text is
- * actually truncated. The text sits in its own flex container (`min-width: 0` on both the
- * container and the text) so the ellipsis appears reliably whether this is rendered on its own
+ * Text wrapped onto at most two lines, ending in an ellipsis with a tooltip shown only when the
+ * text is actually cut. The text sits in its own flex container (`min-width: 0` on both the
+ * container and the text) so it wraps at the cell width whether this is rendered on its own
  * inside a data-grid cell or next to another element such as an expand chevron.
  *
  * The Tooltip is always mounted and merely disabled while the text fits. Toggling the wrapper
@@ -32,25 +34,15 @@ export const OverflowText = ({ text, testId, bold = false, align = "left", conta
         if (!element) {
             return;
         }
-        // Ignore transient 0×0 readings (e.g. while the grid re-lays out a cell) instead of
-        // clearing the truncated state on them.
         const measure = () => {
-            const boxWidth = element.getBoundingClientRect().width;
-            if (boxWidth <= 0) {
+            // Ignore transient 0×0 readings (e.g. while the grid re-lays out a cell) instead of
+            // clearing the truncated state on them.
+            if (element.clientHeight <= 0) {
                 return;
             }
-            // `scrollWidth`/`clientWidth` are integer-rounded, so text that overflows its box by
-            // a fraction of a pixel — enough for the browser to still apply the CSS ellipsis —
-            // reads as scrollWidth === clientWidth and wrongly suppresses the tooltip. (Observed:
-            // an English "attacker" label at 145.03px in a 145px cell — 0.03px over, ellipsis
-            // shown, no tooltip.) Whether a label lands on that boundary depends on its exact
-            // width, so it varies by locale and column width. Compare the text's true fractional
-            // width (via a Range) against the fractional box width to catch the sub-pixel case;
-            // the tolerance only rejects float noise, since any real overflow triggers ellipsis.
-            const range = document.createRange();
-            range.selectNodeContents(element);
-            const textWidth = range.getBoundingClientRect().width;
-            setIsTruncated(textWidth - boxWidth > 0.01);
+            // The clamp hides whole lines, so a cut text overflows by a full line height; the
+            // tolerance only rejects the integer rounding of scrollHeight and clientHeight.
+            setIsTruncated(element.scrollHeight - element.clientHeight > 1);
         };
         measure();
         // Re-measure on column resize so the tooltip appears/disappears as the fit changes.
@@ -92,9 +84,15 @@ export const OverflowText = ({ text, testId, bold = false, align = "left", conta
                     sx={{
                         flex: 1,
                         minWidth: 0,
+                        display: "-webkit-box",
+                        WebkitBoxOrient: "vertical",
+                        WebkitLineClamp: MAX_LINES,
                         overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
+                        whiteSpace: "normal",
+                        // German compounds such as "Kommunikationsinfrastruktur" have no space to wrap
+                        // at; hyphenation follows the page language, break-word is the fallback.
+                        hyphens: "auto",
+                        overflowWrap: "break-word",
                         fontSize: "0.875rem",
                         textAlign: align,
                         fontWeight: bold ? "bold" : "normal",
