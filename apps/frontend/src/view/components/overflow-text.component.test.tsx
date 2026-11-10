@@ -128,4 +128,62 @@ describe("OverflowText", () => {
 
         expect(getText()).toHaveAttribute("tabindex", "0");
     });
+
+    // A single line is cut sideways, so it is measured by width rather than height.
+    describe("on a single line", () => {
+        let boxWidth = 0;
+        let textWidth = 0;
+
+        const renderSingleLine = () =>
+            renderWithProviders(<OverflowText text={LONG_NAME} testId="threat-name" maxLines={1} />);
+
+        beforeEach(() => {
+            vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(
+                () => ({ width: boxWidth }) as DOMRect
+            );
+            // jsdom has no Range#getBoundingClientRect; the component measures the text's own width through it.
+            Object.defineProperty(Range.prototype, "getBoundingClientRect", {
+                configurable: true,
+                value: () => ({ width: textWidth }) as DOMRect,
+            });
+        });
+
+        afterEach(() => {
+            delete (Range.prototype as Partial<Range>).getBoundingClientRect;
+        });
+
+        it("shows the full text in a tooltip when the text is wider than its box", async () => {
+            boxWidth = 116;
+            textWidth = 144.4;
+            renderSingleLine();
+
+            await userEvent.hover(getText());
+
+            expect(await screen.findByRole("tooltip")).toHaveTextContent(LONG_NAME);
+        });
+
+        it("offers no tab stop while the text fits its box", () => {
+            boxWidth = 152;
+            textWidth = 144.4;
+            renderSingleLine();
+
+            expect(getText()).not.toHaveAttribute("tabindex");
+        });
+
+        it("treats a sub-pixel overflow as truncated, since the browser already shows the ellipsis", () => {
+            boxWidth = 145;
+            textWidth = 145.03;
+            renderSingleLine();
+
+            expect(getText()).toHaveAttribute("tabindex", "0");
+        });
+
+        it("ignores width differences below the float-noise tolerance", () => {
+            boxWidth = 145;
+            textWidth = 145.005;
+            renderSingleLine();
+
+            expect(getText()).not.toHaveAttribute("tabindex");
+        });
+    });
 });

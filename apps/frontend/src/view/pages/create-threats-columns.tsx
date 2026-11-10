@@ -527,7 +527,11 @@ export const createThreatsColumns = ({
     {
         field: "actions",
         headerName: "",
-        width: 186,
+        // Grows with spare space up to the width that fits the threat count beside the add button for
+        // single-digit filtered counts ("6 von 6 Bedrohungen"); narrower, longer counts end in an ellipsis.
+        flex: 1,
+        minWidth: 186,
+        maxWidth: 222,
         sortable: false,
         filterable: false,
         align: "right",
@@ -546,11 +550,19 @@ export const createThreatsColumns = ({
                             paddingRight: 1,
                         }}
                     >
-                        <Typography sx={{ ...cellText, whiteSpace: "nowrap" }}>
-                            {row.threatCount < row.totalThreatCount
-                                ? t("threatsCountFiltered", { visible: row.threatCount, count: row.totalThreatCount })
-                                : t("threatsCount", { count: row.totalThreatCount })}
-                        </Typography>
+                        {/* One line, cut at the end: overflowing a right-aligned box would clip the leading count. */}
+                        <OverflowText
+                            text={
+                                row.threatCount < row.totalThreatCount
+                                    ? t("threatsCountFiltered", {
+                                          visible: row.threatCount,
+                                          count: row.totalThreatCount,
+                                      })
+                                    : t("threatsCount", { count: row.totalThreatCount })
+                            }
+                            align="right"
+                            maxLines={1}
+                        />
                         {checkUserRole(userRole, USER_ROLES.EDITOR) && (
                             <IconButton
                                 title={t("addThreat")}
