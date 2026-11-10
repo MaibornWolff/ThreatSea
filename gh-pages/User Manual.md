@@ -372,7 +372,9 @@ The assets view visualizes the results of the protection need analysis for the s
 
 ![Assets Page View](assets/image-2024-7-30_14-16-36.png "Assets Page View")
 
-Users can sort the assets in ascending and descending order according to their name, the protection need for each protection goal and their creation date. They can also search for specific assets by using the search bar. The search covers the asset name and the description.
+Each column header contains a filter field. The filters match any part of the value, regardless of upper and lower case, and an asset is listed if it matches all filters. The arrow next to a column name collapses its filter field, and "Clear filters" resets all filters. Clicking a column name sorts the list by that column, ascending first and descending on the next click; by default it is sorted by name.
+
+With "Customize view", users can show and hide columns; the description column is hidden by default. Columns can be resized by dragging the border of their header. Both settings are kept per project until the browser tab is closed or the user logs out.
 
 ### Creating an asset
 
@@ -518,11 +520,14 @@ Users can delete a threat scenario by using the <img src="../assets/images_2_.pn
 The measures view lists all security measures that are planned or already implemented to reduce the risks related to the system and contains the following information:
 
 - Name: Name of the security measure
+- Description: Description of the security measure (hidden by default, see "Customize view" below)
 - Scheduled at: (Planned) implementation date of the security measure
 
 ![Measures Page View](assets/image-2024-7-30_13-18-56.png "Measures Page View")
 
-Users can sort the list of measures according to each of these information in ascending or descending order or search for specific measures. The search takes names and description fields into account.
+Each column header contains a filter field. The filters match any part of the value, regardless of upper and lower case, and a measure is listed if it matches all filters; filtering the "Scheduled at" column for "Not scheduled yet" lists the measures without a date. The arrow next to a column name collapses its filter field, and "Clear filters" resets all filters. Clicking a column name sorts the list by that column, ascending first and descending on the next click; by default it is sorted by name.
+
+With "Customize view", users can show and hide columns. Columns can be resized by dragging the border of their header. Both settings are kept per project until the browser tab is closed or the user logs out.
 
 Tipp:
 
