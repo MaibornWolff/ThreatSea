@@ -51,13 +51,14 @@ const DEFAULT_COLUMN_VISIBILITY: GridColumnVisibilityModel = {
     name: true,
     // Descriptions are long free text; the column is opt-in via Customize view.
     description: false,
-    assets: true,
+    // Assets, probability and damage are rarely needed; hiding them leaves room for the columns read every time.
+    assets: false,
     protectionGoals: false,
     componentName: true,
     pointOfAttack: true,
     attacker: true,
-    probability: true,
-    damage: true,
+    probability: false,
+    damage: false,
     risk: true,
     status: true,
     actions: true,
