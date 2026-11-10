@@ -363,8 +363,9 @@ export const createThreatsColumns = ({
     {
         field: "attacker",
         headerName: t("attacker"),
-        flex: 1,
-        minWidth: 150,
+        // Attacker labels are short; the space goes to the threat count in the actions column.
+        flex: 0.9,
+        minWidth: 134,
         align: "center",
         headerAlign: "center",
         renderHeader: () => (
@@ -526,7 +527,7 @@ export const createThreatsColumns = ({
     {
         field: "actions",
         headerName: "",
-        width: 170,
+        width: 186,
         sortable: false,
         filterable: false,
         align: "right",
