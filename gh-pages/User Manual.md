@@ -376,6 +376,8 @@ Each column header contains a filter field. The filters match any part of the va
 
 With "Customize view", users can show and hide columns; the description column is hidden by default. Columns can be resized by dragging the border of their header. Both settings are kept per project until the browser tab is closed or the user logs out.
 
+Long names and descriptions wrap onto a second line and the row grows to fit them. Text that needs more than two lines ends in "…"; hovering over it, or moving the keyboard focus to it, shows the full text. The complete description is shown when the asset is opened.
+
 ### Creating an asset
 
 Users can create new assets with the "Add Asset" button above the list.
@@ -423,13 +425,13 @@ For each threat, the list contains the following information:
 
 - **Name:** Name of the threat
 - **Description:** Description of the threat (hidden by default, see "Customize view" below)
-- **Assets:** Number of assets that are affected by the threat scenario
+- **Assets:** Number of assets that are affected by the threat scenario (hidden by default, see "Customize view" below)
 - **Protection Goals:** The protection goals the threat scenario applies to, shown as "C I A" for confidentiality, integrity and availability (in German "Vt In Vf" for Vertraulichkeit, Integrität and Verfügbarkeit). The goals that apply are shown in bold, the others are greyed out. The column is hidden by default, see "Customize view" below.
 - **Component:** Name of the component that is affected by the threat scenario
 - **Point of Attack:** Type of the attack point in the component that is affected by the threat scenario, as used in the 4x6 methodology (data storage infrastructure, processing infrastructure, user interface, user behaviour, communication interface, communication infrastructure)
 - **Attacker:** Type of attacker that is involved in the threat scenario, as used in the 4x6 methodology (unauthorized parties, system users, application users, administrators)
-- **Probability:** (Gross) probability value for the risk that is associated with the threat scenario
-- **Damage:** (Gross) impact value for the risk that is associated with the threat scenario
+- **Probability:** (Gross) probability value for the risk that is associated with the threat scenario (hidden by default, see "Customize view" below)
+- **Damage:** (Gross) impact value for the risk that is associated with the threat scenario (hidden by default, see "Customize view" below)
 - **Risk:** (Gross) risk value that is associated with the threat scenario
 - **Status:** Assessment status of the threat (see below)
 
@@ -439,7 +441,9 @@ Each column header contains a filter field. Text filters match any part of the v
 
 Clicking a column name sorts the list by that column, ascending first and descending on the next click; by default it is sorted by name. Generic threats always keep their threats directly below them. Sorting by a column of the generic threat itself (name, component, point of attack, attacker) orders the generic threats by that value. Sorting by a column that only the threats have values for (for example risk, probability or status) orders the threats within each generic threat and ranks the generic threats by their first threat in that order, so sorting by risk in descending order lists the generic threat with the highest-risk threat first; all generic threats are expanded so the sorted values are visible. The status is sorted in the order "New", "In progress", "Finalized", "Out of scope". The protection goals column cannot be sorted. The list is shown in pages of generic threats: each page holds the chosen number of generic threats together with all of their threats, so expanding a generic threat never moves its threats to the next page.
 
-With "Customize view", users can show and hide columns, for example the description and protection goals columns. Columns can be resized by dragging the border of their header. Both settings are kept per project until the browser tab is closed or the user logs out.
+With "Customize view", users can show and hide columns. The description, assets, protection goals, probability and damage columns are hidden by default to leave room for the columns that are needed most; each of them can be shown again at any time. Columns can be resized by dragging the border of their header. Both settings are kept per project until the browser tab is closed or the user logs out.
+
+Long texts, such as names, components or points of attack, wrap onto a second line and the row grows to fit them. Text that needs more than two lines ends in "…"; hovering over it, or moving the keyboard focus to it, shows the full text.
 
 The status of a threat shows how far its assessment has progressed:
 
@@ -528,6 +532,8 @@ The measures view lists all security measures that are planned or already implem
 Each column header contains a filter field. The filters match any part of the value, regardless of upper and lower case, and a measure is listed if it matches all filters; filtering the "Scheduled at" column for "Not scheduled yet" lists the measures without a date. The arrow next to a column name collapses its filter field, and "Clear filters" resets all filters. Clicking a column name sorts the list by that column, ascending first and descending on the next click; by default it is sorted by name.
 
 With "Customize view", users can show and hide columns. Columns can be resized by dragging the border of their header. Both settings are kept per project until the browser tab is closed or the user logs out.
+
+Long names and descriptions wrap onto a second line and the row grows to fit them. Text that needs more than two lines ends in "…"; hovering over it, or moving the keyboard focus to it, shows the full text. The complete description is shown when the measure is opened.
 
 Tipp:
 
