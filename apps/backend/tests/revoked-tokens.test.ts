@@ -36,6 +36,14 @@ async function isLoggedInWith(accessToken: string): Promise<boolean> {
     return response.body.data.status.isLoggedIn;
 }
 
+async function logOut(accessToken: string): Promise<void> {
+    const logoutResponse = await request(app)
+        .post("/api/auth/logout")
+        .set("X-CSRF-TOKEN", csrfToken)
+        .set("Cookie", [...csrfCookies, `accessToken=${accessToken}`]);
+    expect(logoutResponse.statusCode).toEqual(204);
+}
+
 beforeAll(async () => {
     const csrfResponse = await request(app).get("/api/csrf-token");
     expect(csrfResponse.status).toBe(200);
@@ -49,11 +57,7 @@ describe("revoked access tokens", () => {
 
     beforeAll(async () => {
         revokedToken = await signAccessToken("revoked@example.com");
-        const logoutResponse = await request(app)
-            .post("/api/auth/logout")
-            .set("X-CSRF-TOKEN", csrfToken)
-            .set("Cookie", [...csrfCookies, `accessToken=${revokedToken}`]);
-        expect(logoutResponse.statusCode).toEqual(204);
+        await logOut(revokedToken);
     });
 
     it("rejects the token that was logged out", async () => {
@@ -81,5 +85,17 @@ describe("revoked access tokens", () => {
         const otherToken = await signAccessToken("still-logged-in@example.com");
 
         expect(await isLoggedInWith(otherToken)).toBe(true);
+    });
+});
+
+describe("logging out with a re-encoded token", () => {
+    it("revokes the original token and every other encoding of it", async () => {
+        const originalToken = await signAccessToken("reencoded-logout@example.com");
+
+        await logOut(flipUnusedSignatureBits(originalToken, 0b01));
+
+        expect(await isLoggedInWith(originalToken)).toBe(false);
+        expect(await isLoggedInWith(flipUnusedSignatureBits(originalToken, 0b10))).toBe(false);
+        expect(await isLoggedInWith(`${originalToken}=`)).toBe(false);
     });
 });
