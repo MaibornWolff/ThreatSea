@@ -51,7 +51,7 @@ const setup = ({ siblings = 2, expanded = false } = {}) => {
     const store = createStore();
     const wrapper = ({ children }: { children: ReactNode }) => (
         <Provider store={store}>
-            <MemoryRouter>
+            <MemoryRouter initialEntries={["/projects/5/threats"]}>
                 <I18nextProvider i18n={translationUtil}>{children}</I18nextProvider>
             </MemoryRouter>
         </Provider>

@@ -7,7 +7,6 @@ import { CatalogsActions } from "#application/actions/catalogs.actions.ts";
 import { CatalogThreatsActions } from "#application/actions/catalog-threats.actions.ts";
 import { CatalogMeasuresActions } from "#application/actions/catalog-measures.actions.ts";
 import { MeasuresActions } from "#application/actions/measures.actions.ts";
-import { MeasureImpactsActions } from "#application/actions/measureImpacts.actions.ts";
 import { EditorActions } from "#application/actions/editor.actions.ts";
 import { MemberActions } from "#application/actions/members.actions.ts";
 
@@ -79,13 +78,6 @@ const handleConfirmDialog: AppMiddleware =
                             MemberActions.addAddableMember(data as Parameters<typeof MemberActions.addAddableMember>[0])
                         );
                         break;
-                    case "measureImpacts":
-                        dispatch(
-                            MeasureImpactsActions.updateMeasureImpact(
-                                data as Parameters<typeof MeasureImpactsActions.updateMeasureImpact>[0]
-                            )
-                        );
-                        break;
                     default:
                         break;
                 }
@@ -133,13 +125,6 @@ const handleConfirmDialog: AppMiddleware =
                         dispatch(
                             EditorActions.createComponentType(
                                 data as Parameters<typeof EditorActions.createComponentType>[0]
-                            )
-                        );
-                        break;
-                    case "measureImpacts":
-                        dispatch(
-                            MeasureImpactsActions.createMeasureImpact(
-                                data as Parameters<typeof MeasureImpactsActions.createMeasureImpact>[0]
                             )
                         );
                         break;
