@@ -82,6 +82,10 @@ export const databaseConfig: PoolConfig = {
     database: getEnvironmentVariable("DATABASE_NAME"),
     password: getEnvironmentVariable("DATABASE_PASSWORD"),
     ssl: getDatabaseTlsConfig(process.env["DATABASE_TLS"]),
+    // pg waits forever for a free pool client by default, so one stuck transaction pattern could hang
+    // the whole API. Fail the request instead, and let Postgres abort transactions left idle.
+    connectionTimeoutMillis: 10_000,
+    idle_in_transaction_session_timeout: 60_000,
 };
 
 // Config for cors and express.
