@@ -60,10 +60,16 @@ const handleFailedRequest: AppMiddleware =
         next(action);
         if (isRejectedAction(action)) {
             if (CatalogThreatsActions.deleteCatalogThreat.rejected.match(action)) {
-                const { arg: asset } = action.meta;
+                const { arg: catalogThreat } = action.meta;
+                const isUsedInProject = action.error.name === "Conflict";
                 dispatch(
                     AlertActions.openErrorAlert({
-                        text: translationUtil.t("catalogPage:catalogThreats.alert.deleteFailed", { name: asset.name }),
+                        text: translationUtil.t(
+                            isUsedInProject
+                                ? "catalogPage:catalogThreats.alert.deleteFailedInUse"
+                                : "catalogPage:catalogThreats.alert.deleteFailed",
+                            { name: catalogThreat.name }
+                        ),
                     })
                 );
             } else if (CatalogThreatsActions.importCatalogThreats.rejected.match(action)) {

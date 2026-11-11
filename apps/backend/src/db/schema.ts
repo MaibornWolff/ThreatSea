@@ -345,9 +345,10 @@ export const genericThreats = pgTable(
         updatedAt: timestamp({ mode: "string", withTimezone: true })
             .notNull()
             .default(sql`now()`),
+        // Restrict: deleting a catalog threat must never silently remove analysis work from projects.
         catalogThreatId: integer()
             .notNull()
-            .references(() => catalogThreats.id, { onDelete: "cascade", onUpdate: "cascade" }),
+            .references(() => catalogThreats.id, { onDelete: "restrict", onUpdate: "cascade" }),
         projectId: integer()
             .notNull()
             .references(() => projects.id, { onDelete: "cascade", onUpdate: "cascade" }),

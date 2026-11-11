@@ -8,9 +8,11 @@ import {
     CatalogThreat,
     catalogThreats,
     CreateCatalogThreat,
+    genericThreats,
     projects,
     UpdateCatalogThreat,
 } from "#db/schema.js";
+import { ConflictError } from "#errors/conflict.error.js";
 import { eq, getTableColumns, inArray } from "drizzle-orm";
 // oxlint-disable-next-line import/no-relative-parent-imports -- templates live outside src/; no alias defined
 import DefaultThreatMatrix from "../../templates/matrix/threats.matrix.json" with { type: "json" };
@@ -186,9 +188,18 @@ export async function updateCatalogThreat(
  *
  * @param {number} id - The id of the catalog threat.
  * @return {Promise<void>} A promise that resolves when the catalog threat is deleted.
+ * @throws {ConflictError} If a project still uses the catalog threat.
  */
-
 export async function deleteCatalogThreat(id: number) {
+    const usingGenericThreat = await db.query.genericThreats.findFirst({
+        columns: { id: true },
+        where: eq(genericThreats.catalogThreatId, id),
+    });
+
+    if (usingGenericThreat !== undefined) {
+        throw new ConflictError("Catalog threat is used in a project and cannot be deleted");
+    }
+
     await db.delete(catalogThreats).where(eq(catalogThreats.id, id));
 }
 

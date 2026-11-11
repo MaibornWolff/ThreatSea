@@ -4,7 +4,8 @@
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import { db } from "#db/index.js";
-import { catalogs, catalogThreats, usersCatalogs } from "#db/schema.js";
+import { catalogs, catalogThreats, genericThreats, projects, usersCatalogs } from "#db/schema.js";
+import { eq } from "drizzle-orm";
 import { ATTACKERS } from "#types/attackers.types.js";
 import { POINTS_OF_ATTACK } from "#types/points-of-attack.types.js";
 import { app } from "#server.js";
@@ -329,5 +330,63 @@ describe("delete or update catalog threats (invalid data)", () => {
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(400);
+    });
+});
+
+describe("delete a catalog threat that is used in a project", () => {
+    let catalogThreatId: number;
+    let genericThreatId: number;
+
+    beforeEach(async () => {
+        catalogThreatId = (
+            await db
+                .insert(catalogThreats)
+                .values({ ...VALID_CATALOG_THREAT_1, catalogId })
+                .returning()
+        ).at(0)!.id;
+
+        // The project has no membership for the requesting user, like another user's project.
+        const projectId = (
+            await db.insert(projects).values({ name: "Other user's project", description: "", catalogId }).returning()
+        ).at(0)!.id;
+
+        genericThreatId = (
+            await db
+                .insert(genericThreats)
+                .values({
+                    pointOfAttackId: "point-of-attack-1",
+                    name: VALID_CATALOG_THREAT_1.name,
+                    description: VALID_CATALOG_THREAT_1.description,
+                    pointOfAttack: VALID_CATALOG_THREAT_1.pointOfAttack,
+                    attacker: VALID_CATALOG_THREAT_1.attacker,
+                    catalogThreatId,
+                    projectId,
+                })
+                .returning()
+        ).at(0)!.id;
+    });
+
+    it("refuses the deletion and keeps the project's threats", async () => {
+        const res = await request(app)
+            .delete("/api/catalogs/" + catalogId + "/threats/" + catalogThreatId)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+
+        expect(res.statusCode).toEqual(409);
+        expect(res.body.message).toEqual("Catalog threat is used in a project and cannot be deleted");
+        expect(
+            await db.query.catalogThreats.findFirst({ where: eq(catalogThreats.id, catalogThreatId) })
+        ).toBeDefined();
+        expect(
+            await db.query.genericThreats.findFirst({ where: eq(genericThreats.id, genericThreatId) })
+        ).toBeDefined();
+    });
+
+    it("is also refused by the database, so no other code path can cascade into projects", async () => {
+        await expect(db.delete(catalogThreats).where(eq(catalogThreats.id, catalogThreatId))).rejects.toThrow();
+
+        expect(
+            await db.query.genericThreats.findFirst({ where: eq(genericThreats.id, genericThreatId) })
+        ).toBeDefined();
     });
 });
