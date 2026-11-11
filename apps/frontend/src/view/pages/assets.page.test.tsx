@@ -48,6 +48,13 @@ const columnFilter = (header: RegExp) =>
 const nameFilter = () => columnFilter(/^Name\b/);
 const confidentialityFilter = () => columnFilter(/^Confidentiality\b/);
 
+// Pasting sets a filter in one change; typing re-filters and re-renders the grid once per character,
+// which makes these tests needlessly slow on CI.
+const enterFilter = async (filter: HTMLElement, value: string) => {
+    await userEvent.click(filter);
+    await userEvent.paste(value);
+};
+
 beforeEach(() => {
     mockUseAssets({
         items: [createAsset({ id: 1, name: "Customer database" }), createAsset({ id: 2, name: "Payment service" })],
@@ -62,10 +69,11 @@ describe("AssetsPage — clear filters", () => {
         expect(screen.queryByRole("button", { name: "Clear filters" })).not.toBeInTheDocument();
     });
 
+    // Renders the whole DataGrid four times; on slow CI runners that nears the default 5s timeout.
     it("clears every column filter and lists all assets again", async () => {
         renderPage();
-        await userEvent.type(nameFilter(), "payment");
-        await userEvent.type(confidentialityFilter(), "3");
+        await enterFilter(nameFilter(), "payment");
+        await enterFilter(confidentialityFilter(), "3");
         expect(screen.queryByText("Customer database")).not.toBeInTheDocument();
 
         await userEvent.click(screen.getByRole("button", { name: "Clear filters" }));
@@ -75,11 +83,11 @@ describe("AssetsPage — clear filters", () => {
         expect(screen.getByText("Customer database")).toBeInTheDocument();
         expect(screen.getByText("Payment service")).toBeInTheDocument();
         expect(screen.queryByRole("button", { name: "Clear filters" })).not.toBeInTheDocument();
-    });
+    }, 15_000);
 
     it("stays available when the filter matches no asset", async () => {
         renderPage();
-        await userEvent.type(nameFilter(), "zzz");
+        await enterFilter(nameFilter(), "zzz");
 
         expect(screen.getByRole("button", { name: "Clear filters" })).toBeInTheDocument();
     });

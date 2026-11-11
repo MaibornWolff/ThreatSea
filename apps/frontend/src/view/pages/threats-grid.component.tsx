@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import type { ExtendedThreat } from "#api/types/threat.types.ts";
 import { usePageSizeOptions } from "#application/hooks/use-page-size-options.hook.ts";
 import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
+import { getWrappingRowHeight, wrappingGridRowStyles } from "#utils/wrapping-grid-rows.ts";
 import { NoRowsOverlay } from "#view/components/no-rows-overlay.component.tsx";
 import { GENERIC_THREAT_ROW_PREFIX, THREAT_ROW_PREFIX, type ThreatsGridRow } from "./create-threats-columns";
 
@@ -130,6 +131,7 @@ export const ThreatsGrid = ({
                 return "";
             }}
             columnHeaderHeight={90}
+            getRowHeight={getWrappingRowHeight}
             columnVisibilityModel={columnVisibilityModel}
             sortingMode="server"
             sortingOrder={["asc", "desc"]}
@@ -149,6 +151,7 @@ export const ThreatsGrid = ({
                 "& .MuiDataGrid-columnHeader:focus": { outline: "none" },
                 "& .MuiDataGrid-columnHeader": { padding: "8px 16px" },
                 "& .MuiDataGrid-cell": { cursor: "pointer" },
+                ...wrappingGridRowStyles,
                 // Dim per cell (not per row) so the exemptions below can win.
                 "& .threats-grid--dimmed .MuiDataGrid-cell": { opacity: 0.6 },
                 "& .threats-grid--dimmed .MuiDataGrid-cell[data-field='status']": { opacity: 1 },

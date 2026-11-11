@@ -4,18 +4,18 @@ import { renderWithProviders } from "#test-utils/render-with-providers.tsx";
 import { OverflowText } from "./overflow-text.component.tsx";
 
 const LONG_NAME = "Unauthorised access to the payment gateway";
+const TWO_LINES = 40;
+const THREE_LINES = 60;
 
-let boxWidth = 0;
-let textWidth = 0;
+let boxHeight = 0;
+let contentHeight = 0;
 let reportResize: () => void = vi.fn();
 
-const setWidths = ({ box, text }: { box: number; text: number }) => {
-    boxWidth = box;
-    textWidth = text;
+// jsdom does no layout; the component compares the clamped box height with the full content height.
+const setHeights = ({ box, content }: { box: number; content: number }) => {
+    boxHeight = box;
+    contentHeight = content;
 };
-
-const rectWithWidth = (width: number) =>
-    ({ width, height: 20, top: 0, left: 0, right: width, bottom: 20, x: 0, y: 0, toJSON: () => ({}) }) as DOMRect;
 
 const getText = () => screen.getByTestId("threat-name");
 
@@ -23,13 +23,9 @@ const renderOverflowText = (text = LONG_NAME) => renderWithProviders(<OverflowTe
 
 describe("OverflowText", () => {
     beforeEach(() => {
-        setWidths({ box: 145, text: 100 });
-        vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(() => rectWithWidth(boxWidth));
-        // jsdom has no Range#getBoundingClientRect; the component measures the text's own width through it.
-        Object.defineProperty(Range.prototype, "getBoundingClientRect", {
-            configurable: true,
-            value: () => rectWithWidth(textWidth),
-        });
+        setHeights({ box: TWO_LINES, content: TWO_LINES });
+        vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockImplementation(() => boxHeight);
+        vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockImplementation(() => contentHeight);
         vi.stubGlobal(
             "ResizeObserver",
             class {
@@ -44,7 +40,6 @@ describe("OverflowText", () => {
     });
 
     afterEach(() => {
-        delete (Range.prototype as Partial<Range>).getBoundingClientRect;
         vi.unstubAllGlobals();
     });
 
@@ -64,7 +59,7 @@ describe("OverflowText", () => {
     });
 
     it("shows the full text in a tooltip on hover when the text is truncated", async () => {
-        setWidths({ box: 145, text: 180 });
+        setHeights({ box: TWO_LINES, content: THREE_LINES });
         renderOverflowText();
 
         await userEvent.hover(getText());
@@ -74,7 +69,7 @@ describe("OverflowText", () => {
 
     // The tooltip overlaps the row below; it must let the pointer through so that row can show its own.
     it("closes the tooltip when the pointer moves on to where the tooltip overlaps", async () => {
-        setWidths({ box: 145, text: 180 });
+        setHeights({ box: TWO_LINES, content: THREE_LINES });
         renderOverflowText();
         const user = userEvent.setup({ pointerEventsCheck: PointerEventsCheckLevel.Never });
 
@@ -87,7 +82,7 @@ describe("OverflowText", () => {
 
     // Showing the tooltip on keyboard focus is MUI's :focus-visible logic, which jsdom cannot evaluate.
     it("makes truncated text reachable by keyboard", async () => {
-        setWidths({ box: 145, text: 180 });
+        setHeights({ box: TWO_LINES, content: THREE_LINES });
         renderOverflowText();
 
         await userEvent.tab();
@@ -95,15 +90,8 @@ describe("OverflowText", () => {
         expect(getText()).toHaveFocus();
     });
 
-    it("treats a sub-pixel overflow as truncated, since the browser already shows the ellipsis", () => {
-        setWidths({ box: 145, text: 145.03 });
-        renderOverflowText();
-
-        expect(getText()).toHaveAttribute("tabindex", "0");
-    });
-
-    it("ignores width differences below the float-noise tolerance", () => {
-        setWidths({ box: 145, text: 145.005 });
+    it("ignores a one-pixel difference from rounding the box and content heights", () => {
+        setHeights({ box: TWO_LINES, content: TWO_LINES + 1 });
         renderOverflowText();
 
         expect(getText()).not.toHaveAttribute("tabindex");
@@ -112,20 +100,20 @@ describe("OverflowText", () => {
     it("re-measures when the column is resized, in both directions", () => {
         renderOverflowText();
 
-        setWidths({ box: 80, text: 100 });
+        setHeights({ box: TWO_LINES, content: THREE_LINES });
         act(() => reportResize());
         expect(getText()).toHaveAttribute("tabindex", "0");
 
-        setWidths({ box: 200, text: 100 });
+        setHeights({ box: TWO_LINES, content: TWO_LINES });
         act(() => reportResize());
         expect(getText()).not.toHaveAttribute("tabindex");
     });
 
     it("keeps the truncated state when a resize reports a transient 0×0 measurement", () => {
-        setWidths({ box: 145, text: 180 });
+        setHeights({ box: TWO_LINES, content: THREE_LINES });
         renderOverflowText();
 
-        setWidths({ box: 0, text: 0 });
+        setHeights({ box: 0, content: 0 });
         act(() => reportResize());
 
         expect(getText()).toHaveAttribute("tabindex", "0");
@@ -135,9 +123,67 @@ describe("OverflowText", () => {
         const { rerender } = renderOverflowText("Short");
         expect(getText()).not.toHaveAttribute("tabindex");
 
-        setWidths({ box: 145, text: 180 });
+        setHeights({ box: TWO_LINES, content: THREE_LINES });
         rerender(<OverflowText text={LONG_NAME} testId="threat-name" />);
 
         expect(getText()).toHaveAttribute("tabindex", "0");
+    });
+
+    // A single line is cut sideways, so it is measured by width rather than height.
+    describe("on a single line", () => {
+        let boxWidth = 0;
+        let textWidth = 0;
+
+        const renderSingleLine = () =>
+            renderWithProviders(<OverflowText text={LONG_NAME} testId="threat-name" maxLines={1} />);
+
+        beforeEach(() => {
+            vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(
+                () => ({ width: boxWidth }) as DOMRect
+            );
+            // jsdom has no Range#getBoundingClientRect; the component measures the text's own width through it.
+            Object.defineProperty(Range.prototype, "getBoundingClientRect", {
+                configurable: true,
+                value: () => ({ width: textWidth }) as DOMRect,
+            });
+        });
+
+        afterEach(() => {
+            delete (Range.prototype as Partial<Range>).getBoundingClientRect;
+        });
+
+        it("shows the full text in a tooltip when the text is wider than its box", async () => {
+            boxWidth = 116;
+            textWidth = 144.4;
+            renderSingleLine();
+
+            await userEvent.hover(getText());
+
+            expect(await screen.findByRole("tooltip")).toHaveTextContent(LONG_NAME);
+        });
+
+        it("offers no tab stop while the text fits its box", () => {
+            boxWidth = 152;
+            textWidth = 144.4;
+            renderSingleLine();
+
+            expect(getText()).not.toHaveAttribute("tabindex");
+        });
+
+        it("treats a sub-pixel overflow as truncated, since the browser already shows the ellipsis", () => {
+            boxWidth = 145;
+            textWidth = 145.03;
+            renderSingleLine();
+
+            expect(getText()).toHaveAttribute("tabindex", "0");
+        });
+
+        it("ignores width differences below the float-noise tolerance", () => {
+            boxWidth = 145;
+            textWidth = 145.005;
+            renderSingleLine();
+
+            expect(getText()).not.toHaveAttribute("tabindex");
+        });
     });
 });

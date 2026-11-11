@@ -50,6 +50,13 @@ const columnFilter = (header: RegExp) =>
 const nameFilter = () => columnFilter(/^Name\b/);
 const scheduledAtFilter = () => columnFilter(/^Scheduled at\b/);
 
+// Pasting sets a filter in one change; typing re-filters and re-renders the grid once per character,
+// which makes these tests needlessly slow on CI.
+const enterFilter = async (filter: HTMLElement, value: string) => {
+    await userEvent.click(filter);
+    await userEvent.paste(value);
+};
+
 beforeEach(() => {
     mockUseMeasures({
         items: [createMeasure({ id: 1, name: "Encrypt backups" }), createMeasure({ id: 2, name: "Rotate API keys" })],
@@ -64,10 +71,11 @@ describe("MeasuresPage — clear filters", () => {
         expect(screen.queryByRole("button", { name: "Clear filters" })).not.toBeInTheDocument();
     });
 
+    // Renders the whole DataGrid four times; on slow CI runners that nears the default 5s timeout.
     it("clears every column filter and lists all measures again", async () => {
         renderPage();
-        await userEvent.type(nameFilter(), "rotate");
-        await userEvent.type(scheduledAtFilter(), "2025");
+        await enterFilter(nameFilter(), "rotate");
+        await enterFilter(scheduledAtFilter(), "2025");
         expect(screen.queryByText("Encrypt backups")).not.toBeInTheDocument();
 
         await userEvent.click(screen.getByRole("button", { name: "Clear filters" }));
@@ -77,11 +85,11 @@ describe("MeasuresPage — clear filters", () => {
         expect(screen.getByText("Encrypt backups")).toBeInTheDocument();
         expect(screen.getByText("Rotate API keys")).toBeInTheDocument();
         expect(screen.queryByRole("button", { name: "Clear filters" })).not.toBeInTheDocument();
-    });
+    }, 15_000);
 
     it("stays available when the filter matches no measure", async () => {
         renderPage();
-        await userEvent.type(nameFilter(), "zzz");
+        await enterFilter(nameFilter(), "zzz");
 
         expect(screen.getByRole("button", { name: "Clear filters" })).toBeInTheDocument();
     });
