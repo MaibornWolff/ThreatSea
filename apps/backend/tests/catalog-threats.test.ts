@@ -373,7 +373,9 @@ describe("delete a catalog threat that is used in a project", () => {
             .set("Cookie", cookies);
 
         expect(res.statusCode).toEqual(409);
-        expect(res.body.message).toEqual("Catalog threat is used in a project and cannot be deleted");
+        expect(res.body.message).toEqual(
+            "Catalog threat is used in at least one project, possibly one you cannot access, and cannot be deleted"
+        );
         expect(
             await db.query.catalogThreats.findFirst({ where: eq(catalogThreats.id, catalogThreatId) })
         ).toBeDefined();
@@ -383,7 +385,9 @@ describe("delete a catalog threat that is used in a project", () => {
     });
 
     it("is also refused by the database, so no other code path can cascade into projects", async () => {
-        await expect(db.delete(catalogThreats).where(eq(catalogThreats.id, catalogThreatId))).rejects.toThrow();
+        await expect(db.delete(catalogThreats).where(eq(catalogThreats.id, catalogThreatId))).rejects.toMatchObject({
+            cause: { code: "23001", constraint: "generic_threats_catalogThreatId_catalog_threats_id_fk" },
+        });
 
         expect(
             await db.query.genericThreats.findFirst({ where: eq(genericThreats.id, genericThreatId) })

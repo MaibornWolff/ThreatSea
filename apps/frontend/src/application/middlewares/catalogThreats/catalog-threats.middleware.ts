@@ -61,6 +61,7 @@ const handleFailedRequest: AppMiddleware =
         if (isRejectedAction(action)) {
             if (CatalogThreatsActions.deleteCatalogThreat.rejected.match(action)) {
                 const { arg: catalogThreat } = action.meta;
+                // Groundwork: alert.component.tsx still replaces this alert with the raw API error message.
                 const isUsedInProject = action.error.name === "Conflict";
                 dispatch(
                     AlertActions.openErrorAlert({

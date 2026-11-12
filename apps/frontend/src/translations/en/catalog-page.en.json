@@ -13,7 +13,7 @@
       "saved": "Catalog Threat '{{name}}' was saved successfully.",
       "imported": "{{amount}} Catalog Threats were successfully imported.",
       "deleteFailed": "Failed to delete Catalog Threat '{{name}}'.",
-      "deleteFailedInUse": "Catalog Threat '{{name}}' is used in at least one project and cannot be deleted.",
+      "deleteFailedInUse": "Catalog Threat '{{name}}' is used in at least one project, possibly one you cannot access, and cannot be deleted.",
       "saveFailed": "Failed to save Catalog Threat '{{name}}'.",
       "importFailed": "Failed to import Catalog Threats."
     }

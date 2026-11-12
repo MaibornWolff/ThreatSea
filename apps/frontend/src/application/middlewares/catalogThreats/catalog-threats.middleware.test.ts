@@ -16,7 +16,10 @@ describe("catalog-threats.middleware", () => {
 
     it("explains that a catalog threat used in a project cannot be deleted", async () => {
         vi.spyOn(CatalogThreatsApi, "deleteCatalogThreat").mockRejectedValue(
-            createApiError("Conflict", "Catalog threat is used in a project and cannot be deleted")
+            createApiError(
+                "Conflict",
+                "Catalog threat is used in at least one project, possibly one you cannot access, and cannot be deleted"
+            )
         );
         const store = createStore();
 
@@ -25,7 +28,7 @@ describe("catalog-threats.middleware", () => {
         await vi.waitFor(() => expect(store.getState().alert.visible).toBe(true));
         expect(store.getState().alert).toMatchObject({
             type: "error",
-            text: "Catalog Threat 'Phishing' is used in at least one project and cannot be deleted.",
+            text: "Catalog Threat 'Phishing' is used in at least one project, possibly one you cannot access, and cannot be deleted.",
         });
     });
 
