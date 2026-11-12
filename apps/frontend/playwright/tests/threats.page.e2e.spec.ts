@@ -238,6 +238,18 @@ test.describe("Threats Page Tests", () => {
         await expect(pg.threatListEntry(SERVER_RACK_THREAT)).toHaveCount(0);
     });
 
+    test("Should delete a new threat without asking for confirmation", async ({ page }) => {
+        const pg = new ThreatsPage(page);
+        await pg.addThreatButton(pg.genericThreatListEntry(PHYSICAL_ATTACK, SERVER)).click();
+        await expect(pg.threatListEntries).toHaveCount(3);
+
+        await pg.deleteThreatButton(pg.threatListEntry(`${PHYSICAL_ATTACK} (new)`)).click();
+
+        await expect(pg.threatListEntries).toHaveCount(2);
+        await expect(pg.threatListEntry(`${PHYSICAL_ATTACK} (new)`)).toHaveCount(0);
+        await expect(pg.confirmButton).toHaveCount(0);
+    });
+
     test("Should not delete the only threat of a generic threat", async ({ page }) => {
         const pg = new ThreatsPage(page);
         await pg.toggleButton(pg.genericThreatListEntry("Breach of isolation", SERVER)).click();
