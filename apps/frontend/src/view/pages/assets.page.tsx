@@ -49,7 +49,8 @@ const DEFAULT_COLUMN_VISIBILITY: GridColumnVisibilityModel = {
     confidentiality: true,
     integrity: true,
     availability: true,
-    createdAt: true,
+    // Rarely read; it stays available via Customize view for sorting long lists by creation.
+    createdAt: false,
     actions: true,
 };
 

@@ -62,6 +62,25 @@ beforeEach(() => {
     mockUseConfirm();
 });
 
+describe("AssetsPage — column visibility", () => {
+    it("hides the date column by default", () => {
+        renderPage();
+
+        expect(screen.getByRole("columnheader", { name: /^Name\b/ })).toBeInTheDocument();
+        expect(screen.queryByRole("columnheader", { name: /^Date\b/ })).not.toBeInTheDocument();
+    });
+
+    it("shows the date column once it is ticked in Customize view", async () => {
+        renderPage();
+
+        await userEvent.click(screen.getByRole("button", { name: "Customize view" }));
+        await userEvent.click(screen.getByRole("menuitem", { name: "Date" }));
+        await userEvent.keyboard("{Escape}");
+
+        expect(screen.getByRole("columnheader", { name: /^Date\b/ })).toBeInTheDocument();
+    });
+});
+
 describe("AssetsPage — clear filters", () => {
     it("offers no clear-filters button while no filter is set", () => {
         renderPage();

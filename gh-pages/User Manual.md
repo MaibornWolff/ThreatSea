@@ -374,7 +374,7 @@ The assets view visualizes the results of the protection need analysis for the s
 
 Each column header contains a filter field. The filters match any part of the value, regardless of upper and lower case, and an asset is listed if it matches all filters. The arrow next to a column name collapses its filter field, and "Clear filters" resets all filters. Clicking a column name sorts the list by that column, ascending first and descending on the next click; by default it is sorted by name.
 
-With "Customize view", users can show and hide columns; the description column is hidden by default. Columns can be resized by dragging the border of their header. Both settings are kept per project until the browser tab is closed or the user logs out.
+With "Customize view", users can show and hide columns; the description and creation date columns are hidden by default. Showing the date column allows sorting the assets by their creation date. Columns can be resized by dragging the border of their header. Both settings are kept per project until the browser tab is closed or the user logs out.
 
 Long names and descriptions wrap onto a second line and the row grows to fit them. Text that needs more than two lines ends in "…"; hovering over it, or moving the keyboard focus to it, shows the full text. The complete description is shown when the asset is opened.
 
