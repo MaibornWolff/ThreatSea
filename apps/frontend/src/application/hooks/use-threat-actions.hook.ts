@@ -105,8 +105,9 @@ export const useThreatActions = ({
     );
 
     // Deleting a new threat needs no confirmation, so several deletes can run before the list
-    // reloads. Threats stay in here until the reloaded list no longer shows them, so the
-    // only-threat check below does not count them.
+    // reloads. A deleted threat stays in here for good: the list keeps showing it until a reload
+    // succeeds, which the loader does not report, and ids are never reused, so it cannot hide
+    // another threat from the only-threat check below.
     const threatIdsBeingDeletedRef = useRef(new Set<number>());
 
     const deleteThreat = useCallback(
@@ -114,7 +115,7 @@ export const useThreatActions = ({
             threatIdsBeingDeletedRef.current.add(threat.id);
             try {
                 await dispatch(ThreatsActions.deleteThreat({ id: threat.id, projectId, name: threat.name })).unwrap();
-                void loadGenericThreats().finally(() => threatIdsBeingDeletedRef.current.delete(threat.id));
+                void loadGenericThreats();
             } catch {
                 threatIdsBeingDeletedRef.current.delete(threat.id);
                 // the error itself is handled globally

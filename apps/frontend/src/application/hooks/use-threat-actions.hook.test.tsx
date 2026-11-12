@@ -269,6 +269,21 @@ describe("useThreatActions", () => {
         );
     });
 
+    it("keeps the last threat when the reload after deleting its sibling failed", async () => {
+        // The loader reports a failed reload globally and resolves, keeping the stale list, which
+        // the unchanged hook parameters stand in for here.
+        const { result } = setup({ siblings: 2 });
+        const sibling = createThreat({ id: 43, genericThreatId: 7, name: "Session hijacking" });
+
+        await deleteThreat(result, threat);
+        await deleteThreat(result, sibling);
+
+        expect(ThreatsAPI.deleteThreat).toHaveBeenCalledTimes(1);
+        expect(openConfirm).toHaveBeenCalledWith(
+            expect.objectContaining({ message: "You cannot delete the only threat 'Session hijacking'." })
+        );
+    });
+
     it("refuses to delete the only threat of a generic threat", async () => {
         const { result } = setup({ siblings: 1 });
 
