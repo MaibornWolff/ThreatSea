@@ -15,6 +15,7 @@ interface RenderMainTabOptions {
     lineOfToleranceGreen?: number;
     lineOfToleranceRed?: number;
     threatId?: number;
+    genericThreatName?: string;
     genericThreatDescription?: string;
     defaultValues?: DefaultValues<ThreatFormValues>;
 }
@@ -25,6 +26,7 @@ const renderMainTab = ({
     lineOfToleranceGreen = 3,
     lineOfToleranceRed = 6,
     threatId = 42,
+    genericThreatName = "Default generic threat",
     genericThreatDescription = "Default generic wording",
     defaultValues,
 }: RenderMainTabOptions = {}) => {
@@ -57,6 +59,7 @@ const renderMainTab = ({
                 register={register}
                 control={control}
                 errors={errors}
+                genericThreatName={genericThreatName}
                 genericThreatDescription={genericThreatDescription}
             />
         );
@@ -270,6 +273,27 @@ describe("AddThreatMainTab — generic threat description", () => {
         const text = screen.getByTestId("GenericThreatDescriptionText");
         expect(text).toBeVisible();
         expect(text).toHaveTextContent("Original generic wording");
+    });
+
+    it("Should name the generic threat above its description", async () => {
+        const { user } = renderMainTab({
+            genericThreatName: "Physical attack on the server room",
+            genericThreatDescription: "Original generic wording",
+        });
+
+        await user.click(screen.getByTestId("GenericThreatDescriptionToggle"));
+
+        const name = screen.getByTestId("GenericThreatName");
+        expect(name).toBeVisible();
+        expect(name).toHaveTextContent("Physical attack on the server room");
+        const description = screen.getByTestId("GenericThreatDescriptionText");
+        expect(name.compareDocumentPosition(description) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
+    it("Should hide the generic threat name while the description is collapsed", () => {
+        renderMainTab({ genericThreatName: "Physical attack on the server room" });
+
+        expect(screen.getByTestId("GenericThreatName")).not.toBeVisible();
     });
 
     it("Should render the generic description as read-only, non-editable text", async () => {

@@ -40,6 +40,7 @@ interface AddThreatMainTabProps {
     register: UseFormRegister<ThreatFormValues>;
     control: Control<ThreatFormValues>;
     errors: FieldErrors<ThreatFormValues>;
+    genericThreatName: string;
     genericThreatDescription: string;
 }
 
@@ -53,6 +54,7 @@ export const AddThreatMainTab = ({
     register,
     control,
     errors,
+    genericThreatName,
     genericThreatDescription,
 }: AddThreatMainTabProps) => {
     const { t } = useTranslation("threatDialogPage");
@@ -134,18 +136,18 @@ export const AddThreatMainTab = ({
                     <Typography sx={{ fontSize: "0.875rem" }}>{t("genericThreatDescription")}</Typography>
                 </Box>
                 <Collapse in={showGenericDescription}>
-                    <Typography
-                        data-testid="GenericThreatDescriptionText"
-                        sx={{
-                            fontSize: "0.875rem",
-                            whiteSpace: "pre-wrap",
-                            color: "text.secondary",
-                            mt: 0.5,
-                            ml: 3,
-                        }}
-                    >
-                        {genericThreatDescription}
-                    </Typography>
+                    <Box sx={{ fontSize: "0.875rem", color: "text.secondary", mt: 0.5, ml: 3 }}>
+                        {/* The threat's own name may be refined, so name the generic threat it stems from. */}
+                        <Typography data-testid="GenericThreatName" sx={{ fontSize: "inherit", fontWeight: 600 }}>
+                            {genericThreatName}
+                        </Typography>
+                        <Typography
+                            data-testid="GenericThreatDescriptionText"
+                            sx={{ fontSize: "inherit", whiteSpace: "pre-wrap" }}
+                        >
+                            {genericThreatDescription}
+                        </Typography>
+                    </Box>
                 </Collapse>
             </Box>
 
