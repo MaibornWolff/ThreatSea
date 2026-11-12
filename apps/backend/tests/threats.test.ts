@@ -252,8 +252,9 @@ describe("get or create threats", () => {
         const genericThreat = res.body[0];
         expect(Array.isArray(genericThreat.threats)).toBe(true);
         expect(genericThreat.threats.length).toBeGreaterThan(0);
-        // Each threat carries its generic threat's description verbatim.
+        // Each threat carries its generic threat's name and description verbatim.
         for (const threat of genericThreat.threats) {
+            expect(threat.genericThreatName).toBe(genericThreat.name);
             expect(threat.genericThreatDescription).toBe(genericThreat.description);
         }
     });
