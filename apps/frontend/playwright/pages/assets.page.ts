@@ -72,6 +72,13 @@ export class AssetsPage extends BasePage {
         await this.page.locator(`.MuiDataGrid-columnHeader[data-field="${field}"] p`).first().click();
     }
 
+    /** Shows a column that is hidden by default, through the Customize view menu. */
+    async showColumn(label: string): Promise<void> {
+        await this.page.getByRole("button", { name: "Customize view" }).click();
+        await this.page.getByRole("menuitem", { name: label }).click();
+        await this.page.keyboard.press("Escape");
+    }
+
     assetListEntryCia(attribute: string): Locator {
         return this.page.locator(`[data-testid="assets-page_assets-list-entry_${attribute}"]`);
     }

@@ -101,6 +101,7 @@ test.describe("Assets Page Tests", () => {
         const sorted = [...assets].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
         await createAssets(request, token, assets);
         await page.reload();
+        await pg.showColumn("Date");
 
         await pg.toggleSort("createdAt");
         await expect(pg.sortByDateButton).toHaveAttribute("aria-sort", "ascending");
