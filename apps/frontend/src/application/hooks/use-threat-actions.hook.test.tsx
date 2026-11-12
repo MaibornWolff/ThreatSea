@@ -119,20 +119,14 @@ describe("useThreatActions", () => {
         expect(toggleGenericThreat).not.toHaveBeenCalled();
     });
 
-    it("duplicates a threat as a new threat after confirmation and reloads", async () => {
+    it("duplicates a threat as a new threat right away and reloads", async () => {
         const { result, loadGenericThreats } = setup();
 
-        result.current.handleDuplicateThreat(clickEvent(), threat);
-        expect(openConfirm).toHaveBeenCalledWith(
-            expect.objectContaining({
-                message: "Do you really want to duplicate the threat 'Login bypass'?",
-                acceptText: "Duplicate",
-            })
-        );
-        expect(ThreatsAPI.createThreat).not.toHaveBeenCalled();
+        await act(async () => {
+            await result.current.handleDuplicateThreat(clickEvent(), threat);
+        });
 
-        await acceptConfirm();
-
+        expect(openConfirm).not.toHaveBeenCalled();
         expect(ThreatsAPI.createThreat).toHaveBeenCalledWith(
             expect.objectContaining({
                 projectId: 5,

@@ -513,7 +513,7 @@ Tipp:
 
 In some cases it is necessary to duplicate a threat. This usually happens when there are different threat scenarios which greatly differ in their probability for the different protection goals. In most cases it is sufficient to focus on the worst-case scenario but sometimes it might be necessary to explicitly highlight this difference in the threat list and to duplicate the threat scenario. E.g., given above example about destroying equipment, there might also be other physical attacks from unauthorized parties which actually pose a risk to confidentiality but are more difficult to execute than simply swinging a hammer at the equipment and therefore have a lesser probability of occurrence.
 
-Users can duplicate a threat scenario by using the <img src="../assets/content-copy.png" alt="Assets Page Copy Icon" style="height:1em; width:auto; vertical-align:middle;"> button in the row of the respective threat. After confirming a safety dialog, the threat is duplicated below the same generic threat with all values including the description copied. The name of the copy gets the suffix "(Copy)" and its status is "New".
+Users can duplicate a threat scenario by using the <img src="../assets/content-copy.png" alt="Assets Page Copy Icon" style="height:1em; width:auto; vertical-align:middle;"> button in the row of the respective threat. The threat is duplicated right away below the same generic threat with all values including the description copied. The name of the copy gets the suffix "(Copy)" and its status is "New".
 
 ### Deleting a threat
 

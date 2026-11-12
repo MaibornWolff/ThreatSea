@@ -5,8 +5,6 @@
   "genericThreatsPerPage": "Generische Bedrohungen pro Seite:",
   "newProbability": "Neue Eintrittswahrscheinlichkeit",
   "newDamage": "Neuer Schaden",
-  "duplicateMessage": "Wollen Sie die Bedrohung '{{ threatName }}' wirklich duplizieren?",
-  "duplicate": "Duplizieren",
   "duplicateSuffix": "Kopie",
   "duplicateThreat": "Bedrohung duplizieren",
   "addThreat": "Bedrohung hinzufügen",

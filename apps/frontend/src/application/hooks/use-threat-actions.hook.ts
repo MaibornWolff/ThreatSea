@@ -69,37 +69,28 @@ export const useThreatActions = ({
     );
 
     const handleDuplicateThreat = useCallback(
-        (event: MouseEvent<HTMLElement>, threat: Threat) => {
+        async (event: MouseEvent<HTMLElement>, threat: Threat) => {
             event.preventDefault();
-            openConfirm({
-                state: threat,
-                message: t("duplicateMessage", { threatName: threat.name }),
-                acceptText: t("duplicate"),
-                cancelText: t("cancel"),
-                acceptColor: "secondary",
-                onAccept: async (threat) => {
-                    try {
-                        const payload = {
-                            projectId,
-                            genericThreatId: threat.genericThreatId,
-                            name: `${threat.name} (${t("duplicateSuffix")})`,
-                            description: threat.description,
-                            probability: threat.probability,
-                            confidentiality: threat.confidentiality,
-                            integrity: threat.integrity,
-                            availability: threat.availability,
-                            status: THREAT_STATUSES.NEW,
-                        };
+            try {
+                const payload = {
+                    projectId,
+                    genericThreatId: threat.genericThreatId,
+                    name: `${threat.name} (${t("duplicateSuffix")})`,
+                    description: threat.description,
+                    probability: threat.probability,
+                    confidentiality: threat.confidentiality,
+                    integrity: threat.integrity,
+                    availability: threat.availability,
+                    status: THREAT_STATUSES.NEW,
+                };
 
-                        await dispatch(ThreatsActions.createThreat(payload)).unwrap();
-                        void loadGenericThreats();
-                    } catch {
-                        // swallow; error handling via global error handler
-                    }
-                },
-            });
+                await dispatch(ThreatsActions.createThreat(payload)).unwrap();
+                void loadGenericThreats();
+            } catch {
+                // swallow; error handling via global error handler
+            }
         },
-        [openConfirm, t, dispatch, projectId, loadGenericThreats]
+        [t, dispatch, projectId, loadGenericThreats]
     );
 
     // Deleting a new threat needs no confirmation, so several deletes can run before the list

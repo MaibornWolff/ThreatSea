@@ -220,10 +220,10 @@ test.describe("Threats Page Tests", () => {
         await pg.toggleButton(pg.genericThreatListEntry(PHYSICAL_ATTACK, SERVER)).click();
 
         await pg.duplicateThreatButton(pg.threatListEntry(SERVER_RACK_THREAT)).click();
-        await pg.confirmButton.click();
 
         await expect(pg.threatListEntries).toHaveCount(3);
         await expect(pg.threatListEntry(`${SERVER_RACK_THREAT} (Copy)`)).toHaveCount(1);
+        await expect(pg.confirmButton).toHaveCount(0);
     });
 
     test("Should delete an existing threat", async ({ page }) => {
