@@ -47,6 +47,7 @@ export const useThreatActions = ({
             event.preventDefault();
             // Keep the add button from toggling the generic threat row's expand/collapse.
             event.stopPropagation();
+            // TODO: a double click adds two threats; guard it like duplicating below (separate follow-up).
             try {
                 // Only the name is overridden; identity and assessment defaults come
                 // from the generic threat and its catalogue threat on the backend.
@@ -68,9 +69,18 @@ export const useThreatActions = ({
         [dispatch, projectId, t, expandedGenericThreatIds, toggleGenericThreat, loadGenericThreats]
     );
 
+    // Duplicating needs no confirmation, so guard against a repeated click creating a second copy
+    // before the reloaded list shows the first one.
+    const threatIdsBeingDuplicatedRef = useRef(new Set<number>());
+
     const handleDuplicateThreat = useCallback(
         async (event: MouseEvent<HTMLElement>, threat: Threat) => {
             event.preventDefault();
+            const threatIdsBeingDuplicated = threatIdsBeingDuplicatedRef.current;
+            if (threatIdsBeingDuplicated.has(threat.id)) {
+                return;
+            }
+            threatIdsBeingDuplicated.add(threat.id);
             try {
                 const payload = {
                     projectId,
@@ -85,8 +95,9 @@ export const useThreatActions = ({
                 };
 
                 await dispatch(ThreatsActions.createThreat(payload)).unwrap();
-                void loadGenericThreats();
+                void loadGenericThreats().finally(() => threatIdsBeingDuplicated.delete(threat.id));
             } catch {
+                threatIdsBeingDuplicated.delete(threat.id);
                 // swallow; error handling via global error handler
             }
         },

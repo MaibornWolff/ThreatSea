@@ -139,6 +139,49 @@ describe("useThreatActions", () => {
         expect(loadGenericThreats).toHaveBeenCalledTimes(1);
     });
 
+    it("duplicates a threat only once when its duplicate button is clicked twice", async () => {
+        const { result } = setup();
+
+        await act(async () => {
+            await Promise.all([
+                result.current.handleDuplicateThreat(clickEvent(), threat),
+                result.current.handleDuplicateThreat(clickEvent(), threat),
+            ]);
+        });
+
+        expect(ThreatsAPI.createThreat).toHaveBeenCalledTimes(1);
+    });
+
+    it("lets a threat be duplicated again after a failed attempt", async () => {
+        vi.spyOn(ThreatsAPI, "createThreat")
+            .mockRejectedValueOnce(new Error("offline"))
+            .mockResolvedValueOnce(createThreat({ id: 99 }));
+        const { result } = setup();
+
+        await act(async () => {
+            await result.current.handleDuplicateThreat(clickEvent(), threat);
+        });
+        await act(async () => {
+            await result.current.handleDuplicateThreat(clickEvent(), threat);
+        });
+
+        expect(ThreatsAPI.createThreat).toHaveBeenCalledTimes(2);
+    });
+
+    it("duplicates two different threats clicked in quick succession", async () => {
+        const { result } = setup();
+        const otherThreat = createThreat({ id: 43, genericThreatId: 7, name: "Session hijacking" });
+
+        await act(async () => {
+            await Promise.all([
+                result.current.handleDuplicateThreat(clickEvent(), threat),
+                result.current.handleDuplicateThreat(clickEvent(), otherThreat),
+            ]);
+        });
+
+        expect(ThreatsAPI.createThreat).toHaveBeenCalledTimes(2);
+    });
+
     const deleteThreat = async (result: ReturnType<typeof setup>["result"], threatToDelete: Threat) => {
         await act(async () => {
             await result.current.handleDeleteThreat(clickEvent(), threatToDelete);
