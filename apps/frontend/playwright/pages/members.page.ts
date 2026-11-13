@@ -24,6 +24,9 @@ export class MembersPage extends BasePage {
     readonly memberEmailCells: Locator;
     readonly memberRoleCells: Locator;
     readonly rowActionButtons: Locator;
+    readonly memberListScrollArea: Locator;
+    readonly paginationSummary: Locator;
+    readonly rowsPerPageSelect: Locator;
 
     // Add/edit member dialog
     readonly addableMemberSearchField: Locator;
@@ -62,6 +65,9 @@ export class MembersPage extends BasePage {
         // Action (delete) buttons live inside the grid's data rows only; used to assert that a
         // non-owner sees none.
         this.rowActionButtons = page.locator(".MuiDataGrid-row button");
+        this.memberListScrollArea = page.locator(".MuiDataGrid-virtualScroller");
+        this.paginationSummary = page.locator(".MuiTablePagination-displayedRows");
+        this.rowsPerPageSelect = page.getByRole("combobox", { name: "Rows per page" });
 
         this.addableMemberSearchField = page.locator('[data-testid="MemberAddableSearch"] input');
         this.addableMemberListItems = page.locator("#addableMemberList li");
@@ -107,6 +113,20 @@ export class MembersPage extends BasePage {
     /** Delete icon button inside the row for the given name or email (Owner only). */
     deleteButtonForRow(nameOrEmail: string): Locator {
         return this.row(nameOrEmail).getByRole("button");
+    }
+
+    /**
+     * Scrolls the member list with the mouse wheel, the way a user would. Rows outside the
+     * visible area are virtualized, so a row further down only exists in the DOM once scrolled to.
+     */
+    async scrollMemberListToBottom(): Promise<void> {
+        await this.memberListScrollArea.hover();
+        await this.page.mouse.wheel(0, 10_000);
+    }
+
+    async selectRowsPerPage(option: string): Promise<void> {
+        await this.rowsPerPageSelect.click();
+        await this.page.getByRole("option", { name: option, exact: true }).click();
     }
 
     /** Candidate entry in the "Add Member" dialog's addable-members list. */
