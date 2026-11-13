@@ -5,8 +5,6 @@
   "genericThreatsPerPage": "Generic threats per page:",
   "newProbability": "New Probability",
   "newDamage": "New Damage",
-  "duplicateMessage": "Do you really want to duplicate the threat '{{ threatName }}'?",
-  "duplicate": "Duplicate",
   "duplicateSuffix": "Copy",
   "duplicateThreat": "Duplicate Threat",
   "addThreat": "Add Threat",

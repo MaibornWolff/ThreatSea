@@ -3,12 +3,13 @@ import type { MouseEvent, ReactNode } from "react";
 import { I18nextProvider } from "react-i18next";
 import { Provider } from "react-redux";
 import { MemoryRouter } from "react-router";
+import { MeasureImpactsApi } from "#api/measureImpacts.api.ts";
 import { ThreatsAPI } from "#api/threats.api.ts";
 import type { GenericThreatWithExtendedThreats } from "#api/types/generic-threat.types.ts";
 import type { Threat } from "#api/types/threat.types.ts";
 import { THREAT_STATUSES } from "#api/types/threat-statuses.types.ts";
 import { createStore } from "#application/store.ts";
-import { createThreat } from "#test-utils/builders.ts";
+import { createMeasureImpact, createThreat } from "#test-utils/builders.ts";
 import { mockUseConfirm } from "#test-utils/mock-hooks.ts";
 import { translationUtil } from "#utils/translations.ts";
 import type { ExtendedThreatWithMetrics } from "./use-generic-threats-list.hook";
@@ -28,6 +29,7 @@ beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(ThreatsAPI, "createThreat").mockResolvedValue(createThreat({ id: 99 }));
     vi.spyOn(ThreatsAPI, "deleteThreat").mockResolvedValue(undefined);
+    vi.spyOn(MeasureImpactsApi, "getMeasureImpacts").mockResolvedValue([]);
     mockUseConfirm({ openConfirm });
 });
 
@@ -41,6 +43,7 @@ const withMetrics = (threat: ReturnType<typeof createThreat>): ExtendedThreatWit
 
 const genericThreat = { id: 7, name: "Spoofing of identity" } as GenericThreatWithExtendedThreats;
 const threat = createThreat({ id: 42, genericThreatId: 7, name: "Login bypass", probability: 4 });
+const threatInProgress = { ...threat, status: THREAT_STATUSES.IN_PROGRESS };
 
 const setup = ({ siblings = 2, expanded = false } = {}) => {
     const loadGenericThreats = vi.fn().mockResolvedValue(undefined);
@@ -116,20 +119,14 @@ describe("useThreatActions", () => {
         expect(toggleGenericThreat).not.toHaveBeenCalled();
     });
 
-    it("duplicates a threat as a new threat after confirmation and reloads", async () => {
+    it("duplicates a threat as a new threat right away and reloads", async () => {
         const { result, loadGenericThreats } = setup();
 
-        result.current.handleDuplicateThreat(clickEvent(), threat);
-        expect(openConfirm).toHaveBeenCalledWith(
-            expect.objectContaining({
-                message: "Do you really want to duplicate the threat 'Login bypass'?",
-                acceptText: "Duplicate",
-            })
-        );
-        expect(ThreatsAPI.createThreat).not.toHaveBeenCalled();
+        await act(async () => {
+            await result.current.handleDuplicateThreat(clickEvent(), threat);
+        });
 
-        await acceptConfirm();
-
+        expect(openConfirm).not.toHaveBeenCalled();
         expect(ThreatsAPI.createThreat).toHaveBeenCalledWith(
             expect.objectContaining({
                 projectId: 5,
@@ -142,13 +139,63 @@ describe("useThreatActions", () => {
         expect(loadGenericThreats).toHaveBeenCalledTimes(1);
     });
 
-    it("deletes a threat after confirmation and reloads", async () => {
+    it("duplicates a threat only once when its duplicate button is clicked twice", async () => {
+        const { result } = setup();
+
+        await act(async () => {
+            await Promise.all([
+                result.current.handleDuplicateThreat(clickEvent(), threat),
+                result.current.handleDuplicateThreat(clickEvent(), threat),
+            ]);
+        });
+
+        expect(ThreatsAPI.createThreat).toHaveBeenCalledTimes(1);
+    });
+
+    it("lets a threat be duplicated again after a failed attempt", async () => {
+        vi.spyOn(ThreatsAPI, "createThreat")
+            .mockRejectedValueOnce(new Error("offline"))
+            .mockResolvedValueOnce(createThreat({ id: 99 }));
+        const { result } = setup();
+
+        await act(async () => {
+            await result.current.handleDuplicateThreat(clickEvent(), threat);
+        });
+        await act(async () => {
+            await result.current.handleDuplicateThreat(clickEvent(), threat);
+        });
+
+        expect(ThreatsAPI.createThreat).toHaveBeenCalledTimes(2);
+    });
+
+    it("duplicates two different threats clicked in quick succession", async () => {
+        const { result } = setup();
+        const otherThreat = createThreat({ id: 43, genericThreatId: 7, name: "Session hijacking" });
+
+        await act(async () => {
+            await Promise.all([
+                result.current.handleDuplicateThreat(clickEvent(), threat),
+                result.current.handleDuplicateThreat(clickEvent(), otherThreat),
+            ]);
+        });
+
+        expect(ThreatsAPI.createThreat).toHaveBeenCalledTimes(2);
+    });
+
+    const deleteThreat = async (result: ReturnType<typeof setup>["result"], threatToDelete: Threat) => {
+        await act(async () => {
+            await result.current.handleDeleteThreat(clickEvent(), threatToDelete);
+        });
+    };
+
+    it("deletes a threat that is being worked on after confirmation and reloads", async () => {
         const { result, loadGenericThreats } = setup({ siblings: 2 });
 
-        result.current.handleDeleteThreat(clickEvent(), threat);
+        await deleteThreat(result, threatInProgress);
         expect(openConfirm).toHaveBeenCalledWith(
             expect.objectContaining({ message: "Do you really want to delete the threat 'Login bypass'?" })
         );
+        expect(ThreatsAPI.deleteThreat).not.toHaveBeenCalled();
 
         await acceptConfirm();
 
@@ -156,10 +203,91 @@ describe("useThreatActions", () => {
         expect(loadGenericThreats).toHaveBeenCalledTimes(1);
     });
 
-    it("refuses to delete the only threat of a generic threat", () => {
+    it("deletes a new threat without applied measures right away and reloads", async () => {
+        vi.spyOn(MeasureImpactsApi, "getMeasureImpacts").mockResolvedValue([createMeasureImpact({ threatId: 43 })]);
+        const { result, loadGenericThreats } = setup({ siblings: 2 });
+
+        await deleteThreat(result, threat);
+
+        expect(openConfirm).not.toHaveBeenCalled();
+        expect(ThreatsAPI.deleteThreat).toHaveBeenCalledWith({ id: 42, projectId: 5, name: "Login bypass" });
+        expect(loadGenericThreats).toHaveBeenCalledTimes(1);
+    });
+
+    it("asks for confirmation before deleting a new threat that has a measure applied", async () => {
+        vi.spyOn(MeasureImpactsApi, "getMeasureImpacts").mockResolvedValue([createMeasureImpact({ threatId: 42 })]);
+        const { result } = setup({ siblings: 2 });
+
+        await deleteThreat(result, threat);
+
+        expect(openConfirm).toHaveBeenCalledWith(
+            expect.objectContaining({ message: "Do you really want to delete the threat 'Login bypass'?" })
+        );
+        expect(ThreatsAPI.deleteThreat).not.toHaveBeenCalled();
+    });
+
+    it("asks for confirmation when the applied measures cannot be loaded", async () => {
+        vi.spyOn(MeasureImpactsApi, "getMeasureImpacts").mockRejectedValue(new Error("offline"));
+        const { result } = setup({ siblings: 2 });
+
+        await deleteThreat(result, threat);
+
+        expect(openConfirm).toHaveBeenCalledWith(
+            expect.objectContaining({ message: "Do you really want to delete the threat 'Login bypass'?" })
+        );
+        expect(ThreatsAPI.deleteThreat).not.toHaveBeenCalled();
+    });
+
+    it("deletes a new threat only once when its delete button is clicked twice", async () => {
+        const { result } = setup({ siblings: 3 });
+
+        await act(async () => {
+            await Promise.all([
+                result.current.handleDeleteThreat(clickEvent(), threat),
+                result.current.handleDeleteThreat(clickEvent(), threat),
+            ]);
+        });
+
+        expect(ThreatsAPI.deleteThreat).toHaveBeenCalledTimes(1);
+    });
+
+    it("keeps the last threat when the other new threat of its generic threat is still being deleted", async () => {
+        const { result } = setup({ siblings: 2 });
+        const sibling = createThreat({ id: 43, genericThreatId: 7, name: "Session hijacking" });
+
+        await act(async () => {
+            await Promise.all([
+                result.current.handleDeleteThreat(clickEvent(), threat),
+                result.current.handleDeleteThreat(clickEvent(), sibling),
+            ]);
+        });
+
+        expect(ThreatsAPI.deleteThreat).toHaveBeenCalledTimes(1);
+        expect(ThreatsAPI.deleteThreat).toHaveBeenCalledWith({ id: 42, projectId: 5, name: "Login bypass" });
+        expect(openConfirm).toHaveBeenCalledWith(
+            expect.objectContaining({ message: "You cannot delete the only threat 'Session hijacking'." })
+        );
+    });
+
+    it("keeps the last threat when the reload after deleting its sibling failed", async () => {
+        // The loader reports a failed reload globally and resolves, keeping the stale list, which
+        // the unchanged hook parameters stand in for here.
+        const { result } = setup({ siblings: 2 });
+        const sibling = createThreat({ id: 43, genericThreatId: 7, name: "Session hijacking" });
+
+        await deleteThreat(result, threat);
+        await deleteThreat(result, sibling);
+
+        expect(ThreatsAPI.deleteThreat).toHaveBeenCalledTimes(1);
+        expect(openConfirm).toHaveBeenCalledWith(
+            expect.objectContaining({ message: "You cannot delete the only threat 'Session hijacking'." })
+        );
+    });
+
+    it("refuses to delete the only threat of a generic threat", async () => {
         const { result } = setup({ siblings: 1 });
 
-        result.current.handleDeleteThreat(clickEvent(), threat);
+        await deleteThreat(result, threat);
 
         expect(openConfirm).toHaveBeenCalledWith(
             expect.objectContaining({
