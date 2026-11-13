@@ -28,10 +28,14 @@ type CatalogWithRole = Catalog & {
  * Gets all catalogs of the current user.
  *
  * @param {number} userId - The id of the user.
+ * @param {TransactionType} transaction - Optional drizzle transaction.
  * @returns {Promise<CatalogWithRole[]>} A promise that resolves to an array of catalogs with the user's role.
  */
-export async function getCatalogsByUserId(userId: number): Promise<CatalogWithRole[]> {
-    return await db
+export async function getCatalogsByUserId(
+    userId: number,
+    transaction: TransactionType | undefined = undefined
+): Promise<CatalogWithRole[]> {
+    return await (transaction ?? db)
         .select({
             ...getTableColumns(catalogs),
             role: usersCatalogs.role,
