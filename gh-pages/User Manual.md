@@ -517,7 +517,7 @@ Users can duplicate a threat scenario by using the <img src="../assets/content-c
 
 ### Deleting a threat
 
-Users can delete a threat scenario by using the <img src="../assets/images_2_.png" alt="Assets Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> button in the row of the respective threat. **Deleting cannot be reverted**, so a safety dialog asks for confirmation first. A threat that is still "New" and has no measures applied is deleted without the safety dialog, as no assessment work would be lost. The only threat of a generic threat cannot be deleted; ThreatSea shows a notice instead, so that every generic threat keeps at least one threat.
+Users can delete a threat scenario by using the <img src="../assets/images_2_.png" alt="Assets Page Delete Icon" style="height:1em; width:auto; vertical-align:middle;"> button in the row of the respective threat. **Deleting cannot be reverted**, so a safety dialog asks for confirmation first. A threat that is still "New" and has no measures applied is deleted without the safety dialog; this includes copies made with "Duplicate", even though they carry the values of the original. The only threat of a generic threat cannot be deleted; ThreatSea shows a notice instead, so that every generic threat keeps at least one threat.
 
 ## Measures
 
