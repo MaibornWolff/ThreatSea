@@ -171,8 +171,8 @@ catalogs:
       specifier: 4.1.12
       version: 4.1.12
     dotenv:
-      specifier: 18.0.9
-      version: 18.0.9
+      specifier: 18.0.10
+      version: 18.0.10
     oxlint:
       specifier: 1.92.0
       version: 1.92.0
@@ -249,7 +249,7 @@ importers:
         version: 4.2.1
       dotenv:
         specifier: 'catalog:'
-        version: 18.0.9
+        version: 18.0.10
       drizzle-orm:
         specifier: 0.45.4
         version: 0.45.4(@types/pg@8.23.1)(pg@8.23.1)
@@ -458,7 +458,7 @@ importers:
         version: 4.1.12(vitest@4.1.12)
       dotenv:
         specifier: 'catalog:'
-        version: 18.0.9
+        version: 18.0.10
       jsdom:
         specifier: 31.0.0
         version: 31.0.0(@noble/hashes@1.8.0)
@@ -2869,8 +2869,8 @@ packages:
     resolution: {integrity: sha512-QM8q3zDe58hqUqjraQOmzZ1LIH9SWQJTlEKCH4kJ2oQvLZk7RbQXvtDM2XEq3fwkV9CCvvH4LA0AV+ogFsBM2Q==}
     engines: {node: '>=8'}
 
-  dotenv@18.0.9:
-    resolution: {integrity: sha512-3fVOW4cB02R066PUSwn8O4TJyz9NckQl7F81blIbaq9jKBm2tSmOKky7ZHIXzGvkVPXCSn6jkpziBPZdGFs8Tw==}
+  dotenv@18.0.10:
+    resolution: {integrity: sha512-89FAA1xchzK2mxVWdr5F/0rldwiueXs6zJM86rO66EzekR1iBdiXRthyG+m5GvkJaFH3C2LESzamTkgndmLT2A==}
     engines: {node: '>=12'}
     hasBin: true
 
@@ -4791,6 +4791,7 @@ packages:
 
   tldts-core@7.4.20:
     resolution: {integrity: sha512-C630TWXZCZmLq0F2bW4QqwnaaxCQ/svpAqvJwnC4JvgEM5ohhBnGsEzTLSOXcN+xjz+kEaHS5uoWIw2klnqd0A==}
+    deprecated: Partial release, see https://github.com/remusao/tldts/issues/2735. Use >=7.4.22.
 
   tldts@7.4.19:
     resolution: {integrity: sha512-48dH6aSpQnpbzDUc4vIQZ1VjB8tkK+e8c1yx05/SZK+rkssgjEOlxDd/yU8/a4vGYQ9vRgJr9dwMq9TJ0b3X2Q==}
@@ -7163,7 +7164,7 @@ snapshots:
     dependencies:
       is-obj: 2.0.0
 
-  dotenv@18.0.9: {}
+  dotenv@18.0.10: {}
 
   drizzle-kit@0.31.11:
     dependencies:
