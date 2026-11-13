@@ -57,6 +57,7 @@ export interface EditorState {
     isCapturing: boolean;
     selectedAnnotation: string | null;
     annotationTool: AnnotationType | null;
+    componentTypeToPlace: EditorComponentType | null;
 }
 
 const standardComponentTypes: Record<STANDARD_COMPONENT_TYPES, EditorComponentType> = {
@@ -160,12 +161,14 @@ const defaultState: EditorState = {
     isCapturing: false,
     selectedAnnotation: null,
     annotationTool: null,
+    componentTypeToPlace: null,
 };
 
 const editorReducer = createReducer(defaultState, (builder) => {
     builder.addCase(EditorActions.selectComponent, (state, action) => {
         state.selectedComponent = action.payload;
         state.annotationTool = null;
+        state.componentTypeToPlace = null;
     });
 
     builder.addCase(EditorActions.deselectComponent, (state) => {
@@ -175,6 +178,7 @@ const editorReducer = createReducer(defaultState, (builder) => {
     builder.addCase(EditorActions.setConnection, (state, action) => {
         state.connection = action.payload;
         state.annotationTool = null;
+        state.componentTypeToPlace = null;
     });
 
     builder.addCase(EditorActions.resetConnection, (state) => {
@@ -184,6 +188,7 @@ const editorReducer = createReducer(defaultState, (builder) => {
     builder.addCase(EditorActions.selectConnection, (state, action) => {
         state.selectedConnection = action.payload;
         state.annotationTool = null;
+        state.componentTypeToPlace = null;
     });
 
     builder.addCase(EditorActions.deselectConnection, (state) => {
@@ -208,6 +213,7 @@ const editorReducer = createReducer(defaultState, (builder) => {
     builder.addCase(EditorActions.selectPointOfAttack, (state, action) => {
         state.selectedPointOfAttack = action.payload;
         state.annotationTool = null;
+        state.componentTypeToPlace = null;
     });
 
     builder.addCase(EditorActions.deselectPointOfAttack, (state) => {
@@ -217,6 +223,7 @@ const editorReducer = createReducer(defaultState, (builder) => {
     builder.addCase(EditorActions.selectConnectionPoint, (state, action) => {
         state.selectedConnectionPoint = action.payload;
         state.annotationTool = null;
+        state.componentTypeToPlace = null;
     });
 
     builder.addCase(EditorActions.deselectConnectionPoint, (state) => {
@@ -301,6 +308,7 @@ const editorReducer = createReducer(defaultState, (builder) => {
     builder.addCase(EditorActions.selectAnnotation, (state, action) => {
         state.selectedAnnotation = action.payload;
         state.annotationTool = null;
+        state.componentTypeToPlace = null;
     });
 
     builder.addCase(EditorActions.deselectAnnotation, (state) => {
@@ -309,10 +317,21 @@ const editorReducer = createReducer(defaultState, (builder) => {
 
     builder.addCase(EditorActions.setAnnotationTool, (state, action) => {
         state.annotationTool = action.payload;
+        if (action.payload !== null) {
+            state.componentTypeToPlace = null;
+        }
+    });
+
+    builder.addCase(EditorActions.setComponentTypeToPlace, (state, action) => {
+        state.componentTypeToPlace = action.payload;
+        if (action.payload !== null) {
+            state.annotationTool = null;
+        }
     });
 
     builder.addCase(SystemActions.setLoadedProjectId, (state) => {
         state.annotationTool = null;
+        state.componentTypeToPlace = null;
         state.selectedAnnotation = null;
     });
 });
