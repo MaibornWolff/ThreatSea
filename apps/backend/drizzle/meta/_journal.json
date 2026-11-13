@@ -78,6 +78,13 @@
       "when": 1784904671607,
       "tag": "0010_inherited-threats-model",
       "breakpoints": false
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1794406904128,
+      "tag": "0011_catalog-threat-delete-restrict",
+      "breakpoints": false
     }
   ]
 }

@@ -19,6 +19,7 @@
       "saved": "Die Katalog-Bedrohung '{{name}}' wurde erfolgreich gespeichert.",
       "imported": "{{amount}} Katalog-Bedrohungen wurden erfolgreich importiert.",
       "deleteFailed": "Die Katalog-Bedrohung '{{name}}' konnte nicht gelöscht werden.",
+      "deleteFailedInUse": "Die Katalog-Bedrohung '{{name}}' wird in mindestens einem Projekt verwendet, möglicherweise auch in Projekten ohne Ihren Zugriff, und kann nicht gelöscht werden.",
       "saveFailed": "Die Katalog-Bedrohung '{{name}}' konnte nicht gespeichert werden.",
       "importFailed": "Die Katalog-Bedrohungen konnten nicht importiert werden."
     }
