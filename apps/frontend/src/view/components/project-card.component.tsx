@@ -9,6 +9,7 @@ import { checkUserRole, USER_ROLES } from "#api/types/user-roles.types.ts";
 import { Button } from "./button.component";
 import { ProjectActionsMenu } from "./project-actions-menu.component";
 import type { ExtendedProject } from "#api/types/project.types.ts";
+import { isSafeSystemImage } from "#utils/system-image.ts";
 
 interface ProjectCardProps {
     project: ExtendedProject;
@@ -131,7 +132,7 @@ export const ProjectCard = ({ project, onClickEditProject, onClickDeleteProject,
                     height: 200,
                     mb: 2,
                     bgcolor: "background.paper",
-                    backgroundImage: `url(${image})`,
+                    backgroundImage: isSafeSystemImage(image) ? `url("${image}")` : "none",
                     backgroundPosition: "center",
                     backgroundSize: "contain",
                     backgroundRepeat: "no-repeat",

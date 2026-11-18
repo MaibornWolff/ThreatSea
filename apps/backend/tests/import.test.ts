@@ -145,6 +145,21 @@ describe("import a project", () => {
         expect(res.statusCode).toEqual(400);
     });
 
+    it.each([
+        ["a remote URL", "https://example.com/preview.png"],
+        ["a value breaking out of a CSS url()", "x);}body::after{content:'INJECTED'}.z{b:url(x"],
+    ])("should reject an import whose system preview is %s", async (_description, image) => {
+        const project = JSON.parse(JSON.stringify(VALID_TEST_PROJECT));
+        project.system.image = image;
+
+        const res = await request(app)
+            .post("/api/import")
+            .send(project)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(400);
+    });
+
     it("should reject an import whose componentTypes is an object instead of an array", async () => {
         const project = JSON.parse(JSON.stringify(VALID_TEST_PROJECT));
         project.componentTypes = {};

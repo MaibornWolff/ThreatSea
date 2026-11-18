@@ -27,6 +27,9 @@ export const IMAGE_DATA_URL_PATTERN = /^data:image\/(png|jpeg|webp|svg\+xml);bas
 // `javascript:` URLs. SVG may contain scripts, so symbols must only ever be rendered via <img>.
 export const SYSTEM_COMPONENT_SYMBOL_PATTERN =
     /^(?:\/[\w.-][\w./-]*\.(?:png|jpe?g|webp|svg)|data:image\/(?:png|jpeg|webp|svg\+xml);base64,[A-Za-z0-9+/=]+)$/i;
+// System preview: the canvas snapshot the editor generates. Raster data URLs only (no SVG, no remote
+// URLs), because the value ends up in a CSS url() on the project card and in the PDF report.
+export const SYSTEM_IMAGE_PATTERN = /^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/;
 export const CIA_VALUE_MIN = 1;
 export const CIA_VALUE_MAX = 5;
 export const PROBABILITY_VALUE_MIN = 1;

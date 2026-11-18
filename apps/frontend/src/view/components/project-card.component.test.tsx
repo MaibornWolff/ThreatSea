@@ -98,3 +98,29 @@ describe("ProjectCard — actions menu delegation", () => {
         expect(onClickDeleteProject).toHaveBeenCalledWith(expect.anything(), project);
     });
 });
+
+describe("ProjectCard — preview image", () => {
+    const renderedStyles = () =>
+        Array.from(document.querySelectorAll("style"))
+            .map((style) => style.textContent)
+            .join("\n");
+
+    it("shows a raster data URL preview as the card background", () => {
+        const image = "data:image/png;base64,iVBORw0KGgo=";
+        setup(createProject({ image }));
+
+        expect(renderedStyles()).toContain(`url("${image}")`);
+    });
+
+    it("ignores a stored preview that would inject CSS into the page", () => {
+        setup(createProject({ image: "x);}body::after{content:'INJECTED-PREVIEW'}.z{b:url(x" }));
+
+        expect(renderedStyles()).not.toContain("INJECTED-PREVIEW");
+    });
+
+    it("ignores a stored preview pointing to a remote host", () => {
+        setup(createProject({ image: "https://example.com/tracking-preview.png" }));
+
+        expect(renderedStyles()).not.toContain("tracking-preview.png");
+    });
+});

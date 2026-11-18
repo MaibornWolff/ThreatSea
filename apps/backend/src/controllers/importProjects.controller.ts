@@ -42,19 +42,31 @@ import {
     MAX_SYMBOL_LENGTH,
     STRING_TOO_LONG_MESSAGE,
     SYSTEM_COMPONENT_SYMBOL_PATTERN,
+    SYSTEM_IMAGE_PATTERN,
 } from "#middlewares/input-validations/validator-messages.js";
 import { Logger } from "#logging/index.js";
 import { THREAT_STATUSES } from "#types/threat-statuses.types.js";
 
 interface ImportSymbolBody {
     componentTypes?: unknown;
-    system?: { data?: { components?: unknown } };
+    system?: { data?: { components?: unknown }; image?: unknown };
+}
+
+// Same rule as UpdateSystemRequestDto.image; the snapshot may exceed MAX_SYMBOL_LENGTH.
+function checkSystemImage(image: unknown): string | null {
+    if (image == null || image === "") {
+        return null;
+    }
+    if (typeof image !== "string" || !SYSTEM_IMAGE_PATTERN.test(image)) {
+        return FIELD_MUST_BE_VALID_IMAGE_DATA("image");
+    }
+    return null;
 }
 
 /**
- * Import writes symbols directly via services, bypassing the route DTOs, so re-check them here:
- * component types with the strict data-URL rule, system components with the laxer one. Returns the
- * first error, or null when all valid.
+ * Import writes symbols and the system preview directly via services, bypassing the route DTOs, so
+ * re-check them here: component types with the strict data-URL rule, system components with the
+ * laxer one, the preview with the raster-only rule. Returns the first error, or null when all valid.
  */
 function findInvalidImportedSymbol(body: ImportSymbolBody): string | null {
     const checkSymbol = (symbol: unknown, pattern: RegExp): string | null => {
@@ -93,7 +105,8 @@ function findInvalidImportedSymbol(body: ImportSymbolBody): string | null {
 
     return (
         checkSymbolArray(body.componentTypes, "componentTypes", IMAGE_DATA_URL_PATTERN) ??
-        checkSymbolArray(body.system?.data?.components, "components", SYSTEM_COMPONENT_SYMBOL_PATTERN)
+        checkSymbolArray(body.system?.data?.components, "components", SYSTEM_COMPONENT_SYMBOL_PATTERN) ??
+        checkSystemImage(body.system?.image)
     );
 }
 

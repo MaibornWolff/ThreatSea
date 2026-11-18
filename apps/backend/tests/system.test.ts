@@ -715,3 +715,52 @@ it("should reject a component whose symbol data URL exceeds the size limit", asy
         .set("Cookie", cookies);
     expect(res.statusCode).toEqual(400);
 });
+
+const systemWithImage = (image: string | null) => ({ data: VALID_SYSTEM.data, image });
+
+it("should accept a system preview that is a large raster data URL", async () => {
+    const image = `data:image/png;base64,${"A".repeat(200000)}`;
+    const res = await request(app)
+        .put(`/api/projects/${projectId}/system`)
+        .send(systemWithImage(image))
+        .set("X-CSRF-TOKEN", csrfToken)
+        .set("Cookie", cookies);
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.image).toBe(image);
+});
+
+it("should accept a system without a preview", async () => {
+    const res = await request(app)
+        .put(`/api/projects/${projectId}/system`)
+        .send(systemWithImage(null))
+        .set("X-CSRF-TOKEN", csrfToken)
+        .set("Cookie", cookies);
+    expect(res.statusCode).toEqual(200);
+});
+
+it.each([
+    ["a remote URL", "https://example.com/preview.png"],
+    ["an SVG data URL", "data:image/svg+xml;base64,PHN2Zz48L3N2Zz4="],
+    ["a value breaking out of a CSS url()", "x);}body::after{content:'INJECTED'}.z{b:url(x"],
+    ["a data URL with trailing CSS", 'data:image/png;base64,iVBORw0KGgo=");}body{color:red'],
+])("should reject a system preview that is %s and keep the stored one", async (_description, image) => {
+    const stored = await request(app)
+        .put(`/api/projects/${projectId}/system`)
+        .send(VALID_SYSTEM)
+        .set("X-CSRF-TOKEN", csrfToken)
+        .set("Cookie", cookies);
+    expect(stored.statusCode).toEqual(200);
+
+    const res = await request(app)
+        .put(`/api/projects/${projectId}/system`)
+        .send(systemWithImage(image))
+        .set("X-CSRF-TOKEN", csrfToken)
+        .set("Cookie", cookies);
+    expect(res.statusCode).toEqual(400);
+
+    const systemResponse = await request(app)
+        .get(`/api/projects/${projectId}/system`)
+        .set("X-CSRF-TOKEN", csrfToken)
+        .set("Cookie", cookies);
+    expect(systemResponse.body.image).toBe(VALID_SYSTEM.image);
+});
