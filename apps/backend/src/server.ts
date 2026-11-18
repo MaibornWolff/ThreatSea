@@ -30,6 +30,8 @@ export const app = express();
 // Enable gzip compression
 app.use(compression());
 
+app.use(helmet(helmetConfig));
+
 const PUBLIC_DIR = path.resolve(path.resolve(path.dirname("")), "public");
 app.use(express.static(PUBLIC_DIR));
 app.use(
@@ -67,7 +69,6 @@ app.use(
         store: new PostgresSessionStore({ pool, disableTouch: true }),
     })
 );
-app.use(helmet(helmetConfig));
 app.use(nocache());
 app.set("etag", false);
 app.get("/api/csrf-token", function (req: express.Request, res: express.Response) {
