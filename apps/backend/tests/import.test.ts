@@ -90,6 +90,25 @@ describe("import a project", () => {
         expect(res.statusCode).toEqual(204);
     });
 
+    it("should import more projects concurrently than the database pool has connections", async () => {
+        const concurrentImportCount = 30;
+
+        const responses = await Promise.all(
+            Array.from({ length: concurrentImportCount }, () =>
+                request(app)
+                    .post("/api/import")
+                    .send({ ...VALID_TEST_PROJECT_SMALL })
+                    .set("X-CSRF-TOKEN", csrfToken)
+                    .set("Cookie", cookies)
+            )
+        );
+
+        expect(responses.map((response) => response.statusCode)).toEqual(Array(concurrentImportCount).fill(204));
+
+        const projectsAfterImports = await request(app).get("/api/projects").set("Cookie", cookies);
+        expect(projectsAfterImports.statusCode).toEqual(200);
+    }, 30_000);
+
     it("should import a project whose component type symbol is a data:image/svg+xml URL", async () => {
         const project = JSON.parse(JSON.stringify(VALID_TEST_PROJECT));
         project.componentTypes[0].symbol = "data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=";

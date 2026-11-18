@@ -145,7 +145,8 @@ export async function importProject(request: Request<void>, response: Response, 
                 usedCatalog.catalog,
                 usedCatalog.catalogThreats,
                 usedCatalog.catalogMeasures,
-                usedCatalog.user.id!
+                usedCatalog.user.id!,
+                tx
             );
             let newCatalogId: number;
 
@@ -391,21 +392,26 @@ async function generateNewCatalog(
 /**
  * Checks, if a set of catalog, catalogThreats, catalogMeasures exist for a user
  *
+ * Runs inside the import transaction: querying through the global pool here would need a second
+ * connection per import and deadlock the pool under concurrent imports.
+ *
  * @param {object} usedCatalog - A object containing a catalog, catalogThreats, catalogMeasures and a user
+ * @param {TransactionType} transaction - The import transaction.
  * @returns {number} returns the id of the matching catalog or -1 if no matching catalog was found
  */
 async function checkCatalogAlreadyExists(
     catalog: Catalog,
     catalogThreats: CatalogThreat[],
     catalogMeasures: CatalogMeasure[],
-    userId: number
+    userId: number,
+    transaction: TransactionType
 ): Promise<number> {
-    const existingCatalogs = await getCatalogsByUserId(userId);
+    const existingCatalogs = await getCatalogsByUserId(userId, transaction);
     for (const existingCatalog of existingCatalogs) {
         //There is a catalog with the same name and language
         if (existingCatalog.name === catalog.name && existingCatalog.language === catalog.language) {
-            const existingThreats = await getCatalogThreatsByCatalogId(existingCatalog.id);
-            const existingMeasures = await getCatalogMeasuresByCatalogId(existingCatalog.id);
+            const existingThreats = await getCatalogThreatsByCatalogId(existingCatalog.id, transaction);
+            const existingMeasures = await getCatalogMeasuresByCatalogId(existingCatalog.id, transaction);
 
             //There are the same number of measures and threats for it
             if (

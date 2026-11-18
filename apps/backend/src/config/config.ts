@@ -82,6 +82,10 @@ export const databaseConfig: PoolConfig = {
     database: getEnvironmentVariable("DATABASE_NAME"),
     password: getEnvironmentVariable("DATABASE_PASSWORD"),
     ssl: getDatabaseTlsConfig(process.env["DATABASE_TLS"]),
+    // pg waits forever for a free pool client by default, so one stuck transaction pattern could hang
+    // the whole API. Fail the request instead. Session timeouts are left to the database: pg would send
+    // them as startup parameters, which PgBouncer rejects by default.
+    connectionTimeoutMillis: 10_000,
 };
 
 // Config for cors and express.
