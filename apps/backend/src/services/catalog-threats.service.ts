@@ -11,6 +11,11 @@ import {
     projects,
     UpdateCatalogThreat,
 } from "#db/schema.js";
+import { ConflictError } from "#errors/conflict.error.js";
+
+// Postgres raises restrict_violation (not foreign_key_violation) for ON DELETE RESTRICT.
+const RESTRICT_VIOLATION = "23001";
+const GENERIC_THREATS_CATALOG_THREAT_FOREIGN_KEY = "generic_threats_catalogThreatId_catalog_threats_id_fk";
 import { eq, getTableColumns, inArray } from "drizzle-orm";
 // oxlint-disable-next-line import/no-relative-parent-imports -- templates live outside src/; no alias defined
 import DefaultThreatMatrix from "../../templates/matrix/threats.matrix.json" with { type: "json" };
@@ -186,10 +191,24 @@ export async function updateCatalogThreat(
  *
  * @param {number} id - The id of the catalog threat.
  * @return {Promise<void>} A promise that resolves when the catalog threat is deleted.
+ * @throws {ConflictError} If a project still uses the catalog threat.
  */
-
 export async function deleteCatalogThreat(id: number) {
-    await db.delete(catalogThreats).where(eq(catalogThreats.id, id));
+    try {
+        await db.delete(catalogThreats).where(eq(catalogThreats.id, id));
+    } catch (error) {
+        // The generic_threats foreign key restricts the delete while any project uses the catalog threat.
+        const databaseError = (error as { cause?: { code?: string; constraint?: string } }).cause;
+        if (
+            databaseError?.code === RESTRICT_VIOLATION &&
+            databaseError.constraint === GENERIC_THREATS_CATALOG_THREAT_FOREIGN_KEY
+        ) {
+            throw new ConflictError(
+                "Catalog threat is used in at least one project, possibly one you cannot access, and cannot be deleted"
+            );
+        }
+        throw error;
+    }
 }
 
 /**
