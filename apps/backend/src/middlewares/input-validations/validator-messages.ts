@@ -27,9 +27,10 @@ export const IMAGE_DATA_URL_PATTERN = /^data:image\/(png|jpeg|webp|svg\+xml);bas
 // `javascript:` URLs. SVG may contain scripts, so symbols must only ever be rendered via <img>.
 export const SYSTEM_COMPONENT_SYMBOL_PATTERN =
     /^(?:\/[\w.-][\w./-]*\.(?:png|jpe?g|webp|svg)|data:image\/(?:png|jpeg|webp|svg\+xml);base64,[A-Za-z0-9+/=]+)$/i;
-// System preview: the canvas snapshot the editor generates. Raster data URLs only (no SVG, no remote
-// URLs), because the value ends up in a CSS url() on the project card and in the PDF report.
-export const SYSTEM_IMAGE_PATTERN = /^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/;
+// System preview: the canvas snapshot the editor generates. PNG or JPEG data URLs only (no SVG, no
+// remote URLs), because the value ends up in a CSS url() on the project card and in the PDF report,
+// whose renderer supports only these two formats.
+export const SYSTEM_IMAGE_PATTERN = /^data:image\/(?:png|jpeg);base64,[A-Za-z0-9+/=]+$/i;
 export const CIA_VALUE_MIN = 1;
 export const CIA_VALUE_MAX = 5;
 export const PROBABILITY_VALUE_MIN = 1;
@@ -81,6 +82,10 @@ export const FIELD_MUST_BE_ISO_8601_DATE = (field: string, condition?: string) =
 
 export const FIELD_MUST_BE_VALID_IMAGE_DATA = (field: string, condition?: string) => {
     return `Field ${field} must be a valid base64-encoded PNG, JPEG, WebP or SVG${condition ? ` ${condition}` : ""}`;
+};
+
+export const FIELD_MUST_BE_VALID_PREVIEW_IMAGE = (field: string) => {
+    return `Field ${field} must be a base64-encoded PNG or JPEG data URL`;
 };
 
 export const FIELD_MUST_BE_ONE_OF_MESSAGE = (field: string, values: unknown[]) => {

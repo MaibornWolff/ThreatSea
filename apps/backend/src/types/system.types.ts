@@ -4,6 +4,7 @@ import {
     FIELD_MUST_BE_ARRAY_MESSAGE,
     FIELD_MUST_BE_STRING_MESSAGE,
     FIELD_MUST_BE_VALID_IMAGE_DATA,
+    FIELD_MUST_BE_VALID_PREVIEW_IMAGE,
     MAX_SYMBOL_LENGTH,
     STRING_TOO_LONG_MESSAGE,
     SYSTEM_COMPONENT_SYMBOL_PATTERN,
@@ -46,7 +47,7 @@ export class UpdateSystemRequestDto {
     // limit bounds the size.
     @ValidateIf((_, value) => value != null && value !== "")
     @IsString({ message: FIELD_MUST_BE_STRING_MESSAGE("image") })
-    @Matches(SYSTEM_IMAGE_PATTERN, { message: FIELD_MUST_BE_VALID_IMAGE_DATA("image") })
+    @Matches(SYSTEM_IMAGE_PATTERN, { message: FIELD_MUST_BE_VALID_PREVIEW_IMAGE("image") })
     image?: string | null;
 }
 

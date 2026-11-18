@@ -4,8 +4,8 @@ describe("isSafeSystemImage", () => {
     it.each([
         "data:image/png;base64,iVBORw0KGgo=",
         "data:image/jpeg;base64,/9j/4AAQSkZJRg==",
-        "data:image/webp;base64,UklGRg+/",
-    ])("accepts the raster data URL %s", (image) => {
+        "data:image/PNG;base64,iVBORw0KGgo=",
+    ])("accepts the PNG or JPEG data URL %s", (image) => {
         expect(isSafeSystemImage(image)).toBe(true);
     });
 
@@ -15,6 +15,7 @@ describe("isSafeSystemImage", () => {
         ["an empty string", ""],
         ["a remote URL", "https://example.com/preview.png"],
         ["an SVG data URL", "data:image/svg+xml;base64,PHN2Zz48L3N2Zz4="],
+        ["a WebP data URL the PDF report cannot render", "data:image/webp;base64,UklGRg+/"],
         ["a non-image data URL", "data:text/html;base64,PGgxPmhpPC9oMT4="],
         ["a value breaking out of the CSS declaration", "x);}body::after{content:'INJECTED'}.z{b:url(x"],
         ["a data URL with trailing CSS", 'data:image/png;base64,iVBORw0KGgo=");}body{color:red'],

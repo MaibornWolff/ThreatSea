@@ -49,24 +49,19 @@ import { THREAT_STATUSES } from "#types/threat-statuses.types.js";
 
 interface ImportSymbolBody {
     componentTypes?: unknown;
-    system?: { data?: { components?: unknown }; image?: unknown };
+    system?: { data?: { components?: unknown } };
 }
 
-// Same rule as UpdateSystemRequestDto.image; the snapshot may exceed MAX_SYMBOL_LENGTH.
-function checkSystemImage(image: unknown): string | null {
-    if (image == null || image === "") {
-        return null;
-    }
-    if (typeof image !== "string" || !SYSTEM_IMAGE_PATTERN.test(image)) {
-        return FIELD_MUST_BE_VALID_IMAGE_DATA("image");
-    }
-    return null;
+// Same rule as UpdateSystemRequestDto.image. An invalid preview is dropped instead of failing the
+// import, so archives exported before the rule existed stay importable; the editor regenerates it.
+function keepValidSystemImage(image: unknown): string | null {
+    return typeof image === "string" && SYSTEM_IMAGE_PATTERN.test(image) ? image : null;
 }
 
 /**
- * Import writes symbols and the system preview directly via services, bypassing the route DTOs, so
- * re-check them here: component types with the strict data-URL rule, system components with the
- * laxer one, the preview with the raster-only rule. Returns the first error, or null when all valid.
+ * Import writes symbols directly via services, bypassing the route DTOs, so re-check them here:
+ * component types with the strict data-URL rule, system components with the laxer one. Returns the
+ * first error, or null when all valid.
  */
 function findInvalidImportedSymbol(body: ImportSymbolBody): string | null {
     const checkSymbol = (symbol: unknown, pattern: RegExp): string | null => {
@@ -105,8 +100,7 @@ function findInvalidImportedSymbol(body: ImportSymbolBody): string | null {
 
     return (
         checkSymbolArray(body.componentTypes, "componentTypes", IMAGE_DATA_URL_PATTERN) ??
-        checkSymbolArray(body.system?.data?.components, "components", SYSTEM_COMPONENT_SYMBOL_PATTERN) ??
-        checkSystemImage(body.system?.image)
+        checkSymbolArray(body.system?.data?.components, "components", SYSTEM_COMPONENT_SYMBOL_PATTERN)
     );
 }
 
@@ -256,6 +250,7 @@ export async function importProject(request: Request<void>, response: Response, 
             }
 
             body.system.projectId = newProjectId;
+            body.system.image = keepValidSystemImage(body.system.image);
             delete body.system.id;
 
             for (const component of body.system.data.components as Component[]) {

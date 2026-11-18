@@ -729,18 +729,42 @@ it("should accept a system preview that is a large raster data URL", async () =>
     expect(res.body.image).toBe(image);
 });
 
-it("should accept a system without a preview", async () => {
+it("should accept an uppercase MIME type in the system preview", async () => {
+    const image = "data:image/PNG;base64,iVBORw0KGgo=";
+    const res = await request(app)
+        .put(`/api/projects/${projectId}/system`)
+        .send(systemWithImage(image))
+        .set("X-CSRF-TOKEN", csrfToken)
+        .set("Cookie", cookies);
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.image).toBe(image);
+});
+
+it("should clear the stored preview when the system is saved with image null", async () => {
+    await request(app)
+        .put(`/api/projects/${projectId}/system`)
+        .send(VALID_SYSTEM)
+        .set("X-CSRF-TOKEN", csrfToken)
+        .set("Cookie", cookies);
+
     const res = await request(app)
         .put(`/api/projects/${projectId}/system`)
         .send(systemWithImage(null))
         .set("X-CSRF-TOKEN", csrfToken)
         .set("Cookie", cookies);
     expect(res.statusCode).toEqual(200);
+
+    const systemResponse = await request(app)
+        .get(`/api/projects/${projectId}/system`)
+        .set("X-CSRF-TOKEN", csrfToken)
+        .set("Cookie", cookies);
+    expect(systemResponse.body.image).toBeNull();
 });
 
 it.each([
     ["a remote URL", "https://example.com/preview.png"],
     ["an SVG data URL", "data:image/svg+xml;base64,PHN2Zz48L3N2Zz4="],
+    ["a WebP data URL the PDF report cannot render", "data:image/webp;base64,UklGRg+/"],
     ["a value breaking out of a CSS url()", "x);}body::after{content:'INJECTED'}.z{b:url(x"],
     ["a data URL with trailing CSS", 'data:image/png;base64,iVBORw0KGgo=");}body{color:red'],
 ])("should reject a system preview that is %s and keep the stored one", async (_description, image) => {
@@ -757,6 +781,7 @@ it.each([
         .set("X-CSRF-TOKEN", csrfToken)
         .set("Cookie", cookies);
     expect(res.statusCode).toEqual(400);
+    expect(JSON.stringify(res.body)).toContain("Field image must be a base64-encoded PNG or JPEG data URL");
 
     const systemResponse = await request(app)
         .get(`/api/projects/${projectId}/system`)
