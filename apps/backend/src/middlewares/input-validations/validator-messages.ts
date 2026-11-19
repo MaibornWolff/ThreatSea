@@ -88,6 +88,10 @@ export const STRING_MUST_NOT_BE_EMPTY_MESSAGE = (field: string) => {
     return `Field ${field} must not be empty`;
 };
 
+export const ARRAY_TOO_LONG_MESSAGE = (field: string, maxLength: number) => {
+    return `Field ${field} may contain at most ${maxLength} entries`;
+};
+
 export const STRING_TOO_LONG_MESSAGE = (field: string, maxLength: number) => {
     return `Field ${field} may be at most ${maxLength} characters long`;
 };

@@ -25,6 +25,18 @@ function getOptionalPositiveNumber(key: string, defaultValue: number): number {
     return parsedValue;
 }
 
+function getOptionalIntegerInRange(key: string, defaultValue: number, minimum: number, maximum: number): number {
+    const rawValue = process.env[key];
+    if (rawValue === undefined || rawValue === "") {
+        return defaultValue;
+    }
+    const parsedValue = Number(rawValue);
+    if (!Number.isInteger(parsedValue) || parsedValue < minimum || parsedValue > maximum) {
+        throw new Error(`Environment variable ${key} must be an integer between ${minimum} and ${maximum}`);
+    }
+    return parsedValue;
+}
+
 // OIDC requires the "openid" scope; without it the IdP returns no ID token and every login fails
 // with a misleading "No 'sub' claim" error, so reject the misconfiguration at startup instead.
 export function validateOidcScope(scope: string): string {
@@ -139,6 +151,11 @@ export const sessionConfig: SessionOptions = {
     // extend a row's `expire` and rolling would only slide the cookie while the store row still
     // dies at creation + 12h. Keep both lifetimes consistent at a fixed 12h instead.
 };
+
+// Upper bound for each element list of a system (components, connections, ...), so a single save
+// cannot produce an unbounded amount of threat rows. Capped below Postgres' 65535 bind parameters,
+// because removed points of attack are deleted in one query.
+export const SYSTEM_MAX_ELEMENTS = getOptionalIntegerInRange("SYSTEM_MAX_ELEMENTS", 10_000, 1, 65_000);
 
 const MAXIMUM_PURGE_INTERVAL_HOURS = 596; // setInterval delays above 2^31 - 1 ms overflow and fire every millisecond
 

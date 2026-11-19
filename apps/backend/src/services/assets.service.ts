@@ -2,7 +2,7 @@
  * Module that defines the access and manipulation
  * for the assets of a project.
  */
-import { eq, inArray, and, ne } from "drizzle-orm";
+import { eq, and, ne } from "drizzle-orm";
 import { db, TransactionType } from "#db/index.js";
 import { Asset, assets, CreateAsset, UpdateAsset } from "#db/schema.js";
 import { ConflictError } from "#errors/conflict.error.js";
@@ -31,23 +31,6 @@ export async function getAsset(assetId: number): Promise<Asset | null> {
     const asset = await db.query.assets.findFirst({ where: eq(assets.id, assetId) });
 
     return asset ?? null;
-}
-
-/**
- * Gets multiple assets of a project by their ids. Ids of other projects are ignored.
- *
- * @param {number} projectId - The id of the project the assets must belong to.
- * @param {number[]} assetIds - The ids of the assets.
- * @returns {Promise<Asset[]>} A promise that resolves to an array of assets.
- */
-export async function getAssetsByIds(projectId: number, assetIds: number[]): Promise<Asset[]> {
-    if (assetIds.length === 0) {
-        return [];
-    }
-
-    return await db.query.assets.findMany({
-        where: and(eq(assets.projectId, projectId), inArray(assets.id, assetIds)),
-    });
 }
 
 /**

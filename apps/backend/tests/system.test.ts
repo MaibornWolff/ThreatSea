@@ -715,3 +715,69 @@ it("should reject a component whose symbol data URL exceeds the size limit", asy
         .set("Cookie", cookies);
     expect(res.statusCode).toEqual(400);
 });
+
+it("should store connections, connection points, points of attack and annotations unchanged", async () => {
+    const system = {
+        ...VALID_SYSTEM,
+        data: {
+            ...VALID_SYSTEM.data,
+            annotations: [
+                {
+                    id: "annotation-freehand",
+                    type: "freehand",
+                    projectId,
+                    x: 10,
+                    y: 20,
+                    stroke: "#000000",
+                    strokeWidth: 2,
+                    points: [0, 0, 5, 5, 10, 0],
+                },
+                {
+                    id: "annotation-text",
+                    type: "text",
+                    projectId,
+                    x: 30,
+                    y: 40,
+                    width: 100,
+                    height: 20,
+                    text: "Note",
+                    stroke: "#000000",
+                    strokeWidth: 1,
+                    bold: true,
+                },
+            ],
+        },
+    };
+
+    const res = await request(app)
+        .put(`/api/projects/${projectId}/system`)
+        .send(system)
+        .set("X-CSRF-TOKEN", csrfToken)
+        .set("Cookie", cookies);
+    expect(res.statusCode).toEqual(200);
+
+    const systemResponse = await request(app)
+        .get(`/api/projects/${projectId}/system`)
+        .set("X-CSRF-TOKEN", csrfToken)
+        .set("Cookie", cookies);
+    expect(systemResponse.body.data.connections).toEqual(system.data.connections);
+    expect(systemResponse.body.data.connectionPoints).toEqual(system.data.connectionPoints);
+    // The fixture's asset ids belong to no asset of this project, so the save drops them.
+    expect(systemResponse.body.data.pointsOfAttack).toEqual(
+        system.data.pointsOfAttack.map((pointOfAttack) => ({ ...pointOfAttack, assets: [] }))
+    );
+    expect(systemResponse.body.data.annotations).toEqual(system.data.annotations);
+});
+
+it.each(["components", "pointsOfAttack", "connections", "connectionPoints", "annotations"])(
+    "should reject a system with more than the maximum number of %s",
+    async (field) => {
+        const res = await request(app)
+            .put(`/api/projects/${projectId}/system`)
+            .send({ ...VALID_SYSTEM, data: { ...VALID_SYSTEM.data, [field]: Array(10_001).fill({}) } })
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(400);
+        expect(JSON.stringify(res.body)).toContain(`Field ${field} may contain at most 10000 entries`);
+    }
+);

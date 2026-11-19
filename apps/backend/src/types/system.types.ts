@@ -1,6 +1,7 @@
 import { Type } from "class-transformer";
-import { IsArray, IsString, Matches, MaxLength, ValidateIf, ValidateNested } from "class-validator";
+import { ArrayMaxSize, IsArray, IsString, Matches, MaxLength, ValidateIf, ValidateNested } from "class-validator";
 import {
+    ARRAY_TOO_LONG_MESSAGE,
     FIELD_MUST_BE_ARRAY_MESSAGE,
     FIELD_MUST_BE_STRING_MESSAGE,
     FIELD_MUST_BE_VALID_IMAGE_DATA,
@@ -8,6 +9,7 @@ import {
     STRING_TOO_LONG_MESSAGE,
     SYSTEM_COMPONENT_SYMBOL_PATTERN,
 } from "#middlewares/input-validations/validator-messages.js";
+import { SYSTEM_MAX_ELEMENTS } from "#config/config.js";
 
 export interface UpdateSystemRequest {
     data: SystemData | null;
@@ -30,9 +32,34 @@ export class ComponentDto {
 export class SystemDataDto {
     @ValidateIf((_, value) => value != null)
     @IsArray({ message: FIELD_MUST_BE_ARRAY_MESSAGE("components") })
+    @ArrayMaxSize(SYSTEM_MAX_ELEMENTS, { message: ARRAY_TOO_LONG_MESSAGE("components", SYSTEM_MAX_ELEMENTS) })
     @ValidateNested({ each: true })
     @Type(() => ComponentDto)
     components?: ComponentDto[];
+
+    @ValidateIf((_, value) => value != null)
+    @IsArray({ message: FIELD_MUST_BE_ARRAY_MESSAGE("pointsOfAttack") })
+    @ArrayMaxSize(SYSTEM_MAX_ELEMENTS, { message: ARRAY_TOO_LONG_MESSAGE("pointsOfAttack", SYSTEM_MAX_ELEMENTS) })
+    @Type(() => Object)
+    pointsOfAttack?: unknown[];
+
+    @ValidateIf((_, value) => value != null)
+    @IsArray({ message: FIELD_MUST_BE_ARRAY_MESSAGE("connections") })
+    @ArrayMaxSize(SYSTEM_MAX_ELEMENTS, { message: ARRAY_TOO_LONG_MESSAGE("connections", SYSTEM_MAX_ELEMENTS) })
+    @Type(() => Object)
+    connections?: unknown[];
+
+    @ValidateIf((_, value) => value != null)
+    @IsArray({ message: FIELD_MUST_BE_ARRAY_MESSAGE("connectionPoints") })
+    @ArrayMaxSize(SYSTEM_MAX_ELEMENTS, { message: ARRAY_TOO_LONG_MESSAGE("connectionPoints", SYSTEM_MAX_ELEMENTS) })
+    @Type(() => Object)
+    connectionPoints?: unknown[];
+
+    @ValidateIf((_, value) => value != null)
+    @IsArray({ message: FIELD_MUST_BE_ARRAY_MESSAGE("annotations") })
+    @ArrayMaxSize(SYSTEM_MAX_ELEMENTS, { message: ARRAY_TOO_LONG_MESSAGE("annotations", SYSTEM_MAX_ELEMENTS) })
+    @Type(() => Object)
+    annotations?: unknown[];
 }
 
 export class UpdateSystemRequestDto {

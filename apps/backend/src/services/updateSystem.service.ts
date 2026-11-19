@@ -10,12 +10,12 @@ import { getCatalogThreatsByIds, getCatalogThreatsByProjectId } from "#services/
 import {
     buildThreatForGenericThreat,
     createThreats,
-    deleteThreatsByPointOfAttackId,
+    deleteThreatsByPointOfAttackIds,
     getThreatsByProjectId,
 } from "#services/threats.service.js";
 import {
     createGenericThreats,
-    deleteGenericThreatsByPointOfAttackId,
+    deleteGenericThreatsByPointOfAttackIds,
     getGenericThreatsByProjectId,
 } from "#services/generic-threats.service.js";
 import * as systemService from "#services/system.service.js";
@@ -90,20 +90,24 @@ async function keepProjectAssetIds(
 
 function getDeletedPointsOfAttack(oldSystem: System | undefined, newSystem: System): PointOfAttack[] {
     const oldPointsOfAttack = oldSystem?.data?.pointsOfAttack || [];
-    const newPointsOfAttack = newSystem.data?.pointsOfAttack || [];
+    const newPointOfAttackIds = new Set(
+        (newSystem.data?.pointsOfAttack || []).map((pointOfAttack) => pointOfAttack.id)
+    );
 
-    return oldPointsOfAttack.filter((oldPointOfAttack) => {
-        return !newPointsOfAttack.some((newPointOfAttack) => newPointOfAttack.id === oldPointOfAttack.id);
-    });
+    return oldPointsOfAttack.filter((oldPointOfAttack) => !newPointOfAttackIds.has(oldPointOfAttack.id));
 }
 
 function getCreatedPointsOfAttack(oldSystem: System | undefined, newSystem: System): PointOfAttack[] {
-    const oldPointsOfAttack = oldSystem?.data?.pointsOfAttack || [];
+    const oldPointOfAttackIds = new Set(
+        (oldSystem?.data?.pointsOfAttack || []).map((pointOfAttack) => pointOfAttack.id)
+    );
     const newPointsOfAttack = newSystem.data?.pointsOfAttack || [];
 
-    return newPointsOfAttack.filter((newPointOfAttack) => {
-        return !oldPointsOfAttack.some((oldPointOfAttack) => oldPointOfAttack.id === newPointOfAttack.id);
-    });
+    return newPointsOfAttack.filter((newPointOfAttack) => !oldPointOfAttackIds.has(newPointOfAttack.id));
+}
+
+function genericThreatKey(catalogThreatId: number, pointOfAttackId: string): string {
+    return `${catalogThreatId}|${pointOfAttackId}`;
 }
 
 // Returns every point of attack that currently has assets. Threat creation is deduplicated
@@ -120,11 +124,11 @@ async function deleteThreatsByPointsOfAttack(
     projectId: number,
     transaction: TransactionType
 ): Promise<void> {
-    for (const pointOfAttack of pointsOfAttack) {
-        await deleteGenericThreatsByPointOfAttackId(pointOfAttack.id, projectId, transaction);
+    const pointOfAttackIds = pointsOfAttack.map((pointOfAttack) => pointOfAttack.id);
 
-        await deleteThreatsByPointOfAttackId(pointOfAttack.id, projectId, transaction);
-    }
+    await deleteGenericThreatsByPointOfAttackIds(pointOfAttackIds, projectId, transaction);
+
+    await deleteThreatsByPointOfAttackIds(pointOfAttackIds, projectId, transaction);
 }
 
 async function createThreatsByPointsOfAttack(
@@ -133,13 +137,19 @@ async function createThreatsByPointsOfAttack(
     projectId: number,
     transaction: TransactionType
 ): Promise<void> {
-    const existingGenericThreats = await getGenericThreatsByProjectId(projectId, transaction);
+    const knownGenericThreatKeys = new Set(
+        (await getGenericThreatsByProjectId(projectId, transaction))
+            .filter((genericThreat) => genericThreat.projectId === projectId)
+            .map((genericThreat) => genericThreatKey(genericThreat.catalogThreatId, genericThreat.pointOfAttackId))
+    );
+    const catalogThreatsByPointOfAttackType = Map.groupBy<string, CatalogThreat>(
+        catalogThreats,
+        (catalogThreat) => catalogThreat.pointOfAttack
+    );
     const newGenericThreats: CreateGenericThreat[] = [];
 
     for (const pointOfAttack of pointsOfAttack) {
-        const relevantCatalogThreats = catalogThreats.filter(
-            (catalogThreat) => catalogThreat.pointOfAttack === pointOfAttack.type
-        );
+        const relevantCatalogThreats = catalogThreatsByPointOfAttackType.get(pointOfAttack.type) ?? [];
 
         for (const catalogThreat of relevantCatalogThreats) {
             const {
@@ -150,19 +160,10 @@ async function createThreatsByPointsOfAttack(
                 pointOfAttack: catalogThreatPointOfAttack,
             } = catalogThreat;
 
-            const genericThreat =
-                existingGenericThreats.find(
-                    (existingThreat) =>
-                        existingThreat.catalogThreatId === catalogThreatId &&
-                        existingThreat.pointOfAttackId === pointOfAttack.id &&
-                        existingThreat.projectId === projectId
-                ) ??
-                newGenericThreats.find(
-                    (newThreat) =>
-                        newThreat.catalogThreatId === catalogThreatId && newThreat.pointOfAttackId === pointOfAttack.id
-                );
+            const key = genericThreatKey(catalogThreatId, pointOfAttack.id);
 
-            if (!genericThreat) {
+            if (!knownGenericThreatKeys.has(key)) {
+                knownGenericThreatKeys.add(key);
                 newGenericThreats.push({
                     projectId,
                     pointOfAttackId: pointOfAttack.id,
@@ -192,23 +193,22 @@ async function createThreatsForAssetAssignedPointsOfAttack(
         return;
     }
 
-    const existingThreats = await getThreatsByProjectId(projectId, transaction);
+    const genericThreatIdsWithThreat = new Set(
+        (await getThreatsByProjectId(projectId, transaction)).map((threat) => threat.genericThreatId)
+    );
     const catalogThreatsById = await mapCatalogThreatsOfGenericThreats(genericThreats, catalogThreats, transaction);
+    const genericThreatsByPointOfAttackId = Map.groupBy(
+        genericThreats.filter((genericThreat) => genericThreat.projectId === projectId),
+        (genericThreat) => genericThreat.pointOfAttackId
+    );
     const newThreats: CreateThreat[] = [];
 
     for (const pointOfAttack of pointsOfAttack) {
-        const applicableGenericThreats = genericThreats.filter(
-            (genericThreat) =>
-                genericThreat.pointOfAttackId === pointOfAttack.id && genericThreat.projectId === projectId
-        );
-
-        for (const genericThreat of applicableGenericThreats) {
-            if (
-                existingThreats.some((threat) => threat.genericThreatId === genericThreat.id) ||
-                newThreats.some((threat) => threat.genericThreatId === genericThreat.id)
-            ) {
+        for (const genericThreat of genericThreatsByPointOfAttackId.get(pointOfAttack.id) ?? []) {
+            if (genericThreatIdsWithThreat.has(genericThreat.id)) {
                 continue;
             }
+            genericThreatIdsWithThreat.add(genericThreat.id);
 
             const catalogThreat = catalogThreatsById.get(genericThreat.catalogThreatId);
 
