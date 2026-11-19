@@ -411,8 +411,8 @@ importers:
         specifier: 19.3.2
         version: 19.3.2(@types/react@19.3.0)(konva@10.9.1)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       react-konva-utils:
-        specifier: 2.1.0
-        version: 2.1.0(konva@10.9.1)(react-dom@19.3.1(react@19.3.1))(react-konva@19.3.2(@types/react@19.3.0)(konva@10.9.1)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react@19.3.1)
+        specifier: 2.1.1
+        version: 2.1.1(konva@10.9.1)(react-dom@19.3.1(react@19.3.1))(react-konva@19.3.2(@types/react@19.3.0)(konva@10.9.1)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react@19.3.1)
       react-redux:
         specifier: 9.3.1
         version: 9.3.1(@types/react@19.3.0)(react@19.3.1)(redux@5.0.1)
@@ -4397,8 +4397,8 @@ packages:
   react-is@19.3.1:
     resolution: {integrity: sha512-RRieF6IyxQBkcK6pP8xOHprLTPW6QjRkbGdImtqNme+/hYVwCZkLQLdlZGOhUqXwkS9IEynaGvPJtv6XB/cz0Q==}
 
-  react-konva-utils@2.1.0:
-    resolution: {integrity: sha512-ecCE3U4T0FaDoiHBpKGffAcyOjEPJtVrinFAf9qWG1SQsbQ28qVEVss42WV4uft5oUKrpRou6yVR9uVMRYfUiA==}
+  react-konva-utils@2.1.1:
+    resolution: {integrity: sha512-MrwEpIiXtZzGXjfTCMv2muKq1Pdb0DugYgneJFvWEK9J/IX7YSGQJ1k26PYJghdp7Vx01LywGeYOpPj29c79/Q==}
     peerDependencies:
       konva: ^8.3.5 || ^9.0.0 || ^10.0.0
       react: ^18.2.0 || ^19.0.0
@@ -8570,7 +8570,7 @@ snapshots:
 
   react-is@19.3.1: {}
 
-  react-konva-utils@2.1.0(konva@10.9.1)(react-dom@19.3.1(react@19.3.1))(react-konva@19.3.2(@types/react@19.3.0)(konva@10.9.1)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react@19.3.1):
+  react-konva-utils@2.1.1(konva@10.9.1)(react-dom@19.3.1(react@19.3.1))(react-konva@19.3.2(@types/react@19.3.0)(konva@10.9.1)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react@19.3.1):
     dependencies:
       konva: 10.9.1
       react: 19.3.1
