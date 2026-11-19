@@ -29,8 +29,9 @@ export const SYSTEM_COMPONENT_SYMBOL_PATTERN =
     /^(?:\/[\w.-][\w./-]*\.(?:png|jpe?g|webp|svg)|data:image\/(?:png|jpeg|webp|svg\+xml);base64,[A-Za-z0-9+/=]+)$/i;
 // System preview: the canvas snapshot the editor generates. PNG or JPEG data URLs only (no SVG, no
 // remote URLs), because the value ends up in a CSS url() on the project card and in the PDF report,
-// whose renderer supports only these two formats.
-export const SYSTEM_IMAGE_PATTERN = /^data:image\/(?:png|jpeg);base64,[A-Za-z0-9+/=]+$/i;
+// whose renderer supports only these two formats. Only the format name may vary in case: the renderer
+// requires the "data:image/" and ";base64," parts in lowercase.
+export const SYSTEM_IMAGE_PATTERN = /^data:image\/(?:[Pp][Nn][Gg]|[Jj][Pp][Ee][Gg]);base64,[A-Za-z0-9+/=]+$/;
 export const CIA_VALUE_MIN = 1;
 export const CIA_VALUE_MAX = 5;
 export const PROBABILITY_VALUE_MIN = 1;

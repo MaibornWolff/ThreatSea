@@ -16,6 +16,8 @@ describe("isSafeSystemImage", () => {
         ["a remote URL", "https://example.com/preview.png"],
         ["an SVG data URL", "data:image/svg+xml;base64,PHN2Zz48L3N2Zz4="],
         ["a WebP data URL the PDF report cannot render", "data:image/webp;base64,UklGRg+/"],
+        ["an uppercase data URL prefix the PDF report cannot read", "data:IMAGE/png;base64,iVBORw0KGgo="],
+        ["an uppercase base64 marker the PDF report cannot read", "data:image/png;BASE64,iVBORw0KGgo="],
         ["a non-image data URL", "data:text/html;base64,PGgxPmhpPC9oMT4="],
         ["a value breaking out of the CSS declaration", "x);}body::after{content:'INJECTED'}.z{b:url(x"],
         ["a data URL with trailing CSS", 'data:image/png;base64,iVBORw0KGgo=");}body{color:red'],
