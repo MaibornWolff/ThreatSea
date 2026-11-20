@@ -1,4 +1,4 @@
-import { test, expect, type APIRequestContext } from "@playwright/test";
+import { test, expect, type APIRequestContext, type Page } from "@playwright/test";
 import { CONFIDENTIALITY_LEVELS } from "#utils/confidentiality.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 import { MembersPage, ROLE_LABELS } from "../pages/members.page.ts";
@@ -96,6 +96,29 @@ function registerMemberManagementTests(memberPath: MemberPath, options: MemberMa
             await provisionFixedTestUser(secondary.testUserIndex);
             const userId = await findAddableMemberId(request, ownerToken, memberPath, entityId, secondary.email);
             await addMember(request, ownerToken, memberPath, entityId, userId, role);
+        }
+
+        /**
+         * Serves the member list with `count` generated Viewers on top of the real members. The
+         * fixed test profiles are too few to build a list longer than the screen from real users.
+         */
+        async function serveLongMemberList(page: Page, request: APIRequestContext, count: number): Promise<void> {
+            const realMembers = await getAddedMembers(request, ownerToken, memberPath, entityId);
+            const generatedMembers: MemberApiEntry[] = Array.from({ length: count }, (_unused, index) => {
+                const memberNumber = String(index + 1).padStart(2, "0");
+                return {
+                    id: 1_000_000 + index,
+                    firstname: "Long List",
+                    lastname: `Member ${memberNumber}`,
+                    email: `long-list-member-${memberNumber}@example.test`,
+                    role: USER_ROLES.VIEWER,
+                };
+            });
+            await page.route(`**/api/${memberPath}/${entityId}/members`, (route) =>
+                route.request().method() === "GET"
+                    ? route.fulfill({ json: [...realMembers, ...generatedMembers] })
+                    : route.fallback()
+            );
         }
 
         if (includeListMechanicsTests) {
@@ -208,6 +231,30 @@ function registerMemberManagementTests(memberPath: MemberPath, options: MemberMa
                 await expect(pg.memberRows).toHaveCount(1);
             });
         }
+
+        test("Should keep every member reachable when the list is longer than the screen", async ({
+            page,
+            request,
+        }) => {
+            const pg = new MembersPage(page);
+            await serveLongMemberList(page, request, 40);
+            await pg.goto(memberPath, entityId);
+
+            // The owner ("E2E Testing") sorts first, so the first page ends with generated member 24.
+            await expect(pg.paginationSummary).toHaveText("1–25 of 41");
+            await expect(pg.paginationSummary).toBeInViewport({ ratio: 1 });
+            await pg.scrollMemberListToBottom();
+            // Not 1: once scrolled to the end, the last row sits a sub-pixel under the footer border.
+            await expect(pg.row("Long List Member 24")).toBeInViewport({ ratio: 0.9 });
+
+            await pg.selectRowsPerPage("All");
+            await pg.scrollMemberListToBottom();
+            const lastMember = pg.row("Long List Member 40");
+            await expect(lastMember).toBeInViewport({ ratio: 0.9 });
+
+            await lastMember.click();
+            await expect(pg.roleSelect).toBeVisible();
+        });
 
         test("Should show the add button first, labelled and readable on hover", async ({ page }) => {
             const pg = new MembersPage(page);
