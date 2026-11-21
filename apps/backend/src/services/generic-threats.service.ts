@@ -2,7 +2,7 @@
  * Module that defines the access and manipulation
  * of generic threats.
  */
-import { and, eq, getTableColumns } from "drizzle-orm";
+import { and, eq, getTableColumns, inArray } from "drizzle-orm";
 import { db, TransactionType } from "#db/index.js";
 import { genericThreats, GenericThreat, CreateGenericThreat } from "#db/schema.js";
 import { GenericThreatWithExtendedThreatsResponse } from "#types/generic-threat.types.js";
@@ -132,12 +132,15 @@ export async function createGenericThreats(
     return await (transaction ?? db).insert(genericThreats).values(createGenericThreatsData).returning();
 }
 
-export async function deleteGenericThreatsByPointOfAttackId(
-    pointOfAttackId: string,
+export async function deleteGenericThreatsByPointOfAttackIds(
+    pointOfAttackIds: string[],
     projectId: number,
     transaction: TransactionType | undefined = undefined
 ): Promise<void> {
+    if (pointOfAttackIds.length === 0) {
+        return;
+    }
     await (transaction ?? db)
         .delete(genericThreats)
-        .where(and(eq(genericThreats.pointOfAttackId, pointOfAttackId), eq(genericThreats.projectId, projectId)));
+        .where(and(inArray(genericThreats.pointOfAttackId, pointOfAttackIds), eq(genericThreats.projectId, projectId)));
 }

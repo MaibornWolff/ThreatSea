@@ -2,7 +2,7 @@
  * Module that defines the access and manipulation
  * of threats.
  */
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { db, TransactionType } from "#db/index.js";
 import { threats, Threat, CreateThreat, UpdateThreat, CatalogThreat, GenericThreat } from "#db/schema.js";
 import { getGenericThreat } from "#services/generic-threats.service.js";
@@ -172,12 +172,15 @@ export async function deleteThreat(threatId: number): Promise<void> {
     await db.delete(threats).where(eq(threats.id, threatId));
 }
 
-export async function deleteThreatsByPointOfAttackId(
-    pointOfAttackId: string,
+export async function deleteThreatsByPointOfAttackIds(
+    pointOfAttackIds: string[],
     projectId: number,
     transaction: TransactionType | undefined = undefined
 ): Promise<void> {
+    if (pointOfAttackIds.length === 0) {
+        return;
+    }
     await (transaction ?? db)
         .delete(threats)
-        .where(and(eq(threats.pointOfAttackId, pointOfAttackId), eq(threats.projectId, projectId)));
+        .where(and(inArray(threats.pointOfAttackId, pointOfAttackIds), eq(threats.projectId, projectId)));
 }

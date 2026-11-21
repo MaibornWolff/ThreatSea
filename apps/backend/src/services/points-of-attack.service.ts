@@ -4,7 +4,7 @@
 import { Asset } from "#db/schema.js";
 import { ComponentType } from "#types/system.types.js";
 import { findSystem } from "#services/system.service.js";
-import { getAssetsByIds } from "#services/assets.service.js";
+import { getAssets } from "#services/assets.service.js";
 
 interface PointOfAttack {
     id: string;
@@ -41,14 +41,20 @@ export async function getPointsOfAttack(projectId: number): Promise<PointOfAttac
     // Destructure data.
     const { pointsOfAttack, components = [], connections = [], connectionPoints = [] } = data;
 
+    const componentsById = new Map(components.map((component) => [component.id, component]));
+    const connectionsById = new Map(connections.map((connection) => [connection.id, connection]));
+    const connectionPointsById = new Map(
+        connectionPoints.map((connectionPoint) => [connectionPoint.id, connectionPoint])
+    );
+    const projectAssetsById = new Map((await getAssets(projectId)).map((asset) => [asset.id, asset]));
+
     const items: PointOfAttack[] = [];
     for (const pointOfAttack of pointsOfAttack) {
-        const component = components.find((component) => component.id === pointOfAttack?.componentId);
-        const connection = connections.find((connection) => connection.id === pointOfAttack?.connectionId);
-
-        const connectionPoint = connectionPoints.find(
-            (connectionPoint) => connectionPoint.id === pointOfAttack?.connectionPointId
-        );
+        const component = pointOfAttack?.componentId ? componentsById.get(pointOfAttack.componentId) : undefined;
+        const connection = pointOfAttack?.connectionId ? connectionsById.get(pointOfAttack.connectionId) : undefined;
+        const connectionPoint = pointOfAttack?.connectionPointId
+            ? connectionPointsById.get(pointOfAttack.connectionPointId)
+            : undefined;
 
         // optional chaining if the member does not exist.
         const componentName = component?.name ?? null;
@@ -59,7 +65,9 @@ export async function getPointsOfAttack(projectId: number): Promise<PointOfAttac
         const connectionPointId = connectionPoint?.id ?? null;
         const connectionPointName = connectionPoint?.name ?? null;
 
-        const assets = await getAssetsByIds(projectId, pointOfAttack.assets);
+        const assets = [...new Set(pointOfAttack.assets ?? [])]
+            .map((assetId) => projectAssetsById.get(assetId))
+            .filter((asset) => asset !== undefined);
 
         items.push({
             ...pointOfAttack,
