@@ -56,6 +56,8 @@ export class EditorPage extends BasePage {
     readonly centerEditorButton: Locator;
     readonly exportSystemImageButton: Locator;
     readonly shapesButton: Locator;
+    readonly componentsButton: Locator;
+    readonly componentsPopover: Locator;
     readonly pencilButton: Locator;
     readonly textToolButton: Locator;
     readonly deleteAnnotationButton: Locator;
@@ -117,6 +119,8 @@ export class EditorPage extends BasePage {
         this.centerEditorButton = page.getByRole("button", { name: "Center editor" });
         this.exportSystemImageButton = page.getByRole("button", { name: "Export System Image" });
         this.shapesButton = page.getByRole("button", { name: "Shapes" });
+        this.componentsButton = page.getByRole("button", { name: "Components" });
+        this.componentsPopover = page.getByTestId("components-popover");
         this.pencilButton = page.getByRole("button", { name: "Pencil", exact: true });
         this.textToolButton = page.getByRole("button", { name: "Text", exact: true });
         // Unambiguous for a selected shape; the floating text toolbar adds one only while editing text.
@@ -235,6 +239,22 @@ export class EditorPage extends BasePage {
     // Color picker preset chips are labelled by their hex value (e.g. "#e74c3c").
     colorPresetChip(hex: string): Locator {
         return this.page.getByRole("button", { name: hex });
+    }
+
+    async pickComponentFromToolbar(name: string): Promise<void> {
+        await this.componentsButton.click();
+        await this.componentsPopover.getByText(name, { exact: true }).click();
+    }
+
+    async getCanvasCursor(): Promise<string> {
+        return this.page.evaluate(() => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const stage = (globalThis as any).Konva?.stages?.[0];
+            if (!stage) {
+                throw new Error("No Konva stage found");
+            }
+            return stage.content.style.cursor;
+        });
     }
 
     async selectShapeTool(name: string): Promise<void> {
