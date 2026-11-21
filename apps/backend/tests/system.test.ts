@@ -715,3 +715,81 @@ it("should reject a component whose symbol data URL exceeds the size limit", asy
         .set("Cookie", cookies);
     expect(res.statusCode).toEqual(400);
 });
+
+const systemWithImage = (image: string | null) => ({ data: VALID_SYSTEM.data, image });
+
+it("should accept a system preview that is a large raster data URL", async () => {
+    const image = `data:image/png;base64,${"A".repeat(200000)}`;
+    const res = await request(app)
+        .put(`/api/projects/${projectId}/system`)
+        .send(systemWithImage(image))
+        .set("X-CSRF-TOKEN", csrfToken)
+        .set("Cookie", cookies);
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.image).toBe(image);
+});
+
+it("should accept an uppercase format name in the system preview", async () => {
+    const image = VALID_SYSTEM.image.replace("data:image/png;", "data:image/PNG;");
+    expect(image).not.toBe(VALID_SYSTEM.image);
+    const res = await request(app)
+        .put(`/api/projects/${projectId}/system`)
+        .send(systemWithImage(image))
+        .set("X-CSRF-TOKEN", csrfToken)
+        .set("Cookie", cookies);
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.image).toBe(image);
+});
+
+it("should clear the stored preview when the system is saved with image null", async () => {
+    const seeded = await request(app)
+        .put(`/api/projects/${projectId}/system`)
+        .send(VALID_SYSTEM)
+        .set("X-CSRF-TOKEN", csrfToken)
+        .set("Cookie", cookies);
+    expect(seeded.statusCode).toEqual(200);
+    expect(seeded.body.image).toBe(VALID_SYSTEM.image);
+
+    const res = await request(app)
+        .put(`/api/projects/${projectId}/system`)
+        .send(systemWithImage(null))
+        .set("X-CSRF-TOKEN", csrfToken)
+        .set("Cookie", cookies);
+    expect(res.statusCode).toEqual(200);
+
+    const systemResponse = await request(app)
+        .get(`/api/projects/${projectId}/system`)
+        .set("X-CSRF-TOKEN", csrfToken)
+        .set("Cookie", cookies);
+    expect(systemResponse.body.image).toBeNull();
+});
+
+it.each([
+    ["a remote URL", "https://example.com/preview.png"],
+    ["an SVG data URL", "data:image/svg+xml;base64,PHN2Zz48L3N2Zz4="],
+    ["a WebP data URL the PDF report cannot render", "data:image/webp;base64,UklGRg+/"],
+    ["an uppercase data URL prefix the PDF report cannot read", "data:IMAGE/png;base64,iVBORw0KGgo="],
+    ["a value breaking out of a CSS url()", "x);}body::after{content:'INJECTED'}.z{b:url(x"],
+    ["a data URL with trailing CSS", 'data:image/png;base64,iVBORw0KGgo=");}body{color:red'],
+])("should reject a system preview that is %s and keep the stored one", async (_description, image) => {
+    const stored = await request(app)
+        .put(`/api/projects/${projectId}/system`)
+        .send(VALID_SYSTEM)
+        .set("X-CSRF-TOKEN", csrfToken)
+        .set("Cookie", cookies);
+    expect(stored.statusCode).toEqual(200);
+
+    const res = await request(app)
+        .put(`/api/projects/${projectId}/system`)
+        .send(systemWithImage(image))
+        .set("X-CSRF-TOKEN", csrfToken)
+        .set("Cookie", cookies);
+    expect(res.statusCode).toEqual(400);
+    expect(JSON.stringify(res.body)).toContain("Field image must be a base64-encoded PNG or JPEG data URL");
+
+    const systemResponse = await request(app)
+        .get(`/api/projects/${projectId}/system`)
+        .set("X-CSRF-TOKEN", csrfToken)
+        .set("Cookie", cookies);
+    expect(systemResponse.body.image).toBe(VALID_SYSTEM.image);
+});

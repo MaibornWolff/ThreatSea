@@ -2,6 +2,7 @@ import type { ComponentProps } from "react";
 import { View, Image } from "@react-pdf/renderer";
 import type { Style } from "@react-pdf/types";
 import { primaryColor } from "#view/report/report.style.ts";
+import { isSafeSystemImage } from "#utils/system-image.ts";
 
 type ViewBaseProps = Omit<ComponentProps<typeof View>, "style">;
 
@@ -20,7 +21,7 @@ export const SystemImage = ({ src, style, ...props }: SystemImageProps) => {
             }}
             {...props}
         >
-            {src && <Image style={{ width: "100%", height: "auto" }} src={src} />}
+            {isSafeSystemImage(src) && <Image style={{ width: "100%", height: "auto" }} src={src} />}
         </View>
     );
 };
