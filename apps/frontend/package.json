@@ -34,7 +34,7 @@
     "@mui/system": "9.5.0",
     "@mui/x-data-grid": "9.18.0",
     "@react-pdf/renderer": "4.9.0",
-    "@reduxjs/toolkit": "2.14.0",
+    "@reduxjs/toolkit": "2.15.0",
     "buffer": "6.0.3",
     "i18next": "27.1.5",
     "jwt-decode": "4.0.0",
