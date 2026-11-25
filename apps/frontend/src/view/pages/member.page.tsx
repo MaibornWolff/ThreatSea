@@ -72,11 +72,13 @@ const MemberPageBody = () => {
     const isRoleLoaded = (isProject ? currentProject?.id : currentCatalog?.id) === projectCatalogId;
     const userProjectRole = isProject && isRoleLoaded ? currentProject?.role : undefined;
     const userCatalogRole = !isProject && isRoleLoaded ? currentCatalog?.role : undefined;
-    // The Alert component already shows the error and sends authentication errors to the login page.
+    // On an authentication error the Alert component opens the login page instead: the error type marks it in the
+    // render of the failed load, the logged-out user after the Alert has cleared the error.
     const isLoadFailed =
         !isRoleLoaded &&
         (isProject ? loadFailedProjectId : loadFailedCatalogId) === projectCatalogId &&
-        errorType !== ERR_TYPE_API;
+        errorType !== ERR_TYPE_API &&
+        user.status.isLoggedIn;
     const headerConfig: NavigationState = useMemo(() => {
         return isProject
             ? {

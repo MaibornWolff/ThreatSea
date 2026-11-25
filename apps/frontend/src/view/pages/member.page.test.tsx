@@ -5,7 +5,9 @@ import type { CatalogWithRole } from "#api/types/catalogs.types.ts";
 import type { ExtendedProject } from "#api/types/project.types.ts";
 import { USER_ROLES } from "#api/types/user-roles.types.ts";
 import { CatalogsActions } from "#application/actions/catalogs.actions.ts";
+import { ErrorActions } from "#application/actions/error.actions.ts";
 import { ProjectsActions } from "#application/actions/projects.actions.ts";
+import { UserActions } from "#application/actions/user.actions.ts";
 import type { RootState } from "#application/store.ts";
 import { createCatalog, createProject } from "#test-utils/builders.ts";
 import { mockUseConfirm } from "#test-utils/mock-hooks.ts";
@@ -48,6 +50,16 @@ const catalogsState = (
     current,
 });
 
+const loggedInUser: RootState["user"] = {
+    userId: 1,
+    firstname: "Test",
+    lastname: "User",
+    displayName: "Test User",
+    email: "test@test.test",
+    status: { isLoggedIn: true },
+    isPending: false,
+};
+
 const renderPage = (initialEntry: string, preloadedState: Partial<RootState>) =>
     renderWithProviders(
         <div style={{ height: 600, width: 800 }}>
@@ -58,7 +70,7 @@ const renderPage = (initialEntry: string, preloadedState: Partial<RootState>) =>
                 <Route path="/catalogs" element={<div>Catalog list</div>} />
             </Routes>
         </div>,
-        { initialEntries: [initialEntry], preloadedState }
+        { initialEntries: [initialEntry], preloadedState: { user: loggedInUser, ...preloadedState } }
     );
 
 beforeEach(() => {
@@ -139,6 +151,7 @@ describe("MemberPage — failed load", () => {
         expect(await screen.findByText("Catalog list")).toBeInTheDocument();
     });
 
+    // The Alert component (tested on its own) logs the user out, opens the login page and clears the error.
     it("leaves an authentication error to the login redirect", () => {
         const { store } = renderPage("/projects/1/members", { projects: projectsState([]) });
 
@@ -147,7 +160,12 @@ describe("MemberPage — failed load", () => {
                 ProjectsActions.getProjectFromBackend.rejected(failedLoadError("AuthenticationError"), "request-id", 1)
             );
         });
+        expect(screen.queryByText("Project list")).not.toBeInTheDocument();
 
+        act(() => {
+            store.dispatch(UserActions.setUserLoggedOut());
+            store.dispatch(ErrorActions.clearError());
+        });
         expect(screen.queryByText("Project list")).not.toBeInTheDocument();
     });
 
