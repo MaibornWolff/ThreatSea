@@ -22,6 +22,7 @@ import { HeaderUtilityControls } from "#view/components/header-utility-controls.
 import MemberDialogPage from "./member-dialog.page";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { AlertActions } from "#application/actions/alert.actions.ts";
+import { ERR_TYPE_API } from "#application/reducers/error.reducer.ts";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import type { NavigationState } from "#application/reducers/navigation.reducer.ts";
 import type { ConfirmAcceptColor } from "#application/reducers/confirm.reducer.ts";
@@ -59,6 +60,9 @@ const MemberPageBody = () => {
     const isSelfRemoved = useAppSelector((state) => state.members.isSelfRemoved);
     const currentProject = useAppSelector((state) => state.projects.current);
     const currentCatalog = useAppSelector((state) => state.catalogs.current);
+    const loadFailedProjectId = useAppSelector((state) => state.projects.loadFailedProjectId);
+    const loadFailedCatalogId = useAppSelector((state) => state.catalogs.loadFailedCatalogId);
+    const errorType = useAppSelector((state) => state.error.type);
 
     const isProject = projectId !== undefined;
     const targetId = isProject ? projectId : catalogId;
@@ -68,6 +72,11 @@ const MemberPageBody = () => {
     const isRoleLoaded = (isProject ? currentProject?.id : currentCatalog?.id) === projectCatalogId;
     const userProjectRole = isProject && isRoleLoaded ? currentProject?.role : undefined;
     const userCatalogRole = !isProject && isRoleLoaded ? currentCatalog?.role : undefined;
+    // The Alert component already shows the error and sends authentication errors to the login page.
+    const isLoadFailed =
+        !isRoleLoaded &&
+        (isProject ? loadFailedProjectId : loadFailedCatalogId) === projectCatalogId &&
+        errorType !== ERR_TYPE_API;
     const headerConfig: NavigationState = useMemo(() => {
         return isProject
             ? {
@@ -94,8 +103,10 @@ const MemberPageBody = () => {
                 })
             );
             navigate(`/${memberPath}`);
+        } else if (isLoadFailed) {
+            navigate(`/${memberPath}`, { replace: true });
         }
-    }, [isAccessDenied, dispatch, navigate, memberPath]);
+    }, [isAccessDenied, isLoadFailed, dispatch, navigate, memberPath]);
 
     const { isPending, members, allMembers, onConfirmDeleteMember } = useMembersList(
         projectCatalogId,

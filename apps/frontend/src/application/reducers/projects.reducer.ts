@@ -12,6 +12,7 @@ export type ProjectsState = ProjectsAdapterState & {
     current: ExtendedProject | undefined;
     deletingProjectId: number | undefined;
     lineOfToleranceDraft: LineOfToleranceDraft | undefined;
+    loadFailedProjectId?: number | undefined;
 };
 
 const defaultState: ProjectsState = {
@@ -42,6 +43,7 @@ const projectsReducer = createReducer(defaultState, (builder) => {
 
     builder.addCase(ProjectsActions.getProjectFromBackend.pending, (state) => {
         state.isPending = true;
+        state.loadFailedProjectId = undefined;
     });
 
     builder.addCase(ProjectsActions.getProjectFromBackend.fulfilled, (state, action) => {
@@ -53,8 +55,9 @@ const projectsReducer = createReducer(defaultState, (builder) => {
         state.deletingProjectId = undefined;
     });
 
-    builder.addCase(ProjectsActions.getProjectFromBackend.rejected, (state) => {
+    builder.addCase(ProjectsActions.getProjectFromBackend.rejected, (state, action) => {
         state.isPending = false;
+        state.loadFailedProjectId = action.meta.arg;
     });
 
     // Marks a project as being deleted so the editor's lazy/Suspense teardown skips saving/refetching

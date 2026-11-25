@@ -112,6 +112,58 @@ describe("MemberPage — project role check", () => {
     });
 });
 
+describe("MemberPage — failed load", () => {
+    const failedLoadError = (name: string) => Object.assign(new Error("Request failed"), { name });
+
+    it("sends the user back to the project list when the project cannot be loaded", async () => {
+        const { store } = renderPage("/projects/1/members", { projects: projectsState([]) });
+
+        act(() => {
+            store.dispatch(
+                ProjectsActions.getProjectFromBackend.rejected(failedLoadError("ServerError"), "request-id", 1)
+            );
+        });
+
+        expect(await screen.findByText("Project list")).toBeInTheDocument();
+    });
+
+    it("sends the user back to the catalog list when the catalog cannot be loaded", async () => {
+        const { store } = renderPage("/catalogs/5/members", { catalogs: catalogsState([]) });
+
+        act(() => {
+            store.dispatch(
+                CatalogsActions.getCatalogFromBackend.rejected(failedLoadError("ServerError"), "request-id", 5)
+            );
+        });
+
+        expect(await screen.findByText("Catalog list")).toBeInTheDocument();
+    });
+
+    it("leaves an authentication error to the login redirect", () => {
+        const { store } = renderPage("/projects/1/members", { projects: projectsState([]) });
+
+        act(() => {
+            store.dispatch(
+                ProjectsActions.getProjectFromBackend.rejected(failedLoadError("AuthenticationError"), "request-id", 1)
+            );
+        });
+
+        expect(screen.queryByText("Project list")).not.toBeInTheDocument();
+    });
+
+    it("ignores a failed load of a different project", () => {
+        const { store } = renderPage("/projects/1/members", { projects: projectsState([]) });
+
+        act(() => {
+            store.dispatch(
+                ProjectsActions.getProjectFromBackend.rejected(failedLoadError("ServerError"), "request-id", 2)
+            );
+        });
+
+        expect(screen.queryByText("Project list")).not.toBeInTheDocument();
+    });
+});
+
 describe("MemberPage — catalog role check", () => {
     it("opens for an editor once the catalog is loaded after the first render", async () => {
         const editedCatalog = createCatalog({ id: 5, role: USER_ROLES.EDITOR });
