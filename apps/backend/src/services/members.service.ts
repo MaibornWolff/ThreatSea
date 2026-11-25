@@ -8,6 +8,7 @@ import { projects, users, usersCatalogs, usersProjects } from "#db/schema.js";
 import { checkRole } from "#guards/authorisation.guard.js";
 import { USER_ROLES } from "#types/user-roles.types.js";
 import { userLifecycleConfig } from "#config/config.js";
+import { ConflictError } from "#errors/conflict.error.js";
 
 // Only non-sensitive identity fields are exposed via member endpoints; lastLoginAt,
 // oidcSub, createdAt and updatedAt must never leak to other users.
@@ -149,7 +150,7 @@ export async function addProjectAddableMember(projectId: number, userId: number,
  * @param userId - The id of the user.
  * @param role - The new role of the user.
  * @return {Promise<void>} A promise that resolves when the role has been updated.
- * @throws {Error} If the catalog would be left without an owner.
+ * @throws {ConflictError} If the catalog would be left without an owner.
  */
 export async function updateCatalogAddedMember(catalogId: number, userId: number, role: USER_ROLES): Promise<void> {
     const otherOwner = await db.query.usersCatalogs.findFirst({
@@ -161,7 +162,7 @@ export async function updateCatalogAddedMember(catalogId: number, userId: number
 
     // Check that this catalog has another owner.
     if (!otherOwner) {
-        throw new Error("Cannot change role of user, this would leave the catalog without an owner.");
+        throw new ConflictError("Cannot change role of user, this would leave the catalog without an owner.");
     }
 
     await db
@@ -177,7 +178,7 @@ export async function updateCatalogAddedMember(catalogId: number, userId: number
  * @param userId - The id of the user.
  * @param role - The new role of the user.
  * @return {Promise<void>} A promise that resolves when the role has been updated.
- * @throws {Error} If the project would be left without an owner.
+ * @throws {ConflictError} If the project would be left without an owner.
  */
 export async function updateProjectAddedMember(projectId: number, userId: number, role: USER_ROLES): Promise<void> {
     const otherOwner = await db.query.usersProjects.findFirst({
@@ -189,7 +190,7 @@ export async function updateProjectAddedMember(projectId: number, userId: number
 
     // Check that this project has another owner.
     if (!otherOwner) {
-        throw new Error("Cannot change role of user, this would leave the project without an owner.");
+        throw new ConflictError("Cannot change role of user, this would leave the project without an owner.");
     }
 
     await db.transaction(async (tx) => {
@@ -240,7 +241,7 @@ async function addMemberAsCatalogViewer(
  * @param {number} catalogId - The id of the catalog.
  * @param {number} userId - The id of the member.
  * @return {Promise<void>} A promise that resolves when the member has been removed.
- * @throws {Error} If the catalog would be left without an owner.
+ * @throws {ConflictError} If the catalog would be left without an owner.
  */
 export async function removeCatalogMember(catalogId: number, userId: number): Promise<void> {
     const otherOwner = await db.query.usersCatalogs.findFirst({
@@ -252,7 +253,7 @@ export async function removeCatalogMember(catalogId: number, userId: number): Pr
 
     // Check that this catalog has another owner.
     if (otherOwner === undefined || otherOwner === null) {
-        throw new Error("Cannot delete user, this would leave the catalog without an owner.");
+        throw new ConflictError("Cannot delete user, this would leave the catalog without an owner.");
     }
 
     await db.delete(usersCatalogs).where(and(eq(usersCatalogs.userId, userId), eq(usersCatalogs.catalogId, catalogId)));
@@ -264,7 +265,7 @@ export async function removeCatalogMember(catalogId: number, userId: number): Pr
  * @param {number} projectId - The id of the project.
  * @param {number} userId - The id of the member.
  * @return {Promise<void>} A promise that resolves when the member has been removed.
- * @throws {Error} If the project would be left without an owner.
+ * @throws {ConflictError} If the project would be left without an owner.
  */
 export async function removeProjectMember(projectId: number, userId: number): Promise<void> {
     const otherOwner = await db.query.usersProjects.findFirst({
@@ -276,7 +277,7 @@ export async function removeProjectMember(projectId: number, userId: number): Pr
 
     // Check that this project has another owner.
     if (otherOwner === undefined || otherOwner === null) {
-        throw new Error("Cannot delete user, this would leave the project without an owner.");
+        throw new ConflictError("Cannot delete user, this would leave the project without an owner.");
     }
 
     await db.delete(usersProjects).where(and(eq(usersProjects.userId, userId), eq(usersProjects.projectId, projectId)));

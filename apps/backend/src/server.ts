@@ -22,6 +22,7 @@ import { importRouter } from "#routers/import.router.js";
 
 // Middleware Handlers
 import { ErrorHandler } from "#middlewares/error.middleware.js";
+import { NotFoundError } from "#errors/not-found.error.js";
 import { LogHandler } from "#middlewares/logging.middleware.js";
 import { CheckTokenHandler } from "#middlewares/authentication.middleware.js";
 
@@ -93,6 +94,10 @@ app.use("/api/projects", apiRateLimiter, CheckTokenHandler, projectsRouter);
 app.use("/api/folders", apiRateLimiter, CheckTokenHandler, foldersRouter);
 app.use("/api/export", apiRateLimiter, CheckTokenHandler, exportRouter);
 app.use("/api/import", apiRateLimiter, CheckTokenHandler, express.json({ limit: "200mb" }), importRouter);
+
+app.use("/api", (_req, _res, next) => {
+    next(new NotFoundError("Unknown API endpoint"));
+});
 
 app.use((_req, res) => {
     res.sendFile(path.join(PUBLIC_DIR, "index.html"));
