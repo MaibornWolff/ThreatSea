@@ -1,7 +1,7 @@
 import Visibility from "@mui/icons-material/Visibility";
 import { Box, Button, Checkbox, FormControlLabel, LinearProgress, Menu, MenuItem, Typography } from "@mui/material";
 import { DataGrid, type GridColumnVisibilityModel } from "@mui/x-data-grid";
-import { memo, useCallback, useLayoutEffect, useMemo, useState, type SyntheticEvent } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useState, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router";
 import type { Member } from "#api/types/members.types.ts";
@@ -57,13 +57,17 @@ const MemberPageBody = () => {
 
     const user = useAppSelector((state) => state.user);
     const isSelfRemoved = useAppSelector((state) => state.members.isSelfRemoved);
-    const userProjectRole = useAppSelector((state) => state.projects.current?.role);
-    const userCatalogRole = useAppSelector((state) => state.catalogs.current?.role);
+    const currentProject = useAppSelector((state) => state.projects.current);
+    const currentCatalog = useAppSelector((state) => state.catalogs.current);
 
     const isProject = projectId !== undefined;
     const targetId = isProject ? projectId : catalogId;
     const projectCatalogId = targetId ? Number.parseInt(targetId, 10) : 0;
     const memberPath: MemberPath = isProject ? "projects" : "catalogs";
+    // `current` is loaded by CreatePage after the first render and may still hold the previously opened project or catalog.
+    const isRoleLoaded = (isProject ? currentProject?.id : currentCatalog?.id) === projectCatalogId;
+    const userProjectRole = isProject && isRoleLoaded ? currentProject?.role : undefined;
+    const userCatalogRole = !isProject && isRoleLoaded ? currentCatalog?.role : undefined;
     const headerConfig: NavigationState = useMemo(() => {
         return isProject
             ? {
@@ -80,18 +84,18 @@ const MemberPageBody = () => {
               };
     }, [isProject]);
     const userRole = isProject ? userProjectRole : userCatalogRole;
+    const isAccessDenied = isRoleLoaded && !checkUserRole(userRole, USER_ROLES.EDITOR);
 
-    if (
-        (projectId && !checkUserRole(userProjectRole, USER_ROLES.EDITOR)) ||
-        (catalogId && !checkUserRole(userCatalogRole, USER_ROLES.EDITOR))
-    ) {
-        dispatch(
-            AlertActions.openErrorAlert({
-                text: "Users with Viewer role may not access the members page.",
-            })
-        );
-        navigate("/projects");
-    }
+    useEffect(() => {
+        if (isAccessDenied) {
+            dispatch(
+                AlertActions.openErrorAlert({
+                    text: "Users with Viewer role may not access the members page.",
+                })
+            );
+            navigate(`/${memberPath}`);
+        }
+    }, [isAccessDenied, dispatch, navigate, memberPath]);
 
     const { isPending, members, allMembers, onConfirmDeleteMember } = useMembersList(
         projectCatalogId,
@@ -285,6 +289,10 @@ const MemberPageBody = () => {
         }
         return t("participant");
     };
+
+    if (!isRoleLoaded || isAccessDenied) {
+        return <LinearProgress sx={{ boxSizing: "border-box" }} />;
+    }
 
     return (
         <>
