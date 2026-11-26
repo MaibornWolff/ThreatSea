@@ -403,8 +403,8 @@ importers:
         specifier: 10.10.0
         version: 10.10.0
       markdown-to-jsx:
-        specifier: 9.10.6
-        version: 9.10.6(react@19.3.1)
+        specifier: 9.11.0
+        version: 9.11.0(react@19.3.1)
       react:
         specifier: 19.3.1
         version: 19.3.1
@@ -3794,8 +3794,8 @@ packages:
     resolution: {integrity: sha512-hXdUTZYIVOt1Ex//jAQi+wTZZpUpwBj/0QsOzqegb3rGMMeJiSEu5xLHnYfBrRV4RH2+OCSOO95Is/7x1WJ4bw==}
     engines: {node: '>=10'}
 
-  markdown-to-jsx@9.10.6:
-    resolution: {integrity: sha512-vvd4cMAAK6RDCzklzRYykG8Tos1Wyid8IoxenyiSAnGb1JIX2fTzn6MuU5QBu9Kb4BdjOCnKlbs84NQRVsaaVA==}
+  markdown-to-jsx@9.11.0:
+    resolution: {integrity: sha512-g9DFUSPOD0HkdY8F2d30w3XxL4OUhJXGO/MzqB8zPnh18AhANsDhr/da+R0idzIcBRpL7MZWi+aiD3x0sOb5LQ==}
     engines: {node: '>= 18'}
     peerDependencies:
       react: '>= 16.0.0'
@@ -8112,7 +8112,7 @@ snapshots:
     dependencies:
       semver: 7.8.6
 
-  markdown-to-jsx@9.10.6(react@19.3.1):
+  markdown-to-jsx@9.11.0(react@19.3.1):
     optionalDependencies:
       react: 19.3.1
 
