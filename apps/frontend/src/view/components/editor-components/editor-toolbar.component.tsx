@@ -7,12 +7,15 @@ import HorizontalRule from "@mui/icons-material/HorizontalRule";
 import RadioButtonUnchecked from "@mui/icons-material/RadioButtonUnchecked";
 import TextFields from "@mui/icons-material/TextFields";
 import TrendingFlat from "@mui/icons-material/TrendingFlat";
+import WidgetsOutlined from "@mui/icons-material/WidgetsOutlined";
 import { Box, IconButton, Paper, Popover, Popper, Tooltip } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useState, type ComponentType } from "react";
 import { useTranslation } from "react-i18next";
 import { EditorColorPicker } from "./editor-color-picker.component";
+import { EditorComponentList } from "./editor-component-list.component";
 import type { AnnotationType } from "#api/types/system.types.ts";
+import type { EditorComponentType } from "#application/adapters/editor-component-type.adapter.ts";
 
 const ANNOTATION_TYPE_LABEL_KEYS: Record<AnnotationType, string> = {
     rect: "canvas.annotation.rectangle",
@@ -29,6 +32,8 @@ export interface EditorToolbarProps {
     showAnnotationTools: boolean;
     annotationTool: AnnotationType | null;
     onSetAnnotationTool: (tool: AnnotationType | null) => void;
+    componentTypeToPlace: EditorComponentType | null;
+    onSetComponentTypeToPlace: (componentType: EditorComponentType | null) => void;
     annotationColor: string;
     onSetAnnotationColor: (color: string) => void;
 }
@@ -68,12 +73,22 @@ const popoverPaperSx = {
     gap: "4px",
 };
 
+const componentsPopoverPaperSx = {
+    marginLeft: "8px",
+    borderRadius: 4,
+    paddingTop: 1,
+    paddingBottom: 1,
+    bgcolor: "background.contextMenu",
+};
+
 export const EditorToolbar = ({
     onCenterEditor,
     onDownloadSystemView,
     showAnnotationTools,
     annotationTool,
     onSetAnnotationTool,
+    componentTypeToPlace,
+    onSetComponentTypeToPlace,
     annotationColor,
     onSetAnnotationColor,
 }: EditorToolbarProps) => {
@@ -82,6 +97,9 @@ export const EditorToolbar = ({
     const [shapesButton, setShapesButton] = useState<HTMLButtonElement | null>(null);
     const [freehandButton, setFreehandButton] = useState<HTMLButtonElement | null>(null);
     const [shapesOpen, setShapesOpen] = useState(false);
+    const [componentsButton, setComponentsButton] = useState<HTMLButtonElement | null>(null);
+    const [componentsOpen, setComponentsOpen] = useState(false);
+    const [showCustomComponents, setShowCustomComponents] = useState(false);
 
     const iconButtonSx = {
         backgroundColor: "background.paperIntransparent",
@@ -101,6 +119,18 @@ export const EditorToolbar = ({
         onSetAnnotationTool(annotationTool === tool ? null : tool);
         setShapesOpen(false);
     };
+
+    const closeComponents = (): void => {
+        setComponentsOpen(false);
+        setShowCustomComponents(false);
+    };
+
+    const selectComponentTypeToPlace = (componentType: EditorComponentType): void => {
+        onSetComponentTypeToPlace(componentType);
+        closeComponents();
+    };
+
+    const isPlacingComponent = componentTypeToPlace !== null;
 
     // Pencil and text are standalone now.
     const isShapesActive = ANNOTATION_TOOLS.some(({ tool }) => tool === annotationTool);
@@ -134,6 +164,20 @@ export const EditorToolbar = ({
                 </Tooltip>
                 {showAnnotationTools && (
                     <>
+                        <Tooltip title={t("canvas.components")}>
+                            <IconButton
+                                ref={setComponentsButton}
+                                onClick={() => {
+                                    setComponentsOpen((open) => !open);
+                                    onSetComponentTypeToPlace(null);
+                                }}
+                                aria-label={t("canvas.components")}
+                                aria-pressed={isPlacingComponent}
+                                sx={isPlacingComponent ? activeIconButtonSx : iconButtonSx}
+                            >
+                                <WidgetsOutlined sx={isPlacingComponent ? activeIconSx : iconSx} />
+                            </IconButton>
+                        </Tooltip>
                         <Tooltip title={t("canvas.annotation.shapes")}>
                             <IconButton
                                 ref={setShapesButton}
@@ -174,6 +218,22 @@ export const EditorToolbar = ({
             </Box>
             {showAnnotationTools && (
                 <>
+                    <Popover
+                        open={componentsOpen}
+                        anchorEl={componentsButton}
+                        onClose={closeComponents}
+                        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+                        transformOrigin={{ vertical: "top", horizontal: "left" }}
+                        slotProps={{ paper: { sx: componentsPopoverPaperSx } }}
+                        data-testid="components-popover"
+                    >
+                        <EditorComponentList
+                            onSelect={selectComponentTypeToPlace}
+                            showCustomComponents={showCustomComponents}
+                            onToggleCustomComponents={() => setShowCustomComponents((previous) => !previous)}
+                            onNavigateAway={closeComponents}
+                        />
+                    </Popover>
                     <Popover
                         open={shapesOpen}
                         anchorEl={shapesButton}

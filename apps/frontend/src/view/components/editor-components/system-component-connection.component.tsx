@@ -104,7 +104,7 @@ const SystemComponentConnectionInner = ({
     onHoverChange,
 }: SystemComponentConnectionProps): JSX.Element | null => {
     const isCapturing = useAppSelector((state) => state.editor.isCapturing);
-    const annotationTool = useAppSelector(editorSelectors.selectAnnotationTool);
+    const isCanvasToolActive = useAppSelector(editorSelectors.selectIsCanvasToolActive);
     const visualSelected = selected && !isCapturing;
     const visualHover = hovered && !isCapturing;
 
@@ -114,14 +114,14 @@ const SystemComponentConnectionInner = ({
         : POA_COLORS[POINTS_OF_ATTACK.COMMUNICATION_INFRASTRUCTURE];
 
     const handleClick = (event: KonvaEventObject<MouseEvent>) => {
-        if (annotationTool !== null) {
+        if (isCanvasToolActive) {
             return;
         }
         onClick(event, id);
     };
 
     const onMouseEnter = () => {
-        if (annotationTool !== null) {
+        if (isCanvasToolActive) {
             return;
         }
         onHoverChange?.(id, true);
@@ -132,7 +132,7 @@ const SystemComponentConnectionInner = ({
 
     const onMouseLeave = () => {
         onHoverChange?.(id, false);
-        if (annotationTool !== null) {
+        if (isCanvasToolActive) {
             return;
         }
         if (stageRef && stageRef.current) {
@@ -141,7 +141,7 @@ const SystemComponentConnectionInner = ({
     };
 
     const handleLinePointOfAttackClicked = (event: KonvaEventObject<MouseEvent>) => {
-        if (annotationTool !== null) {
+        if (isCanvasToolActive) {
             return;
         }
         if (pointsOfAttack[2]) {
