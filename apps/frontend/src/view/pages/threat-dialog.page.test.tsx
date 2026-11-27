@@ -30,6 +30,7 @@ beforeEach(() => {
 });
 
 const REDIRECT_MARKER = "redirected-to-threats";
+const RISK_REDIRECT_MARKER = "redirected-to-risk";
 
 const project = createProject({ id: 1, lineOfToleranceGreen: 6, lineOfToleranceRed: 15 });
 const draft: LineOfToleranceDraft = { projectId: 1, lineOfToleranceGreen: 3, lineOfToleranceRed: 10 };
@@ -53,6 +54,8 @@ function renderPage(url: InitialEntry, lineOfToleranceDraft?: LineOfToleranceDra
             <Route path="/projects/:projectId/risk/threats/edit" element={<ThreatDialogPage />} />
             <Route path="/projects/:projectId/threats/edit" element={<ThreatDialogPage />} />
             <Route path="/projects/:projectId/threats" element={<div>{REDIRECT_MARKER}</div>} />
+            <Route path="/projects/:projectId/risk/threats/edit" element={<ThreatDialogPage />} />
+            <Route path="/projects/:projectId/risk" element={<div>{RISK_REDIRECT_MARKER}</div>} />
         </Routes>,
         { preloadedState: { projects: projectsState(lineOfToleranceDraft) }, initialEntries: [url] }
     );
@@ -112,6 +115,13 @@ describe("ThreatDialogPage", () => {
 
         expect(screen.getByText(REDIRECT_MARKER)).toBeInTheDocument();
         expect(GenericThreatsAPI.getGenericThreatsWithExtendedThreats).not.toHaveBeenCalled();
+    });
+
+    it("redirects to the page it was opened on, not the threats list", () => {
+        renderPage("/projects/1/risk/threats/edit");
+
+        expect(screen.getByText(RISK_REDIRECT_MARKER)).toBeInTheDocument();
+        expect(screen.queryByText(REDIRECT_MARKER)).not.toBeInTheDocument();
     });
 });
 
