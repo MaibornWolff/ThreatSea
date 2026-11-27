@@ -1,7 +1,7 @@
 import Visibility from "@mui/icons-material/Visibility";
 import { Box, Button, Checkbox, FormControlLabel, LinearProgress, Menu, MenuItem, Typography } from "@mui/material";
 import { DataGrid, type GridColumnVisibilityModel } from "@mui/x-data-grid";
-import { memo, useCallback, useLayoutEffect, useMemo, useState, type SyntheticEvent } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useState, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router";
 import type { Member } from "#api/types/members.types.ts";
@@ -22,6 +22,7 @@ import { HeaderUtilityControls } from "#view/components/header-utility-controls.
 import MemberDialogPage from "./member-dialog.page";
 import { NavigationActions } from "#application/actions/navigation.actions.ts";
 import { AlertActions } from "#application/actions/alert.actions.ts";
+import { ERR_TYPE_API } from "#application/reducers/error.reducer.ts";
 import { useAppDispatch, useAppSelector } from "#application/hooks/use-app-redux.hook.ts";
 import type { NavigationState } from "#application/reducers/navigation.reducer.ts";
 import type { ConfirmAcceptColor } from "#application/reducers/confirm.reducer.ts";
@@ -57,13 +58,27 @@ const MemberPageBody = () => {
 
     const user = useAppSelector((state) => state.user);
     const isSelfRemoved = useAppSelector((state) => state.members.isSelfRemoved);
-    const userProjectRole = useAppSelector((state) => state.projects.current?.role);
-    const userCatalogRole = useAppSelector((state) => state.catalogs.current?.role);
+    const currentProject = useAppSelector((state) => state.projects.current);
+    const currentCatalog = useAppSelector((state) => state.catalogs.current);
+    const loadFailedProjectId = useAppSelector((state) => state.projects.loadFailedProjectId);
+    const loadFailedCatalogId = useAppSelector((state) => state.catalogs.loadFailedCatalogId);
+    const errorType = useAppSelector((state) => state.error.type);
 
     const isProject = projectId !== undefined;
     const targetId = isProject ? projectId : catalogId;
     const projectCatalogId = targetId ? Number.parseInt(targetId, 10) : 0;
     const memberPath: MemberPath = isProject ? "projects" : "catalogs";
+    // `current` is loaded by CreatePage after the first render and may still hold the previously opened project or catalog.
+    const isRoleLoaded = (isProject ? currentProject?.id : currentCatalog?.id) === projectCatalogId;
+    const userProjectRole = isProject && isRoleLoaded ? currentProject?.role : undefined;
+    const userCatalogRole = !isProject && isRoleLoaded ? currentCatalog?.role : undefined;
+    // On an authentication error the Alert component opens the login page instead: the error type marks it in the
+    // render of the failed load, the logged-out user after the Alert has cleared the error.
+    const isLoadFailed =
+        !isRoleLoaded &&
+        (isProject ? loadFailedProjectId : loadFailedCatalogId) === projectCatalogId &&
+        errorType !== ERR_TYPE_API &&
+        user.status.isLoggedIn;
     const headerConfig: NavigationState = useMemo(() => {
         return isProject
             ? {
@@ -80,18 +95,20 @@ const MemberPageBody = () => {
               };
     }, [isProject]);
     const userRole = isProject ? userProjectRole : userCatalogRole;
+    const isAccessDenied = isRoleLoaded && !checkUserRole(userRole, USER_ROLES.EDITOR);
 
-    if (
-        (projectId && !checkUserRole(userProjectRole, USER_ROLES.EDITOR)) ||
-        (catalogId && !checkUserRole(userCatalogRole, USER_ROLES.EDITOR))
-    ) {
-        dispatch(
-            AlertActions.openErrorAlert({
-                text: "Users with Viewer role may not access the members page.",
-            })
-        );
-        navigate("/projects");
-    }
+    useEffect(() => {
+        if (isAccessDenied) {
+            dispatch(
+                AlertActions.openErrorAlert({
+                    text: "Users with Viewer role may not access the members page.",
+                })
+            );
+            navigate(`/${memberPath}`);
+        } else if (isLoadFailed) {
+            navigate(`/${memberPath}`, { replace: true });
+        }
+    }, [isAccessDenied, isLoadFailed, dispatch, navigate, memberPath]);
 
     const { isPending, members, allMembers, onConfirmDeleteMember } = useMembersList(
         projectCatalogId,
@@ -285,6 +302,10 @@ const MemberPageBody = () => {
         }
         return t("participant");
     };
+
+    if (!isRoleLoaded || isAccessDenied) {
+        return <LinearProgress sx={{ boxSizing: "border-box" }} />;
+    }
 
     return (
         <>

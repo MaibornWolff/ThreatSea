@@ -9,6 +9,7 @@ type CatalogsAdapterState = ReturnType<typeof catalogsAdapter.getInitialState>;
 type CatalogsState = CatalogsAdapterState & {
     isPending: boolean;
     current: CatalogWithRole | undefined;
+    loadFailedCatalogId?: number | undefined;
 };
 
 const defaultState: CatalogsState = {
@@ -33,6 +34,7 @@ const catalogsReducer = createReducer(defaultState, (builder) => {
 
     builder.addCase(CatalogsActions.getCatalogFromBackend.pending, (state) => {
         state.isPending = true;
+        state.loadFailedCatalogId = undefined;
     });
 
     builder.addCase(CatalogsActions.getCatalogFromBackend.fulfilled, (state, action) => {
@@ -40,8 +42,9 @@ const catalogsReducer = createReducer(defaultState, (builder) => {
         state.isPending = false;
     });
 
-    builder.addCase(CatalogsActions.getCatalogFromBackend.rejected, (state) => {
+    builder.addCase(CatalogsActions.getCatalogFromBackend.rejected, (state, action) => {
         state.isPending = false;
+        state.loadFailedCatalogId = action.meta.arg;
     });
 
     builder.addCase(CatalogsActions.createCatalog.pending, (state) => {
