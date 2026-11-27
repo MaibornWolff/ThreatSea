@@ -40,15 +40,25 @@ export async function exportAsExcelFile(tabs: Tab[], name = "file.xlsx") {
     await writeXlsxFile(sheets).toFile(name);
 }
 
+const FORMULA_PREFIX = /^[=+\-@\t\r]/;
+const FORMULA_ESCAPE = "'";
+const TAB_LINE_PREFIX = "Tab:";
+
+function toCsvCell(value: string): string {
+    const neutralisedValue = FORMULA_PREFIX.test(value) ? FORMULA_ESCAPE + value : value;
+    return `"${neutralisedValue.replace(/"/g, '""')}"`;
+}
+
 /**
- * Exports the given data into a csv file.
+ * Builds the csv content for the given tabs. Every cell is quoted (RFC 4180), so delimiters, quotes and
+ * line breaks in values keep the row structure, and values that a spreadsheet would run as a formula
+ * are prefixed with an apostrophe.
  *
- * @param {array of object} items - Items that are exported.
- * @param {array of object} header - Header for the csv file.
- * @param {string} name - Name of the csv file.
+ * @param {Tab[]} tabs - Tabs that are exported.
  * @param {string} delimiter - Delimiter used.
+ * @returns {string} The csv content.
  */
-export function exportAsCsvFile(tabs: Tab[], name = "file.csv", delimiter = ";") {
+export function buildCsvContent(tabs: Tab[], delimiter = ";"): string {
     let csvContent = "";
 
     tabs.forEach((tab) => {
@@ -63,10 +73,22 @@ export function exportAsCsvFile(tabs: Tab[], name = "file.csv", delimiter = ";")
                 )
             ),
         ];
-        csvContent += "Tab:" + tab.name + "\n" + rows.map((e) => e.join(delimiter)).join("\n") + "\n";
+        csvContent +=
+            TAB_LINE_PREFIX + tab.name + "\n" + rows.map((row) => row.map(toCsvCell).join(delimiter)).join("\n") + "\n";
     });
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    return csvContent;
+}
+
+/**
+ * Exports the given data into a csv file.
+ *
+ * @param {Tab[]} tabs - Tabs that are exported.
+ * @param {string} name - Name of the csv file.
+ * @param {string} delimiter - Delimiter used.
+ */
+export function exportAsCsvFile(tabs: Tab[], name = "file.csv", delimiter = ";") {
+    const blob = new Blob([buildCsvContent(tabs, delimiter)], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
 
@@ -75,6 +97,66 @@ export function exportAsCsvFile(tabs: Tab[], name = "file.csv", delimiter = ";")
     link.click();
 
     URL.revokeObjectURL(url);
+}
+
+function fromCsvCell(value: string): string {
+    return value.startsWith(FORMULA_ESCAPE) && FORMULA_PREFIX.test(value.slice(1)) ? value.slice(1) : value;
+}
+
+/**
+ * Splits csv content into rows of cells. Supports quoted cells (RFC 4180) with delimiters, escaped
+ * quotes and line breaks inside, as well as unquoted cells and \r\n line endings. Empty lines are
+ * skipped.
+ *
+ * @param {string} content - The csv content.
+ * @param {string} delimiter - Delimiter used.
+ * @returns {string[][]} The rows with their cells.
+ */
+export function parseCsvRows(content: string, delimiter = ";"): string[][] {
+    const rows: string[][] = [];
+    let row: string[] = [];
+    let cell = "";
+    let isQuoted = false;
+
+    const endCell = () => {
+        row.push(fromCsvCell(cell));
+        cell = "";
+    };
+    const endRow = () => {
+        endCell();
+        if (row.length > 1 || row[0] !== "") {
+            rows.push(row);
+        }
+        row = [];
+    };
+
+    for (let index = 0; index < content.length; index++) {
+        const character = content[index];
+
+        if (isQuoted) {
+            if (character === '"' && content[index + 1] === '"') {
+                cell += '"';
+                index++;
+            } else if (character === '"') {
+                isQuoted = false;
+            } else {
+                cell += character;
+            }
+        } else if (character === '"' && cell === "") {
+            isQuoted = true;
+        } else if (character === delimiter) {
+            endCell();
+        } else if (character === "\n") {
+            endRow();
+        } else if (character === "\r" && content[index + 1] === "\n") {
+            continue;
+        } else {
+            cell += character;
+        }
+    }
+    endRow();
+
+    return rows;
 }
 
 /**
@@ -101,13 +183,13 @@ export function importCsvFile(
                 resolve(null);
                 return;
             }
-            const header = str.slice(0, str.indexOf("\n")).split(delimiter);
-            const rows = str
-                .slice(str.indexOf("\n") + 1)
-                .split("\n")
-                .map((row) => row.split(delimiter))
-                .map((rowCells) => parse(rowCells));
-            rows.pop();
+            const csvRows = parseCsvRows(str, delimiter);
+            // Files from exportAsCsvFile start with a "Tab:<name>" line before the header.
+            if (csvRows[0]?.length === 1 && csvRows[0][0]?.startsWith(TAB_LINE_PREFIX)) {
+                csvRows.shift();
+            }
+            const header = csvRows.shift() ?? [];
+            const rows = csvRows.map((rowCells) => parse(rowCells));
             rows.forEach((row, i) => {
                 try {
                     validate(row);
