@@ -33,7 +33,7 @@
     "@mui/material": "9.6.0",
     "@mui/system": "9.6.0",
     "@mui/x-data-grid": "9.18.0",
-    "@react-pdf/renderer": "4.9.0",
+    "@react-pdf/renderer": "4.9.1",
     "@reduxjs/toolkit": "2.15.0",
     "buffer": "6.0.3",
     "i18next": "27.2.6",
