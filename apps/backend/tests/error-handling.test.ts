@@ -48,6 +48,8 @@ describe("client errors are not reported as 500", () => {
         const response = await request(app)
             .post("/api/projects")
             .set("Content-Type", "application/json")
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies)
             .send("{malformed");
 
         expect(response.status).toBe(400);
@@ -58,7 +60,9 @@ describe("client errors are not reported as 500", () => {
         const response = await request(app)
             .post("/api/projects")
             .set("Content-Type", "application/json")
-            .send(JSON.stringify({ padding: "a".repeat(11 * 1024 * 1024) }));
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies)
+            .send(JSON.stringify({ padding: "a".repeat(2 * 1024 * 1024) }));
 
         expect(response.status).toBe(413);
         expect(response.body).toEqual({ type: "Payload Too Large", message: "Request body is too large", code: null });

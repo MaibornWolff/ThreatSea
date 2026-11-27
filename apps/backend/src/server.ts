@@ -7,7 +7,7 @@ import { csrfSync } from "csrf-sync";
 import cors from "cors";
 import path from "path";
 import helmet from "helmet";
-import { corsConfig, helmetConfig, sessionConfig } from "#config/config.js";
+import { apiRateLimitConfig, corsConfig, helmetConfig, requestBodyLimits, sessionConfig } from "#config/config.js";
 import nocache from "nocache";
 import connectPgSimple from "connect-pg-simple";
 import { pool } from "#db/index.js";
@@ -75,25 +75,29 @@ app.set("etag", false);
 app.get("/api/csrf-token", function (req: express.Request, res: express.Response) {
     res.json({ token: generateToken(req) });
 });
-app.use(express.json({ limit: "10mb" }));
-
 app.use(LogHandler);
 
 app.use(csrfSynchronisedProtection);
 
-const apiRateLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 3000,
-    standardHeaders: true,
-    legacyHeaders: false,
-});
+const apiRateLimiter = rateLimit(apiRateLimitConfig);
+
+// JSON bodies are parsed only after authentication, so anonymous requests cannot make the server read
+// and parse large payloads. The frontend never sends compressed bodies, so inflation stays off.
+const parseJsonBody = (limit: string) => express.json({ limit, inflate: false });
 
 app.use("/api/auth", authRouter);
-app.use("/api/catalogs", apiRateLimiter, CheckTokenHandler, catalogsRouter);
-app.use("/api/projects", apiRateLimiter, CheckTokenHandler, projectsRouter);
-app.use("/api/folders", apiRateLimiter, CheckTokenHandler, foldersRouter);
+app.use("/api/catalogs", apiRateLimiter, CheckTokenHandler);
+app.post(
+    ["/api/catalogs/:catalogId/threats/import", "/api/catalogs/:catalogId/measures/import"],
+    parseJsonBody(requestBodyLimits.catalogImport)
+);
+app.use("/api/catalogs", parseJsonBody(requestBodyLimits.default), catalogsRouter);
+app.use("/api/projects", apiRateLimiter, CheckTokenHandler);
+app.put("/api/projects/:projectId/system", parseJsonBody(requestBodyLimits.systemSave));
+app.use("/api/projects", parseJsonBody(requestBodyLimits.default), projectsRouter);
+app.use("/api/folders", apiRateLimiter, CheckTokenHandler, parseJsonBody(requestBodyLimits.default), foldersRouter);
 app.use("/api/export", apiRateLimiter, CheckTokenHandler, exportRouter);
-app.use("/api/import", apiRateLimiter, CheckTokenHandler, express.json({ limit: "200mb" }), importRouter);
+app.use("/api/import", apiRateLimiter, CheckTokenHandler, parseJsonBody(requestBodyLimits.projectImport), importRouter);
 
 app.use("/api", (_req, _res, next) => {
     next(new NotFoundError("Unknown API endpoint"));

@@ -4,6 +4,7 @@ import { PoolConfig } from "pg";
 import { CorsOptions } from "cors";
 import { HelmetOptions } from "helmet";
 import { SessionOptions } from "express-session";
+import { Options as RateLimitOptions } from "express-rate-limit";
 
 function getEnvironmentVariable(key: string): string {
     const value = process.env[key];
@@ -120,6 +121,22 @@ export const helmetConfig: HelmetOptions = {
         preload: true,
     },
     xXssProtection: false,
+};
+
+export const apiRateLimitConfig: Partial<RateLimitOptions> = {
+    windowMs: 15 * 60 * 1000,
+    max: 3000,
+    standardHeaders: true,
+    legacyHeaders: false,
+};
+
+// Maximum JSON body size per use case. The project import is configurable because the size of exports
+// depends on the installation (number and size of diagrams, memory of the container).
+export const requestBodyLimits = {
+    default: "1mb",
+    catalogImport: "2mb",
+    systemSave: "10mb",
+    projectImport: `${getOptionalPositiveNumber("PROJECT_IMPORT_MAX_BODY_SIZE_MB", 50)}mb`,
 };
 
 //Config for the express-session module needed by csrf-sync
