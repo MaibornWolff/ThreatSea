@@ -9,7 +9,7 @@ import VALID_TEST_PROJECT from "./testData/testData.json" with { type: "json" };
 import VALID_TEST_PROJECT_1 from "./testData/testDataWithConnection.json" with { type: "json" };
 import INVALID_TEST_PROJECT_1 from "./testData/invalidTest.json" with { type: "json" };
 import { db } from "#db/index.js";
-import { catalogs, projects } from "#db/schema.js";
+import { catalogs, projects, systems } from "#db/schema.js";
 import { eq } from "drizzle-orm";
 import { LANGUAGES } from "#types/languages.type.js";
 
@@ -143,6 +143,48 @@ describe("import a project", () => {
             .set("X-CSRF-TOKEN", csrfToken)
             .set("Cookie", cookies);
         expect(res.statusCode).toEqual(400);
+    });
+
+    it.each([
+        ["a remote URL", "https://example.com/preview.png"],
+        ["a value breaking out of a CSS url()", "x);}body::after{content:'INJECTED'}.z{b:url(x"],
+    ])("should import a project whose system preview is %s and drop the preview", async (description, image) => {
+        const projectName = `invalid preview import: ${description}`;
+        const project = JSON.parse(JSON.stringify(VALID_TEST_PROJECT));
+        project.project.name = projectName;
+        project.system.image = image;
+
+        const res = await request(app)
+            .post("/api/import")
+            .send(project)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(204);
+
+        const importedProject = await db.query.projects.findFirst({ where: eq(projects.name, projectName) });
+        const importedSystem = await db.query.systems.findFirst({
+            where: eq(systems.projectId, importedProject!.id),
+        });
+        expect(importedSystem!.image).toBeNull();
+    });
+
+    it("should keep a valid system preview on import", async () => {
+        const projectName = "valid preview import";
+        const project = JSON.parse(JSON.stringify(VALID_TEST_PROJECT));
+        project.project.name = projectName;
+
+        const res = await request(app)
+            .post("/api/import")
+            .send(project)
+            .set("X-CSRF-TOKEN", csrfToken)
+            .set("Cookie", cookies);
+        expect(res.statusCode).toEqual(204);
+
+        const importedProject = await db.query.projects.findFirst({ where: eq(projects.name, projectName) });
+        const importedSystem = await db.query.systems.findFirst({
+            where: eq(systems.projectId, importedProject!.id),
+        });
+        expect(importedSystem!.image).toBe(VALID_TEST_PROJECT.system.image);
     });
 
     it("should reject an import whose componentTypes is an object instead of an array", async () => {

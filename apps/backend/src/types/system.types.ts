@@ -4,9 +4,11 @@ import {
     FIELD_MUST_BE_ARRAY_MESSAGE,
     FIELD_MUST_BE_STRING_MESSAGE,
     FIELD_MUST_BE_VALID_IMAGE_DATA,
+    FIELD_MUST_BE_VALID_PREVIEW_IMAGE,
     MAX_SYMBOL_LENGTH,
     STRING_TOO_LONG_MESSAGE,
     SYSTEM_COMPONENT_SYMBOL_PATTERN,
+    SYSTEM_IMAGE_PATTERN,
 } from "#middlewares/input-validations/validator-messages.js";
 
 export interface UpdateSystemRequest {
@@ -41,7 +43,11 @@ export class UpdateSystemRequestDto {
     @Type(() => SystemDataDto)
     data?: SystemDataDto | null;
 
-    // Unvalidated: a generated snapshot that can exceed MAX_SYMBOL_LENGTH; the 10mb body limit bounds it.
+    // A generated snapshot that can exceed MAX_SYMBOL_LENGTH, so only the format is checked; the 10mb body
+    // limit bounds the size.
+    @ValidateIf((_, value) => value != null && value !== "")
+    @IsString({ message: FIELD_MUST_BE_STRING_MESSAGE("image") })
+    @Matches(SYSTEM_IMAGE_PATTERN, { message: FIELD_MUST_BE_VALID_PREVIEW_IMAGE("image") })
     image?: string | null;
 }
 

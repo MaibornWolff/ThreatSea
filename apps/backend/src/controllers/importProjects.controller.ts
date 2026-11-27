@@ -42,6 +42,7 @@ import {
     MAX_SYMBOL_LENGTH,
     STRING_TOO_LONG_MESSAGE,
     SYSTEM_COMPONENT_SYMBOL_PATTERN,
+    SYSTEM_IMAGE_PATTERN,
 } from "#middlewares/input-validations/validator-messages.js";
 import { Logger } from "#logging/index.js";
 import { THREAT_STATUSES } from "#types/threat-statuses.types.js";
@@ -49,6 +50,12 @@ import { THREAT_STATUSES } from "#types/threat-statuses.types.js";
 interface ImportSymbolBody {
     componentTypes?: unknown;
     system?: { data?: { components?: unknown } };
+}
+
+// Same rule as UpdateSystemRequestDto.image. An invalid preview is dropped instead of failing the
+// import, so archives exported before the rule existed stay importable; the editor regenerates it.
+function keepValidSystemImage(image: unknown): string | null {
+    return typeof image === "string" && SYSTEM_IMAGE_PATTERN.test(image) ? image : null;
 }
 
 /**
@@ -243,6 +250,7 @@ export async function importProject(request: Request<void>, response: Response, 
             }
 
             body.system.projectId = newProjectId;
+            body.system.image = keepValidSystemImage(body.system.image);
             delete body.system.id;
 
             for (const component of body.system.data.components as Component[]) {
