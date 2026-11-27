@@ -96,6 +96,15 @@ export const corsConfig: CorsOptions = {
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
 };
 
+// Each CSRF token request without a session cookie stores a new session row. The frontend asks for a
+// token on start and every 15 minutes per tab; fixed profile mode (local development, E2E) asks far more.
+export const csrfTokenRateLimitConfig: Partial<RateLimitOptions> = {
+    windowMs: 15 * 60 * 1000,
+    max: AUTH_METHOD === "fixed" ? 5000 : 500,
+    standardHeaders: true,
+    legacyHeaders: false,
+};
+
 export const helmetConfig: HelmetOptions = {
     xFrameOptions: { action: "deny" },
     referrerPolicy: {

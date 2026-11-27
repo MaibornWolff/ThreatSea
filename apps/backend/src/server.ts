@@ -7,7 +7,14 @@ import { csrfSync } from "csrf-sync";
 import cors from "cors";
 import path from "path";
 import helmet from "helmet";
-import { apiRateLimitConfig, corsConfig, helmetConfig, requestBodyLimits, sessionConfig } from "#config/config.js";
+import {
+    apiRateLimitConfig,
+    corsConfig,
+    csrfTokenRateLimitConfig,
+    helmetConfig,
+    requestBodyLimits,
+    sessionConfig,
+} from "#config/config.js";
 import nocache from "nocache";
 import connectPgSimple from "connect-pg-simple";
 import { pool } from "#db/index.js";
@@ -72,7 +79,7 @@ app.use(
 );
 app.use(nocache());
 app.set("etag", false);
-app.get("/api/csrf-token", function (req: express.Request, res: express.Response) {
+app.get("/api/csrf-token", rateLimit(csrfTokenRateLimitConfig), function (req: express.Request, res: express.Response) {
     res.json({ token: generateToken(req) });
 });
 app.use(LogHandler);
